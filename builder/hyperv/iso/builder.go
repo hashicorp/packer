@@ -314,7 +314,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Description:  "ISO",
 			ResultKey:    "iso_path",
 			Url:          b.config.ISOUrls,
-			Extension:    "iso",
+			Extension:    b.config.TargetExtension,
 			TargetPath:   b.config.TargetPath,
 		},
 		&common.StepCreateFloppy{
