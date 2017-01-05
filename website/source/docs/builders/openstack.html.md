@@ -106,6 +106,11 @@ builder.
 -   `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
 
+-   `instance_metadata` (object of key/value strings) - Metadata that is
+    applied to the server instance created by Packer. Also called server
+    properties in some documentation. The strings have a max size of 255 bytes
+    each.
+
 -   `networks` (array of strings) - A list of networks by UUID to attach to
     this instance.
 
