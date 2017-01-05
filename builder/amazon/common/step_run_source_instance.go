@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/private/waiter"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -56,7 +56,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			log.Printf("[DEBUG] Found security group %s", sg)
 			securityGroupIds[i] = aws.String(sg)
 		} else {
-			err := fmt.Errorf("Timed out waiting for security group %s", sg)
+			err := fmt.Errorf("Timed out waiting for security group %s: %s", sg, err)
 			log.Printf("[DEBUG] %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -368,21 +368,36 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 }
 
 func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
-	for i := 0; i < 40; i++ {
-		_, err := c.DescribeSecurityGroups(input)
-		if err != nil {
-			// Check if this is just because it doesn't exist yet
-			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidSecurityGroupID.NotFound" {
-				log.Printf("[DEBUG] Security group %v doesn't exist, sleeping for a moment", input.GroupIds)
-				time.Sleep(15 * time.Second)
-				continue
-			}
-			// The error is something else, abort and throw it
-			return fmt.Errorf("Error looking for security group %v: %s", input.GroupIds, err)
-		}
-
-		// Success!
-		return nil
+	waiterCfg := waiter.Config{
+		Operation:   "DescribeSecurityGroups",
+		Delay:       15,
+		MaxAttempts: 40,
+		Acceptors: []waiter.WaitAcceptor{
+			{
+				State:    "success",
+				Matcher:  "path",
+				Argument: "length(SecurityGroups[]) > `0`",
+				Expected: true,
+			},
+			{
+				State:    "retry",
+				Matcher:  "error",
+				Argument: "",
+				Expected: "InvalidGroupID.NotFound",
+			},
+			{
+				State:    "retry",
+				Matcher:  "error",
+				Argument: "",
+				Expected: "InvalidSecurityGroupID.NotFound",
+			},
+		},
 	}
-	return fmt.Errorf("Timeout waiting for security group %v to appear", input.GroupIds)
+
+	w := waiter.Waiter{
+		Client: c,
+		Input:  input,
+		Config: waiterCfg,
+	}
+	return w.Wait()
 }
