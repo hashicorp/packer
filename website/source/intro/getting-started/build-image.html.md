@@ -162,6 +162,13 @@ and it would work great.
 try to launch the one in the example output above, you will get an error. If you
 want to try to launch your AMI, get the ID from the Packer output.
 
+-> **Note:** If you see a `VPCResourceNotSpecified` error, Packer might not be
+able to determine the default VPC, which the `t2` instance types require. This
+can happen if you created you AWS account before `2013-12-04`.  You can either
+change the `instance_type` to `m3.medium`, or specify a VPC. Please see
+http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
+information.
+
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
