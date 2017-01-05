@@ -197,22 +197,19 @@ header .header {
         }
       }
 
-    ul, ol {
-      list-style-position: inside;
-      margin-top: $baseline;
-      margin-left: 20px;
-      margin-right: 20px;
+      ul, ol {
+        list-style-position: inside;
+        margin-top: $baseline;
+        margin-left: 20px;
+        margin-right: 20px;
 
-      li {
-        font-family: $serif;
-        font-size: 17px;
-        line-height: (30/17) !important;
-        margin-bottom: $baseline;
-        p {
-          display: inline;
+        li {
+          font-family: $serif;
+          font-size: 17px;
+          line-height: (30/17) !important;
+          margin-bottom: $baseline;
         }
       }
-    }
 
       ul {
         list-style-type: circle;
