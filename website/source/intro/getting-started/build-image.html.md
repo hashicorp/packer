@@ -158,6 +158,8 @@ artifact: the AMI in us-east-1 that was created.
 This AMI is ready to use. If you wanted you could go and launch this AMI right now
 and it would work great.
 
+-&gt; **Note:** If you run into errors about VPCResourceNotSpecified, see this [github thread](https://github.com/mitchellh/packer/issues/2056).
+
 -&gt; **Note:** Your AMI ID will surely be different than the one above. If you
 try to launch the one in the example output above, you will get an error. If you
 want to try to launch your AMI, get the ID from the Packer output.
