@@ -41,8 +41,7 @@ For `gcloud`, do this via the `--scopes` parameter:
 
 ``` {.sh}
 gcloud compute --project YOUR_PROJECT instances create "INSTANCE-NAME" ... \
-               --scopes "https://www.googleapis.com/auth/compute" \
-                        "https://www.googleapis.com/auth/devstorage.full_control" \
+               --scopes "https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/devstorage.full_control" \
                ...
 ```
 
