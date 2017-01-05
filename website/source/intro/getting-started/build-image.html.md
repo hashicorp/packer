@@ -162,6 +162,11 @@ and it would work great.
 try to launch the one in the example output above, you will get an error. If you
 want to try to launch your AMI, get the ID from the Packer output.
 
+-> **Note:** If you see a `VPCResourceNotSpecified` error, Packer might not be
+able to 
+might not have a VPC set up. You can either try changing the `instance_type` to
+`m3.medium`, 
+
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
