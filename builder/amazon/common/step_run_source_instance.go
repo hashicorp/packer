@@ -383,7 +383,7 @@ func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsI
 				State:    "retry",
 				Matcher:  "error",
 				Argument: "",
-				Expected: "InvalidGroupID.NotFound",
+				Expected: "InvalidGroup.NotFound",
 			},
 			{
 				State:    "retry",
