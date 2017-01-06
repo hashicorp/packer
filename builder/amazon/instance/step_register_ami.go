@@ -63,6 +63,8 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	state.Put("snapshots", map[string][]string{})
+
 	return multistep.ActionContinue
 }
 
