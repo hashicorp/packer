@@ -230,9 +230,9 @@ builder.
     slightly larger. If you find this to be the case, you can disable compaction
     using this configuration value.  Defaults to `false`.
 
--   `skip_export` (boolean) - Defaults to false. When enabled Packer will skip
-    export of the installed virtual machine. Only useful for some edge use
-    cases.
+-   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
+    not export the VM. Useful if the build output is not the resultant image,
+    but created inside the VM.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with the remote ESXi server. This is convenient if you
