@@ -17,6 +17,8 @@ IMPROVEMENTS:
   * provisioner/puppet-server: Add default facts. [GH-4286]
   * provisioner/powershell: Allow equals sign in value of environment
       variables. [GH-4328]
+  * builder/virtualbox: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4339]
  
 BUG FIXES:
 
