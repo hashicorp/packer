@@ -29,6 +29,7 @@ BUG FIXES:
   * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
   * builder/amazon: Properly error if we don't have the
       ec2:DescribeSecurityGroups permission. [GH-4304]
+  * builder/amazon: Fix crash in amazon-instance. [GH-4372]
 
 ## 0.12.1 (December 15, 2016)
 
