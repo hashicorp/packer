@@ -230,6 +230,10 @@ builder.
     slightly larger. If you find this to be the case, you can disable compaction
     using this configuration value.  Defaults to `false`.
 
+-   `skip_export` (boolean) - Defaults to false. When enabled Packer will skip
+    export of the installed virtual machine. Only useful for some edge use
+    cases.
+
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with the remote ESXi server. This is convenient if you
     use packer to provision VMs on ESXi and don't want to use ovftool to
@@ -334,7 +338,7 @@ by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
@@ -348,9 +352,9 @@ by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
