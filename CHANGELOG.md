@@ -19,6 +19,8 @@ IMPROVEMENTS:
       variables. [GH-4328]
   * builder/virtualbox: add `skip_export` option to skip exporting the VM after
       build completes. [GH-4339]
+  * builder/vmware-iso: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4378]
  
 BUG FIXES:
 
