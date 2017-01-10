@@ -35,7 +35,7 @@ Required:
 
 Optional:
 
--   `description` (string) - The name of the key in `s3_bucket_name` where the OVA file will be copied to for import. If not specified, this will default to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will be removed after import, unless `skip_clean` is `true`.
+-   `description` (string) - Adding description for created snapshot.
 
 -   `tags` (object of key/value strings) - Tags applied to the created snapshots.
 
