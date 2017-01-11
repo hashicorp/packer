@@ -34,6 +34,8 @@ BUG FIXES:
   * builder/amazon: Properly error if we don't have the
       ec2:DescribeSecurityGroups permission. [GH-4304]
   * builder/amazon: Fix crash in amazon-instance. [GH-4372]
+  * builder/docker: Fix crash when performing log in to ECR with an invalid
+      URL. [GH-4385]
 
 ## 0.12.1 (December 15, 2016)
 
