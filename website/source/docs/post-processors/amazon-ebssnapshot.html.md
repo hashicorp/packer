@@ -8,9 +8,9 @@ page_title: 'Amazon EBS Snapshot Post-Processor'
 
 # Amazon EBS Snapshot Post-Processor
 
-Type: `amazon-ebssnap`
+Type: `amazon-ebssnapshot`
 
-The Packer Amazon EBS Snapshot post-processor takes EBS Volume IDs from an artifact from ebsvolume builders and creates snapshots out of it.
+The Packer Amazon EBS Snapshot post-processor takes EBS Volume IDs from an artifact of ebsvolume builders and creates snapshots out of it.
 
 ## How Does it Work?
 
@@ -35,7 +35,7 @@ Required:
 
 Optional:
 
--   `description` (string) - Adding description for created snapshot.
+-   `description` (string) - Description for created snapshot.
 
 -   `tags` (object of key/value strings) - Tags applied to the created snapshots.
 
@@ -45,11 +45,11 @@ Here is a basic example. This assumes that the ebsvolume builder has produced an
 
 ``` {.javascript}
 {
-  "type": "amazon-ebssnap",
+  "type": "amazon-ebssnapshot",
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "description": "Packer amazon-ebssnap",
+  "description": "Packer amazon-ebssnapshot",
   "tags": {
     "Name": "foo-bar-{{timestamp}}"
   }

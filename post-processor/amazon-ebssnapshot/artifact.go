@@ -1,4 +1,4 @@
-package ebssnap
+package ebssnapshot
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const BuilderId = "packer.post-processor.amazon-ebssnap"
+const BuilderId = "packer.post-processor.amazon-ebssnapshot"
 
 type Artifact struct {
 	Snapshots []string
