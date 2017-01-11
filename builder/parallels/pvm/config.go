@@ -14,7 +14,7 @@ import (
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
-	parallelscommon.FloppyConfig        `mapstructure:",squash"`
+	common.FloppyConfig                 `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
@@ -27,7 +27,7 @@ type Config struct {
 	BootCommand []string `mapstructure:"boot_command"`
 	SourcePath  string   `mapstructure:"source_path"`
 	VMName      string   `mapstructure:"vm_name"`
-	ReassignMac bool     `mapstructure:"reassign_mac"`
+	ReassignMAC bool     `mapstructure:"reassign_mac"`
 
 	ctx interpolate.Context
 }

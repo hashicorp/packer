@@ -96,6 +96,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 			log.Printf("[DEBUG] Error getting WinRM host: %s", err)
 			continue
 		}
+
 		port := s.Config.WinRMPort
 		if s.WinRMPort != nil {
 			port, err = s.WinRMPort(state)

@@ -41,8 +41,7 @@ For `gcloud`, do this via the `--scopes` parameter:
 
 ``` {.sh}
 gcloud compute --project YOUR_PROJECT instances create "INSTANCE-NAME" ... \
-               --scopes "https://www.googleapis.com/auth/compute" \
-                        "https://www.googleapis.com/auth/devstorage.full_control" \
+               --scopes "https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/devstorage.full_control" \
                ...
 ```
 
@@ -125,8 +124,14 @@ builder.
 -   `project_id` (string) - The project ID that will be used to launch instances
     and store images.
 
--   `source_image` (string) - The source image to use to create the new
-    image from. Example: `"debian-7-wheezy-v20150127"`
+-   `source_image` (string) - The source image to use to create the new image
+    from. You can also specify `source_image_family` instead. If both
+    `source_image` and `source_image_family` are specified, `source_image`
+    takes precedence. Example: `"debian-8-jessie-v20161027"`
+
+-   `source_image_family` (string) - The source image family to use to create
+    the new image from. The image family always returns its latest image that
+    is not deprecated. Example: `"debian-8"`.
 
 -   `zone` (string) - The zone in which to launch the instance used to create
     the image. Example: `"us-central1-a"`
@@ -147,7 +152,10 @@ builder.
 
 -   `image_description` (string) - The description of the resulting image.
 
--   `image_family` (string) - The name of the image family to which the resulting image belongs. You can create disks by specifying an image family instead of a specific image name. The image family always returns its latest image that is not deprecated.
+-   `image_family` (string) - The name of the image family to which the
+    resulting image belongs. You can create disks by specifying an image family
+    instead of a specific image name. The image family always returns its
+    latest image that is not deprecated.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
@@ -157,10 +165,14 @@ builder.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
--   `metadata` (object of key/value strings)
+-   `metadata` (object of key/value strings) - Metadata applied to the launched
+    instance.
 
 -   `network` (string) - The Google Compute network to use for the
     launched instance. Defaults to `"default"`.
+
+-   `network_project_id` (string) - The project ID for the network and subnetwork
+    to use for launched instance. Defaults to `project_id`.
 
 -   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
     `use_internal_ip` must be true if this property is true.
@@ -170,13 +182,25 @@ builder.
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
--   `startup_script_file` (string) - The filepath to a startup script to run on 
+-   `scopes` (array of strings) - The service account scopes for launched instance.
+    Defaults to:
+
+``` {.json}
+[ "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/compute",
+  "https://www.googleapis.com/auth/devstorage.full_control" ]
+```
+
+-   `source_image_project_id` (string) - The project ID of the
+    project containing the source image.
+
+-   `startup_script_file` (string) - The filepath to a startup script to run on
     the VM from which the image will be made.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
 
--   `subnetwork` (string) - The Google Compute subnetwork to use for the launced
+-   `subnetwork` (string) - The Google Compute subnetwork to use for the launched
      instance. Only required if the `network` has been created with custom
      subnetting.
      Note, the region of the subnetwork must match the `region` or `zone` in
@@ -186,10 +210,10 @@ builder.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
-    
+
 ## Startup Scripts
 
-Startup scripts can be a powerful tool for configuring the instance from which the image is made. 
+Startup scripts can be a powerful tool for configuring the instance from which the image is made.
 The builder will wait for a startup script to terminate. A startup script can be provided via the
 `startup_script_file` or 'startup-script' instance creation `metadata` field. Therefore, the build
 time will vary depending on the duration of the startup script. If `startup_script_file` is set,

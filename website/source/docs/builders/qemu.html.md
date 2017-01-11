@@ -31,8 +31,8 @@ to files, URLS for ISOs and checksums.
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
-      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+      "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "shutdown_command": "shutdown -P now",
@@ -164,6 +164,12 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
 
@@ -190,6 +196,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
+
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
 
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
@@ -229,6 +238,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     strings makes up a command line switch that overrides matching default
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
+
+-   `use_default_display` (boolean) - If true, do not pass a `-display` option
+    to qemu, allowing it to choose the default. This may be needed when running
+    under OS X.
 
 \~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
@@ -363,12 +376,32 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
+-   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+
+-   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+
+-   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+
+-   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+
+-   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+
+-   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+
+-   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+
 -   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
 -   `<waitXX> ` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
+
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
@@ -389,3 +422,11 @@ CentOS 6.4 installer:
   " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
+
+### Troubleshooting
+
+Some users have experienced errors complaining about invalid keymaps. This
+seems to be related to having a `common` directory or file in the directory
+they've run Packer in, like the packer source directory. This appears to be an
+upstream bug with qemu, and the best solution for now is to remove the
+file/directory or run in another directory.

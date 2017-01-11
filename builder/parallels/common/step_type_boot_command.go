@@ -13,16 +13,14 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const KeyLeftShift uint32 = 0xFFE1
-
 type bootCommandTemplateData struct {
 	HTTPIP   string
 	HTTPPort uint
 	Name     string
 }
 
-// This step "types" the boot command into the VM via the prltype script, built on the
-// Parallels Virtualization SDK - Python API.
+// StepTypeBootCommand is a step that "types" the boot command into the VM via
+// the prltype script, built on the Parallels Virtualization SDK - Python API.
 //
 // Uses:
 //   driver Driver
@@ -39,6 +37,7 @@ type StepTypeBootCommand struct {
 	Ctx            interpolate.Context
 }
 
+// Run types the boot command by sending key scancodes into the VM.
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
@@ -50,7 +49,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
-	hostIp := "0.0.0.0"
+	hostIP := "0.0.0.0"
 
 	if len(s.HostInterfaces) > 0 {
 		// Determine the host IP
@@ -58,18 +57,18 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		ip, err := ipFinder.HostIP()
 		if err != nil {
-			err := fmt.Errorf("Error detecting host IP: %s", err)
+			err = fmt.Errorf("Error detecting host IP: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		hostIp = ip
+		hostIP = ip
 	}
 
-	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIp))
+	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIP))
 
 	s.Ctx.Data = &bootCommandTemplateData{
-		hostIp,
+		hostIP,
 		httpPort,
 		s.VMName,
 	}
@@ -78,7 +77,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
-			err := fmt.Errorf("Error preparing boot command: %s", err)
+			err = fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -88,7 +87,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		for _, code := range scancodes(command) {
 			if code == "wait" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -100,7 +99,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait5" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -112,7 +111,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait10" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -136,7 +135,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		log.Printf("Sending scancodes: %#v", codes)
 		if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-			err := fmt.Errorf("Error sending boot command: %s", err)
+			err = fmt.Errorf("Error sending boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -146,6 +145,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {
@@ -186,6 +186,13 @@ func scancodes(message string) []string {
 	special["<pageUp>"] = []string{"49", "c9"}
 	special["<pageDown>"] = []string{"51", "d1"}
 
+	special["<leftAlt>"] = []string{"38", "b8"}
+	special["<leftCtrl>"] = []string{"1d", "9d"}
+	special["<leftShift>"] = []string{"2a", "aa"}
+	special["<rightAlt>"] = []string{"e038", "e0b8"}
+	special["<rightCtrl>"] = []string{"e01d", "e09d"}
+	special["<rightShift>"] = []string{"36", "b6"}
+
 	shiftedChars := "!@#$%^&*()_+{}:\"~|<>?"
 
 	scancodeIndex := make(map[string]uint)
@@ -201,18 +208,90 @@ func scancodes(message string) []string {
 
 	scancodeMap := make(map[rune]uint)
 	for chars, start := range scancodeIndex {
-		var i uint = 0
+		var i uint
 		for len(chars) > 0 {
 			r, size := utf8.DecodeRuneInString(chars)
 			chars = chars[size:]
 			scancodeMap[r] = start + i
-			i += 1
+			i++
 		}
 	}
 
 	result := make([]string, 0, len(message)*2)
 	for len(message) > 0 {
 		var scancode []string
+
+		if strings.HasPrefix(message, "<leftAltOn>") {
+			scancode = []string{"38"}
+			message = message[len("<leftAltOn>"):]
+			log.Printf("Special code '<leftAltOn>' found, replacing with: 38")
+		}
+
+		if strings.HasPrefix(message, "<leftCtrlOn>") {
+			scancode = []string{"1d"}
+			message = message[len("<leftCtrlOn>"):]
+			log.Printf("Special code '<leftCtrlOn>' found, replacing with: 1d")
+		}
+
+		if strings.HasPrefix(message, "<leftShiftOn>") {
+			scancode = []string{"2a"}
+			message = message[len("<leftShiftOn>"):]
+			log.Printf("Special code '<leftShiftOn>' found, replacing with: 2a")
+		}
+
+		if strings.HasPrefix(message, "<leftAltOff>") {
+			scancode = []string{"b8"}
+			message = message[len("<leftAltOff>"):]
+			log.Printf("Special code '<leftAltOff>' found, replacing with: b8")
+		}
+
+		if strings.HasPrefix(message, "<leftCtrlOff>") {
+			scancode = []string{"9d"}
+			message = message[len("<leftCtrlOff>"):]
+			log.Printf("Special code '<leftCtrlOff>' found, replacing with: 9d")
+		}
+
+		if strings.HasPrefix(message, "<leftShiftOff>") {
+			scancode = []string{"aa"}
+			message = message[len("<leftShiftOff>"):]
+			log.Printf("Special code '<leftShiftOff>' found, replacing with: aa")
+		}
+
+		if strings.HasPrefix(message, "<rightAltOn>") {
+			scancode = []string{"e038"}
+			message = message[len("<rightAltOn>"):]
+			log.Printf("Special code '<rightAltOn>' found, replacing with: e038")
+		}
+
+		if strings.HasPrefix(message, "<rightCtrlOn>") {
+			scancode = []string{"e01d"}
+			message = message[len("<rightCtrlOn>"):]
+			log.Printf("Special code '<rightCtrlOn>' found, replacing with: e01d")
+		}
+
+		if strings.HasPrefix(message, "<rightShiftOn>") {
+			scancode = []string{"36"}
+			message = message[len("<rightShiftOn>"):]
+			log.Printf("Special code '<rightShiftOn>' found, replacing with: 36")
+		}
+
+		if strings.HasPrefix(message, "<rightAltOff>") {
+			scancode = []string{"e0b8"}
+			message = message[len("<rightAltOff>"):]
+			log.Printf("Special code '<rightAltOff>' found, replacing with: e0b8")
+		}
+
+		if strings.HasPrefix(message, "<rightCtrlOff>") {
+			scancode = []string{"e09d"}
+			message = message[len("<rightCtrlOff>"):]
+			log.Printf("Special code '<rightCtrlOff>' found, replacing with: e09d")
+		}
+
+		if strings.HasPrefix(message, "<rightShiftOff>") {
+			scancode = []string{"b6"}
+			message = message[len("<rightShiftOff>"):]
+			log.Printf("Special code '<rightShiftOff>' found, replacing with: b6")
+		}
 
 		if strings.HasPrefix(message, "<wait>") {
 			log.Printf("Special code <wait> found, will sleep 1 second at this point.")

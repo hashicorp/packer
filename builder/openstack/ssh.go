@@ -6,10 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/floatingip"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
+	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -30,7 +31,7 @@ func CommHost(
 		}
 
 		// If we have a floating IP, use that
-		ip := state.Get("access_ip").(*floatingip.FloatingIP)
+		ip := state.Get("access_ip").(*floatingips.FloatingIP)
 		if ip != nil && ip.IP != "" {
 			log.Printf("[DEBUG] Using floating IP %s to connect", ip.IP)
 			return ip.IP, nil
@@ -60,23 +61,37 @@ func CommHost(
 }
 
 // SSHConfig returns a function that can be used for the SSH communicator
-// config for connecting to the instance created over SSH using the generated
-// private key.
-func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+// config for connecting to the instance created over SSH using a private key
+// or a password.
+func SSHConfig(username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		privateKey := state.Get("privateKey").(string)
 
-		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
-		if err != nil {
-			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+		privateKey, hasKey := state.GetOk("privateKey")
+
+		if hasKey {
+
+			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeys(signer),
+				},
+			}, nil
+
+		} else {
+
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.Password(password),
+					ssh.KeyboardInteractive(
+						packerssh.PasswordKeyboardInteractive(password)),
+				}}, nil
 		}
-
-		return &ssh.ClientConfig{
-			User: username,
-			Auth: []ssh.AuthMethod{
-				ssh.PublicKeys(signer),
-			},
-		}, nil
 	}
 }
 

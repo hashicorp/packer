@@ -1,9 +1,10 @@
 package common
 
 import (
+	"testing"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"testing"
 )
 
 func TestStepUploadParallelsTools_impl(t *testing.T) {

@@ -125,6 +125,12 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
     "/Applications/VMware Fusion.app" but this setting allows you to
     customize this.
@@ -154,6 +160,9 @@ builder.
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
+
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
 
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
@@ -220,6 +229,10 @@ builder.
     certain rare cases, this might actually end up making the resulting disks
     slightly larger. If you find this to be the case, you can disable compaction
     using this configuration value.  Defaults to `false`.
+
+-   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
+    not export the VM. Useful if the build output is not the resultant image,
+    but created inside the VM.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with the remote ESXi server. This is convenient if you
@@ -317,9 +330,33 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
+-   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+
+-   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+
+-   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+
+-   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
+
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+
+-   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+
+-   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+
+-   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+
 -   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
+
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
+
+For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The

@@ -101,7 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.setTemplateParameters(b.stateBag)
 	var steps []multistep.Step
 
-	if strings.EqualFold(b.config.OSType, constants.Target_Linux) {
+	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
@@ -119,7 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 		}
-	} else if strings.EqualFold(b.config.OSType, constants.Target_Windows) {
+	} else if b.config.OSType == constants.Target_Windows {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
@@ -157,7 +157,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ui.Message(fmt.Sprintf("temp admin password: '%s'", b.config.Password))
 	}
 
-	b.runner = b.createRunner(&steps, ui)
+	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(b.stateBag)
 
 	// Report any errors.
@@ -195,19 +195,6 @@ func (b *Builder) Cancel() {
 	if b.runner != nil {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
-	}
-}
-
-func (b *Builder) createRunner(steps *[]multistep.Step, ui packer.Ui) multistep.Runner {
-	if b.config.PackerDebug {
-		return &multistep.DebugRunner{
-			Steps:   *steps,
-			PauseFn: packerCommon.MultistepDebugFn(ui),
-		}
-	}
-
-	return &multistep.BasicRunner{
-		Steps: *steps,
 	}
 }
 

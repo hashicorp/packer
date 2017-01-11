@@ -95,12 +95,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) error {
 	for _, src := range p.config.Sources {
-		ui.Say(fmt.Sprintf("Downloading %s => %s", src, p.config.Destination))
+		dst := p.config.Destination
+		ui.Say(fmt.Sprintf("Downloading %s => %s", src, dst))
 		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
-		dir := p.config.Destination
+		dir := dst
 		// if it doesn't end with a /, set dir as the parent dir
-		if !strings.HasSuffix(p.config.Destination, "/") {
+		if !strings.HasSuffix(dst, "/") {
 			dir = filepath.Dir(dir)
+		} else if !strings.HasSuffix(src, "/") && !strings.HasSuffix(src, "*") {
+			dst = filepath.Join(dst, filepath.Base(src))
 		}
 		if dir != "" {
 			err := os.MkdirAll(dir, os.FileMode(0755))
@@ -108,12 +111,12 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 				return err
 			}
 		}
-		// if the config.Destination was a dir, download the dir
-		if !strings.HasSuffix(p.config.Destination, "/") {
-			return comm.DownloadDir(src, p.config.Destination, nil)
+		// if the src was a dir, download the dir
+		if strings.HasSuffix(src, "/") || strings.IndexAny(src, "*?[") >= 0 {
+			return comm.DownloadDir(src, dst, nil)
 		}
 
-		f, err := os.OpenFile(p.config.Destination, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+		f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 		if err != nil {
 			return err
 		}
@@ -130,7 +133,9 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 
 func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) error {
 	for _, src := range p.config.Sources {
-		ui.Say(fmt.Sprintf("Uploading %s => %s", src, p.config.Destination))
+		dst := p.config.Destination
+
+		ui.Say(fmt.Sprintf("Uploading %s => %s", src, dst))
 
 		info, err := os.Stat(src)
 		if err != nil {
@@ -154,7 +159,11 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 			return err
 		}
 
-		err = comm.Upload(p.config.Destination, f, &fi)
+		if strings.HasSuffix(dst, "/") {
+			dst = filepath.Join(dst, filepath.Base(src))
+		}
+
+		err = comm.Upload(dst, f, &fi)
 		if err != nil {
 			ui.Error(fmt.Sprintf("Upload failed: %s", err))
 			return err

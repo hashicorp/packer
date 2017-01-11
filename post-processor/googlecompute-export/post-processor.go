@@ -79,9 +79,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			Zone:                 zone,
 			Network:              "default",
 			RawStateTimeout:      "5m",
+			Scopes: []string{
+				"https://www.googleapis.com/auth/userinfo.email",
+				"https://www.googleapis.com/auth/compute",
+				"https://www.googleapis.com/auth/devstorage.full_control",
+			},
 		}
 		exporterConfig.CalcTimeout()
-		
+
 		// Set up credentials and GCE driver.
 		b, err := ioutil.ReadFile(accountKeyFilePath)
 		if err != nil {
@@ -110,7 +115,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			&googlecompute.StepCreateInstance{
 				Debug: p.config.PackerDebug,
 			},
-			new(googlecompute.StepWaitInstanceStartup),
+			new(googlecompute.StepWaitStartupScript),
 			new(googlecompute.StepTeardownInstance),
 		}
 

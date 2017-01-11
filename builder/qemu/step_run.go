@@ -35,7 +35,7 @@ func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
 
 	command, err := getCommandArgs(s.BootDrive, state)
 	if err != nil {
-		err := fmt.Errorf("Error processing QemuArggs: %s", err)
+		err := fmt.Errorf("Error processing QemuArgs: %s", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -63,7 +63,6 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	isoPath := state.Get("iso_path").(string)
 	vncIP := state.Get("vnc_ip").(string)
 	vncPort := state.Get("vnc_port").(uint)
-	sshHostPort := state.Get("sshHostPort").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)
 
@@ -74,10 +73,16 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	defaultArgs := make(map[string]interface{})
 	var deviceArgs []string
 	var driveArgs []string
+	var sshHostPort uint
 
 	defaultArgs["-name"] = vmName
 	defaultArgs["-machine"] = fmt.Sprintf("type=%s", config.MachineType)
-	defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+	if config.Comm.Type != "none" {
+		sshHostPort = state.Get("sshHostPort").(uint)
+		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0,hostfwd=tcp::%v-:%d", sshHostPort, config.Comm.Port())
+	} else {
+		defaultArgs["-netdev"] = fmt.Sprintf("user,id=user.0")
+	}
 
 	qemuVersion, err := driver.Version()
 	if err != nil {
@@ -91,12 +96,12 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if qemuMajor >= 2 {
 		if config.DiskInterface == "virtio-scsi" {
 			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
-			driveArgs = append(driveArgs, fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s", imgPath, config.DiskCache, config.DiskDiscard))
+			driveArgs = append(driveArgs, fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format))
 		} else {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard))
+			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format))
 		}
 	} else {
-		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s", imgPath, config.DiskInterface, config.DiskCache))
+		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.Format))
 	}
 	deviceArgs = append(deviceArgs, fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
 
@@ -119,7 +124,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	} else {
 		if qemuMajor >= 2 {
-			defaultArgs["-display"] = "sdl"
+			if !config.UseDefaultDisplay {
+				defaultArgs["-display"] = "sdl"
+			}
 		} else {
 			ui.Message("WARNING: The version of qemu  on your host doesn't support display mode.\n" +
 				"The display parameter will be ignored.")
@@ -157,13 +164,23 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 
 		httpPort := state.Get("http_port").(uint)
 		ctx := config.ctx
-		ctx.Data = qemuArgsTemplateData{
-			"10.0.2.2",
-			httpPort,
-			config.HTTPDir,
-			config.OutputDir,
-			config.VMName,
-			sshHostPort,
+		if config.Comm.Type != "none" {
+			ctx.Data = qemuArgsTemplateData{
+				"10.0.2.2",
+				httpPort,
+				config.HTTPDir,
+				config.OutputDir,
+				config.VMName,
+				sshHostPort,
+			}
+		} else {
+			ctx.Data = qemuArgsTemplateData{
+				HTTPIP:    "10.0.2.2",
+				HTTPPort:  httpPort,
+				HTTPDir:   config.HTTPDir,
+				OutputDir: config.OutputDir,
+				Name:      config.VMName,
+			}
 		}
 		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
 		if err != nil {

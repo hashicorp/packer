@@ -57,6 +57,9 @@ Optional:
     tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
     This will be uploaded to the `remote_state_tree` on the remote.
 
+-   `custom_state` (string) - A state to be run instead of `state.highstate`.
+    Defaults to `state.highstate` if unspecified.
+
 -   `minion_config` (string) - The path to your local [minion config
     file](http://docs.saltstack.com/ref/configuration/minion.html). This will be
     uploaded to the `/etc/salt` on the remote. This option overrides the
@@ -69,7 +72,12 @@ Optional:
 -   `temp_config_dir` (string) - Where your local state tree will be copied
     before moving to the `/srv/salt` directory. Default is `/tmp/salt`.
 
--   `no_exit_on_failure` (boolean) - Packer will exit if the Salt highstate command
+-   `no_exit_on_failure` (boolean) - Packer will exit if the `salt-call` command
     fails. Set this option to true to ignore Salt failures.
 
--   `log_level` (string) - Set the logging level for the Salt highstate run.
+-   `log_level` (string) - Set the logging level for the `salt-call` run.
+
+-   `salt_call_args` (string) - Additional arguments to pass directly to `salt-call`. See
+    [salt-call](https://docs.saltstack.com/ref/cli/salt-call.html) documentation for more
+    information. By default no additional arguments (besides the ones Packer generates)
+    are passed to `salt-call`.

@@ -41,7 +41,7 @@ builder.
 -   `image` (string) - The name (or slug) of the base image to use. This is the
     image that will be used to launch a new droplet and provision it. See
     [https://developers.digitalocean.com/documentation/v2/\#list-all-images](https://developers.digitalocean.com/documentation/v2/#list-all-images) for
-    details on how to get a list of the the accepted image names/slugs.
+    details on how to get a list of the accepted image names/slugs.
 
 -   `region` (string) - The name (or slug) of the region to launch the
     droplet in. Consequently, this is the region where the snapshot will
@@ -75,6 +75,9 @@ builder.
     default state timeout is "6m".
 
 -   `user_data` (string) - User data to launch with the Droplet.
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the Droplet.
+
 
 ## Basic Example
 

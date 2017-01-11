@@ -108,23 +108,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				computeClient,
 				b.config.SSHInterface,
 				b.config.SSHIPVersion),
-			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername),
+			SSHConfig: SSHConfig(b.config.RunConfig.Comm.SSHUsername,
+				b.config.RunConfig.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
 		&StepStopServer{},
 		&stepCreateImage{},
+		&stepUpdateImageVisibility{},
+		&stepAddImageMembers{},
 	}
 
 	// Run!
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that

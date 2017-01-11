@@ -8,10 +8,10 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -41,6 +41,11 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
+
+	if config.Comm.Type == "ssh" && config.Comm.SSHPassword != "" {
+		ui.Say("Not creating temporary keypair when using password.")
+		return multistep.ActionContinue
+	}
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()

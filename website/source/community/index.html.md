@@ -4,7 +4,7 @@ description: |
     dedicated users willing to help through various mediums.
 layout: community
 page_title: Community
-...
+---
 
 # Community
 

@@ -30,6 +30,7 @@ type Config struct {
 	S3Key     string            `mapstructure:"s3_key_name"`
 	SkipClean bool              `mapstructure:"skip_clean"`
 	Tags      map[string]string `mapstructure:"tags"`
+	Name      string            `mapstructure:"ami_name"`
 
 	ctx interpolate.Context
 }
@@ -123,7 +124,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Set up the AWS session
 	log.Println("Creating AWS session")
-	session := session.New(config)
+	session, err := session.NewSession(config)
+	if err != nil {
+		return nil, false, err
+	}
 
 	// open the source file
 	log.Printf("Opening file %s to upload", source)
@@ -205,6 +209,45 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Pull AMI ID out of the completed job
 	createdami := *import_result.ImportImageTasks[0].ImageId
+
+	if p.config.Name != "" {
+
+		ui.Message(fmt.Sprintf("Starting rename of AMI (%s)", createdami))
+
+		resp, err := ec2conn.CopyImage(&ec2.CopyImageInput{
+			Name:          &p.config.Name,
+			SourceImageId: &createdami,
+			SourceRegion:  config.Region,
+		})
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Error Copying AMI (%s): %s", createdami, err)
+		}
+
+		ui.Message(fmt.Sprintf("Waiting for AMI rename to complete (may take a while)"))
+
+		stateChange := awscommon.StateChangeConf{
+			Pending: []string{"pending"},
+			Target:  "available",
+			Refresh: awscommon.AMIStateRefreshFunc(ec2conn, *resp.ImageId),
+		}
+
+		if _, err := awscommon.WaitForState(&stateChange); err != nil {
+			return nil, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
+		}
+
+		ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+			ImageId: &createdami,
+		})
+
+		if err != nil {
+			return nil, false, fmt.Errorf("Error deregistering existing AMI: %s", err)
+		}
+
+		ui.Message(fmt.Sprintf("AMI rename completed"))
+
+		createdami = *resp.ImageId
+	}
 
 	// If we have tags, then apply them now to both the AMI and snaps
 	// created by the import

@@ -48,6 +48,7 @@ if [ -z $NOSIGN ]; then
   popd
 fi
 
-hc-releases -upload $DIR/pkg/dist --publish --purge
+hc-releases upload $DIR/pkg/dist/
+hc-releases publish
 
 exit 0

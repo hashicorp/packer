@@ -168,6 +168,12 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<end>"] = 0xFF57
 	special["<pageUp>"] = 0xFF55
 	special["<pageDown>"] = 0xFF56
+	special["<leftAlt>"] = 0xFFE9
+	special["<leftCtrl>"] = 0xFFE3
+	special["<leftShift>"] = 0xFFE1
+	special["<rightAlt>"] = 0xFFEA
+	special["<rightCtrl>"] = 0xFFE4
+	special["<rightShift>"] = 0xFFE2
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
@@ -175,6 +181,138 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	for len(original) > 0 {
 		var keyCode uint32
 		keyShift := false
+
+		if strings.HasPrefix(original, "<leftAltOn>") {
+			keyCode = special["<leftAlt>"]
+			original = original[len("<leftAltOn>"):]
+			log.Printf("Special code '<leftAltOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftCtrlOn>") {
+			keyCode = special["<leftCtrl>"]
+			original = original[len("<leftCtrlOn>"):]
+			log.Printf("Special code '<leftCtrlOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftShiftOn>") {
+			keyCode = special["<leftShift>"]
+			original = original[len("<leftShiftOn>"):]
+			log.Printf("Special code '<leftShiftOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftAltOff>") {
+			keyCode = special["<leftAlt>"]
+			original = original[len("<leftAltOff>"):]
+			log.Printf("Special code '<leftAltOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftCtrlOff>") {
+			keyCode = special["<leftCtrl>"]
+			original = original[len("<leftCtrlOff>"):]
+			log.Printf("Special code '<leftCtrlOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftShiftOff>") {
+			keyCode = special["<leftShift>"]
+			original = original[len("<leftShiftOff>"):]
+			log.Printf("Special code '<leftShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightAltOn>") {
+			keyCode = special["<rightAlt>"]
+			original = original[len("<rightAltOn>"):]
+			log.Printf("Special code '<rightAltOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightCtrlOn>") {
+			keyCode = special["<rightCtrl>"]
+			original = original[len("<rightCtrlOn>"):]
+			log.Printf("Special code '<rightCtrlOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightShiftOn>") {
+			keyCode = special["<rightShift>"]
+			original = original[len("<rightShiftOn>"):]
+			log.Printf("Special code '<rightShiftOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightAltOff>") {
+			keyCode = special["<rightAlt>"]
+			original = original[len("<rightAltOff>"):]
+			log.Printf("Special code '<rightAltOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightCtrlOff>") {
+			keyCode = special["<rightCtrl>"]
+			original = original[len("<rightCtrlOff>"):]
+			log.Printf("Special code '<rightCtrlOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightShiftOff>") {
+			keyCode = special["<rightShift>"]
+			original = original[len("<rightShiftOff>"):]
+			log.Printf("Special code '<rightShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(time.Second / 10)
+
+			continue
+		}
 
 		if strings.HasPrefix(original, "<wait>") {
 			log.Printf("Special code '<wait>' found, sleeping one second")

@@ -31,6 +31,7 @@ type Config struct {
 	StateTimeout      time.Duration `mapstructure:"state_timeout"`
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
+	UserDataFile      string        `mapstructure:"user_data_file"`
 
 	ctx interpolate.Context
 }
@@ -76,12 +77,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DropletName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.Comm.SSHUsername == "" {
-		// Default to "root". You can override this if your
-		// SourceImage has a different user account then the DO default
-		c.Comm.SSHUsername = "root"
-	}
-
 	if c.StateTimeout == 0 {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active
@@ -111,6 +106,16 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Image == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("image is required"))
+	}
+
+	if c.UserData != "" && c.UserDataFile != "" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("only one of user_data or user_data_file can be specified"))
+	} else if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

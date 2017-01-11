@@ -4,9 +4,9 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
-	"testing"
-	"strings"
 	"regexp"
+	"strings"
+	"testing"
 )
 
 func testConfig() map[string]interface{} {
@@ -32,9 +32,40 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	if *p.config.ExpectDisconnect != true {
+		t.Errorf("expected ExpectDisconnect to be true")
+	}
+
 	if p.config.RemotePath == "" {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
 	}
+}
+
+func TestProvisionerPrepare_ExpectDisconnect(t *testing.T) {
+	config := testConfig()
+	p := new(Provisioner)
+	config["expect_disconnect"] = false
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if *p.config.ExpectDisconnect != false {
+		t.Errorf("expected ExpectDisconnect to be false")
+	}
+
+	config["expect_disconnect"] = true
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if *p.config.ExpectDisconnect != true {
+		t.Errorf("expected ExpectDisconnect to be true")
+	}
+
 }
 
 func TestProvisionerPrepare_InlineShebang(t *testing.T) {
@@ -306,7 +337,7 @@ func TestProvisioner_RemotePathSetViaRemotePathAndRemoteFile(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.RemotePath != expectedRemoteFolder + "/" + expectedRemoteFile {
+	if p.config.RemotePath != expectedRemoteFolder+"/"+expectedRemoteFile {
 		t.Fatalf("remote path does not contain remote_file")
 	}
 }

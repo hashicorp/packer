@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/go-fs"
 	"math"
+	"strings"
 	"time"
 	"unicode/utf16"
 )
@@ -159,8 +160,8 @@ func NewFat16RootDirectoryCluster(bs *BootSectorCommon, label string) (*Director
 
 	// Create the volume ID entry
 	result.entries[0] = &DirectoryClusterEntry{
-		attr: AttrVolumeId,
-		name: label,
+		attr:    AttrVolumeId,
+		name:    label,
 		cluster: 0,
 	}
 
@@ -341,8 +342,8 @@ func DecodeDirectoryClusterEntry(data []byte) (*DirectoryClusterEntry, error) {
 			data[0] = 0xE5
 		}
 
-		result.name = string(data[0:8])
-		result.ext = string(data[8:11])
+		result.name = strings.TrimRight(string(data[0:8]), " ")
+		result.ext = strings.TrimRight(string(data[8:11]), " ")
 
 		// Creation time
 		createTimeTenths := data[13]

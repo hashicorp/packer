@@ -71,6 +71,10 @@ Optional parameters:
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
+-   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+    server disconnects us. A disconnect might happen if you restart the ssh
+    server or reboot the host. May default to false in the future.
+
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
@@ -112,20 +116,18 @@ Some operating systems default to a non-root user. For example if you login as
 `execute_command` to be:
 
 ``` {.text}
-"echo 'packer' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+"echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
 ```
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
-is being piped in with the value of `packer`. The `-E` flag tells `sudo` to
-preserve the environment, allowing our environmental variables to work within
-the script.
+is being piped in with the value of `packer`.
 
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
@@ -159,12 +161,14 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put a long `sleep` after the reboot so that SSH will
-eventually be killed automatically:
+machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
 
-``` {.text}
-reboot
-sleep 60
+``` {.javascript}
+{
+  "type": "shell",
+  "script": "script.sh",
+  "pause_before": "10s"
+}
 ```
 
 Some OS configurations don't properly kill all network connections on reboot,

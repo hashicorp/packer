@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/packer/packer"
@@ -105,11 +104,6 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		return
 	}
 
-	// A channel to keep track of our done state
-	doneCh := make(chan struct{})
-	sessionLock := new(sync.Mutex)
-	timedOut := false
-
 	// Start a goroutine to wait for the session to end and set the
 	// exit boolean and status.
 	go func() {
@@ -118,25 +112,19 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 		err := session.Wait()
 		exitStatus := 0
 		if err != nil {
-			exitErr, ok := err.(*ssh.ExitError)
-			if ok {
-				exitStatus = exitErr.ExitStatus()
+			switch err.(type) {
+			case *ssh.ExitError:
+				exitStatus = err.(*ssh.ExitError).ExitStatus()
+				log.Printf("Remote command exited with '%d': %s", exitStatus, cmd.Command)
+			case *ssh.ExitMissingError:
+				log.Printf("Remote command exited without exit status or exit signal.")
+				exitStatus = packer.CmdDisconnect
+			default:
+				log.Printf("Error occurred waiting for ssh session: %s", err.Error())
 			}
 		}
-
-		sessionLock.Lock()
-		defer sessionLock.Unlock()
-
-		if timedOut {
-			// We timed out, so set the exit status to -1
-			exitStatus = -1
-		}
-
-		log.Printf("remote command exited with '%d': %s", exitStatus, cmd.Command)
 		cmd.SetExited(exitStatus)
-		close(doneCh)
 	}()
-
 	return
 }
 
@@ -160,6 +148,7 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 	log.Printf("Download dir '%s' to '%s'", src, dst)
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
+		dirStack := []string{dst}
 		for {
 			fmt.Fprint(w, "\x00")
 
@@ -175,18 +164,25 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 
 			switch fi[0] {
 			case '\x01', '\x02':
-				return fmt.Errorf("%s", fi[1:len(fi)])
+				return fmt.Errorf("%s", fi[1:])
 			case 'C', 'D':
 				break
+			case 'E':
+				dirStack = dirStack[:len(dirStack)-1]
+				if len(dirStack) == 0 {
+					fmt.Fprint(w, "\x00")
+					return nil
+				}
+				continue
 			default:
 				return fmt.Errorf("unexpected server response (%x)", fi[0])
 			}
 
-			var mode string
+			var mode int64
 			var size int64
 			var name string
 			log.Printf("Download dir str:%s", fi)
-			n, err := fmt.Sscanf(fi, "%6s %d %s", &mode, &size, &name)
+			n, err := fmt.Sscanf(fi[1:], "%o %d %s", &mode, &size, &name)
 			if err != nil || n != 3 {
 				return fmt.Errorf("can't parse server response (%s)", fi)
 			}
@@ -194,18 +190,20 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 				return fmt.Errorf("negative file size")
 			}
 
-			log.Printf("Download dir mode:%s size:%d name:%s", mode, size, name)
+			log.Printf("Download dir mode:%0o size:%d name:%s", mode, size, name)
+
+			dst = filepath.Join(dirStack...)
 			switch fi[0] {
 			case 'D':
-				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(0755))
+				err = os.MkdirAll(filepath.Join(dst, name), os.FileMode(mode))
 				if err != nil {
 					return err
 				}
-				fmt.Fprint(w, "\x00")
-				return nil
+				dirStack = append(dirStack, name)
+				continue
 			case 'C':
 				fmt.Fprint(w, "\x00")
-				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(0644))
+				err = scpDownloadFile(filepath.Join(dst, name), stdoutR, size, os.FileMode(mode))
 				if err != nil {
 					return err
 				}
@@ -240,7 +238,11 @@ func (c *comm) newSession() (session *ssh.Session, err error) {
 			return nil, err
 		}
 
-		return c.client.NewSession()
+		if c.client == nil {
+			err = errors.New("client not available")
+		} else {
+			session, err = c.client.NewSession()
+		}
 	}
 
 	return session, nil
@@ -591,7 +593,7 @@ func (c *comm) scpDownloadSession(path string, output io.Writer) error {
 
 		switch fi[0] {
 		case '\x01', '\x02':
-			return fmt.Errorf("%s", fi[1:len(fi)])
+			return fmt.Errorf("%s", fi[1:])
 		case 'C':
 		case 'D':
 			return fmt.Errorf("remote file is directory")

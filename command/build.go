@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mitchellh/packer/helper/enumflag"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template"
 )
@@ -20,11 +21,14 @@ type BuildCommand struct {
 
 func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
+	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
+	flags.Var(flagOnError, "on-error", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
 	if err := flags.Parse(args); err != nil {
 		return 1
@@ -99,12 +103,14 @@ func (c BuildCommand) Run(args []string) int {
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
+	log.Printf("On error: %v", cfgOnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
+		b.SetOnError(cfgOnError)
 
 		warnings, err := b.Prepare()
 		if err != nil {
@@ -282,9 +288,10 @@ Options:
   -color=false               Disable color output (on by default)
   -debug                     Debug mode enabled for builds
   -except=foo,bar,baz        Build all builds other than these
+  -only=foo,bar,baz          Build only the specified builds
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
-  -only=foo,bar,baz          Only build the given builds by name
+  -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
   -parallel=false            Disable parallelization (on by default)
   -var 'key=value'           Variable for templates, can be used multiple times.
   -var-file=path             JSON file containing user variables.

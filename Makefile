@@ -4,6 +4,7 @@ VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
+GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
 
 default: deps generate test dev
 
@@ -29,11 +30,8 @@ package:
 deps:
 	go get github.com/mitchellh/gox
 	go get golang.org/x/tools/cmd/stringer
-	@go version | grep 1.4 ; if [ $$? -eq 0 ]; then \
-		echo "Installing godep and restoring dependencies"; \
-		go get github.com/tools/godep; \
-		godep restore; \
-	fi
+	go get github.com/kardianos/govendor
+	govendor sync
 
 dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -43,7 +41,10 @@ dev: deps ## Build and install a development build
 	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 fmt: ## Format Go code
-	go fmt `go list ./... | grep -v vendor`
+	@gofmt -w -s $(GOFMT_FILES)
+
+fmt-check: ## Check go code formatting
+	$(CURDIR)/scripts/gofmtcheck.sh $(GOFMT_FILES)
 
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:
@@ -53,9 +54,9 @@ fmt-examples:
 # source files.
 generate: deps ## Generate dynamically generated code
 	go generate .
-	go fmt command/plugin.go
+	gofmt -w command/plugin.go
 
-test: deps ## Run unit tests
+test: deps fmt-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \
@@ -73,13 +74,7 @@ testrace: deps ## Test for race conditions
 updatedeps:
 	go get -u github.com/mitchellh/gox
 	go get -u golang.org/x/tools/cmd/stringer
-	@echo "INFO: Packer deps are managed by godep. See CONTRIBUTING.md"
-
-# This is used to add new dependencies to packer. If you are submitting a PR
-# that includes new dependencies you will need to run this.
-vendor: ## Add new dependencies.
-	godep restore
-	godep save
+	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

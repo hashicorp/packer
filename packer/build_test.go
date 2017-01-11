@@ -12,17 +12,18 @@ func testBuild() *coreBuild {
 		builderConfig: 42,
 		builderType:   "foo",
 		hooks: map[string][]Hook{
-			"foo": []Hook{&MockHook{}},
+			"foo": {&MockHook{}},
 		},
 		provisioners: []coreBuildProvisioner{
-			coreBuildProvisioner{&MockProvisioner{}, []interface{}{42}},
+			{&MockProvisioner{}, []interface{}{42}},
 		},
 		postProcessors: [][]coreBuildPostProcessor{
-			[]coreBuildPostProcessor{
-				coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
+			{
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", make(map[string]interface{}), true},
 			},
 		},
 		variables: make(map[string]string),
+		onError:   "cleanup",
 	}
 }
 
@@ -32,6 +33,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 		BuilderTypeConfigKey:   "foo",
 		DebugConfigKey:         false,
 		ForceConfigKey:         false,
+		OnErrorConfigKey:       "cleanup",
 		TemplatePathKey:        "",
 		UserVariablesConfigKey: make(map[string]string),
 	}
@@ -244,8 +246,8 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// inputs, only that post-processors results are returned.
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), false},
+		{
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", make(map[string]interface{}), false},
 		},
 	}
 
@@ -269,11 +271,11 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// keeps the original, the original is kept.
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), false},
+		{
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", make(map[string]interface{}), false},
 		},
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), true},
+		{
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", make(map[string]interface{}), true},
 		},
 	}
 
@@ -297,13 +299,13 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// want to be.
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
+		{
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", make(map[string]interface{}), true},
 		},
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
-			coreBuildPostProcessor{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
+		{
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", make(map[string]interface{}), false},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", make(map[string]interface{}), false},
 		},
 	}
 
@@ -327,8 +329,8 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	// keeps inputs, that the artifacts are kept.
 	build = testBuild()
 	build.postProcessors = [][]coreBuildPostProcessor{
-		[]coreBuildPostProcessor{
-			coreBuildPostProcessor{
+		{
+			{
 				&MockPostProcessor{ArtifactId: "pp", Keep: true}, "pp", make(map[string]interface{}), false,
 			},
 		},

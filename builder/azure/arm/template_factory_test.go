@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"testing"
 
@@ -200,6 +201,51 @@ func TestVirtualMachineDeployment06(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Verify that custom data are properly inserted
+func TestVirtualMachineDeployment07(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "https://localhost/custom.vhd",
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The user specifies a configuration value for the setting custom_data_file.
+	// The config type will read that file, and base64 encode it.  The encoded
+	// contents are then assigned to Config's customData property, which are directly
+	// injected into the template.
+	//
+	// I am not aware of an easy to mimic this situation in a test without having
+	// a file on disk, which I am loathe to do.  The alternative is to inject base64
+	// encoded data myself, which is what I am doing here.
+	customData := `#cloud-config
+growpart:
+  mode: off
+`
+	base64CustomData := base64.StdEncoding.EncodeToString([]byte(customData))
+	c.customData = base64CustomData
 
 	deployment, err := GetVirtualMachineDeployment(c)
 	if err != nil {

@@ -29,8 +29,8 @@ scsi0:0.virtualSSD = 1
 
 func TestEncodeVMX(t *testing.T) {
 	contents := map[string]string{
-		".encoding":      "UTF-8",
-		"config.version": "8",
+		".encoding":          "UTF-8",
+		"config.version":     "8",
 		"scsi0:0.virtualssd": "1",
 	}
 

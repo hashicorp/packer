@@ -30,12 +30,6 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		instance = instanceRaw.(*ec2.Instance)
 	}
 	ui := state.Get("ui").(packer.Ui)
-	amisRaw := state.Get("amis")
-	if amisRaw == nil {
-		ui.Say("No AMIs to cleanup")
-		return
-	}
-
 	if instance == nil {
 		ui.Say("No volumes to clean up, skipping")
 		return
@@ -72,7 +66,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// date information on them
 	resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name:   aws.String("volume-id"),
 				Values: vl,
 			},
@@ -98,7 +92,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	}
 
 	// Filter out any devices marked for saving
-	for saveName, _ := range save {
+	for saveName := range save {
 		for volKey, volName := range volList {
 			if volName == saveName {
 				delete(volList, volKey)
@@ -107,7 +101,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	}
 
 	// Destroy remaining volumes
-	for k, _ := range volList {
+	for k := range volList {
 		ui.Say(fmt.Sprintf("Destroying volume (%s)...", k))
 		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
 		if err != nil {

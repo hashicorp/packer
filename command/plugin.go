@@ -15,18 +15,24 @@ import (
 
 	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
+	amazonebsvolumebuilder "github.com/mitchellh/packer/builder/amazon/ebsvolume"
 	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
+	cloudstackbuilder "github.com/mitchellh/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
 	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
+	hypervisobuilder "github.com/mitchellh/packer/builder/hyperv/iso"
 	lxdbuilder "github.com/mitchellh/packer/builder/lxd"
 	nullbuilder "github.com/mitchellh/packer/builder/null"
+	oneandonebuilder "github.com/mitchellh/packer/builder/oneandone"
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
 	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
+	profitbricksbuilder "github.com/mitchellh/packer/builder/profitbricks"
 	qemubuilder "github.com/mitchellh/packer/builder/qemu"
+	tritonbuilder "github.com/mitchellh/packer/builder/triton"
 	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
@@ -50,6 +56,7 @@ import (
 	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
 	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
 	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
+	convergeprovisioner "github.com/mitchellh/packer/provisioner/converge"
 	fileprovisioner "github.com/mitchellh/packer/provisioner/file"
 	powershellprovisioner "github.com/mitchellh/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/mitchellh/packer/provisioner/puppet-masterless"
@@ -66,24 +73,30 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
-	"amazon-chroot":   new(amazonchrootbuilder.Builder),
-	"amazon-ebs":      new(amazonebsbuilder.Builder),
-	"amazon-instance": new(amazoninstancebuilder.Builder),
-	"azure-arm":       new(azurearmbuilder.Builder),
-	"digitalocean":    new(digitaloceanbuilder.Builder),
-	"docker":          new(dockerbuilder.Builder),
-	"file":            new(filebuilder.Builder),
-	"googlecompute":   new(googlecomputebuilder.Builder),
-	"lxd":             new(lxdbuilder.Builder),
-	"null":            new(nullbuilder.Builder),
-	"openstack":       new(openstackbuilder.Builder),
-	"parallels-iso":   new(parallelsisobuilder.Builder),
-	"parallels-pvm":   new(parallelspvmbuilder.Builder),
-	"qemu":            new(qemubuilder.Builder),
-	"virtualbox-iso":  new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":  new(virtualboxovfbuilder.Builder),
-	"vmware-iso":      new(vmwareisobuilder.Builder),
-	"vmware-vmx":      new(vmwarevmxbuilder.Builder),
+	"amazon-chroot":    new(amazonchrootbuilder.Builder),
+	"amazon-ebs":       new(amazonebsbuilder.Builder),
+	"amazon-ebsvolume": new(amazonebsvolumebuilder.Builder),
+	"amazon-instance":  new(amazoninstancebuilder.Builder),
+	"azure-arm":        new(azurearmbuilder.Builder),
+	"cloudstack":       new(cloudstackbuilder.Builder),
+	"digitalocean":     new(digitaloceanbuilder.Builder),
+	"docker":           new(dockerbuilder.Builder),
+	"file":             new(filebuilder.Builder),
+	"googlecompute":    new(googlecomputebuilder.Builder),
+	"hyperv-iso":       new(hypervisobuilder.Builder),
+	"lxd":              new(lxdbuilder.Builder),
+	"null":             new(nullbuilder.Builder),
+	"oneandone":        new(oneandonebuilder.Builder),
+	"openstack":        new(openstackbuilder.Builder),
+	"parallels-iso":    new(parallelsisobuilder.Builder),
+	"parallels-pvm":    new(parallelspvmbuilder.Builder),
+	"profitbricks":     new(profitbricksbuilder.Builder),
+	"qemu":             new(qemubuilder.Builder),
+	"triton":           new(tritonbuilder.Builder),
+	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
+	"vmware-iso":       new(vmwareisobuilder.Builder),
+	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
 }
 
 var Provisioners = map[string]packer.Provisioner{
@@ -91,6 +104,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
+	"converge":          new(convergeprovisioner.Provisioner),
 	"file":              new(fileprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),

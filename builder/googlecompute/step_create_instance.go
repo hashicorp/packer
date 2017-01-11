@@ -15,82 +15,115 @@ type StepCreateInstance struct {
 	Debug bool
 }
 
-func (config *Config) getImage() Image {
-	project := config.ProjectId
-	if config.SourceImageProjectId != "" {
-		project = config.SourceImageProjectId
-	}
-	return Image{Name: config.SourceImage, ProjectId: project}
-}
-
-func (config *Config) getInstanceMetadata(sshPublicKey string) (map[string]string, error) {
+func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string) (map[string]string, error) {
 	instanceMetadata := make(map[string]string)
 	var err error
 
 	// Copy metadata from config.
-	for k, v := range config.Metadata {
+	for k, v := range c.Metadata {
 		instanceMetadata[k] = v
 	}
 
-	// Merge any existing ssh keys with our public key.
-	sshMetaKey := "sshKeys"
-	sshKeys := fmt.Sprintf("%s:%s", config.Comm.SSHUsername, sshPublicKey)
-	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
-		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+	// Merge any existing ssh keys with our public key, unless there is no
+	// supplied public key. This is possible if a private_key_file was
+	// specified.
+	if sshPublicKey != "" {
+		sshMetaKey := "sshKeys"
+		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
+		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
+			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+		}
+		instanceMetadata[sshMetaKey] = sshKeys
 	}
-	instanceMetadata[sshMetaKey] = sshKeys
-	
+
 	// Wrap any startup script with our own startup script.
-	if config.StartupScriptFile != "" {
+	if c.StartupScriptFile != "" {
 		var content []byte
-		content, err = ioutil.ReadFile(config.StartupScriptFile)
+		content, err = ioutil.ReadFile(c.StartupScriptFile)
 		instanceMetadata[StartupWrappedScriptKey] = string(content)
 	} else if wrappedStartupScript, exists := instanceMetadata[StartupScriptKey]; exists {
 		instanceMetadata[StartupWrappedScriptKey] = wrappedStartupScript
 	}
-	instanceMetadata[StartupScriptKey] = StartupScript
+	if sourceImage.IsWindows() {
+		// Windows startup script support is not yet implemented.
+		// Mark the startup script as done.
+		instanceMetadata[StartupScriptKey] = StartupScriptWindows
+		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusDone
+	} else {
+		instanceMetadata[StartupScriptKey] = StartupScriptLinux
+		instanceMetadata[StartupScriptStatusKey] = StartupScriptStatusNotDone
+	}
 
 	return instanceMetadata, err
 }
 
+func getImage(c *Config, d Driver) (*Image, error) {
+	name := c.SourceImageFamily
+	fromFamily := true
+	if c.SourceImage != "" {
+		name = c.SourceImage
+		fromFamily = false
+	}
+	if c.SourceImageProjectId == "" {
+		return d.GetImage(name, fromFamily)
+	} else {
+		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage, fromFamily)
+	}
+}
+
 // Run executes the Packer build step that creates a GCE instance.
 func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
-	driver := state.Get("driver").(Driver)
+	c := state.Get("config").(*Config)
+	d := state.Get("driver").(Driver)
 	sshPublicKey := state.Get("ssh_public_key").(string)
 	ui := state.Get("ui").(packer.Ui)
 
+	sourceImage, err := getImage(c, d)
+	if err != nil {
+		err := fmt.Errorf("Error getting source image for instance creation: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	ui.Say(fmt.Sprintf("Using image: %s", sourceImage.Name))
+
+	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
+		state.Put("create_windows_password", true)
+	}
+
 	ui.Say("Creating instance...")
-	name := config.InstanceName
+	name := c.InstanceName
 
 	var errCh <-chan error
-	var err error
 	var metadata map[string]string
-	metadata, err = config.getInstanceMetadata(sshPublicKey)
-	errCh, err = driver.RunInstance(&InstanceConfig{
-		Address:             config.Address,
+	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
+	errCh, err = d.RunInstance(&InstanceConfig{
+		Address:             c.Address,
 		Description:         "New instance created by Packer",
-		DiskSizeGb:          config.DiskSizeGb,
-		DiskType:            config.DiskType,
-		Image:               config.getImage(),
-		MachineType:         config.MachineType,
+		DiskSizeGb:          c.DiskSizeGb,
+		DiskType:            c.DiskType,
+		Image:               sourceImage,
+		MachineType:         c.MachineType,
 		Metadata:            metadata,
 		Name:                name,
-		Network:             config.Network,
-		OmitExternalIP:      config.OmitExternalIP,
-		Preemptible:         config.Preemptible,
-		Region:              config.Region,
-		ServiceAccountEmail: config.Account.ClientEmail,
-		Subnetwork:          config.Subnetwork,
-		Tags:                config.Tags,
-		Zone:                config.Zone,
+		Network:             c.Network,
+		NetworkProjectId:    c.NetworkProjectId,
+		OmitExternalIP:      c.OmitExternalIP,
+		Preemptible:         c.Preemptible,
+		Region:              c.Region,
+		ServiceAccountEmail: c.Account.ClientEmail,
+		Scopes:              c.Scopes,
+		Subnetwork:          c.Subnetwork,
+		Tags:                c.Tags,
+		Zone:                c.Zone,
 	})
 
 	if err == nil {
 		ui.Message("Waiting for creation operation to complete...")
 		select {
 		case err = <-errCh:
-		case <-time.After(config.stateTimeout):
+		case <-time.After(c.stateTimeout):
 			err = errors.New("time out while waiting for instance to create")
 		}
 	}
@@ -106,7 +139,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	if s.Debug {
 		if name != "" {
-			ui.Message(fmt.Sprintf("Instance: %s started in %s", name, config.Zone))
+			ui.Message(fmt.Sprintf("Instance: %s started in %s", name, c.Zone))
 		}
 	}
 
