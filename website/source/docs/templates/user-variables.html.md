@@ -143,7 +143,7 @@ The `-var-file` flag can be specified multiple times and variables from multiple
 files will be read and applied. As you'd expect, variables read from files
 specified later override a variable set earlier if it has already been set.
 
-Combining the the -var and -var-file flags together also works how you'd
+Combining the -var and -var-file flags together also works how you'd
 expect. Flags set later in the command override flags set earlier. So, for
 example, in the following command with the above variables.json file:
 
