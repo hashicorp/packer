@@ -25,7 +25,7 @@ Further information about the import process can be found in AWS's [EC2 Import/E
 ## Configuration
 
 There are some configuration options available for the post-processor. They are
-segmented below into three categories: required and optional parameters.
+segmented below into two categories: required and optional parameters.
 Within each category, the available configuration keys are alphabetized.
 
 Required:
