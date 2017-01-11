@@ -52,6 +52,9 @@ func (c *AwsAccessConfig) EcrGetLogin(ecrUrl string) (string, string, error) {
 
 	exp := regexp.MustCompile("(?:http://|https://|)([0-9]*)\\.dkr\\.ecr\\.(.*)\\.amazonaws\\.com.*")
 	splitUrl := exp.FindStringSubmatch(ecrUrl)
+	if len(splitUrl) != 3 {
+		return "", "", fmt.Errorf("Failed to parse the ECR URL: %s it should be on the form <account number>.dkr.ecr.<region>.amazonaws.com", ecrUrl)
+	}
 	accountId := splitUrl[1]
 	region := splitUrl[2]
 
