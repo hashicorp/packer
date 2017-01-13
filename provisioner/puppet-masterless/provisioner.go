@@ -63,8 +63,8 @@ type Config struct {
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 
-	GuestOSType    string `mapstructure:"guest_os_type"`
-	ConfigTemplate string `mapstructure:"config_template"`
+	// The Guest OS Type (unix or windows)
+	GuestOSType string `mapstructure:"guest_os_type"`
 }
 
 type guestOSTypeConfig struct {
@@ -73,7 +73,7 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: guestOSTypeConfig{
+	provisioner.UnixOSType: {
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
@@ -84,7 +84,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}",
 	},
-	provisioner.WindowsOSType: guestOSTypeConfig{
+	provisioner.WindowsOSType: {
 		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} && " +
@@ -212,17 +212,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
-	}
-
-	if p.config.ConfigTemplate != "" {
-		fi, err := os.Stat(p.config.ConfigTemplate)
-		if err != nil {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad config template path: %s", err))
-		} else if fi.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Config template path must be a file: %s", err))
-		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
