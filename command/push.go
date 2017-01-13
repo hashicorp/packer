@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
+	"github.com/mitchellh/packer/helper/flag-kv"
 	"github.com/mitchellh/packer/template"
 )
 
@@ -189,7 +190,15 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
-	uploadOpts.Vars = core.Context().UserVariables
+	uploadOpts.Vars = make(map[string]string)
+	if vs := flags.Lookup("var"); vs != nil {
+		f := vs.Value.(*kvflag.Flag)
+		vars := map[string]string(*f)
+
+		for k, v := range vars {
+			uploadOpts.Vars[k] = v
+		}
+	}
 
 	// Add the upload metadata
 	metadata := make(map[string]interface{})
