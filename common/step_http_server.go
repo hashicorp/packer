@@ -45,7 +45,8 @@ func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 
 		if portRange > 0 {
 			// Intn will panic if portRange == 0, so we do a check.
-			offset = uint(rand.Intn(portRange))
+			// Intn is from [0, n), so add 1 to make from [0, n]
+			offset = uint(rand.Intn(portRange + 1))
 		}
 
 		httpPort = offset + s.HTTPPortMin
