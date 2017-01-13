@@ -68,12 +68,13 @@ listed below:
 -   `puppet_server` (string) - Hostname of the Puppet server. By default
     "puppet" will be used.
 
--   `staging_dir` (string) - This is the directory where all the
-    configuration of Puppet by Packer will be placed. By default this
-    is /tmp/packer-puppet-server. This directory doesn't need to exist but
-    must have proper permissions so that the SSH user that Packer uses is able
-    to create directories and write into this folder. If the permissions are not
-    correct, use a shell provisioner prior to this to configure it properly.
+-   `staging_dir` (string) - This is the directory where all the configuration
+    of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-server"
+    when guest_os_type unix and "C:/Windows/Temp/packer-puppet-server" when windows.
+    This directory doesn't need to exist but must have proper permissions so that
+    the SSH user that Packer uses is able to create directories and write into this
+    folder. If the permissions are not correct, use a shell provisioner prior to this
+    to configure it properly.
 
 -   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
     binary for running `puppet agent`. Usually, this would be found via the `$PATH`
@@ -83,18 +84,11 @@ listed below:
 -   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
     various [configuration template
     variables](/docs/templates/configuration-templates.html) available. See
-    below for more information. By default, Packer uses the following command:
+    below for more information.
 
-```
-{{.FacterVars}} {{if .Sudo}} sudo -E {{end}} \
-  {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent --onetime --no-daemonize \
-  {{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}} \
-  {{if ne .Options \"\"}}{{.Options}} {{end}} \
-  {{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}} \
-  {{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}} \
-  {{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' \
-  {{end}} --detailed-exitcodes
-```
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
 
 ## Default Facts
 
