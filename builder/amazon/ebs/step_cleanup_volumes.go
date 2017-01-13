@@ -106,6 +106,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
 		if err != nil {
 			ui.Say(fmt.Sprintf("Error deleting volume: %s", k))
+			ui.Say(fmt.Sprintf("The error is: %s", err))
 		}
 
 	}
