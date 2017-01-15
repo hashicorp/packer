@@ -23,7 +23,7 @@ import (
 	dockerbuilder "github.com/mitchellh/packer/builder/docker"
 	filebuilder "github.com/mitchellh/packer/builder/file"
 	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
-	hypervbuilder "github.com/mitchellh/packer/builder/hyperv/iso"
+	hypervisobuilder "github.com/mitchellh/packer/builder/hyperv/iso"
 	nullbuilder "github.com/mitchellh/packer/builder/null"
 	oneandonebuilder "github.com/mitchellh/packer/builder/oneandone"
 	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
@@ -36,7 +36,6 @@ import (
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
-
 	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
@@ -52,11 +51,11 @@ import (
 	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/mitchellh/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/mitchellh/packer/post-processor/vsphere"
-
 	ansibleprovisioner "github.com/mitchellh/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
 	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
 	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
+	convergeprovisioner "github.com/mitchellh/packer/provisioner/converge"
 	fileprovisioner "github.com/mitchellh/packer/provisioner/file"
 	powershellprovisioner "github.com/mitchellh/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/mitchellh/packer/provisioner/puppet-masterless"
@@ -83,7 +82,7 @@ var Builders = map[string]packer.Builder{
 	"docker":           new(dockerbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"googlecompute":    new(googlecomputebuilder.Builder),
-	"hyperv-iso":       new(hypervbuilder.Builder),
+	"hyperv-iso":       new(hypervisobuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
 	"openstack":        new(openstackbuilder.Builder),
@@ -103,6 +102,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
+	"converge":          new(convergeprovisioner.Provisioner),
 	"file":              new(fileprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
