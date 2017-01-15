@@ -7,6 +7,8 @@ FEATURES:
 
 IMPROVEMENTS:
 
+  * builder/vmware & builder/qemu: Allow configurable delay between keystrokes
+      when typing boot command. [GH-4403]
   * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
   * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
   * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
