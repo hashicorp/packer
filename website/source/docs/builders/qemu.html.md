@@ -362,9 +362,7 @@ machine, simulating a human actually typing the keyboard.
 -> Keystrokes are typed as separate key up/down events over VNC with a
    default 100ms delay. The delay alleviates issues with latency and CPU
    contention. For local builds you can tune this delay by specifying
-   `PACKER_KEY_INTERVAL` to speed through the boot command. For example:
-
-       PACKER_KEY_INTERVAL=10ms packer build packer.json
+   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
 
 There are a set of special keys available. If these are in your boot
 command, they will be replaced by the proper key:
