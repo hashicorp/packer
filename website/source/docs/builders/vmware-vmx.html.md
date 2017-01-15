@@ -185,9 +185,15 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard. There are a set of
-special keys available. If these are in your boot command, they will be replaced
-by the proper key:
+machine, simulating a human actually typing the keyboard.
+
+-> Keystrokes are typed as separate key up/down events over VNC with a
+   default 100ms delay. The delay alleviates issues with latency and CPU
+   contention. For local builds you can tune this delay by specifying
+   `PACKER_KEY_INTERVAL` to speed through the boot command. For example:
+
+There are a set of special keys available. If these are in your boot
+command, they will be replaced by the proper key:
 
 -   `<bs>` - Backspace
 
