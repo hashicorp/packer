@@ -148,9 +148,8 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 	waitRe := regexp.MustCompile(`^<wait([0-9hms]+)>`)
 
-	// Send the key events. We add a 100ms sleep after each key event
-	// to deal with network latency and the OS responding to the keystroke.
-	// It is kind of arbitrary but it is better than nothing.
+	// We delay (default 100ms) between each key event to allow for CPU or
+	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
 	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
 		keyInterval = delay
