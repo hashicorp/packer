@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/multistep"
+	packer_common "github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -67,6 +68,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIP))
 
+	packer_common.SetHTTPIP(hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIP,
 		httpPort,
