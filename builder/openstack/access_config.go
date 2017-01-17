@@ -3,6 +3,7 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -56,7 +57,10 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Get as much as possible from the end
-	ao, _ := openstack.AuthOptionsFromEnv()
+	ao, err := openstack.AuthOptionsFromEnv()
+	if err != nil {
+		log.Printf("[WARN] Error getting openstack auth from environment: %s", err)
+	}
 
 	// Make sure we reauth as needed
 	ao.AllowReauth = true
