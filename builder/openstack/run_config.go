@@ -2,6 +2,7 @@ package openstack
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -15,17 +16,18 @@ type RunConfig struct {
 	SSHInterface   string              `mapstructure:"ssh_interface"`
 	SSHIPVersion   string              `mapstructure:"ssh_ip_version"`
 
-	SourceImage      string   `mapstructure:"source_image"`
-	SourceImageName  string   `mapstructure:"source_image_name"`
-	Flavor           string   `mapstructure:"flavor"`
-	AvailabilityZone string   `mapstructure:"availability_zone"`
-	RackconnectWait  bool     `mapstructure:"rackconnect_wait"`
-	FloatingIpPool   string   `mapstructure:"floating_ip_pool"`
-	FloatingIp       string   `mapstructure:"floating_ip"`
-	SecurityGroups   []string `mapstructure:"security_groups"`
-	Networks         []string `mapstructure:"networks"`
-	UserData         string   `mapstructure:"user_data"`
-	UserDataFile     string   `mapstructure:"user_data_file"`
+	SourceImage      string            `mapstructure:"source_image"`
+	SourceImageName  string            `mapstructure:"source_image_name"`
+	Flavor           string            `mapstructure:"flavor"`
+	AvailabilityZone string            `mapstructure:"availability_zone"`
+	RackconnectWait  bool              `mapstructure:"rackconnect_wait"`
+	FloatingIpPool   string            `mapstructure:"floating_ip_pool"`
+	FloatingIp       string            `mapstructure:"floating_ip"`
+	SecurityGroups   []string          `mapstructure:"security_groups"`
+	Networks         []string          `mapstructure:"networks"`
+	UserData         string            `mapstructure:"user_data"`
+	UserDataFile     string            `mapstructure:"user_data_file"`
+	InstanceMetadata map[string]string `mapstructure:"instance_metadata"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 
@@ -54,6 +56,15 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.SSHIPVersion != "" && c.SSHIPVersion != "4" && c.SSHIPVersion != "6" {
 		errs = append(errs, errors.New("SSH IP version must be either 4 or 6"))
+	}
+
+	for key, value := range c.InstanceMetadata {
+		if len(key) > 255 {
+			errs = append(errs, fmt.Errorf("Instance metadata key too long (max 255 bytes): %s", key))
+		}
+		if len(value) > 255 {
+			errs = append(errs, fmt.Errorf("Instance metadata value too long (max 255 bytes): %s", value))
+		}
 	}
 
 	return errs
