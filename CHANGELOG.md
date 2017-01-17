@@ -24,6 +24,8 @@ IMPROVEMENTS:
   * builder/vmware-iso: add `skip_export` option to skip exporting the VM after
       build completes. [GH-4378]
   * builder/openstack: Add support for instance metadata. [GH-4361]
+  * builder/openstack: Attempt to use existing floating IPs before allocating
+      a new one. [GH-4357]
  
 BUG FIXES:
 
