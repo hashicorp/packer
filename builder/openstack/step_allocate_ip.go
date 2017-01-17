@@ -5,6 +5,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
@@ -36,20 +37,55 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	if s.FloatingIp != "" {
 		instanceIp.IP = s.FloatingIp
 	} else if s.FloatingIpPool != "" {
-		ui.Say(fmt.Sprintf("Creating floating IP..."))
-		ui.Message(fmt.Sprintf("Pool: %s", s.FloatingIpPool))
-		newIp, err := floatingips.Create(client, floatingips.CreateOpts{
-			Pool: s.FloatingIpPool,
-		}).Extract()
+		// If we have a free floating IP in the pool, use it first
+		// rather than creating one
+		ui.Say(fmt.Sprintf("Searching for unassociated floating IP in pool %s", s.FloatingIpPool))
+		pager := floatingips.List(client)
+		err := pager.EachPage(func(page pagination.Page) (bool, error) {
+			candidates, err := floatingips.ExtractFloatingIPs(page)
+
+			if err != nil {
+				return false, err // stop and throw error out
+			}
+
+			for _, candidate := range candidates {
+				if candidate.Pool != s.FloatingIpPool || candidate.InstanceID != "" {
+					continue // move to next in list
+				}
+
+				// In correct pool and able to be allocated
+				instanceIp.IP = candidate.IP
+				ui.Message(fmt.Sprintf("Selected floating IP: %s", instanceIp.IP))
+				state.Put("floatingip_istemp", false)
+				return false, nil // stop iterating over pages
+			}
+			return true, nil // try the next page
+		})
+
 		if err != nil {
-			err := fmt.Errorf("Error creating floating ip from pool '%s'", s.FloatingIpPool)
+			err := fmt.Errorf("Error searching for floating ip from pool '%s'", s.FloatingIpPool)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
-		instanceIp = *newIp
-		ui.Message(fmt.Sprintf("Created floating IP: %s", instanceIp.IP))
+		if instanceIp.IP == "" {
+			ui.Say(fmt.Sprintf("Creating floating IP..."))
+			ui.Message(fmt.Sprintf("Pool: %s", s.FloatingIpPool))
+			newIp, err := floatingips.Create(client, floatingips.CreateOpts{
+				Pool: s.FloatingIpPool,
+			}).Extract()
+			if err != nil {
+				err := fmt.Errorf("Error creating floating ip from pool '%s'", s.FloatingIpPool)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+			instanceIp = *newIp
+			ui.Message(fmt.Sprintf("Created floating IP: %s", instanceIp.IP))
+			state.Put("floatingip_istemp", true)
+		}
 	}
 
 	if instanceIp.IP != "" {
@@ -79,6 +115,11 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	instanceIp := state.Get("access_ip").(*floatingips.FloatingIP)
+
+	// Don't delete pool addresses we didn't allocate
+	if state.Get("floatingip_istemp") == false {
+		return
+	}
 
 	// We need the v2 compute client
 	client, err := config.computeV2Client()
