@@ -24,6 +24,7 @@ type AccessConfig struct {
 	Insecure         bool   `mapstructure:"insecure"`
 	Region           string `mapstructure:"region"`
 	EndpointType     string `mapstructure:"endpoint_type"`
+	TokenID          string `mapstructure:"token"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -72,6 +73,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.TenantName, &ao.TenantName},
 		{&c.DomainID, &ao.DomainID},
 		{&c.DomainName, &ao.DomainName},
+		{&c.TokenID, &ao.TokenID},
 	}
 	for _, s := range overrides {
 		if *s.From != "" {
