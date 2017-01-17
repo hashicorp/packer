@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -42,6 +43,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Say(fmt.Sprintf("Host IP for the HyperV machine: %s", hostIp))
 
+	common.SetHTTPIP(hostIp)
 	s.Ctx.Data = &bootCommandTemplateData{
 		hostIp,
 		httpPort,

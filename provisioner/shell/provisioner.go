@@ -229,10 +229,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
+	envVars := make([]string, len(p.config.Vars)+3)
 	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
-	copy(envVars[2:], p.config.Vars)
+	envVars[2] = fmt.Sprintf("PACKER_HTTP_ADDR=%s", common.GetHTTPAddr())
+
+	copy(envVars[3:], p.config.Vars)
 
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
