@@ -21,6 +21,7 @@ type StepRunSourceServer struct {
 	UserData         string
 	UserDataFile     string
 	ConfigDrive      bool
+	InstanceMetadata map[string]string
 	server           *servers.Server
 }
 
@@ -65,6 +66,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		UserData:         userData,
 		ConfigDrive:      &s.ConfigDrive,
 		ServiceClient:    computeClient,
+		Metadata:         s.InstanceMetadata,
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder
