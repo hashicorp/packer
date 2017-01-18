@@ -31,9 +31,9 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
 
 		// Convert tags to ec2.Tag format
-		amiTags := ConvertToEC2Tags(s.Tags, ui)
+		amiTags := ConvertToEC2Tags(s.Tags)
 		ui.Say(fmt.Sprintf("Snapshot tags:"))
-		snapshotTags := ConvertToEC2Tags(s.SnapshotTags, ui)
+		snapshotTags := ConvertToEC2Tags(s.SnapshotTags)
 
 		// Declare list of resources to tag
 		awsConfig := aws.Config{
@@ -128,10 +128,9 @@ func (s *StepCreateTags) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }
 
-func ConvertToEC2Tags(tags map[string]string, ui packer.Ui) []*ec2.Tag {
+func ConvertToEC2Tags(tags map[string]string) []*ec2.Tag {
 	var amiTags []*ec2.Tag
 	for key, value := range tags {
-		ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"", key, value))
 		amiTags = append(amiTags, &ec2.Tag{
 			Key:   aws.String(key),
 			Value: aws.String(value),
