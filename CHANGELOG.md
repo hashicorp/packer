@@ -26,6 +26,7 @@ IMPROVEMENTS:
   * builder/openstack: Add support for instance metadata. [GH-4361]
   * builder/openstack: Attempt to use existing floating IPs before allocating
       a new one. [GH-4357]
+  * builder/vmware: Try to use `ip address` to find host IP. [GH-4411]
  
 BUG FIXES:
 
