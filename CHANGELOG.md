@@ -30,6 +30,7 @@ IMPROVEMENTS:
  
 BUG FIXES:
 
+  * builder/amazon: fix run volume tagging [GH-4420]
   * command/push: Don't interpolate variables when pushing. [GH-4389]
   * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
   * builder/amazon-chroot: Panic in AMI region copy step. [GH-4341]
