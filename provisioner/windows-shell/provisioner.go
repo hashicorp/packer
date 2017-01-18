@@ -294,7 +294,10 @@ func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
-	envVars["PACKER_HTTP_ADDR"] = common.GetHTTPAddr()
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
 
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
