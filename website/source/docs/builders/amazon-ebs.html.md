@@ -63,8 +63,13 @@ builder.
 
 ### Optional:
 
--   `ami_block_device_mappings` (array of block device mappings) - Add the block
-    device mappings to the AMI. The block device mappings allow for keys:
+-   `ami_block_device_mappings` (array of block device mappings) - Add one or
+    more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. These will be attached when booting a new instance from your
+    AMI. To add a block device during the packer build see
+    `launch_block_device_mappings` below. Your options here may vary depending
+    on the type of VM you use. The block device mappings allow for the following
+    configuration:
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination. Default `false`. **NOTE**: If this
@@ -170,9 +175,10 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `launch_block_device_mappings` (array of block device mappings) - Add the
-    block device mappings to the launch instance. The block device mappings are
-    the same as `ami_block_device_mappings` above.
+-   `launch_block_device_mappings` (array of block device mappings) - Add one or
+    more block devices before the packer build starts. These are not necessarily
+    preserved when booting from the AMI built with packer. See
+    `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
@@ -303,7 +309,8 @@ builder.
 
 ## Basic Example
 
-Here is a basic example. You will need to provide access keys, and may need to change the AMI IDs according to what images exist at the time the template is run:
+Here is a basic example. You will need to provide access keys, and may need to
+change the AMI IDs according to what images exist at the time the template is run:
 
 ``` {.javascript}
 {
@@ -322,7 +329,10 @@ Here is a basic example. You will need to provide access keys, and may need to c
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
-Further information on locating AMI IDs and their relationship to instance types and regions can be found in the AWS EC2 Documentation [for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+Further information on locating AMI IDs and their relationship to instance types
+and regions can be found in the AWS EC2 Documentation
+[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
 
 ## Accessing the Instance to Debug
 
@@ -333,8 +343,11 @@ You can use this information to access the instance as it is running.
 
 ## AMI Block Device Mappings Example
 
-Here is an example using the optional AMI block device mappings. This will add
-the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the basic example, you will need to provide access keys and may need to change the source AMI ID based on what images exist when this template is run:
+Here is an example using the optional AMI block device mappings. Our
+configuration of `launch_block_device_mappings` will expand the root volume
+(`/dev/sda`) to 40gb during the build (up from the default of 8gb). With
+`ami_block_device_mappings` AWS will attach additional volumes `/dev/sdb` and
+`/dev/sdc` when we boot a new instance of our AMI.
 
 ``` {.javascript}
 {
@@ -346,6 +359,12 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the
   "instance_type": "t2.micro",
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
+  "launch_block_device_mappings": [{
+    "device_name": "/dev/sda1",
+    "volume_size": 40,
+    "volume_type": "gp2",
+    "delete_on_termination": true
+  }],
   "ami_block_device_mappings": [
     {
       "device_name": "/dev/sdb",
@@ -362,7 +381,9 @@ the /dev/sdb and /dev/sdc block device mappings to the finished AMI. As with the
 ## Tag Example
 
 Here is an example using the optional AMI tags. This will add the tags
-"OS\_Version" and "Release" to the finished AMI. As before, you will need to provide your access keys, and may need to change the source AMI ID based on what images exist when this template is run:
+`OS_Version` and `Release` to the finished AMI. As before, you will need to
+provide your access keys, and may need to change the source AMI ID based on what
+images exist when this template is run:
 
 ``` {.javascript}
 {
