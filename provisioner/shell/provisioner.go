@@ -229,7 +229,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+3)
+	envVars := make([]string, len(p.config.Vars)+2)
 	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
 
