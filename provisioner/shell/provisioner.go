@@ -232,7 +232,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	envVars := make([]string, len(p.config.Vars)+2)
 	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
+
 	copy(envVars[2:], p.config.Vars)
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars = append(envVars, fmt.Sprintf("PACKER_HTTP_ADDR=%s", common.GetHTTPAddr()))
+	}
 
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
