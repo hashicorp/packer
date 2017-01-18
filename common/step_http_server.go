@@ -75,25 +75,25 @@ func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func httpAddrFilename(suffix string) string {
+func HTTPAddrFilename(suffix string) string {
 	uuid := os.Getenv("PACKER_RUN_UUID")
 	return filepath.Join(os.TempDir(), fmt.Sprintf("packer-%s-%s", uuid, suffix))
 }
 
 func SetHTTPPort(port string) error {
-	return ioutil.WriteFile(httpAddrFilename("port"), []byte(port), 0644)
+	return ioutil.WriteFile(HTTPAddrFilename("port"), []byte(port), 0644)
 }
 
 func SetHTTPIP(ip string) error {
-	return ioutil.WriteFile(httpAddrFilename("ip"), []byte(ip), 0644)
+	return ioutil.WriteFile(HTTPAddrFilename("ip"), []byte(ip), 0644)
 }
 
 func GetHTTPAddr() string {
-	ip, err := ioutil.ReadFile(httpAddrFilename("ip"))
+	ip, err := ioutil.ReadFile(HTTPAddrFilename("ip"))
 	if err != nil {
 		return ""
 	}
-	port, err := ioutil.ReadFile(httpAddrFilename("port"))
+	port, err := ioutil.ReadFile(HTTPAddrFilename("port"))
 	if err != nil {
 		return ""
 	}
@@ -105,6 +105,6 @@ func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()
 	}
-	os.Remove(httpAddrFilename("port"))
-	os.Remove(httpAddrFilename("ip"))
+	os.Remove(HTTPAddrFilename("port"))
+	os.Remove(HTTPAddrFilename("ip"))
 }
