@@ -69,6 +69,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.WindowsPasswordTimeout = 10 * time.Minute
 	}
 
+	if c.RunTags == nil {
+		c.RunTags = make(map[string]string)
+	}
+
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 	if c.SourceAmi == "" && c.SourceAmiFilter.Empty() {
