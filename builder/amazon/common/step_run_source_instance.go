@@ -295,7 +295,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	if _, exists := s.Tags["Name"]; !exists {
 		s.Tags["Name"] = "Packer Builder"
 	}
-	ec2Tags := ConvertToEC2Tags(s.Tags, ui)
+	ec2Tags := ConvertToEC2Tags(s.Tags)
 
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
