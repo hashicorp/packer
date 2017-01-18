@@ -2,12 +2,16 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step creates and runs the HTTP server that is serving files from the
@@ -66,8 +70,34 @@ func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Save the address into the state so it can be accessed in the future
 	state.Put("http_port", httpPort)
+	SetHTTPPort(fmt.Sprintf("%d", httpPort))
 
 	return multistep.ActionContinue
+}
+
+func httpAddrFilename(suffix string) string {
+	uuid := os.Getenv("PACKER_RUN_UUID")
+	return filepath.Join(os.TempDir(), fmt.Sprintf("packer-%s-%s", uuid, suffix))
+}
+
+func SetHTTPPort(port string) error {
+	return ioutil.WriteFile(httpAddrFilename("port"), []byte(port), 0644)
+}
+
+func SetHTTPIP(ip string) error {
+	return ioutil.WriteFile(httpAddrFilename("ip"), []byte(ip), 0644)
+}
+
+func GetHTTPAddr() string {
+	ip, err := ioutil.ReadFile(httpAddrFilename("ip"))
+	if err != nil {
+		return ""
+	}
+	port, err := ioutil.ReadFile(httpAddrFilename("port"))
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%s:%s", ip, port)
 }
 
 func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
@@ -75,4 +105,6 @@ func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()
 	}
+	os.Remove(httpAddrFilename("port"))
+	os.Remove(httpAddrFilename("ip"))
 }
