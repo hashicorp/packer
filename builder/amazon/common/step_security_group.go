@@ -27,6 +27,17 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.SecurityGroupIds) > 0 {
+		_, err := ec2conn.DescribeSecurityGroups(
+			&ec2.DescribeSecurityGroupsInput{
+				GroupIds: aws.StringSlice(s.SecurityGroupIds),
+			},
+		)
+		if err != nil {
+			err := fmt.Errorf("Couldn't find specified security group: %s", err)
+			log.Printf("[DEBUG] %s", err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 		log.Printf("Using specified security groups: %v", s.SecurityGroupIds)
 		state.Put("securityGroupIds", s.SecurityGroupIds)
 		return multistep.ActionContinue
