@@ -291,11 +291,9 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	instance := latestInstance.(*ec2.Instance)
 
-	ec2Tags := make([]*ec2.Tag, 1, len(s.Tags)+1)
-	ec2Tags[0] = &ec2.Tag{Key: aws.String("Name"), Value: aws.String("Packer Builder")}
-	for k, v := range s.Tags {
-		ec2Tags = append(ec2Tags, &ec2.Tag{Key: aws.String(k), Value: aws.String(v)})
-	}
+	ui.Say(fmt.Sprintf("Adding tags to source instance:"))
+	s.Tags["Name"] = "Packer Builder"
+	ec2Tags := ConvertToEC2Tags(s.Tags, ui)
 
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
