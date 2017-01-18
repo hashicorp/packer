@@ -37,10 +37,8 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	tags := common.ConvertToEC2Tags(s.VolumeRunTags)
 
 	_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-		Resources: []*string{
-			instance.BlockDeviceMappings[0].Ebs.VolumeId,
-		},
-		Tags: tags,
+		Resources: volumeIds,
+		Tags:      tags,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
