@@ -1,16 +1,12 @@
 package winrm
 
-import (
-	"net/http"
-)
-
 // Parameters struct defines
 // metadata information and http transport config
 type Parameters struct {
 	Timeout            string
 	Locale             string
 	EnvelopeSize       int
-	TransportDecorator func(*http.Transport) http.RoundTripper
+	TransportDecorator func() Transporter
 }
 
 // DefaultParameters return constant config
