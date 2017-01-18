@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/private/waiter"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common/uuid"
@@ -87,6 +88,21 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	log.Printf("[DEBUG] Waiting for temporary security group: %s", s.createdGroupId)
+	err = waitUntilSecurityGroupExists(ec2conn,
+		&ec2.DescribeSecurityGroupsInput{
+			GroupIds: []*string{aws.String(s.createdGroupId)},
+		},
+	)
+	if err == nil {
+		log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
+	} else {
+		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, err)
+		log.Printf("[DEBUG] %s", err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
 	// Set some state data for use in future steps
 	state.Put("securityGroupIds", []string{s.createdGroupId})
 
@@ -118,4 +134,39 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up security group. Please delete the group manually: %s", s.createdGroupId))
 	}
+}
+
+func waitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
+	waiterCfg := waiter.Config{
+		Operation:   "DescribeSecurityGroups",
+		Delay:       15,
+		MaxAttempts: 40,
+		Acceptors: []waiter.WaitAcceptor{
+			{
+				State:    "success",
+				Matcher:  "path",
+				Argument: "length(SecurityGroups[]) > `0`",
+				Expected: true,
+			},
+			{
+				State:    "retry",
+				Matcher:  "error",
+				Argument: "",
+				Expected: "InvalidGroup.NotFound",
+			},
+			{
+				State:    "retry",
+				Matcher:  "error",
+				Argument: "",
+				Expected: "InvalidSecurityGroupID.NotFound",
+			},
+		},
+	}
+
+	w := waiter.Waiter{
+		Client: c,
+		Input:  input,
+		Config: waiterCfg,
+	}
+	return w.Wait()
 }

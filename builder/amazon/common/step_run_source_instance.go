@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/private/waiter"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -23,8 +22,9 @@ type StepRunSourceInstance struct {
 	Debug                             bool
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
-	InstanceType                      string
 	IamInstanceProfile                string
+	InstanceInitiatedShutdownBehavior string
+	InstanceType                      string
 	SourceAMI                         string
 	SpotPrice                         string
 	SpotPriceProduct                  string
@@ -32,7 +32,6 @@ type StepRunSourceInstance struct {
 	Tags                              map[string]string
 	UserData                          string
 	UserDataFile                      string
-	InstanceInitiatedShutdownBehavior string
 
 	instanceId  string
 	spotRequest *ec2.SpotInstanceRequest
@@ -41,27 +40,8 @@ type StepRunSourceInstance struct {
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	keyName := state.Get("keyPair").(string)
-	tempSecurityGroupIds := state.Get("securityGroupIds").([]string)
+	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
 	ui := state.Get("ui").(packer.Ui)
-
-	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
-	for i, sg := range tempSecurityGroupIds {
-		log.Printf("[DEBUG] Waiting for tempSecurityGroup: %s", sg)
-		err := WaitUntilSecurityGroupExists(ec2conn,
-			&ec2.DescribeSecurityGroupsInput{
-				GroupIds: []*string{aws.String(sg)},
-			},
-		)
-		if err == nil {
-			log.Printf("[DEBUG] Found security group %s", sg)
-			securityGroupIds[i] = aws.String(sg)
-		} else {
-			err := fmt.Errorf("Timed out waiting for security group %s: %s", sg, err)
-			log.Printf("[DEBUG] %s", err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-	}
 
 	userData := s.UserData
 	if s.UserDataFile != "" {
@@ -367,39 +347,4 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 		WaitForState(&stateChange)
 	}
-}
-
-func WaitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
-	waiterCfg := waiter.Config{
-		Operation:   "DescribeSecurityGroups",
-		Delay:       15,
-		MaxAttempts: 40,
-		Acceptors: []waiter.WaitAcceptor{
-			{
-				State:    "success",
-				Matcher:  "path",
-				Argument: "length(SecurityGroups[]) > `0`",
-				Expected: true,
-			},
-			{
-				State:    "retry",
-				Matcher:  "error",
-				Argument: "",
-				Expected: "InvalidGroup.NotFound",
-			},
-			{
-				State:    "retry",
-				Matcher:  "error",
-				Argument: "",
-				Expected: "InvalidSecurityGroupID.NotFound",
-			},
-		},
-	}
-
-	w := waiter.Waiter{
-		Client: c,
-		Input:  input,
-		Config: waiterCfg,
-	}
-	return w.Wait()
 }
