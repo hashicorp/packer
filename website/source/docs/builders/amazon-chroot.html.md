@@ -133,9 +133,11 @@ each category, the available configuration keys are alphabetized.
     `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
 
--   `ami_block_device_mappings` (array of block device mappings) - Add the block
-    device mappings to the AMI. A `device_name` entry matching `root_device_name`
-    should be set. The block device mappings allow for keys:
+-   `ami_block_device_mappings` (array of block device mappings) - Add one or
+    more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. These will be attached when booting a new instance from your
+    AMI. Your options here may vary depending on the type of VM you use. The
+    block device mappings allow for the following configuration:
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination. Default `false`. **NOTE**: If this
@@ -144,7 +146,7 @@ each category, the available configuration keys are alphabetized.
         every build.
 
     -   `device_name` (string) - The device name exposed to the instance (for
-        example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
