@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-uuid"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -642,7 +644,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 
-	// no user env var
+	// No user env var. No Packer web server
 	flattenedEnvVars, err := p.createFlattenedEnvVars(false)
 	if err != nil {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
@@ -651,7 +653,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
-	// single user env var
+	// Single user env var. No Packer web server
 	p.config.Vars = []string{"FOO=bar"}
 
 	flattenedEnvVars, err = p.createFlattenedEnvVars(false)
@@ -662,7 +664,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
 
-	// multiple user env vars
+	// Multiple user env vars. No Packer web server
 	p.config.Vars = []string{"FOO=bar", "BAZ=qux"}
 
 	flattenedEnvVars, err = p.createFlattenedEnvVars(false)
@@ -672,6 +674,50 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 	if flattenedEnvVars != `$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; ` {
 		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
 	}
+
+	// Mock enable Packer web server
+	runUUID, _ := uuid.GenerateUUID()
+	os.Setenv("PACKER_RUN_UUID", runUUID)
+	common.SetHTTPIP("1.2.3.4")
+	common.SetHTTPPort("1234")
+
+	// No user env var. Packer web server enabled
+	p.config.Vars = nil
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars(false)
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != `$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; $env:PACKER_HTTP_ADDR="1.2.3.4:1234"; ` {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// Single user env var. Packer web server enabled
+	p.config.Vars = []string{"FOO=bar"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars(false)
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != `$env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; $env:PACKER_HTTP_ADDR="1.2.3.4:1234"; ` {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// Multiple user env vars. Packer web server enabled
+	p.config.Vars = []string{"FOO=bar", "BAZ=qux"}
+
+	flattenedEnvVars, err = p.createFlattenedEnvVars(false)
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	if flattenedEnvVars != `$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; $env:PACKER_HTTP_ADDR="1.2.3.4:1234"; ` {
+		t.Fatalf("unexpected flattened env vars: %s", flattenedEnvVars)
+	}
+
+	// Cleanup mock Packer web server
+	os.Remove(common.HTTPAddrFilename("ip"))
+	os.Remove(common.HTTPAddrFilename("port"))
+	os.Unsetenv("PACKER_RUN_UUID")
 }
 
 func TestProvision_createCommandText(t *testing.T) {
