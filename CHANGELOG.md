@@ -45,6 +45,9 @@ BUG FIXES:
   * builder/amazon: Fix crash in amazon-instance. [GH-4372]
   * builder/docker: Fix crash when performing log in to ECR with an invalid
       URL. [GH-4385]
+  * communicator/winrm: update winrm client, resolving `MaxMemoryPerShellMB`
+      errors and properly error logging instead of panicking. [GH-4412]
+      [GH-4424]
 
 ## 0.12.1 (December 15, 2016)
 
