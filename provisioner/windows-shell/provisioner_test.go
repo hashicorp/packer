@@ -210,12 +210,36 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
+
+	// Test when the env variable value contains an equals sign
+	config["environment_vars"] = []string{"good=withequals=true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test when the env variable value starts with an equals sign
+	config["environment_vars"] = []string{"good==true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
 }
 
 func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	config := testConfig()
 
-	config["environment_vars"] = []string{"keyone=valueone", "keytwo=value\ntwo", "keythree='valuethree'", "keyfour='value\nfour'"}
+	config["environment_vars"] = []string{
+		"keyone=valueone",
+		"keytwo=value\ntwo",
+		"keythree='valuethree'",
+		"keyfour='value\nfour'",
+		"keyfive='value=five'",
+		"keysix='=six'",
+	}
+
 	p := new(Provisioner)
 	p.Prepare(config)
 
@@ -238,6 +262,17 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	if p.config.Vars[3] != expectedValue {
 		t.Fatalf("%s should be equal to %s", p.config.Vars[3], expectedValue)
 	}
+
+	expectedValue = "keyfive='value=five'"
+	if p.config.Vars[4] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[4], expectedValue)
+	}
+
+	expectedValue = "keysix='=six'"
+	if p.config.Vars[5] != expectedValue {
+		t.Fatalf("%s should be equal to %s", p.config.Vars[5], expectedValue)
+	}
+
 }
 
 func testUi() *packer.BasicUi {
@@ -403,6 +438,28 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("should not have error creating flattened env vars: %s", err)
 	}
 	expectedEnvVars = `set "BAZ=qux" && set "FOO=bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
+	if flattenedEnvVars != expectedEnvVars {
+		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
+	}
+
+	// Environment variable with value containing equals. No Packer web server
+	p.config.Vars = []string{"FOO=bar=baz"}
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	expectedEnvVars = `set "FOO=bar=baz" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
+	if flattenedEnvVars != expectedEnvVars {
+		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
+	}
+
+	// Environment variable with value starting with equals. No Packer web server
+	p.config.Vars = []string{"FOO==baz"}
+	flattenedEnvVars, err = p.createFlattenedEnvVars()
+	if err != nil {
+		t.Fatalf("should not have error creating flattened env vars: %s", err)
+	}
+	expectedEnvVars = `set "FOO==baz" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
 	if flattenedEnvVars != expectedEnvVars {
 		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
 	}
