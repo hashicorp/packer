@@ -302,8 +302,10 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		Resources: []*string{instance.InstanceId},
 	})
 	if err != nil {
-		ui.Message(
-			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
+		err := fmt.Errorf("Error tagging source instance: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	if s.Debug {
