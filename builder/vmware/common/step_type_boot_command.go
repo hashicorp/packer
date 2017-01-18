@@ -95,7 +95,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		ipFinder = &IfconfigIPFinder{Device: "vmnet8"}
 	}
 
-	hostIp, err := ipFinder.HostIP()
+	hostIP, err := ipFinder.HostIP()
 	if err != nil {
 		err := fmt.Errorf("Error detecting host IP: %s", err)
 		state.Put("error", err)
@@ -103,10 +103,11 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Host IP for the VMware machine: %s", hostIp)
+	log.Printf("Host IP for the VMware machine: %s", hostIP)
+	common.SetHTTPIP(hostIP)
 
 	s.Ctx.Data = &bootCommandTemplateData{
-		hostIp,
+		hostIP,
 		httpPort,
 		s.VMName,
 	}
