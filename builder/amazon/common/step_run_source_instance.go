@@ -292,7 +292,9 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	instance := latestInstance.(*ec2.Instance)
 
 	ui.Say(fmt.Sprintf("Adding tags to source instance:"))
-	s.Tags["Name"] = "Packer Builder"
+	if _, exists := s.Tags["Name"]; !exists {
+		s.Tags["Name"] = "Packer Builder"
+	}
 	ec2Tags := ConvertToEC2Tags(s.Tags, ui)
 
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
