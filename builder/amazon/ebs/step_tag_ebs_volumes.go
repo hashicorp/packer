@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -18,7 +19,6 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.VolumeRunTags) > 0 {
-		ui.Say("Tagging source EBS volumes...")
 
 		volumeIds := make([]*string, 0)
 		for _, v := range instance.BlockDeviceMappings {
@@ -31,10 +31,8 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionContinue
 		}
 
-		tags := make([]*ec2.Tag, len(s.VolumeRunTags))
-		for key, value := range s.VolumeRunTags {
-			tags = append(tags, &ec2.Tag{Key: &key, Value: &value})
-		}
+		ui.Say(fmt.Sprintf("Adding tags to source EBS Volumes:"))
+		tags := common.ConvertToEC2Tags(s.VolumeRunTags, ui)
 
 		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Resources: []*string{
