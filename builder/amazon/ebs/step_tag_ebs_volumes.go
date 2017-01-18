@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
@@ -17,37 +18,35 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	if len(s.VolumeRunTags) > 0 {
-		ui.Say("Tagging source EBS volumes...")
+	if len(s.VolumeRunTags) == 0 {
+		return multistep.ActionContinue
+	}
 
-		volumeIds := make([]*string, 0)
-		for _, v := range instance.BlockDeviceMappings {
-			if ebs := v.Ebs; ebs != nil {
-				volumeIds = append(volumeIds, ebs.VolumeId)
-			}
+	volumeIds := make([]*string, 0)
+	for _, v := range instance.BlockDeviceMappings {
+		if ebs := v.Ebs; ebs != nil {
+			volumeIds = append(volumeIds, ebs.VolumeId)
 		}
+	}
 
-		if len(volumeIds) == 0 {
-			return multistep.ActionContinue
-		}
+	if len(volumeIds) == 0 {
+		return multistep.ActionContinue
+	}
 
-		tags := make([]*ec2.Tag, len(s.VolumeRunTags))
-		for key, value := range s.VolumeRunTags {
-			tags = append(tags, &ec2.Tag{Key: &key, Value: &value})
-		}
+	ui.Say(fmt.Sprintf("Adding tags to source EBS Volumes:"))
+	tags := common.ConvertToEC2Tags(s.VolumeRunTags, ui)
 
-		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-			Resources: []*string{
-				instance.BlockDeviceMappings[0].Ebs.VolumeId,
-			},
-			Tags: tags,
-		})
-		if err != nil {
-			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+		Resources: []*string{
+			instance.BlockDeviceMappings[0].Ebs.VolumeId,
+		},
+		Tags: tags,
+	})
+	if err != nil {
+		err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
