@@ -271,7 +271,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	instance := latestInstance.(*ec2.Instance)
 
-	ui.Say(fmt.Sprintf("Adding tags to source instance:"))
+	ui.Say("Adding tags to source instance")
 	if _, exists := s.Tags["Name"]; !exists {
 		s.Tags["Name"] = "Packer Builder"
 	}
