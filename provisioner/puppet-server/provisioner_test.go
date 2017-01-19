@@ -15,6 +15,7 @@ func testConfig() map[string]interface{} {
 
 	return map[string]interface{}{
 		"puppet_server": tf.Name(),
+		"guest_os_type": "unix",
 	}
 }
 
@@ -182,11 +183,16 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 
 func TestProvisionerPrepare_stagingDir(t *testing.T) {
 	config := testConfig()
+	comm := &packer.MockCommunicator{}
 
 	delete(config, "staging_dir")
 	p := new(Provisioner)
 	err := p.Prepare(config)
 	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if err := p.prepareGuestOS(comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -200,6 +206,9 @@ func TestProvisionerPrepare_stagingDir(t *testing.T) {
 	p = new(Provisioner)
 	err = p.Prepare(config)
 	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	if err := p.prepareGuestOS(comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

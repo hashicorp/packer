@@ -189,7 +189,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	err := p.prepareGuestOs(comm)
+	err := p.prepareGuestOS(comm)
 	if err != nil {
 		return fmt.Errorf("Error discovering guest OS.")
 	}
@@ -298,7 +298,7 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) prepareGuestOs(comm packer.Communicator) error {
+func (p *Provisioner) prepareGuestOS(comm packer.Communicator) error {
 	if p.config.GuestOSType == "" {
 		osType, err := provisioner.GuestOSTypeFromComm(comm)
 		if err != nil {
