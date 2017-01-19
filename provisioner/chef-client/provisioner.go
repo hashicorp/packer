@@ -184,7 +184,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	err := p.prepareGuestOS(comm)
 	if err != nil {
-		return fmt.Errorf("Error discovering guest OS.")
+		return fmt.Errorf("Error discovering guest OS: %s", err)
 	}
 
 	ui.Say("Provisioning with Chef-client...")
