@@ -30,6 +30,7 @@ IMPROVEMENTS:
  
 BUG FIXES:
 
+  * step_http_server: make port range inclusive. [GH-4398]
   * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
   * builder/amazon: fix run volume tagging [GH-4420]
   * command/push: Don't interpolate variables when pushing. [GH-4389]
