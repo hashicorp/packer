@@ -88,7 +88,8 @@ listed below:
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+     Windows friendly paths and commands. By default, this is guessed from the
+     communicator type: winrm for Windows, ssh for Unix.
 
 ## Default Facts
 
