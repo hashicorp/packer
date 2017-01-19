@@ -33,7 +33,7 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	ui.Say(fmt.Sprintf("Adding tags to source EBS Volumes:"))
+	ui.Say("Adding tags to source EBS Volumes")
 	tags := common.ConvertToEC2Tags(s.VolumeRunTags)
 
 	_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
