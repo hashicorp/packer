@@ -3,6 +3,10 @@ package provisioner
 import (
 	"fmt"
 	"strings"
+
+	"github.com/mitchellh/packer/communicator/ssh"
+	"github.com/mitchellh/packer/communicator/winrm"
+	"github.com/mitchellh/packer/packer"
 )
 
 const UnixOSType = "unix"
@@ -26,6 +30,17 @@ var guestOSTypeCommands = map[string]guestOSTypeCommand{
 		mkdir:     "powershell.exe -Command \"New-Item -ItemType directory -Force -ErrorAction SilentlyContinue -Path %s\"",
 		removeDir: "powershell.exe -Command \"rm %s -recurse -force\"",
 	},
+}
+
+func GuestOSTypeFromComm(comm packer.Communicator) (string, error) {
+	switch comm.(type) {
+	case *winrm.Communicator:
+		return WindowsOSType, nil
+	case *ssh.Communicator:
+		return UnixOSType, nil
+	default:
+		return "", fmt.Errorf("Unable to guess guest os type from connection type. Please specify `guest_os_type` in the provisioner.")
+	}
 }
 
 type GuestCommands struct {

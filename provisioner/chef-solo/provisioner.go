@@ -109,38 +109,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
-	}
-	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
-
-	var ok bool
-	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
-	if !ok {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
-	if err != nil {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
-	}
-
-	if p.config.InstallCommand == "" {
-		p.config.InstallCommand = p.guestOSTypeConfig.installCommand
-	}
-
-	if p.config.RunList == nil {
-		p.config.RunList = make([]string, 0)
-	}
-
-	if p.config.StagingDir == "" {
-		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
-	}
-
 	var errs *packer.MultiError
 	if p.config.ConfigTemplate != "" {
 		fi, err := os.Stat(p.config.ConfigTemplate)
@@ -301,6 +269,47 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) prepareGuestOs(comm packer.Communicator) error {
+	if p.config.GuestOSType == "" {
+		osType, err := provisioner.GuestOSTypeFromComm(comm)
+		if err != nil {
+			return err
+		}
+		p.config.GuestOSType = osType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	var err error
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
+	}
+
+	if p.config.InstallCommand == "" {
+		p.config.InstallCommand = p.guestOSTypeConfig.installCommand
+	}
+
+	if p.config.RunList == nil {
+		p.config.RunList = make([]string, 0)
+	}
+
+	if p.config.StagingDir == "" {
+		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
+	}
+
+	return nil
 }
 
 func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {

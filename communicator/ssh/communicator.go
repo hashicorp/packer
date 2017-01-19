@@ -26,7 +26,7 @@ import (
 // out period is 1 minute. You can change it with Config.HandshakeTimeout.
 var ErrHandshakeTimeout = fmt.Errorf("Timeout during SSH handshake")
 
-type comm struct {
+type Communicator struct {
 	client  *ssh.Client
 	config  *Config
 	conn    net.Conn
@@ -59,9 +59,9 @@ type Config struct {
 
 // Creates a new packer.Communicator implementation over SSH. This takes
 // an already existing TCP connection and SSH configuration.
-func New(address string, config *Config) (result *comm, err error) {
+func New(address string, config *Config) (result *Communicator, err error) {
 	// Establish an initial connection and connect
-	result = &comm{
+	result = &Communicator{
 		config:  config,
 		address: address,
 	}
@@ -74,7 +74,7 @@ func New(address string, config *Config) (result *comm, err error) {
 	return
 }
 
-func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
+func (c *Communicator) Start(cmd *packer.RemoteCmd) (err error) {
 	session, err := c.newSession()
 	if err != nil {
 		return
@@ -128,7 +128,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	return
 }
 
-func (c *comm) Upload(path string, input io.Reader, fi *os.FileInfo) error {
+func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	if c.config.UseSftp {
 		return c.sftpUploadSession(path, input, fi)
 	} else {
@@ -136,7 +136,7 @@ func (c *comm) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	}
 }
 
-func (c *comm) UploadDir(dst string, src string, excl []string) error {
+func (c *Communicator) UploadDir(dst string, src string, excl []string) error {
 	log.Printf("Upload dir '%s' to '%s'", src, dst)
 	if c.config.UseSftp {
 		return c.sftpUploadDirSession(dst, src, excl)
@@ -145,7 +145,7 @@ func (c *comm) UploadDir(dst string, src string, excl []string) error {
 	}
 }
 
-func (c *comm) DownloadDir(src string, dst string, excl []string) error {
+func (c *Communicator) DownloadDir(src string, dst string, excl []string) error {
 	log.Printf("Download dir '%s' to '%s'", src, dst)
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		dirStack := []string{dst}
@@ -217,14 +217,14 @@ func (c *comm) DownloadDir(src string, dst string, excl []string) error {
 	return c.scpSession("scp -vrf "+src, scpFunc)
 }
 
-func (c *comm) Download(path string, output io.Writer) error {
+func (c *Communicator) Download(path string, output io.Writer) error {
 	if c.config.UseSftp {
 		return c.sftpDownloadSession(path, output)
 	}
 	return c.scpDownloadSession(path, output)
 }
 
-func (c *comm) newSession() (session *ssh.Session, err error) {
+func (c *Communicator) newSession() (session *ssh.Session, err error) {
 	log.Println("opening new ssh session")
 	if c.client == nil {
 		err = errors.New("client not available")
@@ -248,7 +248,7 @@ func (c *comm) newSession() (session *ssh.Session, err error) {
 	return session, nil
 }
 
-func (c *comm) reconnect() (err error) {
+func (c *Communicator) reconnect() (err error) {
 	if c.conn != nil {
 		c.conn.Close()
 	}
@@ -321,7 +321,7 @@ func (c *comm) reconnect() (err error) {
 	return
 }
 
-func (c *comm) connectToAgent() {
+func (c *Communicator) connectToAgent() {
 	if c.client == nil {
 		return
 	}
@@ -374,7 +374,7 @@ func (c *comm) connectToAgent() {
 	return
 }
 
-func (c *comm) sftpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
+func (c *Communicator) sftpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
 	sftpFunc := func(client *sftp.Client) error {
 		return sftpUploadFile(path, input, client, fi)
 	}
@@ -406,7 +406,7 @@ func sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.Fi
 	return nil
 }
 
-func (c *comm) sftpUploadDirSession(dst string, src string, excl []string) error {
+func (c *Communicator) sftpUploadDirSession(dst string, src string, excl []string) error {
 	sftpFunc := func(client *sftp.Client) error {
 		rootDst := dst
 		if src[len(src)-1] != '/' {
@@ -476,7 +476,7 @@ func sftpVisitFile(dst string, src string, fi os.FileInfo, client *sftp.Client) 
 	}
 }
 
-func (c *comm) sftpDownloadSession(path string, output io.Writer) error {
+func (c *Communicator) sftpDownloadSession(path string, output io.Writer) error {
 	sftpFunc := func(client *sftp.Client) error {
 		f, err := client.Open(path)
 		if err != nil {
@@ -494,7 +494,7 @@ func (c *comm) sftpDownloadSession(path string, output io.Writer) error {
 	return c.sftpSession(sftpFunc)
 }
 
-func (c *comm) sftpSession(f func(*sftp.Client) error) error {
+func (c *Communicator) sftpSession(f func(*sftp.Client) error) error {
 	client, err := c.newSftpClient()
 	if err != nil {
 		return err
@@ -504,7 +504,7 @@ func (c *comm) sftpSession(f func(*sftp.Client) error) error {
 	return f(client)
 }
 
-func (c *comm) newSftpClient() (*sftp.Client, error) {
+func (c *Communicator) newSftpClient() (*sftp.Client, error) {
 	session, err := c.newSession()
 	if err != nil {
 		return nil, err
@@ -526,7 +526,7 @@ func (c *comm) newSftpClient() (*sftp.Client, error) {
 	return sftp.NewClientPipe(pr, pw)
 }
 
-func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
+func (c *Communicator) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
 
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
@@ -544,7 +544,7 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	return c.scpSession("scp -vt "+target_dir, scpFunc)
 }
 
-func (c *comm) scpUploadDirSession(dst string, src string, excl []string) error {
+func (c *Communicator) scpUploadDirSession(dst string, src string, excl []string) error {
 	scpFunc := func(w io.Writer, r *bufio.Reader) error {
 		uploadEntries := func() error {
 			f, err := os.Open(src)
@@ -577,7 +577,7 @@ func (c *comm) scpUploadDirSession(dst string, src string, excl []string) error 
 	return c.scpSession("scp -rvt "+dst, scpFunc)
 }
 
-func (c *comm) scpDownloadSession(path string, output io.Writer) error {
+func (c *Communicator) scpDownloadSession(path string, output io.Writer) error {
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		fmt.Fprint(w, "\x00")
 
@@ -633,7 +633,7 @@ func (c *comm) scpDownloadSession(path string, output io.Writer) error {
 	return c.scpSession("scp -vf "+strconv.Quote(path), scpFunc)
 }
 
-func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) error) error {
+func (c *Communicator) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) error) error {
 	session, err := c.newSession()
 	if err != nil {
 		return err

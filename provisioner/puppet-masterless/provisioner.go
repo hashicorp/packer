@@ -129,19 +129,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	// Set some defaults
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
-	}
-
-	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-puppet-masterless"
-	}
-
-	if p.config.WorkingDir == "" {
-		p.config.WorkingDir = p.config.StagingDir
-	}
-
 	if p.config.Facter == nil {
 		p.config.Facter = make(map[string]string)
 	}
@@ -194,26 +181,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
-	}
-	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
-
-	var ok bool
-	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
-	if !ok {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
-	if err != nil {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
-	}
-
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -222,6 +189,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	err := p.prepareGuestOs(comm)
+	if err != nil {
+		return fmt.Errorf("Error discovering guest OS.")
+	}
+
 	ui.Say("Provisioning with Puppet...")
 	ui.Message("Creating Puppet staging directory...")
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
@@ -324,6 +296,42 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) prepareGuestOs(comm packer.Communicator) error {
+	if p.config.GuestOSType == "" {
+		osType, err := provisioner.GuestOSTypeFromComm(comm)
+		if err != nil {
+			return err
+		}
+		p.config.GuestOSType = osType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	var err error
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
+	}
+
+	if p.config.StagingDir == "" {
+		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
+	}
+
+	if p.config.WorkingDir == "" {
+		p.config.WorkingDir = p.config.StagingDir
+	}
+	return nil
 }
 
 func (p *Provisioner) uploadHieraConfig(ui packer.Ui, comm packer.Communicator) (string, error) {
