@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -29,11 +30,6 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 	// Adds tags to AMIs and snapshots
 	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
-
-		// Convert tags to ec2.Tag format
-		amiTags := ConvertToEC2Tags(s.Tags)
-		ui.Say(fmt.Sprintf("Snapshot tags:"))
-		snapshotTags := ConvertToEC2Tags(s.SnapshotTags)
 
 		// Declare list of resources to tag
 		awsConfig := aws.Config{
@@ -80,6 +76,12 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 				snapshotIds = append(snapshotIds, device.Ebs.SnapshotId)
 			}
 		}
+
+		// Convert tags to ec2.Tag format
+		ui.Say("Creating AMI tags")
+		amiTags := ConvertToEC2Tags(s.Tags)
+		ui.Say("Creating snapshot tags")
+		snapshotTags := ConvertToEC2Tags(s.SnapshotTags)
 
 		// Retry creating tags for about 2.5 minutes
 		err = retry.Retry(0.2, 30, 11, func() (bool, error) {
@@ -129,12 +131,13 @@ func (s *StepCreateTags) Cleanup(state multistep.StateBag) {
 }
 
 func ConvertToEC2Tags(tags map[string]string) []*ec2.Tag {
-	var amiTags []*ec2.Tag
+	var ec2tags []*ec2.Tag
 	for key, value := range tags {
-		amiTags = append(amiTags, &ec2.Tag{
+		log.Printf("[DEBUG] Creating tag %s=%s", key, value)
+		ec2tags = append(ec2tags, &ec2.Tag{
 			Key:   aws.String(key),
 			Value: aws.String(value),
 		})
 	}
-	return amiTags
+	return ec2tags
 }
