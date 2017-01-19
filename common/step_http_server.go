@@ -40,7 +40,7 @@ func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
 	var err error
 
 	if s.HTTPPort == 0 {
-		// Find an available TCP port for our HTTP server
+		// let ListenTCP below choose an available TCP port for our HTTP server
 		addr, err = net.ResolveTCPAddr("tcp", "0.0.0.0:0")
 	} else {
 		addr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%d", s.HTTPPort))
