@@ -30,6 +30,8 @@ IMPROVEMENTS:
  
 BUG FIXES:
 
+  * builder/vmware builder/parallels: Fix hang when shutting down windows in
+      certain cases. [GH-4436]
   * step_http_server: make port range inclusive. [GH-4398]
   * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
   * builder/amazon: fix run volume tagging [GH-4420]
