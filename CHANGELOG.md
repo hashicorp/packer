@@ -27,6 +27,8 @@ IMPROVEMENTS:
   * builder/openstack: Attempt to use existing floating IPs before allocating
       a new one. [GH-4357]
   * builder/vmware: Try to use `ip address` to find host IP. [GH-4411]
+  * common/step_http_server: set `PACKER_HTTP_ADDR` env var for accessing http
+      server from inside builder. [GH-4409]
  
 BUG FIXES:
 
@@ -52,6 +54,7 @@ BUG FIXES:
       errors and properly error logging instead of panicking. [GH-4412]
       [GH-4424]
   * builder/amazon: fix when using non-existant security_group_id. [GH-4425]
+  * builder/amazon: Properly wait for security group to exist. [GH-4369]
 
 ## 0.12.1 (December 15, 2016)
 
