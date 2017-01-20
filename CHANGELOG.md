@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+## 0.12.2 (January 20, 2017)
+
 FEATURES:
 
  * **New builder:** `triton` for building images for Joyent Triton. [GH-4325]
@@ -7,54 +9,54 @@ FEATURES:
 
 IMPROVEMENTS:
 
-  * builder/vmware & builder/qemu: Allow configurable delay between keystrokes
-      when typing boot command. [GH-4403]
-  * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
-  * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
-  * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
-  * builder/vmware-iso: add `iso_target_extension` option. [GH-4294]
-  * builder/qemu: add `iso_target_extension` option. [GH-4294]
-  * builder/qemu: add `use_default_display option for osx compatibility.
-      [GH-4293]
-  * provisioner/puppet-server: Add default facts. [GH-4286]
-  * provisioner/powershell: Allow equals sign in value of environment
-      variables. [GH-4328]
-  * builder/virtualbox: add `skip_export` option to skip exporting the VM after
-      build completes. [GH-4339]
-  * builder/vmware-iso: add `skip_export` option to skip exporting the VM after
-      build completes. [GH-4378]
+  * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
   * builder/openstack: Add support for instance metadata. [GH-4361]
   * builder/openstack: Attempt to use existing floating IPs before allocating
       a new one. [GH-4357]
+  * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `use_default_display` option for osx compatibility.
+      [GH-4293]
+  * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/virtualbox: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4339]
+  * builder/vmware & builder/qemu: Allow configurable delay between keystrokes
+      when typing boot command. [GH-4403]
+  * builder/vmware-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/vmware-iso: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4378]
   * builder/vmware: Try to use `ip address` to find host IP. [GH-4411]
   * common/step_http_server: set `PACKER_HTTP_ADDR` env var for accessing http
       server from inside builder. [GH-4409]
+  * provisioner/powershell: Allow equals sign in value of environment
+      variables. [GH-4328]
+  * provisioner/puppet-server: Add default facts.  [GH-4286]
  
 BUG FIXES:
 
-  * builder/vmware builder/parallels: Fix hang when shutting down windows in
-      certain cases. [GH-4436]
-  * step_http_server: make port range inclusive. [GH-4398]
-  * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
-  * builder/amazon: fix run volume tagging [GH-4420]
-  * command/push: Don't interpolate variables when pushing. [GH-4389]
-  * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
   * builder/amazon-chroot: Panic in AMI region copy step. [GH-4341]
-  * builder/openstack: fix for finding resource by ID. [GH-4301]
-  * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
-  * builder/virtualbox: Pause between each boot command element in -debug.
-    [GH-4346]
-  * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
+  * builder/amazon: Fix crash in amazon-instance. [GH-4372]
   * builder/amazon: Properly error if we don't have the
       ec2:DescribeSecurityGroups permission. [GH-4304]
-  * builder/amazon: Fix crash in amazon-instance. [GH-4372]
+  * builder/amazon: Properly wait for security group to exist. [GH-4369]
+  * builder/amazon: fix run volume tagging [GH-4420]
+  * builder/amazon: fix when using non-existant security_group_id. [GH-4425]
   * builder/docker: Fix crash when performing log in to ECR with an invalid
       URL. [GH-4385]
+  * builder/openstack: fix for finding resource by ID. [GH-4301]
+  * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/virtualbox: Pause between each boot command element in -debug.
+      [GH-4346]
+  * builder/vmware builder/parallels: Fix hang when shutting down windows in
+      certain cases. [GH-4436]
+  * command/push: Don't interpolate variables when pushing. [GH-4389]
+  * common/step_http_server: make port range inclusive. [GH-4398]
   * communicator/winrm: update winrm client, resolving `MaxMemoryPerShellMB`
       errors and properly error logging instead of panicking. [GH-4412]
       [GH-4424]
-  * builder/amazon: fix when using non-existant security_group_id. [GH-4425]
-  * builder/amazon: Properly wait for security group to exist. [GH-4369]
+  * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
 
 ## 0.12.1 (December 15, 2016)
 
