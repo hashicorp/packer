@@ -70,6 +70,8 @@ type Config struct {
 	// Whether to clean scripts up
 	SkipClean bool `mapstructure:"skip_clean"`
 
+	ExpectDisconnect *bool `mapstructure:"expect_disconnect"`
+
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
 }
@@ -99,6 +101,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+	}
+
+	if p.config.ExpectDisconnect == nil {
+		t := true
+		p.config.ExpectDisconnect = &t
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -225,7 +232,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	envVars := make([]string, len(p.config.Vars)+2)
 	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
 	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
+
 	copy(envVars[2:], p.config.Vars)
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars = append(envVars, fmt.Sprintf("PACKER_HTTP_ADDR=%s", common.GetHTTPAddr()))
+	}
 
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
@@ -283,11 +295,18 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
 		})
+
 		if err != nil {
 			return err
 		}
 
-		if cmd.ExitStatus != 0 {
+		// If the exit code indicates a remote disconnect, fail unless
+		// we were expecting it.
+		if cmd.ExitStatus == packer.CmdDisconnect {
+			if !*p.config.ExpectDisconnect {
+				return fmt.Errorf("Script disconnected unexpectedly.")
+			}
+		} else if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
 		}
 
@@ -306,6 +325,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 						p.config.RemotePath, err)
 				}
 				cmd.Wait()
+				// treat disconnects as retryable by returning an error
+				if cmd.ExitStatus == packer.CmdDisconnect {
+					return fmt.Errorf("Disconnect while removing temporary script.")
+				}
 				return nil
 			})
 			if err != nil {

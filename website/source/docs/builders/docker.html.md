@@ -21,7 +21,7 @@ Dockerfiles, Packer is able to provision containers with portable scripts or
 configuration management systems that are not tied to Docker in any way. It also
 has a simpler mental model: you provision containers much the same way you
 provision a normal virtualized or dedicated server. For more information, read
-the section on [Dockerfiles](#toc_8).
+the section on [Dockerfiles](#dockerfiles).
 
 The Docker builder must run on a machine that has Docker installed. Therefore
 the builder only works on machines that support Docker (modern Linux machines).
@@ -86,6 +86,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 ### Optional:
 
+-   `author` (string) - Set the author (e-mail) of a commit.
+
 -   `aws_access_key` (string) - The AWS access key used to communicate with AWS.
     [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
@@ -97,12 +99,17 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
+-   `changes` (array of strings) - Dockerfile instructions to add to the commit.
+    Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
+    `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
+
 -   `ecr_login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image from
     [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
     The builder only logs in for the duration of the pull. If true
     `login_server` is required and `login`, `login_username`, and
-    `login_password` will be ignored.
+    `login_password` will be ignored. For more information see the
+    [section on ECR](#amazon-ec2-container-registry).
 
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image. The builder only logs in for the duration of
@@ -115,6 +122,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `login_password` (string) - The password to use to authenticate to login.
 
 -   `login_server` (string) - The server address to login to.
+
+-   `message` (string) - Set a message for the commit.
 
 -   `privileged` (boolean) - If true, run the docker container with the
     `--privileged` flag. This defaults to false if not set.

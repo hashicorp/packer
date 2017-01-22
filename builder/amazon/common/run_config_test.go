@@ -29,6 +29,13 @@ func testConfig() *RunConfig {
 	}
 }
 
+func testConfigFilter() *RunConfig {
+	config := testConfig()
+	config.SourceAmi = ""
+	config.SourceAmiFilter = AmiFilterOptions{}
+	return config
+}
+
 func TestRunConfigPrepare(t *testing.T) {
 	c := testConfig()
 	err := c.Prepare(nil)
@@ -49,6 +56,25 @@ func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	c := testConfig()
 	c.SourceAmi = ""
 	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestRunConfigPrepare_SourceAmiFilterBlank(t *testing.T) {
+	c := testConfigFilter()
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
+	c := testConfigFilter()
+	owner := "123"
+	filter_key := "name"
+	filter_value := "foo"
+	goodFilter := AmiFilterOptions{Owners: []*string{&owner}, Filters: map[*string]*string{&filter_key: &filter_value}}
+	c.SourceAmiFilter = goodFilter
+	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 }
@@ -84,14 +110,6 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 
 	if c.Comm.SSHPort != 44 {
 		t.Fatalf("invalid value: %d", c.Comm.SSHPort)
-	}
-}
-
-func TestRunConfigPrepare_SSHUsername(t *testing.T) {
-	c := testConfig()
-	c.Comm.SSHUsername = ""
-	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
 	}
 }
 

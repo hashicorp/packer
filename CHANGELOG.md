@@ -1,5 +1,186 @@
 ## (Unreleased)
 
+## 0.12.2 (January 20, 2017)
+
+FEATURES:
+
+ * **New builder:** `triton` for building images for Joyent Triton. [GH-4325]
+ * **New provisioner:** `converge` for provisioning with converge.sh. [GH-4326]
+
+IMPROVEMENTS:
+
+  * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/openstack: Add support for instance metadata. [GH-4361]
+  * builder/openstack: Attempt to use existing floating IPs before allocating
+      a new one. [GH-4357]
+  * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `iso_target_extension` option. [GH-4294]
+  * builder/qemu: add `use_default_display` option for osx compatibility.
+      [GH-4293]
+  * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/virtualbox: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4339]
+  * builder/vmware & builder/qemu: Allow configurable delay between keystrokes
+      when typing boot command. [GH-4403]
+  * builder/vmware-iso: add `iso_target_extension` option. [GH-4294]
+  * builder/vmware-iso: add `skip_export` option to skip exporting the VM after
+      build completes. [GH-4378]
+  * builder/vmware: Try to use `ip address` to find host IP. [GH-4411]
+  * common/step_http_server: set `PACKER_HTTP_ADDR` env var for accessing http
+      server from inside builder. [GH-4409]
+  * provisioner/powershell: Allow equals sign in value of environment
+      variables. [GH-4328]
+  * provisioner/puppet-server: Add default facts.  [GH-4286]
+ 
+BUG FIXES:
+
+  * builder/amazon-chroot: Panic in AMI region copy step. [GH-4341]
+  * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
+  * builder/amazon: Fix crash in amazon-instance. [GH-4372]
+  * builder/amazon: Properly error if we don't have the
+      ec2:DescribeSecurityGroups permission. [GH-4304]
+  * builder/amazon: Properly wait for security group to exist. [GH-4369]
+  * builder/amazon: fix run volume tagging [GH-4420]
+  * builder/amazon: fix when using non-existant security_group_id. [GH-4425]
+  * builder/docker: Fix crash when performing log in to ECR with an invalid
+      URL. [GH-4385]
+  * builder/openstack: fix for finding resource by ID. [GH-4301]
+  * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
+  * builder/virtualbox: Pause between each boot command element in -debug.
+      [GH-4346]
+  * builder/vmware builder/parallels: Fix hang when shutting down windows in
+      certain cases. [GH-4436]
+  * command/push: Don't interpolate variables when pushing. [GH-4389]
+  * common/step_http_server: make port range inclusive. [GH-4398]
+  * communicator/winrm: update winrm client, resolving `MaxMemoryPerShellMB`
+      errors and properly error logging instead of panicking. [GH-4412]
+      [GH-4424]
+  * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
+
+## 0.12.1 (December 15, 2016)
+
+BACKWARDS INCOMPATIBILITIES:
+
+  * `ssh_username` is now required if using communicator ssh. [GH-4172]
+  * builder/amazon: Change `shutdown_behaviour` to `shutdown_behavior`.  Run
+      "packer fix template.json" to migrate a template. [GH-4285]
+  * builder/openstack: No long supports the `api_key` option for rackspace.
+      [GH-4283]
+  * post-processor/manifest: Changed `filename` field to be `output`, to be
+      more consistent with other post-processors. `packer fix` will fix this
+      for you. [GH-4192]
+  * post-processor/shell-local: Now runs per-builder instead of per-file. The
+      filename is no longer passed in as an argument to the script, but instead
+      needs to be gleaned from the manifest post-processor. [GH-4189]
+
+FEATURES:
+
+* **New builder:** "Hyper-V" Added new builder for Hyper-V on Windows.
+    [GH-2576]
+* **New builder:** "1&1" Added new builder for [1&1](https://www.1and1.com/).
+    [GH-4163]
+
+IMPROVEMENTS:
+
+  * builder/amazon-ebs: Support specifying KMS key for encryption. [GH-4023]
+  * builder/amazon-ebsvolume: Add artifact output. [GH-4141]
+  * builder/amazon: Add `snapshot_tag` overrides. [GH-4015]
+  * builder/amazon: Added new region London - eu-west-2. [GH-4284]
+  * builder/amazon: Added ca-central-1 to list of known aws regions. [GH-4274]
+  * builder/amazon: Adds `force_delete_snapshot` flag to also cleanup snapshots
+      if we're removing a preexisting image, as with `force_deregister_image`.
+      [GH-4223]
+  * builder/amazon: Support `snapshot_users` and `snapshot_groups` for sharing
+      ebs snapshots. [GH-4243]
+  * builder/cloudstack: Support reusing an already associated public IP.
+      [GH-4149]
+  * builder/docker: Introduce docker commit changes, author, and message.
+      [GH-4202]
+  * builder/googlecompute: Support `source_image_family`. [GH-4162]
+  * builder/googlecompute: enable support for Google Compute XPN. [GH-4288]
+  * builder/openstack: Added `image_members` to add new members to image after
+      it's created. [GH-4283]
+  * builder/openstack: Added `image_visibility` field to specify visibility of
+      created image. [GH-4283]
+  * builder/openstack: Automatically reauth as needed. [GH-4262]
+  * builder/virtualbox-ovf: Can now give a URL to an ova file. [GH-3982]
+  * communicator/ssh: adds ability to download download directories and
+      wildcards, fix destination file mode (not hardcoded anymore). [GH-4210]
+  * post-processor/shell-local: support spaces in script path. [GH-4144]
+  * provisioner/ansible: Allow `winrm` communicator. [GH-4209]
+  * provisioner/salt: Bootstrap fallback on wget if curl failed. [GH-4244]
+
+BUG FIXES:
+
+  * builder/amazon: Correctly assign key from `ssh_keypair_name` to source
+      instance. [GH-4222]
+  * builder/amazon: Fix `source_ami_filter` ignores `owners`. [GH-4235]
+  * builder/amazon: Fix launching spot instances in EC2 Classic [GH-4204]
+  * builder/qemu: Fix issue where multiple <waitXX> commands on a single line
+      in boot_command wouldn't be parsed correctly. [GH-4269]
+  * core: Unbreak glob patterns in `floppy_files`. [GH-3890]
+  * post-processor/checksum: cleanup, and fix output to specified file with
+      more than one artifacts. [GH-4210]
+  * post-processor/checksum: reset hash after each artifact file. [GH-4210]
+  * provisioner/file: fix for directory download. [GH-4210]
+  * provisioner/file: fix issue uploading multiple files to a directory,
+      mentioned in [GH-4049]. [GH-4210]
+  * provisioner/shell: Treat disconnects as retryable when running cleanup. If
+      you have a reboot in your script, we'll now wait until the host is
+      available before attempting to cleanup the script. [GH-4197]
+
+## 0.12.0 (November 15, 2016)
+
+FEATURES:
+* **New builder:** "cloudstack" Can create new templates for use with
+    CloudStack taking either an ISO or existing template as input. [GH-3909]
+* **New builder:** "profitbricks" Builder for creating images in the
+    ProfitBricks cloud. [GH-3660]
+* **New Builder:** "amazon-ebsvolume" Can create Amazon EBS volumes which are
+    preinitialized with a filesystem and data. [GH-4088]
+
+
+IMPROVEMENTS:
+
+  * builder/amazon: Allow polling delay override with `AWS_POLL_DELAY_SECONDS`.
+      [GH-4083]
+  * builder/amazon: Allow use of local SSH Agent. [GH-4050]
+  * builder/amazon: Dynamic source AMI [GH-3817]
+  * builder/amazon: Show AMI ID found when using `source_ami_filter`. [GH-4096]
+  * builder/googlecompute: Support `ssh_private_key_file` in communicator.
+      [GH-4101]
+  * builder/googlecompute: Support custom scopes. [GH-4043]
+  * command/push: Fix variable pushes to Atlas. Still needs Atlas server to be
+      updated before the issue will be fixed completely. [GH-4089]
+  * communicator/ssh: Improved SSH upload performance. [GH-3940]
+  * contrib/azure-setup.sh: Support for azure-cli 0.10.7. [GH-4133]
+  * docs: Fix command line variable docs. [GH-4143]
+  * post-processor/vagrant: Fixed inconsistency between vagrant-libvirt driver
+      and packer QEMU accelerator. [GH-4104]
+  * provisioner/ansible: Move info messages to log [GH-4123]
+  * provisioner/puppet: Add `puppet_bin_dir` option. [GH-4014]
+  * provisioner/salt: Add `salt_call_args` option. [GH-4158]
+
+BUG FIXES:
+
+  * builder/amazon: Fixed an error where we wouldn't fail the build even if we
+      timed out waiting for the temporary security group to become available.
+      [GH-4099]
+  * builder/amazon: Properly cleanup temporary key pairs. [GH-4080]
+  * builder/google: Fix issue where we'd hang waiting for a startup script
+      which doesn't exist. [GH-4102]
+  * builder/qemu: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
+  * builder/vmware: Fix keycodes for ctrl, shift and alt keys. [GH-4115]
+  * builder/vmware: Fixed build error when shutting down. [GH-4041]
+  * common/step_create_floppy: Fixed support for 1.44MB floppies on Windows.
+      [GH-4135]
+  * post-processor/googlecompute-export: Fixes scopes. [GH-4147]
+  * provisioner/powershell: Reverted [GH-3371] fixes quoting issue. [GH-4069]
+  * scripts: Fix build under Windows for go 1.5. [GH-4142]
+
+## 0.11.0 (October 21, 2016)
+
 BACKWARDS INCOMPATIBILITIES:
 
   * VNC and VRDP-like features in VirtualBox, VMware, and QEMU now configurable
@@ -7,142 +188,172 @@ BACKWARDS INCOMPATIBILITIES:
     builder docs for more info.
   * Docker builder requires Docker > 1.3
   * provisioner/chef-solo: default staging directory renamed to
-      `packer-chef-solo`
+      `packer-chef-solo`. [GH-3971]
 
 FEATURES:
 
-  * **New Checksum post-processor**: Create a checksum file from your build artifacts as part of your build. [GH-3492]  
-    [GH-3790]
-  * **New build flag** `-on-error` to allow inspection and keeping artifacts on builder errors. [GH-3885]
+  * **New Checksum post-processor**: Create a checksum file from your build
+      artifacts as part of your build. [GH-3492] [GH-3790]
+  * **New build flag** `-on-error` to allow inspection and keeping artifacts on
+      builder errors. [GH-3885]
+  * **New Google Compute Export post-processor**: exports an image from
+      a Packer googlecompute builder run and uploads it to Google Cloud
+      Storage.  [GH-3760]
+  * **New Manifest post-processor**: writes metadata about packer's output
+      artifacts data to a JSON file. [GH-3651]
 
 
 IMPROVEMENTS:
 
-  * core: Test floppy disk files actually exist [GH-3756]
   * builder/amazon: Added `disable_stop_instance` option to prevent automatic
-    shutdown when the build is complete [GH-3352]
-  * builder/amazon: Added `skip_region_validation` option to allow newer or
-    custom AWS regions [GH-3598]
+      shutdown when the build is complete. [GH-3352]
   * builder/amazon: Added `shutdown_behavior` option to support `stop` or
-    `terminate` at the end of the build [GH-3556]
+      `terminate` at the end of the build. [GH-3556]
+  * builder/amazon: Added `skip_region_validation` option to allow newer or
+      custom AWS regions. [GH-3598]
+  * builder/amazon: Added `us-east-2` and `ap-south-1` regions. [GH-4021]
+      [GH-3663]
   * builder/amazon: Support building from scratch with amazon-chroot builder.
-    [GH-3855] [GH-3895]
-  * builder/amazon: Support create an AMI with an `encrypted_boot` volume. [GH-3382]
+      [GH-3855] [GH-3895]
+  * builder/amazon: Support create an AMI with an `encrypt_boot` volume.
+      [GH-3382]
+  * builder/azure: Add `os_disk_size_gb`. [GH-3995]
+  * builder/azure: Add location to setup script. [GH-3803]
+  * builder/azure: Allow user to set custom data. [GH-3996]
+  * builder/azure: Made `tenant_id` optional. [GH-3643]
   * builder/azure: Now pre-validates `capture_container_name` and
-    `capture_name_prefix` [GH-3537]
-  * builder/azure: Support for custom images [GH-3575]
-  * builder/azure: Removed superfluous polling code for deployments [GH-3638]
-  * builder/azure: Made `tenant_id` optional [GH-3643]
-  * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
-    [GH-3444]
-  * builder/digitalocean: Fixes timeout waiting for snapshot [GH-3868]
+      `capture_name_prefix` [GH-3537]
+  * builder/azure: Removed superfluous polling code for deployments. [GH-3638]
+  * builder/azure: Support for a user defined VNET. [GH-3683]
+  * builder/azure: Support for custom images. [GH-3575]
+  * builder/azure: tag all resources. [GH-3764]
   * builder/digitalocean: Added `user_data_file` support. [GH-3933]
+  * builder/digitalocean: Fixes timeout waiting for snapshot. [GH-3868]
+  * builder/digitalocean: Use `state_timeout` for unlock and off transitions.
+      [GH-3444]
   * builder/docker: Improved support for Docker pull from Amazon ECR. [GH-3856]
-  * builder/google: Added support for `image_family` [GH-3503]
-  * builder/google: Use gcloud application default credentials. [GH-3655]
-  * builder/google: Signal that startup script fished via metadata. [GH-3873]
+  * builder/google: Add `-force` option to delete old image before creating new
+      one. [GH-3918]
   * builder/google: Add image license metadata. [GH-3873]
-  * builder/google: Enable to select NVMe images. [GH-3338]
+  * builder/google: Added support for `image_family` [GH-3531]
+  * builder/google: Added support for startup scripts. [GH-3639]
   * builder/google: Create passwords for Windows instances. [GH-3932]
-  * builder/null: Can now be used with WinRM [GH-2525]
-  * builder/parallels: Now pauses between `boot_command` entries when running
-    with `-debug` [GH-3547]
-  * builder/parallels: Support future versions of Parallels by using the latest
-    driver [GH-3673]
-  * builder/parallels: Add support for ctrl, shift and alt keys in `boot_command`.
-    [GH-3767]
-  * builder/parallels: Copy directories recursively with `floppy_dirs`. [GH-2919]
-  * builder/qemu: Added `vnc_bind_address` option [GH-3574]
-  * builder/qemu: Specify disk format when starting qemu [GH-3888]
-  * builder/qemu: Now pauses between `boot_command` entries when running with
-    `-debug` [GH-3547]
-  * builder/qemu: Add support for ctrl, shift and alt keys in `boot_command`.
-    [GH-3767]
-  * builder/qemu: Copy directories recursively with `floppy_dirs`. [GH-2919]
-  * builder/virtualbox: Now pauses between `boot_command` entries when running
-    with `-debug` [GH-3542]
-  * builder/virtualbox: Added `vrdp_bind_address` option [GH-3566]
-  * builder/virtualbox: Add support for ctrl, shift and alt keys in `boot_command`.
-    [GH-3767]
-  * builder/virtualbox: Copy directories recursively with `floppy_dirs`. [GH-2919]
-  * builder/vmware: Now paused between `boot_command` entries when running with
-    `-debug` [GH-3542]
-  * builder/vmware: Added `vnc_bind_address` option [GH-3565]
-  * builder/vmware: Adds passwords for VNC [GH-2325]
-  * builder/vmware: Handle connection to VM with more than one NIC on ESXi
-    [GH-3347]
-  * builder/vmware: Add support for ctrl, shift and alt keys in `boot_command`.
-    [GH-3767]
-  * builder/vmware: Copy directories recursively with `floppy_dirs`. [GH-2919]
-  * provisioner/ansible: Improved logging and error handling [GH-3477]
-  * provisioner/ansible: Support scp [GH-3861]
-  * provisioner/ansible-local: Support for ansible-galaxy [GH-3350] [GH-3836]
-  * provisioner/chef: Added `knife_command` option and added a correct default
-    value for Windows [GH-3622]
-  * provisioner/chef: Installs 64bit chef on Windows if available [GH-3848]
-  * provisioner/puppet: Added `execute_command` option [GH-3614]
-  * post-processor/amazon-import: Support `ami_name` for naming imported AMI.
-    [GH-3941]
-  * post-processor/compress: Added support for bgzf compression [GH-3501]
-  * post-processor/docker: Preserve tags when running docker push [GH-3631]
-  * post-processor/docker: Improved support for Docker push to Amazon ECR [GH-3856]
-  * scripts: Added `help` target to Makefile [GH-3290]
-  * builder/googlecompute: Add `-force` option to delete old image before
-      creating new one. [GH-3918]
-  * builder/virtualbox-iso: Added `keep_registed` option to skip cleaning up
-      the image. [GH-3954]
-  * builder/virtualbox: Added `post_shutdown_delay` option to wait after
-      shutting down to prevent issues removing floppy drive. [GH-3952]
-  * core: setting `PACKER_LOG=0` now disables logging. [GH-3964]
-  * vendor: Moving from Godep to govendor. See `CONTRIBUTING.md` for details.
-      [GH-3956]
-  * post-processor/vagrant: Added vsphere-esx hosts to supported machine types.
-      [GH-3967]
-  * provisioner/salt: Added `custom_state` to specify state to run instead of
-      `highstate`. [GH-3776]
+  * builder/google: Enable to select NVMe images. [GH-3338]
+  * builder/google: Signal that startup script fished via metadata. [GH-3873]
+  * builder/google: Use gcloud application default credentials. [GH-3655]
+  * builder/google: provision VM without external IP address. [GH-3774]
+  * builder/null: Can now be used with WinRM. [GH-2525]
   * builder/openstack: Added support for `ssh_password` instead of generating
       ssh keys. [GH-3976]
-  * builder/azure: Add `os_disk_size_gb`. [GH-3995]
+  * builder/parallels: Add support for ctrl, shift and alt keys in
+      `boot_command`.  [GH-3767]
+  * builder/parallels: Copy directories recursively with `floppy_dirs`.
+      [GH-2919]
+  * builder/parallels: Now pauses between `boot_command` entries when running
+      with `-debug` [GH-3547]
+  * builder/parallels: Support future versions of Parallels by using the latest
+      driver. [GH-3673]
+  * builder/qemu: Add support for ctrl, shift and alt keys in `boot_command`.
+      [GH-3767]
+  * builder/qemu: Added `vnc_bind_address` option. [GH-3574]
+  * builder/qemu: Copy directories recursively with `floppy_dirs`. [GH-2919]
+  * builder/qemu: Now pauses between `boot_command` entries when running with
+      `-debug` [GH-3547]
+  * builder/qemu: Specify disk format when starting qemu. [GH-3888]
   * builder/virtualbox-iso: Added `hard_drive_nonrotational` and
       `hard_drive_discard` options to enable trim/discard. [GH-4013]
+  * builder/virtualbox-iso: Added `keep_registered` option to skip cleaning up
+      the image. [GH-3954]
+  * builder/virtualbox: Add support for ctrl, shift and alt keys in
+      `boot_command`.  [GH-3767]
+  * builder/virtualbox: Added `post_shutdown_delay` option to wait after
+      shutting down to prevent issues removing floppy drive. [GH-3952]
+  * builder/virtualbox: Added `vrdp_bind_address` option. [GH-3566]
+  * builder/virtualbox: Copy directories recursively with `floppy_dirs`.
+      [GH-2919]
+  * builder/virtualbox: Now pauses between `boot_command` entries when running
+      with `-debug` [GH-3542]
+  * builder/vmware-vmx: Added `tools_upload_flavor` and `tools_upload_path` to
+      docs.
+  * builder/vmware: Add support for ctrl, shift and alt keys in `boot_command`.
+      [GH-3767]
+  * builder/vmware: Added `vnc_bind_address` option. [GH-3565]
+  * builder/vmware: Adds passwords for VNC. [GH-2325]
+  * builder/vmware: Copy directories recursively with `floppy_dirs`. [GH-2919]
+  * builder/vmware: Handle connection to VM with more than one NIC on ESXi
+      [GH-3347]
+  * builder/vmware: Now paused between `boot_command` entries when running with
+      `-debug` [GH-3542]
+  * core: Supress plugin discovery from plugins. [GH-4002]
+  * core: Test floppy disk files actually exist. [GH-3756]
+  * core: setting `PACKER_LOG=0` now disables logging. [GH-3964]
+  * post-processor/amazon-import: Support `ami_name` for naming imported AMI.
+      [GH-3941]
+  * post-processor/compress: Added support for bgzf compression. [GH-3501]
+  * post-processor/docker: Improved support for Docker push to Amazon ECR.
+      [GH-3856]
+  * post-processor/docker: Preserve tags when running docker push. [GH-3631]
+  * post-processor/vagrant: Added vsphere-esx hosts to supported machine types.
+      [GH-3967]
+  * provisioner/ansible-local: Support for ansible-galaxy. [GH-3350] [GH-3836]
+  * provisioner/ansible: Improved logging and error handling. [GH-3477]
+  * provisioner/ansible: Support scp. [GH-3861]
+  * provisioner/chef: Added `knife_command` option and added a correct default
+      value for Windows. [GH-3622]
+  * provisioner/chef: Installs 64bit chef on Windows if available. [GH-3848]
+  * provisioner/file: Now makes destination directory. [GH-3692]
+  * provisioner/puppet: Added `execute_command` option. [GH-3614]
+  * provisioner/salt: Added `custom_state` to specify state to run instead of
+      `highstate`. [GH-3776]
+  * provisioner/shell: Added `expect_disconnect` flag to fail if remote
+      unexpectedly disconnects. [GH-4034]
+  * scripts: Added `help` target to Makefile. [GH-3290]
+  * vendor: Moving from Godep to govendor. See `CONTRIBUTING.md` for details.
+      [GH-3956]
   * website: code examples now use inconsolata. Improve code font rendering on
       linux.
 
 BUG FIXES:
 
-  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
   * builder/amazon: Add 0.5 cents to discovered spot price. [GH-3662]
+  * builder/amazon: Allow using `ssh_private_key_file` and `ssh_password`.
+      [GH-3953]
   * builder/amazon: Fix packer crash when waiting for SSH. [GH-3865]
   * builder/amazon: Honor ssh_private_ip flag in EC2-Classic. [GH-3752]
-  * builder/amazon: Allow using `ssh_private_key_file` and `ssh_password`.
-    [GH-3953]
   * builder/amazon: Properly clean up EBS volumes on failure. [GH-3789]
-  * builder/azure: check for empty resource group [GH-3606]
-  * builder/azure: fix token validity test [GH-3609]
-  * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
+  * builder/amazon: Use `temporary_key_pair_name` when specified. [GH-3739]
+  * builder/amazon: retry creating tags on images since the images might take
+      some time to become available. [GH-3938]
+  * builder/azure: Fix authorization setup script failing to creating service
+      principal. [GH-3812]
+  * builder/azure: check for empty resource group. [GH-3606]
+  * builder/azure: fix token validity test. [GH-3609]
   * builder/docker: Fix file provisioner dotfile matching. [GH-3800]
-  * builder/virtualbox: Respect `ssh_host` [GH-3617]
-  * builder/virtualbox: Make `ssh_host_port_max` an inclusive bound. [GH-2784]
-  * builder/vmware: Re-introduce case sensitive VMX keys [GH-2707]
-  * builder/vmware: Don't check for poweron errors on ESXi [GH-3195]
-  * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi [GH-3738]
-  * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
-    [GH-3740]
+  * builder/docker: fix docker builder with ansible provisioner. [GH-3476]
   * builder/qemu: Don't fail on communicator set to `none`. [GH-3681]
   * builder/qemu: Make `ssh_host_port_max` an inclusive bound. [GH-2784]
-  * post-processor/shell-local: Do not set execute bit on artifact file [GH-3505]
-  * post-processor/vsphere: Fix upload failures with vsphere [GH-3321]
-  * provisioner/ansible: Properly set host key checking even when a custom ENV
-    is specified [GH-3568]
-  * website: improved rendering on iPad [GH-3780]
-  * provisioner/file: Fix directory download. [GH-3899]
+  * builder/virtualbox: Make `ssh_host_port_max` an inclusive bound. [GH-2784]
+  * builder/virtualbox: Respect `ssh_host` [GH-3617]
+  * builder/vmware: Do not add remotedisplay.vnc.ip to VMX data on ESXi
+      [GH-3740]
+  * builder/vmware: Don't check for poweron errors on ESXi. [GH-3195]
+  * builder/vmware: Re-introduce case sensitive VMX keys. [GH-2707]
+  * builder/vmware: Respect `ssh_host`/`winrm_host` on ESXi. [GH-3738]
   * command/push: Allows dot (`.`) in image names. [GH-3937]
-  * builder/amazon: add retry logic when creating tags.
+  * common/iso_config: fix potential panic when iso checksum url was given but
+      not the iso url. [GH-4004]
+  * communicator/ssh: fixed possible panic when reconnecting fails. [GH-4008]
   * communicator/ssh: handle error case where server closes the connection but
       doesn't give us an error code. [GH-3966]
-  * communicator/ssh: fixed possible panic when reconnecting fails [GH-4008]
+  * post-processor/shell-local: Do not set execute bit on artifact file.
+      [GH-3505]
+  * post-processor/vsphere: Fix upload failures with vsphere. [GH-3321]
+  * provisioner/ansible: Properly set host key checking even when a custom ENV
+      is specified. [GH-3568]
+  * provisioner/file: Fix directory download. [GH-3899]
   * provisioner/powershell: fixed issue with setting environment variables.
       [GH-2785]
+  * website: improved rendering on iPad. [GH-3780]
 
 ## 0.10.2 (September 20, 2016)
 
@@ -161,21 +372,21 @@ IMPROVEMENTS:
 
   * core: Added support for `ATLAS_CAFILE` and `ATLAS_CAPATH` [GH-3494]
   * builder/azure: Improved build cancellation and cleanup of partially-
-    provisioned resources [GH-3461]
-  * builder/azure: Improved logging [GH-3461]
-  * builder/azure: Added support for US Government and China clouds [GH-3461]
-  * builder/azure: Users may now specify an image version [GH-3461]
-  * builder/azure: Added device login [GH-3461]
-  * builder/docker: Added `privileged` build option [GH-3475]
-  * builder/google: Packer now identifies its version to the service [GH-3465]
+    provisioned resources. [GH-3461]
+  * builder/azure: Improved logging. [GH-3461]
+  * builder/azure: Added support for US Government and China clouds. [GH-3461]
+  * builder/azure: Users may now specify an image version. [GH-3461]
+  * builder/azure: Added device login. [GH-3461]
+  * builder/docker: Added `privileged` build option. [GH-3475]
+  * builder/google: Packer now identifies its version to the service. [GH-3465]
   * provisioner/shell: Added `remote_folder` and `remote_file` options
     [GH-3462]
   * post-processor/compress: Added support for `bgzf` format and added
-    `format` option [GH-3501]
+    `format` option. [GH-3501]
 
 BUG FIXES:
 
-  * core: Fix hang after pressing enter key in `-debug` mode [GH-3346]
+  * core: Fix hang after pressing enter key in `-debug` mode. [GH-3346]
   * provisioner/chef: Use custom values for remote validation key path
     [GH-3468]
 
@@ -196,12 +407,12 @@ IMPROVEMENTS:
 
   * builder/google: Added support for `disk_type` [GH-2830]
   * builder/openstack: Added support for retrieving the Administrator password
-    when using WinRM if no `winrm_password` is set [GH-3209]
-  * provisioner/ansible: Added the `empty_groups` parameter [GH-3232]
-  * provisioner/ansible: Added the `user` parameter [GH-3276]
+    when using WinRM if no `winrm_password` is set. [GH-3209]
+  * provisioner/ansible: Added the `empty_groups` parameter. [GH-3232]
+  * provisioner/ansible: Added the `user` parameter. [GH-3276]
   * provisioner/ansible: Don't use deprecated ssh option with Ansible 2.0
     [GH-3291]
-  * provisioner/puppet-masterless: Add `ignore_exit_codes` parameter [GH-3349]
+  * provisioner/puppet-masterless: Add `ignore_exit_codes` parameter. [GH-3349]
 
 BUG FIXES:
 
@@ -221,25 +432,25 @@ BACKWARDS INCOMPATIBILITIES:
   * Release binaries are now provided via <https://releases.hashicorp.com>.
   * Packer 0.9.0 is now built with Go 1.6.
   * core: Plugins that implement the Communicator interface must now implement
-    a DownloadDir method [GH-2618]
+    a DownloadDir method. [GH-2618]
   * builder/amazon: Inline `user_data` for EC2 is now base64 encoded
-    automatically [GH-2539]
+    automatically. [GH-2539]
   * builder/parallels: `parallels_tools_host_path` and `guest_os_distribution`
     have been replaced by `guest_os_type`; use `packer fix` to update your
-    templates [GH-2751]
+    templates. [GH-2751]
 
 FEATURES:
 
   * **Chef on Windows**: The chef provisioner now has native support for
-    Windows using Powershell and WinRM [GH-1215]
+    Windows using Powershell and WinRM. [GH-1215]
   * **New `vmware-esxi` feature**: Packer can now export images from vCloud or
-    vSphere during the build [GH-1921]
+    vSphere during the build. [GH-1921]
   * **New Ansible Provisioner**: `ansible` provisioner supports remote
-    provisioning to keep your build image cleaner [GH-1969]
-  * **New Amazon Import post-processor**: `amazon-import` allows you to upload an OVA-based VM to Amazon EC2 [GH-2962]
+    provisioning to keep your build image cleaner. [GH-1969]
+  * **New Amazon Import post-processor**: `amazon-import` allows you to upload an OVA-based VM to Amazon EC2. [GH-2962]
   * **Shell Local post-processor**: `shell-local` allows you to run shell
     commands on the host after a build has completed for custom packaging or
-    publishing of your artifacts [GH-2706]
+    publishing of your artifacts. [GH-2706]
   * **Artifice post-processor**: Override packer artifacts during post-
     processing. This allows you to extract artifacts from a packer builder and
     use them with other post-processors like compress, docker, and Atlas.
@@ -250,69 +461,69 @@ IMPROVEMENTS:
     size and build times, and making packer easier to install. The overall
     plugin architecture has not changed and third-party plugins can still be
     loaded from disk. Please make sure your plugins are up-to-date! [GH-2854]
-  * core: Packer now indicates line numbers for template parse errors [GH-2742]
+  * core: Packer now indicates line numbers for template parse errors. [GH-2742]
   * core: Scripts are executed via `/usr/bin/env bash` instead of `/bin/bash`
     for broader compatibility. [GH-2913]
   * core: `target_path` for builder downloads can now be specified. [GH-2600]
-  * core: WinRM communicator now supports HTTPS protocol [GH-3061]
-  * core: Template syntax errors now show line, column, offset [GH-3180]
-  * core: SSH communicator now supports downloading directories [GH-2618]
+  * core: WinRM communicator now supports HTTPS protocol. [GH-3061]
+  * core: Template syntax errors now show line, column, offset. [GH-3180]
+  * core: SSH communicator now supports downloading directories. [GH-2618]
   * builder/amazon: Add support for `ebs_optimized` [GH-2806]
   * builder/amazon: You can now specify `0` for `spot_price` to switch to on
-    demand instances [GH-2845]
+    demand instances. [GH-2845]
   * builder/amazon: Added `ap-northeast-2` (Seoul) [GH-3056]
   * builder/amazon: packer will try to derive the AZ if only a subnet is
-    specified [GH-3037]
+    specified. [GH-3037]
   * builder/digitalocean: doubled instance wait timeouts to power off or
     shutdown (now 4 minutes) and to complete a snapshot (now 20 minutes)
     [GH-2939]
   * builder/google: `account_file` can now be provided as a JSON string
     [GH-2811]
-  * builder/google: added support for `preemptible` instances [GH-2982]
+  * builder/google: added support for `preemptible` instances. [GH-2982]
   * builder/google: added support for static external IPs via `address` option
     [GH-3030]
-  * builder/openstack: added retry on WaitForImage 404 [GH-3009]
+  * builder/openstack: added retry on WaitForImage 404. [GH-3009]
   * builder/openstack: Can specify `source_image_name` instead of the ID
     [GH-2577]
-  * builder/openstack: added support for SSH over IPv6 [GH-3197]
-  * builder/parallels: Improve support for Parallels 11 [GH-2662]
-  * builder/parallels: Parallels disks are now compacted by default [GH-2731]
+  * builder/openstack: added support for SSH over IPv6. [GH-3197]
+  * builder/parallels: Improve support for Parallels 11. [GH-2662]
+  * builder/parallels: Parallels disks are now compacted by default. [GH-2731]
   * builder/parallels: Packer will look for Parallels in
     `/Applications/Parallels Desktop.app` if it is not detected automatically
     [GH-2839]
-  * builder/qemu: qcow2 images are now compacted by default [GH-2748]
-  * builder/qemu: qcow2 images can now be compressed [GH-2748]
-  * builder/qemu: Now specifies `virtio-scsi` by default [GH-2422]
-  * builder/qemu: Now checks for version-specific options [GH-2376]
+  * builder/qemu: qcow2 images are now compacted by default. [GH-2748]
+  * builder/qemu: qcow2 images can now be compressed. [GH-2748]
+  * builder/qemu: Now specifies `virtio-scsi` by default. [GH-2422]
+  * builder/qemu: Now checks for version-specific options. [GH-2376]
   * builder/qemu: Can now bypass disk cache using `iso_skip_cache` [GH-3105]
   * builder/qemu: `<wait>` in `boot_command` now accepts an arbitrary duration
     like <wait1m30s> [GH-3129]
-  * builder/qemu: Expose `{{ .SSHHostPort }}` in templates [GH-2884]
-  * builder/virtualbox: Added VRDP for debugging [GH-3188]
+  * builder/qemu: Expose `{{ .SSHHostPort }}` in templates. [GH-2884]
+  * builder/virtualbox: Added VRDP for debugging. [GH-3188]
   * builder/vmware-esxi: Added private key auth for remote builds via
     `remote_private_key_file` [GH-2912]
   * post-processor/atlas: Added support for compile ID. [GH-2775]
-  * post-processor/docker-import: Can now import Artifice artifacts [GH-2718]
-  * provisioner/chef: Added `encrypted_data_bag_secret_path` option [GH-2653]
-  * provisioner/puppet: Added the `extra_arguments` parameter [GH-2635]
+  * post-processor/docker-import: Can now import Artifice artifacts. [GH-2718]
+  * provisioner/chef: Added `encrypted_data_bag_secret_path` option. [GH-2653]
+  * provisioner/puppet: Added the `extra_arguments` parameter. [GH-2635]
   * provisioner/salt: Added `no_exit_on_failure`, `log_level`, and improvements
-    to salt command invocation [GH-2660]
+    to salt command invocation. [GH-2660]
 
 BUG FIXES:
 
   * core: Random number generator is now seeded. [GH-2640]
-  * core: Packer should now have a lot less race conditions [GH-2824]
-  * builder/amazon: The `no_device` option for block device mappings is now handled correctly [GH-2398]
-  * builder/amazon: AMI name validation now matches Amazon's spec [GH-2774]
-  * builder/amazon: Use snapshot size when volume size is unspecified [GH-2480]
+  * core: Packer should now have a lot less race conditions. [GH-2824]
+  * builder/amazon: The `no_device` option for block device mappings is now handled correctly. [GH-2398]
+  * builder/amazon: AMI name validation now matches Amazon's spec. [GH-2774]
+  * builder/amazon: Use snapshot size when volume size is unspecified. [GH-2480]
   * builder/amazon: Pass AccessKey and SecretKey when uploading bundles for
-    instance-backed AMIs [GH-2596]
+    instance-backed AMIs. [GH-2596]
   * builder/parallels: Added interpolation in `prlctl_post` [GH-2828]
-  * builder/vmware: `format` option is now read correctly [GH-2892]
+  * builder/vmware: `format` option is now read correctly. [GH-2892]
   * builder/vmware-esxi: Correct endless loop in destroy validation logic
     [GH-2911]
-  * provisioner/shell: No longer leaves temp scripts behind [GH-1536]
-  * provisioner/winrm: Now waits for reboot to complete before continuing with provisioning [GH-2568]
+  * provisioner/shell: No longer leaves temp scripts behind. [GH-1536]
+  * provisioner/winrm: Now waits for reboot to complete before continuing with provisioning. [GH-2568]
   * post-processor/artifice: Fix truncation of files downloaded from Docker. [GH-2793]
 
 
@@ -325,7 +536,7 @@ IMPROVEMENTS:
   * builder/docker: Now verifies that the artifact will be used before the build
       starts, unless the `discard` option is specified. This prevent failures
       after the build completes. [GH-2626]
-  * post-processor/artifice: Now supports glob-like syntax for filenames [GH-2619]
+  * post-processor/artifice: Now supports glob-like syntax for filenames. [GH-2619]
   * post-processor/vagrant: Like the compress post-processor, vagrant now uses a
       parallel gzip algorithm to compress vagrant boxes. [GH-2590]
 
@@ -346,29 +557,29 @@ FEATURES:
 IMPROVEMENTS:
 
   * Many docs have been updated and corrected; big thanks to our contributors!
-  * builder/openstack: Add debug logging for IP addresses used for SSH [GH-2513]
-  * builder/openstack: Add option to use existing SSH keypair [GH-2512]
-  * builder/openstack: Add support for Glance metadata [GH-2434]
+  * builder/openstack: Add debug logging for IP addresses used for SSH. [GH-2513]
+  * builder/openstack: Add option to use existing SSH keypair. [GH-2512]
+  * builder/openstack: Add support for Glance metadata. [GH-2434]
   * builder/qemu and builder/vmware: Packer's VNC connection no longer asks for
-      an exclusive connection [GH-2522]
-  * provisioner/salt-masterless: Can now customize salt remote directories [GH-2519]
+      an exclusive connection. [GH-2522]
+  * provisioner/salt-masterless: Can now customize salt remote directories. [GH-2519]
 
 BUG FIXES:
 
-  * builder/amazon: Improve instance cleanup by storing id sooner [GH-2404]
-  * builder/amazon: Only fetch windows password when using WinRM communicator [GH-2538]
-  * builder/openstack: Support IPv6 SSH address [GH-2450]
-  * builder/openstack: Track new IP address discovered during RackConnect [GH-2514]
+  * builder/amazon: Improve instance cleanup by storing id sooner. [GH-2404]
+  * builder/amazon: Only fetch windows password when using WinRM communicator. [GH-2538]
+  * builder/openstack: Support IPv6 SSH address. [GH-2450]
+  * builder/openstack: Track new IP address discovered during RackConnect. [GH-2514]
   * builder/qemu: Add 100ms delay between VNC key events. [GH-2415]
-  * post-processor/atlas: atlas_url configuration option works now [GH-2478]
-  * post-processor/compress: Now supports interpolation in output config [GH-2414]
-  * provisioner/powershell: Elevated runs now receive environment variables [GH-2378]
+  * post-processor/atlas: atlas_url configuration option works now. [GH-2478]
+  * post-processor/compress: Now supports interpolation in output config. [GH-2414]
+  * provisioner/powershell: Elevated runs now receive environment variables. [GH-2378]
   * provisioner/salt-masterless: Clarify error messages when we can't create or
-      write to the temp directory [GH-2518]
-  * provisioner/salt-masterless: Copy state even if /srv/salt exists already [GH-1699]
-  * provisioner/salt-masterless: Make sure /etc/salt exists before writing to it [GH-2520]
+      write to the temp directory. [GH-2518]
+  * provisioner/salt-masterless: Copy state even if /srv/salt exists already. [GH-1699]
+  * provisioner/salt-masterless: Make sure /etc/salt exists before writing to it. [GH-2520]
   * provisioner/winrm: Connect to the correct port when using NAT with
-      VirtualBox / VMware [GH-2399]
+      VirtualBox / VMware. [GH-2399]
 
 Note: 0.8.3 was pulled and 0.8.4 was skipped.
 
@@ -376,49 +587,49 @@ Note: 0.8.3 was pulled and 0.8.4 was skipped.
 
 IMPROVEMENTS:
 
-  * builder/docker: Add option to use a Pty [GH-2425]
+  * builder/docker: Add option to use a Pty. [GH-2425]
 
 BUG FIXES:
 
   * core: Fix crash when `min_packer_version` is specified in a template. [GH-2385]
-  * builder/amazon: Fix EC2 devices being included in EBS mappings [GH-2459]
-  * builder/googlecompute: Fix default name for GCE images [GH-2400]
-  * builder/null: Fix error message with missing ssh_host [GH-2407]
-  * builder/virtualbox: Use --portcount on VirtualBox 5.x [GH-2438]
-  * provisioner/puppet: Packer now correctly handles a directory for manifest_file [GH-2463]
-  * provisioner/winrm: Fix potential crash with WinRM [GH-2416]
+  * builder/amazon: Fix EC2 devices being included in EBS mappings. [GH-2459]
+  * builder/googlecompute: Fix default name for GCE images. [GH-2400]
+  * builder/null: Fix error message with missing ssh_host. [GH-2407]
+  * builder/virtualbox: Use --portcount on VirtualBox 5.x. [GH-2438]
+  * provisioner/puppet: Packer now correctly handles a directory for manifest_file. [GH-2463]
+  * provisioner/winrm: Fix potential crash with WinRM. [GH-2416]
 
 ## 0.8.1 (July 2, 2015)
 
 IMPROVEMENTS:
 
   * builder/amazon: When debug mode is enabled, the Windows administrator
-      password for Windows instances will be shown [GH-2351]
+      password for Windows instances will be shown. [GH-2351]
 
 BUG FIXES:
 
-  * core: `min_packer_version`  field in configs work [GH-2356]
-  * core: The `build_name` and `build_type` functions work in provisioners [GH-2367]
-  * core: Handle timeout in SSH handshake [GH-2333]
-  * command/build: Fix reading configuration from stdin [GH-2366]
+  * core: `min_packer_version`  field in configs work. [GH-2356]
+  * core: The `build_name` and `build_type` functions work in provisioners. [GH-2367]
+  * core: Handle timeout in SSH handshake. [GH-2333]
+  * command/build: Fix reading configuration from stdin. [GH-2366]
   * builder/amazon: Fix issue with sharing AMIs when using `ami_users` [GH-2308]
-  * builder/amazon: Fix issue when using multiple Security Groups [GH-2381]
-  * builder/amazon: Fix for tag creation when creating new ec2 instance [GH-2317]
-  * builder/amazon: Fix issue with creating AMIs with multiple device mappings [GH-2320]
+  * builder/amazon: Fix issue when using multiple Security Groups. [GH-2381]
+  * builder/amazon: Fix for tag creation when creating new ec2 instance. [GH-2317]
+  * builder/amazon: Fix issue with creating AMIs with multiple device mappings. [GH-2320]
   * builder/amazon: Fix failing AMI snapshot tagging when copying to other
-      regions [GH-2316]
-  * builder/amazon: Fix setting AMI launch permissions [GH-2348]
-  * builder/amazon: Fix spot instance cleanup to remove the correct request [GH-2327]
+      regions. [GH-2316]
+  * builder/amazon: Fix setting AMI launch permissions. [GH-2348]
+  * builder/amazon: Fix spot instance cleanup to remove the correct request. [GH-2327]
   * builder/amazon: Fix `bundle_prefix` not interpolating `timestamp` [GH-2352]
   * builder/amazon-instance: Fix issue with creating AMIs without specifying a
-      virtualization type [GH-2330]
-  * builder/digitalocean: Fix builder using private IP instead of public IP [GH-2339]
-  * builder/google: Set default communicator settings properly [GH-2353]
+      virtualization type. [GH-2330]
+  * builder/digitalocean: Fix builder using private IP instead of public IP. [GH-2339]
+  * builder/google: Set default communicator settings properly. [GH-2353]
   * builder/vmware-iso: Setting `checksum_type` to `none` for ESX builds
-      now works [GH-2323]
+      now works. [GH-2323]
   * provisioner/chef: Use knife config file vs command-line params to
-      clean up nodes so full set of features can be used [GH-2306]
-  * post-processor/compress: Fixed crash in compress post-processor plugin [GH-2311]
+      clean up nodes so full set of features can be used. [GH-2306]
+  * post-processor/compress: Fixed crash in compress post-processor plugin. [GH-2311]
 
 ## 0.8.0 (June 23, 2015)
 
@@ -472,22 +683,22 @@ FEATURES:
 IMPROVEMENTS:
 
   * core: Interrupt handling for SIGTERM signal as well. [GH-1858]
-  * core: HTTP downloads support resuming [GH-2106]
+  * core: HTTP downloads support resuming. [GH-2106]
   * builder/*: Add `ssh_handshake_attempts` to configure the number of
-      handshake attempts done before failure [GH-2237]
+      handshake attempts done before failure. [GH-2237]
   * builder/amazon: Add `force_deregister` option for automatic AMI
-      deregistration [GH-2221]
-  * builder/amazon: Now applies tags to EBS snapshots [GH-2212]
-  * builder/amazon: Clean up orphaned volumes from Source AMIs [GH-1783]
-  * builder/amazon: Support custom keypairs [GH-1837]
+      deregistration. [GH-2221]
+  * builder/amazon: Now applies tags to EBS snapshots. [GH-2212]
+  * builder/amazon: Clean up orphaned volumes from Source AMIs. [GH-1783]
+  * builder/amazon: Support custom keypairs. [GH-1837]
   * builder/amazon-chroot: Can now resize the root volume of the resulting
-      AMI with the `root_volume_size` option [GH-2289]
+      AMI with the `root_volume_size` option. [GH-2289]
   * builder/amazon-chroot: Add `mount_options` configuration option for providing
-      options to the `mount` command [GH-2296]
+      options to the `mount` command. [GH-2296]
   * builder/digitalocean: Save SSH key to pwd if debug mode is on. [GH-1829]
-  * builder/digitalocean: User data support [GH-2113]
+  * builder/digitalocean: User data support. [GH-2113]
   * builder/googlecompute: Option to use internal IP for connections. [GH-2152]
-  * builder/parallels: Support Parallels Desktop 11 [GH-2199]
+  * builder/parallels: Support Parallels Desktop 11. [GH-2199]
   * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
       RackConnect data to appear
   * buidler/openstack: Add `ssh_interface` option for rackconnect for users that
@@ -496,61 +707,61 @@ IMPROVEMENTS:
   * builder/openstack: Add `availability_zone` [GH-2016]
   * builder/openstack: Machine will be stopped prior to imaging if the
       cluster supports the `startstop` extension. [GH-2223]
-  * builder/openstack: Support for user data [GH-2224]
-  * builder/qemu: Default accelerator to "tcg" on Windows [GH-2291]
+  * builder/openstack: Support for user data. [GH-2224]
+  * builder/qemu: Default accelerator to "tcg" on Windows. [GH-2291]
   * builder/virtualbox: Added option: `ssh_skip_nat_mapping` to skip the
       automatic port forward for SSH and to use the guest port directly. [GH-1078]
   * builder/virtualbox: Added SCSI support
-  * builder/vmware: Support for additional disks [GH-1382]
-  * builder/vmware: Can now customize the template used for adding disks [GH-2254]
-  * command/fix: After fixing, the template is validated [GH-2228]
-  * command/push: Add `-name` flag for specifying name from CLI [GH-2042]
-  * command/push: Push configuration in templates supports variables [GH-1861]
-  * post-processor/docker-save: Can be chained [GH-2179]
-  * post-processor/docker-tag: Support `force` option [GH-2055]
-  * post-processor/docker-tag: Can be chained [GH-2179]
+  * builder/vmware: Support for additional disks. [GH-1382]
+  * builder/vmware: Can now customize the template used for adding disks. [GH-2254]
+  * command/fix: After fixing, the template is validated. [GH-2228]
+  * command/push: Add `-name` flag for specifying name from CLI. [GH-2042]
+  * command/push: Push configuration in templates supports variables. [GH-1861]
+  * post-processor/docker-save: Can be chained. [GH-2179]
+  * post-processor/docker-tag: Support `force` option. [GH-2055]
+  * post-processor/docker-tag: Can be chained. [GH-2179]
   * post-processor/vsphere: Make more fields optional, support empty
       resource pools. [GH-1868]
-  * provisioner/puppet-masterless: `working_directory` option [GH-1831]
+  * provisioner/puppet-masterless: `working_directory` option. [GH-1831]
   * provisioner/puppet-masterless: `packer_build_name` and
       `packer_build_type` are default facts. [GH-1878]
-  * provisioner/puppet-server: `ignore_exit_codes` option added [GH-2280]
+  * provisioner/puppet-server: `ignore_exit_codes` option added. [GH-2280]
 
 BUG FIXES:
 
-  * core: Fix potential panic for post-processor plugin exits [GH-2098]
-  * core: `PACKER_CONFIG` may point to a non-existent file [GH-2226]
+  * core: Fix potential panic for post-processor plugin exits. [GH-2098]
+  * core: `PACKER_CONFIG` may point to a non-existent file. [GH-2226]
   * builder/amazon: Allow spaces in AMI names when using `clean_ami_name` [GH-2182]
-  * builder/amazon: Remove deprecated ec2-upload-bundle paramger [GH-1931]
-  * builder/amazon: Use IAM Profile to upload bundle if provided [GH-1985]
-  * builder/amazon: Use correct exit code after SSH authentication failed [GH-2004]
+  * builder/amazon: Remove deprecated ec2-upload-bundle paramger. [GH-1931]
+  * builder/amazon: Use IAM Profile to upload bundle if provided. [GH-1985]
+  * builder/amazon: Use correct exit code after SSH authentication failed. [GH-2004]
   * builder/amazon: Retry finding created instance for eventual
       consistency. [GH-2129]
   * builder/amazon: If no AZ is specified, use AZ chosen automatically by
       AWS for spot instance. [GH-2017]
   * builder/amazon: Private key file (only available in debug mode)
       is deleted on cleanup. [GH-1801]
-  * builder/amazon: AMI copy won't copy to the source region [GH-2123]
-  * builder/amazon: Validate AMI doesn't exist with name prior to build [GH-1774]
+  * builder/amazon: AMI copy won't copy to the source region. [GH-2123]
+  * builder/amazon: Validate AMI doesn't exist with name prior to build. [GH-1774]
   * builder/amazon: Improved retry logic around waiting for instances. [GH-1764]
   * builder/amazon: Fix issues with creating Block Devices. [GH-2195]
-  * builder/amazon/chroot: Retry waiting for disk attachments [GH-2046]
-  * builder/amazon/chroot: Only unmount path if it is mounted [GH-2054]
+  * builder/amazon/chroot: Retry waiting for disk attachments. [GH-2046]
+  * builder/amazon/chroot: Only unmount path if it is mounted. [GH-2054]
   * builder/amazon/instance: Use `-i` in sudo commands so PATH is inherited. [GH-1930]
   * builder/amazon/instance: Use `--region` flag for bundle upload command. [GH-1931]
   * builder/digitalocean: Wait for droplet to unlock before changing state,
       should lower the "pending event" errors.
   * builder/digitalocean: Ignore invalid fields from the ever-changing v2 API
-  * builder/digitalocean: Private images can be used as a source [GH-1792]
+  * builder/digitalocean: Private images can be used as a source. [GH-1792]
   * builder/docker: Fixed hang on prompt while copying script
   * builder/docker: Use `docker exec` for newer versions of Docker for
-      running scripts [GH-1993]
-  * builder/docker: Fix crash that could occur at certain timed ctrl-c [GH-1838]
-  * builder/docker: validate that `export_path` is not a directory [GH-2105]
-  * builder/google: `ssh_timeout` is respected [GH-1781]
+      running scripts. [GH-1993]
+  * builder/docker: Fix crash that could occur at certain timed ctrl-c. [GH-1838]
+  * builder/docker: validate that `export_path` is not a directory. [GH-2105]
+  * builder/google: `ssh_timeout` is respected. [GH-1781]
   * builder/openstack: `ssh_interface` can be used to specify the interface
       to retrieve the SSH IP from. [GH-2220]
-  * builder/qemu: Add `disk_discard` option [GH-2120]
+  * builder/qemu: Add `disk_discard` option. [GH-2120]
   * builder/qemu: Use proper SSH port, not hardcoded to 22. [GH-2236]
   * builder/qemu: Find unused SSH port if SSH port is taken. [GH-2032]
   * builder/virtualbox: Bind HTTP server to IPv4, which is more compatible with
@@ -566,27 +777,27 @@ BUG FIXES:
       timing issues in most cases. [GH-1663]
   * builder/vmware: Bind HTTP server to IPv4, which is more compatible with
       OS installers. [GH-1709]
-  * builder/vmware: Case-insensitive match of MAC address to find IP [GH-1989]
-  * builder/vmware: More robust IP parsing from ifconfig output [GH-1999]
-  * builder/vmware: Nested output directories for ESXi work [GH-2174]
+  * builder/vmware: Case-insensitive match of MAC address to find IP. [GH-1989]
+  * builder/vmware: More robust IP parsing from ifconfig output. [GH-1999]
+  * builder/vmware: Nested output directories for ESXi work. [GH-2174]
   * builder/vmware: Output dir is verified at runtime, not template
       validation time. [GH-2233]
   * command/fix: For the `virtualbox` to `virtualbox-iso` builder rename,
-      provisioner overrides are now also fixed [GH-2231]
-  * command/validate: don't crash for invalid builds [GH-2139]
-  * post-processor/atlas: Find common archive prefix for Windows [GH-1874]
-  * post-processor/atlas: Fix index out of range panic [GH-1959]
+      provisioner overrides are now also fixed. [GH-2231]
+  * command/validate: don't crash for invalid builds. [GH-2139]
+  * post-processor/atlas: Find common archive prefix for Windows. [GH-1874]
+  * post-processor/atlas: Fix index out of range panic. [GH-1959]
   * post-processor/vagrant-cloud: Fixed failing on response
-  * post-processor/vagrant-cloud: Don't delete version on error [GH-2014]
+  * post-processor/vagrant-cloud: Don't delete version on error. [GH-2014]
   * post-processor/vagrant-cloud: Retry failed uploads a few times
-  * provisioner/chef-client: Fix permissions issues on default dir [GH-2255]
+  * provisioner/chef-client: Fix permissions issues on default dir. [GH-2255]
   * provisioner/chef-client: Node cleanup works now. [GH-2257]
   * provisioner/puppet-masterless: Allow manifest_file to be a directory
   * provisioner/salt-masterless: Add `--retcode-passthrough` to salt-call
-  * provisioner/shell: chmod executable script to 0755, not 0777 [GH-1708]
-  * provisioner/shell: inline commands failing will fail the provisioner [GH-2069]
-  * provisioner/shell: single quotes in env vars are escaped [GH-2229]
-  * provisioner/shell: Temporary file is deleted after run [GH-2259]
+  * provisioner/shell: chmod executable script to 0755, not 0777. [GH-1708]
+  * provisioner/shell: inline commands failing will fail the provisioner. [GH-2069]
+  * provisioner/shell: single quotes in env vars are escaped. [GH-2229]
+  * provisioner/shell: Temporary file is deleted after run. [GH-2259]
   * provisioner/shell: Randomize default script name to avoid strange
       race issues from Windows. [GH-2270]
 
@@ -632,7 +843,7 @@ BUG FIXES:
 FEATURES:
 
   * builder/digitalocean: API V2 support. [GH-1463]
-  * builder/parallels: Don't depend on _prl-utils_ [GH-1499]
+  * builder/parallels: Don't depend on _prl-utils_. [GH-1499]
 
 IMPROVEMENTS:
 
@@ -660,12 +871,12 @@ BUG FIXES:
   * builder/vmware: Wait some time so that post-VMX update aren't
       overwritten. [GH-1504]
   * builder/vmware/esxi: Retry power on if it fails. [GH-1334]
-  * builder/vmware-vmx: Fix issue with order of boot command support [GH-1492]
-  * builder/amazon: Extend timeout and allow user override [GH-1533]
+  * builder/vmware-vmx: Fix issue with order of boot command support. [GH-1492]
+  * builder/amazon: Extend timeout and allow user override. [GH-1533]
   * builder/parallels: Ignore 'The fdd0 device does not exist' [GH-1501]
-  * builder/parallels: Rely on Cleanup functions to detach devices [GH-1502]
-  * builder/parallels: Create VM without hdd and then add it later [GH-1548]
-  * builder/parallels: Disconnect cdrom0 [GH-1605]
+  * builder/parallels: Rely on Cleanup functions to detach devices. [GH-1502]
+  * builder/parallels: Create VM without hdd and then add it later. [GH-1548]
+  * builder/parallels: Disconnect cdrom0. [GH-1605]
   * builder/qemu: Don't use `-redir` flag anymore, replace with
       `hostfwd` options. [GH-1561]
   * builder/qemu: Use `pc` as default machine type instead of `pc-1.0`.
@@ -777,9 +988,9 @@ BUG FIXES:
   * builder/googlecompute: Auth works with latest formats on Google Cloud
       Console. [GH-1344]
   * builder/openstack: Region is not required. [GH-1418]
-  * builder/parallels-iso: ISO not removed from VM after install [GH-1338]
-  * builder/parallels/all: Add support for Parallels Desktop 10 [GH-1438]
-  * builder/parallels/all: Added some navigation keys [GH-1442]
+  * builder/parallels-iso: ISO not removed from VM after install. [GH-1338]
+  * builder/parallels/all: Add support for Parallels Desktop 10. [GH-1438]
+  * builder/parallels/all: Added some navigation keys. [GH-1442]
   * builder/qemu: If headless, sdl display won't be used. [GH-1395]
   * builder/qemu: Use `512M` as `-m` default. [GH-1444]
   * builder/virtualbox/all: Search `VBOX_MSI_INSTALL_PATH` for path to
@@ -795,7 +1006,7 @@ BUG FIXES:
       VM. [GH-1300]
   * builder/vmware/all: `ssh_host` accepts templates. [GH-1396]
   * builder/vmware/all: Don't remount floppy in VMX post step. [GH-1239]
-  * builder/vmware/vmx: Do not re-add floppy disk files to VMX [GH-1361]
+  * builder/vmware/vmx: Do not re-add floppy disk files to VMX. [GH-1361]
   * builder/vmware-iso: Fix crash when `vnc_port_min` and max were the
       same value. [GH-1288]
   * builder/vmware-iso: Finding an available VNC port on Windows works. [GH-1372]
@@ -816,7 +1027,7 @@ FEATURES:
 IMPROVEMENTS:
 
   * builder/amazon: Support for enhanced networking on HVM images. [GH-1228]
-  * builder/amazon-ebs: Support encrypted EBS volumes [GH-1194]
+  * builder/amazon-ebs: Support encrypted EBS volumes. [GH-1194]
   * builder/ansible: Add `playbook_dir` option. [GH-1000]
   * builder/openstack: Add ability to configure networks. [GH-1261]
   * builder/openstack: Skip certificate verification. [GH-1121]
@@ -825,7 +1036,7 @@ IMPROVEMENTS:
   * builder/virtualbox/all: Attempt to use local guest additions ISO
       before downloading from internet. [GH-1123]
   * builder/virtualbox/ovf: Supports `guest_additions_mode` [GH-1035]
-  * builder/vmware/all: Increase cleanup timeout to 120 seconds [GH-1167]
+  * builder/vmware/all: Increase cleanup timeout to 120 seconds. [GH-1167]
   * builder/vmware/all: Add `vmx_data_post` for modifying VMX data
       after shutdown. [GH-1149]
   * builder/vmware/vmx: Supports tools uploading. [GH-1154]
@@ -833,12 +1044,12 @@ IMPROVEMENTS:
 BUG FIXES:
 
   * core: `isotime` is the same time during the entire build. [GH-1153]
-  * builder/amazon-common: Sort AMI strings before outputting [GH-1305]
+  * builder/amazon-common: Sort AMI strings before outputting. [GH-1305]
   * builder/amazon: User data can use templates/variables. [GH-1343]
   * builder/amazon: Can now build AMIs in GovCloud.
   * builder/null: SSH info can use templates/variables. [GH-1343]
-  * builder/openstack: Workaround for gophercloud.ServerById crashing [GH-1257]
-  * builder/openstack: Force IPv4 addresses from address pools [GH-1258]
+  * builder/openstack: Workaround for gophercloud.ServerById crashing. [GH-1257]
+  * builder/openstack: Force IPv4 addresses from address pools. [GH-1258]
   * builder/parallels: Do not delete entire CDROM device. [GH-1115]
   * builder/parallels: Errors while creating floppy disk. [GH-1225]
   * builder/parallels: Errors while removing floppy drive. [GH-1226]
@@ -847,8 +1058,8 @@ BUG FIXES:
   * builder/vmware: Remote ESXi builder now uploads floppy. [GH-1106]
   * builder/vmware: Remote ESXi builder no longer re-uploads ISO every
       time. [GH-1244]
-  * post-processor/vsphere: Accept DOMAIN\account usernames [GH-1178]
-  * provisioner/chef-*: Fix remotePaths for Windows [GH-394]
+  * post-processor/vsphere: Accept DOMAIN\account usernames. [GH-1178]
+  * provisioner/chef-*: Fix remotePaths for Windows. [GH-394]
 
 ## 0.6.0 (May 2, 2014)
 
@@ -871,8 +1082,8 @@ IMPROVEMENTS:
   * core: Templates array values can now be comma separated strings.
       Most importantly, this allows for user variables to fill
       array configurations. [GH-950]
-  * builder/amazon: Added `ssh_private_key_file` option [GH-971]
-  * builder/amazon: Added `ami_virtualization_type` option [GH-1021]
+  * builder/amazon: Added `ssh_private_key_file` option. [GH-971]
+  * builder/amazon: Added `ami_virtualization_type` option. [GH-1021]
   * builder/digitalocean: Regions, image names, and sizes can be
       names that are looked up for their valid ID. [GH-960]
   * builder/googlecompute: Configurable instance name. [GH-1065]
@@ -887,17 +1098,17 @@ IMPROVEMENTS:
   * builder/virtualbox: Support an `export_opts` option which allows
       specifying arbitrary arguments when exporting the VM. [GH-945]
   * builder/virtualbox: Added `vboxmanage_post` option to run vboxmanage
-      commands just before exporting [GH-664]
+      commands just before exporting. [GH-664]
   * builder/virtualbox: Floppy disk files list can also include globs
       and directories. [GH-1086]
   * builder/vmware: Workstation 10 support for Linux. [GH-900]
-  * builder/vmware: add cloning support on Windows [GH-824]
+  * builder/vmware: add cloning support on Windows. [GH-824]
   * builder/vmware: Floppy disk files list can also include globs
       and directories. [GH-1086]
   * command/build: Added `-parallel` flag so you can disable parallelization
     with `-no-parallel`. [GH-924]
   * post-processors/vsphere: `disk_mode` option. [GH-778]
-  * provisioner/ansible: Add `inventory_file` option [GH-1006]
+  * provisioner/ansible: Add `inventory_file` option. [GH-1006]
   * provisioner/chef-client: Add `validation_client_name` option. [GH-1056]
 
 BUG FIXES:
@@ -907,21 +1118,21 @@ BUG FIXES:
   * core: Create Cache directory only when it is needed. [GH-367]
   * builder/amazon-instance: Use S3Endpoint for ec2-upload-bundle arg,
       which works for every region. [GH-904]
-  * builder/digitalocean: updated default image_id [GH-1032]
+  * builder/digitalocean: updated default image_id. [GH-1032]
   * builder/googlecompute: Create persistent disk as boot disk via
-      API v1 [GH-1001]
-  * builder/openstack: Return proper error on invalid instance states [GH-1018]
+      API v1. [GH-1001]
+  * builder/openstack: Return proper error on invalid instance states. [GH-1018]
   * builder/virtualbox-iso: Retry unregister a few times to deal with
       VBoxManage randomness. [GH-915]
   * provisioner/ansible: Fix paths when provisioning Linux from
-      Windows [GH-963]
-  * provisioner/ansible: set cwd to staging directory [GH-1016]
+      Windows. [GH-963]
+  * provisioner/ansible: set cwd to staging directory. [GH-1016]
   * provisioners/chef-client: Don't chown directory with Ubuntu. [GH-939]
   * provisioners/chef-solo: Deeply nested JSON works properly. [GH-1076]
   * provisioners/shell: Env var values can have equal signs. [GH-1045]
   * provisioners/shell: chmod the uploaded script file to 0777. [GH-994]
   * post-processor/docker-push: Allow repositories with ports. [GH-923]
-  * post-processor/vagrant: Create parent directories for `output` path [GH-1059]
+  * post-processor/vagrant: Create parent directories for `output` path. [GH-1059]
   * post-processor/vsphere: datastore, network, and folder are no longer
       required. [GH-1091]
 
@@ -966,7 +1177,7 @@ BUG FIXES:
 
 BUG FIXES:
 
-* core: If a stream ID loops around, don't let it use stream ID 0 [GH-767]
+* core: If a stream ID loops around, don't let it use stream ID 0. [GH-767]
 * core: Fix issue where large writes to plugins would result in stream
   corruption. [GH-727]
 * builders/virtualbox-ovf: `shutdown_timeout` config works. [GH-772]
@@ -1080,7 +1291,7 @@ BUG FIXES:
 * builder/amazon/chroot: Block when obtaining file lock to allow
   parallel builds. [GH-689]
 * builder/amazon/instance: Add location flag to upload bundle command
-  so that building AMIs works out of us-east-1 [GH-679]
+  so that building AMIs works out of us-east-1. [GH-679]
 * builder/qemu: Qemu arguments are templated. [GH-688]
 * builder/vmware: Cleanup of VMX keys works properly so cd-rom won't
   get stuck with ISO. [GH-685]
@@ -1110,7 +1321,7 @@ IMPROVEMENTS:
 * builder/virtualbox: Use VBOX\_INSTALL\_PATH env var on Windows to find
   VBoxManage. [GH-628]
 * post-processor/vagrant: skips gzip compression when compression_level=0
-* provisioner/chef-solo: Encrypted data bag support [GH-625]
+* provisioner/chef-solo: Encrypted data bag support. [GH-625]
 
 BUG FIXES:
 
@@ -1138,7 +1349,7 @@ IMPROVEMENTS:
 * builder/digitalocean: Can now specify a droplet name
 * builder/virtualbox: Can now disable guest addition download entirely
   by setting "guest_additions_mode" to "disable" [GH-580]
-* builder/virtualbox,vmware: ISO urls can now be https [GH-587]
+* builder/virtualbox,vmware: ISO urls can now be https. [GH-587]
 * builder/virtualbox,vmware: Warning if shutdown command is not specified,
   since it is a common case of data loss.
 
@@ -1147,7 +1358,7 @@ BUG FIXES:
 * core: Won't panic when writing to a bad pipe. [GH-560]
 * builder/amazon/all: Properly scrub access key and secret key from logs.
   [GH-554]
-* builder/openstack: Properly scrub password from logs [GH-554]
+* builder/openstack: Properly scrub password from logs. [GH-554]
 * builder/virtualbox: No panic if SSH host port min/max is the same. [GH-594]
 * builder/vmware: checks if `ifconfig` is in `/sbin` [GH-591]
 * builder/vmware: Host IP lookup works for non-C locales. [GH-592]
@@ -1178,12 +1389,12 @@ BUG FIXES:
   before copy, fixing issues with dangling symlinks. [GH-500]
 * builder/digitalocean: don't panic if erroneous API response doesn't
   contain error message. [GH-492]
-* builder/digitalocean: scrub API keys from config debug output [GH-516]
+* builder/digitalocean: scrub API keys from config debug output. [GH-516]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
 * builder/virtualbox: sleep a bit before export to ensure the sesssion
   is unlocked. [GH-512]
-* builder/virtualbox: create SATA drives properly on VirtualBox 4.3 [GH-547]
+* builder/virtualbox: create SATA drives properly on VirtualBox 4.3. [GH-547]
 * builder/virtualbox: support user templates in SSH key path. [GH-539]
 * builder/vmware: support user templates in SSH key path. [GH-539]
 * communicator/ssh: Fix issue where a panic could arise from a nil
@@ -1378,7 +1589,7 @@ BUG FIXES:
 IMPROVEMENTS:
 
 * post-processor/vagrant: the file being compressed will be shown
-  in the UI [GH-314]
+  in the UI. [GH-314]
 
 BUG FIXES:
 
@@ -1404,7 +1615,7 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * core: TCP connection between plugin processes will keep-alive. [GH-312]
-* core: No more "unused key keep_input_artifact" for post processors [GH-310]
+* core: No more "unused key keep_input_artifact" for post processors. [GH-310]
 * post-processor/vagrant: `output_path` templates now work again.
 
 ## 0.3.2 (August 18, 2013)
@@ -1432,7 +1643,7 @@ IMPROVEMENTS:
 * builder/vmware: Do not check for VMware as part of template validation;
   only check at execution.
 * command/build: A path of "-" will read the template from stdin.
-* builder/amazon: add block device mappings [GH-90]
+* builder/amazon: add block device mappings. [GH-90]
 
 BUG FIXES:
 
@@ -1514,7 +1725,7 @@ BUG FIXES:
 
 IMPROVEMENTS:
 
-* builder/amazon/all: Added Amazon AMI tag support [GH-233]
+* builder/amazon/all: Added Amazon AMI tag support. [GH-233]
 
 BUG FIXES:
 
@@ -1559,7 +1770,7 @@ FEATURES:
 IMPROVEMENTS:
 
 * builder/amazon/all: Ctrl-C while waiting for state change works
-* builder/amazon/ebs: Can now launch instances into a VPC for added protection [GH-210]
+* builder/amazon/ebs: Can now launch instances into a VPC for added protection. [GH-210]
 * builder/virtualbox,vmware: Add backspace, delete, and F1-F12 keys to the boot
   command.
 * builder/virtualbox: massive performance improvements with big ISO files because
@@ -1676,13 +1887,13 @@ IMPROVEMENTS:
 * core: Template syntax errors now show line and character number. [GH-56]
 * amazon-ebs: Access key and secret access key default to
   environmental variables. [GH-40]
-* virtualbox: Send password for keyboard-interactive auth [GH-121]
-* vmware: Send password for keyboard-interactive auth [GH-121]
+* virtualbox: Send password for keyboard-interactive auth. [GH-121]
+* vmware: Send password for keyboard-interactive auth. [GH-121]
 
 BUG FIXES:
 
 * vmware: Wait until shut down cleans up properly to avoid corrupt
-  disk files [GH-111]
+  disk files. [GH-111]
 
 ## 0.1.3 (July 1, 2013)
 
@@ -1698,8 +1909,8 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
-* core: More plugin server fixes that avoid hangs on OS X 10.7 [GH-87]
-* vagrant: AWS boxes will keep the AMI artifact around [GH-55]
+* core: More plugin server fixes that avoid hangs on OS X 10.7. [GH-87]
+* vagrant: AWS boxes will keep the AMI artifact around. [GH-55]
 * virtualbox: More robust version parsing for uploading guest additions. [GH-69]
 * virtualbox: Output dir and VM name defaults depend on build name,
   avoiding collisions. [GH-91]
@@ -1719,7 +1930,7 @@ BUG FIXES:
 * core: Plugin servers consider a port in use if there is any
   error listening to it. This fixes I18n issues and Windows. [GH-58]
 * amazon-ebs: Sleep between checking instance state to avoid
-  RequestLimitExceeded [GH-50]
+  RequestLimitExceeded. [GH-50]
 * vagrant: Rename VirtualBox ovf to "box.ovf" [GH-64]
 * vagrant: VMware boxes have the correct provider type.
 * vmware: Properly populate files in artifact so that the Vagrant
@@ -1731,13 +1942,13 @@ BUG FIXES:
 
 * core: plugins listen explicitly on 127.0.0.1, fixing odd hangs. [GH-37]
 * core: fix race condition on verifying checksum of large ISOs which
-  could cause panics [GH-52]
+  could cause panics. [GH-52]
 * virtualbox: `boot_wait` defaults to "10s" rather than 0. [GH-44]
 * virtualbox: if `http_port_min` and max are the same, it will no longer
-  panic [GH-53]
+  panic. [GH-53]
 * vmware: `boot_wait` defaults to "10s" rather than 0. [GH-44]
 * vmware: if `http_port_min` and max are the same, it will no longer
-  panic [GH-53]
+  panic. [GH-53]
 
 ## 0.1.0 (June 28, 2013)
 

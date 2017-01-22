@@ -31,8 +31,8 @@ to files, URLS for ISOs and checksums.
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
-      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+      "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "shutdown_command": "shutdown -P now",
@@ -146,10 +146,17 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
+    values include any of "ide", "scsi", "virtio" or "virtio-scsi"^* . Note also
     that any boot commands or kickstart type scripts must have proper
     adjustments for resulting device names. The Qemu builder uses "virtio" by
     default.
+
+    ^* Please be aware that use of the "scsi" disk interface has been disabled
+    by Red Hat due to a bug described
+    [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220).
+    If you are running Qemu on RHEL or a RHEL variant such as CentOS, you
+    *must* choose one of the other listed interfaces. Using the "scsi"
+    interface under these circumstances will cause the build to fail.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
@@ -167,7 +174,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
+    your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
@@ -196,6 +203,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
+
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
 
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
@@ -235,6 +245,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     strings makes up a command line switch that overrides matching default
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
+
+-   `use_default_display` (boolean) - If true, do not pass a `-display` option
+    to qemu, allowing it to choose the default. This may be needed when running
+    under OS X.
 
 \~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
@@ -343,9 +357,15 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard. There are a set of
-special keys available. If these are in your boot command, they will be replaced
-by the proper key:
+machine, simulating a human actually typing the keyboard.
+
+-> Keystrokes are typed as separate key up/down events over VNC with a
+   default 100ms delay. The delay alleviates issues with latency and CPU
+   contention. For local builds you can tune this delay by specifying
+   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+
+There are a set of special keys available. If these are in your boot
+command, they will be replaced by the proper key:
 
 -   `<bs>` - Backspace
 
@@ -377,7 +397,7 @@ by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
@@ -415,3 +435,11 @@ CentOS 6.4 installer:
   " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
+
+### Troubleshooting
+
+Some users have experienced errors complaining about invalid keymaps. This
+seems to be related to having a `common` directory or file in the directory
+they've run Packer in, like the packer source directory. This appears to be an
+upstream bug with qemu, and the best solution for now is to remove the
+file/directory or run in another directory.

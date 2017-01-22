@@ -55,6 +55,9 @@ type Config struct {
 	// Set the logging level for the salt-call run
 	LogLevel string `mapstructure:"log_level"`
 
+	// Arguments to pass to salt-call
+	SaltCallArgs string `mapstructure:"salt_call_args"`
+
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
@@ -143,6 +146,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		cmd_args.WriteString(p.config.LogLevel)
 	}
 
+	if p.config.SaltCallArgs != "" {
+		cmd_args.WriteString(" ")
+		cmd_args.WriteString(p.config.SaltCallArgs)
+	}
+
 	p.config.CmdArgs = cmd_args.String()
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -159,7 +167,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Salt...")
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
-			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh"),
+			// Fallback on wget if curl failed for any reason (such as not being installed)
+			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com"),
 		}
 		ui.Message(fmt.Sprintf("Downloading saltstack bootstrap to /tmp/install_salt.sh"))
 		if err = cmd.StartWithUi(comm, ui); err != nil {

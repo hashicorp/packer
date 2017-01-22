@@ -1,7 +1,18 @@
 # Packer
 
-[![Build Status](https://travis-ci.org/mitchellh/packer.svg?branch=master)](https://travis-ci.org/mitchellh/packer)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true)](https://ci.appveyor.com/project/hashicorp/packer)
+[![Build Status][travis-badge]][travis]
+[![Windows Build Status][appveyor-badge]][appveyor]
+[![GoDoc][godoc-badge]][godoc]
+[![GoReportCard][report-badge]][report]
+
+[travis-badge]: https://travis-ci.org/mitchellh/packer.svg?branch=master
+[travis]: https://travis-ci.org/mitchellh/packer
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true
+[appveyor]: https://ci.appveyor.com/project/hashicorp/packer
+[godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
+[godoc]: https://godoc.org/github.com/mitchellh/packer
+[report-badge]: https://goreportcard.com/badge/github.com/mitchellh/packer
+[report]: https://goreportcard.com/report/github.com/mitchellh/packer
 
 * Website: http://www.packer.io
 * IRC: `#packer-tool` on Freenode
@@ -31,6 +42,10 @@ The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
+Download and install packages and dependencies
+```
+go get github.com/mitchellh/packer
+```
 
 **Note:** There is a great
 [introduction and getting started guide](http://www.packer.io/intro)
@@ -39,7 +54,7 @@ will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
 First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
-for your operating system or [compile Packer yourself](#developing-packer).
+for your operating system or [compile Packer yourself](CONTRIBUTING.md#setting-up-go-to-work-on-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our

@@ -79,17 +79,20 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `floppy_files` (array of strings) - A list of files to put onto a floppy
-    disk that is attached when the VM is booted for the first time. This is most
-    useful for unattended Windows installs, which look for an `Autounattend.xml`
-    file on removable media. By default no floppy will be attached. The files
-    listed in this configuration will all be put into the root directory of the
-    floppy disk; sub-directories are not supported.
+-   `floppy_files` (array of strings) - A list of files to place onto a floppy
+    disk that is attached when the VM is booted. This is most useful for
+    unattended Windows installs, which look for an `Autounattend.xml` file on
+    removable media. By default, no floppy will be attached. All files listed in
+    this setting get placed into the root directory of the floppy and the floppy
+    is attached as the first floppy device. Currently, no support exists for
+    creating sub-directories on the floppy. Wildcard characters (\*, ?,
+    and \[\]) are allowed. Directory names are also allowed, which will add all
+    the files found in the directory to the floppy.
 
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
+    your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `output_directory` (string) - This is the path to the directory where the

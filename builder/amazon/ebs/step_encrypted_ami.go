@@ -2,6 +2,7 @@ package ebs
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -18,9 +19,13 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	config := state.Get("config").(Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+	kmsKeyId := config.AMIConfig.AMIKmsKeyId
 
 	// Encrypt boot not set, so skip step
 	if !config.AMIConfig.AMIEncryptBootVolume {
+		if kmsKeyId != "" {
+			log.Printf(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
+		}
 		return multistep.ActionContinue
 	}
 
@@ -36,11 +41,16 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 
 	ui.Say(fmt.Sprintf("Copying AMI: %s(%s)", region, id))
 
+	if kmsKeyId != "" {
+		ui.Say(fmt.Sprintf("Encypting with KMS Key ID: %s", kmsKeyId))
+	}
+
 	copyOpts := &ec2.CopyImageInput{
 		Name:          &config.AMIName, // Try to overwrite existing AMI
 		SourceImageId: aws.String(id),
 		SourceRegion:  aws.String(region),
 		Encrypted:     aws.Bool(true),
+		KmsKeyId:      aws.String(kmsKeyId),
 	}
 
 	copyResp, err := ec2conn.CopyImage(copyOpts)
@@ -67,6 +77,22 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 
+	// Get the encrypted AMI image, we need the new snapshot id's
+	encImagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(*copyResp.ImageId)}})
+	if err != nil {
+		err := fmt.Errorf("Error searching for AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	encImage := encImagesResp.Images[0]
+	var encSnapshots []string
+	for _, blockDevice := range encImage.BlockDeviceMappings {
+		if blockDevice.Ebs != nil && blockDevice.Ebs.SnapshotId != nil {
+			encSnapshots = append(encSnapshots, *blockDevice.Ebs.SnapshotId)
+		}
+	}
+
 	// Get the unencrypted AMI image
 	unencImagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(id)}})
 	if err != nil {
@@ -78,7 +104,7 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	unencImage := unencImagesResp.Images[0]
 
 	// Remove unencrypted AMI
-	ui.Say("Deregistering unecrypted AMI")
+	ui.Say("Deregistering unencrypted AMI")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: aws.String(id)}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
@@ -87,25 +113,26 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 
 	// Remove associated unencrypted snapshot(s)
 	ui.Say("Deleting unencrypted snapshots")
+	snapshots := state.Get("snapshots").(map[string][]string)
 
 	for _, blockDevice := range unencImage.BlockDeviceMappings {
-		if blockDevice.Ebs != nil {
-			if blockDevice.Ebs.SnapshotId != nil {
-				ui.Message(fmt.Sprintf("Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
-				deleteSnapOpts := &ec2.DeleteSnapshotInput{
-					SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
-				}
-				if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
-					ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
-					return multistep.ActionHalt
-				}
+		if blockDevice.Ebs != nil && blockDevice.Ebs.SnapshotId != nil {
+			ui.Message(fmt.Sprintf("Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
+			deleteSnapOpts := &ec2.DeleteSnapshotInput{
+				SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
+			}
+			if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
+				ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
+				return multistep.ActionHalt
 			}
 		}
 	}
 
 	// Replace original AMI ID with Encrypted ID in state
 	amis[region] = *copyResp.ImageId
+	snapshots[region] = encSnapshots
 	state.Put("amis", amis)
+	state.Put("snapshots", snapshots)
 
 	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{copyResp.ImageId}})
 	if err != nil {

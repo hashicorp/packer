@@ -48,6 +48,7 @@ type Config struct {
 	BootCommand         []string `mapstructure:"boot_command"`
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
+	SkipExport          bool     `mapstructure:"skip_export"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 
@@ -222,7 +223,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
-			Extension:    "iso",
+			Extension:    b.config.TargetExtension,
 			ResultKey:    "iso_path",
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
@@ -301,7 +302,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RemoteType: b.config.RemoteType,
 		},
 		&StepExport{
-			Format: b.config.Format,
+			Format:     b.config.Format,
+			SkipExport: b.config.SkipExport,
 		},
 	}
 

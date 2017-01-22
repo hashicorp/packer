@@ -37,14 +37,14 @@ Exactly *one* of the following is required:
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
 
--   `script` (string) - The path to a script to upload and execute in
-    the machine. This path can be absolute or relative. If it is relative, it is
-    relative to the working directory when Packer is executed.
+-   `script` (string) - The path to a script to execute. This path can be
+    absolute or relative. If it is relative, it is relative to the working
+    directory when Packer is executed.
 
 -   `scripts` (array of strings) - An array of scripts to execute. The scripts
-    will be uploaded and executed in the order specified. Each script is
-    executed in isolation, so state such as variables from one script won't
-    carry on to the next.
+    will be executed in the order specified. Each script is executed in
+    isolation, so state such as variables from one script won't carry on to the
+    next.
 
 Optional parameters:
 
@@ -54,11 +54,10 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x {{.Script}}; {{.Vars}} {{.Script}} {{.Artifact}}`.
+    default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
     The value of this is treated as [configuration template](/docs/templates/configuration-templates.html).
-    There are three available variables: `Script`, which is the path to the script
-    to run, `Vars`, which is the list of `environment_vars`, if configured and
-    `Artifact`, which is path to artifact file.
+    There are two available variables: `Script`, which is the path to the script
+    to run, `Vars`, which is the list of `environment_vars`, if configured.
 
 -   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
@@ -90,67 +89,61 @@ commonly useful environmental variables:
 
 ## Safely Writing A Script
 
-Whether you use the `inline` option, or pass it a direct `script` or `scripts`, it is important to understand a few things about how the shell-local post-processor works to run it safely and easily. This understanding will save you much time in the process.
+Whether you use the `inline` option, or pass it a direct `script` or `scripts`,
+it is important to understand a few things about how the shell-local
+post-processor works to run it safely and easily. This understanding will save
+you much time in the process.
 
-### Once Per Artifact
+### Once Per Builder
 
-The `shell-local` script(s) you pass are run once per artifact output file. That means that if your builder results in 1 output file, your script will be run once. If it results in 3 output files, it will run 3 times, once for each file.
+The `shell-local` script(s) you pass are run once per builder.  That means that
+if you have an `amazon-ebs` builder and a `docker` builder, your script will be
+run twice. If you have 3 builders, it will run 3 times, once for each builder.
 
-For example, the virtualbox builders, when configured to provide an `ovf` output format (the default), will provide **two** output files:
+### Interacting with Build Artifacts
 
-* The actual disk itself, in `.vmdk` format
-* The appliance description file, in `.ovf` format
+In order to interact with build artifacts, you may want to use the [manifest
+post-processor](/docs/post-processors/manifest.html). This will write the list
+of files produced by a `builder` to a json file after each `builder` is run.
 
-Each time each shell-local script is run, it is passed the path to the artifact file, relative to the directory in which packer is run, as the first argument to the script. 
+For example, if you wanted to package a file from the file builder into
+a tarball, you might wright this:
 
-Let's take a simple example. You want to run a post-processor that records the name of every artifact created to `/tmp/artifacts`. (Why? I don't know. For fun.)
-
-Your post-processor should look like this:
-
-
-``` {.javascript}
+```json
 {
-  "type": "shell-local",
-  "inline": [
-    "echo \$1 >> /tmp/artifacts"
-  ]
+    "builders": [
+        {
+            "content": "Lorem ipsum dolor sit amet",
+            "target": "dummy_artifact",
+            "type": "file"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "output": "manifest.json",
+                "strip_path": true,
+                "type": "manifest"
+            },
+            {
+                "inline": [
+                    "jq ".builds[].files[].name" manifest.json | xargs tar cfz artifacts.tgz"
+                ],
+                "type": "shell-local"
+            }
+        ]
+    ]
 }
 ```
 
-The result of the above will be an output line for each artifact.
-
-The net effect of this is that if you want to post-process only some files, **you must test** `$1` to see if it is the file you want.
-
-Here is an example script that converts the `.vmdk` artifact of a virtualbox build to a raw img, suitable for converting to a USB.
-
-
-``` {.bash}
-    #!/bin/bash -e
-
-    [[ "$1" == *.vmdk ]] && vboxmanage clonemedium disk $1 --format raw output_file.img
-
-```
+This uses the [jq](https://stedolan.github.io/jq/) tool to extract all of the
+file names from the manifest file and passes them to tar.
 
 ### Always Exit Intentionally
 
-If any post-processor fails, the `packer build` stops and all interim artifacts are cleaned up.
+If any post-processor fails, the `packer build` stops and all interim artifacts
+are cleaned up.
 
-For a shell script, that means the script **must** exit with a zero code. You *must* be extra careful to `exit 0` when necessary. Using our above conversion script example, if the current artifact is *not* a `.vmdk` file, the test `[[ "$1" == *.vmdk ]]` will fail. Since that is the last command in the script, the script will exit with a non-zero code, the post-processor will fail, the build will fail, and you will have to start over.
-
-Of course, we didn't mean that! We just meant:
-
-* If a `.vmdk` file, convert, and that is OK
-* If not a `.vmdk` file, ignore, and that is OK
-
-To make it work correctly, use the following instead:
-
-``` {.bash}
-    #!/bin/bash -e
-
-    [[ "$1" == *.vmdk ]] && vboxmanage clonemedium disk $1 --format raw output_file.img
-
-    # always exit 0 unless a command actually fails
-    exit 0
-
-````
+For a shell script, that means the script **must** exit with a zero code. You
+*must* be extra careful to `exit 0` when necessary.
 

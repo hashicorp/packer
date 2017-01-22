@@ -107,7 +107,7 @@ func (t *Template) Validate() error {
 		}
 
 		// Validate overrides
-		for name, _ := range p.Override {
+		for name := range p.Override {
 			if _, ok := t.Builders[name]; !ok {
 				err = multierror.Append(err, fmt.Errorf(
 					"provisioner %d: override '%s' doesn't exist",

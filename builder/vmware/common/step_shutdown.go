@@ -57,20 +57,6 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Wait for the command to run
-		cmd.Wait()
-
-		// If the command failed to run, notify the user in some way.
-		if cmd.ExitStatus != 0 {
-			state.Put("error", fmt.Errorf(
-				"Shutdown command has non-zero exit status.\n\nStdout: %s\n\nStderr: %s",
-				stdout.String(), stderr.String()))
-			return multistep.ActionHalt
-		}
-
-		log.Printf("Shutdown stdout: %s", stdout.String())
-		log.Printf("Shutdown stderr: %s", stderr.String())
-
 		// Wait for the machine to actually shut down
 		log.Printf("Waiting max %s for shutdown to complete", s.Timeout)
 		shutdownTimer := time.After(s.Timeout)
@@ -82,6 +68,8 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 			select {
 			case <-shutdownTimer:
+				log.Printf("Shutdown stdout: %s", stdout.String())
+				log.Printf("Shutdown stderr: %s", stderr.String())
 				err := errors.New("Timeout while waiting for machine to shut down.")
 				state.Put("error", err)
 				ui.Error(err.Error())
