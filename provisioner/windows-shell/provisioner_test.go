@@ -207,6 +207,7 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
+
 	// Test when the env variable value contains an equals sign
 	config["environment_vars"] = []string{"good=withequals=true"}
 	p = new(Provisioner)
@@ -237,7 +238,6 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	}
 
 	expected := []string{
-
 		"keyone=valueone",
 		"keytwo=value\ntwo",
 		"keythree='valuethree'",
@@ -250,9 +250,8 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 	p.Prepare(config)
 
 	for i, expectedValue := range expected {
-
 		if p.config.Vars[i] != expectedValue {
-			t.Fatalf("%s should be equal to %s", p.config.Vars[0], expectedValue)
+			t.Fatalf("%s should be equal to %s", p.config.Vars[i], expectedValue)
 		}
 	}
 
@@ -425,7 +424,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
 	}
 
-	// Environment variable with value containing equals. No Packer web server
+	// Environment variable with value containing equals
 	p.config.Vars = []string{"FOO=bar=baz"}
 	flattenedEnvVars, err = p.createFlattenedEnvVars()
 	if err != nil {
@@ -436,7 +435,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
 	}
 
-	// Environment variable with value starting with equals. No Packer web server
+	// Environment variable with value starting with equals
 	p.config.Vars = []string{"FOO==baz"}
 	flattenedEnvVars, err = p.createFlattenedEnvVars()
 	if err != nil {
