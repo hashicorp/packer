@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -38,22 +39,6 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 	// Adds tags to AMIs and snapshots
 	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
-
-		// Convert tags to ec2.Tag format
-		amiTags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, sourceAMI, s.Ctx, ui)
-		if err != nil {
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		ui.Say(fmt.Sprintf("Snapshot tags:"))
-		snapshotTags, err := ConvertToEC2Tags(s.SnapshotTags, *ec2conn.Config.Region, sourceAMI, s.Ctx, ui)
-		if err != nil {
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
 
 		// Declare list of resources to tag
 		awsConfig := aws.Config{
@@ -103,7 +88,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 		// Convert tags to ec2.Tag format
 		ui.Say("Creating AMI tags")
-		amiTags, err = ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, sourceAMI, s.Ctx, ui)
+		amiTags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, sourceAMI, s.Ctx)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -111,7 +96,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		ui.Say("Creating snapshot tags")
-		snapshotTags, err = ConvertToEC2Tags(s.SnapshotTags, *ec2conn.Config.Region, sourceAMI, s.Ctx, ui)
+		snapshotTags, err := ConvertToEC2Tags(s.SnapshotTags, *ec2conn.Config.Region, sourceAMI, s.Ctx)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -165,8 +150,8 @@ func (s *StepCreateTags) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }
 
-func ConvertToEC2Tags(tags map[string]string, region, sourceAmiId string, ctx interpolate.Context, ui packer.Ui) ([]*ec2.Tag, error) {
-	var amiTags []*ec2.Tag
+func ConvertToEC2Tags(tags map[string]string, region, sourceAmiId string, ctx interpolate.Context) ([]*ec2.Tag, error) {
+	var ec2Tags []*ec2.Tag
 	for key, value := range tags {
 
 		ctx.Data = &BuildInfoTemplate{
@@ -175,15 +160,15 @@ func ConvertToEC2Tags(tags map[string]string, region, sourceAmiId string, ctx in
 		}
 		interpolatedValue, err := interpolate.Render(value, &ctx)
 		if err != nil {
-			return amiTags, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
+			return ec2Tags, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
 		}
 
-		ui.Message(fmt.Sprintf("Adding tag: \"%s\": \"%s\"", key, interpolatedValue))
-		amiTags = append(amiTags, &ec2.Tag{
+		log.Printf("Adding tag: \"%s\": \"%s\"", key, interpolatedValue)
+		ec2Tags = append(ec2Tags, &ec2.Tag{
 			Key:   aws.String(key),
 			Value: aws.String(interpolatedValue),
 		})
 	}
 
-	return amiTags, nil
+	return ec2Tags, nil
 }
