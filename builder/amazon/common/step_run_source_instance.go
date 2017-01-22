@@ -278,22 +278,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags := make([]*ec2.Tag, 1, len(s.Tags))
-	for k, v := range s.Tags {
-		s.Ctx.Data = &BuildInfoTemplate{
-			SourceAMI:   s.SourceAMI,
-			BuildRegion: *ec2conn.Config.Region,
-		}
-		interpolatedValue, err := interpolate.Render(v, &s.Ctx)
-		if err != nil {
-			err = fmt.Errorf("Error processing tag: %s:%s - %s", k, v, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		ec2Tags = append(ec2Tags, &ec2.Tag{Key: aws.String(k), Value: aws.String(interpolatedValue)})
-	}
-	ec2Tags, err = ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx, ui)
+	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
