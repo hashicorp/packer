@@ -310,37 +310,23 @@ func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
 		"keyfive='value=five'",
 		"keysix='=six'",
 	}
+
+	expected := []string{
+		"keyone=valueone",
+		"keytwo=value\ntwo",
+		"keythree='valuethree'",
+		"keyfour='value\nfour'",
+		"keyfive='value=five'",
+		"keysix='=six'",
+	}
+
 	p := new(Provisioner)
 	p.Prepare(config)
 
-	expectedValue := "keyone=valueone"
-	if p.config.Vars[0] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[0], expectedValue)
-	}
-
-	expectedValue = "keytwo=value\ntwo"
-	if p.config.Vars[1] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[1], expectedValue)
-	}
-
-	expectedValue = "keythree='valuethree'"
-	if p.config.Vars[2] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[2], expectedValue)
-	}
-
-	expectedValue = "keyfour='value\nfour'"
-	if p.config.Vars[3] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[3], expectedValue)
-	}
-
-	expectedValue = "keyfive='value=five'"
-	if p.config.Vars[4] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[4], expectedValue)
-	}
-
-	expectedValue = "keysix='=six'"
-	if p.config.Vars[5] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[5], expectedValue)
+	for i, expectedValue := range expected {
+		if p.config.Vars[i] != expectedValue {
+			t.Fatalf("%s should be equal to %s", p.config.Vars[i], expectedValue)
+		}
 	}
 }
 
