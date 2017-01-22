@@ -36,24 +36,8 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	tags := make([]*ec2.Tag, len(s.VolumeRunTags))
-	for key, value := range s.VolumeRunTags {
-		s.Ctx.Data = &common.BuildInfoTemplate{
-			SourceAMI:   *sourceAMI.ImageId,
-			BuildRegion: *ec2conn.Config.Region,
-		}
-		interpolatedValue, err := interpolate.Render(value, &s.Ctx)
-		if err != nil {
-			err = fmt.Errorf("Error processing volume tag: %s:%s - %s", key, value, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		tags = append(tags, &ec2.Tag{Key: &key, Value: &interpolatedValue})
-	}
-
 	ui.Say("Adding tags to source EBS Volumes")
-	tags, err := common.ConvertToEC2Tags(s.VolumeRunTags, *ec2conn.Config.Region, *sourceAMI.ImageId, s.Ctx, ui)
+	tags, err := common.ConvertToEC2Tags(s.VolumeRunTags, *ec2conn.Config.Region, *sourceAMI.ImageId, s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 		state.Put("error", err)
