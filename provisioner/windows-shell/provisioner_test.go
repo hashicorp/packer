@@ -378,72 +378,37 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 }
 
 func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
+	var flattenedEnvVars string
 	config := testConfig()
 
-	p := new(Provisioner)
-	err := p.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error preparing config: %s", err)
+	userEnvVarTests := [][]string{
+		{},                     // No user env var
+		{"FOO=bar"},            // Single user env var
+		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
+		{"FOO=bar=baz"},        // User env var with value containing equals
+		{"FOO==bar"},           // User env var with value starting with equals
 	}
+	expected := []string{
+		`set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `,
+		`set "FOO=bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `,
+		`set "BAZ=qux" && set "FOO=bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `,
+		`set "FOO=bar=baz" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `,
+		`set "FOO==bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `,
+	}
+
+	p := new(Provisioner)
+	p.Prepare(config)
 
 	// Defaults provided by Packer
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 
-	// no user env var
-	flattenedEnvVars, err := p.createFlattenedEnvVars()
-	if err != nil {
-		t.Fatalf("should not have error creating flattened env vars: %s", err)
-	}
-	expectedEnvVars := `set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
-	if flattenedEnvVars != expectedEnvVars {
-		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
-	}
-
-	// single user env var
-	p.config.Vars = []string{"FOO=bar"}
-
-	flattenedEnvVars, err = p.createFlattenedEnvVars()
-	if err != nil {
-		t.Fatalf("should not have error creating flattened env vars: %s", err)
-	}
-	expectedEnvVars = `set "FOO=bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
-	if flattenedEnvVars != expectedEnvVars {
-		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
-	}
-
-	// multiple user env vars
-	p.config.Vars = []string{"FOO=bar", "BAZ=qux"}
-
-	flattenedEnvVars, err = p.createFlattenedEnvVars()
-	if err != nil {
-		t.Fatalf("should not have error creating flattened env vars: %s", err)
-	}
-	expectedEnvVars = `set "BAZ=qux" && set "FOO=bar" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
-	if flattenedEnvVars != expectedEnvVars {
-		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
-	}
-
-	// Environment variable with value containing equals
-	p.config.Vars = []string{"FOO=bar=baz"}
-	flattenedEnvVars, err = p.createFlattenedEnvVars()
-	if err != nil {
-		t.Fatalf("should not have error creating flattened env vars: %s", err)
-	}
-	expectedEnvVars = `set "FOO=bar=baz" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
-	if flattenedEnvVars != expectedEnvVars {
-		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
-	}
-
-	// Environment variable with value starting with equals
-	p.config.Vars = []string{"FOO==baz"}
-	flattenedEnvVars, err = p.createFlattenedEnvVars()
-	if err != nil {
-		t.Fatalf("should not have error creating flattened env vars: %s", err)
-	}
-	expectedEnvVars = `set "FOO==baz" && set "PACKER_BUILDER_TYPE=iso" && set "PACKER_BUILD_NAME=vmware" && `
-	if flattenedEnvVars != expectedEnvVars {
-		t.Fatalf("expected flattened env vars to be: %s, got: %s", expectedEnvVars, flattenedEnvVars)
+	for i, expectedValue := range expected {
+		p.config.Vars = userEnvVarTests[i]
+		flattenedEnvVars = p.createFlattenedEnvVars()
+		if flattenedEnvVars != expectedValue {
+			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
 	}
 }
 
