@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+  * builder/docker: create export dir if needed [GH-4439]
+
 ## 0.12.2 (January 20, 2017)
 
 FEATURES:
