@@ -247,7 +247,6 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
 }
 
 func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
