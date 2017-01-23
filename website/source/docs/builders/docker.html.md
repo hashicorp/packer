@@ -56,6 +56,58 @@ more easily tagged, pushed, etc.
 }
 ```
 
+## Basic Example: Changes to Metadata
+
+Below is an example using the changes argument of the builder. This feature allows the source images metadata to be changed when committed back into the Docker environment. It is derived from the `docker commit --change` command line [option to Docker](https://docs.docker.com/engine/reference/commandline/commit/).
+
+Example uses of all of the options, assuming one is building an NGINX image from ubuntu as an simple example:
+
+```
+{
+	"type": "docker",
+	"image": "ubuntu",
+	"commit": true,
+	"changes": [
+		"USER www-data",
+		"WORKDIR /var/www",
+		"ENV HOSTNAME www.example.com",
+		"VOLUME /test1 /test2",
+		"EXPOSE 80 443",
+		"CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+		"MAINTAINER Captain Kirk",
+		"ENTRYPOINT /var/www/start.sh"
+	]
+}
+```
+
+Allowed metadata fields that can be changed are:
+
+- CMD
+	- String, supports both array (escaped) and string form
+	- EX: `”CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
+	- EX: `"CMD nginx -g daemon off;”`
+- ENTRYPOINT
+	- String 
+	- EX: `“ENTRYPOINT /var/www/start.sh”`
+- ENV
+	- String, note there is no equal sign: 
+	- EX: `“ENV HOSTNAME www.example.com”` not `“ENV HOSTNAME=www.example.com”`
+- EXPOSE
+	- String, space separated ports 
+	- EX: `“EXPOSE 80 443”`
+- MAINTAINER
+	- String 
+	- EX: `“MAINTAINER NAME”`
+- USER
+	- String 
+	- EX: `“USER USERNAME”`
+- VOLUME
+	- String 
+	- EX: `“VOLUME FROM TO“`
+- WORKDIR
+	- String
+	- EX: `“WORKDIR PATH”`
+
 ## Configuration Reference
 
 Configuration options are organized below into two categories: required and
