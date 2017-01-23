@@ -70,10 +70,14 @@ func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error 
 
 	// Copy the contents to the temporary file
 	_, err = io.Copy(tempfile, src)
-	tempfile.Close()
 	if err != nil {
 		return err
 	}
+
+	if fi != nil {
+		tempfile.Chmod((*fi).Mode())
+	}
+	tempfile.Close()
 
 	// Copy the file into place by copying the temporary file we put
 	// into the shared folder into the proper location in the container
