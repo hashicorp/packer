@@ -231,23 +231,58 @@ func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
+
+	// Test when the env variable value contains an equals sign
+	config["environment_vars"] = []string{"good=withequals=true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test when the env variable value starts with an equals sign
+	config["environment_vars"] = []string{"good==true"}
+	p = new(Provisioner)
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
 }
 
-func TestProvisionerQuote_EnvironmentVars(t *testing.T) {
+func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
+	var flattenedEnvVars string
 	config := testConfig()
 
-	config["environment_vars"] = []string{"keyone=valueone", "keytwo=value\ntwo"}
+	userEnvVarTests := [][]string{
+		{},                     // No user env var
+		{"FOO=bar"},            // Single user env var
+		{"FOO=bar's"},          // User env var with single quote in value
+		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
+		{"FOO=bar=baz"},        // User env var with value containing equals
+		{"FOO==bar"},           // User env var with value starting with equals
+	}
+	expected := []string{
+		`PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+		`FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+		`FOO='bar'"'"'s' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+		`BAZ='qux' FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+		`FOO='bar=baz' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+		`FOO='=bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
+	}
+
 	p := new(Provisioner)
 	p.Prepare(config)
 
-	expectedValue := "keyone='valueone'"
-	if p.config.Vars[0] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[0], expectedValue)
-	}
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
 
-	expectedValue = "keytwo='value\ntwo'"
-	if p.config.Vars[1] != expectedValue {
-		t.Fatalf("%s should be equal to %s", p.config.Vars[1], expectedValue)
+	for i, expectedValue := range expected {
+		p.config.Vars = userEnvVarTests[i]
+		flattenedEnvVars = p.createFlattenedEnvVars()
+		if flattenedEnvVars != expectedValue {
+			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
 	}
 }
 
