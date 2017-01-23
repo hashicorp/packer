@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -185,15 +186,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Error processing command: %s", err)
 		}
 
-		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", command))
+		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
 		comm := &Communicator{}
 
 		cmd := &packer.RemoteCmd{Command: command}
 
-		ui.Say(fmt.Sprintf(
-			"Executing local script: %s",
-			script))
+		log.Printf("starting local command: %s", command)
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return nil, false, fmt.Errorf(
 				"Error executing script: %s\n\n"+
