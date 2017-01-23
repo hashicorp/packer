@@ -16,7 +16,7 @@ func NewDriver(config *Config) (vmwcommon.Driver, error) {
 	}
 
 	drivers = []vmwcommon.Driver{
-		&ESX5Driver{
+		&vmwcommon.ESX5Driver{
 			Host:           config.RemoteHost,
 			Port:           config.RemotePort,
 			Username:       config.RemoteUser,
