@@ -33,6 +33,7 @@
 * provisioner/powershell: Allow equals sign in value of environment
     variables. [GH-4328]
 * provisioner/puppet-server: Add default facts.  [GH-4286]
+* builder/qemu: Detect input disk image format during copy/convert. [GH-4343]
 
 ### BUG FIXES:
 
