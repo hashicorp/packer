@@ -10,9 +10,10 @@ import (
 )
 
 type StepDeregisterAMI struct {
-	ForceDeregister     bool
-	ForceDeleteSnapshot bool
-	AMIName             string
+	ForceDeregister       bool
+	ForceDeregisterOwners []string
+	ForceDeleteSnapshot   bool
+	AMIName               string
 }
 
 func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
@@ -20,12 +21,14 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Check for force deregister
-	if s.ForceDeregister {
+	if s.ForceDeregister || len(s.ForceDeregisterOwners) > 0 {
 		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
-			}}})
+			}},
+			Owners: aws.StringSlice(s.ForceDeregisterOwners),
+		})
 
 		if err != nil {
 			err := fmt.Errorf("Error describing AMI: %s", err)

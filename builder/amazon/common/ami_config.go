@@ -8,23 +8,24 @@ import (
 
 // AMIConfig is for common configuration related to creating AMIs.
 type AMIConfig struct {
-	AMIName                 string            `mapstructure:"ami_name"`
-	AMIDescription          string            `mapstructure:"ami_description"`
-	AMIVirtType             string            `mapstructure:"ami_virtualization_type"`
-	AMIUsers                []string          `mapstructure:"ami_users"`
-	AMIGroups               []string          `mapstructure:"ami_groups"`
-	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
-	AMIRegions              []string          `mapstructure:"ami_regions"`
-	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
-	AMITags                 map[string]string `mapstructure:"tags"`
-	AMIEnhancedNetworking   bool              `mapstructure:"enhanced_networking"`
-	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
-	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
-	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
-	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
-	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
-	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
-	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
+	AMIName                  string            `mapstructure:"ami_name"`
+	AMIDescription           string            `mapstructure:"ami_description"`
+	AMIVirtType              string            `mapstructure:"ami_virtualization_type"`
+	AMIUsers                 []string          `mapstructure:"ami_users"`
+	AMIGroups                []string          `mapstructure:"ami_groups"`
+	AMIProductCodes          []string          `mapstructure:"ami_product_codes"`
+	AMIRegions               []string          `mapstructure:"ami_regions"`
+	AMISkipRegionValidation  bool              `mapstructure:"skip_region_validation"`
+	AMITags                  map[string]string `mapstructure:"tags"`
+	AMIEnhancedNetworking    bool              `mapstructure:"enhanced_networking"`
+	AMIForceDeregister       bool              `mapstructure:"force_deregister"`
+	AMIForceDeregisterOwners []string          `mapstructure:"force_deregister_owners"`
+	AMIForceDeleteSnapshot   bool              `mapstructure:"force_delete_snapshot"`
+	AMIEncryptBootVolume     bool              `mapstructure:"encrypt_boot"`
+	AMIKmsKeyId              string            `mapstructure:"kms_key_id"`
+	SnapshotTags             map[string]string `mapstructure:"snapshot_tags"`
+	SnapshotUsers            []string          `mapstructure:"snapshot_users"`
+	SnapshotGroups           []string          `mapstructure:"snapshot_groups"`
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
