@@ -37,12 +37,14 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	NetworkProjectId     string            `mapstructure:"network_project_id"`
 	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
 	Scopes               []string          `mapstructure:"scopes"`
 	SourceImage          string            `mapstructure:"source_image"`
+	SourceImageFamily    string            `mapstructure:"source_image_family"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	StartupScriptFile    string            `mapstructure:"startup_script_file"`
 	Subnetwork           string            `mapstructure:"subnetwork"`
@@ -130,10 +132,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RawStateTimeout = "5m"
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -152,9 +150,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.SourceImage == "" {
+	if c.SourceImage == "" && c.SourceImageFamily == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a source_image must be specified"))
+			errs, errors.New("a source_image or source_image_family must be specified"))
 	}
 
 	if c.Zone == "" {

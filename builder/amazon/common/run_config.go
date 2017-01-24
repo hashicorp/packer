@@ -46,7 +46,7 @@ type RunConfig struct {
 	UserDataFile                      string            `mapstructure:"user_data_file"`
 	WindowsPasswordTimeout            time.Duration     `mapstructure:"windows_password_timeout"`
 	VpcId                             string            `mapstructure:"vpc_id"`
-	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behaviour"`
+	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behavior"`
 
 	// Communicator settings
 	Comm           communicator.Config `mapstructure:",squash"`
@@ -67,6 +67,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.WindowsPasswordTimeout == 0 {
 		c.WindowsPasswordTimeout = 10 * time.Minute
+	}
+
+	if c.RunTags == nil {
+		c.RunTags = make(map[string]string)
 	}
 
 	// Validation
@@ -106,7 +110,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.InstanceInitiatedShutdownBehavior == "" {
 		c.InstanceInitiatedShutdownBehavior = "stop"
 	} else if !reShutdownBehavior.MatchString(c.InstanceInitiatedShutdownBehavior) {
-		errs = append(errs, fmt.Errorf("shutdown_behaviour only accepts 'stop' or 'terminate' values."))
+		errs = append(errs, fmt.Errorf("shutdown_behavior only accepts 'stop' or 'terminate' values."))
 	}
 
 	return errs

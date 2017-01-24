@@ -107,6 +107,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 			KeyPairName:          b.config.SSHKeyPairName,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
@@ -165,8 +166,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
 		&awscommon.StepDeregisterAMI{
-			ForceDeregister: b.config.AMIForceDeregister,
-			AMIName:         b.config.AMIName,
+			ForceDeregister:     b.config.AMIForceDeregister,
+			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
+			AMIName:             b.config.AMIName,
 		},
 		&stepCreateAMI{},
 		&stepCreateEncryptedAMICopy{},
@@ -176,13 +178,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Name:         b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
-			Description:  b.config.AMIDescription,
-			Users:        b.config.AMIUsers,
-			Groups:       b.config.AMIGroups,
-			ProductCodes: b.config.AMIProductCodes,
+			Description:    b.config.AMIDescription,
+			Users:          b.config.AMIUsers,
+			Groups:         b.config.AMIGroups,
+			ProductCodes:   b.config.AMIProductCodes,
+			SnapshotUsers:  b.config.SnapshotUsers,
+			SnapshotGroups: b.config.SnapshotGroups,
 		},
 		&awscommon.StepCreateTags{
-			Tags: b.config.AMITags,
+			Tags:         b.config.AMITags,
+			SnapshotTags: b.config.SnapshotTags,
 		},
 	}
 

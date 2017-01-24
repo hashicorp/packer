@@ -127,7 +127,7 @@ privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
@@ -148,6 +148,13 @@ commonly useful environmental variables:
 -   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
+
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
 
 ## Handling Reboots
 

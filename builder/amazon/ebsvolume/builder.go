@@ -5,7 +5,6 @@ package ebsvolume
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -18,6 +17,8 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
+
+const BuilderId = "mitchellh.amazon.ebsvolume"
 
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
@@ -91,8 +92,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	launchBlockDevices := commonBlockDevices(b.config.VolumeMappings)
 
-	var volumeIds *[]string
-
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepSourceAMIInfo{
@@ -102,6 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 			KeyPairName:          b.config.SSHKeyPairName,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
@@ -132,7 +132,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepTagEBSVolumes{
 			VolumeMapping: b.config.VolumeMappings,
-			VolumeIDs:     &volumeIds,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
@@ -168,8 +167,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	ui.Say(fmt.Sprintf("Created Volumes: %s", strings.Join(*volumeIds, ", ")))
-	return nil, nil
+	// Build the artifact and return it
+	artifact := &Artifact{
+		Volumes:        state.Get("ebsvolumes").(EbsVolumes),
+		BuilderIdValue: BuilderId,
+		Conn:           ec2conn,
+	}
+	ui.Say(fmt.Sprintf("Created Volumes: %s", artifact))
+	return artifact, nil
 }
 
 func (b *Builder) Cancel() {

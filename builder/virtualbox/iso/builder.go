@@ -39,16 +39,17 @@ type Config struct {
 
 	BootCommand            []string `mapstructure:"boot_command"`
 	DiskSize               uint     `mapstructure:"disk_size"`
-	KeepRegistered         bool     `mapstructure:"keep_registered"`
 	GuestAdditionsMode     string   `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath     string   `mapstructure:"guest_additions_path"`
-	GuestAdditionsURL      string   `mapstructure:"guest_additions_url"`
 	GuestAdditionsSHA256   string   `mapstructure:"guest_additions_sha256"`
+	GuestAdditionsURL      string   `mapstructure:"guest_additions_url"`
 	GuestOSType            string   `mapstructure:"guest_os_type"`
+	HardDriveDiscard       bool     `mapstructure:"hard_drive_discard"`
 	HardDriveInterface     string   `mapstructure:"hard_drive_interface"`
 	HardDriveNonrotational bool     `mapstructure:"hard_drive_nonrotational"`
-	HardDriveDiscard       bool     `mapstructure:"hard_drive_discard"`
 	ISOInterface           string   `mapstructure:"iso_interface"`
+	KeepRegistered         bool     `mapstructure:"keep_registered"`
+	SkipExport             bool     `mapstructure:"skip_export"`
 	VMName                 string   `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
@@ -187,7 +188,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
-			Extension:    "iso",
+			Extension:    b.config.TargetExtension,
 			ResultKey:    "iso_path",
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
@@ -242,6 +243,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
 			SSHConfig: vboxcommon.SSHConfigFunc(b.config.SSHConfig),
 			SSHPort:   vboxcommon.SSHPort,
+			WinRMPort: vboxcommon.SSHPort,
 		},
 		&vboxcommon.StepUploadVersion{
 			Path: b.config.VBoxVersionFile,
@@ -267,6 +269,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			OutputDir:      b.config.OutputDir,
 			ExportOpts:     b.config.ExportOpts.ExportOpts,
 			SkipNatMapping: b.config.SSHSkipNatMapping,
+			SkipExport:     b.config.SkipExport,
 		},
 	}
 

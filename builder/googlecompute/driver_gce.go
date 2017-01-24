@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/api/compute/v1"
+
 	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/version"
@@ -21,7 +23,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
-	"google.golang.org/api/compute/v1"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -119,7 +120,7 @@ func (d *driverGCE) CreateImage(name, description, family, zone, disk string) (<
 				return
 			}
 			var image *Image
-			image, err = d.GetImageFromProject(d.projectId, name)
+			image, err = d.GetImageFromProject(d.projectId, name, false)
 			if err != nil {
 				close(imageCh)
 				errCh <- err
@@ -167,11 +168,11 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 	return errCh, nil
 }
 
-func (d *driverGCE) GetImage(name string) (*Image, error) {
+func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
-		image, err := d.GetImageFromProject(project, name)
+		image, err := d.GetImageFromProject(project, name, fromFamily)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -185,8 +186,17 @@ func (d *driverGCE) GetImage(name string) (*Image, error) {
 		projects, errs)
 }
 
-func (d *driverGCE) GetImageFromProject(project, name string) (*Image, error) {
-	image, err := d.service.Images.Get(project, name).Do()
+func (d *driverGCE) GetImageFromProject(project, name string, fromFamily bool) (*Image, error) {
+	var (
+		image *compute.Image
+		err   error
+	)
+
+	if fromFamily {
+		image, err = d.service.Images.GetFromFamily(project, name).Do()
+	} else {
+		image, err = d.service.Images.Get(project, name).Do()
+	}
 
 	if err != nil {
 		return nil, err
@@ -264,7 +274,7 @@ func (d *driverGCE) GetSerialPortOutput(zone, name string) (string, error) {
 }
 
 func (d *driverGCE) ImageExists(name string) bool {
-	_, err := d.GetImageFromProject(d.projectId, name)
+	_, err := d.GetImageFromProject(d.projectId, name, false)
 	// The API may return an error for reasons other than the image not
 	// existing, but this heuristic is sufficient for now.
 	return err == nil
@@ -288,8 +298,11 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	// TODO(mitchellh): deprecation warnings
 
 	// Get the network
+	if c.NetworkProjectId == "" {
+		c.NetworkProjectId = d.projectId
+	}
 	d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-	network, err := d.service.Networks.Get(d.projectId, c.Network).Do()
+	network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +319,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	subnetworkSelfLink := ""
 	if c.Subnetwork != "" {
 		d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-		subnetwork, err := d.service.Subnetworks.Get(d.projectId, c.Region, c.Subnetwork).Do()
+		subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
 		if err != nil {
 			return nil, err
 		}

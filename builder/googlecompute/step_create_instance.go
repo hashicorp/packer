@@ -24,13 +24,17 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 		instanceMetadata[k] = v
 	}
 
-	// Merge any existing ssh keys with our public key.
-	sshMetaKey := "sshKeys"
-	sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
-	if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
-		sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+	// Merge any existing ssh keys with our public key, unless there is no
+	// supplied public key. This is possible if a private_key_file was
+	// specified.
+	if sshPublicKey != "" {
+		sshMetaKey := "sshKeys"
+		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
+		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
+			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
+		}
+		instanceMetadata[sshMetaKey] = sshKeys
 	}
-	instanceMetadata[sshMetaKey] = sshKeys
 
 	// Wrap any startup script with our own startup script.
 	if c.StartupScriptFile != "" {
@@ -54,10 +58,16 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 }
 
 func getImage(c *Config, d Driver) (*Image, error) {
+	name := c.SourceImageFamily
+	fromFamily := true
+	if c.SourceImage != "" {
+		name = c.SourceImage
+		fromFamily = false
+	}
 	if c.SourceImageProjectId == "" {
-		return d.GetImage(c.SourceImage)
+		return d.GetImage(name, fromFamily)
 	} else {
-		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage)
+		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage, fromFamily)
 	}
 }
 
@@ -75,6 +85,8 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	ui.Say(fmt.Sprintf("Using image: %s", sourceImage.Name))
 
 	if sourceImage.IsWindows() && c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
 		state.Put("create_windows_password", true)
@@ -96,6 +108,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Metadata:            metadata,
 		Name:                name,
 		Network:             c.Network,
+		NetworkProjectId:    c.NetworkProjectId,
 		OmitExternalIP:      c.OmitExternalIP,
 		Preemptible:         c.Preemptible,
 		Region:              c.Region,

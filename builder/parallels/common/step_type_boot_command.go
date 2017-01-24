@@ -9,11 +9,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/multistep"
+	packer_common "github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
-
-const KeyLeftShift uint32 = 0xFFE1
 
 type bootCommandTemplateData struct {
 	HTTPIP   string
@@ -21,8 +20,8 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-// This step "types" the boot command into the VM via the prltype script, built on the
-// Parallels Virtualization SDK - Python API.
+// StepTypeBootCommand is a step that "types" the boot command into the VM via
+// the prltype script, built on the Parallels Virtualization SDK - Python API.
 //
 // Uses:
 //   driver Driver
@@ -39,6 +38,7 @@ type StepTypeBootCommand struct {
 	Ctx            interpolate.Context
 }
 
+// Run types the boot command by sending key scancodes into the VM.
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
@@ -50,7 +50,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
-	hostIp := "0.0.0.0"
+	hostIP := "0.0.0.0"
 
 	if len(s.HostInterfaces) > 0 {
 		// Determine the host IP
@@ -58,18 +58,19 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		ip, err := ipFinder.HostIP()
 		if err != nil {
-			err := fmt.Errorf("Error detecting host IP: %s", err)
+			err = fmt.Errorf("Error detecting host IP: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		hostIp = ip
+		hostIP = ip
 	}
 
-	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIp))
+	ui.Say(fmt.Sprintf("Host IP for the Parallels machine: %s", hostIP))
 
+	packer_common.SetHTTPIP(hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
-		hostIp,
+		hostIP,
 		httpPort,
 		s.VMName,
 	}
@@ -78,7 +79,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	for i, command := range s.BootCommand {
 		command, err := interpolate.Render(command, &s.Ctx)
 		if err != nil {
-			err := fmt.Errorf("Error preparing boot command: %s", err)
+			err = fmt.Errorf("Error preparing boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -88,7 +89,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		for _, code := range scancodes(command) {
 			if code == "wait" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -100,7 +101,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait5" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -112,7 +113,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 			if code == "wait10" {
 				if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-					err := fmt.Errorf("Error sending boot command: %s", err)
+					err = fmt.Errorf("Error sending boot command: %s", err)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -136,7 +137,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 
 		log.Printf("Sending scancodes: %#v", codes)
 		if err := driver.SendKeyScanCodes(s.VMName, codes...); err != nil {
-			err := fmt.Errorf("Error sending boot command: %s", err)
+			err = fmt.Errorf("Error sending boot command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -146,6 +147,7 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {
@@ -208,12 +210,12 @@ func scancodes(message string) []string {
 
 	scancodeMap := make(map[rune]uint)
 	for chars, start := range scancodeIndex {
-		var i uint = 0
+		var i uint
 		for len(chars) > 0 {
 			r, size := utf8.DecodeRuneInString(chars)
 			chars = chars[size:]
 			scancodeMap[r] = start + i
-			i += 1
+			i++
 		}
 	}
 

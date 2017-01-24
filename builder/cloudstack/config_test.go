@@ -151,6 +151,7 @@ func testConfig(config map[string]interface{}) map[string]interface{} {
 		"api_url":          "https://cloudstack.com/client/api",
 		"api_key":          "some-api-key",
 		"secret_key":       "some-secret-key",
+		"ssh_username":     "root",
 		"cidr_list":        []interface{}{"0.0.0.0/0"},
 		"network":          "c5ed8a14-3f21-4fa9-bd74-bb887fc0ed0d",
 		"service_offering": "a29c52b1-a83d-4123-a57d-4548befa47a0",

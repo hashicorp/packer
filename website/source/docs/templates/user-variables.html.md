@@ -118,10 +118,6 @@ As you can see, the `-var` flag can be specified multiple times in order to set
 multiple variables. Also, variables set later on the command-line override
 earlier set variables if it has already been set.
 
-Finally, variables set from the command-line override all other methods of
-setting variables. So if you specify a variable in a file (the next method
-shown), you can override it using the command-line.
-
 ### From a File
 
 Variables can also be set from an external JSON file. The `-var-file` flag reads
@@ -147,8 +143,24 @@ The `-var-file` flag can be specified multiple times and variables from multiple
 files will be read and applied. As you'd expect, variables read from files
 specified later override a variable set earlier if it has already been set.
 
-And as mentioned above, no matter where a `-var-file` is specified, a `-var`
-flag on the command line will always override any variables from a file.
+Combining the -var and -var-file flags together also works how you'd
+expect. Flags set later in the command override flags set earlier. So, for
+example, in the following command with the above variables.json file:
+
+``` {.text}
+$ packer build \
+    -var 'aws_access_key=bar' \
+    -var-file=variables.json \
+    -var 'aws_secret_key=baz' \
+    template.json
+```
+
+results in the following variables:
+
+| Variable | Value |
+| --- | --- |
+| aws_access_key | foo |
+| aws_secret_key | baz |
 
 # Recipes
 

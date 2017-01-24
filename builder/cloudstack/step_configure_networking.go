@@ -28,6 +28,7 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		ui.Message("Networking has been setup!")
 		return multistep.ActionContinue
 	}
+
 	// Generate a random public port used to configure our port forward.
 	rand.Seed(time.Now().UnixNano())
 	s.publicPort = 50000 + rand.Intn(10000)
@@ -125,8 +126,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		p.SetAclid(network.Aclid)
 		p.SetAction("allow")
 		p.SetCidrlist(config.CIDRList)
-		p.SetStartport(s.publicPort)
-		p.SetEndport(s.publicPort)
+		p.SetStartport(s.privatePort)
+		p.SetEndport(s.privatePort)
 		p.SetTraffictype("ingress")
 
 		// Create the network ACL rule.

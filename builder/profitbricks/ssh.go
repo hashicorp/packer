@@ -3,7 +3,8 @@ package profitbricks
 import (
 	"fmt"
 	"github.com/mitchellh/multistep"
-	"golang.org/x/crypto/ssh"
+	"github.com/mitchellh/packer/communicator/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 func commHost(state multistep.StateBag) (string, error) {
@@ -11,19 +12,36 @@ func commHost(state multistep.StateBag) (string, error) {
 	return ipAddress, nil
 }
 
-func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
+func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	config := state.Get("config").(*Config)
-	privateKey := state.Get("privateKey").(string)
+	var privateKey string
 
-	signer, err := ssh.ParsePrivateKey([]byte(privateKey))
-	if err != nil {
-		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+	var auth []gossh.AuthMethod
+
+	if config.Comm.SSHPassword != "" {
+		auth = []gossh.AuthMethod{
+			gossh.Password(config.Comm.SSHPassword),
+			gossh.KeyboardInteractive(
+				ssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
+		}
 	}
 
-	return &ssh.ClientConfig{
+	if config.Comm.SSHPrivateKey != "" {
+		if priv, ok := state.GetOk("privateKey"); ok {
+			privateKey = priv.(string)
+		}
+		signer, err := gossh.ParsePrivateKey([]byte(privateKey))
+		if err != nil {
+			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		auth = append(auth, gossh.PublicKeys(signer))
+	}
+	return &gossh.ClientConfig{
 		User: config.Comm.SSHUsername,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
-		},
+		Auth: auth,
 	}, nil
 }

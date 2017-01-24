@@ -3,10 +3,10 @@ package communicator
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
+	"github.com/masterzen/winrm"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -41,7 +41,7 @@ type Config struct {
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
-	WinRMTransportDecorator func(*http.Transport) http.RoundTripper
+	WinRMTransportDecorator func() winrm.Transporter
 }
 
 // Port returns the port that will be used for access based on config.
@@ -146,7 +146,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	// Validation
 	var errs []error
 	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
+		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
 	if c.SSHPrivateKey != "" {

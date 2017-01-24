@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/images"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 )
 
 // Artifact is an artifact implementation that contains built images.

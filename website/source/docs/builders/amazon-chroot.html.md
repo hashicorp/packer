@@ -122,18 +122,55 @@ each category, the available configuration keys are alphabetized.
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default false.
+    AMI if one with the same name already exists. Default `false`.
+
+-   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
+    AMIs, which have been deregistered by `force_deregister`. Default `false`.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
-    existing AMI root volume snapshot. Default false. If true, `source_ami` is
+    existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:
     `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
 
-    -   `ami_block_device_mappings` (array of block device mappings) An entry
-        matching `root_device_name` should be set. See the
-        [amazon-ebs](/docs/builders/amazon-ebs.html) documentation for more
-        details on this parameter.
+-   `ami_block_device_mappings` (array of block device mappings) - Add one or
+    more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. These will be attached when booting a new instance from your
+    AMI. Your options here may vary depending on the type of VM you use. The
+    block device mappings allow for the following configuration:
+
+    -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
+        deleted on instance termination. Default `false`. **NOTE**: If this
+        value is not explicitly set to `true` and volumes are not cleaned up by
+        an alternative method, additional volumes will accumulate after
+        every build.
+
+    -   `device_name` (string) - The device name exposed to the instance (for
+         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+
+    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+
+    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+        volume supports. See the documentation on
+        [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+        for more information
+
+    -   `no_device` (boolean) - Suppresses the specified device included in the
+        block device mapping of the AMI
+
+    -   `snapshot_id` (string) - The ID of the snapshot
+
+    -   `virtual_name` (string) - The virtual device name. See the documentation on
+        [Block Device
+        Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
+        for more information
+
+    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+        specifying a `snapshot_id`
+
+    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
+        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+        volumes
 
     -   `root_device_name` (string) - The root device name. For example, `xvda`.
 
@@ -170,10 +207,22 @@ each category, the available configuration keys are alphabetized.
     this field must be defined.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
-    validation of the `ami_regions` configuration option. Defaults to false.
+    validation of the `ami_regions` configuration option. Default `false`.
+
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
+
+-   `snapshot_groups` (array of strings) - A list of groups that have access to
+    create volumes from the snapshot(s). By default no groups have permission to create
+    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+
+-   `snapshot_users` (array of strings) - A list of account IDs that have access to
+    create volumes from the snapshot(s). By default no additional users other than the
+    user creating the AMI has permissions to create volumes from the backing snapshot(s).
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
+
     ``` {.javascript}
     "source_ami_filter": {
         "filters": {
@@ -185,6 +234,7 @@ each category, the available configuration keys are alphabetized.
         "most_recent": true
     }
     ```
+
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
     NOTE: This will fail unless *exactly* one AMI is returned. In the above
     example, `most_recent` will cause this to succeed by selecting the newest image.

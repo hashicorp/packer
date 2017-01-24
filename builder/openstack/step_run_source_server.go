@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions/keypairs"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 )
 
 type StepRunSourceServer struct {
@@ -21,6 +21,7 @@ type StepRunSourceServer struct {
 	UserData         string
 	UserDataFile     string
 	ConfigDrive      bool
+	InstanceMetadata map[string]string
 	server           *servers.Server
 }
 
@@ -63,7 +64,9 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 		Networks:         networks,
 		AvailabilityZone: s.AvailabilityZone,
 		UserData:         userData,
-		ConfigDrive:      s.ConfigDrive,
+		ConfigDrive:      &s.ConfigDrive,
+		ServiceClient:    computeClient,
+		Metadata:         s.InstanceMetadata,
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder

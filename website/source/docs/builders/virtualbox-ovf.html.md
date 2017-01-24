@@ -62,7 +62,7 @@ builder.
 ### Required:
 
 -   `source_path` (string) - The path to an OVF or OVA file that acts as the
-    source of this build.
+    source of this build. It can also be a URL.
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
@@ -82,10 +82,20 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
+-   `checksum` (string) - The checksum for the OVA file. The type of the
+    checksum is specified with `checksum_type`, documented below.
+
+-   `checksum_type` (string) - The type of the checksum specified in `checksum`.
+    Valid values are "none", "md5", "sha1", "sha256", or "sha512". Although the
+    checksum will not be verified when `checksum_type` is set to "none", this is
+    not recommended since OVA files can be very large and corruption does happen
+    from time to time.
+
 -   `export_opts` (array of strings) - Additional options to pass to the
-    [VBoxManage export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export).
-    This can be useful for passing product information to include in the
-    resulting appliance file. Packer JSON configuration file example:
+    [VBoxManage
+    export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
+    can be useful for passing product information to include in the resulting
+    appliance file. Packer JSON configuration file example:
 
     ``` {.json}
     {
@@ -101,12 +111,13 @@ builder.
     }
     ```
 
-    A VirtualBox [VM description](https://www.virtualbox.org/manual/ch08.html#idm3756)
-    may contain arbitrary strings; the GUI interprets HTML formatting.
-    However, the JSON format does not allow arbitrary newlines within a
-    value. Add a multi-line description by preparing the string in the
-    shell before the packer call like this (shell `>` continuation
-    character snipped for easier copy & paste):
+    A VirtualBox [VM
+    description](https://www.virtualbox.org/manual/ch08.html#idm3756) may
+    contain arbitrary strings; the GUI interprets HTML formatting. However, the
+    JSON format does not allow arbitrary newlines within a value. Add a
+    multi-line description by preparing the string in the shell before the
+    packer call like this (shell `>` continuation character snipped for easier
+    copy & paste):
 
     ``` {.shell}
 
@@ -132,11 +143,11 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option except
+    that the directory structure is preserved. This is useful for when your
+    floppy disk includes drivers or if you just want to organize it's contents
+    as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `format` (string) - Either "ovf" or "ova", this specifies the output format
     of the exported virtual machine. This defaults to "ovf".
@@ -201,9 +212,9 @@ builder.
     name of the build.
 
 -   `post_shutdown_delay` (string) - The amount of time to wait after shutting
-    down the virtual machine. If you get the error `Error removing floppy
-    controller`, you might need to set this to `5m` or so. By default, the
-    delay is `0s`, or disabled.
+    down the virtual machine. If you get the error
+    `Error removing floppy controller`, you might need to set this to `5m`
+    or so. By default, the delay is `0s`, or disabled.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -218,6 +229,10 @@ builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
 
+-   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
+    not export the VM. Useful if the build output is not the resultant image,
+    but created inside the VM.
+
 -   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
@@ -227,6 +242,10 @@ builder.
 -   `ssh_skip_nat_mapping` (boolean) - Defaults to false. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
     on the host to communicate to the virtual machine
+
+-   `target_path` (string) - The path where the OVA should be saved
+    after download. By default, it will go in the packer cache, with a hash of
+    the original filename as its name.
 
 -   `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
     execute in order to further customize the virtual machine being created. The
@@ -254,8 +273,8 @@ builder.
     is exported. By default this is "packer-BUILDNAME", where "BUILDNAME" is the
     name of the build.
 
--   `vrdp_bind_address` (string / IP address) - The IP address that should be binded
-     to for VRDP. By default packer will use 127.0.0.1 for this.
+-   `vrdp_bind_address` (string / IP address) - The IP address that should be
+    binded to for VRDP. By default packer will use 127.0.0.1 for this.
 
 -   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
@@ -299,19 +318,21 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+    ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+    shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 

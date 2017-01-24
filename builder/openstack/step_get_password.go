@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/servers"
 	"golang.org/x/crypto/ssh"
 )
 

@@ -22,7 +22,6 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	command := []string{
 		"convert",
-		"-f", config.Format,
 		"-O", config.Format,
 		isoPath,
 		path,

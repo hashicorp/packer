@@ -21,7 +21,7 @@ documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMI
 This builder builds an AMI by launching an EC2 instance from an existing
 instance-storage backed AMI, provisioning that running machine, and then
 bundling and creating a new AMI from that machine. This is all done in your own
-AWS account. The builder will create temporary keypairs, security group rules,
+AWS account. The builder will create temporary key pairs, security group rules,
 etc. that provide it temporary access to the instance while the image is being
 created. This simplifies configuration quite a bit.
 
@@ -60,9 +60,9 @@ builder.
     templates](/docs/templates/configuration-templates.html) for more info)
 
 -   `instance_type` (string) - The EC2 instance type to use while building the
-    AMI, such as "m1.small".
+    AMI, such as `m1.small`.
 
--   `region` (string) - The name of the region, such as "us-east-1", in which to
+-   `region` (string) - The name of the region, such as `us-east-1`, in which to
     launch the EC2 instance to create the AMI.
 
 -   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
@@ -85,36 +85,54 @@ builder.
 
 ### Optional:
 
--   `ami_block_device_mappings` (array of block device mappings) - Add the block
-    device mappings to the AMI. The block device mappings allow for keys:
+-   `ami_block_device_mappings` (array of block device mappings) - Add one or
+    more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. These will be attached when booting a new instance from your
+    AMI. To add a block device during the packer build see
+    `launch_block_device_mappings` below. Your options here may vary depending
+    on the type of VM you use. The block device mappings allow for the following
+    configuration:
+
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
-        deleted on instance termination
+        deleted on instance termination. Default `false`. **NOTE**: If this
+        value is not explicitly set to `true` and volumes are not cleaned up by
+        an alternative method, additional volumes will accumulate after
+        every build.
+
     -   `device_name` (string) - The device name exposed to the instance (for
-        example, "/dev/sdh" or "xvdh"). Required when specifying `volume_size`.
+         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+
     -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
+
     -   `no_device` (boolean) - Suppresses the specified device included in the
         block device mapping of the AMI
+
     -   `snapshot_id` (string) - The ID of the snapshot
+
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
+
     -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
-    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+
+    -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
+        volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
+
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
     the AMI. `all` will make the AMI publicly accessible. AWS currently doesn't
-    accept any value other than "all".
+    accept any value other than `all`.
 
 -   `ami_product_codes` (array of strings) - A list of product codes to
     associate with the AMI. By default no product codes are associated with
@@ -130,7 +148,7 @@ builder.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
-    "paravirtual" (default) or "hvm".
+    `paravirtual` (default) or `hvm`.
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -140,11 +158,11 @@ builder.
     instance in. Leave this empty to allow Amazon to auto-assign.
 
 -   `bundle_destination` (string) - The directory on the running instance where
-    the bundled AMI will be saved prior to uploading. By default this is "/tmp".
+    the bundled AMI will be saved prior to uploading. By default this is `/tmp`.
     This directory must exist and be writable.
 
 -   `bundle_prefix` (string) - The prefix for files created from bundling the
-    root volume. By default this is "image-{{timestamp}}". The `timestamp`
+    root volume. By default this is `image-{{timestamp}}`. The `timestamp`
     variable should be used to make sure this is unique, otherwise it can
     collide with other created AMIs by Packer in your account.
 
@@ -164,15 +182,19 @@ builder.
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default `false`.
+    AMI if one with the same name already exists. Defaults to `false`.
+
+-   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
+    AMIs, which have been deregistered by `force_deregister`. Defaults to `false`.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `launch_block_device_mappings` (array of block device mappings) - Add the
-    block device mappings to the launch instance. The block device mappings are
-    the same as `ami_block_device_mappings` above.
+-   `launch_block_device_mappings` (array of block device mappings) - Add one or
+    more block devices before the packer build starts. These are not necessarily
+    preserved when booting from the AMI built with packer. See
+    `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
@@ -188,11 +210,20 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip 
-    validation of the region configuration option.  Defaults to false.
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the region configuration option.  Defaults to `false`.
+
+-   `snapshot_groups` (array of strings) - A list of groups that have access to
+    create volumes from the snapshot(s). By default no groups have permission to create
+    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+
+-   `snapshot_users` (array of strings) - A list of account IDs that have access to
+    create volumes from the snapshot(s). By default no additional users other than the
+    user creating the AMI has permissions to create volumes from the backing snapshot(s).
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
+
     ``` {.javascript}
     "source_ami_filter": {
         "filters": {
@@ -204,6 +235,7 @@ builder.
         "most_recent": true
     }
     ```
+
     This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical.
     NOTE: This will fail unless *exactly* one AMI is returned. In the above
     example, `most_recent` will cause this to succeed by selecting the newest image.
@@ -219,46 +251,49 @@ builder.
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
 
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot.
+
 -   `spot_price` (string) - The maximum hourly price to launch a spot instance
     to create the AMI. It is a type of instances that EC2 starts when the
     maximum price that you specify exceeds the current spot price. Spot price
     will be updated based on available spot instance capacity and current spot
-    Instance requests. It may save you some costs. You can set this to "auto"
-    for Packer to automatically discover the best spot price or to "0" to use
-    an on demand instance (default).
+    Instance requests. It may save you some costs. You can set this to `auto`
+    for Packer to automatically discover the best spot price or to `0` to use
+    an on-demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
-    to "auto". This tells Packer what sort of AMI you're launching to find the
+    to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
     up into Amazon EC2.  By default, this is blank, and Packer will
-    generate a temporary keypair unless
+    generate a temporary key pair unless
     [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
-    authenticate connections to the source instance. No temporary keypair will
+    authenticate connections to the source instance. No temporary key pair will
     be created, and the values of `ssh_password` and `ssh_private_key_file` will
     be ignored. To use this option with a key pair already configured in the source
     AMI, leave the `ssh_keypair_name` blank. To associate an existing key pair
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
-    
+
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
     IP if available.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
-    "subnet-12345def", where Packer will launch the EC2 instance. This field is
+    `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI.
 
--   `temporary_key_pair_name` (string) - The name of the temporary keypair
-    to generate. By default, Packer generates a name with a UUID.
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair
+    to generate. By default, Packer generates a name with an UUID.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
@@ -277,7 +312,7 @@ builder.
     `/tmp`.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
-    password for Windows instances. Defaults to 20 minutes. Example value: "10m"
+    password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
 ## Basic Example
 
@@ -357,7 +392,7 @@ parameters they're used to satisfy the `ec2-bundle-vol` command.
 \~&gt; **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem and
 .gpg files during the bundling of the AMI, which can cause problems on some
 systems, such as Ubuntu. You may want to customize the bundle volume command to
-include those files (see the `--no-filter` option of ec2-bundle-vol).
+include those files (see the `--no-filter` option of `ec2-bundle-vol`).
 
 ### Bundle Upload Command
 

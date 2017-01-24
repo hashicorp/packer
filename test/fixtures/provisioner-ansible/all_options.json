@@ -5,17 +5,10 @@
         "type": "shell-local",
         "command": "echo 'TODO(bhcleek): write the public key to $HOME/.ssh/known_hosts and stop using ANSIBLE_HOST_KEY_CHECKING=False'"
       }, {
-        "type": "shell",
-        "inline": [
-          "apt-get update",
-          "apt-get -y install python openssh-sftp-server",
-          "ls -l /usr/lib"
-        ]
-      }, {
         "type":  "ansible",
         "playbook_file": "./playbook.yml",
         "extra_arguments": [
-          "-vvvv", "--private-key", "ansible-test-id"
+          "--private-key", "ansible-test-id"
         ],
         "sftp_command": "/usr/lib/sftp-server -e -l INFO",
         "use_sftp": true,
@@ -34,7 +27,8 @@
         "account_file": "{{user `account_file`}}",
         "project_id": "{{user `project_id`}}",
         "image_name": "packerbats-alloptions-{{timestamp}}",
-        "source_image": "debian-7-wheezy-v20141108",
-        "zone": "us-central1-a"
+        "source_image": "debian-8-jessie-v20161027",
+        "zone": "us-central1-a",
+        "ssh_username": "debian"
     }]
 }

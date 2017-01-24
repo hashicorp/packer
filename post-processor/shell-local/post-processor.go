@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/mitchellh/packer/common"
@@ -47,9 +49,8 @@ type PostProcessor struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars     string
-	Script   string
-	Artifact string
+	Vars   string
+	Script string
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -67,7 +68,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Script}}; {{.Vars}} {{.Script}} {{.Artifact}}"
+		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -112,17 +113,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
-	for idx, kv := range p.config.Vars {
+	for _, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
-		} else {
-			// Replace single quotes so they parse
-			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
-
-			// Single quote env var values
-			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
 	}
 
@@ -166,52 +161,72 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		tf.Close()
 	}
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
-	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
-	copy(envVars[2:], p.config.Vars)
+	// Create environment variables to set before executing the command
+	flattenedEnvVars := p.createFlattenedEnvVars()
 
-	for _, file := range artifact.Files() {
-		for _, script := range scripts {
-			// Flatten the environment variables
-			flattendVars := strings.Join(envVars, " ")
+	for _, script := range scripts {
 
-			p.config.ctx.Data = &ExecuteCommandTemplate{
-				Vars:     flattendVars,
-				Script:   script,
-				Artifact: file,
-			}
+		p.config.ctx.Data = &ExecuteCommandTemplate{
+			Vars:   flattenedEnvVars,
+			Script: script,
+		}
 
-			command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-			if err != nil {
-				return nil, false, fmt.Errorf("Error processing command: %s", err)
-			}
+		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+		if err != nil {
+			return nil, false, fmt.Errorf("Error processing command: %s", err)
+		}
 
-			ui.Say(fmt.Sprintf("Post processing with local shell script: %s", command))
+		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
-			comm := &Communicator{}
+		comm := &Communicator{}
 
-			cmd := &packer.RemoteCmd{Command: command}
+		cmd := &packer.RemoteCmd{Command: command}
 
-			ui.Say(fmt.Sprintf(
-				"Executing local script: %s",
-				script))
-			if err := cmd.StartWithUi(comm, ui); err != nil {
-				return nil, false, fmt.Errorf(
-					"Error executing script: %s\n\n"+
-						"Please see output above for more information.",
-					script)
-			}
-			if cmd.ExitStatus != 0 {
-				return nil, false, fmt.Errorf(
-					"Erroneous exit code %d while executing script: %s\n\n"+
-						"Please see output above for more information.",
-					cmd.ExitStatus,
-					script)
-			}
+		log.Printf("starting local command: %s", command)
+		if err := cmd.StartWithUi(comm, ui); err != nil {
+			return nil, false, fmt.Errorf(
+				"Error executing script: %s\n\n"+
+					"Please see output above for more information.",
+				script)
+		}
+		if cmd.ExitStatus != 0 {
+			return nil, false, fmt.Errorf(
+				"Erroneous exit code %d while executing script: %s\n\n"+
+					"Please see output above for more information.",
+				cmd.ExitStatus,
+				script)
 		}
 	}
 
 	return artifact, true, nil
+}
+
+func (p *PostProcessor) createFlattenedEnvVars() (flattened string) {
+	flattened = ""
+	envVars := make(map[string]string)
+
+	// Always available Packer provided env vars
+	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", p.config.PackerBuildName)
+	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", p.config.PackerBuilderType)
+
+	// Split vars into key/value components
+	for _, envVar := range p.config.Vars {
+		keyValue := strings.SplitN(envVar, "=", 2)
+		// Store pair, replacing any single quotes in value so they parse
+		// correctly with required environment variable format
+		envVars[keyValue[0]] = strings.Replace(keyValue[1], "'", `'"'"'`, -1)
+	}
+
+	// Create a list of env var keys in sorted order
+	var keys []string
+	for k := range envVars {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Re-assemble vars surrounding value with single quotes and flatten
+	for _, key := range keys {
+		flattened += fmt.Sprintf("%s='%s' ", key, envVars[key])
+	}
+	return
 }

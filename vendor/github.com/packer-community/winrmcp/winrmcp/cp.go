@@ -2,7 +2,6 @@ package winrmcp
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -16,7 +15,7 @@ import (
 func doCopy(client *winrm.Client, config *Config, in io.Reader, toPath string) error {
 	tempFile, err := tempFileName()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error generating unique filename: %v", err))
+		return fmt.Errorf("Error generating unique filename: %v", err)
 	}
 	tempPath := "$env:TEMP\\" + tempFile
 
@@ -26,7 +25,7 @@ func doCopy(client *winrm.Client, config *Config, in io.Reader, toPath string) e
 
 	err = uploadContent(client, config.MaxOperationsPerShell, "%TEMP%\\"+tempFile, in)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error uploading file to %s: %v", tempPath, err))
+		return fmt.Errorf("Error uploading file to %s: %v", tempPath, err)
 	}
 
 	if os.Getenv("WINRMCP_DEBUG") != "" {
@@ -35,7 +34,7 @@ func doCopy(client *winrm.Client, config *Config, in io.Reader, toPath string) e
 
 	err = restoreContent(client, tempPath, toPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error restoring file from %s to %s: %v", tempPath, toPath, err))
+		return fmt.Errorf("Error restoring file from %s to %s: %v", tempPath, toPath, err)
 	}
 
 	if os.Getenv("WINRMCP_DEBUG") != "" {
@@ -44,7 +43,7 @@ func doCopy(client *winrm.Client, config *Config, in io.Reader, toPath string) e
 
 	err = cleanupContent(client, tempPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error removing temporary file %s: %v", tempPath, err))
+		return fmt.Errorf("Error removing temporary file %s: %v", tempPath, err)
 	}
 
 	return nil
@@ -66,7 +65,7 @@ func uploadContent(client *winrm.Client, maxChunks int, filePath string, reader 
 func uploadChunks(client *winrm.Client, filePath string, maxChunks int, reader io.Reader) (bool, error) {
 	shell, err := client.CreateShell()
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Couldn't create shell: %v", err))
+		return false, fmt.Errorf("Couldn't create shell: %v", err)
 	}
 	defer shell.Close()
 
@@ -126,10 +125,20 @@ func restoreContent(client *winrm.Client, fromPath, toPath string) error {
 		}
 
 		if (Test-Path $tmp_file_path) {
-			$base64_lines = Get-Content $tmp_file_path
-			$base64_string = [string]::join("",$base64_lines)
-			$bytes = [System.Convert]::FromBase64String($base64_string) 
-			[System.IO.File]::WriteAllBytes($dest_file_path, $bytes)
+			$reader = [System.IO.File]::OpenText($tmp_file_path)
+			$writer = [System.IO.File]::OpenWrite($dest_file_path)
+			try {
+				for(;;) {
+					$base64_line = $reader.ReadLine()
+					if ($base64_line -eq $null) { break }
+					$bytes = [System.Convert]::FromBase64String($base64_line)
+					$writer.write($bytes, 0, $bytes.Length)
+				}
+			}
+			finally {
+				$reader.Close()
+				$writer.Close()
+			}
 		} else {
 			echo $null > $dest_file_path
 		}
@@ -155,7 +164,7 @@ func restoreContent(client *winrm.Client, fromPath, toPath string) error {
 	wg.Wait()
 
 	if cmd.ExitCode() != 0 {
-		return errors.New(fmt.Sprintf("restore operation returned code=%d", cmd.ExitCode()))
+		return fmt.Errorf("restore operation returned code=%d", cmd.ExitCode())
 	}
 	return nil
 }
@@ -167,7 +176,10 @@ func cleanupContent(client *winrm.Client, filePath string) error {
 	}
 
 	defer shell.Close()
-	cmd, _ := shell.Execute("powershell", "Remove-Item", filePath, "-ErrorAction SilentlyContinue")
+	cmd, err := shell.Execute("powershell", "Remove-Item", filePath, "-ErrorAction SilentlyContinue")
+	if err != nil {
+		return err
+	}
 
 	cmd.Wait()
 	cmd.Close()
@@ -196,7 +208,7 @@ func appendContent(shell *winrm.Shell, filePath, content string) error {
 	wg.Wait()
 
 	if cmd.ExitCode() != 0 {
-		return errors.New(fmt.Sprintf("upload operation returned code=%d", cmd.ExitCode()))
+		return fmt.Errorf("upload operation returned code=%d", cmd.ExitCode())
 	}
 
 	return nil

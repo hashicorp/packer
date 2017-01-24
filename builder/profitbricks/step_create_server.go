@@ -20,8 +20,9 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	profitbricks.SetAuth(c.PBUsername, c.PBPassword)
 	profitbricks.SetDepth("5")
-	c.SSHKey = state.Get("publicKey").(string)
-
+	if sshkey, ok := state.GetOk("publicKey"); ok {
+		c.SSHKey = sshkey.(string)
+	}
 	ui.Say("Creating Virtual Data Center...")
 	img := s.getImageId(c.Image, c)
 
@@ -44,12 +45,10 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 								Items: []profitbricks.Volume{
 									{
 										Properties: profitbricks.VolumeProperties{
-											Type:          c.DiskType,
-											Size:          c.DiskSize,
-											Name:          c.SnapshotName,
-											Image:         img,
-											SshKeys:       []string{c.SSHKey},
-											ImagePassword: c.SnapshotPassword,
+											Type:  c.DiskType,
+											Size:  c.DiskSize,
+											Name:  c.SnapshotName,
+											Image: img,
 										},
 									},
 								},
@@ -59,6 +58,13 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 				},
 			},
 		},
+	}
+	if c.SSHKey != "" {
+		datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Properties.SshKeys = []string{c.SSHKey}
+	}
+
+	if c.Comm.SSHPassword != "" {
+		datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Properties.ImagePassword = c.Comm.SSHPassword
 	}
 
 	datacenter = profitbricks.CompositeCreateDatacenter(datacenter)
@@ -74,7 +80,12 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 	}
-	s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
+
+	err := s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error occured while creating a datacenter %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
 	state.Put("datacenter_id", datacenter.Id)
 
@@ -90,7 +101,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.waitTillProvisioned(lan.Headers.Get("Location"), *c)
+	err = s.waitTillProvisioned(lan.Headers.Get("Location"), *c)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error occured while creating a LAN %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
 	lanId, _ := strconv.Atoi(lan.Id)
 	nic := profitbricks.CreateNic(datacenter.Id, datacenter.Entities.Servers.Items[0].Id, profitbricks.Nic{
@@ -106,7 +121,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.waitTillProvisioned(nic.Headers.Get("Location"), *c)
+	err = s.waitTillProvisioned(nic.Headers.Get("Location"), *c)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error occured while creating a NIC %s", err.Error()))
+		return multistep.ActionHalt
+	}
 
 	state.Put("volume_id", datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Id)
 
@@ -139,8 +158,8 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 func (d *stepCreateServer) waitTillProvisioned(path string, config Config) error {
 	d.setPB(config.PBUsername, config.PBPassword, config.PBUrl)
 	waitCount := 120
-	if config.Timeout > 0 {
-		waitCount = config.Timeout
+	if config.Retries > 0 {
+		waitCount = config.Retries
 	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)

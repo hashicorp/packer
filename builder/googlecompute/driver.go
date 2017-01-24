@@ -22,11 +22,14 @@ type Driver interface {
 	// DeleteDisk deletes the disk with the given name.
 	DeleteDisk(zone, name string) (<-chan error, error)
 
-	// GetImage gets an image; tries the default and public projects.
-	GetImage(name string) (*Image, error)
+	// GetImage gets an image; tries the default and public projects. If
+	// fromFamily is true, name designates an image family instead of a
+	// particular image.
+	GetImage(name string, fromFamily bool) (*Image, error)
 
-	// GetImageFromProject gets an image from a specific project.
-	GetImageFromProject(project, name string) (*Image, error)
+	// GetImageFromProject gets an image from a specific project. If fromFamily
+	// is true, name designates an image family instead of a particular image.
+	GetImageFromProject(project, name string, fromFamily bool) (*Image, error)
 
 	// GetInstanceMetadata gets a metadata variable for the instance, name.
 	GetInstanceMetadata(zone, name, key string) (string, error)
@@ -64,6 +67,7 @@ type InstanceConfig struct {
 	Metadata            map[string]string
 	Name                string
 	Network             string
+	NetworkProjectId    string
 	OmitExternalIP      bool
 	Preemptible         bool
 	Region              string

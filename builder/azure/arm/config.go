@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
-	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -21,7 +20,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/Azure/go-ntlmssp"
+	"github.com/masterzen/winrm"
 
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/pkcs12"
@@ -275,9 +274,8 @@ func setSshValues(c *Config) error {
 }
 
 func setWinRMCertificate(c *Config) error {
-	c.Comm.WinRMTransportDecorator = func(t *http.Transport) http.RoundTripper {
-		return &ntlmssp.Negotiator{RoundTripper: t}
-	}
+	c.Comm.WinRMTransportDecorator =
+		func() winrm.Transporter { return &winrm.ClientNTLM{} }
 
 	cert, err := c.createCertificate()
 	c.winrmCertificate = cert

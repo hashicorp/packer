@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+// SSHConfig contains the configuration for SSH communicator.
 type SSHConfig struct {
 	Comm communicator.Config `mapstructure:",squash"`
 
@@ -15,6 +16,7 @@ type SSHConfig struct {
 	SSHWaitTimeout time.Duration `mapstructure:"ssh_wait_timeout"`
 }
 
+// Prepare sets the default values for SSH communicator properties.
 func (c *SSHConfig) Prepare(ctx *interpolate.Context) []error {
 	// TODO: backwards compatibility, write fixer instead
 	if c.SSHWaitTimeout != 0 {
