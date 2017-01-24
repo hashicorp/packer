@@ -2,6 +2,7 @@ package vmx
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
@@ -70,8 +71,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
 	} else {
 		if _, err := os.Stat(c.SourcePath); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("source_path is invalid: %s", err))
+			// FIXME:
+			log.Printf("source_path is invalid: %s", err)
+			// errs = packer.MultiErrorAppend(errs,
+			// 	fmt.Errorf("source_path is invalid: %s", err))
 		}
 	}
 

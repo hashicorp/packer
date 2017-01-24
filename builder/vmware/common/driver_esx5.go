@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -39,21 +41,86 @@ type ESX5Driver struct {
 }
 
 func (d *ESX5Driver) Clone(dst, src string) error {
-	ret, err := d.sh("test -r %s", src)
+
+	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
+
+	err := d.sh("test -r", src)
 	if err != nil {
 		return errors.New("Source VMX not found")
 	}
 
-	ret, err := d.run(nil, "ls")
-	files := strings.Split(ret, "\n")
+	vmName := strings.TrimSuffix(path.Base(src), ".vmx")
+	srcDir := path.Dir(src)
+	dstDir := path.Join(path.Dir(srcDir), path.Dir(dst))
+	dstVmx := path.Join(dstDir, path.Base(dst))
+
+	log.Printf("Source: %s\n", src)
+	log.Printf("Dest: %s\n", dstVmx)
+
+	err = d.sh("mkdir", dstDir)
 	if err != nil {
-		return errors.New("Error running cmd")
+		return fmt.Errorf("Failed to create the destination directory %s: %s", dstDir, err)
 	}
-	for _, f := range files {
-		log.Printf("One file is: %s", f)
+
+	err = d.sh("cp", src, dstVmx)
+	if err != nil {
+		return fmt.Errorf("Failed to copy the vmx file %s: %s", src, err)
 	}
-	log.Printf("Return was: %s", ret)
-	return errors.New("Cloning is not supported with the ESX driver.")
+
+	filesToClone, err := d.run(nil, "find", srcDir, "! -name '*.vmdk' ! -name '*.vmx' -type f")
+	if err != nil {
+		return fmt.Errorf("Failing to get the file list to copy: %s", err)
+	}
+	for _, f := range linesToArray(filesToClone) {
+		log.Printf("Copying file %s\n", f)
+		err := d.sh("cp", f, dstDir)
+		if err != nil {
+			return fmt.Errorf("Failing to copy %s to %s: %s", f, dstDir, err)
+		}
+	}
+
+	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", src)
+	if err != nil {
+		return fmt.Errorf("Failing to get the vmdk list to clone %s", err)
+	}
+	for _, disk := range linesToArray(disksToClone) {
+		srcDisk := path.Join(srcDir, disk)
+		if path.IsAbs(disk) {
+			srcDisk = disk
+		}
+		destDisk := path.Join(dstDir, path.Base(disk))
+		err := d.sh("vmkfstools", "-d thin", "-i", srcDisk, destDisk)
+		if err != nil {
+			return fmt.Errorf("Failing to clone disk %s: %s", srcDisk, err)
+		}
+	}
+
+	vmxDir, err = ioutil.TempDir("", "packer-vmx")
+	if err != nil {
+		err := fmt.Errorf("Error preparing VMX template: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Set the tempDir so we clean it up
+	s.tempDir = vmxDir
+
+	// FIXME: VMName should be taken from the config.
+	vmxEdits := []string{
+		"s/\\(display[Nn]ame = \\).*/\\1\"" + vmName + "\"/",
+		"/ethernet..generated[aA]ddress =/d",
+		"/uuid.bios =/d",
+		"/uuid.location =/d",
+		"/vc.uuid =/d",
+	}
+	for _, edit := range vmxEdits {
+		err := d.sh("sed -i -e", "'", edit, "'", dstVmx)
+		if err != nil {
+			return fmt.Errorf("Failed to edit the destination file %s: %s", dstVmx, err)
+		}
+	}
+	return nil
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
@@ -466,6 +533,15 @@ func (d *ESX5Driver) upload(dst, src string) error {
 	}
 	defer f.Close()
 	return d.comm.Upload(dst, f, nil)
+}
+
+func (d *ESX5Driver) download(dst, src string) error {
+	f, err := os.Open(dst)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return d.comm.Download(dst, f, nil)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
