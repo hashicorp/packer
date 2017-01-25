@@ -44,7 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_tags",
-				"tags",
+				"ebs_volumes",
 			},
 		},
 	}, raws...)
