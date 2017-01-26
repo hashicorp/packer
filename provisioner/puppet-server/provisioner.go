@@ -20,6 +20,9 @@ type Config struct {
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	// Additional arguments to pass when executing Puppet
+	ExtraArguments []string `mapstructure:"extra_arguments"`
+
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
 
@@ -66,6 +69,7 @@ type ExecuteTemplate struct {
 	Options              string
 	PuppetBinDir         string
 	Sudo                 bool
+	ExtraArguments       string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -75,6 +79,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -173,7 +178,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
+		ExtraArguments:       strings.Join(p.config.ExtraArguments, " "),
 	}
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
@@ -240,5 +247,6 @@ func (p *Provisioner) commandTemplate() string {
 		"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
 		"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
 		"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-		"--detailed-exitcodes"
+		"--detailed-exitcodes " +
+		"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}"
 }

@@ -86,6 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
