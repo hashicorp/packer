@@ -5,6 +5,7 @@
 * builder/docker: create export dir if needed. [GH-4439]
 * communicator/docker: preserve file mode. [GH-4443]
 * communicator/winrm: support ProxyFromEnvironment. [GH-4463]
+* builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
 
 ## 0.12.2 (January 20, 2017)
 
