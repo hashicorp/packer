@@ -41,6 +41,7 @@ type clientRequest struct {
 
 func (c *clientRequest) Transport(endpoint *Endpoint) error {
 	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: endpoint.Insecure,
 		},
