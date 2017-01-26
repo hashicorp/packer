@@ -41,6 +41,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_tags",
+				"ebs_volumes",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, err
@@ -128,10 +134,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             launchBlockDevices,
 			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
 		&stepTagEBSVolumes{
 			VolumeMapping: b.config.VolumeMappings,
+			Ctx:           b.config.ctx,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,

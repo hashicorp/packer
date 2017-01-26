@@ -13,6 +13,7 @@ import (
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type StepRunSourceInstance struct {
@@ -32,6 +33,7 @@ type StepRunSourceInstance struct {
 	Tags                              map[string]string
 	UserData                          string
 	UserDataFile                      string
+	Ctx                               interpolate.Context
 
 	instanceId  string
 	spotRequest *ec2.SpotInstanceRequest
@@ -275,7 +277,14 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	if _, exists := s.Tags["Name"]; !exists {
 		s.Tags["Name"] = "Packer Builder"
 	}
-	ec2Tags := ConvertToEC2Tags(s.Tags)
+
+	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error tagging source instance: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
