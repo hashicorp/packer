@@ -12,7 +12,6 @@
 ### IMPROVEMENTS:
 
 * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
-* builder/oneandone: oneandone builder - documentation removed invalid parameters. [GH-4456]
 * builder/openstack: Add support for instance metadata. [GH-4361]
 * builder/openstack: Attempt to use existing floating IPs before allocating
     a new one. [GH-4357]
