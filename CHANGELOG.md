@@ -1,6 +1,6 @@
 ## (Unreleased)
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
 * builder/docker: create export dir if needed. [GH-4439]
 * communicator/docker: preserve file mode. [GH-4443]
