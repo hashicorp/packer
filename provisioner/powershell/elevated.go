@@ -82,11 +82,7 @@ do {
 } while (!($t.state -eq 3))
 $result = $t.LastTaskResult
 if (Test-Path $log) {
-  try {
-    Takeown /F $log | Out-Null
-    Icacls $log /Grant:r Administrators:F /c /q 2>&1 | Out-Null
     Remove-Item $log -Force -ErrorAction SilentlyContinue | Out-Null
-  } catch { $Global:Error.RemoveAt(0) }
 }
 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($s) | Out-Null
 exit $result`))
