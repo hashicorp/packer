@@ -12,6 +12,8 @@ import (
 	"sort"
 	"strings"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
 )
@@ -260,8 +262,24 @@ func (r *rawTemplate) parsePostProcessor(
 	}
 }
 
+func convert(i interface{}) interface{} {
+	switch x := i.(type) {
+	case map[interface{}]interface{}:
+		m2 := map[string]interface{}{}
+		for k, v := range x {
+			m2[k.(string)] = convert(v)
+		}
+		return m2
+	case []interface{}:
+		for i, v := range x {
+			x[i] = convert(v)
+		}
+	}
+	return i
+}
+
 // Parse takes the given io.Reader and parses a Template object out of it.
-func Parse(r io.Reader) (*Template, error) {
+func Parse(r io.Reader, ftype string) (*Template, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
@@ -270,8 +288,20 @@ func Parse(r io.Reader) (*Template, error) {
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json.NewDecoder(r).Decode(&raw); err != nil {
-		return nil, err
+	switch ftype {
+	case "json", "":
+		if err := json.NewDecoder(r).Decode(&raw); err != nil {
+			return nil, err
+		}
+	case "yml":
+		tbuf, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		if err := yaml.Unmarshal(tbuf, &raw); err != nil {
+			return nil, err
+		}
+		raw = convert(raw)
 	}
 
 	// Create our decoder
@@ -334,17 +364,26 @@ func ParseFile(path string) (*Template, error) {
 		}
 		defer f.Close()
 	}
-	tpl, err := Parse(f)
+	ext := filepath.Ext(path)[1:]
+	switch ext {
+	case "yaml":
+		ext = "yml"
+	}
+
+	tpl, err := Parse(f, ext)
 	if err != nil {
-		syntaxErr, ok := err.(*json.SyntaxError)
-		if !ok {
-			return nil, err
+		if ext == "json" {
+			syntaxErr, ok := err.(*json.SyntaxError)
+			if !ok {
+				return nil, err
+			}
+			// Rewind the file and get a better error
+			f.Seek(0, os.SEEK_SET)
+			// Grab the error location, and return a string to point to offending syntax error
+			line, col, highlight := highlightPosition(f, syntaxErr.Offset)
+			err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)
 		}
-		// Rewind the file and get a better error
-		f.Seek(0, os.SEEK_SET)
-		// Grab the error location, and return a string to point to offending syntax error
-		line, col, highlight := highlightPosition(f, syntaxErr.Offset)
-		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)
+
 		return nil, err
 	}
 
