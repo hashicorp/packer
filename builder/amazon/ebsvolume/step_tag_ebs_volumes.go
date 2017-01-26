@@ -3,19 +3,22 @@ package ebsvolume
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
+	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type stepTagEBSVolumes struct {
 	VolumeMapping []BlockDevice
+	Ctx           interpolate.Context
 }
 
 func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
+	sourceAMI := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 
 	volumes := make(EbsVolumes)
@@ -40,12 +43,12 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 				continue
 			}
 
-			tags := make([]*ec2.Tag, 0, len(mapping.Tags))
-			for key, value := range mapping.Tags {
-				tags = append(tags, &ec2.Tag{
-					Key:   aws.String(fmt.Sprintf("%s", key)),
-					Value: aws.String(fmt.Sprintf("%s", value)),
-				})
+			tags, err := awscommon.ConvertToEC2Tags(mapping.Tags, *ec2conn.Config.Region, *sourceAMI.ImageId, s.Ctx)
+			if err != nil {
+				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
 			}
 
 			for _, v := range instance.BlockDeviceMappings {
