@@ -96,3 +96,19 @@ AMI.
         "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
       ]
     }
+
+
+## Issues when using numerous Builders/Provisioners/Post-Processors
+
+Packer uses a separate process for each builder, provisioner, post-processor,
+and plugin. In certain cases, if you have too many of these, you can run out of
+[file descriptors](https://en.wikipedia.org/wiki/File_descriptor). This results
+in an error that might look like
+
+```
+error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:
+too many open files
+```
+
+On Unix systems, you can check what your file descriptor limit is with `ulimit
+-Sn`. You should check with your OS vendor on how to raise this limit.
