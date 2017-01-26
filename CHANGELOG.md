@@ -7,6 +7,10 @@
 * communicator/winrm: support ProxyFromEnvironment. [GH-4463]
 * builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
 
+### BUG FIXES:
+
+* builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+
 ## 0.12.2 (January 20, 2017)
 
 ### FEATURES:
