@@ -5,11 +5,11 @@ import (
 )
 
 type elevatedOptions struct {
-	User            string
-	Password        string
-	TaskName        string
-	TaskDescription string
-	EncodedCommand  string
+	User              string
+	Password          string
+	TaskName          string
+	TaskDescription   string
+	XMLEscapedCommand string
 }
 
 var elevatedTemplate = template.Must(template.New("ElevatedCommand").Parse(`
@@ -53,7 +53,7 @@ $t.XmlText = @'
   <Actions Context="Author">
     <Exec>
       <Command>cmd</Command>
-	  <Arguments>/c powershell.exe -EncodedCommand {{.EncodedCommand}} &gt; %SYSTEMROOT%\Temp\{{.TaskName}}.out 2&gt;&amp;1</Arguments>
+      <Arguments>/c {{.XMLEscapedCommand}} &gt; %SYSTEMROOT%\Temp\{{.TaskName}}.out 2&gt;&amp;1</Arguments>
     </Exec>
   </Actions>
 </Task>

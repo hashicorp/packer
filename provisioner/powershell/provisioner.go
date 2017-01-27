@@ -5,6 +5,7 @@ package powershell
 import (
 	"bufio"
 	"bytes"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -112,7 +113,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.EnvVarFormat == "" {
-		p.config.EnvVarFormat = `$env:%s="%s"; `
+		p.config.EnvVarFormat = `$env:%s=\"%s\"; `
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
@@ -120,11 +121,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`
+		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; . {{.Vars}}; &'{{.Path}}'; exit $LastExitCode`
+		p.config.ElevatedExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -389,25 +390,8 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	commandText, err := p.generateCommandLineRunner(command)
-	if err != nil {
-		return "", fmt.Errorf("Error generating command line runner: %s", err)
-	}
-
-	return commandText, err
-}
-
-func (p *Provisioner) generateCommandLineRunner(command string) (commandText string, err error) {
-	log.Printf("Building command line for: %s", command)
-
-	base64EncodedCommand, err := powershellEncode(command)
-	if err != nil {
-		return "", fmt.Errorf("Error encoding command: %s", err)
-	}
-
-	commandText = "powershell -executionpolicy bypass -encodedCommand " + base64EncodedCommand
-
-	return commandText, nil
+	// Return the interpolated command
+	return command, nil
 }
 
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
@@ -449,20 +433,26 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath string, err error) {
 	log.Printf("Building elevated command wrapper for: %s", command)
 
-	// generate command
 	var buffer bytes.Buffer
 
-	base64EncodedCommand, err := powershellEncode(command)
+	// elevatedTemplate wraps the command in a single quoted XML text
+	// string so we need to escape characters considered 'special' in XML.
+	err = xml.EscapeText(&buffer, []byte(command))
 	if err != nil {
-		return "", fmt.Errorf("Error encoding command: %s", err)
+		return "", fmt.Errorf("Error escaping characters special to XML in command %s: %s", command, err)
 	}
+	escapedCommand := buffer.String()
+	log.Printf("Command [%s] converted to [%s] for use in XML string", command, escapedCommand)
 
+	buffer.Reset()
+
+	// Generate command
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
-		User:            p.config.ElevatedUser,
-		Password:        p.config.ElevatedPassword,
-		TaskDescription: "Packer elevated task",
-		TaskName:        fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
-		EncodedCommand:  base64EncodedCommand,
+		User:              p.config.ElevatedUser,
+		Password:          p.config.ElevatedPassword,
+		TaskDescription:   "Packer elevated task",
+		TaskName:          fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
+		XMLEscapedCommand: escapedCommand,
 	})
 
 	if err != nil {
