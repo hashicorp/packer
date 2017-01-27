@@ -170,8 +170,8 @@ http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
 information. If you specify a `vpc_id`, you will also need to set `subnet_id`. 
 Unless you modify your subnet's [IPv4 public addressing attribute](
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-ip-addressing.html#subnet-public-ip),
-you will need to set `associate_public_ip_address` to `true`, or set up a [VPN](
-http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_VPN.html).
+you will also need to set `associate_public_ip_address` to `true`, or set up a 
+[VPN](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_VPN.html).
 
 ## Managing the Image
 
