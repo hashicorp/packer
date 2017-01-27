@@ -167,7 +167,7 @@ able to determine the default VPC, which the `t2` instance types require. This
 can happen if you created your AWS account before `2013-12-04`.  You can either
 change the `instance_type` to `m3.medium`, or specify a VPC. Please see
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
-information. Specify a `vpc_id` and you will need to specify a `subnet_id`.
+information. If you specify a `vpc_id`, you will also need to set `subnet_id`.
 
 ## Managing the Image
 
