@@ -70,13 +70,15 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	// NOTE:lxc file push doesn't yet support directory uploads.
 	// As a work around, we tar up the folder, upload it as a file, then extract it
 
-	os.Chdir(src)
-	tar, err := c.CmdWrapper("tar -czf - .")
+	// Don't use 'z' flag as compressing may take longer and the transfer is likely local.
+	// If this isn't the case, it is possible for the user to crompress in another step then transfer.
+	// It wouldn't be possibe to disable compression, without exposing this option.
+	tar, err := c.CmdWrapper(fmt.Sprintf("tar -cf - -C %s .", src))
 	if err != nil {
 		return err
 	}
 
-	cp, err := c.CmdWrapper(fmt.Sprintf("lxc exec %s -- tar -xzf - -C %s ", c.ContainerName, dst))
+	cp, err := c.CmdWrapper(fmt.Sprintf("lxc exec %s -- tar -xf - -C %s", c.ContainerName, dst))
 	if err != nil {
 		return err
 	}
