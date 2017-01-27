@@ -146,10 +146,17 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
+    values include any of "ide", "scsi", "virtio" or "virtio-scsi"^* . Note also
     that any boot commands or kickstart type scripts must have proper
     adjustments for resulting device names. The Qemu builder uses "virtio" by
     default.
+
+    ^* Please be aware that use of the "scsi" disk interface has been disabled
+    by Red Hat due to a bug described
+    [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220).
+    If you are running Qemu on RHEL or a RHEL variant such as CentOS, you
+    *must* choose one of the other listed interfaces. Using the "scsi"
+    interface under these circumstances will cause the build to fail.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
@@ -350,9 +357,15 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard. There are a set of
-special keys available. If these are in your boot command, they will be replaced
-by the proper key:
+machine, simulating a human actually typing the keyboard.
+
+-> Keystrokes are typed as separate key up/down events over VNC with a
+   default 100ms delay. The delay alleviates issues with latency and CPU
+   contention. For local builds you can tune this delay by specifying
+   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+
+There are a set of special keys available. If these are in your boot
+command, they will be replaced by the proper key:
 
 -   `<bs>` - Backspace
 
@@ -384,7 +397,7 @@ by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 

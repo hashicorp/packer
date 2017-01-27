@@ -558,14 +558,27 @@
 			"revision": "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 		},
 		{
+			"checksumSHA1": "t7hEeujQesCSzjZIPcE80XgQ9M0=",
+			"path": "github.com/masterzen/azure-sdk-for-go/core/http",
+			"revision": "ee4f0065d00cd12b542f18f5bc45799e88163b12",
+			"revisionTime": "2016-10-14T13:56:28Z"
+		},
+		{
+			"checksumSHA1": "xJVMikTtYbfI2KqKeUXaO4292JU=",
+			"path": "github.com/masterzen/azure-sdk-for-go/core/tls",
+			"revision": "ee4f0065d00cd12b542f18f5bc45799e88163b12",
+			"revisionTime": "2016-10-14T13:56:28Z"
+		},
+		{
 			"checksumSHA1": "yg57Q4J8Ob0LoYvqDxsWZ6AHffE=",
 			"path": "github.com/masterzen/simplexml/dom",
 			"revision": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"checksumSHA1": "BL8FA9MJQmmQBH5s9wYvhDWFk0Q=",
+			"checksumSHA1": "6uNzRk3ScsTC+olpCXkW4M/L3fg=",
 			"path": "github.com/masterzen/winrm",
-			"revision": "ef3efbb97f99fc204bd9c7edf778a0dbd9781baf"
+			"revision": "b7e3d2de4979ce5eae5c1c1ef450040c5d675a89",
+			"revisionTime": "2017-01-26T07:02:57Z"
 		},
 		{
 			"checksumSHA1": "KTsgWipT3ennAAtaKxEZairxero=",
@@ -645,9 +658,10 @@
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
-			"checksumSHA1": "Cfe+Uaa7inbFKsaRuUSaUVh8KJs=",
+			"checksumSHA1": "CeruhvOoHGjNlO+8M7WSUUz1oXA=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "7f50d16167d327698b91ccd5363d8691865e2580"
+			"revision": "eda77c146d051992c737322f60a4f690c9538aa1",
+			"revisionTime": "2017-01-17T09:42:35Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",

@@ -3,10 +3,10 @@ package communicator
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
+	"github.com/masterzen/winrm"
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
@@ -41,7 +41,7 @@ type Config struct {
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
-	WinRMTransportDecorator func(*http.Transport) http.RoundTripper
+	WinRMTransportDecorator func() winrm.Transporter
 }
 
 // Port returns the port that will be used for access based on config.

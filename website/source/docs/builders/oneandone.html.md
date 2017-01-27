@@ -33,8 +33,6 @@ builder.
  
 -   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
--   `image_password` (string) - Password for the server images.
-
 -   `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
 
 -   `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".

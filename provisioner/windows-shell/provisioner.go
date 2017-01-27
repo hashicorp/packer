@@ -188,13 +188,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
-	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
-
-	copy(envVars, p.config.Vars)
-
 	if p.config.Inline != nil {
 		temp, err := extractScript(p)
 		if err != nil {
@@ -214,10 +207,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		defer f.Close()
 
 		// Create environment variables to set before executing the command
-		flattendVars, err := p.createFlattenedEnvVars()
-		if err != nil {
-			return err
-		}
+		flattendVars := p.createFlattenedEnvVars()
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
@@ -294,21 +284,21 @@ func (p *Provisioner) retryable(f func() error) error {
 	}
 }
 
-func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
+func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
 	flattened = ""
 	envVars := make(map[string]string)
 
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
 
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
-		keyValue := strings.Split(envVar, "=")
-		if len(keyValue) != 2 || keyValue[0] == "" {
-			err = errors.New(fmt.Sprintf("Shell provisioner environment variables must be in key=value format. Currently it is '%s'", envVar))
-			return
-		}
+		keyValue := strings.SplitN(envVar, "=", 2)
 		envVars[keyValue[0]] = keyValue[1]
 	}
 	// Create a list of env var keys in sorted order

@@ -85,8 +85,13 @@ builder.
 
 ### Optional:
 
--   `ami_block_device_mappings` (array of block device mappings) - Add the block
-    device mappings to the AMI. The block device mappings allow for keys:
+-   `ami_block_device_mappings` (array of block device mappings) - Add one or
+    more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
+    to the AMI. These will be attached when booting a new instance from your
+    AMI. To add a block device during the packer build see
+    `launch_block_device_mappings` below. Your options here may vary depending
+    on the type of VM you use. The block device mappings allow for the following
+    configuration:
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination. Default `false`. **NOTE**: If this
@@ -122,7 +127,10 @@ builder.
         volumes
 
 -   `ami_description` (string) - The description to set for the
-    resulting AMI(s). By default this description is empty.
+    resulting AMI(s). By default this description is empty. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
@@ -186,13 +194,17 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `launch_block_device_mappings` (array of block device mappings) - Add the
-    block device mappings to the launch instance. The block device mappings are
-    the same as `ami_block_device_mappings` above.
+-   `launch_block_device_mappings` (array of block device mappings) - Add one or
+    more block devices before the packer build starts. These are not necessarily
+    preserved when booting from the AMI built with packer. See
+    `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
-    resulting AMI unless they're duplicated in `tags`.
+    resulting AMI unless they're duplicated in `tags`. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
     to assign to the instance. By default this is not set and Packer will
@@ -284,7 +296,10 @@ builder.
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
--   `tags` (object of key/value strings) - Tags applied to the AMI.
+-   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name with an UUID.

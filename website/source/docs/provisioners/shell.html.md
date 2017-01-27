@@ -149,6 +149,13 @@ commonly useful environmental variables:
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
 
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
+
 ## Handling Reboots
 
 Provisioning sometimes involves restarts, usually when updating the operating
@@ -213,9 +220,9 @@ would be:
 
 -   On Ubuntu, the `/bin/sh` shell is
     [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
-    in it, then put `#!/bin/bash` at the top of your script. Differences between
-    dash and bash can be found on the
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific
+    commands in it, then put `#!/bin/bash -e` at the top of your script.
+    Differences between dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*
