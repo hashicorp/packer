@@ -10,6 +10,7 @@
 ### BUG FIXES:
 
 * builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+* core: always check for an error first when walking a path. [GH-4467]
 
 ## 0.12.2 (January 20, 2017)
 
