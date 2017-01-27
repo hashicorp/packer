@@ -72,6 +72,8 @@ type Config struct {
 	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
 	ResourceGroupName               string             `mapstructure:"resource_group_name"`
 	StorageAccount                  string             `mapstructure:"storage_account"`
+	TempComputeName                 string             `mapstructure:"temp_compute_name"`
+	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`	
 	storageAccountBlobEndpoint      string
 	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                *azure.Environment
@@ -288,9 +290,17 @@ func setRuntimeValues(c *Config) {
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	c.tmpCertificatePassword = tempName.CertificatePassword
-	c.tmpComputeName = tempName.ComputeName
+	if c.TempComputeName == "" {
+		c.tmpComputeName = tempName.ComputeName
+	} else {
+		c.tmpComputeName = c.TempComputeName
+	}
 	c.tmpDeploymentName = tempName.DeploymentName
-	c.tmpResourceGroupName = tempName.ResourceGroupName
+	if c.TempResourceGroupName == "" {
+		c.tmpResourceGroupName = tempName.ResourceGroupName
+	} else {
+		c.tmpResourceGroupName = c.TempResourceGroupName
+	}
 	c.tmpOSDiskName = tempName.OSDiskName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
