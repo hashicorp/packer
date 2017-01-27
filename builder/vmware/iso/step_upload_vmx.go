@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
-	"path/filepath"
 )
 
 // This step upload the VMX to the remote host
@@ -28,10 +29,10 @@ func (c *StepUploadVMX) Run(state multistep.StateBag) multistep.StepAction {
 	vmxPath := state.Get("vmx_path").(string)
 
 	if c.RemoteType == "esx5" {
-		remoteDriver, ok := driver.(RemoteDriver)
+		remoteDriver, ok := driver.(vmwcommon.RemoteDriver)
 		if ok {
 			remoteVmxPath := filepath.ToSlash(filepath.Join(fmt.Sprintf("%s", remoteDriver), filepath.Base(vmxPath)))
-			if err := remoteDriver.upload(remoteVmxPath, vmxPath); err != nil {
+			if err := remoteDriver.Upload(remoteVmxPath, vmxPath); err != nil {
 				state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
 				return multistep.ActionHalt
 			}

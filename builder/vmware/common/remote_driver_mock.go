@@ -1,11 +1,7 @@
-package iso
-
-import (
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-)
+package common
 
 type RemoteDriverMock struct {
-	vmwcommon.DriverMock
+	DriverMock
 
 	UploadISOCalled bool
 	UploadISOPath   string

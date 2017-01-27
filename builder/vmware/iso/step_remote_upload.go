@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
@@ -19,7 +20,7 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	remote, ok := driver.(RemoteDriver)
+	remote, ok := driver.(vmwcommon.RemoteDriver)
 	if !ok {
 		return multistep.ActionContinue
 	}

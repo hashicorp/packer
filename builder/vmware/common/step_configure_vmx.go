@@ -1,6 +1,7 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,10 +23,15 @@ type StepConfigureVMX struct {
 }
 
 func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
+	log.Printf("Configure VMX\n")
+	var vmxContents []byte
+	var err error
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	vmxContents, err := ioutil.ReadFile(vmxPath)
+	vmxContents, err = ioutil.ReadFile(vmxPath)
+
 	if err != nil {
 		err := fmt.Errorf("Error reading VMX file: %s", err)
 		state.Put("error", err)
@@ -68,7 +74,15 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	if err := WriteVMX(vmxPath, vmxData); err != nil {
+	if remoteDriver, ok := driver.(RemoteDriver); ok {
+		var buf bytes.Buffer
+		buf.WriteString(EncodeVMX(vmxData))
+		err = remoteDriver.WriteFile(vmxPath, buf.Bytes())
+	} else {
+		err = WriteVMX(vmxPath, vmxData)
+	}
+
+	if err != nil {
 		err := fmt.Errorf("Error writing VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

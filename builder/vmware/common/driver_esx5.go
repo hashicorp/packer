@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -44,27 +43,23 @@ func (d *ESX5Driver) Clone(dst, src string) error {
 
 	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
 
-	err := d.sh("test -r", src)
-	if err != nil {
-		return errors.New("Source VMX not found")
-	}
+	d.SetOutputDir(dst)
+	srcVmx := d.datastorePath(path.Dir(src))
+	dstVmx := d.datastorePath(dst)
+	srcDir := path.Dir(srcVmx)
+	dstDir := path.Dir(dstVmx)
 
-	vmName := strings.TrimSuffix(path.Base(src), ".vmx")
-	srcDir := path.Dir(src)
-	dstDir := path.Join(path.Dir(srcDir), path.Dir(dst))
-	dstVmx := path.Join(dstDir, path.Base(dst))
-
-	log.Printf("Source: %s\n", src)
+	log.Printf("Source: %s\n", srcVmx)
 	log.Printf("Dest: %s\n", dstVmx)
 
-	err = d.sh("mkdir", dstDir)
+	err := d.sh("mkdir", dstDir)
 	if err != nil {
 		return fmt.Errorf("Failed to create the destination directory %s: %s", dstDir, err)
 	}
 
-	err = d.sh("cp", src, dstVmx)
+	err = d.sh("cp", srcVmx, dstVmx)
 	if err != nil {
-		return fmt.Errorf("Failed to copy the vmx file %s: %s", src, err)
+		return fmt.Errorf("Failed to copy the vmx file %s: %s", srcVmx, err)
 	}
 
 	filesToClone, err := d.run(nil, "find", srcDir, "! -name '*.vmdk' ! -name '*.vmx' -type f")
@@ -79,7 +74,7 @@ func (d *ESX5Driver) Clone(dst, src string) error {
 		}
 	}
 
-	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", src)
+	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", srcVmx)
 	if err != nil {
 		return fmt.Errorf("Failing to get the vmdk list to clone %s", err)
 	}
@@ -89,37 +84,28 @@ func (d *ESX5Driver) Clone(dst, src string) error {
 			srcDisk = disk
 		}
 		destDisk := path.Join(dstDir, path.Base(disk))
-		err := d.sh("vmkfstools", "-d thin", "-i", srcDisk, destDisk)
+		err = d.sh("vmkfstools", "-d thin", "-i", srcDisk, destDisk)
 		if err != nil {
 			return fmt.Errorf("Failing to clone disk %s: %s", srcDisk, err)
 		}
 	}
 
-	vmxDir, err = ioutil.TempDir("", "packer-vmx")
-	if err != nil {
-		err := fmt.Errorf("Error preparing VMX template: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// Set the tempDir so we clean it up
-	s.tempDir = vmxDir
-
-	// FIXME: VMName should be taken from the config.
-	vmxEdits := []string{
-		"s/\\(display[Nn]ame = \\).*/\\1\"" + vmName + "\"/",
-		"/ethernet..generated[aA]ddress =/d",
-		"/uuid.bios =/d",
-		"/uuid.location =/d",
-		"/vc.uuid =/d",
-	}
-	for _, edit := range vmxEdits {
-		err := d.sh("sed -i -e", "'", edit, "'", dstVmx)
-		if err != nil {
-			return fmt.Errorf("Failed to edit the destination file %s: %s", dstVmx, err)
-		}
-	}
+	//
+	// // FIXME: VMName should be taken from the config.
+	// vmxEdits := []string{
+	// 	"s/\\(display[Nn]ame = \\).*/\\1\"" + vmName + "\"/",
+	// 	"/ethernet..generated[aA]ddress =/d",
+	// 	"/uuid.bios =/d",
+	// 	"/uuid.location =/d",
+	// 	"/vc.uuid =/d",
+	// }
+	// for _, edit := range vmxEdits {
+	// 	err := d.sh("sed -i -e", "'", edit, "'", dstVmx)
+	// 	if err != nil {
+	// 		return fmt.Errorf("Failed to edit the destination file %s: %s", dstVmx, err)
+	// 	}
+	// }
+	log.Printf("Successfully cloned %s to %s\n", src, dst)
 	return nil
 }
 
@@ -144,6 +130,21 @@ func (d *ESX5Driver) ReloadVM() error {
 	return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
 }
 
+func (d *ESX5Driver) ReadFile(name string) ([]byte, error) {
+	var b bytes.Buffer
+	writer := bufio.NewWriter(&b)
+	err := d.comm.Download(d.datastorePath(name), writer)
+	if err != nil {
+		return nil, fmt.Errorf("Cant read remote file %s: %s", name, err)
+	}
+	writer.Flush()
+	return b.Bytes(), nil
+}
+
+func (d *ESX5Driver) WriteFile(name string, content []byte) error {
+	return d.comm.Upload(d.datastorePath(name), bytes.NewReader(content), nil)
+}
+
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
 		//intentionally not checking for error since poweron may fail specially after initial VM registration
@@ -166,7 +167,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
-	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
+	if err := d.Upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
 	r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
@@ -209,7 +210,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 		return finalPath, nil
 	}
 
-	if err := d.upload(finalPath, localPath); err != nil {
+	if err := d.Upload(finalPath, localPath); err != nil {
 		return "", err
 	}
 
@@ -526,22 +527,13 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", path)
 }
 
-func (d *ESX5Driver) upload(dst, src string) error {
+func (d *ESX5Driver) Upload(dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	return d.comm.Upload(dst, f, nil)
-}
-
-func (d *ESX5Driver) download(dst, src string) error {
-	f, err := os.Open(dst)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return d.comm.Download(dst, f, nil)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
