@@ -22,7 +22,7 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	remote, ok := driver.(RemoteDriver)
+	remote, ok := driver.(vmwcommon.RemoteDriver)
 	if !ok {
 		return multistep.ActionContinue
 	}
