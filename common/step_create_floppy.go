@@ -114,6 +114,9 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	var crawlDirectoryFiles []string
 	crawlDirectory := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() {
 			crawlDirectoryFiles = append(crawlDirectoryFiles, path)
 			ui.Message(fmt.Sprintf("Adding file: %s", path))
