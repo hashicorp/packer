@@ -73,7 +73,7 @@ type Config struct {
 	ResourceGroupName               string             `mapstructure:"resource_group_name"`
 	StorageAccount                  string             `mapstructure:"storage_account"`
 	TempComputeName                 string             `mapstructure:"temp_compute_name"`
-	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`	
+	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`
 	storageAccountBlobEndpoint      string
 	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                *azure.Environment
