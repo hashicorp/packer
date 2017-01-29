@@ -10,6 +10,7 @@
 ### BUG FIXES:
 
 * builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
 * core: always check for an error first when walking a path. [GH-4467]
 
 ## 0.12.2 (January 20, 2017)
