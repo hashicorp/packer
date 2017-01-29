@@ -12,7 +12,9 @@ Type: `ansible`
 The `ansible` Packer provisioner runs Ansible playbooks. It dynamically creates
 an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
-machine being provisioned by Packer.
+machine being provisioned by Packer. Note, this means that any `remote_user`
+defined in tasks will be ignored. Packer will always connect with the user
+given in the json config.
 
 ## Basic Example
 
