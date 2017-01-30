@@ -145,7 +145,7 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 ### winrm communicator
 
-Windows builds require a custom Ansible communicator and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
+Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
 
 ```
 from __future__ import (absolute_import, division, print_function)
