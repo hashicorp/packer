@@ -116,6 +116,33 @@ Redhat / CentOS builds have been known to fail with the following error due to `
     virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
 ```
 
+### chroot communicator
+
+Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
+
+```
+{
+    "builders": [
+        {
+            "type": "amazon-chroot",
+            "mount_path": "/mnt/packer-amazon-chroot",
+            "region": "us-east-1",
+            "source_ami": "ami-123456"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "extra_arguments": [
+                "--connection=chroot",
+                "--inventory-file=/mnt/packer-amazon-chroot,"
+            ],
+            "playbook_file": "main.yml"
+        }
+    ]
+}
+```
+
 ### winrm communicator
 
 Windows builds require a custom Ansible communicator and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
