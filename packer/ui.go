@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -64,6 +65,7 @@ type BasicUi struct {
 	ErrorWriter io.Writer
 	l           sync.Mutex
 	interrupted bool
+	scanner     *bufio.Scanner
 }
 
 // MachineReadableUi is a UI that only outputs machine-readable output
@@ -174,6 +176,9 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		return "", errors.New("interrupted")
 	}
 
+	if rw.scanner == nil {
+		rw.scanner = bufio.NewScanner(rw.Reader)
+	}
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 	defer signal.Stop(sigCh)
@@ -188,10 +193,13 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 	result := make(chan string, 1)
 	go func() {
 		var line string
-		if _, err := fmt.Fscanln(rw.Reader, &line); err != nil {
-			log.Printf("ui: scan err: %s", err)
+		if rw.scanner.Scan() {
+			line = rw.scanner.Text()
 		}
-
+		if err := rw.scanner.Err(); err != nil {
+			log.Printf("ui: scan err: %s", err)
+			return
+		}
 		result <- line
 	}()
 
