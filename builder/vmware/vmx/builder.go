@@ -80,6 +80,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
+		&vmwcommon.StepUploadVMX{
+			RemoteType: b.config.RemoteType,
+		},
+		&vmwcommon.StepRegister{
+			Format:         "foo",
+			KeepRegistered: false,
+		},
 		&vmwcommon.StepConfigureVNC{
 			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
