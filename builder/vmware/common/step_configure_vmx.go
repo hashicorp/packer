@@ -30,7 +30,6 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 
 	var vmxContents []byte
 	var err error
-	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	vmxPath := state.Get("vmx_path").(string)
@@ -75,13 +74,7 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 		}
 	}
 
-	if remoteDriver, ok := driver.(RemoteDriver); ok {
-		var buf bytes.Buffer
-		buf.WriteString(EncodeVMX(vmxData))
-		err = remoteDriver.WriteFile(vmxPath, buf.Bytes())
-	} else {
-		err = WriteVMX(vmxPath, vmxData)
-	}
+	err = WriteVMX(vmxPath, vmxData)
 
 	if err != nil {
 		err := fmt.Errorf("Error writing VMX file: %s", err)
