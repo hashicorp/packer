@@ -59,6 +59,9 @@ type Config struct {
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	// Additional argument to pass when executing Puppet.
+	ExtraArguments []string `mapstructure:"extra_arguments"`
+
 	// The Guest OS Type (unix or windows)
 	GuestOSType string `mapstructure:"guest_os_type"`
 
@@ -77,9 +80,6 @@ type Config struct {
 	// The hostname of the Puppet server.
 	PuppetServer string `mapstructure:"puppet_server"`
 
-	// Additional options to be passed to `puppet agent`.
-	Options string `mapstructure:"options"`
-
 	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
 
@@ -95,6 +95,50 @@ type Config struct {
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
 }
 
+type guestOSTypeConfig struct {
+	tempDir          string
+	stagingDir       string
+	executeCommand   string
+	facterVarsFmt    string
+	facterVarsJoiner string
+}
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: {
+		tempDir: "/tmp",
+		stagingDir: "/tmp/packer-puppet-server",
+		executeCommand: "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}}" +
+			"{{if .Sudo}}sudo -E {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
+			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+		facterVarsFmt:    "FACTER_%s='%s'",
+		facterVarsJoiner: " ",
+	},
+	provisioner.WindowsOSType: {
+		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
+		executeCommand: "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}} " +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
+			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+		facterVarsFmt:    `SET "FACTER_%s=%s"`,
+		facterVarsJoiner: " & ",
+	},
+}
+
 type Provisioner struct {
 	config            Config
 	guestOSTypeConfig guestOSTypeConfig
@@ -107,7 +151,7 @@ type ExecuteTemplate struct {
 	ClientPrivateKeyPath string
 	PuppetNode           string
 	PuppetServer         string
-	Options              string
+	ExtraArguments       string
 	PuppetBinDir         string
 	Sudo                 bool
 }
@@ -119,6 +163,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -223,8 +268,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:           strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		ClientCertPath:       remoteClientCertPath,
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
@@ -233,7 +277,17 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
+		WorkingDir:           p.config.WorkingDir,
+		ExtraArguments:       "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
