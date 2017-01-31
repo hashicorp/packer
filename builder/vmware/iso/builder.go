@@ -341,8 +341,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCPortMax:         b.config.VNCPortMax,
 			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
-		&StepRegister{
-			Format: b.config.Format,
+		&vmwcommon.StepRegister{
+			Format:         b.config.Format,
+			KeepRegistered: b.config.KeepRegistered,
 		},
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
@@ -387,7 +388,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
 			VNCEnabled:               !b.config.DisableVNC,
 		},
-		&StepUploadVMX{
+		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
 		&StepExport{
