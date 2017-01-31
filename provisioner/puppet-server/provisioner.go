@@ -168,8 +168,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf("FACTER_%s='%s'", k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:           strings.Join(facterVars, " "),
 		ClientCertPath:       remoteClientCertPath,
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
@@ -178,14 +177,22 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
-		ExtraArguments:       strings.Join(p.config.ExtraArguments, " "),
+		ExtraArguments:       "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
 
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
 
+	// Execute Puppet
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
@@ -239,14 +246,14 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 }
 
 func (p *Provisioner) commandTemplate() string {
-	return "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
+	return "{{.FacterVars}} {{if .Sudo}} sudo -iE {{end}}" +
 		"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
 		"--onetime --no-daemonize " +
+		"--detailed-exitcodes " +
 		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
 		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
 		"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
 		"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
 		"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-		"--detailed-exitcodes " +
 		"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}"
 }
