@@ -1,25 +1,25 @@
-package iso
+package common
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
 )
 
 type StepRegister struct {
 	registeredPath string
 	Format         string
+	KeepRegistered bool
 }
 
 func (s *StepRegister) Run(state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(vmwcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
+	if remoteDriver, ok := driver.(RemoteDriver); ok {
 		ui.Say("Registering remote VM...")
 		if err := remoteDriver.Register(vmxPath); err != nil {
 			err := fmt.Errorf("Error registering VM: %s", err)
@@ -39,18 +39,17 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	driver := state.Get("driver").(vmwcommon.Driver)
+	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
-	if (config.KeepRegistered) && (!cancelled && !halted) {
+	if (s.KeepRegistered) && (!cancelled && !halted) {
 		ui.Say("Keeping virtual machine registered with ESX host (keep_registered = true)")
 		return
 	}
 
-	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
+	if remoteDriver, ok := driver.(RemoteDriver); ok {
 		if s.Format == "" {
 			ui.Say("Unregistering virtual machine...")
 			if err := remoteDriver.Unregister(s.registeredPath); err != nil {

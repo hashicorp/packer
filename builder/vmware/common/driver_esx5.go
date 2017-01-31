@@ -43,8 +43,8 @@ func (d *ESX5Driver) Clone(dst, src string) error {
 
 	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
 
-	d.SetOutputDir(dst)
-	srcVmx := d.datastorePath(path.Dir(src))
+	d.SetOutputDir(path.Dir(dst))
+	srcVmx := d.datastorePath(src)
 	dstVmx := d.datastorePath(dst)
 	srcDir := path.Dir(srcVmx)
 	dstDir := path.Dir(dstVmx)
