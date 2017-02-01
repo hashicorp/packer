@@ -76,17 +76,6 @@ type Config struct {
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
 
-	// remote vsphere
-	RemoteType           string `mapstructure:"remote_type"`
-	RemoteDatastore      string `mapstructure:"remote_datastore"`
-	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
-	RemoteCacheDirectory string `mapstructure:"remote_cache_directory"`
-	RemoteHost           string `mapstructure:"remote_host"`
-	RemotePort           uint   `mapstructure:"remote_port"`
-	RemoteUser           string `mapstructure:"remote_username"`
-	RemotePassword       string `mapstructure:"remote_password"`
-	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
-
 	CommConfig communicator.Config `mapstructure:",squash"`
 
 	ctx interpolate.Context
