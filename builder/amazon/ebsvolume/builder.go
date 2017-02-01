@@ -28,7 +28,8 @@ type Config struct {
 	VolumeMappings        []BlockDevice `mapstructure:"ebs_volumes"`
 	AMIEnhancedNetworking bool          `mapstructure:"enhanced_networking"`
 
-	ctx interpolate.Context
+	launchBlockDevices awscommon.BlockDevices
+	ctx                interpolate.Context
 }
 
 type Builder struct {
@@ -41,6 +42,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_tags",
+				"ebs_volumes",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, err
@@ -50,6 +57,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+
+	b.config.launchBlockDevices, err = commonBlockDevices(b.config.VolumeMappings, &b.config.ctx)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
@@ -90,8 +102,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	launchBlockDevices := commonBlockDevices(b.config.VolumeMappings)
-
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepSourceAMIInfo{
@@ -126,12 +136,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			EbsOptimized:             b.config.EbsOptimized,
 			AvailabilityZone:         b.config.AvailabilityZone,
-			BlockDevices:             launchBlockDevices,
+			BlockDevices:             b.config.launchBlockDevices,
 			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
 		&stepTagEBSVolumes{
 			VolumeMapping: b.config.VolumeMappings,
+			Ctx:           b.config.ctx,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,

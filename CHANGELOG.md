@@ -1,6 +1,17 @@
 ## (Unreleased)
 
-* builder/docker: create export dir if needed [GH-4439]
+### IMPROVEMENTS:
+
+* builder/docker: create export dir if needed. [GH-4439]
+* communicator/docker: preserve file mode. [GH-4443]
+* communicator/winrm: support ProxyFromEnvironment. [GH-4463]
+* builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
+
+### BUG FIXES:
+
+* builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
+* core: always check for an error first when walking a path. [GH-4467]
 
 ## 0.12.2 (January 20, 2017)
 
@@ -12,7 +23,6 @@
 ### IMPROVEMENTS:
 
 * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
-* builder/oneandone: oneandone builder - documentation removed invalid parameters. [GH-4456]
 * builder/openstack: Add support for instance metadata. [GH-4361]
 * builder/openstack: Attempt to use existing floating IPs before allocating
     a new one. [GH-4357]
