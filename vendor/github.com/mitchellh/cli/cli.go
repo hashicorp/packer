@@ -119,7 +119,7 @@ func (c *CLI) Run() (int, error) {
 	// Just show the version and exit if instructed.
 	if c.IsVersion() && c.Version != "" {
 		c.HelpWriter.Write([]byte(c.Version + "\n"))
-		return 1, nil
+		return 0, nil
 	}
 
 	// Attempt to get the factory function for creating the command
@@ -127,7 +127,7 @@ func (c *CLI) Run() (int, error) {
 	raw, ok := c.commandTree.Get(c.Subcommand())
 	if !ok {
 		c.HelpWriter.Write([]byte(c.HelpFunc(c.helpCommands(c.subcommandParent())) + "\n"))
-		return 1, nil
+		return 2, nil
 	}
 
 	command, err := raw.(CommandFactory)()
@@ -138,7 +138,7 @@ func (c *CLI) Run() (int, error) {
 	// If we've been instructed to just print the help, then print it
 	if c.IsHelp() {
 		c.commandHelp(command)
-		return 1, nil
+		return 0, nil
 	}
 
 	// If there is an invalid flag, then error
@@ -147,14 +147,14 @@ func (c *CLI) Run() (int, error) {
 			"Invalid flags before the subcommand. If these flags are for\n" +
 				"the subcommand, please put them after the subcommand.\n\n"))
 		c.commandHelp(command)
-		return 1, nil
+		return 2, nil
 	}
 
 	code := command.Run(c.SubcommandArgs())
 	if code == RunResultHelp {
 		// Requesting help
 		c.commandHelp(command)
-		return 1, nil
+		return 0, nil
 	}
 
 	return code, nil
