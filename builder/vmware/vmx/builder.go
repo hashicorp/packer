@@ -34,7 +34,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VMware image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig)
+	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, &b.config.CommConfig, b.config.VMName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
@@ -83,16 +83,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
-		&vmwcommon.StepRegister{
-			Format:         "foo",
-			KeepRegistered: false,
-		},
 		&vmwcommon.StepConfigureVNC{
 			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
 			VNCDisablePassword: b.config.VNCDisablePassword,
+		},
+		&vmwcommon.StepRegister{
+			Format:         "foo",
+			KeepRegistered: false,
 		},
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
