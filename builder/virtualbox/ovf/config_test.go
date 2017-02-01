@@ -17,8 +17,8 @@ func testConfig(t *testing.T) map[string]interface{} {
 	}
 }
 
-func getTempFile(t *testing.T) *os.File {
-	tf, err := ioutil.TempFile("", "packer")
+func getTempFile(t *testing.T, dir string) *os.File {
+	tf, err := ioutil.TempFile(dir, "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -88,7 +88,31 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	}
 
 	// Good
-	tf := getTempFile(t)
+	tf := getTempFile(t, "")
+	defer os.Remove(tf.Name())
+
+	c = testConfig(t)
+	c["source_path"] = tf.Name()
+	_, warns, err = NewConfig(c)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad: %s", err)
+	}
+
+	// Tests symlinks
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	err = os.Symlink(cwd, "link")
+	defer os.Remove(cwd + "/link")
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	tf = getTempFile(t, cwd+"/link")
 	defer os.Remove(tf.Name())
 
 	c = testConfig(t)
@@ -104,7 +128,7 @@ func TestNewConfig_sourcePath(t *testing.T) {
 
 func TestNewConfig_shutdown_timeout(t *testing.T) {
 	c := testConfig(t)
-	tf := getTempFile(t)
+	tf := getTempFile(t, "")
 	defer os.Remove(tf.Name())
 
 	// Expect this to fail
