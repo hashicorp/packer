@@ -22,6 +22,20 @@ var (
 	errImageNotSpecified      = fmt.Errorf("Image must be specified")
 )
 
+type Changes struct {
+	Cmd         []string
+	Labels      map[string]string
+	Expose      []string
+	Env         []string
+	Entrypoint  []string
+	User        string
+	Workdir     string
+	Onbuild     []string
+	Stopsignal  int
+	Healthcheck string
+	Shell       map[string]string
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
@@ -37,8 +51,9 @@ type Config struct {
 	Volumes    map[string]string
 	Privileged bool `mapstructure:"privileged"`
 	Author     string
-	Changes    []string
+	Changes    Changes `mapstructure:"changes"`
 	Message    string
+	//Changes    []string // TODO migrate
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors

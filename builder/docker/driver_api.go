@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	godocker "github.com/fsouza/go-dockerclient"
@@ -30,10 +31,28 @@ func (d *DockerApiDriver) DeleteImage(id string) error {
 	return d.client.RemoveImage(id)
 }
 
-func (d *DockerApiDriver) Commit(id, author string, changes []string, message string) (string, error) {
+func (d *DockerApiDriver) Commit(id, author string, changes Changes, message string) (string, error) {
 
-	// TODO changes
-	config := godocker.Config{}
+	exposedPorts := make(map[godocker.Port]struct{})
+	var empty struct{}
+
+	for _, port := range changes.Expose {
+		exposedPorts[godocker.Port(port)] = empty
+	}
+
+	config := godocker.Config{
+		Cmd:          changes.Cmd,
+		Labels:       changes.Labels,
+		Env:          changes.Env,
+		Entrypoint:   changes.Entrypoint,
+		ExposedPorts: exposedPorts,
+		User:         changes.User,
+		WorkingDir:   changes.Workdir,
+		OnBuild:      changes.Onbuild,
+		StopSignal:   strconv.Itoa(changes.Stopsignal),
+		// Healthcheck: changes.Healthcheck, TODO
+		// Shell:       changes.Shell, TODO
+	}
 
 	image, err := d.client.CommitContainer(godocker.CommitContainerOptions{
 		Container: id,
@@ -263,3 +282,42 @@ func (d *DockerApiDriver) Version() (*version.Version, error) {
 	}
 	return version.NewVersion(env.Get("Version"))
 }
+
+// Parses:
+// CMD, LABEL, EXPOSE, ENV, ENTRYPOINT, USER, WORKDIR, ONBUILD, STOPSIGNAL, HEALTHCHECK, SHELL
+// func parseChanges(changes []string) (godocker.Config, error) {
+//
+// 	config := godocker.Config{}
+// 	for change := range changes {
+// 		kv := strings.SplitN(change, " ", 2)
+// 		if len(kv) != 2 {
+// 			fmt.Errorf("Could not parse key value in change: %s", change)
+// 		}
+//
+// 		switch strings.ToLower(change) {
+// 		case "cmd":
+// 			config.Cmd = parseArray(kv[1])
+// 		case "label":
+// 		case "expose":
+// 		case "env":
+// 		case "entrypoint":
+// 		case "user":
+// 		case "workdir":
+// 		case "onbuild":
+// 		case "stopsignal":
+// 		case "healthcheck":
+// 		case "shell":
+// 		default:
+// 			fmt.Errorf("Unknown change %s", change)
+// 		}
+// 	}
+// }
+//
+// func parseArray(array string) []string {
+// 	var a []string
+// 	if err := json.Unmarshal([]byte(array), &a); err != nil {
+// 		return s
+// 	} else {
+// 		return []string{array}
+// 	}
+// }
