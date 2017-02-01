@@ -83,18 +83,24 @@ func (d *DockerApiDriver) Import(path string, repo string) (string, error) {
 	}
 	defer file.Close()
 
-	err = d.client.ImportImage(godocker.ImportImageOptions{
-		Repository:  repo,
-		Source:      path,
-		InputStream: file,
-		// TODO Fix !?
-	})
+	repotag := strings.Split(repo, ":")
+	var output bytes.Buffer
+	opts := godocker.ImportImageOptions{
+		Repository:   repotag[0],
+		Source:       path,
+		InputStream:  file,
+		OutputStream: &output,
+	}
+	if len(repotag) > 1 {
+		opts.Tag = repotag[1]
+	}
+	err = d.client.ImportImage(opts)
 
 	if err != nil {
 		return "", err
 	}
-	//log.Printf("Imported: %v\n", resp) // TODO parse the respones
-	return "", nil // TODO
+	readAndStream(&output, d.Ui)
+	return "", nil // TODO return digest here!
 }
 
 func (d *DockerApiDriver) IPAddress(id string) (string, error) {

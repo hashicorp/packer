@@ -15,6 +15,7 @@ const BuilderId = "packer.post-processor.docker-import"
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	DockerHostConfig    docker.DockerHostConfig `mapstructure:",squash"`
 
 	Repository string `mapstructure:"repository"`
 	Tag        string `mapstructure:"tag"`
@@ -58,7 +59,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		importRepo += ":" + p.config.Tag
 	}
 
-	driver := &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
+	// driver := &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
+	driver := &docker.DockerApiDriver{Ctx: &p.config.ctx, Config: p.config.DockerHostConfig, Ui: ui}
+	if err := driver.Verify(); err != nil {
+		return nil, false, err
+	}
 
 	ui.Message("Importing image: " + artifact.Id())
 	ui.Message("Repository: " + importRepo)

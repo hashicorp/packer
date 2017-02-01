@@ -57,8 +57,8 @@ check_num_saved_layers() {
     check_image '{{(index .RepoTags 0)}}' "${DOCKER_REPOSITORY}:latest"
 }
 
-@test "docker: build export.json" {
-    run packer build $USER_VARS $FIXTURE_ROOT/export.json
+@test "docker: build export-and-import.json" {
+    run packer build $USER_VARS $FIXTURE_ROOT/export-and-import.json
     [ "$status" -eq 0 ]
     ls alpine.tar
 }
@@ -66,7 +66,7 @@ check_num_saved_layers() {
 @test "docker: build login.json" {
     run packer build $USER_VARS $FIXTURE_ROOT/login.json
     [ "$status" -eq 0 ]
-    ls alpine.tar
+    # ls alpine.tar
 }
 
 @test "docker: build provisioner.json" {

@@ -7,5 +7,12 @@
       "run_command": [ "/bin/ash" ],
       "export_path": "alpine.tar"
     }
+  ],
+  "post-processors": [
+    {
+        "type": "docker-import",
+        "repository": "test/packer",
+        "tag": "0.7"
+    }
   ]
 }
