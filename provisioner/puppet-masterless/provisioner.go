@@ -97,7 +97,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	// Set some defaults
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} {{if .Sudo}} sudo -iE {{end}}" +
+			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply " +
 			"--detailed-exitcodes " +
 			"--modulepath='{{.ModulePath}}' " +
