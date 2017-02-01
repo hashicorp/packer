@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/helper/communicator"
 )
 
 // A driver is able to talk to VMware, control virtual machines, etc.
@@ -61,11 +62,9 @@ type Driver interface {
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
+func NewDriver(dconfig *DriverConfig, config *SSHConfig, commConfig *communicator.Config, vmName string) (Driver, error) {
 	drivers := []Driver{}
-	log.Printf("**** NewDriver()")
 	if dconfig.RemoteType != "" {
-		log.Printf("**** Creating the remote driver.")
 		drivers = []Driver{
 			&ESX5Driver{
 				Host:           dconfig.RemoteHost,
@@ -76,6 +75,8 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 				Datastore:      dconfig.RemoteDatastore,
 				CacheDatastore: dconfig.RemoteCacheDatastore,
 				CacheDirectory: dconfig.RemoteCacheDirectory,
+				VMName:         vmName,
+				CommConfig:     *commConfig,
 			},
 		}
 

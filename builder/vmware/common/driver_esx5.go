@@ -18,6 +18,7 @@ import (
 	"github.com/mitchellh/multistep"
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -33,6 +34,8 @@ type ESX5Driver struct {
 	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
+	VMName         string
+	CommConfig     communicator.Config
 
 	comm      packer.Communicator
 	outputDir string
@@ -52,9 +55,9 @@ func (d *ESX5Driver) Clone(dst, src string) error {
 	log.Printf("Source: %s\n", srcVmx)
 	log.Printf("Dest: %s\n", dstVmx)
 
-	err := d.sh("mkdir", dstDir)
+	err := d.MkdirAll()
 	if err != nil {
-		return fmt.Errorf("Failed to create the destination directory %s: %s", dstDir, err)
+		return fmt.Errorf("Failed to create the destination directory %s: %s", d.outputDir, err)
 	}
 
 	err = d.sh("cp", srcVmx, dstVmx)
@@ -323,71 +326,66 @@ func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]strin
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
-	// config := state.Get("config").(*Config)
-	// sshc := config.SSHConfig.Comm
-	// port := sshc.SSHPort
-	// if sshc.Type == "winrm" {
-	// 	port = sshc.WinRMPort
-	// }
-	//
-	// if address, ok := state.GetOk("vm_address"); ok {
-	// 	return address.(string), nil
-	// }
-	//
-	// if address := config.CommConfig.Host(); address != "" {
-	// 	state.Put("vm_address", address)
-	// 	return address, nil
-	// }
-	//
-	// r, err := d.esxcli("network", "vm", "list")
-	// if err != nil {
-	// 	return "", err
-	// }
-	//
-	// record, err := r.find("Name", config.VMName)
-	// if err != nil {
-	// 	return "", err
-	// }
-	// wid := record["WorldID"]
-	// if wid == "" {
-	// 	return "", errors.New("VM WorldID not found")
-	// }
-	//
-	// r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
-	// if err != nil {
-	// 	return "", err
-	// }
-	//
-	// // Loop through interfaces
-	// for {
-	// 	record, err = r.read()
-	// 	if err == io.EOF {
-	// 		break
-	// 	}
-	// 	if err != nil {
-	// 		return "", err
-	// 	}
-	//
-	// 	if record["IPAddress"] == "0.0.0.0" {
-	// 		continue
-	// 	}
-	// 	// When multiple NICs are connected to the same network, choose
-	// 	// one that has a route back. This Dial should ensure that.
-	// 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], port), 2*time.Second)
-	// 	if err != nil {
-	// 		if e, ok := err.(*net.OpError); ok {
-	// 			if e.Timeout() {
-	// 				log.Printf("Timeout connecting to %s", record["IPAddress"])
-	// 				continue
-	// 			}
-	// 		}
-	// 	} else {
-	// 		defer conn.Close()
-	// 		address := record["IPAddress"]
-	// 		state.Put("vm_address", address)
-	// 		return address, nil
-	// 	}
-	// }
+	port := d.CommConfig.Port()
+
+	if address, ok := state.GetOk("vm_address"); ok {
+		return address.(string), nil
+	}
+
+	if address := d.CommConfig.Host(); address != "" {
+		state.Put("vm_address", address)
+		return address, nil
+	}
+
+	r, err := d.esxcli("network", "vm", "list")
+	if err != nil {
+		return "", err
+	}
+
+	record, err := r.find("Name", d.VMName)
+	if err != nil {
+		return "", err
+	}
+	wid := record["WorldID"]
+	if wid == "" {
+		return "", errors.New("VM WorldID not found")
+	}
+
+	r, err = d.esxcli("network", "vm", "port", "list", "-w", wid)
+	if err != nil {
+		return "", err
+	}
+
+	// Loop through interfaces
+	for {
+		record, err = r.read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
+
+		if record["IPAddress"] == "0.0.0.0" {
+			continue
+		}
+		// When multiple NICs are connected to the same network, choose
+		// one that has a route back. This Dial should ensure that.
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", record["IPAddress"], port), 2*time.Second)
+		if err != nil {
+			if e, ok := err.(*net.OpError); ok {
+				if e.Timeout() {
+					log.Printf("Timeout connecting to %s", record["IPAddress"])
+					continue
+				}
+			}
+		} else {
+			defer conn.Close()
+			address := record["IPAddress"]
+			state.Put("vm_address", address)
+			return address, nil
+		}
+	}
 	return "", errors.New("No interface on the VM has an IP address ready")
 }
 

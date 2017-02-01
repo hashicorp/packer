@@ -7,6 +7,7 @@ import (
 
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -30,6 +31,8 @@ type Config struct {
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
 	SourcePath     string   `mapstructure:"source_path"`
 	VMName         string   `mapstructure:"vm_name"`
+
+	CommConfig communicator.Config `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
