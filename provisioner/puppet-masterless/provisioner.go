@@ -86,6 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -98,10 +99,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.ExecuteCommand = "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply " +
-			"--verbose --modulepath='{{.ModulePath}}' " +
+			"--detailed-exitcodes " +
+			"--modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
-			"--detailed-exitcodes " +
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}"
 	}
@@ -226,8 +227,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf("FACTER_%s='%s'", k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:      strings.Join(facterVars, " "),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
@@ -236,13 +236,22 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		PuppetBinDir:    p.config.PuppetBinDir,
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
-		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
+		ExtraArguments:  "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
 
+	// Execute command
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}

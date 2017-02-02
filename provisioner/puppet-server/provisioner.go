@@ -20,6 +20,9 @@ type Config struct {
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	// Additional arguments to pass when executing Puppet
+	ExtraArguments []string `mapstructure:"extra_arguments"`
+
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
 
@@ -66,6 +69,7 @@ type ExecuteTemplate struct {
 	Options              string
 	PuppetBinDir         string
 	Sudo                 bool
+	ExtraArguments       string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -75,6 +79,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -163,8 +168,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf("FACTER_%s='%s'", k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:           strings.Join(facterVars, " "),
 		ClientCertPath:       remoteClientCertPath,
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
@@ -173,12 +177,22 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
+		ExtraArguments:       "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
 
+	// Execute Puppet
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
@@ -235,10 +249,11 @@ func (p *Provisioner) commandTemplate() string {
 	return "{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
 		"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
 		"--onetime --no-daemonize " +
+		"--detailed-exitcodes " +
 		"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
 		"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
 		"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
 		"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
 		"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-		"--detailed-exitcodes"
+		"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}"
 }
