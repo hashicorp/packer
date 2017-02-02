@@ -52,18 +52,16 @@ func (c *VersionCommand) Run(args []string) int {
 	// If we have a version check function, then let's check for
 	// the latest version as well.
 	if c.CheckFunc != nil {
-		// Separate the prior output with a newline
-		c.Ui.Say("")
 
 		// Check the latest version
 		info, err := c.CheckFunc()
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
-				"Error checking latest version: %s", err))
+				"\nError checking latest version: %s", err))
 		}
 		if info.Outdated {
 			c.Ui.Say(fmt.Sprintf(
-				"Your version of Packer is out of date! The latest version\n"+
+				"\nYour version of Packer is out of date! The latest version\n"+
 					"is %s. You can update by downloading from www.packer.io",
 				info.Latest))
 		}
