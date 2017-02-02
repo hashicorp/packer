@@ -4,7 +4,7 @@ VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
-GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
+GOFMT_FILES?=find . -path ./vendor -prune -o -name "*.go"
 
 default: deps generate test dev
 
@@ -41,10 +41,13 @@ dev: deps ## Build and install a development build
 	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
 
 fmt: ## Format Go code
-	@gofmt -w -s $(GOFMT_FILES)
+	@$(GOFMT_FILES) | xargs gofmt -w -s
 
 fmt-check: ## Check go code formatting
-	$(CURDIR)/scripts/gofmtcheck.sh $(GOFMT_FILES)
+	@echo "==> Checking that code complies with gofmt requirements..."
+	@echo "You can use the command: \`make fmt\` to reformat code."
+	@$(GOFMT_FILES) | xargs $(CURDIR)/scripts/gofmtcheck.sh
+	@echo "Check complete."
 
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:
