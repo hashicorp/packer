@@ -56,6 +56,7 @@ func (s *StepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepA
 
 	// Track the path so that we can unregister it from VirtualBox later
 	s.attachedPath = guestAdditionsPath
+	state.Put("guest_additions_attached", true)
 
 	return multistep.ActionContinue
 }

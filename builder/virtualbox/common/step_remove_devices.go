@@ -79,6 +79,23 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
+	if _, ok := state.GetOk("guest_additions_attached"); ok {
+		ui.Message("Detaching guest additions...")
+		command := []string{
+			"storageattach", vmName,
+			"--storagectl", "IDE Controller",
+			"--port", "1",
+			"--device", "0",
+			"--medium", "none",
+		}
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Error removing guest additions: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	return multistep.ActionContinue
 }
 
