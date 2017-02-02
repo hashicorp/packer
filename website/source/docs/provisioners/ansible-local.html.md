@@ -48,7 +48,9 @@ Required:
 Optional:
 
 -   `command` (string) - The command to invoke ansible. Defaults
-    to "ansible-playbook".
+    to "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook".
+    Note, This disregards the value of `-color` when passed to `packer build`.
+    To disable colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
 
 -   `extra_arguments` (array of strings) - An array of extra arguments to pass
     to the ansible command. By default, this is empty.
