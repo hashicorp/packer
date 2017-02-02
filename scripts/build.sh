@@ -15,15 +15,26 @@ cd $DIR
 GIT_COMMIT=$(git rev-parse HEAD)
 GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
+: ${GOPATH:=$(go env GOPATH)}
+[ -n "$GOPATH" ] || { echo "Error: GOPATH not set"; exit 1; }
+
+# Windows version of 'go' tools can not cope with Cygwin style paths
+case $(uname) in
+    CYGWIN*)
+	GOX="$(cygpath -u "$GOPATH")/bin/gox"
+	GOPATH=$(cygpath -w "$GOPATH")
+        ;;
+esac
+
 # If its dev mode, only build for ourself
-if [ "${PACKER_DEV}x" != "x" ]; then
-    XC_OS=${XC_OS:-$(go env GOOS)}
-    XC_ARCH=${XC_ARCH:-$(go env GOARCH)}
+if [ -n "${PACKER_DEV}" ]; then
+    : ${XC_OS:=$(go env GOOS)}
+    : ${XC_ARCH:=$(go env GOARCH)}
 fi
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+: ${XC_ARCH:="386 amd64 arm"}
+: ${XC_OS:=linux darwin windows freebsd openbsd}
 
 # Delete the old dir
 echo "==> Removing old directory..."
@@ -31,43 +42,32 @@ rm -f bin/*
 rm -rf pkg/*
 mkdir -p bin/
 
+OLDIFS=$IFS
+IFS=:
+case $(uname) in
+    MINGW*|MSYS*)
+        IFS=";"
+        ;;
+esac
+
 # Build!
 echo "==> Building..."
 set +e
-gox \
+${GOX:-$GOPATH/bin/gox} \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -ldflags "-X github.com/mitchellh/packer/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" \
     -output "pkg/{{.OS}}_{{.Arch}}/packer" \
     .
-set -e
 
-# Move all the compiled things to the $GOPATH/bin
-GOPATH=${GOPATH:-$(go env GOPATH)}
-case $(uname) in
-    CYGWIN*)
-        GOPATH="$(cygpath $GOPATH)"
-        ;;
-esac
-OLDIFS=$IFS
-IFS=:
-case $(uname) in
-    MINGW*)
-        IFS=";"
-        ;;
-    MSYS*)
-        IFS=";"
-        ;;
-esac
-MAIN_GOPATH=($GOPATH)
 IFS=$OLDIFS
+set -e
 
 # Copy our OS/Arch to the bin/ directory
 echo "==> Copying binaries for this platform..."
-DEV_PLATFORM="./pkg/$(go env GOOS)_$(go env GOARCH)"
-for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
-    cp ${F} bin/
-    cp ${F} ${MAIN_GOPATH}/bin/
+for F in $(find pkg/$(go env GOOS)_$(go env GOARCH) -mindepth 1 -maxdepth 1 -type f); do
+    cp -v ${F} bin/
+    cp -v ${F} ${GOPATH}/bin/
 done
 
 # Done!
