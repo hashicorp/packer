@@ -133,9 +133,9 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	linkName = time.Now().Format("20060102150405")
 	if runtime.GOOS == "windows" {
 		// Create special symlink according to #4323
-		_, err := osexec.Command("cmd", "/c", "mklink", "/J", linkName, cwd).CombinedOutput()
-		defer os.Remove(cwd + "/" + linkName)
-		tf = getTempFile(t, cwd+"/"+linkName)
+		_, err := osexec.Command("cmd", "/c", "mklink", "/J", linkName, "\\\\?\\"+cwd).CombinedOutput()
+		defer os.Remove(cwd + "\\" + linkName)
+		tf = getTempFile(t, cwd+"\\"+linkName)
 		defer os.Remove(tf.Name())
 		c = testConfig(t)
 		c["source_path"] = tf.Name()
