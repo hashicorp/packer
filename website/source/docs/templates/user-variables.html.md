@@ -162,6 +162,11 @@ results in the following variables:
 | aws_access_key | foo |
 | aws_secret_key | baz |
 
+## Defaults
+
+The default function allows you to specify a default value for a given 
+
+
 # Recipes
 
 ## Making a provisioner step conditional on the value of a variable

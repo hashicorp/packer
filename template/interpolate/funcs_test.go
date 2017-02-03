@@ -257,3 +257,39 @@ func TestFuncUser(t *testing.T) {
 		}
 	}
 }
+
+func TestFuncDefault(t *testing.T) {
+	cases := []struct {
+		UserValue string
+		Input     string
+		Output    string
+	}{
+		{
+			"foo",
+			`{{user "foo" | default "bar"}}`,
+			"foo",
+		},
+		{
+			"",
+			`{{user "foo" | default "bar"}}`,
+			"bar",
+		},
+	}
+
+	for _, tc := range cases {
+		ctx := &Context{
+			UserVariables: map[string]string{
+				"foo": tc.UserValue,
+			},
+		}
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
