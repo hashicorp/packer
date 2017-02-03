@@ -278,6 +278,7 @@ func TestFuncDefault(t *testing.T) {
 
 	for _, tc := range cases {
 		ctx := &Context{
+			EnableEnv: true,
 			UserVariables: map[string]string{
 				"foo": tc.UserValue,
 			},
@@ -285,6 +286,38 @@ func TestFuncDefault(t *testing.T) {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
 		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+func TestFuncDefault_disable(t *testing.T) {
+	cases := []struct {
+		UserValue string
+		Input     string
+		Output    string
+	}{
+		{
+			"foo",
+			`{{user "foo" | default "bar"}}`,
+			"",
+		},
+	}
+
+	for _, tc := range cases {
+		ctx := &Context{
+			EnableEnv: false,
+			UserVariables: map[string]string{
+				"foo": tc.UserValue,
+			},
+		}
+
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err == nil {
 			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
 		}
 

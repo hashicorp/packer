@@ -139,11 +139,16 @@ func funcGenTimestamp(ctx *Context) interface{} {
 }
 
 func funcGenDefault(ctx *Context) interface{} {
-	return func(def, input string) string {
-		if input == "" {
-			return def
+	return func(def, input string) (string, error) {
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("env vars are not allowed here")
 		}
-		return input
+		if input == "" {
+			return def, nil
+		}
+		return input, nil
 	}
 }
 
