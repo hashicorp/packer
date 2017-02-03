@@ -3,22 +3,26 @@ package common
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/hashicorp/packer/packer"
 )
 
 // BuilderId for the local artifacts
 const BuilderId = "mitchellh.vmware"
+const BuilderIdESX = "mitchellh.vmware-esx"
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
-type localArtifact struct {
-	id  string
-	dir string
-	f   []string
+type artifact struct {
+	builderId string
+	id        string
+	dir       string
+	f         []string
+	config    map[string]string
 }
 
+// NewLocalArtifact returns a VMware artifact containing the files
+// in the given directory.
 // NewLocalArtifact returns a VMware artifact containing the files
 // in the given directory.
 func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
@@ -37,33 +41,46 @@ func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
 		return nil, err
 	}
 
-	return &localArtifact{
-		id:  id,
-		dir: dir,
-		f:   files,
+	return &artifact{
+		builderId: id,
+		dir:       dir,
+		f:         files,
 	}, nil
 }
 
-func (a *localArtifact) BuilderId() string {
+func NewArtifact(dir OutputDir, files []string, esxi bool) (packer.Artifact, err) {
+	builderID := BuilderId
+	if esxi {
+		builderID = BuilderIdESX
+	}
+
+	return &artifact{
+		builderId: builderID,
+		dir:       dir.String(),
+		f:         files,
+	}, nil
+}
+
+func (a *artifact) BuilderId() string {
 	return BuilderId
 }
 
-func (a *localArtifact) Files() []string {
+func (a *artifact) Files() []string {
 	return a.f
 }
 
-func (a *localArtifact) Id() string {
+func (*artifact) Id() string {
 	return a.id
 }
 
-func (a *localArtifact) String() string {
+func (a *artifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
 }
 
-func (a *localArtifact) State(name string) interface{} {
+func (a *artifact) State(name string) interface{} {
 	return nil
 }
 
-func (a *localArtifact) Destroy() error {
+func (a *artifact) Destroy() error {
 	return os.RemoveAll(a.dir)
 }
