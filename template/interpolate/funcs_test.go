@@ -318,7 +318,7 @@ func TestFuncDefault_disable(t *testing.T) {
 		i := &I{Value: tc.Input}
 		result, err := i.Render(ctx)
 		if err == nil {
-			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+			t.Fatalf("Input: %s\n\nexpected an error", tc.Input)
 		}
 
 		if result != tc.Output {
