@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	osexec "os/exec"
+	"runtime"
 	"testing"
+	"time"
 
 	"github.com/mitchellh/packer/packer"
 )
@@ -106,13 +109,14 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
-	err = os.Symlink(cwd, "link")
-	defer os.Remove(cwd + "/link")
+	linkName := time.Now().Format("20060102150405")
+	err = os.Symlink(cwd, linkName)
+	defer os.Remove(cwd + "/" + linkName)
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
 
-	tf = getTempFile(t, cwd+"/link")
+	tf = getTempFile(t, cwd+"/"+linkName)
 	defer os.Remove(tf.Name())
 
 	c = testConfig(t)
@@ -123,6 +127,25 @@ func TestNewConfig_sourcePath(t *testing.T) {
 	}
 	if err != nil {
 		t.Fatalf("bad: %s", err)
+	}
+
+	// Test Windows-style(?) symlinks
+	linkName = time.Now().Format("20060102150405")
+	if runtime.GOOS == "windows" {
+		// Create special symlink according to #4323
+		_, err := osexec.Command("cmd", "/c", "mklink", "/J", linkName, cwd).CombinedOutput()
+		defer os.Remove(cwd + "/" + linkName)
+		tf = getTempFile(t, cwd+"/"+linkName)
+		defer os.Remove(tf.Name())
+		c = testConfig(t)
+		c["source_path"] = tf.Name()
+		_, warns, err = NewConfig(c)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("bad: %s", err)
+		}
 	}
 }
 
