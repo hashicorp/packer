@@ -167,6 +167,10 @@ table {
     color: $black;
     font-weight: normal !important;
   }
+
+  td {
+      padding-right: 20px;
+  }
 }
 
 ::selection {
