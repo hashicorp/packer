@@ -19,6 +19,7 @@ import (
 type StepConfigureVMX struct {
 	CustomData map[string]string
 	SkipFloppy bool
+	VMName     string
 }
 
 func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
@@ -45,6 +46,7 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 	// Create a new UUID for this VM, since it is a new VM
 	vmxData["uuid.action"] = "create"
 
+	vmxData["displayname"] = s.VMName
 	// Delete any generated addresses since we want to regenerate
 	// them. Conflicting MAC addresses is a bad time.
 	addrRegex := regexp.MustCompile(`(?i)^ethernet\d+\.generatedAddress`)
