@@ -1,10 +1,12 @@
 package ansiblelocal
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -36,7 +38,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.StagingDir != DefaultStagingDir {
+	if !strings.HasPrefix(p.config.StagingDir, DefaultStagingDir) {
 		t.Fatalf("unexpected staging dir %s, expected %s",
 			p.config.StagingDir, DefaultStagingDir)
 	}
