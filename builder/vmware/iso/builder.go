@@ -17,8 +17,6 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-const BuilderIdESX = "mitchellh.vmware-esx"
-
 type Builder struct {
 	config Config
 	runner multistep.Runner
@@ -183,9 +181,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Determine the output dir implementation
-	var dir OutputDir
+	var dir vmwcommon.OutputDir
 	switch d := driver.(type) {
-	case OutputDir:
+	case vmwcommon.OutputDir:
 		dir = d
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
@@ -204,6 +202,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("sshConfig", &b.config.SSHConfig)
 
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
@@ -325,23 +324,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		dir.SetOutputDir(b.config.OutputDir)
 		files, err = dir.ListFiles()
 	} else {
-		files, err = state.Get("dir").(OutputDir).ListFiles()
+		files, err = state.Get("dir").(vmwcommon.OutputDir).ListFiles()
 	}
 	if err != nil {
 		return nil, err
 	}
-
-	// Set the proper builder ID
-	builderId := vmwcommon.BuilderId
-	if b.config.RemoteType != "" {
-		builderId = BuilderIdESX
-	}
-
-	return &Artifact{
-		builderId: builderId,
-		dir:       dir,
-		f:         files,
-	}, nil
+	return vmwcommon.NewArtifact(dir, files, b.config.RemoteType != ""), nil
 }
 
 func (b *Builder) Cancel() {

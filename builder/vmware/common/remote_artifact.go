@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"fmt"
@@ -6,32 +6,32 @@ import (
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
-type Artifact struct {
+type RemoteArtifact struct {
 	builderId string
 	dir       OutputDir
 	f         []string
 }
 
-func (a *Artifact) BuilderId() string {
+func (a *RemoteArtifact) BuilderId() string {
 	return a.builderId
 }
 
-func (a *Artifact) Files() []string {
+func (a *RemoteArtifact) Files() []string {
 	return a.f
 }
 
-func (*Artifact) Id() string {
+func (*RemoteArtifact) Id() string {
 	return "VM"
 }
 
-func (a *Artifact) String() string {
+func (a *RemoteArtifact) String() string {
 	return fmt.Sprintf("VM files in directory: %s", a.dir)
 }
 
-func (a *Artifact) State(name string) interface{} {
+func (a *RemoteArtifact) State(name string) interface{} {
 	return nil
 }
 
-func (a *Artifact) Destroy() error {
+func (a *RemoteArtifact) Destroy() error {
 	return a.dir.RemoveAll()
 }

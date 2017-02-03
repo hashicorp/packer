@@ -39,8 +39,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
-	// Setup the directory
-	dir := new(vmwcommon.LocalOutputDir)
+	// Determine the output dir implementation
+	var dir vmwcommon.OutputDir
+	switch d := driver.(type) {
+	case vmwcommon.OutputDir:
+		dir = d
+	default:
+		dir = new(vmwcommon.LocalOutputDir)
+	}
+	if b.config.RemoteType != "" {
+		b.config.OutputDir = b.config.VMName
+	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Set up the state.
@@ -51,6 +60,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("sshConfig", b.config.SSHConfig)
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -128,6 +138,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipFloppy: true,
 		},
 		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepUploadVMX{
+			RemoteType: b.config.RemoteType,
+		},
 	}
 
 	// Run the steps.
@@ -147,8 +160,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
 		return nil, errors.New("Build was halted.")
 	}
+	files, err := state.Get("dir").(vmwcommon.OutputDir).ListFiles()
+	if err != nil {
+		return nil, err
+	}
 
-	return vmwcommon.NewLocalArtifact(b.config.OutputDir)
+	return vmwcommon.NewArtifact(dir, files, b.config.RemoteType != ""), nil
 }
 
 // Cancel.
