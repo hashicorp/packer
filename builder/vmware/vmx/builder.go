@@ -73,6 +73,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXData,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&common.StepHTTPServer{
