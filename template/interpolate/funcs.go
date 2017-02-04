@@ -138,12 +138,12 @@ func funcGenTimestamp(ctx *Context) interface{} {
 }
 
 func funcGenUser(ctx *Context) interface{} {
-	return func(k string) string {
+	return func(k string) (string, error) {
 		if ctx == nil || ctx.UserVariables == nil {
-			return ""
+			return "", errors.New("test")
 		}
 
-		return ctx.UserVariables[k]
+		return ctx.UserVariables[k], nil
 	}
 }
 
