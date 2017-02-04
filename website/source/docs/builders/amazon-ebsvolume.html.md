@@ -186,7 +186,7 @@ builder.
     must be specified with this.
 
 -   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
-    IP if available.
+    IP if available. Also works for WinRM.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
