@@ -88,18 +88,21 @@ type OnlyExcept struct {
 // are the minimal necessary to make sure parsing builds a reasonable
 // Template structure.
 func (t *Template) Validate() error {
-	var err error
-
 	// At least one builder must be defined
 	if len(t.Builders) == 0 {
-		err = multierror.Append(err, errors.New(
-			"at least one builder must be defined"))
+		return errors.New("at least one builder must be defined")
 	}
 
+	return nil
+}
+
+func (t *Template) OnlyExceptValidate(builds map[string]*Builder) error {
+
+	var err error
 	// Verify that the provisioner overrides target builders that exist
 	for i, p := range t.Provisioners {
 		// Validate only/except
-		if verr := p.OnlyExcept.Validate(t); verr != nil {
+		if verr := p.OnlyExcept.Validate(builds); verr != nil {
 			for _, e := range multierror.Append(verr).Errors {
 				err = multierror.Append(err, fmt.Errorf(
 					"provisioner %d: %s", i+1, e))
@@ -120,7 +123,7 @@ func (t *Template) Validate() error {
 	for i, chain := range t.PostProcessors {
 		for j, p := range chain {
 			// Validate only/except
-			if verr := p.OnlyExcept.Validate(t); verr != nil {
+			if verr := p.OnlyExcept.Validate(builds); verr != nil {
 				for _, e := range multierror.Append(verr).Errors {
 					err = multierror.Append(err, fmt.Errorf(
 						"post-processor %d.%d: %s", i+1, j+1, e))
@@ -128,7 +131,6 @@ func (t *Template) Validate() error {
 			}
 		}
 	}
-
 	return err
 }
 
@@ -158,20 +160,20 @@ func (o *OnlyExcept) Skip(n string) bool {
 }
 
 // Validate validates that the OnlyExcept settings are correct for a thing.
-func (o *OnlyExcept) Validate(t *Template) error {
+func (o *OnlyExcept) Validate(builds map[string]*Builder) error {
 	if len(o.Only) > 0 && len(o.Except) > 0 {
 		return errors.New("only one of 'only' or 'except' may be specified")
 	}
 
 	var err error
 	for _, n := range o.Only {
-		if _, ok := t.Builders[n]; !ok {
+		if _, ok := builds[n]; !ok {
 			err = multierror.Append(err, fmt.Errorf(
 				"'only' specified builder '%s' not found", n))
 		}
 	}
 	for _, n := range o.Except {
-		if _, ok := t.Builders[n]; !ok {
+		if _, ok := builds[n]; !ok {
 			err = multierror.Append(err, fmt.Errorf(
 				"'except' specified builder '%s' not found", n))
 		}
