@@ -40,7 +40,8 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 
 	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
 		state.Put("error", err)
-		return multistep.ActionHalt
+		return halt(err)
+
 	}
 
 	// Read in the machine configuration from the cloned VMX file
@@ -50,18 +51,14 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	// addresses
 	// * The disk compaction step needs the paths to all attached disks
 	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
+		remoteVmxPath := vmxPath
 		tempDir, err := ioutil.TempDir("", "packer-vmx")
 		if err != nil {
 			return halt(err)
 		}
 		s.tempDir = tempDir
-		content, err := remoteDriver.ReadFile(vmxPath)
-		if err != nil {
-			return halt(err)
-		}
 		vmxPath = filepath.Join(tempDir, s.VMName+".vmx")
-		err = ioutil.WriteFile(vmxPath, content, 0600)
-		if err != nil {
+		if err = remoteDriver.Download(remoteVmxPath, vmxPath); err != nil {
 			return halt(err)
 		}
 	}
