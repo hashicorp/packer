@@ -2,7 +2,6 @@ package vmx
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -28,11 +27,12 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	Linked         bool   `mapstructure:"linked"`
-	RemoteType     string `mapstructure:"remote_type"`
-	SkipCompaction bool   `mapstructure:"skip_compaction"`
-	SourcePath     string `mapstructure:"source_path"`
-	VMName         string `mapstructure:"vm_name"`
+	Linked         bool     `mapstructure:"linked"`
+	RemoteType     string   `mapstructure:"remote_type"`
+	SkipCompaction bool     `mapstructure:"skip_compaction"`
+	BootCommand    []string `mapstructure:"boot_command"`
+	SourcePath     string   `mapstructure:"source_path"`
+	VMName         string   `mapstructure:"vm_name"`
 
 	CommConfig communicator.Config `mapstructure:",squash"`
 
@@ -74,14 +74,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 
-	if c.SourcePath == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
-	} else {
-		if _, err := os.Stat(c.SourcePath); err != nil {
-			// FIXME:
-			log.Printf("source_path is invalid: %s", err)
-			// errs = packer.MultiErrorAppend(errs,
-			// 	fmt.Errorf("source_path is invalid: %s", err))
+	if c.DriverConfig.RemoteType == "" {
+		if c.SourcePath == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
+		} else {
+			if _, err := os.Stat(c.SourcePath); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("source_path is invalid: %s", err))
+			}
 		}
 	}
 
