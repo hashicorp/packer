@@ -3,6 +3,7 @@ package ansiblelocal
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -38,7 +39,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !strings.HasPrefix(p.config.StagingDir, DefaultStagingDir) {
+	if !strings.HasPrefix(filepath.ToSlash(p.config.StagingDir), DefaultStagingDir) {
 		t.Fatalf("unexpected staging dir %s, expected %s",
 			p.config.StagingDir, DefaultStagingDir)
 	}
