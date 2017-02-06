@@ -117,21 +117,6 @@ func (d *ESX5Driver) ReloadVM() error {
 	return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
 }
 
-func (d *ESX5Driver) ReadFile(name string) ([]byte, error) {
-	var b bytes.Buffer
-	writer := bufio.NewWriter(&b)
-	err := d.comm.Download(d.datastorePath(name), writer)
-	if err != nil {
-		return nil, fmt.Errorf("Cant read remote file %s: %s", name, err)
-	}
-	writer.Flush()
-	return b.Bytes(), nil
-}
-
-func (d *ESX5Driver) WriteFile(name string, content []byte) error {
-	return d.comm.Upload(d.datastorePath(name), bytes.NewReader(content), nil)
-}
-
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
 		//intentionally not checking for error since poweron may fail specially after initial VM registration
@@ -310,7 +295,7 @@ func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]strin
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
-	sshc := state.Get("sshConfig").(SSHConfig).Comm
+	sshc := state.Get("sshConfig").(*SSHConfig).Comm
 	port := sshc.SSHPort
 	if sshc.Type == "winrm" {
 		port = sshc.WinRMPort
@@ -520,6 +505,15 @@ func (d *ESX5Driver) Upload(dst, src string) error {
 	}
 	defer f.Close()
 	return d.comm.Upload(dst, f, nil)
+}
+
+func (d *ESX5Driver) Download(src, dst string) error {
+	file, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return d.comm.Download(d.datastorePath(src), file)
 }
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {

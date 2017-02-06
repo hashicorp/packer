@@ -36,23 +36,18 @@ func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Cloning to: %s", vmxPath)
 
 	if err := driver.Clone(vmxPath, s.Path); err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return halt(err)
 	}
 
 	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
+		remoteVmxPath := vmxPath
 		tempDir, err := ioutil.TempDir("", "packer-vmx")
 		if err != nil {
 			return halt(err)
 		}
 		s.tempDir = tempDir
-		content, err := remoteDriver.ReadFile(vmxPath)
-		if err != nil {
-			return halt(err)
-		}
 		vmxPath = filepath.Join(tempDir, s.VMName+".vmx")
-		err = ioutil.WriteFile(vmxPath, content, 0600)
-		if err != nil {
+		if err = remoteDriver.Download(remoteVmxPath, vmxPath); err != nil {
 			return halt(err)
 		}
 	}

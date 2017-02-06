@@ -118,25 +118,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Version = "9"
 	}
 
-	if b.config.RemoteUser == "" {
-		b.config.RemoteUser = "root"
-	}
-
-	if b.config.RemoteDatastore == "" {
-		b.config.RemoteDatastore = "datastore1"
-	}
-
-	if b.config.RemoteCacheDatastore == "" {
-		b.config.RemoteCacheDatastore = b.config.RemoteDatastore
-	}
-
-	if b.config.RemoteCacheDirectory == "" {
-		b.config.RemoteCacheDirectory = "packer_cache"
-	}
-
-	if b.config.RemotePort == 0 {
-		b.config.RemotePort = 22
-	}
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(

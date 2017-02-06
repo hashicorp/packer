@@ -60,7 +60,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("sshConfig", b.config.SSHConfig)
+	state.Put("sshConfig", &b.config.SSHConfig)
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -100,7 +100,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
 		&vmwcommon.StepRegister{
-			Format:         "foo",
+			Format:         "",
 			KeepRegistered: false,
 		},
 		&vmwcommon.StepRun{

@@ -23,7 +23,8 @@ type RemoteDriverMock struct {
 	IsDestroyedResult bool
 	IsDestroyedErr    error
 
-	uploadErr error
+	UploadErr   error
+	DownloadErr error
 
 	ReloadVMErr error
 }
@@ -56,8 +57,12 @@ func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
 	return d.IsDestroyedResult, d.IsDestroyedErr
 }
 
-func (d *RemoteDriverMock) upload(dst, src string) error {
-	return d.uploadErr
+func (d *RemoteDriverMock) Upload(dst, src string) error {
+	return d.UploadErr
+}
+
+func (d *RemoteDriverMock) Download(src, dst string) error {
+	return d.DownloadErr
 }
 
 func (d *RemoteDriverMock) ReloadVM() error {

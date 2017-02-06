@@ -10,7 +10,7 @@ import (
 )
 
 func TestLocalArtifact_impl(t *testing.T) {
-	var _ packer.Artifact = new(localArtifact)
+	var _ packer.Artifact = new(artifact)
 }
 
 func TestNewLocalArtifact(t *testing.T) {
@@ -28,11 +28,11 @@ func TestNewLocalArtifact(t *testing.T) {
 	if err := os.Mkdir(filepath.Join(td, "b"), 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	dir := new(LocalOutputDir)
+	dir.SetOutputDir(td)
+	files, err := dir.ListFiles()
 
-	a, err := NewLocalArtifact(td)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+	a := NewArtifact(dir, files, false)
 
 	if a.BuilderId() != BuilderId {
 		t.Fatalf("bad: %#v", a.BuilderId())

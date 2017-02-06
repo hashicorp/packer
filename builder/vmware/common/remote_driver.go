@@ -23,12 +23,9 @@ type RemoteDriver interface {
 	// Uploads a local file to remote side.
 	Upload(dst, src string) error
 
+	// Download a remote file to a local file.
+	Download(src, dst string) error
+
 	// Reload VM on remote side.
 	ReloadVM() error
-
-	// Read bytes from of a remote file.
-	ReadFile(string) ([]byte, error)
-
-	// Write bytes to a remote file.
-	WriteFile(string, []byte) error
 }

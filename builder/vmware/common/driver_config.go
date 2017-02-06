@@ -26,6 +26,21 @@ func (c *DriverConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.FusionAppPath == "" {
 		c.FusionAppPath = "/Applications/VMware Fusion.app"
 	}
+	if c.RemoteUser == "" {
+		c.RemoteUser = "root"
+	}
+	if c.RemoteDatastore == "" {
+		c.RemoteDatastore = "datastore1"
+	}
+	if c.RemoteCacheDatastore == "" {
+		c.RemoteCacheDatastore = c.RemoteDatastore
+	}
+	if c.RemoteCacheDirectory == "" {
+		c.RemoteCacheDirectory = "packer_cache"
+	}
+	if c.RemotePort == 0 {
+		c.RemotePort = 22
+	}
 
 	return nil
 }
