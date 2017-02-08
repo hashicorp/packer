@@ -67,7 +67,7 @@ func getImage(c *Config, d Driver) (*Image, error) {
 	if c.SourceImageProjectId == "" {
 		return d.GetImage(name, fromFamily)
 	} else {
-		return d.GetImageFromProject(c.SourceImageProjectId, c.SourceImage, fromFamily)
+		return d.GetImageFromProject(c.SourceImageProjectId, name, fromFamily)
 	}
 }
 
