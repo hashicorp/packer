@@ -56,11 +56,11 @@ following steps in order to be able to compile and test Packer. These instructio
 1. [Download](https://golang.org/dl) and install Go. The instructions below
    are for go 1.6. Earlier versions of Go are no longer supported.
 
-2. Set and export the `GOPATH` environment variable and update your `PATH`. For
+2. Create your workspace folder (for example `$HOME/work`). Set and export the `GOPATH` environment variable and update your `PATH`. For
    example, you can add to your `.bash_profile`.
 
     ```
-    export GOPATH=$HOME/go
+    export GOPATH=$HOME/work
     export PATH=$PATH:$GOPATH/bin
     ```
 
