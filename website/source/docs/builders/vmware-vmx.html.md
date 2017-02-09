@@ -120,6 +120,40 @@ builder.
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
 
+-   `remote_cache_datastore` (string) - The path to the datastore where
+    supporting files will be stored during the build on the remote machine. By
+    default this is the same as the `remote_datastore` option. This only has an
+    effect if `remote_type` is enabled.
+
+-   `remote_cache_directory` (string) - The path where the ISO and/or floppy
+    files will be stored during the build on the remote machine. The path is
+    relative to the `remote_cache_datastore` on the remote machine. By default
+    this is "packer\_cache". This only has an effect if `remote_type`
+    is enabled.
+
+-   `remote_datastore` (string) - The path to the datastore where the resulting
+    VM will be stored when it is built on the remote machine. By default this
+    is "datastore1". This only has an effect if `remote_type` is enabled.
+
+-   `remote_host` (string) - The host of the remote machine used for access.
+    This is only required if `remote_type` is enabled.
+
+-   `remote_password` (string) - The SSH password for the user used to access
+    the remote machine. By default this is empty. This only has an effect if
+    `remote_type` is enabled.
+
+-   `remote_private_key_file` (string) - The path to the PEM encoded private key
+    file for the user used to access the remote machine. By default this is empty.
+    This only has an effect if `remote_type` is enabled.
+
+-   `remote_type` (string) - The type of remote machine that will be used to
+    build this VM rather than a local desktop product. The only value accepted
+    for this currently is "esx5". If this is not set, a desktop product will
+    be used. By default, this is not set.
+
+-   `remote_username` (string) - The username for the SSH user that will access
+    the remote machine. This is required if `remote_type` is enabled.
+
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a
@@ -225,10 +259,10 @@ command, they will be replaced by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl 
-    key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl
+    key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the 
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
     shift key.
 
 -   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
