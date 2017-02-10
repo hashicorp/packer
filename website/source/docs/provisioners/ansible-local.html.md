@@ -105,7 +105,7 @@ chi-appservers
     on your local system to be copied to the remote machine as the
     `staging_directory` before all other files and directories.
 
--   `playbook_paths` (array of strings) - An array of paths to playbook files on
+-   `playbook_paths` (array of strings) - An array of directories of playbook files on
     your local system. These will be uploaded to the remote machine under
     `staging_directory`/playbooks. By default, this is empty.
 
