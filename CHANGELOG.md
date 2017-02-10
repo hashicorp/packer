@@ -7,6 +7,7 @@
 * communicator/winrm: support ProxyFromEnvironment. [GH-4463]
 * builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
 * VNC: make VNC links clickable in terminal. [GH-4497] [GH-4498] 
+* provisioner/anisble: use randomized staging dir [GH-4472]
 
 ### BUG FIXES:
 
