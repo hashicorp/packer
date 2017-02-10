@@ -117,7 +117,7 @@ func TestConfigPrepare(t *testing.T) {
 		{
 			"on_host_maintenance",
 			"SO VERY BAD",
-			false,
+			true,
 		},
 		{
 			"preemptible",
