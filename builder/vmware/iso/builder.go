@@ -212,11 +212,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.Format != "" {
-		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format must be one of ova, ovf, or vmx"))
-		}
+	if b.config.Format == "" {
+		b.config.Format = "ovf"
+	}
+
+	if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("format must be one of ova, ovf, or vmx"))
 	}
 
 	// Warnings
@@ -256,7 +258,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	exportOutputPath := b.config.OutputDir
 
-	if b.config.RemoteType != "" && b.config.Format != "" {
+	if b.config.RemoteType != "" {
 		b.config.OutputDir = b.config.VMName
 	}
 	dir.SetOutputDir(b.config.OutputDir)
