@@ -105,6 +105,21 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			"on_host_maintenance",
+			nil,
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"TERMINATE",
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"SO VERY BAD",
+			false,
+		},
+		{
 			"preemptible",
 			nil,
 			false,

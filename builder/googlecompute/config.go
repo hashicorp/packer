@@ -39,6 +39,7 @@ type Config struct {
 	Network              string            `mapstructure:"network"`
 	NetworkProjectId     string            `mapstructure:"network_project_id"`
 	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
+	OnHostMaintenance    string            `mapstructure:"on_host_maintenance"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
@@ -91,6 +92,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
+	}
+	// Possible values:
+	//   "MIGRATE"
+	//   "TERMINATE"
+	if c.OnHostMaintenance == "" {
+		c.OnHostMaintenance = "MIGRATE"
 	}
 
 	if c.ImageName == "" {
