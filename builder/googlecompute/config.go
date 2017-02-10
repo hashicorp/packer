@@ -93,11 +93,21 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
 	}
-	// Possible values:
-	//   "MIGRATE"
-	//   "TERMINATE"
-	if c.OnHostMaintenance == "" {
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible if Preemptible is false
+	//   "TERMINATE": Posssible if Preemptible is true
+	if c.OnHostMaintenance == "" && c.Preemptible {
 		c.OnHostMaintenance = "MIGRATE"
+	}
+
+	if c.OnHostMaintenance == "" && !c.Preemptible {
+		c.OnHostMaintenance = "TERMINATE"
+	}
+
+	// Make sure user sets a valid value for on_host_maintenance option
+	if !(c.OnHostMaintenance == "MIGRATE" || c.OnHostMaintenance == "TERMINATE") {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be one of MIGRATE or TERMINATE."))
 	}
 
 	if c.ImageName == "" {
