@@ -112,3 +112,17 @@ too many open files
 
 On Unix systems, you can check what your file descriptor limit is with `ulimit
 -Sn`. You should check with your OS vendor on how to raise this limit.
+
+## Issues when using long temp directory
+
+Packer uses unix sockets internally, which are created inside the default
+directory for temporary files. Some operating systems place a limit on the
+length of the socket name, usually between 80 and 110 characters. If you get an
+error like this (for any builder, not just docker):
+
+```
+Failed to initialize build 'docker': error initializing builder 'docker': plugin exited before we could connect
+```
+
+you should try setting your temp directory to something shorter. This can be
+done through the `TMPDIR` environment variable.
