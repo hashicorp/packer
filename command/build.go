@@ -92,10 +92,12 @@ func (c BuildCommand) Run(args []string) int {
 				Color: colors[i%len(colors)],
 				Ui:    ui,
 			}
+			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
+				ui.Say(fmt.Sprintf("%s output will be in this color.", b))
+			}
 		}
 
 		buildUis[b] = ui
-		ui.Say(fmt.Sprintf("%s output will be in this color.", b))
 	}
 
 	// Add a newline between the color output and the actual output
