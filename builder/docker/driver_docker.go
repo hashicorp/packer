@@ -97,9 +97,10 @@ func (d *DockerDriver) Export(id string, dst io.Writer) error {
 }
 
 func (d *DockerDriver) Import(path string, repo string) (string, error) {
-	var stdout bytes.Buffer
+	var stdout, stderr bytes.Buffer
 	cmd := exec.Command("docker", "import", "-", repo)
 	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return "", err
@@ -122,8 +123,7 @@ func (d *DockerDriver) Import(path string, repo string) (string, error) {
 	}()
 
 	if err := cmd.Wait(); err != nil {
-		err = fmt.Errorf("Error importing container: %s", err)
-		return "", err
+		return "", fmt.Errorf("Error importing container: %s\n\nStderr: %s", err, stderr.String())
 	}
 
 	return strings.TrimSpace(stdout.String()), nil
