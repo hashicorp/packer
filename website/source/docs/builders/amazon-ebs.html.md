@@ -66,7 +66,7 @@ builder.
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
     more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. These will be attached when booting a new instance from your
-    AMI. To add a block device during the packer build see
+    AMI. To add a block device during the Packer build see
     `launch_block_device_mappings` below. Your options here may vary depending
     on the type of VM you use. The block device mappings allow for the following
     configuration:
@@ -179,8 +179,8 @@ builder.
     to launch the EC2 instance with.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the packer build starts. These are not necessarily
-    preserved when booting from the AMI built with packer. See
+    more block devices before the Packer build starts. These are not necessarily
+    preserved when booting from the AMI built with Packer. See
     `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
@@ -208,7 +208,7 @@ builder.
     `security_group_id`.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    in case Packer exits ungracefully. Possible values are "stop" and "terminate",
     default is `stop`.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
