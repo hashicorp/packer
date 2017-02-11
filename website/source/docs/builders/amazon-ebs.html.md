@@ -28,6 +28,10 @@ bit.
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
 account, it is up to you to use, delete, etc. the AMI.
 
+-> **Note:** Temporary resources are, by default, all created with the prefix
+`packer`. This can be useful if you want to restrict the security groups and
+key pairs Packer is able to operate on.
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
