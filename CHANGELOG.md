@@ -9,6 +9,7 @@
 * VNC: make VNC links clickable in terminal. [GH-4497] [GH-4498] 
 * provisioner/anisble: use randomized staging dir [GH-4472]
 * builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
+* post-processor/amazon-import: support AMI attributes on import [GH-4216]
 
 ### BUG FIXES:
 
