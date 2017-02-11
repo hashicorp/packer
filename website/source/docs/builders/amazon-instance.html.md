@@ -28,6 +28,10 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in
 your account, it is up to you to use, delete, etc. the AMI.
 
+-> **Note:** Temporary resources are, by default, all created with the prefix
+`packer`. This can be useful if you want to restrict the security groups and
+key pairs packer is able to operate on.
+
 -> **Note:** This builder requires that the [Amazon EC2 AMI
 Tools](https://aws.amazon.com/developertools/368) are installed onto the
 machine. This can be done within a provisioner, but must be done before the
@@ -88,7 +92,7 @@ builder.
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
     more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. These will be attached when booting a new instance from your
-    AMI. To add a block device during the packer build see
+    AMI. To add a block device during the Packer build see
     `launch_block_device_mappings` below. Your options here may vary depending
     on the type of VM you use. The block device mappings allow for the following
     configuration:
@@ -195,8 +199,8 @@ builder.
     to launch the EC2 instance with.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the packer build starts. These are not necessarily
-    preserved when booting from the AMI built with packer. See
+    more block devices before the Packer build starts. These are not necessarily
+    preserved when booting from the AMI built with Packer. See
     `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
@@ -302,7 +306,8 @@ builder.
     `BuildRegion` variable is replaced with the value of `region`.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
-    to generate. By default, Packer generates a name with an UUID.
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates

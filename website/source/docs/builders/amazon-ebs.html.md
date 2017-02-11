@@ -28,6 +28,10 @@ bit.
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
 account, it is up to you to use, delete, etc. the AMI.
 
+-> **Note:** Temporary resources are, by default, all created with the prefix
+`packer`. This can be useful if you want to restrict the security groups and
+key pairs Packer is able to operate on.
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
@@ -66,7 +70,7 @@ builder.
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
     more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. These will be attached when booting a new instance from your
-    AMI. To add a block device during the packer build see
+    AMI. To add a block device during the Packer build see
     `launch_block_device_mappings` below. Your options here may vary depending
     on the type of VM you use. The block device mappings allow for the following
     configuration:
@@ -179,8 +183,8 @@ builder.
     to launch the EC2 instance with.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the packer build starts. These are not necessarily
-    preserved when booting from the AMI built with packer. See
+    more block devices before the Packer build starts. These are not necessarily
+    preserved when booting from the AMI built with Packer. See
     `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
@@ -208,7 +212,7 @@ builder.
     `security_group_id`.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    in case Packer exits ungracefully. Possible values are "stop" and "terminate",
     default is `stop`.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
@@ -300,8 +304,9 @@ builder.
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
--   `temporary_key_pair_name` (string) - The name of the temporary keypair
-    to generate. By default, Packer generates a name with a UUID.
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
