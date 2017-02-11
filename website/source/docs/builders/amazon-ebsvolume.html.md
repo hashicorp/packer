@@ -121,7 +121,7 @@ builder.
     `security_group_id`.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are `stop` and `terminate`.
+    in case Packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
 
 -   `skip_region_validation` (boolean) - Set to `true` if you want to skip
