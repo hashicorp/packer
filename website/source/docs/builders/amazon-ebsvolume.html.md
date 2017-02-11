@@ -193,7 +193,8 @@ builder.
     required if you are using an non-default VPC.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
-    to generate. By default, Packer generates a name with an UUID.
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
