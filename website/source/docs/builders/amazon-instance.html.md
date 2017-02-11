@@ -28,6 +28,10 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in
 your account, it is up to you to use, delete, etc. the AMI.
 
+-> **Note:** Temporary resources are, by default, all created with the prefix
+`packer`. This can be useful if you want to restrict the security groups and
+key pairs packer is able to operate on.
+
 -> **Note:** This builder requires that the [Amazon EC2 AMI
 Tools](https://aws.amazon.com/developertools/368) are installed onto the
 machine. This can be done within a provisioner, but must be done before the
