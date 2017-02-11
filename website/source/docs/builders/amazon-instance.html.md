@@ -302,7 +302,8 @@ builder.
     `BuildRegion` variable is replaced with the value of `region`.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
-    to generate. By default, Packer generates a name with an UUID.
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
