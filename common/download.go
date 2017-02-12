@@ -23,6 +23,7 @@ import (
 	"io"
 	"path/filepath"
 	"net/http"
+    "gopkg.in/cheggaaa/pb.v1"
 	"github.com/jlaffaye/ftp"
 )
 
@@ -157,6 +158,7 @@ func (d *DownloadClient) Get() (string, error) {
 	local,ok := d.downloader.(LocalDownloader)
 	if !ok && !d.config.CopyFile{
 		return "", fmt.Errorf("Not allowed to use uri scheme %s in no copy file mode : %T", u.Scheme, d.downloader)
+		d.config.CopyFile = true
 	}
 
 	// If we're copying the file, then just use the actual downloader
@@ -275,7 +277,9 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			if fi, err := dst.Stat(); err == nil {
 				if _, err = dst.Seek(0, os.SEEK_END); err == nil {
 					req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+
 					d.progress = uint64(fi.Size())
+					progressBar.Set64(int64(d.Progress()))
 				}
 			}
 		}
@@ -290,6 +294,8 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 
 	d.total = d.progress + uint64(resp.ContentLength)
+	progressBar := pb.New64(int64(d.Total())).Start()
+
 	var buffer [4096]byte
 	for {
 		n, err := resp.Body.Read(buffer[:])
@@ -298,6 +304,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		}
 
 		d.progress += uint64(n)
+		progressBar.Set64(int64(d.Progress()))
 
 		if _, werr := dst.Write(buffer[:n]); werr != nil {
 			return werr
@@ -409,6 +416,7 @@ func (d *FTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	d.progress = 0
 	d.total = entry.Size
+	progressBar := pb.New64(int64(d.Total())).Start()
 
 	// download specified file
 	d.active = true
@@ -421,7 +429,9 @@ func (d *FTPDownloader) Download(dst *os.File, src *url.URL) error {
 		for ; d.active;  {
 			n,err := io.CopyN(w, r, int64(d.mtu))
 			if err != nil { break }
+
 			d.progress += uint64(n)
+			progressBar.Set64(int64(d.Progress()))
 		}
 		d.active = false
 		e <- err
@@ -518,13 +528,16 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	fi, err := f.Stat()
 	if err != nil { return err }
 	d.total = uint64(fi.Size())
+	progressBar := pb.New64(int64(d.Total())).Start()
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
 		n,err = io.Copy(dst, f)
 		d.active = false
+
 		d.progress += uint64(n)
+		progressBar.Set64(int64(d.Progress()))
 
 	// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -533,7 +546,9 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 			for ; d.active; {
 				n,err := io.CopyN(w, r, int64(*d.bufferSize))
 				if err != nil { break }
+
 				d.progress += uint64(n)
+				progressBar.Set64(int64(d.Progress()))
 			}
 			d.active = false
 			e <- err
@@ -611,13 +626,16 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	fi, err := f.Stat()
 	if err != nil { return err }
 	d.total = uint64(fi.Size())
+	progressBar := pb.New64(int64(d.Total())).Start()
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
 		n,err = io.Copy(dst, f)
 		d.active = false
+
 		d.progress += uint64(n)
+		progressBar.Set64(int64(d.Progress()))
 
 	// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -626,7 +644,9 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 			for ; d.active; {
 				n,err := io.CopyN(w, r, int64(*d.bufferSize))
 				if err != nil { break }
+
 				d.progress += uint64(n)
+				progressBar.Set64(int64(d.Progress()))
 			}
 			d.active = false
 			e <- err
