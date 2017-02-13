@@ -75,7 +75,7 @@ func TestConfig(t *testing.T) {
 		_, errs := NewConfig(raw)
 
 		if errs != nil {
-			t.Errorf("err: %+v", errs)
+			t.Fatalf("err: %+v", errs)
 		}
 
 	})
@@ -109,7 +109,7 @@ func TestConfig(t *testing.T) {
 		_, errs := NewConfig(raw)
 
 		if errs != nil {
-			t.Errorf("err: %+v", errs)
+			t.Fatalf("err: %+v", errs)
 		}
 
 	})
@@ -118,7 +118,7 @@ func TestConfig(t *testing.T) {
 		raw := testConfig(cfgFile)
 		c, errs := NewConfig(raw)
 		if errs != nil {
-			t.Errorf("err: %+v", errs)
+			t.Fatalf("err: %+v", errs)
 		}
 
 		expected := "ocid1.tenancy.oc1..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -164,7 +164,7 @@ func TestConfig(t *testing.T) {
 
 			c, errs := NewConfig(raw)
 			if errs != nil {
-				t.Errorf("err: %+v", errs)
+				t.Fatalf("err: %+v", errs)
 			}
 
 			accessVal := getField(c.AccessCfg, v)
