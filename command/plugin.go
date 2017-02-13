@@ -57,6 +57,7 @@ import (
 	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
 	convergeprovisioner "github.com/mitchellh/packer/provisioner/converge"
 	fileprovisioner "github.com/mitchellh/packer/provisioner/file"
+	posixrestartprovisioner "github.com/mitchellh/packer/provisioner/posix-restart"
 	powershellprovisioner "github.com/mitchellh/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/mitchellh/packer/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/mitchellh/packer/provisioner/puppet-server"
@@ -112,6 +113,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"shell-local":       new(shelllocalprovisioner.Provisioner),
 	"windows-restart":   new(windowsrestartprovisioner.Provisioner),
 	"windows-shell":     new(windowsshellprovisioner.Provisioner),
+	"posix-restart":     new(posixrestartprovisioner.Provisioner),
 }
 
 var PostProcessors = map[string]packer.PostProcessor{
