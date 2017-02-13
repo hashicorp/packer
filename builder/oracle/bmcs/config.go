@@ -122,10 +122,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		}
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "opc"
-	}
-
 	var errs *packer.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)

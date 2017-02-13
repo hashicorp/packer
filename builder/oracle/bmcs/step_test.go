@@ -40,6 +40,9 @@ func baseTestConfig() *Config {
 		"tenancy_ocid": "ocid1...",
 		"fingerprint":  "00:00...",
 		"key_file":     keyFile.Name(),
+
+		// Comm
+		"ssh_username": "opc",
 	})
 
 	// Once we have a config object they key file isn't re-read so we can
