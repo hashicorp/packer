@@ -33,19 +33,12 @@ func (d *DockerApiDriver) DeleteImage(id string) error {
 
 func (d *DockerApiDriver) Commit(id, author string, changes Changes, message string) (string, error) {
 
-	exposedPorts := make(map[godocker.Port]struct{})
-	var empty struct{}
-
-	for _, port := range changes.Expose {
-		exposedPorts[godocker.Port(port)] = empty
-	}
-
 	config := godocker.Config{
 		Cmd:          changes.Cmd,
 		Labels:       changes.Labels,
 		Env:          changes.Env,
 		Entrypoint:   changes.Entrypoint,
-		ExposedPorts: exposedPorts,
+		ExposedPorts: convertExposedPorts(changes.Expose),
 		User:         changes.User,
 		WorkingDir:   changes.Workdir,
 		OnBuild:      changes.Onbuild,
@@ -83,16 +76,14 @@ func (d *DockerApiDriver) Import(path string, repo string) (string, error) {
 	}
 	defer file.Close()
 
-	repotag := strings.Split(repo, ":")
+	repository, tag := parseImage(repo)
 	var output bytes.Buffer
 	opts := godocker.ImportImageOptions{
-		Repository:   repotag[0],
+		Repository:   repository,
+		Tag:          tag,
 		Source:       path,
 		InputStream:  file,
 		OutputStream: &output,
-	}
-	if len(repotag) > 1 {
-		opts.Tag = repotag[1]
 	}
 	err = d.client.ImportImage(opts)
 
@@ -133,15 +124,9 @@ func (d *DockerApiDriver) Logout(repo string) error {
 	return nil
 }
 
-// TODO split imageTag -> image, tag
 func (d *DockerApiDriver) Pull(imageTag string) error {
 
-	tmp := strings.Split(imageTag, ":")
-	image := tmp[0]
-	tag := "latest"
-	if len(tmp) > 1 {
-		tag = tmp[1]
-	}
+	image, tag := parseImage(imageTag)
 
 	var output bytes.Buffer
 	opts := godocker.PullImageOptions{
@@ -149,6 +134,7 @@ func (d *DockerApiDriver) Pull(imageTag string) error {
 		Tag:          tag,
 		OutputStream: &output,
 	}
+
 	err := d.client.PullImage(opts, d.auth)
 	if err != nil {
 		return err
@@ -158,11 +144,14 @@ func (d *DockerApiDriver) Pull(imageTag string) error {
 
 func (d *DockerApiDriver) Push(name string) error {
 
+	registry, imageTag := parseRepo(name)
+	image, tag := parseImage(imageTag)
+
 	var output bytes.Buffer
 	opts := godocker.PushImageOptions{
-		Name: name,
-		// Tag:  "latest",
-		// Registry: "",
+		Name:         image,
+		Tag:          tag,
+		Registry:     registry,
 		OutputStream: &output,
 	}
 	err := d.client.PushImage(opts, d.auth)
@@ -183,6 +172,7 @@ func (d *DockerApiDriver) SaveImage(id string, dst io.Writer) error {
 	return err
 }
 
+// TODO expand config.
 func (d *DockerApiDriver) StartContainer(config *ContainerConfig) (string, error) {
 
 	// for host, guest := range config.Volumes {
@@ -192,7 +182,10 @@ func (d *DockerApiDriver) StartContainer(config *ContainerConfig) (string, error
 	conf := godocker.Config{
 		AttachStdout: false,
 		Tty:          true,
-		Env:          []string{}, // TODO
+		Env:          config.Env,
+		User:         config.User,
+		ExposedPorts: convertExposedPorts(config.Expose),
+		WorkingDir:   config.Workdir,
 		Cmd:          config.RunCommand,
 		Image:        config.Image,
 		//Volumes:      config.Volumes, // TODO
@@ -289,41 +282,31 @@ func (d *DockerApiDriver) Version() (*version.Version, error) {
 	return version.NewVersion(env.Get("Version"))
 }
 
-// Parses:
-// CMD, LABEL, EXPOSE, ENV, ENTRYPOINT, USER, WORKDIR, ONBUILD, STOPSIGNAL, HEALTHCHECK, SHELL
-// func parseChanges(changes []string) (godocker.Config, error) {
-//
-// 	config := godocker.Config{}
-// 	for change := range changes {
-// 		kv := strings.SplitN(change, " ", 2)
-// 		if len(kv) != 2 {
-// 			fmt.Errorf("Could not parse key value in change: %s", change)
-// 		}
-//
-// 		switch strings.ToLower(change) {
-// 		case "cmd":
-// 			config.Cmd = parseArray(kv[1])
-// 		case "label":
-// 		case "expose":
-// 		case "env":
-// 		case "entrypoint":
-// 		case "user":
-// 		case "workdir":
-// 		case "onbuild":
-// 		case "stopsignal":
-// 		case "healthcheck":
-// 		case "shell":
-// 		default:
-// 			fmt.Errorf("Unknown change %s", change)
-// 		}
-// 	}
-// }
-//
-// func parseArray(array string) []string {
-// 	var a []string
-// 	if err := json.Unmarshal([]byte(array), &a); err != nil {
-// 		return s
-// 	} else {
-// 		return []string{array}
-// 	}
-// }
+// Parse a image string and return (image, tag)
+func parseImage(image string) (string, string) {
+	tmp := strings.SplitN(image, ":", 2)
+	if len(tmp) {
+		return tmp[0], "latest"
+	}
+	return tmp[0], tmp[1]
+}
+
+// Parse a repository string and return (repo, image)
+func parseRepo(image string) (string, string) {
+	tmp := strings.SplitN(image, "/", 2)
+	if len(tmp) {
+		return "", tmp[0]
+	}
+	return tmp[0], tmp[1]
+}
+
+func convertExposedPorts(ports []string) map[godocker.Port]struct{} {
+
+	exposedPorts := make(map[godocker.Port]struct{})
+	var empty struct{}
+
+	for _, port := range ports {
+		exposedPorts[godocker.Port(port)] = empty
+	}
+	return exposedPorts
+}

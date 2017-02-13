@@ -36,6 +36,14 @@ type Changes struct {
 	Shell       map[string]string
 }
 
+type RunConfig struct {
+	Labels  map[string]string
+	Expose  []string
+	Env     []string
+	User    string
+	Workdir string
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
@@ -47,13 +55,13 @@ type Config struct {
 	Image      string
 	Pty        bool
 	Pull       *bool
-	RunCommand []string `mapstructure:"run_command"`
+	RunCommand []string  `mapstructure:"run_command"`
+	RunConfig  RunConfig `mapstructure:"run_config"`
 	Volumes    map[string]string
 	Privileged bool `mapstructure:"privileged"`
 	Author     string
 	Changes    Changes `mapstructure:"changes"`
 	Message    string
-	//Changes    []string // TODO migrate
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors

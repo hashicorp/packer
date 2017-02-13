@@ -65,6 +65,11 @@ type ContainerConfig struct {
 	RunCommand []string
 	Volumes    map[string]string
 	Privileged bool
+	Labels     map[string]string
+	Expose     []string
+	Env        []string
+	User       string
+	Workdir    string
 }
 
 // This is the template that is used for the RunCommand in the ContainerConfig.
