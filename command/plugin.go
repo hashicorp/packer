@@ -68,6 +68,7 @@ import (
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
+	oraclebmcsbuilder "github.com/mitchellh/packer/builder/oracle/bmcs"
 )
 
 type PluginCommand struct {
@@ -91,6 +92,7 @@ var Builders = map[string]packer.Builder{
 	"null":                new(nullbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
+	"oracle-bmcs":         new(oraclebmcsbuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
