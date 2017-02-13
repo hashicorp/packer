@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/multistep"
+	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -31,6 +32,9 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		User: c.Comm.SSHUsername,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
+			ssh.Password(c.Comm.SSHPassword),
+			ssh.KeyboardInteractive(
+				packerssh.PasswordKeyboardInteractive(c.Comm.SSHPassword)),
 		},
 	}, nil
 }
