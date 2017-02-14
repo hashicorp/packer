@@ -116,7 +116,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.KeyFile != "" {
 		accessCfg.KeyFile = c.KeyFile
-		accessCfg.Key, err = client.LoadPrivateKey(accessCfg.KeyFile)
+		accessCfg.Key, err = client.LoadPrivateKey(accessCfg)
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load private key %s : %s", accessCfg.KeyFile, err)
 		}
