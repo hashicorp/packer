@@ -37,6 +37,9 @@ type Config struct {
 	// Path to BMCS config file (e.g. ~/.oraclebmc/config)
 	KeyFile string `ini:"key_file"`
 
+	// Passphrase used for the key, if it is encrypted.
+	PassPhrase string `ini:"pass_phrase"`
+
 	// Private key (loaded via LoadPrivateKey or ParsePrivateKey)
 	Key *rsa.PrivateKey
 
@@ -108,7 +111,7 @@ func loadConfigSection(f *ini.File, sectionName string, config *Config) (*Config
 		return nil, err
 	}
 
-	config.Key, err = LoadPrivateKey(config.KeyFile)
+	config.Key, err = LoadPrivateKey(config)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +120,9 @@ func loadConfigSection(f *ini.File, sectionName string, config *Config) (*Config
 }
 
 // LoadPrivateKey loads private key from disk and parses it.
-func LoadPrivateKey(path string) (*rsa.PrivateKey, error) {
+func LoadPrivateKey(config *Config) (*rsa.PrivateKey, error) {
 	// Expand '~' to $HOME
-	path, err := homedir.Expand(path)
+	path, err := homedir.Expand(config.KeyFile)
 	if err != nil {
 		return nil, err
 	}
@@ -129,15 +132,34 @@ func LoadPrivateKey(path string) (*rsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	key, err := ParsePrivateKey(keyContent)
+	key, err := ParsePrivateKey(keyContent, []byte(config.PassPhrase))
 
 	return key, err
 }
 
 // ParsePrivateKey parses a PEM encoded array of bytes into an rsa.PrivateKey.
-func ParsePrivateKey(content []byte) (*rsa.PrivateKey, error) {
+// Attempts to decrypt the PEM encoded array of bytes with the given password
+// if the PEM encoded byte array is encrypted.
+func ParsePrivateKey(content, password []byte) (*rsa.PrivateKey, error) {
 	keyBlock, _ := pem.Decode(content)
-	der := keyBlock.Bytes
+
+	if keyBlock == nil {
+		return nil, errors.New("could not decode PEM private key")
+	}
+
+	var der []byte
+	var err error
+	if x509.IsEncryptedPEMBlock(keyBlock) {
+		if len(password) < 1 {
+			return nil, errors.New("encrypted private key but no pass phrase provided")
+		}
+		der, err = x509.DecryptPEMBlock(keyBlock, password)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		der = keyBlock.Bytes
+	}
 
 	if key, err := x509.ParsePKCS1PrivateKey(der); err == nil {
 		return key, nil

@@ -160,9 +160,11 @@ func (c *baseClient) Request() (*http.Request, error) {
 		return nil, err
 	}
 
-	err = addQueryStruct(reqURL, c.queryStruct)
-	if err != nil {
-		return nil, err
+	if c.queryStruct != nil {
+		err = addQueryStruct(reqURL, c.queryStruct)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	body := &bytes.Buffer{}

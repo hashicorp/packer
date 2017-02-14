@@ -128,7 +128,7 @@ var KnownGoodCases = []struct {
 }
 
 func TestKnownGoodRequests(t *testing.T) {
-	pKey, err := ParsePrivateKey([]byte(testKey))
+	pKey, err := ParsePrivateKey([]byte(testKey), []byte{})
 	if err != nil {
 		t.Fatalf("Failed to parse test key: %s", err.Error())
 	}
