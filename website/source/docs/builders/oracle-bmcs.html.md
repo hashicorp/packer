@@ -85,6 +85,11 @@ builder.
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
+ -  `pass_phrase` (string) - Pass phrase used to decrypt the private key used
+    to sign requests to the BMCS API. Overrides value provided by the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+    if present.
+
  -  `region` (string) - An Oracle Bare Metal Cloud Services region. Overrides
     value provided by the
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
