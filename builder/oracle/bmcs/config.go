@@ -37,6 +37,7 @@ type Config struct {
 	Region      string `mapstructure:"region"`
 	Fingerprint string `mapstructure:"fingerprint"`
 	KeyFile     string `mapstructure:"key_file"`
+	PassPhrase  string `mapstructure:"pass_phrase"`
 
 	AvailabilityDomain string `mapstructure:"availability_domain"`
 	CompartmentID      string `mapstructure:"compartment_ocid"`
@@ -112,6 +113,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.Fingerprint != "" {
 		accessCfg.Fingerprint = c.Fingerprint
+	}
+
+	if c.PassPhrase != "" {
+		accessCfg.PassPhrase = c.PassPhrase
 	}
 
 	if c.KeyFile != "" {
