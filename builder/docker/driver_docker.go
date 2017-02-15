@@ -275,8 +275,35 @@ func (d *DockerDriver) StopContainer(id string) error {
 
 func (d *DockerDriver) TagImage(id string, repo string, force bool) error {
 	args := []string{"tag"}
-	if force {
-		args = append(args, "-f")
+
+	// detect running docker version before tagging
+	// flag `force` for docker tagging was removed after Docker 1.12.0
+	// to keep its backward compatibility, we are not going to remove `force`
+	// option, but to ignore it when Docker version >= 1.12.0
+	//
+	// for more detail, please refer to the following links:
+	// - https://docs.docker.com/engine/deprecated/#/f-flag-on-docker-tag
+	// - https://github.com/docker/docker/pull/23090
+	output, err := exec.Command("docker", "--version").Output()
+	if err != nil {
+		return err
+	}
+
+	match := regexp.MustCompile(version.VersionRegexpRaw).FindSubmatch(output)
+	if match == nil {
+		return fmt.Errorf("Unknown Docker version: %s", output)
+	}
+
+	version_running, _ := version.NewVersion(string(match[0]))
+	version_deprecated, _ := version.NewVersion("1.12.0")
+
+	if version_running.LessThan(version_deprecated) {
+		if force {
+			args = append(args, "-f")
+		}
+	} else {
+		// do nothing if Docker version >= 1.12.0
+		log.Printf("[WARN] force is removed since Docker 1.12.0")
 	}
 	args = append(args, id, repo)
 
