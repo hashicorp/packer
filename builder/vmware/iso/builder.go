@@ -162,6 +162,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("remote_host must be specified"))
 		}
+		if b.config.RemoteType != "esx5" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+		}
 	}
 
 	if b.config.Format != "" {
