@@ -303,7 +303,8 @@ func (d *DockerDriver) TagImage(id string, repo string, force bool) error {
 		}
 	} else {
 		// do nothing if Docker version >= 1.12.0
-		log.Printf("[WARN] force is removed since Docker 1.12.0")
+		log.Printf("[WARN] option: \"force\" will be ignored here")
+		log.Printf("since it was removed after Docker 1.12.0 released")
 	}
 	args = append(args, id, repo)
 
