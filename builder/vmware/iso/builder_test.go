@@ -156,7 +156,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	}
 
 	config["remote_host"] = ""
-	config["remote_type"] = "esx5"
+	config["remote_type"] = ""
 	// Bad
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -164,6 +164,18 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("should have error")
+	}
+
+	// Good
+	config["remote_type"] = "esx5"
+	config["remote_host"] = "foobar.example.com"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
 	}
 
 	// Good
