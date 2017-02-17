@@ -3,6 +3,7 @@ package chroot
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -87,8 +88,31 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	err = statDevice(attachVolume, state)
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 	state.Put("attach_cleanup", s)
 	return multistep.ActionContinue
+}
+
+func statDevice(attachVolume string, state multistep.StateBag) error {
+	statAttempts := 0
+	deviceAltName := strings.Replace(attachVolume, "/sd", "/xvd", 1)
+	for statAttempts < 30 {
+		if _, err := os.Stat(attachVolume); err == nil {
+			state.Put("device", attachVolume)
+			return nil
+		} else if _, err := os.Stat(deviceAltName); err == nil {
+			state.Put("device", deviceAltName)
+			return nil
+		}
+		time.Sleep(2 * time.Second)
+		statAttempts += 1
+	}
+	return fmt.Errorf("Instance never enumerated volume: %s", attachVolume)
 }
 
 func (s *StepAttachVolume) Cleanup(state multistep.StateBag) {
