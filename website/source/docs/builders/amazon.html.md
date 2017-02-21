@@ -144,7 +144,7 @@ Packer to work:
 
 ### Attaching IAM Policies to Roles
 
-IAM policies can be associated with user or roles. If you use packer with IAM
+IAM policies can be associated with users or roles. If you use packer with IAM
 roles, you may encounter an error like this one:
 
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.
