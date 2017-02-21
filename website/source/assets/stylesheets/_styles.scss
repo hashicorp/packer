@@ -166,10 +166,11 @@ table {
   th {
     color: $black;
     font-weight: normal !important;
+      padding-right: $baseline;
   }
 
   td {
-      padding-right: 20px;
+      padding-right: $baseline;
   }
 }
 
