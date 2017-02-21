@@ -10,6 +10,7 @@
 * provisioner/anisble: use randomized staging dir [GH-4472]
 * builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
+* builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
 
 ### BUG FIXES:
 
