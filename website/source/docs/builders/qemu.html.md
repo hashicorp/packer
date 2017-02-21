@@ -435,7 +435,7 @@ CentOS 6.4 installer:
 "boot_command":
 [
   "<tab><wait>",
-  " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+  " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
 
