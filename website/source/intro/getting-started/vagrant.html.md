@@ -67,10 +67,11 @@ As you watch the output, you'll notice at the end in the artifact listing that a
 Vagrant box was made (by default at `packer_aws.box` in the current directory).
 Success!
 
-But where did the AMI go? When using post-processors, Vagrant removes
-intermediary artifacts since they're usually not wanted. Only the final artifact
-is preserved. This behavior can be changed, of course. Changing this behavior is
-covered [in the documentation](/docs/templates/post-processors.html).
+But where did the Amazon EBS builder artifact go? When using post-processors,
+Vagrant removes intermediary artifacts since they're usually not wanted. Only
+the final artifact is preserved. This behavior can be changed, of course.
+Changing this behavior is covered [in the
+documentation](/docs/templates/post-processors.html).
 
 Typically when removing intermediary artifacts, the actual underlying files or
 resources of the artifact are also removed. For example, when building a VMware
