@@ -23,6 +23,7 @@ type RunConfig struct {
 	RackconnectWait  bool              `mapstructure:"rackconnect_wait"`
 	FloatingIpPool   string            `mapstructure:"floating_ip_pool"`
 	FloatingIp       string            `mapstructure:"floating_ip"`
+	ReuseIps         bool              `mapstructure:"reuse_ips"`
 	SecurityGroups   []string          `mapstructure:"security_groups"`
 	Networks         []string          `mapstructure:"networks"`
 	UserData         string            `mapstructure:"user_data"`
