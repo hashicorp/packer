@@ -1,5 +1,9 @@
 ## (Unreleased)
 
+### FEATURES:
+
+* **New builder:** `ebs-surrogate` for building AMIs from EBS volumes. [GH-4351]
+
 ### IMPROVEMENTS:
 
 * builder/docker: create export dir if needed. [GH-4439]
