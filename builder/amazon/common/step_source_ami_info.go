@@ -101,7 +101,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", *image.ImageId))
 
-	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
+	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
 	if s.EnhancedNetworking && *image.VirtualizationType != "hvm" {
 		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
