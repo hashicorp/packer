@@ -370,7 +370,7 @@ provisioning commands to install the os and bootloader.
   "ami_name": "packer-from-scratch {{timestamp}}"
   "from_scratch": true,
   "ami_virtualization_type": "hvm",
-  "device_setup_commands": [
+  "pre_mount_commands": [
     "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
     "mkfs.ext4 {{.Device}}1"
   ],
