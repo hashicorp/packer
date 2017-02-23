@@ -25,8 +25,8 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	VolumeMappings        []BlockDevice `mapstructure:"ebs_volumes"`
-	AMIEnhancedNetworking bool          `mapstructure:"enhanced_networking"`
+	VolumeMappings            []BlockDevice `mapstructure:"ebs_volumes"`
+	AMIEnhancedNetworkingType string        `mapstructure:"enhanced_networking_type"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context
@@ -105,9 +105,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-			AmiFilters:         b.config.SourceAmiFilter,
+			SourceAmi:              b.config.SourceAmi,
+			EnhancedNetworkingType: b.config.AMIEnhancedNetworkingType,
+			AmiFilters:             b.config.SourceAmiFilter,
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
@@ -166,7 +166,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
-			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
+			EnhancedNetworkingType: b.config.AMIEnhancedNetworkingType,
 		},
 	}
 
