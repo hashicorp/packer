@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"net"
 	"testing"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/mitchellh/packer/helper/config"
 )
 
 func TestESX5Driver_implDriver(t *testing.T) {
@@ -56,40 +60,31 @@ func TestESX5Driver_HostIP(t *testing.T) {
 func TestESX5Driver_CommHost(t *testing.T) {
 	const expected_host = "127.0.0.1"
 
-	config := make(map[string]interface{})
-	config["communicator"] = "winrm"
-	config["winrm_username"] = "username"
-	config["winrm_password"] = "password"
-	config["winrm_host"] = expected_host
+	conf := make(map[string]interface{})
+	conf["communicator"] = "winrm"
+	conf["winrm_username"] = "username"
+	conf["winrm_password"] = "password"
+	conf["winrm_host"] = expected_host
 
-	// var b Builder
-	// warns, err := b.Prepare(config)
-	// if len(warns) > 0 {
-	// 	t.Fatalf("bad: %#v", warns)
-	// }
-	// if err != nil {
-	// 	t.Fatalf("should not have error: %s", err)
-	// }
-	// if host := b.config.CommConfig.Host(); host != expected_host {
-	// 	t.Fatalf("setup failed, bad host name: %s", host)
-	// }
+	var commConfig communicator.Config
+	err := config.Decode(&commConfig, nil, conf)
+	state := new(multistep.BasicStateBag)
+	sshConfig := SSHConfig{Comm: commConfig}
+	state.Put("sshConfig", &sshConfig)
+	driver := ESX5Driver{CommConfig: commConfig}
 
-	// state := new(multistep.BasicStateBag)
-	// state.Put("config", &b.config)
-	//
-	// var driver ESX5Driver{}
-	// host, err := driver.CommHost(state)
-	// if err != nil {
-	// 	t.Fatalf("should not have error: %s", err)
-	// }
-	// if host != expected_host {
-	// 	t.Errorf("bad host name: %s", host)
-	// }
-	// address, ok := state.GetOk("vm_address")
-	// if !ok {
-	// 	t.Error("state not updated with vm_address")
-	// }
-	// if address.(string) != expected_host {
-	// 	t.Errorf("bad vm_address: %s", address.(string))
-	// }
+	host, err := driver.CommHost(state)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if host != expected_host {
+		t.Errorf("bad host name: %s", host)
+	}
+	address, ok := state.GetOk("vm_address")
+	if !ok {
+		t.Error("state not updated with vm_address")
+	}
+	if address.(string) != expected_host {
+		t.Errorf("bad vm_address: %s", address.(string))
+	}
 }
