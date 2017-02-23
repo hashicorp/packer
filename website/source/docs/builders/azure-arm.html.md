@@ -35,7 +35,7 @@ builder.
 
 -   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
 
--   `capture_container_name` (string) Destination container name. Essentially the "folder" where your VHD will be organized in Azure.
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
 
 -   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and `PREFIX-vmTemplate.UUID`.
 
@@ -73,6 +73,10 @@ builder.
 
 -   `image_url` (string) Specify a custom VHD to use.  If this value is set, do not set image_publisher, image_offer,
      image_sku, or image_version.
+     
+-   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer build, e.g. attach a resource disk to the VM.
+
+-   `temp_resource_group_name` (string) temporary name assigned to the resource group.  If this value is not set, a random value will be assigned.
 
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
      specified, `tenant_id` will be looked up using `subscription_id`.
@@ -141,6 +145,63 @@ Here is a basic example for Azure.
     "vm_size": "Standard_A2"
 }
 ```
+
+## Deprovision
+
+Azure VMs should be deprovisioned at the end of every build.  For Windows this means executing sysprep, and for Linux this means executing the waagent deprovision process.
+
+Please refer to the Azure [examples](https://github.com/mitchellh/packer/tree/master/examples/azure) for complete examples showing the deprovision process.
+
+### Windows
+
+The following provisioner snippet shows how to sysprep a Windows VM.  Deprovision should be the last operation executed by a build.
+
+``` {.javascript}
+    "provisioners": [
+        {
+            "type": "powershell",
+            "inline": [
+                "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
+                "& $Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet"
+            ]
+        }
+    ]
+```
+
+### Linux
+
+The following provisioner snippet shows how to deprovision a Linux VM.  Deprovision should be the last operation executed by a build.
+
+``` {.javascript}
+ "provisioners": [{
+    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+    "inline": [
+      "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+    ],
+    "inline_shebang": "/bin/sh -x",
+    "type": "shell"
+  }]
+```
+
+To learn more about the Linux deprovision process please see WALinuxAgent's [README](https://github.com/Azure/WALinuxAgent/blob/master/README.md).
+
+#### skip_clean
+
+Customers have reported issues with the deprovision process where the builder hangs.  The error message is similar to the following.
+
+```
+Build 'azure-arm' errored: Retryable error: Error removing temporary script at /tmp/script_9899.sh: ssh: handshake failed: EOF
+```
+
+One solution is to set skip_clean to true in the provisioner.  This prevents Packer from cleaning up any helper scripts uploaded to the VM during the build.
+
+## Defaults
+
+The Azure builder attempts to pick default values that provide for a just works experience.  These values can be changed by the user to more suitable values.
+
+ * The default user name is packer not root as in other builders.  Most distros on Azure do not allow root to SSH to a VM hence the need for a non-root default user.  Set the ssh_username option to override the default value.
+ * The default VM size is Standard_A1.  Set the vm_size option to override the default value.
+ * The default image version is latest.  Set the image_version option to override the default value.
 
 ## Implementation
 
