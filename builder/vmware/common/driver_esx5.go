@@ -114,7 +114,11 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 }
 
 func (d *ESX5Driver) ReloadVM() error {
-	return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
+	if d.vmId != "" {
+		return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
+	} else {
+		return nil
+	}
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
