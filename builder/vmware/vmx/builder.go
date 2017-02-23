@@ -47,9 +47,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
-	if b.config.RemoteType != "" {
-		b.config.OutputDir = b.config.VMName
-	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Set up the state.
