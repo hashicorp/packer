@@ -33,7 +33,7 @@ func (c *StepUploadVMX) Run(state multistep.StateBag) multistep.StepAction {
 		if ok {
 			remoteVmxPath := filepath.ToSlash(filepath.Join(fmt.Sprintf("%s", remoteDriver), filepath.Base(vmxPath)))
 			log.Printf("Uploading VMX file from %s to %s", vmxPath, remoteVmxPath)
-			if err := remoteDriver.Upload(remoteVmxPath, vmxPath); err != nil {
+			if err := remoteDriver.upload(remoteVmxPath, vmxPath); err != nil {
 				state.Put("error", fmt.Errorf("Error writing VMX: %s", err))
 				return multistep.ActionHalt
 			}

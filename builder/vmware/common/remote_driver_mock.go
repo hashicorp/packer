@@ -57,7 +57,7 @@ func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
 	return d.IsDestroyedResult, d.IsDestroyedErr
 }
 
-func (d *RemoteDriverMock) Upload(dst, src string) error {
+func (d *RemoteDriverMock) upload(dst, src string) error {
 	return d.UploadErr
 }
 

@@ -21,7 +21,7 @@ type RemoteDriver interface {
 	IsDestroyed() (bool, error)
 
 	// Uploads a local file to remote side.
-	Upload(dst, src string) error
+	upload(dst, src string) error
 
 	// Download a remote file to a local file.
 	Download(src, dst string) error

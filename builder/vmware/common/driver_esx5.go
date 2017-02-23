@@ -143,7 +143,7 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
-	if err := d.Upload(vmxPath, vmxPathLocal); err != nil {
+	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
 	r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
@@ -186,7 +186,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 		return finalPath, nil
 	}
 
-	if err := d.Upload(finalPath, localPath); err != nil {
+	if err := d.upload(finalPath, localPath); err != nil {
 		return "", err
 	}
 
@@ -502,7 +502,7 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", path)
 }
 
-func (d *ESX5Driver) Upload(dst, src string) error {
+func (d *ESX5Driver) upload(dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
