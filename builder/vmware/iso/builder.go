@@ -200,9 +200,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		dir = new(vmwcommon.LocalOutputDir)
 	}
 
-	var localDir localOutputDir
+	localDir := localOutputDir{b.config.OutputDir}
+	log.Printf("b.config.OutputDir: %s, localDir: %s", b.config.OutputDir, localDir.dir)
 	if b.config.RemoteType != "" && b.config.Format != "" {
-		localDir = localOutputDir{b.config.OutputDir}
 		b.config.OutputDir = b.config.VMName
 	}
 	dir.SetOutputDir(b.config.OutputDir)
