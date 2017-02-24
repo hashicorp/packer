@@ -23,7 +23,6 @@ type StepConfigureVMX struct {
 }
 
 func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
-	log.Printf("Configure VMX\n")
 	var vmxContents []byte
 	var err error
 	ui := state.Get("ui").(packer.Ui)
