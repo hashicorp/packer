@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -60,7 +59,7 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Export the VM
 	localDir := state.Get("localDir").(localOutputDir)
-	outputPath := filepath.Join(localDir.dir, c.VMName+"."+s.Format)
+	outputPath := localDir.dir
 
 	if s.Format == "ova" {
 		os.MkdirAll(outputPath, 0755)
