@@ -74,7 +74,6 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 	}
 
 	for _, f := range linesToArray(filesToClone) {
-		log.Printf("Copying file %s\n", f)
 		err := d.sh("cp", f, dstDir)
 		if err != nil {
 			return fmt.Errorf("Failing to copy %s to %s: %s", f, dstDir, err)
