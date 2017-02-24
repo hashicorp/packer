@@ -333,7 +333,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var files []string
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
+		dir.SetOutputDir(localDir.dir)
 		files, err = dir.ListFiles()
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
