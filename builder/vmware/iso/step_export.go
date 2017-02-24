@@ -59,7 +59,8 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Export the VM
-	outputPath := filepath.Join(c.OutputDir, c.VMName+"."+s.Format)
+	localDir := state.Get("localDir").(localOutputDir)
+	outputPath := filepath.Join(fmt.Sprintf("%v", localDir), c.VMName+"."+s.Format)
 
 	if s.Format == "ova" {
 		os.MkdirAll(outputPath, 0755)

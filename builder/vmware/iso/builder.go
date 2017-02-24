@@ -199,7 +199,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+
+	var localDir localOutputDir
 	if b.config.RemoteType != "" && b.config.Format != "" {
+		localDir = localOutputDir{b.config.OutputDir}
 		b.config.OutputDir = b.config.VMName
 	}
 	dir.SetOutputDir(b.config.OutputDir)
@@ -210,6 +213,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("dir", dir)
+	state.Put("localDir", localDir)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
