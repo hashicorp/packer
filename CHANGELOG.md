@@ -6,24 +6,25 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
+* builder/amazon: Change EC2 Windows password timeout to 20 minutes. [GH-4590]
 * builder/docker: create export dir if needed. [GH-4439]
+* builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
+* builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
 * communicator/docker: preserve file mode. [GH-4443]
 * communicator/winrm: support ProxyFromEnvironment. [GH-4463]
-* builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
-* VNC: make VNC links clickable in terminal. [GH-4497] [GH-4498] 
-* provisioner/ansible: use randomized staging dir [GH-4472]
-* builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
+* core: make VNC links clickable in terminal. [GH-4497] [GH-4498] 
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
-* builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
+* provisioner/ansible: use randomized staging dir [GH-4472]
 
 ### BUG FIXES:
 
 * builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
-* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
-* core: always check for an error first when walking a path. [GH-4467]
-* builder/virtualbox: remove guest additions before saving image. [GH-4496]
 * builder/googlecompute: fix bug when creating image from custom image_family.
     [GH-4518]
+* builder/virtualbox: remove guest additions before saving image. [GH-4496]
+* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
+* core: always check for an error first when walking a path. [GH-4467]
 
 ## 0.12.2 (January 20, 2017)
 
