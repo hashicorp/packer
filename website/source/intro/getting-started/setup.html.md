@@ -75,6 +75,14 @@ If you're using OS X and [Homebrew](http://brew.sh), you can install Packer by
 running:
 
     $ brew install packer
+    
+### Windows Package Management
+
+If you're using Windows and [package management](https://technet.microsoft.com/en-us/library/dn890706.aspx), you can install Packer:
+
+```powershell
+Install-Package -Name Packer -Source Chocolatey
+```
 
 ### Chocolatey
 
