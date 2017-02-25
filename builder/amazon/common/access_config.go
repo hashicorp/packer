@@ -2,14 +2,10 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"unicode"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -35,35 +31,27 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
 
+	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
 	if c.CustomEndpointEc2 != "" {
 		config.Endpoint = &c.CustomEndpointEc2
 	}
-
-	if c.ProfileName != "" {
-		profile, err := NewFromProfile(c.ProfileName)
-		if err != nil {
-			return nil, err
-		}
-		creds, err = profile.CredentialsFromProfile(config)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		creds = credentials.NewChainCredentials([]credentials.Provider{
-			&credentials.StaticProvider{Value: credentials.Value{
-				AccessKeyID:     c.AccessKey,
-				SecretAccessKey: c.SecretKey,
-				SessionToken:    c.Token,
-			}},
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-			&ec2rolecreds.EC2RoleProvider{
-				Client: ec2metadata.New(session.New(config)),
+	creds = credentials.NewChainCredentials(
+		[]credentials.Provider{
+			&credentials.StaticProvider{
+				Value: credentials.Value{
+					AccessKeyID:     c.AccessKey,
+					SecretAccessKey: c.SecretKey,
+					SessionToken:    c.Token,
+				},
 			},
+			&credentials.EnvProvider{},
+			&credentials.SharedCredentialsProvider{
+				Profile: c.ProfileName,
+			},
+			defaults.RemoteCredProvider(*(defaults.Config()), defaults.Handlers()),
 		})
-	}
+
 	return config.WithCredentials(creds), nil
 }
 
@@ -79,13 +67,13 @@ func (c *AccessConfig) Region() (string, error) {
 		return c.RawRegion, nil
 	}
 
-	md, err := GetInstanceMetaData("placement/availability-zone")
+	sess := session.New()
+	ec2meta := ec2metadata.New(sess)
+	identity, err := ec2meta.GetInstanceIdentityDocument()
 	if err != nil {
 		return "", err
 	}
-
-	region := strings.TrimRightFunc(string(md), unicode.IsLetter)
-	return region, nil
+	return identity.Region, nil
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
@@ -101,25 +89,4 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func GetInstanceMetaData(path string) (contents []byte, err error) {
-	url := "http://169.254.169.254/latest/meta-data/" + path
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("Code %d returned for url %s", resp.StatusCode, url)
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	return body, err
 }
