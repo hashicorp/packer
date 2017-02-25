@@ -175,6 +175,9 @@ type UploadInput struct {
 	// The type of storage to use for the object. Defaults to 'STANDARD'.
 	StorageClass *string `location:"header" locationName:"x-amz-storage-class" type:"string"`
 
+	// The tag-set for the object. The tag-set must be encoded as URL Query parameters
+	Tagging *string `location:"header" locationName:"x-amz-tagging" type:"string"`
+
 	// If the bucket is configured as a website, redirects requests for this object
 	// to another object in the same bucket or to an external URL. Amazon S3 stores
 	// the value of this header in the object metadata.
@@ -238,7 +241,7 @@ type Uploader struct {
 //
 // Example:
 //     // The session the S3 Uploader will use
-//     sess, err := session.NewSession()
+//     sess := session.Must(session.NewSession())
 //
 //     // Create an uploader with the session and default options
 //     uploader := s3manager.NewUploader(sess)
@@ -269,7 +272,7 @@ func NewUploader(c client.ConfigProvider, options ...func(*Uploader)) *Uploader 
 //
 // Example:
 //     // The session the S3 Uploader will use
-//     sess, err := session.NewSession()
+//     sess := session.Must(session.NewSession())
 //
 //     // S3 service client the Upload manager will use.
 //     s3Svc := s3.New(sess)
@@ -409,8 +412,12 @@ func (u *uploader) initSize() {
 // does not need to be wrapped in a mutex because nextReader is only called
 // from the main thread.
 func (u *uploader) nextReader() (io.ReadSeeker, int, error) {
+	type readerAtSeeker interface {
+		io.ReaderAt
+		io.ReadSeeker
+	}
 	switch r := u.in.Body.(type) {
-	case io.ReaderAt:
+	case readerAtSeeker:
 		var err error
 
 		n := u.ctx.PartSize
@@ -601,11 +608,13 @@ func (u *multiuploader) readChunk(ch chan chunk) {
 // part information.
 func (u *multiuploader) send(c chunk) error {
 	req, resp := u.ctx.S3.UploadPartRequest(&s3.UploadPartInput{
-		Bucket:     u.in.Bucket,
-		Key:        u.in.Key,
-		Body:       c.buf,
-		UploadId:   &u.uploadID,
-		PartNumber: &c.num,
+		Bucket:               u.in.Bucket,
+		Key:                  u.in.Key,
+		Body:                 c.buf,
+		UploadId:             &u.uploadID,
+		SSECustomerAlgorithm: u.in.SSECustomerAlgorithm,
+		SSECustomerKey:       u.in.SSECustomerKey,
+		PartNumber:           &c.num,
 	})
 	req.Handlers.Build.PushBack(request.MakeAddToUserAgentFreeFormHandler("S3Manager"))
 	if err := req.Send(); err != nil {
