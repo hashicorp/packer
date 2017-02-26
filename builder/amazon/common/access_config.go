@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -14,12 +15,12 @@ import (
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	AccessKey         string `mapstructure:"access_key"`
-	SecretKey         string `mapstructure:"secret_key"`
+	AssumeRoleArn     string `mapstructure:"assume_role_arn"`
+	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
 	RawRegion         string `mapstructure:"region"`
+	SecretKey         string `mapstructure:"secret_key"`
 	SkipValidation    bool   `mapstructure:"skip_region_validation"`
 	Token             string `mapstructure:"token"`
-	ProfileName       string `mapstructure:"profile"`
-	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -52,6 +53,10 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 			defaults.RemoteCredProvider(*(defaults.Config()), defaults.Handlers()),
 		})
 
+	if c.AssumeRoleArn != "" {
+		sess := session.Must(session.NewSession(config.WithCredentials(creds)))
+		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn)
+	}
 	return config.WithCredentials(creds), nil
 }
 
