@@ -26,6 +26,8 @@
 * builder/virtualbox: remove guest additions before saving image. [GH-4496]
 * builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
 * core: always check for an error first when walking a path. [GH-4467]
+* builder/docker: Don't force tag if using a docker version that doesn't
+    support it. [GH-4560]
 
 ## 0.12.2 (January 20, 2017)
 
