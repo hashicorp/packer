@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -17,6 +18,10 @@ type AccessConfig struct {
 	AccessKey         string `mapstructure:"access_key"`
 	AssumeRoleArn     string `mapstructure:"assume_role_arn"`
 	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
+	ExternalID        string `mapstructure:"external_id"`
+	MFACode           string `mapstructure:"mfa_code"`
+	MFASerial         string `mapstructure:"mfa_serial"`
+	ProfileName       string `mapstructure:"profile"`
 	RawRegion         string `mapstructure:"region"`
 	SecretKey         string `mapstructure:"secret_key"`
 	SkipValidation    bool   `mapstructure:"skip_region_validation"`
@@ -54,8 +59,24 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		})
 
 	if c.AssumeRoleArn != "" {
+		var mfa func(*stscreds.AssumeRoleProvider)
+		if c.MFACode != "" {
+			mfa = func(p *stscreds.AssumeRoleProvider) {
+				p.SerialNumber = aws.String(c.MFASerial)
+				p.TokenProvider = func() (string, error) {
+					return c.MFACode, nil
+				}
+			}
+		}
+
 		sess := session.Must(session.NewSession(config.WithCredentials(creds)))
-		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn)
+		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn, mfa, func(p *stscreds.AssumeRoleProvider) {
+			p.Duration = time.Duration(60) * time.Minute
+			if len(c.ExternalID) > 0 {
+				p.ExternalID = aws.String(c.ExternalID)
+			}
+		})
+
 	}
 	return config.WithCredentials(creds), nil
 }
@@ -87,6 +108,14 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
+	}
+
+	hasAssumeRoleArn := len(c.AssumeRoleArn) > 0
+	hasMFASerial := len(c.MFASerial) > 0
+	hasMFACode := len(c.MFACode) > 0
+	if hasAssumeRoleArn && ((hasMFACode && !hasMFASerial) || (!hasMFACode && !hasMFACode)) {
+		errs = append(errs, fmt.Errorf("Both mfa_serial and mfa_code must be specified."))
+
 	}
 
 	if len(errs) > 0 {
