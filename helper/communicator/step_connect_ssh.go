@@ -12,7 +12,6 @@ import (
 	commonssh "github.com/mitchellh/packer/common/ssh"
 	"github.com/mitchellh/packer/communicator/ssh"
 	"github.com/mitchellh/packer/packer"
-	"github.com/xanzy/ssh-agent"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -95,7 +94,6 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 
 		conf, err := sshBastionConfig(s.Config)
 		if err != nil {
-			log.Printf("[ERROR] Error calling sshBastionConfig: %v", err)
 			return nil, fmt.Errorf("Error configuring bastion: %s", err)
 		}
 		bConf = conf
@@ -198,15 +196,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 }
 
 func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
-	var auth []gossh.AuthMethod
-
-	if !config.SSHDisableAgent {
-		log.Printf("[INFO] SSH agent forwarding enabled.")
-		if sshAgent := sshAgent(); sshAgent != nil {
-			auth = append(auth, sshAgent)
-		}
-	}
-
+	auth := make([]gossh.AuthMethod, 0, 2)
 	if config.SSHBastionPassword != "" {
 		auth = append(auth,
 			gossh.Password(config.SSHBastionPassword),
@@ -227,20 +217,4 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 		User: config.SSHBastionUsername,
 		Auth: auth,
 	}, nil
-}
-
-func sshAgent() gossh.AuthMethod {
-	if !sshagent.Available() {
-		log.Println("[DEBUG] Error fetching SSH_AUTH_SOCK.")
-		return nil
-	}
-
-	agent, _, err := sshagent.New()
-	if err != nil {
-		log.Printf("[WARN] sshagent.New: %v", err)
-		return nil
-	}
-
-	log.Println("[INFO] Using SSH Agent.")
-	return gossh.PublicKeysCallback(agent.Signers)
 }
