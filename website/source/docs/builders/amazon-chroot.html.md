@@ -131,6 +131,10 @@ each category, the available configuration keys are alphabetized.
 -   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
     AMIs, which have been deregistered by `force_deregister`. Default `false`.
 
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Default `false`.
+
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:
