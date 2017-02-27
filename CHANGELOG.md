@@ -17,6 +17,7 @@
 * core: make VNC links clickable in terminal. [GH-4497] [GH-4498]
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
 * provisioner/ansible: use randomized staging dir [GH-4472]
+* communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
 
 ### BUG FIXES:
 
