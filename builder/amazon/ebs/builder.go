@@ -149,7 +149,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
-		&stepTagEBSVolumes{
+		&awscommon.StepTagEBSVolumes{
 			VolumeRunTags: b.config.VolumeRunTags,
 			Ctx:           b.config.ctx,
 		},
