@@ -248,12 +248,7 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		port = sshc.WinRMPort
 	}
 
-	if address, ok := state.GetOk("vm_address"); ok {
-		return address.(string), nil
-	}
-
 	if address := config.CommConfig.Host(); address != "" {
-		state.Put("vm_address", address)
 		return address, nil
 	}
 
@@ -302,7 +297,6 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		} else {
 			defer conn.Close()
 			address := record["IPAddress"]
-			state.Put("vm_address", address)
 			return address, nil
 		}
 	}
