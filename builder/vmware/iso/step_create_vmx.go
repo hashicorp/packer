@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -21,24 +22,24 @@ type vmxTemplateData struct {
 	ISOPath  string
 	Version  string
 
-	Network_Type  string
-	Network_Device  string
+	Network_Type   string
+	Network_Device string
 
 	Sound_Present string
-	Usb_Present string
+	Usb_Present   string
 
-	Serial_Present string
-	Serial_Type string
+	Serial_Present  string
+	Serial_Type     string
 	Serial_Endpoint string
-	Serial_Host string
-	Serial_Yield string
+	Serial_Host     string
+	Serial_Yield    string
 	Serial_Filename string
-	Serial_Auto string
+	Serial_Auto     string
 
-	Parallel_Present string
+	Parallel_Present       string
 	Parallel_Bidirectional string
-	Parallel_Filename string
-	Parallel_Auto string
+	Parallel_Filename      string
+	Parallel_Auto          string
 }
 
 type additionalDiskTemplateData struct {
@@ -63,34 +64,34 @@ type stepCreateVMX struct {
 type serialConfigPipe struct {
 	filename string
 	endpoint string
-	host string
-	yield string
+	host     string
+	yield    string
 }
 
 type serialConfigFile struct {
 	filename string
-	yield string
+	yield    string
 }
 
 type serialConfigDevice struct {
 	devicename string
-	yield string
+	yield      string
 }
 
 type serialConfigAuto struct {
 	devicename string
-	yield string
+	yield      string
 }
 
 type serialUnion struct {
 	serialType interface{}
-	pipe *serialConfigPipe
-	file *serialConfigFile
-	device *serialConfigDevice
-	auto *serialConfigAuto
+	pipe       *serialConfigPipe
+	file       *serialConfigFile
+	device     *serialConfigDevice
+	auto       *serialConfigAuto
 }
 
-func unformat_serial(config string) (*serialUnion,error) {
+func unformat_serial(config string) (*serialUnion, error) {
 	var defaultSerialPort string
 	if runtime.GOOS == "windows" {
 		defaultSerialPort = "COM1"
@@ -100,7 +101,7 @@ func unformat_serial(config string) (*serialUnion,error) {
 
 	input := strings.SplitN(config, ":", 2)
 	if len(input) < 1 {
-		return nil,fmt.Errorf("Unexpected format for serial port: %s", config)
+		return nil, fmt.Errorf("Unexpected format for serial port: %s", config)
 	}
 
 	var formatType, formatOptions string
@@ -112,116 +113,116 @@ func unformat_serial(config string) (*serialUnion,error) {
 	}
 
 	switch strings.ToUpper(formatType) {
-		case "PIPE":
-			comp := strings.Split(formatOptions, ",")
-			if len(comp) < 3 || len(comp) > 4 {
-				return nil,fmt.Errorf("Unexpected format for serial port : pipe : %s", config)
-			}
-			if res := strings.ToLower(comp[1]); res != "client" && res != "server" {
-				return nil,fmt.Errorf("Unexpected format for serial port : pipe : endpoint : %s : %s", res, config)
-			}
-			if res := strings.ToLower(comp[2]); res != "app" && res != "vm" {
-				return nil,fmt.Errorf("Unexpected format for serial port : pipe : host : %s : %s", res, config)
-			}
-			res := &serialConfigPipe{
-				filename : comp[0],
-				endpoint : comp[1],
-				host : map[string]string{"app":"TRUE","vm":"FALSE"}[strings.ToLower(comp[2])],
-				yield : "FALSE",
-			}
-			if len(comp) == 4 {
-				res.yield = strings.ToUpper(comp[3])
-			}
-			if res.yield != "TRUE" && res.yield != "FALSE" {
-				return nil,fmt.Errorf("Unexpected format for serial port : pipe : yield : %s : %s", res.yield, config)
-			}
-			return &serialUnion{serialType:res, pipe:res},nil
+	case "PIPE":
+		comp := strings.Split(formatOptions, ",")
+		if len(comp) < 3 || len(comp) > 4 {
+			return nil, fmt.Errorf("Unexpected format for serial port : pipe : %s", config)
+		}
+		if res := strings.ToLower(comp[1]); res != "client" && res != "server" {
+			return nil, fmt.Errorf("Unexpected format for serial port : pipe : endpoint : %s : %s", res, config)
+		}
+		if res := strings.ToLower(comp[2]); res != "app" && res != "vm" {
+			return nil, fmt.Errorf("Unexpected format for serial port : pipe : host : %s : %s", res, config)
+		}
+		res := &serialConfigPipe{
+			filename: comp[0],
+			endpoint: comp[1],
+			host:     map[string]string{"app": "TRUE", "vm": "FALSE"}[strings.ToLower(comp[2])],
+			yield:    "FALSE",
+		}
+		if len(comp) == 4 {
+			res.yield = strings.ToUpper(comp[3])
+		}
+		if res.yield != "TRUE" && res.yield != "FALSE" {
+			return nil, fmt.Errorf("Unexpected format for serial port : pipe : yield : %s : %s", res.yield, config)
+		}
+		return &serialUnion{serialType: res, pipe: res}, nil
 
-		case "FILE":
-			comp := strings.Split(formatOptions, ",")
-			if len(comp) > 2 {
-				return nil,fmt.Errorf("Unexpected format for serial port : file : %s", config)
-			}
+	case "FILE":
+		comp := strings.Split(formatOptions, ",")
+		if len(comp) > 2 {
+			return nil, fmt.Errorf("Unexpected format for serial port : file : %s", config)
+		}
 
-			res := &serialConfigFile{ yield : "FALSE" }
+		res := &serialConfigFile{yield: "FALSE"}
 
-			res.filename = filepath.FromSlash(comp[0])
+		res.filename = filepath.FromSlash(comp[0])
 
-			res.yield = map[bool]string{true:strings.ToUpper(comp[0]), false:"FALSE"}[len(comp) > 1]
-			if res.yield != "TRUE" && res.yield != "FALSE" {
-				return nil,fmt.Errorf("Unexpected format for serial port : file : yield : %s : %s", res.yield, config)
-			}
+		res.yield = map[bool]string{true: strings.ToUpper(comp[0]), false: "FALSE"}[len(comp) > 1]
+		if res.yield != "TRUE" && res.yield != "FALSE" {
+			return nil, fmt.Errorf("Unexpected format for serial port : file : yield : %s : %s", res.yield, config)
+		}
 
-			return &serialUnion{serialType:res, file:res},nil
+		return &serialUnion{serialType: res, file: res}, nil
 
-		case "DEVICE":
-			comp := strings.Split(formatOptions, ",")
-			if len(comp) > 2 {
-				return nil,fmt.Errorf("Unexpected format for serial port : device : %s", config)
-			}
+	case "DEVICE":
+		comp := strings.Split(formatOptions, ",")
+		if len(comp) > 2 {
+			return nil, fmt.Errorf("Unexpected format for serial port : device : %s", config)
+		}
 
-			res := new(serialConfigDevice)
+		res := new(serialConfigDevice)
 
-			if len(comp) == 2 {
-				res.devicename = map[bool]string{true:filepath.FromSlash(comp[0]), false:defaultSerialPort}[len(comp[0]) > 0]
-				res.yield = strings.ToUpper(comp[1])
-			} else if len(comp) == 1 {
-				res.devicename = map[bool]string{true:filepath.FromSlash(comp[0]), false:defaultSerialPort}[len(comp[0]) > 0]
-				res.yield = "FALSE"
-			} else if len(comp) == 0 {
-				res.devicename = defaultSerialPort
-				res.yield = "FALSE"
-			}
-
-			if res.yield != "TRUE" && res.yield != "FALSE" {
-				return nil,fmt.Errorf("Unexpected format for serial port : device : yield : %s : %s", res.yield, config)
-			}
-
-			return &serialUnion{serialType:res, device:res},nil
-
-		case "AUTO":
-			res := new(serialConfigAuto)
+		if len(comp) == 2 {
+			res.devicename = map[bool]string{true: filepath.FromSlash(comp[0]), false: defaultSerialPort}[len(comp[0]) > 0]
+			res.yield = strings.ToUpper(comp[1])
+		} else if len(comp) == 1 {
+			res.devicename = map[bool]string{true: filepath.FromSlash(comp[0]), false: defaultSerialPort}[len(comp[0]) > 0]
+			res.yield = "FALSE"
+		} else if len(comp) == 0 {
 			res.devicename = defaultSerialPort
+			res.yield = "FALSE"
+		}
 
-			if len(formatOptions) > 0 {
-				res.yield = strings.ToUpper(formatOptions)
-			} else {
-				res.yield = "FALSE"
-			}
+		if res.yield != "TRUE" && res.yield != "FALSE" {
+			return nil, fmt.Errorf("Unexpected format for serial port : device : yield : %s : %s", res.yield, config)
+		}
 
-			if res.yield != "TRUE" && res.yield != "FALSE" {
-				return nil,fmt.Errorf("Unexpected format for serial port : auto : yield : %s : %s", res.yield, config)
-			}
+		return &serialUnion{serialType: res, device: res}, nil
 
-			return &serialUnion{serialType:res, auto:res},nil
+	case "AUTO":
+		res := new(serialConfigAuto)
+		res.devicename = defaultSerialPort
 
-		default:
-			return nil,fmt.Errorf("Unknown serial type : %s : %s", strings.ToUpper(formatType), config)
+		if len(formatOptions) > 0 {
+			res.yield = strings.ToUpper(formatOptions)
+		} else {
+			res.yield = "FALSE"
+		}
+
+		if res.yield != "TRUE" && res.yield != "FALSE" {
+			return nil, fmt.Errorf("Unexpected format for serial port : auto : yield : %s : %s", res.yield, config)
+		}
+
+		return &serialUnion{serialType: res, auto: res}, nil
+
+	default:
+		return nil, fmt.Errorf("Unknown serial type : %s : %s", strings.ToUpper(formatType), config)
 	}
 }
 
 /* parallel port */
 type parallelUnion struct {
 	parallelType interface{}
-	file *parallelPortFile
-	device *parallelPortDevice
-	auto *parallelPortAuto
+	file         *parallelPortFile
+	device       *parallelPortDevice
+	auto         *parallelPortAuto
 }
 type parallelPortFile struct {
 	filename string
 }
 type parallelPortDevice struct {
 	bidirectional string
-	devicename string
+	devicename    string
 }
 type parallelPortAuto struct {
 	bidirectional string
 }
 
-func unformat_parallel(config string) (*parallelUnion,error) {
+func unformat_parallel(config string) (*parallelUnion, error) {
 	input := strings.SplitN(config, ":", 2)
 	if len(input) < 1 {
-		return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
+		return nil, fmt.Errorf("Unexpected format for parallel port: %s", config)
 	}
 
 	var formatType, formatOptions string
@@ -233,39 +234,44 @@ func unformat_parallel(config string) (*parallelUnion,error) {
 	}
 
 	switch strings.ToUpper(formatType) {
-		case "FILE":
-			res := &parallelPortFile{ filename: filepath.FromSlash(formatOptions) }
-			return &parallelUnion{ parallelType:res, file: res},nil
-		case "DEVICE":
-			comp := strings.Split(formatOptions, ",")
-			if len(comp) < 1 || len(comp) > 2 {
-				return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
+	case "FILE":
+		res := &parallelPortFile{filename: filepath.FromSlash(formatOptions)}
+		return &parallelUnion{parallelType: res, file: res}, nil
+	case "DEVICE":
+		comp := strings.Split(formatOptions, ",")
+		if len(comp) < 1 || len(comp) > 2 {
+			return nil, fmt.Errorf("Unexpected format for parallel port: %s", config)
+		}
+		res := new(parallelPortDevice)
+		res.bidirectional = "FALSE"
+		res.devicename = filepath.FromSlash(comp[0])
+		if len(comp) > 1 {
+			switch strings.ToUpper(comp[1]) {
+			case "BI":
+				res.bidirectional = "TRUE"
+			case "UNI":
+				res.bidirectional = "FALSE"
+			default:
+				return nil, fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(comp[0]), config)
 			}
-			res := new(parallelPortDevice)
-			res.bidirectional = "FALSE"
-			res.devicename = strings.ToUpper(comp[0])
-			if len(comp) > 1 {
-				switch strings.ToUpper(comp[1]) {
-					case "BI": res.bidirectional = "TRUE"
-					case "UNI": res.bidirectional = "FALSE"
-					default:
-						return nil,fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(comp[0]), config)
-				}
-			}
-			return &parallelUnion{ parallelType:res, device:res },nil
+		}
+		return &parallelUnion{parallelType: res, device: res}, nil
 
-		case "AUTO":
-			res := new(parallelPortAuto)
-			switch strings.ToUpper(formatOptions) {
-				case "": fallthrough
-				case "UNI": res.bidirectional = "FALSE"
-				case "BI": res.bidirectional = "TRUE"
-				default:
-					return nil,fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(formatOptions), config)
-			}
-			return &parallelUnion{ parallelType:res, auto:res },nil
+	case "AUTO":
+		res := new(parallelPortAuto)
+		switch strings.ToUpper(formatOptions) {
+		case "":
+			fallthrough
+		case "UNI":
+			res.bidirectional = "FALSE"
+		case "BI":
+			res.bidirectional = "TRUE"
+		default:
+			return nil, fmt.Errorf("Unknown parallel port direction : %s : %s", strings.ToUpper(formatOptions), config)
+		}
+		return &parallelUnion{parallelType: res, auto: res}, nil
 	}
-	return nil,fmt.Errorf("Unexpected format for parallel port: %s", config)
+	return nil, fmt.Errorf("Unexpected format for parallel port: %s", config)
 }
 
 /* regular steps */
@@ -348,11 +354,11 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		Version:  config.Version,
 		ISOPath:  isoPath,
 
-		Sound_Present:	map[bool]string{true:"TRUE",false:"FALSE"}[bool(config.Sound)],
-		Usb_Present:	map[bool]string{true:"TRUE",false:"FALSE"}[bool(config.USB)],
+		Sound_Present: map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.Sound)],
+		Usb_Present:   map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.USB)],
 
-		Serial_Present:		"FALSE",
-		Parallel_Present:	"FALSE",
+		Serial_Present:   "FALSE",
+		Parallel_Present: "FALSE",
 	}
 
 	/// Check the network type that the user specified
@@ -367,7 +373,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	netmap,res := vmwcommon.ReadNetmapConfig(pathNetmap)
+	netmap, res := vmwcommon.ReadNetmapConfig(pathNetmap)
 	if res != nil {
 		err := fmt.Errorf("Unable to read netmap conf file: %s: %v", pathNetmap, res)
 		state.Put("error", err)
@@ -376,13 +382,13 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	}
 
 	// try and convert the specified network to a device
-	device,err := netmap.NameIntoDevice(network)
+	device, err := netmap.NameIntoDevice(network)
 
 	// success. so we know that it's an actual network type inside netmap.conf
 	if err == nil {
 		templateData.Network_Type = network
 		templateData.Network_Device = device
-	// we were unable to find the type, so assume it's a custom network device.
+		// we were unable to find the type, so assume it's a custom network device.
 	} else {
 		templateData.Network_Type = "custom"
 		templateData.Network_Device = network
@@ -392,7 +398,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// check if serial port has been configured
 	if config.Serial != "" {
-		serial,err := unformat_serial(config.Serial)
+		serial, err := unformat_serial(config.Serial)
 		if err != nil {
 			err := fmt.Errorf("Error procesing VMX template: %s", err)
 			state.Put("error", err)
@@ -408,35 +414,35 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.Serial_Auto = "FALSE"
 
 		switch serial.serialType.(type) {
-			case *serialConfigPipe:
-				templateData.Serial_Type = "pipe"
-				templateData.Serial_Endpoint = serial.pipe.endpoint
-				templateData.Serial_Host = serial.pipe.host
-				templateData.Serial_Yield = serial.pipe.yield
-				templateData.Serial_Filename = filepath.FromSlash(serial.pipe.filename)
-			case *serialConfigFile:
-				templateData.Serial_Type = "file"
-				templateData.Serial_Filename = filepath.FromSlash(serial.file.filename)
-			case *serialConfigDevice:
-				templateData.Serial_Type = "device"
-				templateData.Serial_Filename = filepath.FromSlash(serial.device.devicename)
-			case *serialConfigAuto:
-				templateData.Serial_Type = "device"
-				templateData.Serial_Filename = filepath.FromSlash(serial.auto.devicename)
-				templateData.Serial_Yield = serial.auto.yield
-				templateData.Serial_Auto = "TRUE"
+		case *serialConfigPipe:
+			templateData.Serial_Type = "pipe"
+			templateData.Serial_Endpoint = serial.pipe.endpoint
+			templateData.Serial_Host = serial.pipe.host
+			templateData.Serial_Yield = serial.pipe.yield
+			templateData.Serial_Filename = filepath.FromSlash(serial.pipe.filename)
+		case *serialConfigFile:
+			templateData.Serial_Type = "file"
+			templateData.Serial_Filename = filepath.FromSlash(serial.file.filename)
+		case *serialConfigDevice:
+			templateData.Serial_Type = "device"
+			templateData.Serial_Filename = filepath.FromSlash(serial.device.devicename)
+		case *serialConfigAuto:
+			templateData.Serial_Type = "device"
+			templateData.Serial_Filename = filepath.FromSlash(serial.auto.devicename)
+			templateData.Serial_Yield = serial.auto.yield
+			templateData.Serial_Auto = "TRUE"
 
-			default:
-				err := fmt.Errorf("Error procesing VMX template: %v", serial)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
+		default:
+			err := fmt.Errorf("Error procesing VMX template: %v", serial)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 
 	/// check if parallel port has been configured
 	if config.Parallel != "" {
-		parallel,err := unformat_parallel(config.Parallel)
+		parallel, err := unformat_parallel(config.Parallel)
 		if err != nil {
 			err := fmt.Errorf("Error procesing VMX template: %s", err)
 			state.Put("error", err)
@@ -446,22 +452,22 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 		templateData.Parallel_Auto = "FALSE"
 		switch parallel.parallelType.(type) {
-			case *parallelPortFile:
-				templateData.Parallel_Present = "TRUE"
-				templateData.Parallel_Filename = filepath.FromSlash(parallel.file.filename)
-			case *parallelPortDevice:
-				templateData.Parallel_Present = "TRUE"
-				templateData.Parallel_Bidirectional = parallel.device.bidirectional
-				templateData.Parallel_Filename = filepath.FromSlash(parallel.device.devicename)
-			case *parallelPortAuto:
-				templateData.Parallel_Present = "TRUE"
-				templateData.Parallel_Auto = "TRUE"
-				templateData.Parallel_Bidirectional = parallel.auto.bidirectional
-			default:
-				err := fmt.Errorf("Error procesing VMX template: %v", parallel)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
+		case *parallelPortFile:
+			templateData.Parallel_Present = "TRUE"
+			templateData.Parallel_Filename = filepath.FromSlash(parallel.file.filename)
+		case *parallelPortDevice:
+			templateData.Parallel_Present = "TRUE"
+			templateData.Parallel_Bidirectional = parallel.device.bidirectional
+			templateData.Parallel_Filename = filepath.FromSlash(parallel.device.devicename)
+		case *parallelPortAuto:
+			templateData.Parallel_Present = "TRUE"
+			templateData.Parallel_Auto = "TRUE"
+			templateData.Parallel_Bidirectional = parallel.auto.bidirectional
+		default:
+			err := fmt.Errorf("Error procesing VMX template: %v", parallel)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 

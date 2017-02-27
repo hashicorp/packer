@@ -83,7 +83,7 @@ type DriverMock struct {
 
 	VmnetnatConfPathCalled bool
 	VmnetnatConfPathResult string
- 
+
 	NetmapConfPathCalled bool
 	NetmapConfPathResult string
 
