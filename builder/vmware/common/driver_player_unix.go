@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
-	"path/filepath"
 )
 
 func playerFindVdiskManager() (string, error) {
