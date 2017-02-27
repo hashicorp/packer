@@ -135,6 +135,10 @@ each category, the available configuration keys are alphabetized.
     AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
     process). Default `false`.
 
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+    This only applies to the main `region`, other regions where the AMI will be copied
+    will be encrypted by the default EBS KMS key.
+
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
     no longer used and the following options become required:
