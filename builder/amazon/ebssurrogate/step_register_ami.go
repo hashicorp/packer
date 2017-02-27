@@ -14,6 +14,7 @@ import (
 type StepRegisterAMI struct {
 	RootDevice   RootBlockDevice
 	BlockDevices []*ec2.BlockDeviceMapping
+	image        *ec2.Image
 }
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
@@ -74,7 +75,45 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{registerResp.ImageId}})
+	if err != nil {
+		err := fmt.Errorf("Error searching for AMI: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	s.image = imagesResp.Images[0]
+
+	snapshots := make(map[string][]string)
+	for _, blockDeviceMapping := range imagesResp.Images[0].BlockDeviceMappings {
+		if blockDeviceMapping.Ebs != nil && blockDeviceMapping.Ebs.SnapshotId != nil {
+
+			snapshots[*ec2conn.Config.Region] = append(snapshots[*ec2conn.Config.Region], *blockDeviceMapping.Ebs.SnapshotId)
+		}
+	}
+	state.Put("snapshots", snapshots)
+
 	return multistep.ActionContinue
 }
 
-func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {}
+func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {
+	if s.image == nil {
+		return
+	}
+
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
+		return
+	}
+
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	ui := state.Get("ui").(packer.Ui)
+
+	ui.Say("Deregistering the AMI because cancelation or error...")
+	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
+	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+		return
+	}
+}
