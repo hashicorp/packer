@@ -3,18 +3,20 @@ package iso
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 type StepExport struct {
-	Format string
+	Format     string
+	SkipExport bool
 }
 
 func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword bool) []string {
@@ -22,18 +24,25 @@ func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword boo
 	if hidePassword {
 		password = "****"
 	}
-	return []string{
+	args := []string{
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
 		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + c.VMName,
 		outputPath,
 	}
+	return append(c.OVFToolOptions, args...)
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+
+	// Skip export if requested
+	if c.SkipExport {
+		ui.Say("Skipping export of virtual machine...")
+		return multistep.ActionContinue
+	}
 
 	if c.RemoteType != "esx5" || s.Format == "" {
 		return multistep.ActionContinue

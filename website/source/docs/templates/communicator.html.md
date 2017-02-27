@@ -70,7 +70,7 @@ The SSH communicator has the following options:
     host.
 
   * `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
-    disabled.
+    disabled. Defaults to false.
 
   * `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
     copy (default) or SSH File Transfer Protocol.
@@ -96,7 +96,8 @@ The SSH communicator has the following options:
     Packer uses this to determine when the machine has booted so this is
     usually quite long. Example value: "10m"
 
-  * `ssh_username` (string) - The username to connect to SSH with.
+  * `ssh_username` (string) - The username to connect to SSH with. Required
+    if using SSH.
 
 ## WinRM Communicator
 

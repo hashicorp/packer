@@ -37,11 +37,15 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	NetworkProjectId     string            `mapstructure:"network_project_id"`
 	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
+	OnHostMaintenance    string            `mapstructure:"on_host_maintenance"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
+	Scopes               []string          `mapstructure:"scopes"`
 	SourceImage          string            `mapstructure:"source_image"`
+	SourceImageFamily    string            `mapstructure:"source_image_family"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	StartupScriptFile    string            `mapstructure:"startup_script_file"`
 	Subnetwork           string            `mapstructure:"subnetwork"`
@@ -89,6 +93,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
 	}
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible if Preemptible is false
+	//   "TERMINATE": Posssible if Preemptible is true
+	if c.OnHostMaintenance == "" && c.Preemptible {
+		c.OnHostMaintenance = "MIGRATE"
+	}
+
+	if c.OnHostMaintenance == "" && !c.Preemptible {
+		c.OnHostMaintenance = "TERMINATE"
+	}
+
+	// Make sure user sets a valid value for on_host_maintenance option
+	if !(c.OnHostMaintenance == "MIGRATE" || c.OnHostMaintenance == "TERMINATE") {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be one of MIGRATE or TERMINATE."))
+	}
 
 	if c.ImageName == "" {
 		img, err := interpolate.Render("packer-{{timestamp}}", nil)
@@ -129,10 +149,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RawStateTimeout = "5m"
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -143,9 +159,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("a project_id must be specified"))
 	}
 
-	if c.SourceImage == "" {
+	if c.Scopes == nil {
+		c.Scopes = []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/compute",
+			"https://www.googleapis.com/auth/devstorage.full_control",
+		}
+	}
+
+	if c.SourceImage == "" && c.SourceImageFamily == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a source_image must be specified"))
+			errs, errors.New("a source_image or source_image_family must be specified"))
 	}
 
 	if c.Zone == "" {

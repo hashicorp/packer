@@ -180,6 +180,9 @@ header .header {
         border: 0;
         color: #b1d631;
         font-size: 14px;
+        font-weight: normal;
+        font-family: $mono;
+        text-shadow: 0 0 0;
       }
 
       a {
@@ -195,7 +198,6 @@ header .header {
       }
 
       ul, ol {
-        list-style-position: inside;
         margin-top: $baseline;
         margin-left: 20px;
         margin-right: 20px;
@@ -205,6 +207,12 @@ header .header {
           font-size: 17px;
           line-height: (30/17) !important;
           margin-bottom: $baseline;
+          pre {
+            margin-left: -155px;
+            margin-right: -155px;
+            padding-left: 155px;
+            padding-right: 155px;
+          }
         }
       }
 

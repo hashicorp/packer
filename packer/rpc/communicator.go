@@ -44,6 +44,7 @@ type CommunicatorDownloadArgs struct {
 type CommunicatorUploadArgs struct {
 	Path           string
 	ReaderStreamId uint32
+	FileInfo       *fileInfo
 }
 
 type CommunicatorUploadDirArgs struct {
@@ -119,6 +120,10 @@ func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err er
 	args := CommunicatorUploadArgs{
 		Path:           path,
 		ReaderStreamId: streamId,
+	}
+
+	if fi != nil {
+		args.FileInfo = NewFileInfo(*fi)
 	}
 
 	err = c.client.Call("Communicator.Upload", &args, new(interface{}))
@@ -267,7 +272,12 @@ func (c *CommunicatorServer) Upload(args *CommunicatorUploadArgs, reply *interfa
 	}
 	defer readerC.Close()
 
-	err = c.c.Upload(args.Path, readerC, nil)
+	var fi *os.FileInfo
+	if args.FileInfo != nil {
+		fi = new(os.FileInfo)
+		*fi = *args.FileInfo
+	}
+	err = c.c.Upload(args.Path, readerC, fi)
 	return
 }
 

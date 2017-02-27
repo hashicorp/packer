@@ -291,7 +291,7 @@ func (c *Client) Start() (addr net.Addr, err error) {
 	// so they dont' block since it is an io.Pipe
 	defer func() {
 		go func() {
-			for _ = range linesCh {
+			for range linesCh {
 			}
 		}()
 	}()

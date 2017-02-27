@@ -10,7 +10,7 @@ func TestParallels9Driver_impl(t *testing.T) {
 	var _ Driver = new(Parallels9Driver)
 }
 
-func TestIpAddress(t *testing.T) {
+func TestIPAddress(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -18,11 +18,11 @@ func TestIpAddress(t *testing.T) {
 	defer os.Remove(tf.Name())
 
 	d := Parallels9Driver{
-		dhcp_lease_file: tf.Name(),
+		dhcpLeaseFile: tf.Name(),
 	}
 
 	// No lease should be found in an empty file
-	ip, err := d.IpAddress("123456789012")
+	ip, err := d.IPAddress("123456789012")
 	if err == nil {
 		t.Fatalf("Found IP: \"%v\". No IP should be found!\n", ip)
 	}
@@ -35,7 +35,7 @@ func TestIpAddress(t *testing.T) {
 10.211.55.254="1411712008,1800,001c42a51419,01001c42a51419"
 `)
 	ioutil.WriteFile(tf.Name(), c, 0666)
-	ip, err = d.IpAddress("001C4235240c")
+	ip, err = d.IPAddress("001C4235240c")
 	if err != nil {
 		t.Fatalf("Error: %v\n", err)
 	}
@@ -50,7 +50,7 @@ func TestIpAddress(t *testing.T) {
 10.211.55.254="1411712008,1800,001c42a51419,01001c42a51419"
 `)
 	ioutil.WriteFile(tf.Name(), c, 0666)
-	ip, err = d.IpAddress("001c4235240c")
+	ip, err = d.IPAddress("001c4235240c")
 	if err != nil {
 		t.Fatalf("Error: %v\n", err)
 	}

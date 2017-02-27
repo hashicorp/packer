@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -80,7 +81,11 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i.ISOChecksum = ""
 	cs_file, _ := ioutil.TempFile("", "packer-test-")
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
+	filePrefix := "file://"
+	if runtime.GOOS == "windows" {
+		filePrefix += "/"
+	}
+	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	warns, err = i.Prepare(nil)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -98,7 +103,7 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i.ISOChecksum = ""
 	cs_file, _ = ioutil.TempFile("", "packer-test-")
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
-	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
+	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	warns, err = i.Prepare(nil)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
@@ -277,5 +282,37 @@ func TestISOConfigPrepare_ISOUrl(t *testing.T) {
 	}
 	if !reflect.DeepEqual(i.ISOUrls, expected) {
 		t.Fatalf("bad: %#v", i.ISOUrls)
+	}
+}
+
+func TestISOConfigPrepare_TargetExtension(t *testing.T) {
+	i := testISOConfig()
+
+	// Test the default value
+	warns, err := i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if i.TargetExtension != "iso" {
+		t.Fatalf("should've found \"iso\" got: %s", i.TargetExtension)
+	}
+
+	// Test the lowercased value
+	i = testISOConfig()
+	i.TargetExtension = "DMG"
+	warns, err = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if i.TargetExtension != "dmg" {
+		t.Fatalf("should've lowercased: %s", i.TargetExtension)
 	}
 }

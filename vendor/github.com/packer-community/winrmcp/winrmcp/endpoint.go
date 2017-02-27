@@ -24,7 +24,7 @@ func parseEndpoint(addr string, https bool, insecure bool, caCert []byte, timeou
 	} else {
 		shost, sport, err := net.SplitHostPort(addr)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Couldn't convert \"%s\" to an address.", addr))
+			return nil, fmt.Errorf("Couldn't convert \"%s\" to an address.", addr)
 		}
 		host = shost
 		port, err = strconv.Atoi(sport)

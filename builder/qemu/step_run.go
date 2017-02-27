@@ -116,7 +116,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
 					"view the screen of the VM, connect via VNC without a password to\n"+
-					"%s:%d", vncIp, vncPort))
+					"vnc://%s:%d", vncIp, vncPort))
 		} else {
 			ui.Message("The VM will be run headless, without a GUI, as configured.\n" +
 				"If the run isn't succeeding as you expect, please enable the GUI\n" +
@@ -124,7 +124,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	} else {
 		if qemuMajor >= 2 {
-			defaultArgs["-display"] = "sdl"
+			if !config.UseDefaultDisplay {
+				defaultArgs["-display"] = "sdl"
+			}
 		} else {
 			ui.Message("WARNING: The version of qemu  on your host doesn't support display mode.\n" +
 				"The display parameter will be ignored.")

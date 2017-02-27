@@ -27,7 +27,7 @@ func TestFixerCreateTime_Fix(t *testing.T) {
 
 	expected := map[string]interface{}{
 		"builders": []map[string]interface{}{
-			map[string]interface{}{
+			{
 				"type":     "foo",
 				"ami_name": "{{timestamp}} foo",
 			},

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions"
+	"github.com/gophercloud/gophercloud/pagination"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"github.com/rackspace/gophercloud/openstack/compute/v2/extensions"
-	"github.com/rackspace/gophercloud/pagination"
 )
 
 // StepLoadExtensions gets the FlavorRef from a Flavor. It first assumes

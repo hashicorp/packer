@@ -71,6 +71,12 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	state.Put("snapshot_id", s.snapshotId)
+
+	snapshots := map[string][]string{
+		*ec2conn.Config.Region: {s.snapshotId},
+	}
+	state.Put("snapshots", snapshots)
+
 	return multistep.ActionContinue
 }
 

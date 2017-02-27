@@ -5,13 +5,13 @@ $script = <<SCRIPT
 sudo apt-get -y update
 
 # RVM/Ruby
-sudo apt-get -qy install curl git libgmp3-dev
+sudo apt-get -qy install curl git libgmp3-dev nodejs
 gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
 # Install rvm and the latest version of ruby
 curl -sSL https://get.rvm.io | bash -s stable
 . ~/.bashrc
 . ~/.bash_profile
-rvm install ruby-2.2.2
+rvm install ruby-2.3.1
 gem install bundler
 
 # Middleman deps

@@ -86,7 +86,7 @@ builder.
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's 
+    your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
@@ -139,6 +139,17 @@ builder.
     slightly larger. If you find this to be the case, you can disable compaction
     using this configuration value.
 
+-   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
+    upload into the VM. Valid values are "darwin", "linux", and "windows". By
+    default, this is empty, which means VMware tools won't be uploaded.
+
+-   `tools_upload_path` (string) - The path in the VM to upload the
+    VMware tools. This only takes effect if `tools_upload_flavor` is non-empty.
+    This is a [configuration
+    template](/docs/templates/configuration-templates.html) that has a single
+    valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
+    By default the upload path is set to `{{.Flavor}}.iso`.
+
 -   `vm_name` (string) - This is the name of the VMX file for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
@@ -174,9 +185,15 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard. There are a set of
-special keys available. If these are in your boot command, they will be replaced
-by the proper key:
+machine, simulating a human actually typing the keyboard.
+
+-> Keystrokes are typed as separate key up/down events over VNC with a
+   default 100ms delay. The delay alleviates issues with latency and CPU
+   contention. For local builds you can tune this delay by specifying
+   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+
+There are a set of special keys available. If these are in your boot
+command, they will be replaced by the proper key:
 
 -   `<bs>` - Backspace
 

@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/common"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -49,8 +50,10 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 		pauseFn = state.Get("pauseFn").(multistep.DebugPauseFn)
 	}
 
+	hostIP := "10.0.2.2"
+	common.SetHTTPIP(hostIP)
 	s.Ctx.Data = &bootCommandTemplateData{
-		"10.0.2.2",
+		hostIP,
 		httpPort,
 		s.VMName,
 	}
@@ -87,10 +90,6 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 				return multistep.ActionHalt
 			}
 
-			if pauseFn != nil {
-				pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
-			}
-
 			if err := driver.VBoxManage("controlvm", vmName, "keyboardputscancode", code); err != nil {
 				err := fmt.Errorf("Error sending boot command: %s", err)
 				state.Put("error", err)
@@ -98,6 +97,11 @@ func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction
 				return multistep.ActionHalt
 			}
 		}
+
+		if pauseFn != nil {
+			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
+		}
+
 	}
 
 	return multistep.ActionContinue

@@ -1,11 +1,11 @@
 package common
 
 // Parallels10Driver are inherited from Parallels9Driver.
-// Used for Parallels v 10 & 11
 type Parallels10Driver struct {
 	Parallels9Driver
 }
 
+// SetDefaultConfiguration applies pre-defined default settings to the VM config.
 func (d *Parallels10Driver) SetDefaultConfiguration(vmName string) error {
 	commands := make([][]string, 12)
 	commands[0] = []string{"set", vmName, "--cpus", "1"}

@@ -1,0 +1,26 @@
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type": "shell",
+        "inline": [
+          "apt-get update",
+          "apt-get -y install python"
+        ]
+      }, {
+        "type":  "ansible",
+        "playbook_file": "./playbook.yml",
+        "extra_arguments": [
+        ],
+        "sftp_command": "/usr/bin/false",
+        "use_sftp": false
+      }
+    ],
+    "builders": [
+      {
+        "type": "docker",
+        "image": "debian:jessie",
+        "discard": true
+      }
+    ]
+}

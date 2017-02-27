@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -70,6 +71,8 @@ type Config struct {
 	// Whether to clean scripts up
 	SkipClean bool `mapstructure:"skip_clean"`
 
+	ExpectDisconnect *bool `mapstructure:"expect_disconnect"`
+
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
 }
@@ -99,6 +102,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+	}
+
+	if p.config.ExpectDisconnect == nil {
+		t := true
+		p.config.ExpectDisconnect = &t
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -160,17 +168,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
-	for idx, kv := range p.config.Vars {
+	for _, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
 		if len(vs) != 2 || vs[0] == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Environment variable not in format 'key=value': %s", kv))
-		} else {
-			// Replace single quotes so they parse
-			vs[1] = strings.Replace(vs[1], "'", `'"'"'`, -1)
-
-			// Single quote env var values
-			p.config.Vars[idx] = fmt.Sprintf("%s='%s'", vs[0], vs[1])
 		}
 	}
 
@@ -221,11 +223,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		tf.Close()
 	}
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = fmt.Sprintf("PACKER_BUILD_NAME='%s'", p.config.PackerBuildName)
-	envVars[1] = fmt.Sprintf("PACKER_BUILDER_TYPE='%s'", p.config.PackerBuilderType)
-	copy(envVars[2:], p.config.Vars)
+	// Create environment variables to set before executing the command
+	flattenedEnvVars := p.createFlattenedEnvVars()
 
 	for _, path := range scripts {
 		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
@@ -237,12 +236,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 		defer f.Close()
 
-		// Flatten the environment variables
-		flattendVars := strings.Join(envVars, " ")
-
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars: flattendVars,
+			Vars: flattenedEnvVars,
 			Path: p.config.RemotePath,
 		}
 		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
@@ -283,11 +279,18 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
 		})
+
 		if err != nil {
 			return err
 		}
 
-		if cmd.ExitStatus != 0 {
+		// If the exit code indicates a remote disconnect, fail unless
+		// we were expecting it.
+		if cmd.ExitStatus == packer.CmdDisconnect {
+			if !*p.config.ExpectDisconnect {
+				return fmt.Errorf("Script disconnected unexpectedly.")
+			}
+		} else if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
 		}
 
@@ -306,6 +309,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 						p.config.RemotePath, err)
 				}
 				cmd.Wait()
+				// treat disconnects as retryable by returning an error
+				if cmd.ExitStatus == packer.CmdDisconnect {
+					return fmt.Errorf("Disconnect while removing temporary script.")
+				}
 				return nil
 			})
 			if err != nil {
@@ -353,4 +360,38 @@ func (p *Provisioner) retryable(f func() error) error {
 			time.Sleep(2 * time.Second)
 		}
 	}
+}
+
+func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
+	flattened = ""
+	envVars := make(map[string]string)
+
+	// Always available Packer provided env vars
+	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", p.config.PackerBuildName)
+	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", p.config.PackerBuilderType)
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = fmt.Sprintf("%s", httpAddr)
+	}
+
+	// Split vars into key/value components
+	for _, envVar := range p.config.Vars {
+		keyValue := strings.SplitN(envVar, "=", 2)
+		// Store pair, replacing any single quotes in value so they parse
+		// correctly with required environment variable format
+		envVars[keyValue[0]] = strings.Replace(keyValue[1], "'", `'"'"'`, -1)
+	}
+
+	// Create a list of env var keys in sorted order
+	var keys []string
+	for k := range envVars {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Re-assemble vars surrounding value with single quotes and flatten
+	for _, key := range keys {
+		flattened += fmt.Sprintf("%s='%s' ", key, envVars[key])
+	}
+	return
 }

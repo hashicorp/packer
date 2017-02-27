@@ -27,7 +27,7 @@ func TestFixerISOMD5_Fix(t *testing.T) {
 
 	expected := map[string]interface{}{
 		"builders": []map[string]interface{}{
-			map[string]interface{}{
+			{
 				"type":              "foo",
 				"iso_checksum":      "bar",
 				"iso_checksum_type": "md5",

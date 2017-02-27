@@ -30,14 +30,16 @@ type DriverMock struct {
 	DeleteDiskErrCh <-chan error
 	DeleteDiskErr   error
 
-	GetImageName   string
-	GetImageResult *Image
-	GetImageErr    error
+	GetImageName       string
+	GetImageFromFamily bool
+	GetImageResult     *Image
+	GetImageErr        error
 
-	GetImageFromProjectProject string
-	GetImageFromProjectName    string
-	GetImageFromProjectResult  *Image
-	GetImageFromProjectErr     error
+	GetImageFromProjectProject    string
+	GetImageFromProjectName       string
+	GetImageFromProjectFromFamily bool
+	GetImageFromProjectResult     *Image
+	GetImageFromProjectErr        error
 
 	GetInstanceMetadataZone   string
 	GetInstanceMetadataName   string
@@ -162,14 +164,16 @@ func (d *DriverMock) DeleteDisk(zone, name string) (<-chan error, error) {
 	return resultCh, d.DeleteDiskErr
 }
 
-func (d *DriverMock) GetImage(name string) (*Image, error) {
+func (d *DriverMock) GetImage(name string, fromFamily bool) (*Image, error) {
 	d.GetImageName = name
+	d.GetImageFromFamily = fromFamily
 	return d.GetImageResult, d.GetImageErr
 }
 
-func (d *DriverMock) GetImageFromProject(project, name string) (*Image, error) {
+func (d *DriverMock) GetImageFromProject(project, name string, fromFamily bool) (*Image, error) {
 	d.GetImageFromProjectProject = project
 	d.GetImageFromProjectName = name
+	d.GetImageFromProjectFromFamily = fromFamily
 	return d.GetImageFromProjectResult, d.GetImageFromProjectErr
 }
 

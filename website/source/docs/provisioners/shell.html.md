@@ -71,6 +71,10 @@ Optional parameters:
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
+-   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+    server disconnects us. A disconnect might happen if you restart the ssh
+    server or reboot the host. May default to false in the future.
+
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
@@ -123,7 +127,7 @@ privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
@@ -144,6 +148,13 @@ commonly useful environmental variables:
 -   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
+
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
 
 ## Handling Reboots
 
@@ -209,9 +220,9 @@ would be:
 
 -   On Ubuntu, the `/bin/sh` shell is
     [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
-    in it, then put `#!/bin/bash` at the top of your script. Differences between
-    dash and bash can be found on the
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific
+    commands in it, then put `#!/bin/bash -e` at the top of your script.
+    Differences between dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*

@@ -2,6 +2,7 @@ package pvm
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
@@ -20,7 +21,7 @@ func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 
 	ui.Say(fmt.Sprintf("Importing VM: %s", s.SourcePath))
-	if err := driver.Import(s.Name, s.SourcePath, config.OutputDir, config.ReassignMac); err != nil {
+	if err := driver.Import(s.Name, s.SourcePath, config.OutputDir, config.ReassignMAC); err != nil {
 		err := fmt.Errorf("Error importing VM: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

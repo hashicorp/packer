@@ -70,11 +70,3 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 		t.Fatalf("invalid value: %d", c.Comm.SSHPort)
 	}
 }
-
-func TestRunConfigPrepare_SSHUsername(t *testing.T) {
-	c := testRunConfig()
-	c.Comm.SSHUsername = ""
-	if err := c.Prepare(nil); len(err) != 0 {
-		t.Fatalf("err: %s", err)
-	}
-}

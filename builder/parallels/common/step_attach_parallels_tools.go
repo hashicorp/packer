@@ -2,13 +2,14 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
-// This step attaches the Parallels Tools as an inserted CD onto
-// the virtual machine.
+// StepAttachParallelsTools is a step that attaches Parallels Tools ISO image
+// as an inserted CD onto the virtual machine.
 //
 // Uses:
 //   driver Driver
@@ -22,6 +23,8 @@ type StepAttachParallelsTools struct {
 	ParallelsToolsMode string
 }
 
+// Run adds a virtual CD-ROM device to the VM and attaches Parallels Tools ISO image.
+// If ISO image is not specified, then this step will be skipped.
 func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -39,10 +42,10 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	// Attach the guest additions to the computer
 	ui.Say("Attaching Parallels Tools ISO to the new CD/DVD drive...")
 
-	cdrom, err := driver.DeviceAddCdRom(vmName, parallelsToolsPath)
+	cdrom, err := driver.DeviceAddCDROM(vmName, parallelsToolsPath)
 
 	if err != nil {
-		err := fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
+		err = fmt.Errorf("Error attaching Parallels Tools ISO: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -54,6 +57,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 	return multistep.ActionContinue
 }
 
+// Cleanup removes the virtual CD-ROM device attached to the VM.
 func (s *StepAttachParallelsTools) Cleanup(state multistep.StateBag) {
 	if s.cdromDevice == "" {
 		return

@@ -4,7 +4,7 @@ description: |
     dedicated users willing to help through various mediums.
 layout: community
 page_title: Community
-...
+---
 
 # Community
 
@@ -98,6 +98,22 @@ open source enthusiast, published author, and freelance consultant.
 Rickard von Essen maintains our Parallels Desktop builder. Rickard is an
 polyglot programmer and consults on Continuous Delivery.
 </p>
+    </div>
+
+</div>
+
+<div class="person">
+
+    <img class="pull-left" src="https://secure.gravatar.com/avatar/f1695dcf6a21f90f5db84b2eee2cbdbe?s=125">
+    <div class="bio">
+      <h3>Matt Hooker (<a href="https://github.com/mwhooker" target="_blank" rel="nofollow noopener noreferrer">@mwhooker</a>)</h3>
+      <p><a href="https://twitter.com/mwhooker" target="_blank" rel="nofollow
+      noopener noreferrer">Matt</a> maintains Packer for HashiCorp. After
+      picking up Chef for a job, he decided that continually provisioning the
+      same machine was bound for trouble. Luckily Packer had just been created,
+      and was the answer to his prayers. Now he works on it professionally, and
+      couldn't be happier.
+      </p>
     </div>
 
 </div>

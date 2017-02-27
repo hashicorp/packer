@@ -71,20 +71,6 @@ func TestConfigPrepare_host(t *testing.T) {
 	testConfigOk(t, warns, errs)
 }
 
-func TestConfigPrepare_sshUsername(t *testing.T) {
-	raw := testConfig()
-
-	// No ssh_username
-	delete(raw, "ssh_username")
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-
-	// Good ssh_username
-	raw["ssh_username"] = "good"
-	_, warns, errs = NewConfig(raw)
-	testConfigOk(t, warns, errs)
-}
-
 func TestConfigPrepare_sshCredential(t *testing.T) {
 	raw := testConfig()
 

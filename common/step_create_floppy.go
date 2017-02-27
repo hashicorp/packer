@@ -114,6 +114,9 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 	var crawlDirectoryFiles []string
 	crawlDirectory := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if !info.IsDir() {
 			crawlDirectoryFiles = append(crawlDirectoryFiles, path)
 			ui.Message(fmt.Sprintf("Adding file: %s", path))
@@ -353,7 +356,7 @@ func fsDirectoryCache(rootDirectory fs.Directory) directoryCache {
 			// directory not cached, so start at the root and walk each component
 			// creating them if they're not in cache
 			var entry fs.Directory
-			for i, _ := range component {
+			for i := range component {
 
 				// join all of our components into a key
 				path := strings.Join(component[:i], "/")

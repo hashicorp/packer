@@ -2,7 +2,6 @@ package winrmcp
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -23,7 +22,7 @@ func fetchList(client *winrm.Client, remotePath string) ([]FileItem, error) {
 	script := fmt.Sprintf("Get-ChildItem %s", remotePath)
 	stdout, stderr, _, err := client.RunWithString("powershell -Command \""+script+" | ConvertTo-Xml -NoTypeInformation -As String\"", "")
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Couldn't execute script %s: %v", script, err))
+		return nil, fmt.Errorf("Couldn't execute script %s: %v", script, err)
 	}
 
 	if stderr != "" {
@@ -36,7 +35,7 @@ func fetchList(client *winrm.Client, remotePath string) ([]FileItem, error) {
 		doc := pslist{}
 		err := xml.Unmarshal([]byte(stdout), &doc)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Couldn't parse results: %v", err))
+			return nil, fmt.Errorf("Couldn't parse results: %v", err)
 		}
 
 		return convertFileItems(doc.Objects), nil

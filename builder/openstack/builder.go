@@ -90,6 +90,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			UserData:         b.config.UserData,
 			UserDataFile:     b.config.UserDataFile,
 			ConfigDrive:      b.config.ConfigDrive,
+			InstanceMetadata: b.config.InstanceMetadata,
 		},
 		&StepGetPassword{
 			Debug: b.config.PackerDebug,
@@ -101,6 +102,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
+			ReuseIps:       b.config.ReuseIps,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
@@ -114,6 +116,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepProvision{},
 		&StepStopServer{},
 		&stepCreateImage{},
+		&stepUpdateImageVisibility{},
+		&stepAddImageMembers{},
 	}
 
 	// Run!

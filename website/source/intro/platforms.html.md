@@ -29,43 +29,52 @@ happen.
 
 Packer supports creating images for the following platforms or targets. The
 format of the resulting image and any high-level information about the platform
-is noted. They are listed in alphabetical order. For more detailed information
-on supported configuration parameters and usage, please see the appropriate
-[documentation page within the documentation section](/docs).
+is noted. They are listed in alphabetical order.
 
--   ***Amazon EC2 (AMI)***. Both EBS-backed and instance-store AMIs within
+-   ***[Amazon EC2 (AMI)](/docs/builders/amazon.html)***. Both EBS-backed and instance-store AMIs within
     [EC2](https://aws.amazon.com/ec2/), optionally distributed to
     multiple regions.
 
--   ***DigitalOcean***. Snapshots for
+-   ***[Azure Resource Manager (VHD)](/docs/builders/azure-arm.html)***. VHDs for [Azure Resource Manager](https://azure.microsoft.com/en-us/documentation/articles/resource-group-overview/), which can be deployed using the Azure Portal or Azure CLI.
+
+-   ***[CloudStack](/docs/builders/cloudstack.html)***. Images for [CloudStack](https://cloudstack.apache.org/)
+    that can be used to start pre-configured CloudStack servers.
+
+-   ***[DigitalOcean](/docs/builders/digitalocean.html)***. Snapshots for
     [DigitalOcean](https://www.digitalocean.com/) that can be used to start a
     pre-configured DigitalOcean instance of any size.
 
--   ***Docker***. Snapshots for [Docker](https://www.docker.io/) that can be used
+-   ***[Docker](/docs/builders/docker.html)***. Snapshots for [Docker](https://www.docker.io/) that can be used
     to start a pre-configured Docker instance.
 
--   ***Google Compute Engine***. Snapshots for [Google Compute
+-   ***[Google Compute Engine](/docs/builders/googlecompute.html)***. Snapshots for [Google Compute
     Engine](https://cloud.google.com/products/compute-engine) that can be used
     to start a pre-configured Google Compute Engine instance.
 
--   ***OpenStack***. Images for [OpenStack](https://www.openstack.org/) that can
+-   ***[Hyper-V](/docs/builders/hyperv.html)***. Virtual machines for [Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx), which are exportable.
+
+-   ***[1&1](/docs/builders/oneandone.html)***. Virtual machines for [1&1](https://www.1and1.com/).
+
+-   ***[OpenStack](/docs/builders/openstack.html)***. Images for [OpenStack](https://www.openstack.org/) that can
     be used to start pre-configured OpenStack servers.
 
--   ***Parallels (PVM)***. Exported virtual machines for
+-   ***[Parallels (PVM)](/docs/builders/parallels.html)***. Exported virtual machines for
     [Parallels](https://www.parallels.com/downloads/desktop/), including virtual
     machine metadata such as RAM, CPUs, etc. These virtual machines are portable
     and can be started on any platform Parallels runs on.
 
--   ***QEMU***. Images for [KVM](http://www.linux-kvm.org/) or
+-   ***[ProfitBricks](/docs/builders/profitbricks.html)***. Virtual machines for [ProfitBricks](https://www.profitbricks.com).
+
+-   ***[QEMU](/docs/builders/qemu.html)***. Images for [KVM](http://www.linux-kvm.org/) or
     [Xen](http://www.xenproject.org/) that can be used to start pre-configured
     KVM or Xen instances.
 
--   ***VirtualBox (OVF)***. Exported virtual machines for
+-   ***[VirtualBox (OVF)](/docs/builders/virtualbox.html)***. Exported virtual machines for
     [VirtualBox](https://www.virtualbox.org/), including virtual machine
     metadata such as RAM, CPUs, etc. These virtual machines are portable and can
     be started on any platform VirtualBox runs on.
 
--   ***VMware (VMX)***. Exported virtual machines for
+-   ***[VMware (VMX)](/docs/builders/vmware.html)***. Exported virtual machines for
     [VMware](https://www.vmware.com/) that can be run within any desktop products
     such as Fusion, Player, or Workstation, as well as server products such
     as vSphere.

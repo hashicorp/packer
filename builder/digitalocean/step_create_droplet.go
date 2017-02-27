@@ -41,7 +41,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			Slug: c.Image,
 		},
 		SSHKeys: []godo.DropletCreateSSHKey{
-			godo.DropletCreateSSHKey{ID: int(sshKeyId)},
+			{ID: int(sshKeyId)},
 		},
 		PrivateNetworking: c.PrivateNetworking,
 		UserData:          userData,

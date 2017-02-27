@@ -1,16 +1,18 @@
 package common
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
-// This step shuts down the machine. It first attempts to do so gracefully,
-// but ultimately forcefully shuts it down if that fails.
+// StepShutdown is a step that shuts down the machine. It first attempts to do
+// so gracefully, but ultimately forcefully shuts it down if that fails.
 //
 // Uses:
 //   communicator packer.Communicator
@@ -25,6 +27,7 @@ type StepShutdown struct {
 	Timeout time.Duration
 }
 
+// Run shuts down the VM.
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
@@ -34,8 +37,14 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	if s.Command != "" {
 		ui.Say("Gracefully halting virtual machine...")
 		log.Printf("Executing shutdown command: %s", s.Command)
-		cmd := &packer.RemoteCmd{Command: s.Command}
-		if err := cmd.StartWithUi(comm, ui); err != nil {
+
+		var stdout, stderr bytes.Buffer
+		cmd := &packer.RemoteCmd{
+			Command: s.Command,
+			Stdout:  &stdout,
+			Stderr:  &stderr,
+		}
+		if err := comm.Start(cmd); err != nil {
 			err := fmt.Errorf("Failed to send shutdown command: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -53,6 +62,8 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 			select {
 			case <-shutdownTimer:
+				log.Printf("Shutdown stdout: %s", stdout.String())
+				log.Printf("Shutdown stderr: %s", stderr.String())
 				err := errors.New("Timeout while waiting for machine to shut down.")
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -64,7 +75,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	} else {
 		ui.Say("Halting the virtual machine...")
 		if err := driver.Stop(vmName); err != nil {
-			err := fmt.Errorf("Error stopping VM: %s", err)
+			err = fmt.Errorf("Error stopping VM: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -75,4 +86,5 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (s *StepShutdown) Cleanup(state multistep.StateBag) {}

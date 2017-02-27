@@ -12,6 +12,7 @@ type Parallels11Driver struct {
 	Parallels9Driver
 }
 
+// Verify raises an error if the builder could not be used on that host machine.
 func (d *Parallels11Driver) Verify() error {
 
 	stdout, err := exec.Command(d.PrlsrvctlPath, "info", "--license").Output()
@@ -24,18 +25,18 @@ func (d *Parallels11Driver) Verify() error {
 	if matches == nil {
 		return fmt.Errorf(
 			"Could not determine your Parallels Desktop edition using: %s info --license", d.PrlsrvctlPath)
-	} else {
-		switch matches[1] {
-		case "pro", "business":
-			break
-		default:
-			return fmt.Errorf("Packer can be used only with Parallels Desktop 11 Pro or Business edition. You use: %s edition", matches[1])
-		}
+	}
+	switch matches[1] {
+	case "pro", "business":
+		break
+	default:
+		return fmt.Errorf("Packer can be used only with Parallels Desktop 11 Pro or Business edition. You use: %s edition", matches[1])
 	}
 
 	return nil
 }
 
+// SetDefaultConfiguration applies pre-defined default settings to the VM config.
 func (d *Parallels11Driver) SetDefaultConfiguration(vmName string) error {
 	commands := make([][]string, 12)
 	commands[0] = []string{"set", vmName, "--cpus", "1"}

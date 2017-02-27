@@ -71,7 +71,7 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	}
 
 	config["chroot_mounts"] = [][]string{
-		[]string{"bad"},
+		{"bad"},
 	}
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {

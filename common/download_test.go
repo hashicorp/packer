@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"runtime"
 	"testing"
 )
 
@@ -56,6 +57,7 @@ func TestDownloadClient_basic(t *testing.T) {
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
 	})
+
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -352,7 +354,13 @@ func TestDownloadFileUrl(t *testing.T) {
 
 	// source_path is a file path and source is a network path
 	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
-	source := fmt.Sprintf("file://" + sourcePath)
+
+	filePrefix := "file://"
+	if runtime.GOOS == "windows" {
+		filePrefix += "/"
+	}
+
+	source := fmt.Sprintf(filePrefix + sourcePath)
 	t.Logf("Trying to download %s", source)
 
 	config := &DownloadConfig{

@@ -27,10 +27,24 @@ Packer supports the following builders at the moment:
     that device. This is an **advanced builder and should not be used by
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
+    
+-   [amazon-ebssurrogate](/docs/builders/amazone-ebssurrogate.html) - Create EBS
+    -backed AMIs from scratch. Works similarly to the `chroot` builder but does
+    not require running in AWS. This is an **advanced builder and should not be
+    used by newcomers**.
 
 -&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
+
+# Amazon EBS Volume Builder
+
+Packer is able to create Amazon EBS Volumes which are preinitialized with a
+filesystem and data.
+
+-   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS volumes
+    by launching a source AMI with block devices mapped. Provision the instance,
+    then destroy it, retaining the EBS volumes.
 
 <span id="specifying-amazon-credentials"></span>
 
@@ -94,36 +108,37 @@ Packer to work:
       "Effect": "Allow",
       "Action" : [
         "ec2:AttachVolume",
-        "ec2:CreateVolume",
-        "ec2:DeleteVolume",
-        "ec2:CreateKeypair",
-        "ec2:DeleteKeypair",
-        "ec2:DescribeSubnets",
-        "ec2:CreateSecurityGroup",
-        "ec2:DeleteSecurityGroup",
         "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:CreateImage",
         "ec2:CopyImage",
-        "ec2:RunInstances",
-        "ec2:TerminateInstances",
-        "ec2:StopInstances",
+        "ec2:CreateImage",
+        "ec2:CreateKeypair",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:DeleteKeypair",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteVolume",
+        "ec2:DeregisterImage",
+        "ec2:DescribeImageAttribute",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeRegions",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeTags",
         "ec2:DescribeVolumes",
         "ec2:DetachVolume",
-        "ec2:DescribeInstances",
-        "ec2:CreateSnapshot",
-        "ec2:DeleteSnapshot",
-        "ec2:DescribeSnapshots",
-        "ec2:DescribeImages",
-        "ec2:RegisterImage",
-        "ec2:DeregisterImage",
-        "ec2:CreateTags",
-        "ec2:ModifyImageAttribute",
         "ec2:GetPasswordData",
-        "ec2:DescribeTags",
-        "ec2:DescribeImageAttribute",
-        "ec2:CopyImage",
-        "ec2:DescribeRegions",
-        "ec2:ModifyInstanceAttribute"
+        "ec2:ModifyImageAttribute",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:ModifySnapshotAttribute",
+        "ec2:RegisterImage",
+        "ec2:RunInstances",
+        "ec2:StopInstances",
+        "ec2:TerminateInstances"
       ],
       "Resource" : "*"
   }]
@@ -134,7 +149,7 @@ Packer to work:
 
 ### Attaching IAM Policies to Roles
 
-IAM policies can be associated with user or roles. If you use packer with IAM
+IAM policies can be associated with users or roles. If you use packer with IAM
 roles, you may encounter an error like this one:
 
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.

@@ -21,7 +21,7 @@ You can specify manifest more than once and write each build to its own file, or
 
 ### Optional:
 
--   `filename` (string) The manifest will be written to this file. This defaults to `packer-manifest.json`.
+-   `output` (string) The manifest will be written to this file. This defaults to `packer-manifest.json`.
 -   `strip_path` (bool) Write only filename without the path to the manifest file. This defaults to false.
 
 ### Example Configuration
@@ -33,7 +33,7 @@ You can simply add `{"type":"manifest"}` to your post-processor section. Below i
   "post-processors": [
     {
       "type": "manifest",
-      "filename": "manifest.json",
+      "output": "manifest.json",
       "strip_path": true
     }
   ]

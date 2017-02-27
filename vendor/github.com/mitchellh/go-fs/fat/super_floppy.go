@@ -72,14 +72,24 @@ func (f *superFloppyFormatter) format() error {
 			label = "FAT16   "
 		}
 
-		// Determine the number of root directory entries
-		if f.device.Len() > 512*5*32 {
-			bsCommon.RootEntryCount = 512
+		// For 1.44MB Floppy, for other floppy formats see https://support.microsoft.com/en-us/kb/75131.
+		// We make an exception for this most common usecase as the calculations don't create a working image for older operating systems
+		if f.config.FATType == FAT12 && f.device.Len() == 1474560 {
+			bsCommon.RootEntryCount = 224
+			bsCommon.SectorsPerFat = 9
+			bsCommon.SectorsPerTrack = 18
+			bsCommon.Media = 240
+			bsCommon.NumHeads = 2
 		} else {
-			bsCommon.RootEntryCount = uint16(f.device.Len() / (5 * 32))
-		}
+			// Determine the number of root directory entries
+			if f.device.Len() > 512*5*32 {
+				bsCommon.RootEntryCount = 512
+			} else {
+				bsCommon.RootEntryCount = uint16(f.device.Len() / (5 * 32))
+			}
 
-		bsCommon.SectorsPerFat = f.sectorsPerFat(bsCommon.RootEntryCount, sectorsPerCluster)
+			bsCommon.SectorsPerFat = f.sectorsPerFat(bsCommon.RootEntryCount, sectorsPerCluster)
+		}
 
 		bs := &BootSectorFat16{
 			BootSectorCommon:    bsCommon,

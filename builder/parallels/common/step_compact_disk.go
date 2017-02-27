@@ -2,12 +2,13 @@ package common
 
 import (
 	"fmt"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 )
 
-// This step removes all empty blocks from expanding Parallels virtual disks
-// and reduces the result disk size
+// StepCompactDisk is a step that removes all empty blocks from expanding
+// Parallels virtual disks and reduces the result disk size
 //
 // Uses:
 //   driver Driver
@@ -20,6 +21,7 @@ type StepCompactDisk struct {
 	Skip bool
 }
 
+// Run runs the compaction of the virtual disk attached to the VM.
 func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
@@ -33,7 +35,7 @@ func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Compacting the disk image")
 	diskPath, err := driver.DiskPath(vmName)
 	if err != nil {
-		err := fmt.Errorf("Error detecting virtual disk path: %s", err)
+		err = fmt.Errorf("Error detecting virtual disk path: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -48,4 +50,5 @@ func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup does nothing.
 func (*StepCompactDisk) Cleanup(multistep.StateBag) {}

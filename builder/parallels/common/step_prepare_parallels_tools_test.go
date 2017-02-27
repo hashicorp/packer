@@ -29,7 +29,7 @@ func TestStepPrepareParallelsTools(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Mock results
-	driver.ToolsIsoPathResult = tf.Name()
+	driver.ToolsISOPathResult = tf.Name()
 
 	// Test the run
 	if action := step.Run(state); action != multistep.ActionContinue {
@@ -40,11 +40,11 @@ func TestStepPrepareParallelsTools(t *testing.T) {
 	}
 
 	// Test the driver
-	if !driver.ToolsIsoPathCalled {
+	if !driver.ToolsISOPathCalled {
 		t.Fatal("tools iso path should be called")
 	}
-	if driver.ToolsIsoPathFlavor != "foo" {
-		t.Fatalf("bad: %#v", driver.ToolsIsoPathFlavor)
+	if driver.ToolsISOPathFlavor != "foo" {
+		t.Fatalf("bad: %#v", driver.ToolsISOPathFlavor)
 	}
 
 	// Test the resulting state
@@ -75,8 +75,8 @@ func TestStepPrepareParallelsTools_disabled(t *testing.T) {
 	}
 
 	// Test the driver
-	if driver.ToolsIsoPathCalled {
-		t.Fatal("tools iso path should NOT be called")
+	if driver.ToolsISOPathCalled {
+		t.Fatal("tools ISO path should NOT be called")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestStepPrepareParallelsTools_nonExist(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Mock results
-	driver.ToolsIsoPathResult = "foo"
+	driver.ToolsISOPathResult = "foo"
 
 	// Test the run
 	if action := step.Run(state); action != multistep.ActionHalt {
@@ -101,11 +101,11 @@ func TestStepPrepareParallelsTools_nonExist(t *testing.T) {
 	}
 
 	// Test the driver
-	if !driver.ToolsIsoPathCalled {
+	if !driver.ToolsISOPathCalled {
 		t.Fatal("tools iso path should be called")
 	}
-	if driver.ToolsIsoPathFlavor != "foo" {
-		t.Fatalf("bad: %#v", driver.ToolsIsoPathFlavor)
+	if driver.ToolsISOPathFlavor != "foo" {
+		t.Fatalf("bad: %#v", driver.ToolsISOPathFlavor)
 	}
 
 	// Test the resulting state

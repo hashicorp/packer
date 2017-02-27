@@ -12,7 +12,9 @@ Type: `ansible`
 The `ansible` Packer provisioner runs Ansible playbooks. It dynamically creates
 an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
-machine being provisioned by Packer.
+machine being provisioned by Packer. Note, this means that any `remote_user`
+defined in tasks will be ignored. Packer will always connect with the user
+given in the json config.
 
 ## Basic Example
 
@@ -63,12 +65,12 @@ Optional Parameters:
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
   connects to this server and will validate the identity of the server using
-  the system known_hosts. The default behaviour is to generate and use a
+  the system known_hosts. The default behavior is to generate and use a
   onetime key. Host key checking is disabled via the
   `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
 
 - `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
-  `ssh_user`. The default behaviour is to generate and use a onetime key. If
+  `ssh_user`. The default behavior is to generate and use a onetime key. If
   this key is generated, the corresponding private key is passed to
   `ansible-playbook` with the `--private-key` option.
 
@@ -107,9 +109,95 @@ Optional Parameters:
 
 ## Limitations
 
-- Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+### Redhat / CentOS
+
+Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
 
 ```
 ==> virtualbox-ovf: starting sftp subsystem
     virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
 ```
+
+### chroot communicator
+
+Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
+
+```
+{
+    "builders": [
+        {
+            "type": "amazon-chroot",
+            "mount_path": "/mnt/packer-amazon-chroot",
+            "region": "us-east-1",
+            "source_ami": "ami-123456"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "extra_arguments": [
+                "--connection=chroot",
+                "--inventory-file=/mnt/packer-amazon-chroot,"
+            ],
+            "playbook_file": "main.yml"
+        }
+    ]
+}
+```
+
+### winrm communicator
+
+Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
+
+```
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+class Connection(SSHConnection):
+    ''' ssh based connections for powershell via packer'''
+
+    transport = 'packer'
+    has_pipelining = True
+    become_methods = []
+    allow_executable = False
+    module_implementation_preferences = ('.ps1', '')
+
+    def __init__(self, *args, **kwargs):
+        super(Connection, self).__init__(*args, **kwargs)
+```
+
+This template should build a Windows Server 2012 image on Google Cloud Platform:
+
+```
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type":  "ansible",
+        "playbook_file": "./win-playbook.yml",
+        "extra_arguments": [
+          "--connection", "packer",
+          "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+        ]
+      }
+    ],
+    "builders": [
+      {
+        "type": "googlecompute",
+        "account_file": "{{user `account_file`}}",
+        "project_id": "{{user `project_id`}}",
+        "source_image": "windows-server-2012-r2-dc-v20160916",
+        "communicator": "winrm",
+        "zone": "us-central1-a",
+        "disk_size": 50,
+        "winrm_username": "packer",
+        "winrm_use_ssl": true,
+        "winrm_insecure": true,
+        "metadata": {
+                  "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
+        }
+      }
+    ]
+}

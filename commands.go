@@ -9,7 +9,7 @@ import (
 	"github.com/mitchellh/packer/version"
 )
 
-// Commands is the mapping of all the available Terraform commands.
+// Commands is the mapping of all the available Packer commands.
 var Commands map[string]cli.CommandFactory
 
 // CommandMeta is the Meta to use for the commands. This must be written

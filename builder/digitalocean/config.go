@@ -77,12 +77,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.DropletName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.Comm.SSHUsername == "" {
-		// Default to "root". You can override this if your
-		// SourceImage has a different user account then the DO default
-		c.Comm.SSHUsername = "root"
-	}
-
 	if c.StateTimeout == 0 {
 		// Default to 6 minute timeouts waiting for
 		// desired state. i.e waiting for droplet to become active

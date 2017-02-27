@@ -139,7 +139,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
-			Extension:    "iso",
+			Extension:    b.config.TargetExtension,
 			ResultKey:    "iso_path",
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,

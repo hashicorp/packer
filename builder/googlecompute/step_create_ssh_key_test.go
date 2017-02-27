@@ -12,6 +12,23 @@ func TestStepCreateSSHKey_impl(t *testing.T) {
 	var _ multistep.Step = new(StepCreateSSHKey)
 }
 
+func TestStepCreateSSHKey_privateKey(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateSSHKey)
+	step.PrivateKeyFile = "test-fixtures/fake-key"
+	defer step.Cleanup(state)
+
+	// run the step
+	if action := step.Run(state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// Verify that we have a public/private key
+	if _, ok := state.GetOk("ssh_private_key"); !ok {
+		t.Fatal("should have key")
+	}
+}
+
 func TestStepCreateSSHKey(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateSSHKey)

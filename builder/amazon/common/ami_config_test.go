@@ -59,11 +59,18 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 }
 
-func TestAMIConfigPrepare_EncryptBoot(t *testing.T) {
+func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIUsers = []string{"testAccountID"}
 	c.AMIEncryptBootVolume = true
+
+	c.AMIKmsKeyId = ""
 	if err := c.Prepare(nil); err == nil {
-		t.Fatal("should have error")
+		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
+	}
+
+	c.AMIKmsKeyId = "89c3fb9a-de87-4f2a-aedc-fddc5138193c"
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
 	}
 }

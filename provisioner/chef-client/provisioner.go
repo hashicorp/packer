@@ -28,13 +28,13 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: guestOSTypeConfig{
+	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
-	provisioner.WindowsOSType: guestOSTypeConfig{
+	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "powershell.exe -Command \"(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
@@ -280,20 +280,25 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	err = p.executeChef(ui, comm, configPath, jsonPath)
 
-	knifeConfigPath, err2 := p.createKnifeConfig(
-		ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
-	if err2 != nil {
-		return fmt.Errorf("Error creating knife config on node: %s", err2)
-	}
-	if !p.config.SkipCleanNode {
-		if err2 := p.cleanNode(ui, comm, nodeName, knifeConfigPath); err2 != nil {
-			return fmt.Errorf("Error cleaning up chef node: %s", err2)
-		}
-	}
+	if !(p.config.SkipCleanNode && p.config.SkipCleanClient) {
 
-	if !p.config.SkipCleanClient {
-		if err2 := p.cleanClient(ui, comm, nodeName, knifeConfigPath); err2 != nil {
-			return fmt.Errorf("Error cleaning up chef client: %s", err2)
+		knifeConfigPath, knifeErr := p.createKnifeConfig(
+			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
+
+		if knifeErr != nil {
+			return fmt.Errorf("Error creating knife config on node: %s", knifeErr)
+		}
+
+		if !p.config.SkipCleanNode {
+			if err := p.cleanNode(ui, comm, nodeName, knifeConfigPath); err != nil {
+				return fmt.Errorf("Error cleaning up chef node: %s", err)
+			}
+		}
+
+		if !p.config.SkipCleanClient {
+			if err := p.cleanClient(ui, comm, nodeName, knifeConfigPath); err != nil {
+				return fmt.Errorf("Error cleaning up chef client: %s", err)
+			}
 		}
 	}
 

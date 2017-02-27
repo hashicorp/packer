@@ -163,7 +163,7 @@ This command can be customized using the `execute_command` configuration. As you
 can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
 
--   `ConfigPath` - The path to the Chef configuration file. file.
+-   `ConfigPath` - The path to the Chef configuration file.
 -   `JsonPath` - The path to the JSON attributes file for the node.
 -   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
     value of the `prevent_sudo` configuration.

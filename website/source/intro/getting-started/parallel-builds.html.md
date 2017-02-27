@@ -67,7 +67,8 @@ array.
   "api_token": "{{user `do_api_token`}}",
   "image": "ubuntu-14-04-x64",
   "region": "nyc3",
-  "size": "512mb"
+  "size": "512mb",
+  "ssh_username": "ubuntu"
 }
 ```
 
@@ -104,7 +105,8 @@ The entire template should now look like this:
     "api_token": "{{user `do_api_token`}}",
     "image": "ubuntu-14-04-x64",
     "region": "nyc3",
-    "size": "512mb"
+    "size": "512mb",
+    "ssh_username": "ubuntu"
   }],
   "provisioners": [{
     "type": "shell",

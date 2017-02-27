@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/mitchellh/multistep"
 	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
 	"github.com/mitchellh/packer/packer"
-	"strconv"
 )
 
 // This step creates the virtual disk that will be used as the

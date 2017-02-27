@@ -93,12 +93,12 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_InvalidShutdownBehaviour(t *testing.T) {
+func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
 	// Test good
-	config["shutdown_behaviour"] = "terminate"
+	config["shutdown_behavior"] = "terminate"
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -108,7 +108,7 @@ func TestBuilderPrepare_InvalidShutdownBehaviour(t *testing.T) {
 	}
 
 	// Test good
-	config["shutdown_behaviour"] = "stop"
+	config["shutdown_behavior"] = "stop"
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -118,7 +118,7 @@ func TestBuilderPrepare_InvalidShutdownBehaviour(t *testing.T) {
 	}
 
 	// Test bad
-	config["shutdown_behaviour"] = "foobar"
+	config["shutdown_behavior"] = "foobar"
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)

@@ -12,19 +12,19 @@ const StartupScriptStatusDone string = "done"
 const StartupScriptStatusError string = "error"
 const StartupScriptStatusNotDone string = "notdone"
 
-var StartupScriptLinux string = fmt.Sprintf(`#!/bin/bash
+var StartupScriptLinux string = fmt.Sprintf(`#!/usr/bin/env bash
 echo "Packer startup script starting."
 RETVAL=0
 BASEMETADATAURL=http://metadata/computeMetadata/v1/instance/
 
 GetMetadata () {
-	echo "$(curl -f -H "Metadata-Flavor: Google" ${BASEMETADATAURL}/${1} 2> /dev/null)"
+  echo "$(curl -f -H "Metadata-Flavor: Google" ${BASEMETADATAURL}/${1} 2> /dev/null)"
 }
 
 ZONE=$(GetMetadata zone | grep -oP "[^/]*$")
 
 SetMetadata () {
-	gcloud compute instances add-metadata ${HOSTNAME} --metadata ${1}=${2} --zone ${ZONE}
+  gcloud compute instances add-metadata ${HOSTNAME} --metadata ${1}=${2} --zone ${ZONE}
 }
 
 STARTUPSCRIPT=$(GetMetadata attributes/%s)

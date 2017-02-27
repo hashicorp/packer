@@ -77,25 +77,6 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	}
 }
 
-func TestSSHConfigPrepare_SSHUser(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = "exists"
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
 const testPem = `
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpQIBAAKCAQEAxd4iamvrwRJvtNDGQSIbNvvIQN8imXTRWlRY62EvKov60vqu

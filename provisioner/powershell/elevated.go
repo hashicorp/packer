@@ -14,7 +14,7 @@ type elevatedOptions struct {
 
 var elevatedTemplate = template.Must(template.New("ElevatedCommand").Parse(`
 $name = "{{.TaskName}}"
-$log = "$env:TEMP\$name.out"
+$log = "$env:SystemRoot\Temp\$name.out"
 $s = New-Object -ComObject "Schedule.Service"
 $s.Connect()
 $t = $s.NewTask($null)
@@ -53,11 +53,12 @@ $t.XmlText = @'
   <Actions Context="Author">
     <Exec>
       <Command>cmd</Command>
-	  <Arguments>/c powershell.exe -EncodedCommand {{.EncodedCommand}} &gt; %TEMP%\{{.TaskName}}.out 2&gt;&amp;1</Arguments>
+	  <Arguments>/c powershell.exe -EncodedCommand {{.EncodedCommand}} &gt; %SYSTEMROOT%\Temp\{{.TaskName}}.out 2&gt;&amp;1</Arguments>
     </Exec>
   </Actions>
 </Task>
 '@
+if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}
 $f = $s.GetFolder("\")
 $f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", "{{.Password}}", 1, $null) | Out-Null
 $t = $f.GetTask("\$name")
@@ -68,20 +69,20 @@ while ((!($t.state -eq 4)) -and ($sec -lt $timeout)) {
   Start-Sleep -s 1
   $sec++
 }
-function SlurpOutput($l) {
-  if (Test-Path $log) {
-    Get-Content $log | select -skip $l | ForEach {
-      $l += 1
-      Write-Host "$_"
-    }
-  }
-  return $l
-}
+
 $line = 0
 do {
   Start-Sleep -m 100
-  $line = SlurpOutput $line
+  if (Test-Path $log) {
+    Get-Content $log | select -skip $line | ForEach {
+      $line += 1
+      Write-Output "$_"
+    }
+  }
 } while (!($t.state -eq 3))
 $result = $t.LastTaskResult
+if (Test-Path $log) {
+    Remove-Item $log -Force -ErrorAction SilentlyContinue | Out-Null
+}
 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($s) | Out-Null
 exit $result`))

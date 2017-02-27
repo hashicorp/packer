@@ -76,3 +76,8 @@ Optional:
     fails. Set this option to true to ignore Salt failures.
 
 -   `log_level` (string) - Set the logging level for the `salt-call` run.
+
+-   `salt_call_args` (string) - Additional arguments to pass directly to `salt-call`. See
+    [salt-call](https://docs.saltstack.com/ref/cli/salt-call.html) documentation for more
+    information. By default no additional arguments (besides the ones Packer generates)
+    are passed to `salt-call`.

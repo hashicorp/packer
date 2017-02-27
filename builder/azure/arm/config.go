@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
-	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -21,7 +20,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/Azure/go-ntlmssp"
+	"github.com/masterzen/winrm"
 
 	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"github.com/mitchellh/packer/builder/azure/pkcs12"
@@ -73,6 +72,8 @@ type Config struct {
 	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
 	ResourceGroupName               string             `mapstructure:"resource_group_name"`
 	StorageAccount                  string             `mapstructure:"storage_account"`
+	TempComputeName                 string             `mapstructure:"temp_compute_name"`
+	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`
 	storageAccountBlobEndpoint      string
 	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                *azure.Environment
@@ -275,9 +276,8 @@ func setSshValues(c *Config) error {
 }
 
 func setWinRMCertificate(c *Config) error {
-	c.Comm.WinRMTransportDecorator = func(t *http.Transport) http.RoundTripper {
-		return &ntlmssp.Negotiator{RoundTripper: t}
-	}
+	c.Comm.WinRMTransportDecorator =
+		func() winrm.Transporter { return &winrm.ClientNTLM{} }
 
 	cert, err := c.createCertificate()
 	c.winrmCertificate = cert
@@ -290,9 +290,17 @@ func setRuntimeValues(c *Config) {
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	c.tmpCertificatePassword = tempName.CertificatePassword
-	c.tmpComputeName = tempName.ComputeName
+	if c.TempComputeName == "" {
+		c.tmpComputeName = tempName.ComputeName
+	} else {
+		c.tmpComputeName = c.TempComputeName
+	}
 	c.tmpDeploymentName = tempName.DeploymentName
-	c.tmpResourceGroupName = tempName.ResourceGroupName
+	if c.TempResourceGroupName == "" {
+		c.tmpResourceGroupName = tempName.ResourceGroupName
+	} else {
+		c.tmpResourceGroupName = c.TempResourceGroupName
+	}
 	c.tmpOSDiskName = tempName.OSDiskName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }

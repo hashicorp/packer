@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"github.com/mitchellh/go-fs"
 	"math"
+	"strings"
 	"time"
 	"unicode/utf16"
-	"strings"
 )
 
 type DirectoryAttr uint8
@@ -160,8 +160,8 @@ func NewFat16RootDirectoryCluster(bs *BootSectorCommon, label string) (*Director
 
 	// Create the volume ID entry
 	result.entries[0] = &DirectoryClusterEntry{
-		attr: AttrVolumeId,
-		name: label,
+		attr:    AttrVolumeId,
+		name:    label,
 		cluster: 0,
 	}
 

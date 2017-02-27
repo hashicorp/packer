@@ -10,6 +10,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/mitchellh/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
@@ -37,7 +38,7 @@ func newAdapter(done <-chan struct{}, l net.Listener, config *ssh.ServerConfig, 
 }
 
 func (c *adapter) Serve() {
-	c.ui.Say(fmt.Sprintf("SSH proxy: serving on %s", c.l.Addr()))
+	log.Printf("SSH proxy: serving on %s", c.l.Addr())
 
 	for {
 		// Accept will return if either the underlying connection is closed or if a connection is made.
@@ -62,7 +63,7 @@ func (c *adapter) Serve() {
 }
 
 func (c *adapter) Handle(conn net.Conn, ui packer.Ui) error {
-	c.ui.Message("SSH proxy: accepted connection")
+	log.Print("SSH proxy: accepted connection")
 	_, chans, reqs, err := ssh.NewServerConn(conn, c.config)
 	if err != nil {
 		return errors.New("failed to handshake")
@@ -160,7 +161,7 @@ func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
 						sftpCmd = "/usr/lib/sftp-server -e"
 					}
 
-					c.ui.Say("starting sftp subsystem")
+					log.Print("starting sftp subsystem")
 					go func() {
 						_ = c.remoteExec(sftpCmd, channel, channel, channel.Stderr())
 						close(done)
@@ -171,7 +172,7 @@ func (c *adapter) handleSession(newChannel ssh.NewChannel) error {
 					req.Reply(false, nil)
 				}
 			default:
-				c.ui.Message(fmt.Sprintf("rejecting %s request", req.Type))
+				log.Printf("rejecting %s request", req.Type)
 				req.Reply(false, nil)
 			}
 		}
@@ -189,7 +190,7 @@ func (c *adapter) exec(command string, in io.Reader, out io.Writer, err io.Write
 	var exitStatus int
 	switch {
 	case strings.HasPrefix(command, "scp ") && serveSCP(command[4:]):
-		err := c.scpExec(command[4:], in, out, err)
+		err := c.scpExec(command[4:], in, out)
 		if err != nil {
 			log.Println(err)
 			exitStatus = 1
@@ -205,8 +206,15 @@ func serveSCP(args string) bool {
 	return bytes.IndexAny(opts, "tf") >= 0
 }
 
-func (c *adapter) scpExec(args string, in io.Reader, out io.Writer, err io.Writer) error {
+func (c *adapter) scpExec(args string, in io.Reader, out io.Writer) error {
 	opts, rest := scpOptions(args)
+
+	// remove the quoting that ansible added to rest for shell safety.
+	shargs, err := shlex.Split(rest)
+	if err != nil {
+		return err
+	}
+	rest = strings.Join(shargs, "")
 
 	if i := bytes.IndexByte(opts, 't'); i >= 0 {
 		return scpUploadSession(opts, rest, in, out, c.comm)

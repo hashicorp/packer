@@ -87,7 +87,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 // BuildNames returns the builds that are available in this configured core.
 func (c *Core) BuildNames() []string {
 	r := make([]string, 0, len(c.builds))
-	for n, _ := range c.builds {
+	for n := range c.builds {
 		r = append(r, n)
 	}
 	sort.Strings(r)

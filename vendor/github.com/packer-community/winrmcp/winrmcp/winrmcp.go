@@ -1,10 +1,8 @@
 package winrmcp
 
 import (
-	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +24,7 @@ type Config struct {
 	ConnectTimeout        time.Duration
 	OperationTimeout      time.Duration
 	MaxOperationsPerShell int
-	TransportDecorator    func(*http.Transport) http.RoundTripper
+	TransportDecorator    func() winrm.Transporter
 }
 
 type Auth struct {
@@ -64,13 +62,13 @@ func New(addr string, config *Config) (*Winrmcp, error) {
 func (fs *Winrmcp) Copy(fromPath, toPath string) error {
 	f, err := os.Open(fromPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Couldn't read file %s: %v", fromPath, err))
+		return fmt.Errorf("Couldn't read file %s: %v", fromPath, err)
 	}
 
 	defer f.Close()
 	fi, err := f.Stat()
 	if err != nil {
-		return errors.New(fmt.Sprintf("Couldn't stat file %s: %v", fromPath, err))
+		return fmt.Errorf("Couldn't stat file %s: %v", fromPath, err)
 	}
 
 	if !fi.IsDir() {
@@ -117,7 +115,7 @@ func (fw *fileWalker) copyFile(fromPath string, fi os.FileInfo, err error) error
 
 	f, err := os.Open(hostPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Couldn't read file %s: %v", fromPath, err))
+		return fmt.Errorf("Couldn't read file %s: %v", fromPath, err)
 	}
 
 	return doCopy(fw.client, fw.config, f, winPath(toPath))

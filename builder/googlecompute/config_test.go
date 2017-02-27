@@ -47,6 +47,17 @@ func TestConfigPrepare(t *testing.T) {
 		},
 
 		{
+			"source_image_family",
+			nil,
+			false,
+		},
+		{
+			"source_image_family",
+			"foo",
+			false,
+		},
+
+		{
 			"zone",
 			nil,
 			true,
@@ -94,6 +105,21 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			"on_host_maintenance",
+			nil,
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"TERMINATE",
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"SO VERY BAD",
+			true,
+		},
+		{
 			"preemptible",
 			nil,
 			false,
@@ -127,6 +153,21 @@ func TestConfigPrepare(t *testing.T) {
 			"image_family",
 			"foo bar",
 			true,
+		},
+		{
+			"scopes",
+			[]string{},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control", "https://www.googleapis.com/auth/sqlservice.admin"},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/cloud-platform"},
+			false,
 		},
 	}
 
@@ -202,6 +243,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
+		"ssh_username": "root",
 		"image_family": "bar",
 		"zone":         "us-east1-a",
 	}

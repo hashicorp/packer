@@ -92,14 +92,17 @@ func (c BuildCommand) Run(args []string) int {
 				Color: colors[i%len(colors)],
 				Ui:    ui,
 			}
+			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
+				ui.Say(fmt.Sprintf("%s output will be in this color.", b))
+				if i+1 == len(buildNames) {
+					// Add a newline between the color output and the actual output
+					c.Ui.Say("")
+				}
+			}
 		}
 
 		buildUis[b] = ui
-		ui.Say(fmt.Sprintf("%s output will be in this color.", b))
 	}
-
-	// Add a newline between the color output and the actual output
-	c.Ui.Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
@@ -288,6 +291,7 @@ Options:
   -color=false               Disable color output (on by default)
   -debug                     Debug mode enabled for builds
   -except=foo,bar,baz        Build all builds other than these
+  -only=foo,bar,baz          Build only the specified builds
   -force                     Force a build to continue if artifacts exist, deletes existing artifacts
   -machine-readable          Machine-readable output
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask

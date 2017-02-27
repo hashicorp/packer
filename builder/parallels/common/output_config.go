@@ -9,10 +9,12 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
+// OutputConfig contains the configuration for builder's output.
 type OutputConfig struct {
 	OutputDir string `mapstructure:"output_directory"`
 }
 
+// Prepare configures the output directory or returns an error if it already exists.
 func (c *OutputConfig) Prepare(ctx *interpolate.Context, pc *common.PackerConfig) []error {
 	if c.OutputDir == "" {
 		c.OutputDir = fmt.Sprintf("output-%s", pc.PackerBuildName)

@@ -162,7 +162,7 @@ func ImportImageRefreshFunc(conn *ec2.EC2, importTaskId string) StateRefreshFunc
 func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
-	sleepSeconds := 2
+	sleepSeconds := SleepSeconds()
 	maxTicks := int(TimeoutSeconds()/sleepSeconds) + 1
 	notfoundTick := 0
 
@@ -237,5 +237,26 @@ func TimeoutSeconds() (seconds int) {
 	}
 
 	log.Printf("Allowing %ds to complete (change with AWS_TIMEOUT_SECONDS)", seconds)
+	return seconds
+}
+
+// Returns 2 seconds by default
+// AWS async operations sometimes takes long times, if there are multiple parallel builds,
+// polling at 2 second frequency will exceed the request limit. Allow 2 seconds to be
+// overwritten with AWS_POLL_DELAY_SECONDS
+func SleepSeconds() (seconds int) {
+	seconds = 2
+
+	override := os.Getenv("AWS_POLL_DELAY_SECONDS")
+	if override != "" {
+		n, err := strconv.Atoi(override)
+		if err != nil {
+			log.Printf("Invalid sleep seconds '%s', using default", override)
+		} else {
+			seconds = n
+		}
+	}
+
+	log.Printf("Using %ds as polling delay (change with AWS_POLL_DELAY_SECONDS)", seconds)
 	return seconds
 }

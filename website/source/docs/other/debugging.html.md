@@ -96,3 +96,33 @@ AMI.
         "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done"
       ]
     }
+
+
+## Issues when using numerous Builders/Provisioners/Post-Processors
+
+Packer uses a separate process for each builder, provisioner, post-processor,
+and plugin. In certain cases, if you have too many of these, you can run out of
+[file descriptors](https://en.wikipedia.org/wiki/File_descriptor). This results
+in an error that might look like
+
+```
+error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:
+too many open files
+```
+
+On Unix systems, you can check what your file descriptor limit is with `ulimit
+-Sn`. You should check with your OS vendor on how to raise this limit.
+
+## Issues when using long temp directory
+
+Packer uses unix sockets internally, which are created inside the default
+directory for temporary files. Some operating systems place a limit on the
+length of the socket name, usually between 80 and 110 characters. If you get an
+error like this (for any builder, not just docker):
+
+```
+Failed to initialize build 'docker': error initializing builder 'docker': plugin exited before we could connect
+```
+
+you should try setting your temp directory to something shorter. This can be
+done through the `TMPDIR` environment variable.

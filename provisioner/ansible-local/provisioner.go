@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/packer/common"
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -85,7 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = DefaultStagingDir
+		p.config.StagingDir = filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID())
 	}
 
 	// Validation
