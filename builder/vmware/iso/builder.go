@@ -39,38 +39,35 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	// disk drives
-	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	DiskName            string   `mapstructure:"vmdk_name"`
-	DiskSize            uint     `mapstructure:"disk_size"`
-	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	Format              string   `mapstructure:"format"`
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+	DiskName           string `mapstructure:"vmdk_name"`
+	DiskSize           uint   `mapstructure:"disk_size"`
+	DiskTypeId         string `mapstructure:"disk_type_id"`
+	Format             string `mapstructure:"format"`
 
 	// platform information
-	GuestOSType         string   `mapstructure:"guest_os_type"`
-	Version             string   `mapstructure:"version"`
-	VMName              string   `mapstructure:"vm_name"`
+	GuestOSType string `mapstructure:"guest_os_type"`
+	Version     string `mapstructure:"version"`
+	VMName      string `mapstructure:"vm_name"`
 
 	// Network type
-	Network             string   `mapstructure:"network"`
+	Network string `mapstructure:"network"`
 
 	// device presence
-	Sound               bool     `mapstructure:"sound"`
-	USB                 bool     `mapstructure:"usb"`
+	Sound bool `mapstructure:"sound"`
+	USB   bool `mapstructure:"usb"`
 
 	// communication ports
-	Serial              string   `mapstructure:"serial"`
-	Parallel            string   `mapstructure:"parallel"`
+	Serial   string `mapstructure:"serial"`
+	Parallel string `mapstructure:"parallel"`
 
 	// booting a guest
-	BootCommand         []string `mapstructure:"boot_command"`
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
 	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	SkipExport          bool     `mapstructure:"skip_export"`
-	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
-	Version             string   `mapstructure:"version"`
 
 	// remote vsphere
 	RemoteType           string `mapstructure:"remote_type"`
