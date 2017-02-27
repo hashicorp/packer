@@ -19,6 +19,7 @@
 
 ### BUG FIXES:
 
+* builder/amazon: Fix ssh agent authentication. [GH-4597]
 * builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
 * builder/googlecompute: fix bug when creating image from custom image_family.
     [GH-4518]
