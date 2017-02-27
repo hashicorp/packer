@@ -28,7 +28,8 @@ type Config struct {
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 
-	RootDevice RootBlockDevice `mapstructure:"ami_root_device"`
+	RootDevice    RootBlockDevice   `mapstructure:"ami_root_device"`
+	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -47,6 +48,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			Exclude: []string{
 				"ami_description",
 				"run_tags",
+				"run_volume_tags",
+				"snapshot_tags",
 				"tags",
 			},
 		},
@@ -119,6 +122,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
+		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
 			EnhancedNetworking: b.config.AMIEnhancedNetworking,
@@ -155,6 +162,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Tags:                     b.config.RunTags,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
+		&awscommon.StepTagEBSVolumes{
+			VolumeRunTags: b.config.VolumeRunTags,
+			Ctx:           b.config.ctx,
+		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
@@ -181,9 +192,38 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepSnapshotNewRootVolume{
 			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
 		},
+		&awscommon.StepDeregisterAMI{
+			ForceDeregister:     b.config.AMIForceDeregister,
+			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
+			AMIName:             b.config.AMIName,
+		},
 		&StepRegisterAMI{
 			RootDevice:   b.config.RootDevice,
 			BlockDevices: b.config.BlockDevices.BuildLaunchDevices(),
+		},
+		&awscommon.StepCreateEncryptedAMICopy{
+			KeyID:             b.config.AMIKmsKeyId,
+			EncryptBootVolume: b.config.AMIEncryptBootVolume,
+			Name:              b.config.AMIName,
+		},
+		&awscommon.StepAMIRegionCopy{
+			AccessConfig: &b.config.AccessConfig,
+			Regions:      b.config.AMIRegions,
+			Name:         b.config.AMIName,
+		},
+		&awscommon.StepModifyAMIAttributes{
+			Description:    b.config.AMIDescription,
+			Users:          b.config.AMIUsers,
+			Groups:         b.config.AMIGroups,
+			ProductCodes:   b.config.AMIProductCodes,
+			SnapshotUsers:  b.config.SnapshotUsers,
+			SnapshotGroups: b.config.SnapshotGroups,
+			Ctx:            b.config.ctx,
+		},
+		&awscommon.StepCreateTags{
+			Tags:         b.config.AMITags,
+			SnapshotTags: b.config.SnapshotTags,
+			Ctx:          b.config.ctx,
 		},
 	}
 
