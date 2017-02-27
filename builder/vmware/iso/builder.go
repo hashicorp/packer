@@ -37,20 +37,21 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	DiskName            string   `mapstructure:"vmdk_name"`
-	DiskSize            uint     `mapstructure:"disk_size"`
-	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	Format              string   `mapstructure:"format"`
-	GuestOSType         string   `mapstructure:"guest_os_type"`
-	Version             string   `mapstructure:"version"`
-	VMName              string   `mapstructure:"vm_name"`
-	BootCommand         []string `mapstructure:"boot_command"`
-	KeepRegistered      bool     `mapstructure:"keep_registered"`
-	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	SkipExport          bool     `mapstructure:"skip_export"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
-	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
+	AdditionalDiskSize            []uint   `mapstructure:"disk_additional_size"`
+	BootCommand                   []string `mapstructure:"boot_command"`
+	DiskName                      string   `mapstructure:"vmdk_name"`
+	DiskSize                      uint     `mapstructure:"disk_size"`
+	DiskTypeId                    string   `mapstructure:"disk_type_id"`
+	Format                        string   `mapstructure:"format"`
+	GuestOSType                   string   `mapstructure:"guest_os_type"`
+	KeepRegistered                bool     `mapstructure:"keep_registered"`
+	SkipCompaction                bool     `mapstructure:"skip_compaction"`
+	SkipExport                    bool     `mapstructure:"skip_export"`
+	ThirdPartySwitchCompatibility bool     `mapstructure:"third_party_switch_compatibility"`
+	VMName                        string   `mapstructure:"vm_name"`
+	VMXDiskTemplatePath           string   `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath               string   `mapstructure:"vmx_template_path"`
+	Version                       string   `mapstructure:"version"`
 
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`

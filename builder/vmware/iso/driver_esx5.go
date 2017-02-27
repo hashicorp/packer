@@ -257,6 +257,15 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return address, nil
 	}
 
+	if config.ThirdPartySwitchCompatibility {
+		address, err := d.getIPAddressCompat()
+		if err != nil {
+			return "", err
+		}
+		state.Put("vm_address", address)
+		return address, nil
+	}
+
 	r, err := d.esxcli("network", "vm", "list")
 	if err != nil {
 		return "", err
@@ -307,6 +316,21 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		}
 	}
 	return "", errors.New("No interface on the VM has an IP address ready")
+}
+
+func (d *ESX5Driver) getIPAddressCompat() (string, error) {
+	r, err := d.run(nil, "vim-cmd", "vmsvc/get.guest", d.vmId, " | grep -m 1 ipAddress | awk -F'\"' '{print $2}'")
+	if err != nil {
+		return "", err
+	}
+
+	ipAddress := strings.TrimRight(r, "\n")
+
+	if ipAddress == "" {
+		return "", errors.New("VM network port found, but no IP address")
+	}
+
+	return ipAddress, nil
 }
 
 //-------------------------------------------------------------------

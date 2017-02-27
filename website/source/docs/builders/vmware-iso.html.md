@@ -240,6 +240,12 @@ builder.
     deploy the resulting artifact (VMX or OVA or whatever you used as `format`).
     Defaults to `false`.
 
+-   `third_party_switch_compatibility` (boolean) - If true, will use a method
+    compatible with third party distributed switches (like the Cisco 1000v) to
+    get the virtual machine's IP address. This method requires that VMWare
+    Tools is installed and running. This only has an effect if `remote_type` is
+    enabled.
+
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
     default, this is empty, which means VMware tools won't be uploaded.
