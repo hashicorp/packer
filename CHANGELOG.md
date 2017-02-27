@@ -8,6 +8,7 @@
 
 * builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
 * builder/amazon: Change EC2 Windows password timeout to 20 minutes. [GH-4590]
+* builder/amazon-chroot: support encrypted boot volume. [GH-4584]
 * builder/docker: create export dir if needed. [GH-4439]
 * builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
 * builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
