@@ -24,15 +24,23 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Registering the AMI...")
 
-	blockDevices := s.BlockDevices
-	blockDevices = append(blockDevices, s.RootDevice.createBlockDeviceMapping(snapshotId))
+	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(s.BlockDevices)-1)
+	for _, blockDevice := range s.BlockDevices {
+		if *blockDevice.DeviceName == s.RootDevice.SourceDeviceName {
+			continue
+		}
+
+		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
+	}
+
+	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, s.RootDevice.createBlockDeviceMapping(snapshotId))
 
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
 		Architecture:        aws.String(ec2.ArchitectureValuesX8664),
 		RootDeviceName:      aws.String(s.RootDevice.DeviceName),
 		VirtualizationType:  aws.String(config.AMIVirtType),
-		BlockDeviceMappings: blockDevices,
+		BlockDeviceMappings: blockDevicesExcludingRoot,
 	}
 
 	if config.AMIEnhancedNetworking {
