@@ -42,6 +42,8 @@ h1 {
 h2 {
   font-size: 36px;
   line-height: (50/40);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 
   &.has-dividers {
     //overflow: auto !important;
