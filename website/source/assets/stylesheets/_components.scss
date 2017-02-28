@@ -5,7 +5,6 @@ header .header {
   h1 {
     margin-bottom: -8px;
     margin-top: 60px;
-    text-transform: uppercase;
   }
 
   span {
@@ -254,12 +253,13 @@ header .header {
     h1 {
       font-size: 40px;
       line-height: (25/20);
-      text-transform: uppercase;
+      font-weight: 600;
     }
 
     h2 {
       margin-top: $baseline * 2;
       text-transform: capitalize;
+      font-weight: 600;
     }
 
     h3 {
