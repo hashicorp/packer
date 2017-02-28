@@ -17,19 +17,17 @@ html {
 
 body {
   background-color: $background;
-  font-family: $sans;
-  letter-spacing: 1px;
+  font-family: $font-family-open-sans;
   font-size: $base-font-size;
   line-height: $base-line-height;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  letter-spacing: 2px;
+  font-family: $font-family-klavika;
   font-weight: normal;
 }
 
 h1 {
-  font-family: $sans;
   font-size: 70px;
   line-height: (80/70);
   @include respond-to(mobile) {
@@ -39,7 +37,6 @@ h1 {
 }
 
 h2 {
-  font-family: $sans;
   font-size: 40px;
   line-height: (50/40);
 
@@ -55,38 +52,31 @@ h2 {
 }
 
 h3 {
-  font-family: $sans;
   font-size: 20px;
   line-height: (30/20);
 }
 
 h4 {
-  font-family: $mono;
+  font-family: $font-family-mono;
   font-size: 20px;
   line-height: (30/20);
 }
 
 h5 {
-  font-family: $sans;
   font-size: 16px;
   line-height: (22/16);
 }
 
 h6 {
-  font-family: $mono;
+  font-family: $font-family-mono;
   font-size: 16px;
   line-height: (22/16);
 }
 
 p {
-  font-family: $serif;
-  font-size: 17px;
-  line-height: (30/17);
-  letter-spacing: 1px;
 
   &.large-text {
     font-size: 20px;
-    line-height: (35/20);
   }
 
   a {
@@ -121,10 +111,8 @@ dt {
 }
 
 dd {
-  font-family: $serif;
   font-size: 17px;
   line-height: 1.5;
-  letter-spacing: 1px;
   margin-bottom: 30px;
 }
 
@@ -159,7 +147,7 @@ pre {
 }
 
 table {
-  font-family: $mono;
+  font-family: $font-family-mono;
   margin: ($baseline * 2) 0;
   color: $gray-dark;
 

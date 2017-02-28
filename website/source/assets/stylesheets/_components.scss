@@ -72,7 +72,6 @@ header .header {
   }
 
   h2 {
-    font-family: $serif;
     font-size: 44px;
     color: #7bc6b1;
     margin: 0px;
@@ -181,7 +180,7 @@ header .header {
         color: #b1d631;
         font-size: 14px;
         font-weight: normal;
-        font-family: $mono;
+        font-family: $font-family-mono;
         text-shadow: 0 0 0;
       }
 
@@ -203,7 +202,6 @@ header .header {
         margin-right: 20px;
 
         li {
-          font-family: $serif;
           font-size: 17px;
           line-height: (30/17) !important;
           margin-bottom: $baseline;
@@ -225,10 +223,8 @@ header .header {
       }
 
       div.alert {
-        font-family: $serif;
         font-size: 17px;
         line-height: 1.5;
-        letter-spacing: 1px;
         margin-left: -135px;
         margin-right: -135px;
         padding-top: 40px;

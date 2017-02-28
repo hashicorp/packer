@@ -19,7 +19,7 @@ $border-dark: #333;
 // base measures
 $baseline: 20px;
 $base-font-size: 16px;
-$base-line-height: 20px;
+$base-line-height: 1.5;
 $button-height: 60px;
 
 .center {
@@ -40,13 +40,13 @@ $sidebar-width: 250px;
 
 
 //typography
-$serif: 'myriad-pro', helvetica, Georgia, serif;
-$sans: 'HeimatStencil-SemiBold', 'Avenir', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-$mono: 'Inconsolata', 'courier new', courier, monospace;
+$font-family-open-sans: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-klavika: 'klavika-web', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-mono: 'Inconsolata', 'Monaco', 'courier new', courier, monospace;
 
-.serif { font-family: $serif; }
-.sans { font-family: $sans; }
-.mono { font-family: $mono; }
+.open-sans { font-family: $font-family-open-sans;}
+.klavika { font-family: $font-family-klavika; }
+.mono { font-family: $font-family-mono; }
 
 .text-center { text-align: center !important; }
 .text-left { text-align: left !important; }
@@ -55,15 +55,6 @@ $mono: 'Inconsolata', 'courier new', courier, monospace;
 .text-green { color: $green; }
 
 .uppercase { text-transform: uppercase !important; }
-
-@font-face {
-    font-family: 'HeimatStencil-SemiBold';
-    src: font-url('2772B2_0_0.eot');
-    src: font-url('2772B2_0_0.woff') format('woff'),
-         font-url('2772B2_0_0.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
 
 //color
 .dark-background {
