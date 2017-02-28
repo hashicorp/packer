@@ -19,7 +19,7 @@ header .header {
   background-size: 100%;
 
   h1 {
-    margin-top: 70px;
+    margin-top: 100px;
   }
 
   @media (max-width: $screen-md-max) {
@@ -36,7 +36,7 @@ header .header {
 
     h1 {
       margin: 0;
-      padding: 1em;
+      padding-bottom: 1em;
     }
   }
 }
