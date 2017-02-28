@@ -13,12 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="shortcut icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
     <link rel="icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
-    <script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
-    <script type="text/javascript">
-      try {
-        Typekit.load();
-      } catch (e) {}
-    </script>
+
     <!-- Google Tag Manager -->
     <script>
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -28,6 +23,11 @@
           })(window,document,'script','dataLayer','GTM-NR2SD7C');
     </script>
     <!-- End Google Tag Manager -->
+
+    <!-- Typekit script to import Klavika -->
+    <script src="https://use.typekit.net/wxf7mfi.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+
   </head>
   <body id="page-<%= current_page.data.page_title ? "#{current_page.data.page_title}" : "home" %>" class="page-<%= current_page.data.page_title ? "#{current_page.data.page_title} layout-#{current_page.data.layout} page-sub" : "home layout-#{current_page.data.layout}" %>">
     <!-- Google Tag Manager (noscript) -->
