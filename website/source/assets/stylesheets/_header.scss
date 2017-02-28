@@ -9,13 +9,12 @@
   background-color: $black;
   .navbar-brand {
     .logo{
-      color: $green;
-      padding-left: 36px;
-      font-size: 22px;
-      line-height: 77px;
-      background: image-url('logo-header.png') 0 0 no-repeat;
-      @include img-retina("../images/logo-header.png", "../images/logo-header@2x.png", $project-logo-width, $project-logo-height);
-      background-position: 0 center;
+      width: 110px;
+      height: 42px;
+      line-height: 70px;
+      margin-top: 15px;
+      background: image-url('logo-header.svg') 0 0 no-repeat;
+      font-size: 0;
 
       &:hover{
         opacity: .6;
