@@ -26,6 +26,7 @@ body {
 .home {
   h1, h2, h3, h4, h5, h6 {
     font-family: $font-family-klavika;
+    letter-spacing: 1px;
     font-weight: normal;
   }
 }
@@ -43,7 +44,6 @@ h2 {
   font-size: 36px;
   line-height: (50/40);
   text-transform: uppercase;
-  letter-spacing: 1px;
 
   &.has-dividers {
     //overflow: auto !important;
