@@ -19,16 +19,19 @@ body {
   background-color: $background;
   font-family: $font-family-open-sans;
   font-size: $base-font-size;
+  font-weight: 400;
   line-height: $base-line-height;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: $font-family-klavika;
-  font-weight: normal;
+.home {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: $font-family-klavika;
+    font-weight: normal;
+  }
 }
 
 h1 {
-  font-size: 70px;
+  font-size: 42px;
   line-height: (80/70);
   @include respond-to(mobile) {
     font-size: 50px;
@@ -37,7 +40,7 @@ h1 {
 }
 
 h2 {
-  font-size: 40px;
+  font-size: 36px;
   line-height: (50/40);
 
   &.has-dividers {
@@ -52,7 +55,7 @@ h2 {
 }
 
 h3 {
-  font-size: 20px;
+  font-size: 24px;
   line-height: (30/20);
 }
 
