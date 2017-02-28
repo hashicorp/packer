@@ -251,7 +251,6 @@ header .header {
     }
 
     h1 {
-      font-size: 40px;
       line-height: (25/20);
       font-weight: 600;
     }
@@ -263,9 +262,10 @@ header .header {
     }
 
     h3 {
-      margin-top: $baseline;
+      margin-top: $baseline * 2;
       text-transform: capitalize;
-      font-size: 26px;
+      font-size: 24px;
+      font-weight: 600;
     }
   }
 }
