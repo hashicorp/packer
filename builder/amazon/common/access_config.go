@@ -113,7 +113,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	hasAssumeRoleArn := len(c.AssumeRoleArn) > 0
 	hasMFASerial := len(c.MFASerial) > 0
 	hasMFACode := len(c.MFACode) > 0
-	if hasAssumeRoleArn && ((hasMFACode && !hasMFASerial) || (!hasMFACode && !hasMFACode)) {
+	if hasAssumeRoleArn && (!hasMFACode || !hasMFASerial) {
 		errs = append(errs, fmt.Errorf("Both mfa_serial and mfa_code must be specified."))
 
 	}
