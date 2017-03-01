@@ -26,7 +26,7 @@ install:
 
 build_script:
   - git rev-parse HEAD
-  - ps: Start-Process pageant.exe
+  - ps: Start-Process pageant.exe --shimgen-log
  # go test $(go list ./... | grep -v vendor)
   - ps: |
       go.exe test (go.exe list ./... `
