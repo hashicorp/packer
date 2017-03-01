@@ -81,8 +81,8 @@ following steps:
     - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
       environment variable, and if that's empty, use the default credentials
       file (`.aws/credentials`) in the user's home directory.
-    - Uses the profile set in the `AWS_PROFILE` environment variable. If the
-      environment variable is not set, uses "default" as the profile.
+    - Uses the profile name set in the `AWS_PROFILE` environment variable. If
+      the environment variable is not set, uses "default" as the profile name.
 
 3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
 
