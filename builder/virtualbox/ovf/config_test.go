@@ -76,17 +76,6 @@ func TestNewConfig_sourcePath(t *testing.T) {
 		t.Fatalf("Nonexistant file should throw a validation error!")
 	}
 
-	// Bad
-	c = testConfig(t)
-	c["source_path"] = "ftp://i/dont/exist"
-	_, warns, err = NewConfig(c)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should error")
-	}
-
 	// Good
 	tf := getTempFile(t)
 	defer os.Remove(tf.Name())
