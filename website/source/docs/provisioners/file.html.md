@@ -76,7 +76,7 @@ the covers, rsync may or may not be used.
 
 The behavior when uploading symbolic links depends on the communicator. The
 Docker communicator will preserve symlinks, but all other communicators will
-treat local symlinks as regular files. If you wish the preserve symlinks when
+treat local symlinks as regular files. If you wish to preserve symlinks when
 uploading, it's recommended that you use `tar`. Below is an example of what
 that might look like:
 
