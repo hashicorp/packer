@@ -1480,6 +1480,22 @@
 			"checksumSHA1": "U7dGDNwEHORvJFMoNSXErKE7ITg=",
 			"path": "google.golang.org/cloud/internal",
 			"revision": "5a3b06f8b5da3b7c3a93da43163b872c86c509ef"
+		},
+		{
+			"checksumSHA1": "w3z2xM4+RT/OWvVusDgNXZZEEkE=",
+			"path": "gopkg.in/cheggaaa/pb.v1",
+			"revision": "d7e6ca3010b6f084d8056847f55d7f572f180678",
+			"revisionTime": "2016-11-21T09:29:06Z"
+		},
+		{
+			"checksumSHA1": "gY2M/3SCxqgrPz+P/N6JQ+m/wnA=",
+			"path": "gopkg.in/xmlpath.v2",
+			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
+		},
+		{
+			"checksumSHA1": "0dDWcU08d0FS4d99NCgCkGLjjqw=",
+			"path": "gopkg.in/xmlpath.v2/cmd/webpath",
+			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
 	"rootPath": "github.com/hashicorp/packer"
