@@ -35,7 +35,7 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
-    	<div class="container">
+    	<div class="container-fluid">
 				<div class="navbar-header">
 					<div class="navbar-brand">
 						<a class="logo" href="/">Packer</a>
@@ -72,7 +72,7 @@
     <%= yield %>
     <div class="clearfix"></div>
     <footer id="footer" class="navigation white">
-      <div class="container">
+      <div class="container-fluid">
         <div class="row">
           <div class="col-xs-12">
             <% # current_page.path does not have an extension, but
