@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
-	"path/filepath"
 	"testing"
 )
 
@@ -119,7 +119,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-        CopyFile:   true,
+		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -398,7 +398,7 @@ func TestDownloadFileUrl(t *testing.T) {
 // into a testable file path whilst ignoring a correct checksum match, stripping
 // UNC path info, and then calling stat to ensure the correct file exists.
 //    (used by TestFileUriTransforms)
-func SimulateFileUriDownload(t *testing.T, uri string) (string,error) {
+func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 	// source_path is a file path and source is a network path
 	source := fmt.Sprintf(uri)
 	t.Logf("Trying to download %s", source)
@@ -430,7 +430,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string,error) {
 	if _, err = os.Stat(path); err != nil {
 		t.Errorf("Could not stat source file: %s", path)
 	}
-	return path,err
+	return path, err
 }
 
 // TestFileUriTransforms tests the case where we use a local file uri
@@ -470,10 +470,10 @@ func TestFileUriTransforms(t *testing.T) {
 	}
 
 	// all regular slashed testcases
-	for _,testcase := range testcases {
+	for _, testcase := range testcases {
 		uri := "file://" + fmt.Sprintf(testcase, testpath)
 		t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
-		res,err := SimulateFileUriDownload(t, uri)
+		res, err := SimulateFileUriDownload(t, uri)
 		if err != nil {
 			t.Errorf("Unable to transform uri '%s' into a path : %v", uri, err)
 		}
@@ -485,7 +485,7 @@ func TestFileUriTransforms(t *testing.T) {
 	testcase := host + "/" + share + "/" + cwd[1:] + "/%s"
 	uri := "smb://" + fmt.Sprintf(testcase, testpath)
 	t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
-	res,err := SimulateFileUriDownload(t, uri)
+	res, err := SimulateFileUriDownload(t, uri)
 	if err != nil {
 		t.Errorf("Unable to transform uri '%s' into a path", uri)
 		return
