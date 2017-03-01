@@ -61,7 +61,6 @@ header .header {
 
     @media (max-width: $screen-sm) {
       background: none;
-      font-size: 75%;
       min-height: 50px;
       padding: 0;
     }
@@ -84,6 +83,10 @@ header .header {
     padding-bottom: 3px;
     line-height: 1.0;
     white-space: nowrap;
+
+    @media (max-width: $screen-sm) {
+      font-size: 30px;
+    }
 
     &:hover {
       color: $dark-background;
