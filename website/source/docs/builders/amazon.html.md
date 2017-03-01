@@ -76,6 +76,11 @@ following steps:
 1.  Lookup via environment variables.
     -   First `AWS_ACCESS_KEY_ID`, then `AWS_ACCESS_KEY`
     -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
+    -   With optional `AWS_SESSION_TOKEN`
+
+2.  Look for [shared credential files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+    -   The file is defined by `AWS_SHARED_CREDENTIALS_FILE` environment variable, default to: `~/.aws/credentials`
+    -   Packer will use the profile specified in the template or from environment variable `AWS_PROFILE` and defaults to `default`.
 
 2.  Look for [local AWS configuration
     files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
@@ -85,7 +90,7 @@ following steps:
     - Uses the profile name set in the `AWS_PROFILE` environment variable. If
       the environment variable is not set, uses "default" as the profile name.
 
-3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
+3.  Automatically looked up from an EC2 Instance or ECS Task IAM Role
 
 ~> **Subtle details of automatic lookup may change over time.** The most
 reliable way to specify your configuration is by setting them in template
@@ -95,12 +100,12 @@ variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and
 Environment variables provide the best portability, allowing you to run your
 packer build on your workstation, in Atlas, or on another build server.
 
-## Using an IAM Instance Profile
+## Using an IAM Task or Instance Role
 
 If AWS keys are not specified in the template, a
-[credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-file or through environment variables Packer will use credentials provided by
-the instance's IAM profile, if it has one.
+[shared credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+or through environment variables Packer will use credentials provided by
+the task's or instance's IAM role, if it has one.
 
 The following policy document provides the minimal set permissions necessary for
 Packer to work:
