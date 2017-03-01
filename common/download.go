@@ -279,7 +279,6 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 					req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
 
 					d.progress = uint64(fi.Size())
-					progressBar.Set64(int64(d.Progress()))
 				}
 			}
 		}
@@ -295,6 +294,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	d.total = d.progress + uint64(resp.ContentLength)
 	progressBar := pb.New64(int64(d.Total())).Start()
+	progressBar.Set64(int64(d.Progress()))
 
 	var buffer [4096]byte
 	for {
