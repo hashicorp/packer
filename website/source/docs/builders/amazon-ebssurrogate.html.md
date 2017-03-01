@@ -49,15 +49,15 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine. `source_ami_filter` may be used instead to populate this
     automatically.
-    
+
 -   `ami_root_device` (block device mapping) - A block device mapping describing
     the root device of the AMI. This looks like the mappings in `ami_block_device_mapping`,
     except with an additional field:
-    
-    - `source_device_name` (string) - The device name of the block device on the
-      source instance to be used as the root device for the AMI. This must correspond
-      to a block device in `launch_block_device_mapping`.
-    
+
+-   `source_device_name` (string) - The device name of the block device on the
+    source instance to be used as the root device for the AMI. This must correspond
+    to a block device in `launch_block_device_mapping`.
+
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
@@ -132,6 +132,8 @@ builder.
     IP addresses are not provided by default. If this is toggled, your new
     instance will get a Public IP.
 
+-   `assume_role_arn` (string) - The ARN for a IAM role to assume via STS.
+
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
@@ -157,6 +159,9 @@ builder.
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
+-   `external_id` (string) - External ID if assuming a role in another account
+    which does not belongs to your organization.
+
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
@@ -179,6 +184,12 @@ builder.
     more block devices before the packer build starts. These are not necessarily
     preserved when booting from the AMI built with packer. See
     `ami_block_device_mappings`, above, for details.
+
+-   `mfa_serial` (string) - The ARN of the MFA device that should be used when
+    assuming role. If defined `mfa_code` is also required.
+
+-   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the time.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
