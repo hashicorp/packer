@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -49,7 +50,7 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 
 	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
 
-	d.SetOutputDir(path.Dir(dst))
+	d.SetOutputDir(path.Dir(filepath.ToSlash(dst)))
 	srcVmx := d.datastorePath(src)
 	dstVmx := d.datastorePath(dst)
 	srcDir := path.Dir(srcVmx)
@@ -63,24 +64,28 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 		return fmt.Errorf("Failed to create the destination directory %s: %s", d.outputDir, err)
 	}
 
-	err = d.sh("cp", srcVmx, dstVmx)
+	err = d.sh("cp", strconv.Quote(srcVmx), strconv.Quote(dstVmx))
 	if err != nil {
 		return fmt.Errorf("Failed to copy the vmx file %s: %s", srcVmx, err)
 	}
 
-	filesToClone, err := d.run(nil, "find", srcDir, "! -name '*.vmdk' ! -name '*.vmx' -type f ! -size 0")
+	filesToClone, err := d.run(nil, "find", strconv.Quote(srcDir), "! -name '*.vmdk' ! -name '*.vmx' -type f ! -size 0")
 	if err != nil {
 		return fmt.Errorf("Failed to get the file list to copy: %s", err)
 	}
 
 	for _, f := range linesToArray(filesToClone) {
-		err := d.sh("cp", f, dstDir)
+		// TODO: linesToArray should really return [] if the string is empty. Instead it returns [""]
+		if f == "" {
+			continue
+		}
+		err := d.sh("cp", strconv.Quote(f), strconv.Quote(dstDir))
 		if err != nil {
 			return fmt.Errorf("Failing to copy %s to %s: %s", f, dstDir, err)
 		}
 	}
 
-	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", srcVmx)
+	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", strconv.Quote(srcVmx))
 	if err != nil {
 		return fmt.Errorf("Failing to get the vmdk list to clone %s", err)
 	}
@@ -90,7 +95,7 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 			srcDisk = disk
 		}
 		destDisk := path.Join(dstDir, path.Base(disk))
-		err = d.sh("vmkfstools", "-d thin", "-i", srcDisk, destDisk)
+		err = d.sh("vmkfstools", "-d thin", "-i", strconv.Quote(srcDisk), strconv.Quote(destDisk))
 		if err != nil {
 			return fmt.Errorf("Failing to clone disk %s: %s", srcDisk, err)
 		}
@@ -443,7 +448,6 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	}
 
 	if address := d.CommConfig.Host(); address != "" {
-		state.Put("vm_address", address)
 		return address, nil
 	}
 
@@ -452,7 +456,10 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	record, err := r.find("Name", d.VMName)
+	spacesToUnderscores := func(string string) string {
+		return strings.Replace(string, " ", "_", -1)
+	}
+	record, err := r.find("Name", spacesToUnderscores(d.VMName))
 	if err != nil {
 		return "", err
 	}
@@ -509,7 +516,7 @@ func (d *ESX5Driver) DirExists() (bool, error) {
 }
 
 func (d *ESX5Driver) ListFiles() ([]string, error) {
-	stdout, err := d.ssh("ls -1p "+d.outputDir, nil)
+	stdout, err := d.ssh("ls -1p "+strconv.Quote(d.outputDir), nil)
 	if err != nil {
 		return nil, err
 	}
