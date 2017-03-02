@@ -21,6 +21,15 @@
 * builder/amazon: enable ena when `enhanced_networking` is set. [GH-4578]
 * builder/vmware-esxi: try for longer to connect to vnc port. [GH-4480]
     [GH-4610]
+* core: don't show ui color if we're not colorized. [GH-4525]
+* builder/vmware: don't cache ip address so we know if it changes. [GH-4532]
+* builder/vmware: allow extra options for ovftool. [GH-4536]
+* docs: add community page. [GH-4550]
+* post-processor/docker-import: print stderr on docker import failure.
+    [GH-4529]
+* builder/azure:: add two new config variables for temp_compute_name and
+    temp_resource_group_name. [GH-4468]
+
 
 ### BUG FIXES:
 
@@ -32,6 +41,9 @@
 * core: always check for an error first when walking a path. [GH-4467]
 * builder/docker: Don't force tag if using a docker version that doesn't
     support it. [GH-4560]
+* provisioner/chef-client: only upload knife config if we're cleaning.
+    [GH-4534]
+* core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 
 ## 0.12.2 (January 20, 2017)
 
