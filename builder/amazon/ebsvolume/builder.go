@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/errwrap"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -72,16 +70,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	config, err := b.config.Config()
+	session, err := b.config.Session()
 	if err != nil {
 		return nil, err
 	}
-
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, errwrap.Wrapf("Error creating AWS Session: {{err}}", err)
-	}
-
 	ec2conn := ec2.New(session)
 
 	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -99,10 +98,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
-	config, err := p.config.Config()
+	session, err := p.config.Session()
 	if err != nil {
 		return nil, false, err
 	}
+	config := session.Config
 
 	// Render this key since we didn't in the configure phase
 	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
@@ -124,13 +124,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Hope we found something useful
 	if source == "" {
 		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
-	}
-
-	// Set up the AWS session
-	log.Println("Creating AWS session")
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, false, err
 	}
 
 	// open the source file
