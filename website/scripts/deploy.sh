@@ -93,7 +93,7 @@ if [ -z "$NO_UPLOAD" ]; then
     modify "s3://hc-sites/$PROJECT/latest/"
 fi
 
-# Perform a purge of the surrogate key.
+# Perform a soft-purge of the surrogate key.
 if [ -z "$NO_PURGE" ]; then
   echo "Purging Fastly cache..."
   curl \
