@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+## 0.12.3 (March 1, 2017)
+
 ### FEATURES:
 
 * **New builder:** `ebs-surrogate` for building AMIs from EBS volumes. [GH-4351]
