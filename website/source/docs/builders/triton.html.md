@@ -8,6 +8,7 @@ description: |
     Triton "VM to image" functionality to create a reusable image and finally
     destroys the temporary VM. This reusable image can then be used to launch new
     VM's.
+layout: docs
 page_title: Triton Builder
 ...
 
