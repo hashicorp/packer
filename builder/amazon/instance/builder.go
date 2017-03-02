@@ -9,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
@@ -164,12 +163,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	config, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	session, err := session.NewSession(config)
+	session, err := b.config.Session()
 	if err != nil {
 		return nil, err
 	}
