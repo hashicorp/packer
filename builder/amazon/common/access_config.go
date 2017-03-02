@@ -55,23 +55,25 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		})
 
 	if c.AssumeRoleArn != "" {
-		var mfa func(*stscreds.AssumeRoleProvider)
+		var options []func(*stscreds.AssumeRoleProvider)
 		if c.MFACode != "" {
-			mfa = func(p *stscreds.AssumeRoleProvider) {
+			options = append(options, func(p *stscreds.AssumeRoleProvider) {
 				p.SerialNumber = aws.String(c.MFASerial)
 				p.TokenProvider = func() (string, error) {
 					return c.MFACode, nil
 				}
-			}
+			})
 		}
 
-		sess := session.Must(session.NewSession(config.WithCredentials(creds)))
-		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn, mfa, func(p *stscreds.AssumeRoleProvider) {
+		options = append(options, func(p *stscreds.AssumeRoleProvider) {
 			p.Duration = time.Duration(60) * time.Minute
 			if len(c.ExternalID) > 0 {
 				p.ExternalID = aws.String(c.ExternalID)
 			}
 		})
+
+		sess := session.Must(session.NewSession(config.WithCredentials(creds)))
+		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn, options...)
 
 	}
 	return config.WithCredentials(creds), nil
@@ -109,7 +111,8 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	hasAssumeRoleArn := len(c.AssumeRoleArn) > 0
 	hasMFASerial := len(c.MFASerial) > 0
 	hasMFACode := len(c.MFACode) > 0
-	if hasAssumeRoleArn && (!hasMFACode || !hasMFASerial) {
+	if hasAssumeRoleArn && (hasMFACode != hasMFASerial) {
+		// either both mfa code and serial must be set, or neither.
 		errs = append(errs, fmt.Errorf("Both mfa_serial and mfa_code must be specified."))
 
 	}
