@@ -86,3 +86,24 @@ party, so it may not be the latest available version.
 ``` {.text}
 $ choco install packer
 ```
+
+### NuGet
+
+If you want to use Packer on Windows in an automated build, you can use
+Packer from a [nuget.org](https://nuget.org) package in either the
+[64-bit](https://www.nuget.org/packages/Packer.Windows.x64/) or
+[32-bit](https://www.nuget.org/packages/Packer.Windows.x86/) version. Remember
+that this is updated by a 3rd party, so it may not be the latest available
+version.
+
+Install the 64-bit version
+
+``` {.text}
+$ nuget install packer.windows.x64
+```
+
+Install the 32-bit version
+
+``` {.text}
+$ nuget install packer.windows.x86
+```
