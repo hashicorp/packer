@@ -13,6 +13,7 @@ import (
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/packer/plugin"
 
+	alicloudecsbuilder "github.com/mitchellh/packer/builder/alicloud/ecs"
 	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
 	amazonebssurrogatebuilder "github.com/mitchellh/packer/builder/amazon/ebssurrogate"
@@ -73,10 +74,11 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
+	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
-	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
+	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"azure-arm":           new(azurearmbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
