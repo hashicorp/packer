@@ -315,6 +315,7 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	}
 
 	if address := d.CommConfig.Host(); address != "" {
+		state.Put("vm_address", address)
 		return address, nil
 	}
 
