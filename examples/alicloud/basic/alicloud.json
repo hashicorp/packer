@@ -12,7 +12,8 @@
     "source_image":"centos_7_2_64_40G_base_20170222.vhd",
     "ssh_username":"root",
     "instance_type":"ecs.n1.tiny",
-    "io_optimized":"true"
+    "io_optimized":"true",
+    "image_force_delete":"true"
   }],
   "provisioners": [{
     "type": "shell",
