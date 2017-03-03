@@ -1,5 +1,7 @@
 ## (Unreleased)
 
+## 0.12.3 (March 1, 2017)
+
 ### FEATURES:
 
 * **New builder:** `ebs-surrogate` for building AMIs from EBS volumes. [GH-4351]
@@ -19,6 +21,17 @@
 * provisioner/ansible: use randomized staging dir [GH-4472]
 * communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
 * builder/amazon: enable ena when `enhanced_networking` is set. [GH-4578]
+* builder/vmware-esxi: try for longer to connect to vnc port. [GH-4480]
+    [GH-4610]
+* core: don't show ui color if we're not colorized. [GH-4525]
+* builder/vmware: don't cache ip address so we know if it changes. [GH-4532]
+* builder/vmware: allow extra options for ovftool. [GH-4536]
+* docs: add community page. [GH-4550]
+* post-processor/docker-import: print stderr on docker import failure.
+    [GH-4529]
+* builder/azure:: add two new config variables for temp_compute_name and
+    temp_resource_group_name. [GH-4468]
+
 
 ### BUG FIXES:
 
@@ -27,10 +40,12 @@
 * builder/googlecompute: fix bug when creating image from custom image_family.
     [GH-4518]
 * builder/virtualbox: remove guest additions before saving image. [GH-4496]
-* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
 * core: always check for an error first when walking a path. [GH-4467]
 * builder/docker: Don't force tag if using a docker version that doesn't
     support it. [GH-4560]
+* provisioner/chef-client: only upload knife config if we're cleaning.
+    [GH-4534]
+* core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 
 ## 0.12.2 (January 20, 2017)
 
