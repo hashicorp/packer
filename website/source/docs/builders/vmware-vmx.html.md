@@ -53,7 +53,8 @@ builder.
 
 ### Required:
 
--   `source_path` (string) - Path to the source VMX file to clone.
+-   `source_path` (string) - Path to the source VMX file to clone. If
+    `remote_type` is enabled then this specifies a path on the `remote_host`.
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
