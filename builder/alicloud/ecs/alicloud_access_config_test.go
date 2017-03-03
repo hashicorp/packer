@@ -6,8 +6,8 @@ import (
 
 func testAlicloudAccessConfig() *AlicloudAccessConfig {
 	return &AlicloudAccessConfig{
-		AlicloudAccessKey: "",
-		AlicloudSecretKey: "",
+		AlicloudAccessKey: "ak",
+		AlicloudSecretKey: "acs",
 	}
 
 }
