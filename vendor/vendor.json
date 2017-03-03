@@ -9,6 +9,30 @@
 			"revisionTime": "2016-08-11T22:04:02Z"
 		},
 		{
+			"checksumSHA1": "e6yzSIwLwJV0tb2YQupLL0FO1BM=",
+			"path": "github.com/denverdino/aliyungo/common",
+			"revision": "5b4f72bfcf17a2e6ec8238708bd161a2413e97e6",
+			"revisionTime": "2017-02-01T08:56:36Z"
+		},
+		{
+			"checksumSHA1": "YLooG/WAFF61eBUxg/R5cpfi5DE=",
+			"path": "github.com/denverdino/aliyungo/ecs",
+			"revision": "019da4915136cd9fed94064a0604321d9bc09245",
+			"revisionTime": "2017-02-23T07:38:06Z"
+		},
+		{
+			"checksumSHA1": "QlA7zv05k7HWeR3tg4uHqIlFcg8=",
+			"path": "github.com/denverdino/aliyungo/slb",
+			"revision": "5b4f72bfcf17a2e6ec8238708bd161a2413e97e6",
+			"revisionTime": "2017-02-01T08:56:36Z"
+		},
+		{
+			"checksumSHA1": "Lp0KtT7ycgq31ox3Uzhpxyw0U+Y=",
+			"path": "github.com/denverdino/aliyungo/util",
+			"revision": "5b4f72bfcf17a2e6ec8238708bd161a2413e97e6",
+			"revisionTime": "2017-02-01T08:56:36Z"
+		},
+		{
 			"checksumSHA1": "/WG++Jij8INZ80tER+FAiIDMmws=",
 			"comment": "v3.1.0-beta",
 			"path": "github.com/Azure/azure-sdk-for-go/arm/compute",
