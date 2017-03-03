@@ -130,6 +130,47 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_DiskType(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default boot_wait
+	delete(config, "disk_type")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.DiskType != "expand" {
+		t.Fatalf("bad: %s", b.config.DiskType)
+	}
+
+	// Test with a bad
+	config["disk_type"] = "fake"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with a good
+	config["disk_type"] = "plain"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_HardDriveInterface(t *testing.T) {
 	var b Builder
 	config := testConfig()

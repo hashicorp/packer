@@ -75,8 +75,8 @@ type PluginCommand struct {
 var Builders = map[string]packer.Builder{
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
-	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
+	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"azure-arm":           new(azurearmbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
