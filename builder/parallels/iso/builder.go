@@ -37,6 +37,7 @@ type Config struct {
 
 	BootCommand        []string `mapstructure:"boot_command"`
 	DiskSize           uint     `mapstructure:"disk_size"`
+	DiskType           string   `mapstructure:"disk_type"`
 	GuestOSType        string   `mapstructure:"guest_os_type"`
 	HardDriveInterface string   `mapstructure:"hard_drive_interface"`
 	HostInterfaces     []string `mapstructure:"host_interfaces"`
@@ -87,6 +88,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskSize = 40000
 	}
 
+	if b.config.DiskType == "" {
+		b.config.DiskType = "expand"
+	}
+
 	if b.config.HardDriveInterface == "" {
 		b.config.HardDriveInterface = "sata"
 	}
@@ -102,6 +107,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
+	}
+
+	if b.config.DiskType != "expand" && b.config.DiskType != "plain" {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("disk_type can only be expand, or plain"))
 	}
 
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
