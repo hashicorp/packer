@@ -13,6 +13,7 @@ type StepConfigAlicloudKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 	PublicKeyFile        string
+	SSHAgentAuth         bool
 
 	keyName string
 }
@@ -35,6 +36,17 @@ func (s *StepConfigAlicloudKeyPair) Run(state multistep.StateBag) multistep.Step
 		state.Put("keyPair", s.KeyPairName)
 		state.Put("privateKey", string(privateKeyBytes))
 		state.Put("publickKey", string(publicKeyBytes))
+		return multistep.ActionContinue
+	}
+
+	if s.SSHAgentAuth && s.KeyPairName == "" {
+		ui.Say("Using SSH Agent with key pair in Alicloud Source Image")
+		return multistep.ActionContinue
+	}
+
+	if s.SSHAgentAuth && s.KeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
+		state.Put("keyPair", s.KeyPairName)
 		return multistep.ActionContinue
 	}
 

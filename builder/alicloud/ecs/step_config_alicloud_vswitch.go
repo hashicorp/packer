@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type stepConfigAlicloudVSwithc struct {
+type stepConfigAlicloudVSwitch struct {
 	VSwitchId   string
 	ZoneId      string
 	isCreate    bool
@@ -18,7 +18,7 @@ type stepConfigAlicloudVSwithc struct {
 	VSwitchName string
 }
 
-func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpcid").(string)
@@ -42,7 +42,7 @@ func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.Step
 			return multistep.ActionContinue
 		}
 		s.isCreate = false
-		message := fmt.Sprintf("The specific vswitch {%s} isn't exist.", s.VSwitchId)
+		message := fmt.Sprintf("The specific vswitch {%s} doesn't exist.", s.VSwitchId)
 		state.Put("error", errors.New(message))
 		ui.Say(message)
 		return multistep.ActionHalt
@@ -52,7 +52,7 @@ func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.Step
 
 		zones, err := client.DescribeZones(common.Region(config.AlicloudRegion))
 		if err != nil {
-			ui.Say(fmt.Sprintf("Query avaiable zone failed: %s", err))
+			ui.Say(fmt.Sprintf("Query for available zones failed: %s", err))
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
@@ -77,20 +77,20 @@ func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.Step
 
 		if s.ZoneId == "" {
 			if len(instanceTypes) > 0 {
-				ui.Say(fmt.Sprintf("The instance Type %s isn't avaiable in this Region."+
-					"\n You can either change the instance one of following %v \n"+
+				ui.Say(fmt.Sprintf("The instance type %s isn't available in this region."+
+					"\n You can either change the instance to one of following: %v \n"+
 					"or choose another region", config.InstanceType, instanceTypes))
 
-				state.Put("error", fmt.Errorf("The instance Type %s isn't avaiable in this Region."+
-					"\n You can either change the instance one of following %v \n"+
+				state.Put("error", fmt.Errorf("The instance type %s isn't available in this region."+
+					"\n You can either change the instance to one of following: %v \n"+
 					"or choose another region", config.InstanceType, instanceTypes))
 				return multistep.ActionHalt
 			} else {
-				ui.Say(fmt.Sprintf("The instance Type %s isn't avaiable in this Region."+
-					"\n You can change to other ragions \n", config.InstanceType))
+				ui.Say(fmt.Sprintf("The instance type %s isn't available in this region."+
+					"\n You can change to other regions \n", config.InstanceType))
 
-				state.Put("error", fmt.Errorf("The instance Type %s isn't avaiable in this Region."+
-					"\n You can change to other ragions \n", config.InstanceType))
+				state.Put("error", fmt.Errorf("The instance type %s isn't available in this region."+
+					"\n You can change to other regions \n", config.InstanceType))
 				return multistep.ActionHalt
 			}
 		}
@@ -112,7 +112,7 @@ func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.Step
 	}
 	if err := client.WaitForVSwitchAvailable(vpcId, s.VSwitchId, ALICLOUD_DEFAULT_TIMEOUT); err != nil {
 		state.Put("error", err)
-		ui.Error(fmt.Sprintf("Error waiting vswitch avaiable timeout: %v", err))
+		ui.Error(fmt.Sprintf("Timeout waiting for vswitch to become avaiable: %v", err))
 		return multistep.ActionHalt
 	}
 	state.Put("vswitchid", vswitchId)
@@ -121,7 +121,7 @@ func (s *stepConfigAlicloudVSwithc) Run(state multistep.StateBag) multistep.Step
 	return multistep.ActionContinue
 }
 
-func (s *stepConfigAlicloudVSwithc) Cleanup(state multistep.StateBag) {
+func (s *stepConfigAlicloudVSwitch) Cleanup(state multistep.StateBag) {
 	if !s.isCreate {
 		return
 	}

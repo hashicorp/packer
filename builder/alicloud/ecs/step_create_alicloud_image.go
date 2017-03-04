@@ -31,7 +31,7 @@ func (s *stepCreateAlicloudImage) Run(state multistep.StateBag) multistep.StepAc
 		Description:  config.AlicloudImageDescription})
 
 	if err != nil {
-		err := fmt.Errorf("Error create alicloud images: %s", err)
+		err := fmt.Errorf("Error creating alicloud images: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
