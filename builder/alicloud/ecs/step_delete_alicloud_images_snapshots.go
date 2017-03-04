@@ -44,7 +44,7 @@ func (s *stepDeleteAlicloudImageSnapshots) Run(state multistep.StateBag) multist
 			if s.AlicloudImageForceDeteleSnapshots {
 				for _, diskDevice := range image.DiskDeviceMappings.DiskDeviceMapping {
 					if err := client.DeleteSnapshot(diskDevice.SnapshotId); err != nil {
-						err := fmt.Errorf("Delete ECS snapshots failed: %s", err)
+						err := fmt.Errorf("Deleting ECS snapshot failed: %s", err)
 						state.Put("error", err)
 						ui.Error(err.Error())
 						return multistep.ActionHalt

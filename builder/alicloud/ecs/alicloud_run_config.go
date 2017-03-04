@@ -9,12 +9,6 @@ import (
 	"os"
 )
 
-const (
-	ssh_time_out      = 60000000000
-	default_port      = 22
-	default_comm_type = "ssh"
-)
-
 type RunConfig struct {
 	AssociatePublicIpAddress bool   `mapstructure:"associate_public_ip_address"`
 	ZoneId                   string `mapstructure:"zone_id"`
@@ -49,18 +43,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
 
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
-	}
-
-	if c.Comm.Type == "" {
-		c.Comm.Type = default_comm_type
-	}
-
-	if c.Comm.SSHTimeout == 0 {
-		c.Comm.SSHTimeout = ssh_time_out
-	}
-
-	if c.Comm.SSHPort == 0 {
-		c.Comm.SSHPort = default_port
 	}
 
 	// Validation

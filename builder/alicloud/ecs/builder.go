@@ -81,158 +81,98 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 	state.Put("networktype", b.chooseNetworkType())
 	var steps []multistep.Step
+
+	// Build the steps
+	steps = []multistep.Step{
+		&stepPreValidate{
+			AlicloudDestImageName: b.config.AlicloudImageName,
+			ForceDelete:           b.config.AlicloudImageForceDetele,
+		},
+		&stepCheckAlicloudSourceImage{
+			SourceECSImageId: b.config.AlicloudSourceImage,
+		},
+		&StepConfigAlicloudKeyPair{
+			Debug:                b.config.PackerDebug,
+			KeyPairName:          b.config.SSHKeyPairName,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			PublicKeyFile:        b.config.PublicKey,
+			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
+		},
+	}
 	if b.chooseNetworkType() == VpcNet {
-		// Build the steps
-		steps = []multistep.Step{
-			&stepPreValidate{
-				AlicloudDestImageName: b.config.AlicloudImageName,
-				ForceDelete:           b.config.AlicloudImageForceDetele,
-			},
-			&stepCheckAlicloudSourceImage{
-				SourceECSImageId: b.config.AlicloudSourceImage,
-			},
-			&StepConfigAlicloudKeyPair{
-				Debug:                b.config.PackerDebug,
-				KeyPairName:          b.config.SSHKeyPairName,
-				PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-				PublicKeyFile:        b.config.PublicKey,
-				TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			},
+		steps = append(steps,
 			&stepConfigAlicloudVPC{
 				VpcId:     b.config.VpcId,
 				CidrBlock: b.config.CidrBlock,
 				VpcName:   b.config.VpcName,
 			},
-			&stepConfigAlicloudVSwithc{
+			&stepConfigAlicloudVSwitch{
 				VSwitchId:   b.config.VSwitchId,
 				ZoneId:      b.config.ZoneId,
 				CidrBlock:   b.config.CidrBlock,
 				VSwitchName: b.config.VSwitchName,
-			},
-			&stepConfigAlicloudSecurityGroup{
-				SecurityGroupId:   b.config.SecurityGroupId,
-				SecurityGroupName: b.config.SecurityGroupId,
-				RegionId:          b.config.AlicloudRegion,
-			},
-			&stepCreateAlicloudInstance{
-				IOOptimized:             b.config.IOOptimized,
-				InstanceType:            b.config.InstanceType,
-				UserData:                b.config.UserData,
-				UserDataFile:            b.config.UserDataFile,
-				RegionId:                b.config.AlicloudRegion,
-				InternetChargeType:      b.config.InternetChargeType,
-				InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-				InstnaceName:            b.config.InstanceName,
-				ZoneId:                  b.config.ZoneId,
-			},
-			&setpConfigAlicloudEIP{
-				AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-				RegionId:                 b.config.AlicloudRegion,
-			},
-			&stepRunAlicloudInstance{},
-			&stepMountAlicloudDisk{},
-			&communicator.StepConnect{
-				Config: &b.config.RunConfig.Comm,
-				Host: SSHHost(
-					client,
-					b.config.SSHPrivateIp),
-				SSHConfig: SSHConfig(
-					b.config.RunConfig.Comm.SSHAgentAuth,
-					b.config.RunConfig.Comm.SSHUsername,
-					b.config.RunConfig.Comm.SSHPassword),
-			},
-			&common.StepProvision{},
-			&stepStopAlicloudInstance{
-				ForceStop: b.config.ForceStopInstance,
-			},
-			&stepDeleteAlicloudImageSnapshots{
-				AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-				AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
-				AlicloudImageName:                 b.config.AlicloudImageName,
-			},
-			&stepCreateAlicloudImage{},
-			&setpRegionCopyAlicloudImage{
-				AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
-				AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
-				RegionId:                        b.config.AlicloudRegion,
-			},
-			&setpShareAlicloudImage{
-				AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
-				AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
-				RegionId:                     b.config.AlicloudRegion,
-			},
-		}
-	} else {
-		// Build the steps
-		steps = []multistep.Step{
-			&stepPreValidate{
-				AlicloudDestImageName: b.config.AlicloudImageName,
-				ForceDelete:           b.config.AlicloudImageForceDetele,
-			},
-			&stepCheckAlicloudSourceImage{
-				SourceECSImageId: b.config.AlicloudSourceImage,
-			},
-			&StepConfigAlicloudKeyPair{
-				Debug:                b.config.PackerDebug,
-				KeyPairName:          b.config.SSHKeyPairName,
-				PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-				PublicKeyFile:        b.config.PublicKey,
-				TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			},
-			&stepConfigAlicloudSecurityGroup{
-				SecurityGroupId:   b.config.SecurityGroupId,
-				SecurityGroupName: b.config.SecurityGroupId,
-				RegionId:          b.config.AlicloudRegion,
-			},
-			&stepCreateAlicloudInstance{
-				IOOptimized:             b.config.IOOptimized,
-				InstanceType:            b.config.InstanceType,
-				UserData:                b.config.UserData,
-				UserDataFile:            b.config.UserDataFile,
-				RegionId:                b.config.AlicloudRegion,
-				InternetChargeType:      b.config.InternetChargeType,
-				InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-				InstnaceName:            b.config.InstanceName,
-				ZoneId:                  b.config.ZoneId,
-			},
-			&stepConfigAlicloudPublicIP{
-				RegionId: b.config.AlicloudRegion,
-			},
-			&stepRunAlicloudInstance{},
-			&stepMountAlicloudDisk{},
-			&communicator.StepConnect{
-				Config: &b.config.RunConfig.Comm,
-				Host: SSHHost(
-					client,
-					b.config.SSHPrivateIp),
-				SSHConfig: SSHConfig(
-					b.config.RunConfig.Comm.SSHAgentAuth,
-					b.config.RunConfig.Comm.SSHUsername,
-					b.config.RunConfig.Comm.SSHPassword),
-			},
-			&common.StepProvision{},
-			&stepStopAlicloudInstance{
-				ForceStop: b.config.ForceStopInstance,
-			},
-			&stepDeleteAlicloudImageSnapshots{
-				AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-				AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
-				AlicloudImageName:                 b.config.AlicloudImageName,
-			},
-			&stepCreateAlicloudImage{},
-			&setpRegionCopyAlicloudImage{
-				AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
-				AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
-				RegionId:                        b.config.AlicloudRegion,
-			},
-			&setpShareAlicloudImage{
-				AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
-				AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
-				RegionId:                     b.config.AlicloudRegion,
-			},
-		}
-
+			})
 	}
+	steps = append(steps,
+		&stepConfigAlicloudSecurityGroup{
+			SecurityGroupId:   b.config.SecurityGroupId,
+			SecurityGroupName: b.config.SecurityGroupId,
+			RegionId:          b.config.AlicloudRegion,
+		},
+		&stepCreateAlicloudInstance{
+			IOOptimized:             b.config.IOOptimized,
+			InstanceType:            b.config.InstanceType,
+			UserData:                b.config.UserData,
+			UserDataFile:            b.config.UserDataFile,
+			RegionId:                b.config.AlicloudRegion,
+			InternetChargeType:      b.config.InternetChargeType,
+			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
+			InstnaceName:            b.config.InstanceName,
+			ZoneId:                  b.config.ZoneId,
+		})
+	if b.chooseNetworkType() == VpcNet {
+		steps = append(steps, &setpConfigAlicloudEIP{
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			RegionId:                 b.config.AlicloudRegion,
+		})
+	} else {
+		steps = append(steps, &stepConfigAlicloudPublicIP{
+			RegionId: b.config.AlicloudRegion,
+		})
+	}
+	steps = append(steps,
+		&stepRunAlicloudInstance{},
+		&stepMountAlicloudDisk{},
+		&communicator.StepConnect{
+			Config: &b.config.RunConfig.Comm,
+			Host: SSHHost(
+				client,
+				b.config.SSHPrivateIp),
+			SSHConfig: SSHConfig(
+				b.config.RunConfig.Comm.SSHAgentAuth,
+				b.config.RunConfig.Comm.SSHUsername,
+				b.config.RunConfig.Comm.SSHPassword),
+		},
+		&common.StepProvision{},
+		&stepStopAlicloudInstance{
+			ForceStop: b.config.ForceStopInstance,
+		},
+		&stepDeleteAlicloudImageSnapshots{
+			AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
+			AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
+			AlicloudImageName:                 b.config.AlicloudImageName,
+		},
+		&stepCreateAlicloudImage{},
+		&setpRegionCopyAlicloudImage{
+			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
+			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
+			RegionId:                        b.config.AlicloudRegion,
+		},
+		&setpShareAlicloudImage{
+			AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
+			AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
+			RegionId:                     b.config.AlicloudRegion,
+		})
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
