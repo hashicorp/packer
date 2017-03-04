@@ -5,6 +5,9 @@ import (
 	"github.com/mitchellh/multistep"
 	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
+	"net"
+	"os"
 )
 
 type alicloudSSHHelper interface {
@@ -20,6 +23,24 @@ func SSHHost(e alicloudSSHHelper, private bool) func(multistep.StateBag) (string
 
 func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		if useAgent {
+			authSock := os.Getenv("SSH_AUTH_SOCK")
+			if authSock == "" {
+				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+			}
+
+			sshAgent, err := net.Dial("unix", authSock)
+			if err != nil {
+				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+			}
+
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
+				},
+			}, nil
+		}
 		privateKey, hasKey := state.GetOk("privateKey")
 		if hasKey {
 
