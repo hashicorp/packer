@@ -42,13 +42,13 @@ func (s *stepMountAlicloudDisk) Run(state multistep.StateBag) multistep.StepActi
 	}
 	for _, disk := range disks {
 		if err := client.WaitForDisk(instance.RegionId, disk.DiskId, ecs.DiskStatusInUse, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
-			err := fmt.Errorf("Error waiting mount alicloud disks failed: %s", err)
+			err := fmt.Errorf("Timeout waiting for mount of alicloud disk: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 	}
-	ui.Say("Finish mounting Disks")
+	ui.Say("Finish mounting disks")
 	return multistep.ActionContinue
 }
 
