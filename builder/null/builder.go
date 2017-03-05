@@ -27,18 +27,25 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	steps := []multistep.Step{
-		&communicator.StepConnect{
-			Config: &b.config.CommConfig,
-			Host:   CommHost(b.config.CommConfig.Host()),
-			SSHConfig: SSHConfig(
-				b.config.CommConfig.SSHAgentAuth,
-				b.config.CommConfig.SSHUsername,
-				b.config.CommConfig.SSHPassword,
-				b.config.CommConfig.SSHPrivateKey),
-		},
-		&common.StepProvision{},
+	steps := []multistep.Step{}
+
+	if b.config.CommConfig.Type != "none" {
+		steps = append(steps,
+			&communicator.StepConnect{
+				Config: &b.config.CommConfig,
+				Host:   CommHost(b.config.CommConfig.Host()),
+				SSHConfig: SSHConfig(
+					b.config.CommConfig.SSHAgentAuth,
+					b.config.CommConfig.SSHUsername,
+					b.config.CommConfig.SSHPassword,
+					b.config.CommConfig.SSHPrivateKey),
+			},
+		)
 	}
+
+	steps = append(steps,
+		new(common.StepProvision),
+	)
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
