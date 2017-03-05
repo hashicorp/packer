@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"bytes"
@@ -15,11 +15,13 @@ import (
 )
 
 type StepExport struct {
-	Format     string
-	SkipExport bool
+	Format         string
+	SkipExport     bool
+	VMName         string
+	OVFToolOptions []string
 }
 
-func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword bool) []string {
+func (s *StepExport) generateArgs(c *DriverConfig, outputPath string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
 	if hidePassword {
 		password = "****"
@@ -28,18 +30,18 @@ func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword boo
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
-		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + c.VMName,
+		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + s.VMName,
 		outputPath,
 	}
-	return append(c.OVFToolOptions, args...)
+	return append(s.OVFToolOptions, args...)
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
-	c := state.Get("config").(*Config)
+	c := state.Get("driverConfig").(*DriverConfig)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip export if requested
-	if c.SkipExport {
+	if s.SkipExport {
 		ui.Say("Skipping export of virtual machine...")
 		return multistep.ActionContinue
 	}
@@ -54,14 +56,14 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if _, err := exec.LookPath(ovftool); err != nil {
-		err := fmt.Errorf("Error %s not found: %s", ovftool, err)
+		err = fmt.Errorf("Error %s not found: %s", ovftool, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// Export the VM
-	outputPath := filepath.Join(c.VMName, c.VMName+"."+s.Format)
+	outputPath := filepath.Join(s.VMName, s.VMName+"."+s.Format)
 
 	if s.Format == "ova" {
 		os.MkdirAll(outputPath, 0755)

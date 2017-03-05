@@ -184,6 +184,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("sshConfig", &b.config.SSHConfig)
+	state.Put("driverConfig", &b.config.DriverConfig)
 
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
@@ -274,9 +275,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
-		&StepExport{
-			Format:     b.config.Format,
-			SkipExport: b.config.SkipExport,
+		&vmwcommon.StepExport{
+			Format:         b.config.Format,
+			SkipExport:     b.config.SkipExport,
+			VMName:         b.config.VMName,
+			OVFToolOptions: b.config.OVFToolOptions,
 		},
 	}
 
