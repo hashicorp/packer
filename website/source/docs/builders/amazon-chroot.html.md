@@ -97,8 +97,6 @@ each category, the available configuration keys are alphabetized.
     launch the resulting AMI(s). By default no additional users other than the
     user creating the AMI has permissions to launch it.
 
--   `assume_role_arn` (string) - The ARN for a IAM role to assume via STS.
-
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
     "paravirtual" (default) or "hvm".
@@ -126,9 +124,6 @@ each category, the available configuration keys are alphabetized.
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
-
--   `external_id` (string) - External ID if assuming a role in another account
-    which does not belongs to your organization.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -190,9 +185,6 @@ each category, the available configuration keys are alphabetized.
         volumes
 
     -   `root_device_name` (string) - The root device name. For example, `xvda`.
-
--   `mfa_serial` (string) - The ARN of the MFA device that should be used when
-    assuming role. If defined `mfa_code` is also required.
 
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.

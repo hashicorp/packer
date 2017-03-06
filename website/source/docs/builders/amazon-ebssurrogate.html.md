@@ -132,8 +132,6 @@ builder.
     IP addresses are not provided by default. If this is toggled, your new
     instance will get a Public IP.
 
--   `assume_role_arn` (string) - The ARN for a IAM role to assume via STS.
-
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
@@ -159,9 +157,6 @@ builder.
     networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
--   `external_id` (string) - External ID if assuming a role in another account
-    which does not belongs to your organization.
-
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
@@ -184,9 +179,6 @@ builder.
     more block devices before the packer build starts. These are not necessarily
     preserved when booting from the AMI built with packer. See
     `ami_block_device_mappings`, above, for details.
-
--   `mfa_serial` (string) - The ARN of the MFA device that should be used when
-    assuming role. If defined `mfa_code` is also required.
 
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.
