@@ -2,8 +2,6 @@ package common
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -19,11 +17,7 @@ type AccessConfig struct {
 	RawRegion      string `mapstructure:"region"`
 	SkipValidation bool   `mapstructure:"skip_region_validation"`
 	Token          string `mapstructure:"token"`
-	ProfileName    string `mapstructure:"profile"`
-	AssumeRoleArn  string `mapstructure:"assume_role_arn"`
-	MFASerial      string `mapstructure:"mfa_serial"`
 	MFACode        string `mapstructure:"mfa_code"`
-	ExternalID     string `mapstructure:"external_id"`
 	session        *session.Session
 }
 
@@ -37,13 +31,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
-	}
-
-	if c.ProfileName != "" {
-		err := os.Setenv("AWS_PROFILE", c.ProfileName)
-		if err != nil {
-			log.Printf("Set env error: %s", err)
-		}
 	}
 
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
@@ -106,15 +93,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		if valid := ValidateRegion(c.RawRegion); valid == false {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
-	}
-
-	hasAssumeRoleArn := len(c.AssumeRoleArn) > 0
-	hasMFASerial := len(c.MFASerial) > 0
-	hasMFACode := len(c.MFACode) > 0
-	if hasAssumeRoleArn && (hasMFACode != hasMFASerial) {
-		// either both mfa code and serial must be set, or neither.
-		errs = append(errs, fmt.Errorf("Both mfa_serial and mfa_code must be specified."))
-
 	}
 
 	if len(errs) > 0 {
