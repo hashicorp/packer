@@ -2,12 +2,11 @@ package common
 
 import (
 	"fmt"
-	"time"
+	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/mitchellh/packer/template/interpolate"
@@ -25,58 +24,59 @@ type AccessConfig struct {
 	MFASerial      string `mapstructure:"mfa_serial"`
 	MFACode        string `mapstructure:"mfa_code"`
 	ExternalID     string `mapstructure:"external_id"`
+	session        *session.Session
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
 // an error if the authentication and region couldn't be resolved
-func (c *AccessConfig) Config() (*aws.Config, error) {
-	var creds *credentials.Credentials
+func (c *AccessConfig) Session() (*session.Session, error) {
+	if c.session != nil {
+		return c.session, nil
+	}
 
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
 	}
 
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
-	creds = credentials.NewChainCredentials(
-		[]credentials.Provider{
-			&credentials.StaticProvider{
-				Value: credentials.Value{
-					AccessKeyID:     c.AccessKey,
-					SecretAccessKey: c.SecretKey,
-					SessionToken:    c.Token,
-				},
-			},
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{
-				Profile: c.ProfileName,
-			},
-			defaults.RemoteCredProvider(*(defaults.Config()), defaults.Handlers()),
-		})
-
-	if c.AssumeRoleArn != "" {
-		var options []func(*stscreds.AssumeRoleProvider)
-		if c.MFACode != "" {
-			options = append(options, func(p *stscreds.AssumeRoleProvider) {
-				p.SerialNumber = aws.String(c.MFASerial)
-				p.TokenProvider = func() (string, error) {
-					return c.MFACode, nil
-				}
-			})
+	if c.ProfileName != "" {
+		err := os.Setenv("AWS_PROFILE", c.ProfileName)
+		if err != nil {
+			log.Printf("Set env error: %s", err)
 		}
-
-		options = append(options, func(p *stscreds.AssumeRoleProvider) {
-			p.Duration = time.Duration(60) * time.Minute
-			if len(c.ExternalID) > 0 {
-				p.ExternalID = aws.String(c.ExternalID)
-			}
-		})
-
-		sess := session.Must(session.NewSession(config.WithCredentials(creds)))
-		creds = stscreds.NewCredentials(sess, c.AssumeRoleArn, options...)
-
 	}
-	return config.WithCredentials(creds), nil
+
+	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+
+	if c.AccessKey != "" {
+		creds := credentials.NewChainCredentials(
+			[]credentials.Provider{
+				&credentials.StaticProvider{
+					Value: credentials.Value{
+						AccessKeyID:     c.AccessKey,
+						SecretAccessKey: c.SecretKey,
+						SessionToken:    c.Token,
+					},
+				},
+			})
+		config = config.WithCredentials(creds)
+	}
+
+	opts := session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config:            *config,
+	}
+	if c.MFACode != "" {
+		opts.AssumeRoleTokenProvider = func() (string, error) {
+			return c.MFACode, nil
+		}
+	}
+	c.session, err = session.NewSessionWithOptions(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.session, nil
 }
 
 // Region returns the aws.Region object for access to AWS services, requesting
