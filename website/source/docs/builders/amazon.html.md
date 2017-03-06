@@ -78,15 +78,11 @@ following steps:
     -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
     -   With optional `AWS_SESSION_TOKEN`
 
-2.  Look for [shared credential files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    -   The file is defined by `AWS_SHARED_CREDENTIALS_FILE` environment variable, default to: `~/.aws/credentials`
-    -   Packer will use the profile specified in the template or from environment variable `AWS_PROFILE` and defaults to `default`.
-
 2.  Look for [local AWS configuration
     files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
     - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
       environment variable, and if that's empty, use the default credentials
-      file (`.aws/credentials`) in the user's home directory.
+      file (`~/.aws/credentials`) in the user's home directory.
     - Uses the profile name set in the `AWS_PROFILE` environment variable. If
       the environment variable is not set, uses "default" as the profile name.
 
