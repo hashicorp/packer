@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -36,6 +35,13 @@ type AccessConfig struct {
 	Token             string `mapstructure:"token"`
 	Token             string `mapstructure:"token"`
 	session           *session.Session
+	AccessKey         string `mapstructure:"access_key"`
+	SecretKey         string `mapstructure:"secret_key"`
+	RawRegion         string `mapstructure:"region"`
+	SkipValidation    bool   `mapstructure:"skip_region_validation"`
+	Token             string `mapstructure:"token"`
+	MFACode           string `mapstructure:"mfa_code"`
+	session           *session.Session
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -49,26 +55,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
-	if c.CustomEndpointEc2 != "" {
-		config.Endpoint = &c.CustomEndpointEc2
-	}
-	creds = credentials.NewChainCredentials(
-		[]credentials.Provider{
-			&credentials.StaticProvider{
-				Value: credentials.Value{
-					AccessKeyID:     c.AccessKey,
-					SecretAccessKey: c.SecretKey,
-					SessionToken:    c.Token,
-				},
-			},
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{
-				Profile: c.ProfileName,
-			},
-			defaults.RemoteCredProvider(*(defaults.Config()), defaults.Handlers()),
-		})
 
 	if c.AssumeRoleArn != "" {
 		var options []func(*stscreds.AssumeRoleProvider)
@@ -91,6 +77,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
 
+	if c.CustomEndpointEc2 != "" {
+		config.Endpoint = &c.CustomEndpointEc2
+	}
 	if c.AccessKey != "" {
 		creds := credentials.NewChainCredentials(
 			[]credentials.Provider{
@@ -149,15 +138,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
-	}
-
-	hasAssumeRoleArn := len(c.AssumeRoleArn) > 0
-	hasMFASerial := len(c.MFASerial) > 0
-	hasMFACode := len(c.MFACode) > 0
-	if hasAssumeRoleArn && (hasMFACode != hasMFASerial) {
-		// either both mfa code and serial must be set, or neither.
-		errs = append(errs, fmt.Errorf("Both mfa_serial and mfa_code must be specified."))
-
 	}
 
 	if len(errs) > 0 {
