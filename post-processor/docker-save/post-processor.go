@@ -18,7 +18,8 @@ const BuilderId = "packer.post-processor.docker-save"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Path string `mapstructure:"path"`
+	Path              string `mapstructure:"path"`
+	KeepInputArtifact bool   `mapstructure:"keep_input_artifact"`
 
 	ctx interpolate.Context
 }
@@ -54,6 +55,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
+	keep := p.config.KeepInputArtifact
 	path := p.config.Path
 
 	// Open the file that we're going to write to
@@ -81,5 +83,5 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	f.Close()
 	ui.Message("Saved to: " + path)
 
-	return artifact, true, nil
+	return artifact, keep, nil
 }
