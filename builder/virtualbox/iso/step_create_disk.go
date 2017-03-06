@@ -28,7 +28,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 		"--filename", path,
 		"--size", strconv.FormatUint(uint64(config.DiskSize), 10),
 		"--format", format,
-		"--variant", "Standard",
+		"--variant", config.DiskVariant,
 	}
 
 	ui.Say("Creating hard drive...")
