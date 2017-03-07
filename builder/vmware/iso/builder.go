@@ -37,6 +37,7 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.ExportConfig   `mapstructure:",squash"`
 
 	// disk drives
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
@@ -67,12 +68,13 @@ type Config struct {
 	Parallel string `mapstructure:"parallel"`
 
 	// booting a guest
-	KeepRegistered      bool     `mapstructure:"keep_registered"`
-	OVFToolOptions      []string `mapstructure:"ovftool_options"`
-	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	SkipExport          bool     `mapstructure:"skip_export"`
-	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	KeepRegistered bool     `mapstructure:"keep_registered"`
+	OVFToolOptions []string `mapstructure:"ovftool_options"`
+	SkipCompaction bool     `mapstructure:"skip_compaction"`
+	SkipExport     bool     `mapstructure:"skip_export"`
+
+	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath     string `mapstructure:"vmx_template_path"`
 
 	CommConfig communicator.Config `mapstructure:",squash"`
 
@@ -112,6 +114,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -188,6 +191,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("remote_host must be specified"))
 		}
+
 		if b.config.RemoteType != "esx5" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
@@ -353,6 +357,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
