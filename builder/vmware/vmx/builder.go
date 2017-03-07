@@ -47,6 +47,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+	if b.config.RemoteType != "" && b.config.Format != "" {
+		b.config.OutputDir = b.config.VMName
+	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Set up the state.
@@ -58,6 +61,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("sshConfig", &b.config.SSHConfig)
+	state.Put("driverConfig", &b.config.DriverConfig)
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -97,8 +101,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
 		&vmwcommon.StepRegister{
-			Format:         "",
-			KeepRegistered: false,
+			Format:         b.config.Format,
+			KeepRegistered: b.config.KeepRegistered,
 		},
 		&vmwcommon.StepRun{
 			BootWait:           b.config.BootWait,
@@ -133,10 +137,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
+		},
+		&vmwcommon.StepExport{
+			Format:         b.config.Format,
+			SkipExport:     b.config.SkipExport,
+			VMName:         b.config.VMName,
+			OVFToolOptions: b.config.OVFToolOptions,
 		},
 	}
 
@@ -157,7 +168,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
 		return nil, errors.New("Build was halted.")
 	}
-	files, err := state.Get("dir").(vmwcommon.OutputDir).ListFiles()
+	// Compile the artifact list
+	var files []string
+	if b.config.RemoteType != "" && b.config.Format != "" {
+		dir = new(vmwcommon.LocalOutputDir)
+		dir.SetOutputDir(b.config.OutputDir)
+		files, err = dir.ListFiles()
+	} else {
+		files, err = state.Get("dir").(vmwcommon.OutputDir).ListFiles()
+	}
 	if err != nil {
 		return nil, err
 	}

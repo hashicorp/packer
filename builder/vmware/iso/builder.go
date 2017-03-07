@@ -34,18 +34,15 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.ExportConfig   `mapstructure:",squash"`
 
 	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
 	BootCommand         []string `mapstructure:"boot_command"`
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
-	KeepRegistered      bool     `mapstructure:"keep_registered"`
-	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	SkipExport          bool     `mapstructure:"skip_export"`
 	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
@@ -88,6 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -131,13 +129,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if b.config.RemoteHost == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("remote_host must be specified"))
-		}
-	}
-
-	if b.config.Format != "" {
-		if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("format must be one of ova, ovf, or vmx"))
 		}
 	}
 
@@ -270,6 +261,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepCleanVMX{},
 		&vmwcommon.StepUploadVMX{
