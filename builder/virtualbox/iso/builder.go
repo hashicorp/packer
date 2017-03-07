@@ -103,6 +103,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskVariant = "Standard"
 	}
 
+	if b.config.DiskVariant == "" {
+		b.config.DiskVariant = "Standard"
+	}
+
 	if b.config.GuestAdditionsMode == "" {
 		b.config.GuestAdditionsMode = "upload"
 	}

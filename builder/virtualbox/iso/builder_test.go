@@ -55,6 +55,10 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	if b.config.Format != "ovf" {
 		t.Errorf("bad format: %s", b.config.Format)
 	}
+
+	if b.config.DiskVariant != "Standard" {
+		t.Errorf("bad disk variant: %s", b.config.DiskVariant)
+	}
 }
 
 func TestBuilderPrepare_DiskSize(t *testing.T) {
@@ -86,6 +90,38 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_DiskVariant(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	delete(config, "disk_variant")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	if b.config.DiskVariant != "Standard" {
+		t.Fatalf("bad disk variant: %s", b.config.DiskVariant)
+	}
+
+	config["disk_variant"] = "Fixed"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.DiskVariant != "Fixed" {
+		t.Fatalf("bad disk variant: %s", b.config.DiskVariant)
 	}
 }
 
