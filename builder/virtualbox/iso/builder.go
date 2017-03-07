@@ -98,7 +98,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
 	}
-	
+
 	if b.config.DiskVariant == "" {
 		b.config.DiskVariant = "Standard"
 	}
