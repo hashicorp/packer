@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"fmt"
@@ -7,22 +7,23 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/packer"
 )
 
-type stepCreateEncryptedAMICopy struct {
-	image *ec2.Image
+type StepCreateEncryptedAMICopy struct {
+	image             *ec2.Image
+	KeyID             string
+	EncryptBootVolume bool
+	Name              string
 }
 
-func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
-	kmsKeyId := config.AMIConfig.AMIKmsKeyId
+	kmsKeyId := s.KeyID
 
 	// Encrypt boot not set, so skip step
-	if !config.AMIConfig.AMIEncryptBootVolume {
+	if !s.EncryptBootVolume {
 		if kmsKeyId != "" {
 			log.Printf(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
 		}
@@ -46,7 +47,7 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	}
 
 	copyOpts := &ec2.CopyImageInput{
-		Name:          &config.AMIName, // Try to overwrite existing AMI
+		Name:          &s.Name, // Try to overwrite existing AMI
 		SourceImageId: aws.String(id),
 		SourceRegion:  aws.String(region),
 		Encrypted:     aws.Bool(true),
@@ -62,15 +63,15 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	}
 
 	// Wait for the copy to become ready
-	stateChange := awscommon.StateChangeConf{
+	stateChange := StateChangeConf{
 		Pending:   []string{"pending"},
 		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *copyResp.ImageId),
+		Refresh:   AMIStateRefreshFunc(ec2conn, *copyResp.ImageId),
 		StepState: state,
 	}
 
 	ui.Say("Waiting for AMI copy to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
+	if _, err := WaitForState(&stateChange); err != nil {
 		err := fmt.Errorf("Error waiting for AMI Copy: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -146,7 +147,7 @@ func (s *stepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
+func (s *StepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
 	if s.image == nil {
 		return
 	}

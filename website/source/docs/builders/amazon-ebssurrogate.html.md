@@ -1,43 +1,26 @@
 ---
 description: |
-    The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
-    instance storage as the root device. For more information on the difference
-    between instance storage and EBS-backed instances, see the storage for the root
-    device section in the EC2 documentation.
+    The `amazon-ebssurrogate` Packer builder is like the chroot builder, but does
+    not require running inside an EC2 instance. 
 layout: docs
-page_title: 'Amazon AMI Builder (instance-store)'
+page_title: 'Amazon EBS Surrogate Builder'
 ...
 
-# AMI Builder (instance-store)
+# EBS Surrogate Builder
 
-Type: `amazon-instance`
+Type: `amazon-ebssurrogate`
 
-The `amazon-instance` Packer builder is able to create Amazon AMIs backed by
-instance storage as the root device. For more information on the difference
-between instance storage and EBS-backed instances, see the ["storage for the
-root device" section in the EC2
-documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html#storage-for-the-root-device).
+The `amazon-ebssurrogate` Packer builder is able to create Amazon AMIs by running
+a source instance with an attached volume, provisioning the attached volume in such
+a way that it can be used as the root volume for the AMI, and then snapshotting and
+creating the AMI from that volume.
 
-This builder builds an AMI by launching an EC2 instance from an existing
-instance-storage backed AMI, provisioning that running machine, and then
-bundling and creating a new AMI from that machine. This is all done in your own
-AWS account. The builder will create temporary key pairs, security group rules,
-etc. that provide it temporary access to the instance while the image is being
-created. This simplifies configuration quite a bit.
+This builder can therefore be used to bootstrap scratch-build images - for example
+FreeBSD or Ubuntu using ZFS as the root file system.
 
-The builder does *not* manage AMIs. Once it creates an AMI and stores it in
-your account, it is up to you to use, delete, etc. the AMI.
-
--> **Note:** Temporary resources are, by default, all created with the prefix
-`packer`. This can be useful if you want to restrict the security groups and
-key pairs packer is able to operate on.
-
--> **Note:** This builder requires that the [Amazon EC2 AMI
-Tools](https://aws.amazon.com/developertools/368) are installed onto the
-machine. This can be done within a provisioner, but must be done before the
-builder finishes running.
-
-~> Instance builds are not supported for Windows. Use [`amazon-ebs`](amazon-ebs.html) instead.
+This is all done in your own AWS account. The builder will create temporary
+key pairs, security group rules, etc. that provide it temporary access to the
+instance while the image is being created.
 
 ## Configuration Reference
 
@@ -54,45 +37,33 @@ builder.
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `account_id` (string) - Your AWS account ID. This is required for bundling
-    the AMI. This is *not the same* as the access key. You can find your account
-    ID in the security credentials page of your AWS account.
-
--   `ami_name` (string) - The name of the resulting AMI that will appear when
-    managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
-
 -   `instance_type` (string) - The EC2 instance type to use while building the
     AMI, such as `m1.small`.
 
 -   `region` (string) - The name of the region, such as `us-east-1`, in which to
     launch the EC2 instance to create the AMI.
 
--   `s3_bucket` (string) - The name of the S3 bucket to upload the AMI. This
-    bucket will be created if it doesn't exist.
-
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `source_ami` (string) - The initial AMI used as a base for the newly
-    created machine.
-
--   `x509_cert_path` (string) - The local path to a valid X509 certificate for
-    your AWS account. This is used for bundling the AMI. This X509 certificate
-    must be registered with your account from the security credentials page in
-    the AWS console.
-
--   `x509_key_path` (string) - The local path to the private key for the X509
-    certificate specified by `x509_cert_path`. This is used for bundling
-    the AMI.
-
+    created machine. `source_ami_filter` may be used instead to populate this
+    automatically.
+    
+-   `ami_root_device` (block device mapping) - A block device mapping describing
+    the root device of the AMI. This looks like the mappings in `ami_block_device_mapping`,
+    except with an additional field:
+    
+    - `source_device_name` (string) - The device name of the block device on the
+      source instance to be used as the root device for the AMI. This must correspond
+      to a block device in `launch_block_device_mapping`.
+    
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
     more [block device mappings](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html)
     to the AMI. These will be attached when booting a new instance from your
-    AMI. To add a block device during the Packer build see
+    AMI. To add a block device during the packer build see
     `launch_block_device_mappings` below. Your options here may vary depending
     on the type of VM you use. The block device mappings allow for the following
     configuration:
@@ -154,8 +125,8 @@ builder.
     user creating the AMI has permissions to launch it.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
-    you are building. This option is required to register HVM images. Can be
-    `paravirtual` (default) or `hvm`.
+    you are building. This option must match the supported virtualization
+    type of `source_ami`. Can be `paravirtual` or `hvm`.
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -164,47 +135,60 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
--   `bundle_destination` (string) - The directory on the running instance where
-    the bundled AMI will be saved prior to uploading. By default this is `/tmp`.
-    This directory must exist and be writable.
+-   `disable_stop_instance` (boolean) - Packer normally stops the build instance
+    after all provisioners have run. For Windows instances, it is sometimes
+    desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
+    which will stop the instance for you. If this is set to true, Packer *will not*
+    stop the instance and will wait for you to stop it manually. You can do this
+    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
 
--   `bundle_prefix` (string) - The prefix for files created from bundling the
-    root volume. By default this is `image-{{timestamp}}`. The `timestamp`
-    variable should be used to make sure this is unique, otherwise it can
-    collide with other created AMIs by Packer in your account.
-
--   `bundle_upload_command` (string) - The command to use to upload the
-    bundled volume. See the "custom bundle commands" section below for
-    more information.
-
--   `bundle_vol_command` (string) - The command to use to bundle the volume. See
-    the "custom bundle commands" section below for more information.
+    ``` {.javascript}
+    {
+      "type": "windows-shell",
+      "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
+    }
+    ```
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
+    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Defaults to `false`.
+    AMI if one with the same name already exists. Default `false`.
 
 -   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
-    AMIs, which have been deregistered by `force_deregister`. Defaults to `false`.
+    AMIs, which have been deregistered by `force_deregister`. Default `false`.
+
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Default `false`.
+
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+    This only applies to the main `region`, other regions where the AMI will be copied
+    will be encrypted by the default EBS KMS key.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the Packer build starts. These are not necessarily
-    preserved when booting from the AMI built with Packer. See
+    more block devices before the packer build starts. These are not necessarily
+    preserved when booting from the AMI built with packer. See
     `ami_block_device_mappings`, above, for details.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
+    resulting AMI unless they're duplicated in `tags`. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
+
+-   `run_volume_tags` (object of key/value strings) - Tags to apply to the volumes
+    that are *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
     [configuration template](/docs/templates/configuration-templates.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
@@ -220,8 +204,12 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
+    incase packer exits ungracefully. Possible values are "stop" and "terminate",
+    default is `stop`.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
-    validation of the region configuration option.  Defaults to `false`.
+    validation of the region configuration option.  Default `false`.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
@@ -230,6 +218,12 @@ builder.
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
     user creating the AMI has permissions to create volumes from the backing snapshot(s).
+
+-   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
+     They will override AMI tags if already applied to snapshot. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
@@ -261,16 +255,13 @@ builder.
     -   `most_recent` (bool) - Selects the newest created image when true.
          This is most useful for selecting a daily distro build.
 
--   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
-     They will override AMI tags if already applied to snapshot.
-
--   `spot_price` (string) - The maximum hourly price to launch a spot instance
-    to create the AMI. It is a type of instances that EC2 starts when the
-    maximum price that you specify exceeds the current spot price. Spot price
-    will be updated based on available spot instance capacity and current spot
-    Instance requests. It may save you some costs. You can set this to `auto`
-    for Packer to automatically discover the best spot price or to `0` to use
-    an on-demand instance (default).
+-   `spot_price` (string) - The maximum hourly price to pay for a spot instance
+    to create the AMI. Spot instances are a type of instance that EC2 starts
+    when the current spot price is less than the maximum price you specify. Spot
+    price will be updated based on available spot instance capacity and current
+    spot instance requests. It may save you some costs. You can set this to
+    `auto` for Packer to automatically discover the best spot price or to "0"
+    to use an on demand instance (default).
 
 -   `spot_price_auto_product` (string) - Required if `spot_price` is set
     to `auto`. This tells Packer what sort of AMI you're launching to find the
@@ -280,13 +271,13 @@ builder.
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
     up into Amazon EC2.  By default, this is blank, and Packer will
-    generate a temporary key pair unless
+    generate a temporary keypair unless
     [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
-    authenticate connections to the source instance. No temporary key pair will
+    authenticate connections to the source instance. No temporary keypair will
     be created, and the values of `ssh_password` and `ssh_private_key_file` will
     be ignored. To use this option with a key pair already configured in the source
     AMI, leave the `ssh_keypair_name` blank. To associate an existing key pair
@@ -294,20 +285,25 @@ builder.
     of the key pair.
 
 -   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
-    IP if available. Also works for WinRM.
+    IP if available.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
--   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
+-   `tags` (object of key/value strings) - Tags applied to the AMI and
+    relevant snapshots. This is a
     [configuration template](/docs/templates/configuration-templates.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
--   `temporary_key_pair_name` (string) - The name of the temporary key pair
-    to generate. By default, Packer generates a name that looks like
-    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
+-   `temporary_key_pair_name` (string) - The name of the temporary keypair
+    to generate. By default, Packer generates a name with a UUID.
+
+-   `token` (string) - The access token to use. This is different from the
+    access key and secret key. If you're not sure what this is, then you
+    probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
+    environmental variable.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
@@ -317,37 +313,26 @@ builder.
     data when launching the instance.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
-    in order to create a temporary security group within the VPC.
-
--   `x509_upload_path` (string) - The path on the remote machine where the X509
-    certificate will be uploaded. This path must already exist and be writable.
-    X509 certificates are uploaded after provisioning is run, so it is perfectly
-    okay to create this directory as part of the provisioning process. Defaults to
-    `/tmp`.
+    in order to create a temporary security group within the VPC. Requires `subnet_id`
+    to be set.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
 ## Basic Example
 
-Here is a basic example. It is completely valid except for the access keys:
+Here is a basic example. You will need to provide access keys, and may need to
+change the AMI IDs according to what images exist at the time the template is run:
 
 ``` {.javascript}
 {
-  "type": "amazon-instance",
+  "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
-  "source_ami": "ami-d9d6a6b0",
-  "instance_type": "m1.small",
+  "source_ami": "ami-fce3c696",
+  "instance_type": "t2.micro",
   "ssh_username": "ubuntu",
-
-  "account_id": "0123-4567-0890",
-  "s3_bucket": "packer-images",
-  "x509_cert_path": "x509.cert",
-  "x509_key_path": "x509.key",
-  "x509_upload_path": "/tmp",
-
   "ami_name": "packer-quick-start {{timestamp}}"
 }
 ```
@@ -356,6 +341,50 @@ Here is a basic example. It is completely valid except for the access keys:
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 
+Further information on locating AMI IDs and their relationship to instance types
+and regions can be found in the AWS EC2 Documentation
+[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+
+## Basic Example
+
+``` {.javascript}
+{
+   "type" : "amazon-surrogate",
+   "secret_key" : "YOUR SECRET KEY HERE",
+   "access_key" : "YOUR KEY HERE",
+   "region" : "us-east-1",
+   "ssh_username" : "ubuntu",
+   "instance_type" : "t2.medium",
+   "source_ami" : "ami-40d28157",
+   "launch_block_device_mappings" : [
+      {
+         "volume_type" : "gp2",
+         "device_name" : "/dev/xvdf",
+         "delete_on_termination" : false,
+         "volume_size" : 10
+      },
+   ],
+   "ami_root_device": {
+      "source_device_name": "/dev/xvdf",
+      "device_name": "/dev/xvda",
+      "delete_on_termination": true,
+      "volume_size": 16,
+      "volume_type": "gp2"
+   }
+
+}
+```
+
+-&gt; **Note:** Packer can also read the access key and secret access key from
+environmental variables. See the configuration reference in the section above
+for more information on what environmental variables Packer will look for.
+
+Further information on locating AMI IDs and their relationship to instance
+types and regions can be found in the AWS EC2 Documentation
+[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
+or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
+
 ## Accessing the Instance to Debug
 
 If you need to access the instance to debug for some reason, run the builder
@@ -363,69 +392,8 @@ with the `-debug` flag. In debug mode, the Amazon builder will save the private
 key in the current directory and will output the DNS or IP information as well.
 You can use this information to access the instance as it is running.
 
-## Custom Bundle Commands
-
-A lot of the process required for creating an instance-store backed AMI involves
-commands being run on the actual source instance. Specifically, the
-`ec2-bundle-vol` and `ec2-upload-bundle` commands must be used to bundle the
-root filesystem and upload it, respectively.
-
-Each of these commands have a lot of available flags. Instead of exposing each
-possible flag as a template configuration option, the instance-store AMI builder
-for Packer lets you customize the entire command used to bundle and upload the
-AMI.
-
-These are configured with `bundle_vol_command` and `bundle_upload_command`. Both
-of these configurations are [configuration
-templates](/docs/templates/configuration-templates.html) and have support for
-their own set of template variables.
-
-### Bundle Volume Command
-
-The default value for `bundle_vol_command` is shown below. It is split across
-multiple lines for convenience of reading. The bundle volume command is
-responsible for executing `ec2-bundle-vol` in order to store and image of the
-root filesystem to use to create the AMI.
-
-``` {.text}
-sudo -i -n ec2-bundle-vol \
-  -k {{.KeyPath}}  \
-  -u {{.AccountId}} \
-  -c {{.CertPath}} \
-  -r {{.Architecture}} \
-  -e {{.PrivatePath}}/* \
-  -d {{.Destination}} \
-  -p {{.Prefix}} \
-  --batch \
-  --no-filter
-```
-
-The available template variables should be self-explanatory based on the
-parameters they're used to satisfy the `ec2-bundle-vol` command.
-
-\~&gt; **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem and
-.gpg files during the bundling of the AMI, which can cause problems on some
-systems, such as Ubuntu. You may want to customize the bundle volume command to
-include those files (see the `--no-filter` option of `ec2-bundle-vol`).
-
-### Bundle Upload Command
-
-The default value for `bundle_upload_command` is shown below. It is split across
-multiple lines for convenience of reading. Access key and secret key are omitted
-if using instance profile. The bundle upload command is responsible for taking
-the bundled volume and uploading it to S3.
-
-``` {.text}
-sudo -i -n ec2-upload-bundle \
-  -b {{.BucketName}} \
-  -m {{.ManifestPath}} \
-  -a {{.AccessKey}} \
-  -s {{.SecretKey}} \
-  -d {{.BundleDirectory}} \
-  --batch \
-  --region {{.Region}} \
-  --retry
-```
-
-The available template variables should be self-explanatory based on the
-parameters they're used to satisfy the `ec2-upload-bundle` command.
+-&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
+These source AMIs may include volumes that are not flagged to be destroyed on
+termination of the instance building the new image. In addition to those volumes
+created by this builder, any volumes inn the source AMI which are not marked for
+deletion on termination will remain in your account.

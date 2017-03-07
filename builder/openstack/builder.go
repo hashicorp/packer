@@ -102,6 +102,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepAllocateIp{
 			FloatingIpPool: b.config.FloatingIpPool,
 			FloatingIp:     b.config.FloatingIp,
+			ReuseIps:       b.config.ReuseIps,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,

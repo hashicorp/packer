@@ -5,7 +5,6 @@ header .header {
   h1 {
     margin-bottom: -8px;
     margin-top: 60px;
-    text-transform: uppercase;
   }
 
   span {
@@ -19,15 +18,19 @@ header .header {
   background-position: 35px -40px;
   background-size: 100%;
 
-  h2 {
-    margin-top: 70px;
+  @media (min-width: 1200px) {
+    h1 {
+      margin-top: 100px;
+    }
   }
 
   @media (max-width: $screen-md-max) {
     height: $hero-height;
 
-    h2 {
-      font-size: 2.1em;
+    h1 {
+      font-size: 36px;
+      padding-top: 1em;
+      padding-bottom: 1em;
     }
   }
 
@@ -35,9 +38,10 @@ header .header {
     height: auto;
     background: none;
 
-    h2 {
+    h1 {
       margin: 0;
-      padding: 1em;
+      padding-top: 1em;
+      margin-bottom: 1em;
     }
   }
 }
@@ -57,7 +61,6 @@ header .header {
 
     @media (max-width: $screen-sm) {
       background: none;
-      font-size: 75%;
       min-height: 50px;
       padding: 0;
     }
@@ -72,15 +75,18 @@ header .header {
   }
 
   h2 {
-    font-family: $serif;
     font-size: 44px;
     color: #7bc6b1;
     margin: 0px;
     padding: 0px;
-    padding-top: 7px;
+    padding-top: 15px;
     padding-bottom: 3px;
     line-height: 1.0;
     white-space: nowrap;
+
+    @media (max-width: $screen-sm) {
+      font-size: 30px;
+    }
 
     &:hover {
       color: $dark-background;
@@ -181,7 +187,7 @@ header .header {
         color: #b1d631;
         font-size: 14px;
         font-weight: normal;
-        font-family: $mono;
+        font-family: $font-family-mono;
         text-shadow: 0 0 0;
       }
 
@@ -203,7 +209,6 @@ header .header {
         margin-right: 20px;
 
         li {
-          font-family: $serif;
           font-size: 17px;
           line-height: (30/17) !important;
           margin-bottom: $baseline;
@@ -225,10 +230,8 @@ header .header {
       }
 
       div.alert {
-        font-family: $serif;
         font-size: 17px;
         line-height: 1.5;
-        letter-spacing: 1px;
         margin-left: -135px;
         margin-right: -135px;
         padding-top: 40px;
@@ -256,20 +259,21 @@ header .header {
     }
 
     h1 {
-      font-size: 40px;
       line-height: (25/20);
-      text-transform: uppercase;
+      font-weight: 600;
     }
 
     h2 {
       margin-top: $baseline * 2;
       text-transform: capitalize;
+      font-weight: 600;
     }
 
     h3 {
-      margin-top: $baseline;
+      margin-top: $baseline * 2;
       text-transform: capitalize;
-      font-size: 26px;
+      font-size: 24px;
+      font-weight: 600;
     }
   }
 }

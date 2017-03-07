@@ -63,7 +63,6 @@ Here is a basic example:
       "type": "profitbricks",
       "disk_size": "5",
       "snapshot_name": "double",
-      "ssh_key_path": "/path/to/private/key",
       "snapshot_password": "test1234",
       "ssh_username" :"root",
       "timeout": 100

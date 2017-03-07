@@ -13,14 +13,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="shortcut icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
     <link rel="icon" href="<%= image_path(" favicon.ico ") %>" type="image/x-icon">
-    <script type="text/javascript" src="//use.typekit.net/apr3jjs.js"></script>
-    <script type="text/javascript">
-      try {
-        Typekit.load();
-      } catch (e) {}
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-NR2SD7C');
     </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Typekit script to import Klavika -->
+    <script src="https://use.typekit.net/wxf7mfi.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+
   </head>
   <body id="page-<%= current_page.data.page_title ? "#{current_page.data.page_title}" : "home" %>" class="page-<%= current_page.data.page_title ? "#{current_page.data.page_title} layout-#{current_page.data.layout} page-sub" : "home layout-#{current_page.data.layout}" %>">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NR2SD7C"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
     	<div class="container-fluid">
 				<div class="navbar-header">

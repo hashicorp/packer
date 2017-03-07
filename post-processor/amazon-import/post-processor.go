@@ -26,11 +26,14 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 
 	// Variables specific to this post processor
-	S3Bucket  string            `mapstructure:"s3_bucket_name"`
-	S3Key     string            `mapstructure:"s3_key_name"`
-	SkipClean bool              `mapstructure:"skip_clean"`
-	Tags      map[string]string `mapstructure:"tags"`
-	Name      string            `mapstructure:"ami_name"`
+	S3Bucket    string            `mapstructure:"s3_bucket_name"`
+	S3Key       string            `mapstructure:"s3_key_name"`
+	SkipClean   bool              `mapstructure:"skip_clean"`
+	Tags        map[string]string `mapstructure:"tags"`
+	Name        string            `mapstructure:"ami_name"`
+	Description string            `mapstructure:"ami_description"`
+	Users       []string          `mapstructure:"ami_users"`
+	Groups      []string          `mapstrcuture:"ami_groups"`
 
 	ctx interpolate.Context
 }
@@ -302,6 +305,60 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Failed to add tags to resources %#v: %s", resourceIds, err)
 		}
 
+	}
+
+	// Apply atttributes for AMI specified in config
+	// (duped from builder/amazon/common/step_modify_ami_attributes.go)
+	options := make(map[string]*ec2.ModifyImageAttributeInput)
+	if p.config.Description != "" {
+		options["description"] = &ec2.ModifyImageAttributeInput{
+			Description: &ec2.AttributeValue{Value: &p.config.Description},
+		}
+	}
+
+	if len(p.config.Groups) > 0 {
+		groups := make([]*string, len(p.config.Groups))
+		adds := make([]*ec2.LaunchPermission, len(p.config.Groups))
+		addGroups := &ec2.ModifyImageAttributeInput{
+			LaunchPermission: &ec2.LaunchPermissionModifications{},
+		}
+
+		for i, g := range p.config.Groups {
+			groups[i] = aws.String(g)
+			adds[i] = &ec2.LaunchPermission{
+				Group: aws.String(g),
+			}
+		}
+		addGroups.UserGroups = groups
+		addGroups.LaunchPermission.Add = adds
+
+		options["groups"] = addGroups
+	}
+
+	if len(p.config.Users) > 0 {
+		users := make([]*string, len(p.config.Users))
+		adds := make([]*ec2.LaunchPermission, len(p.config.Users))
+		for i, u := range p.config.Users {
+			users[i] = aws.String(u)
+			adds[i] = &ec2.LaunchPermission{UserId: aws.String(u)}
+		}
+		options["users"] = &ec2.ModifyImageAttributeInput{
+			UserIds: users,
+			LaunchPermission: &ec2.LaunchPermissionModifications{
+				Add: adds,
+			},
+		}
+	}
+
+	if len(options) > 0 {
+		for name, input := range options {
+			ui.Message(fmt.Sprintf("Modifying: %s", name))
+			input.ImageId = &createdami
+			_, err := ec2conn.ModifyImageAttribute(input)
+			if err != nil {
+				return nil, false, fmt.Errorf("Error modifying AMI attributes: %s", err)
+			}
+		}
 	}
 
 	// Add the reported AMI ID to the artifact list

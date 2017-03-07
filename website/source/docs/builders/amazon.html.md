@@ -28,6 +28,11 @@ Packer supports the following builders at the moment:
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
 
+-   [amazon-ebssurrogate](/docs/builders/amazon-ebssurrogate.html) - Create EBS
+    -backed AMIs from scratch. Works similarly to the `chroot` builder but does
+    not require running in AWS. This is an **advanced builder and should not be
+    used by newcomers**.
+
 -&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
@@ -73,8 +78,11 @@ following steps:
 
 2.  Look for [local AWS configuration
     files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    -   First `~/.aws/credentials`
-    -   Next based on `AWS_PROFILE`
+    - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
+      environment variable, and if that's empty, use the default credentials
+      file (`.aws/credentials`) in the user's home directory.
+    - Uses the profile name set in the `AWS_PROFILE` environment variable. If
+      the environment variable is not set, uses "default" as the profile name.
 
 3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
 
@@ -144,7 +152,7 @@ Packer to work:
 
 ### Attaching IAM Policies to Roles
 
-IAM policies can be associated with user or roles. If you use packer with IAM
+IAM policies can be associated with users or roles. If you use packer with IAM
 roles, you may encounter an error like this one:
 
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.

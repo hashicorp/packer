@@ -88,8 +88,9 @@ access tokens:
 {
   "type": "digitalocean",
   "api_token": "YOUR API KEY",
-  "image": "ubuntu-12-04-x64",
-  "region": "nyc2",
-  "size": "512mb"
+  "image": "ubuntu-14-04-x64",
+  "region": "nyc3",
+  "size": "512mb",
+  "ssh_username": "root"
 }
 ```

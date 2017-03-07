@@ -13,6 +13,7 @@ import (
 type StepAllocateIp struct {
 	FloatingIpPool string
 	FloatingIp     string
+	ReuseIps       bool
 }
 
 func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
@@ -37,36 +38,38 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	if s.FloatingIp != "" {
 		instanceIp.IP = s.FloatingIp
 	} else if s.FloatingIpPool != "" {
-		// If we have a free floating IP in the pool, use it first
-		// rather than creating one
-		ui.Say(fmt.Sprintf("Searching for unassociated floating IP in pool %s", s.FloatingIpPool))
-		pager := floatingips.List(client)
-		err := pager.EachPage(func(page pagination.Page) (bool, error) {
-			candidates, err := floatingips.ExtractFloatingIPs(page)
+		// If ReuseIps is set to true and we have a free floating IP in
+		// the pool, use it first rather than creating one
+		if s.ReuseIps {
+			ui.Say(fmt.Sprintf("Searching for unassociated floating IP in pool %s", s.FloatingIpPool))
+			pager := floatingips.List(client)
+			err := pager.EachPage(func(page pagination.Page) (bool, error) {
+				candidates, err := floatingips.ExtractFloatingIPs(page)
 
-			if err != nil {
-				return false, err // stop and throw error out
-			}
-
-			for _, candidate := range candidates {
-				if candidate.Pool != s.FloatingIpPool || candidate.InstanceID != "" {
-					continue // move to next in list
+				if err != nil {
+					return false, err // stop and throw error out
 				}
 
-				// In correct pool and able to be allocated
-				instanceIp.IP = candidate.IP
-				ui.Message(fmt.Sprintf("Selected floating IP: %s", instanceIp.IP))
-				state.Put("floatingip_istemp", false)
-				return false, nil // stop iterating over pages
-			}
-			return true, nil // try the next page
-		})
+				for _, candidate := range candidates {
+					if candidate.Pool != s.FloatingIpPool || candidate.InstanceID != "" {
+						continue // move to next in list
+					}
 
-		if err != nil {
-			err := fmt.Errorf("Error searching for floating ip from pool '%s'", s.FloatingIpPool)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
+					// In correct pool and able to be allocated
+					instanceIp.IP = candidate.IP
+					ui.Message(fmt.Sprintf("Selected floating IP: %s", instanceIp.IP))
+					state.Put("floatingip_istemp", false)
+					return false, nil // stop iterating over pages
+				}
+				return true, nil // try the next page
+			})
+
+			if err != nil {
+				err := fmt.Errorf("Error searching for floating ip from pool '%s'", s.FloatingIpPool)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 
 		if instanceIp.IP == "" {

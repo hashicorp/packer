@@ -122,7 +122,7 @@ each category, the available configuration keys are alphabetized.
     forces Packer to find an open device automatically.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
+    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
@@ -130,6 +130,14 @@ each category, the available configuration keys are alphabetized.
 
 -   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
     AMIs, which have been deregistered by `force_deregister`. Default `false`.
+
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Default `false`.
+
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+    This only applies to the main `region`, other regions where the AMI will be copied
+    will be encrypted by the default EBS KMS key.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If true, `source_ami` is

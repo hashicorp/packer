@@ -105,6 +105,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
+    This can also be a URL to an IMG or QCOW2 file, in which case QEMU will
+    boot directly from it. When passing a path to an IMG or QCOW2 file, you 
+    should set `disk_image` to "true".
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
@@ -169,13 +172,18 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     is attached as the first floppy device. Currently, no support exists for
     creating sub-directories on the floppy. Wildcard characters (\*, ?,
     and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
+    the files found in the directory to the floppy. The summary size of the
+    listed files must not exceed 1.44 MB. The supported ways to move large
+    files into the OS are using `http_directory` or [the file provisioner](
+    https://www.packer.io/docs/provisioners/file.html).
 
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
@@ -414,7 +422,10 @@ command, they will be replaced by the proper key:
 -   `<waitXX> ` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers. For example: to simulate ctrl+c use
+`<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
@@ -432,7 +443,7 @@ CentOS 6.4 installer:
 "boot_command":
 [
   "<tab><wait>",
-  " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+  " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
 

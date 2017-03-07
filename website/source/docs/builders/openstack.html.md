@@ -122,6 +122,13 @@ builder.
     launch the server to create the AMI. If not specified, Packer will use the
     environment variable `OS_REGION_NAME`, if set.
 
+-   `reuse_ips` (boolean) - Whether or not to attempt to reuse existing
+    unassigned floating ips in the project before allocating a new one. Note
+    that it is not possible to safely do this concurrently, so if you are
+    running multiple openstack builds concurrently, or if other processes are
+    assigning and using floating IPs in the same openstack project while packer
+    is running, you should not set this to true. Defaults to false.
+
 -   `security_groups` (array of strings) - A list of security groups by name to
     add to this instance.
 

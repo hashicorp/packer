@@ -68,7 +68,7 @@ array.
   "image": "ubuntu-14-04-x64",
   "region": "nyc3",
   "size": "512mb",
-  "ssh_username": "ubuntu"
+  "ssh_username": "root"
 }
 ```
 
@@ -106,7 +106,7 @@ The entire template should now look like this:
     "image": "ubuntu-14-04-x64",
     "region": "nyc3",
     "size": "512mb",
-    "ssh_username": "ubuntu"
+    "ssh_username": "root"
   }],
   "provisioners": [{
     "type": "shell",

@@ -179,6 +179,14 @@ builder.
 
 -   `preemptible` (boolean) - If true, launch a preembtible instance.
 
+-   `on_host_maintenance` (string) - Sets Host Maintenance Option. Valid
+    choices are `MIGRATE` and `TERMINATE`. Please see [GCE Instance Scheduling
+    Options](https://cloud.google.com/compute/docs/instances/setting-instance-scheduling-options),
+    as not all machine_types support `MIGRATE` (i.e. machines with GPUs).  The
+    default value depends on preemtability.
+    - when preemptible == true, defaults to `TERMINATE`
+    - when preemptible == false, defaults to `MIGRATE`
+
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 

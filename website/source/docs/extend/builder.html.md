@@ -125,7 +125,8 @@ Post-processors use the builder ID value in order to make some assumptions about
 the artifact results, so it is important it never changes.
 
 Other than the builder ID, the rest should be self-explanatory by reading the
-[packer.Artifact interface documentation](#).
+[packer.Artifact interface
+documentation](https://github.com/mitchellh/packer/blob/master/packer/artifact.go).
 
 ## Provisioning
 
@@ -167,4 +168,6 @@ operating system ISO from the internet. Most of the time, this ISO is identical.
 The locking mechanisms of the cache allow one of the builders to download it
 only once, but allow both builders to share the downloaded file.
 
-The [documentation for packer.Cache](#) is very detailed in how it works.
+The [documentation for
+packer.Cache](https://github.com/mitchellh/packer/blob/master/packer/cache.go)
+is very detailed in how it works.

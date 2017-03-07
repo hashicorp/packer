@@ -1,16 +1,15 @@
-// The amazonebs package contains a packer.Builder implementation that
-// builds AMIs for Amazon EC2.
-//
-// In general, there are two types of AMIs that can be created: ebs-backed or
-// instance-store. This builder _only_ builds ebs-backed images.
-package ebs
+// The ebssurrogate package contains a packer.Builder implementation that
+// builds a new EBS-backed AMI using an ephemeral instance.
+package ebssurrogate
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/errwrap"
 	"github.com/mitchellh/multistep"
 	awscommon "github.com/mitchellh/packer/builder/amazon/common"
 	"github.com/mitchellh/packer/common"
@@ -20,16 +19,17 @@ import (
 	"github.com/mitchellh/packer/template/interpolate"
 )
 
-// The unique ID for this builder
-const BuilderId = "mitchellh.amazonebs"
+const BuilderId = "mitchellh.amazon.ebssurrogate"
 
 type Config struct {
 	common.PackerConfig    `mapstructure:",squash"`
 	awscommon.AccessConfig `mapstructure:",squash"`
-	awscommon.AMIConfig    `mapstructure:",squash"`
-	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
-	VolumeRunTags          map[string]string `mapstructure:"run_volume_tags"`
+	awscommon.BlockDevices `mapstructure:",squash"`
+	awscommon.AMIConfig    `mapstructure:",squash"`
+
+	RootDevice    RootBlockDevice   `mapstructure:"ami_root_device"`
+	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -61,9 +61,25 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.RootDevice.Prepare(&b.config.ctx)...)
+
+	if b.config.AMIVirtType == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("ami_virtualization_type is required."))
+	}
+
+	foundRootVolume := false
+	for _, launchDevice := range b.config.BlockDevices.LaunchMappings {
+		if launchDevice.DeviceName == b.config.RootDevice.SourceDeviceName {
+			foundRootVolume = true
+		}
+	}
+
+	if !foundRootVolume {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("no volume with name '%s' is found", b.config.RootDevice.SourceDeviceName))
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
@@ -74,16 +90,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	config, err := b.config.Config()
+	awsConfig, err := b.config.Config()
 	if err != nil {
 		return nil, err
 	}
 
-	session, err := session.NewSession(config)
+	awsSession, err := session.NewSession(awsConfig)
 	if err != nil {
-		return nil, err
+		return nil, errwrap.Wrapf("Error creating AWS Session: {{err}}", err)
 	}
-	ec2conn := ec2.New(session)
+
+	ec2conn := ec2.New(awsSession)
 
 	// If the subnet is specified but not the AZ, try to determine the AZ automatically
 	if b.config.SubnetId != "" && b.config.AvailabilityZone == "" {
@@ -98,7 +115,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -127,9 +144,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
 		},
-		&stepCleanupVolumes{
-			BlockDevices: b.config.BlockDevices,
-		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
@@ -146,7 +160,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
-			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
 		&awscommon.StepTagEBSVolumes{
@@ -176,12 +189,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepModifyEBSBackedInstance{
 			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
 		},
+		&StepSnapshotNewRootVolume{
+			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
+		},
 		&awscommon.StepDeregisterAMI{
 			ForceDeregister:     b.config.AMIForceDeregister,
 			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
 			AMIName:             b.config.AMIName,
 		},
-		&stepCreateAMI{},
+		&StepRegisterAMI{
+			RootDevice:   b.config.RootDevice,
+			BlockDevices: b.config.BlockDevices.BuildLaunchDevices(),
+		},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
@@ -217,19 +236,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	// If there are no AMIs, then just return
-	if _, ok := state.GetOk("amis"); !ok {
-		return nil, nil
+	if amis, ok := state.GetOk("amis"); ok {
+		// Build the artifact and return it
+		artifact := &awscommon.Artifact{
+			Amis:           amis.(map[string]string),
+			BuilderIdValue: BuilderId,
+			Conn:           ec2conn,
+		}
+
+		return artifact, nil
 	}
 
-	// Build the artifact and return it
-	artifact := &awscommon.Artifact{
-		Amis:           state.Get("amis").(map[string]string),
-		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
-	}
-
-	return artifact, nil
+	return nil, nil
 }
 
 func (b *Builder) Cancel() {
