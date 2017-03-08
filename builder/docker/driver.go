@@ -11,7 +11,7 @@ import (
 // a mock driver can be shimmed in.
 type Driver interface {
 	// Commit the container to a tag
-	Commit(id string, author string, changes []string, message string) (string, error)
+	Commit(id string, author string, changes Changes, message string) (string, error)
 
 	// Delete an image that is imported into Docker
 	DeleteImage(id string) error
@@ -65,6 +65,11 @@ type ContainerConfig struct {
 	RunCommand []string
 	Volumes    map[string]string
 	Privileged bool
+	Labels     map[string]string
+	Expose     []string
+	Env        []string
+	User       string
+	Workdir    string
 }
 
 // This is the template that is used for the RunCommand in the ContainerConfig.

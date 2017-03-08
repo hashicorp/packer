@@ -1,0 +1,24 @@
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "alpine",
+      "run_command": [ "/bin/ash" ],
+      "export_path": "alpine.tar"
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/metadata.txt",
+      "source": "fixtures/builder-docker/metadata.txt",
+      "type": "file"
+    },
+    {
+      "type": "shell",
+      "execute_command": "sh -eux {{.Path}}",
+      "inline": [
+        "echo Hi"
+      ]
+    }
+  ]
+}

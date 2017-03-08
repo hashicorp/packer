@@ -155,6 +155,17 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
     `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
 
+-   `docker_cert_path` (string) - Path a directory containing "ca.pem", "cert.pem",
+    and "key.pem" needed to connet the Docker host. Will be ignored if `docker_host`
+    is not specified. Will be read from environment variable `DOCKER_CERT_PATH`.
+
+-   `docker_host` (string) - The Docker host to connect to. If unset environment
+    variable `DOCKER_HOST` will be used. Defaults to local host.
+
+-   `docker_tls_verify` (boolean) - Define if TLS certificates should be verified.
+    Will be ignored if `docker_host` is not specified. Will be read from environment
+    variable `DOCKER_TLS_VERIFY`. Defaults to true.
+
 -   `ecr_login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image from
     [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).

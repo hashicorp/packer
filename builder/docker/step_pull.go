@@ -14,7 +14,7 @@ func (s *StepPull) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	if !config.Pull {
+	if !*config.Pull {
 		log.Println("Pull disabled, won't docker pull")
 		return multistep.ActionContinue
 	}

@@ -8,7 +8,6 @@ import (
 
 func testStepRunState(t *testing.T) multistep.StateBag {
 	state := testState(t)
-	state.Put("temp_dir", "/foo")
 	return state
 }
 

@@ -1,0 +1,35 @@
+{
+  "builders": [
+    {
+      "type": "docker",
+      "pull": true,
+      "image": "alpine",
+      "run_command": [ "/bin/ash" ],
+      "commit": true,
+      "author": "Rickard von Essen <rickard@example.com>",
+      "message": "Important commit",
+      "changes": {
+        "user": "nobody",
+        "workdir": "/home",
+        "expose": [ "8080", "8080/udp" ],
+        "labels": {
+          "deploy": "test",
+          "releaser": "ops"
+        }
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "fixtures/builder-docker/dirA/",
+      "destination": "/tmp/"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "docker-save",
+      "path": "alpine.tar"
+    }
+  ]
+}

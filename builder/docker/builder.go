@@ -2,6 +2,7 @@ package docker
 
 import (
 	"log"
+	"os"
 
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/common"
@@ -30,19 +31,28 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver := &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
+
+	var driver Driver
+
+	if os.Getenv("PACKER_DOCKER_API") != "" {
+		driver = &DockerApiDriver{Ctx: &b.config.ctx, Config: b.config.DockerHostConfig, Ui: ui}
+	} else {
+		driver = &DockerDriver{Ctx: &b.config.ctx, Ui: ui}
+	}
+
 	if err := driver.Verify(); err != nil {
 		return nil, err
 	}
 
-	version, err := driver.Version()
-	if err != nil {
-		return nil, err
-	}
-	log.Printf("[DEBUG] Docker version: %s", version.String())
+	/*
+		version, err := driver.Version()
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("[DEBUG] Docker version: %s", version.String())
+	*/
 
 	steps := []multistep.Step{
-		&StepTempDir{},
 		&StepPull{},
 		&StepRun{},
 		&communicator.StepConnect{

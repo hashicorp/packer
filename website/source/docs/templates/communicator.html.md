@@ -23,7 +23,8 @@ section. Packer currently supports three kinds of communicators:
 
 In addition to the above, some builders have custom communicators they can
 use. For example, the Docker builder has a "docker" communicator that uses
-`docker exec` and `docker cp` to execute scripts and copy files.
+[`go-dockerclient`](https://github.com/fsouza/go-dockerclient) to execute
+scripts and copy files through the Docker API.
 
 ## Using a Communicator
 
