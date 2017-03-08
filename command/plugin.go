@@ -37,6 +37,8 @@ import (
 	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
+	vsphereisobuilder "github.com/mitchellh/packer/builder/vsphere/iso"
+	vspherevmbuilder "github.com/mitchellh/packer/builder/vsphere/vm"
 	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
@@ -75,8 +77,8 @@ type PluginCommand struct {
 var Builders = map[string]packer.Builder{
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
-	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
+	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"azure-arm":           new(azurearmbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
@@ -97,6 +99,8 @@ var Builders = map[string]packer.Builder{
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
+	"vsphere-iso":         new(vsphereisobuilder.Builder),
+	"vsphere-vm":          new(vspherevmbuilder.Builder),
 }
 
 var Provisioners = map[string]packer.Provisioner{
