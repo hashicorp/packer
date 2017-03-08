@@ -1,4 +1,4 @@
-# Vault Website
+# Packer Website
 
 This subdirectory contains the entire source for the [Packer Website][packer].
 This is a [Middleman][middleman] project, which builds a static site from these
@@ -18,4 +18,4 @@ Then open up `http://localhost:4567`. Note that some URLs you may need to append
 ".html" to make them work (in the navigation).
 
 [middleman]: https://www.middlemanapp.com
-[vault]: https://www.packer.io
+[packer]: https://www.packer.io
