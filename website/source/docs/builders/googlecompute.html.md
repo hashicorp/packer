@@ -145,6 +145,9 @@ builder.
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
+-   `disk_name` (string) - The name of the disk, if unset the instance name will be
+    used.
+
 -   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
