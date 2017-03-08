@@ -110,7 +110,8 @@ builder.
     image file is small initially and grows in size as you add data to it, and
     `plain` (plain disk) that the image file has a fixed size from the moment it
     is created (i.e the space is allocated for the drive fully). Plain disks
-    perform faster than expanding disks.
+    perform faster than expanding disks. `skip_compaction` will be set to true
+    automatically for plain disks.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -225,9 +226,10 @@ builder.
     "5m", or five minutes.
 
 -   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
-    the build process using `prl_disk_tool` utility. In certain rare cases, this
-    might corrupt the resulting disk image. If you find this to be the case,
-    you can disable compaction using this configuration value.
+    the build process using `prl_disk_tool` utility (except for the case that
+    `disk_type` is set to `plain`). In certain rare cases, this might corrupt
+    the resulting disk image. If you find this to be the case, you can disable
+    compaction using this configuration value.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is

@@ -134,7 +134,7 @@ func TestBuilderPrepare_DiskType(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test a default boot_wait
+	// Test a default disk_type
 	delete(config, "disk_type")
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -159,8 +159,21 @@ func TestBuilderPrepare_DiskType(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	// Test with a good
+	// Test with plain disk with wrong setting for compaction
 	config["disk_type"] = "plain"
+	config["skip_compaction"] = false
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) == 0 {
+		t.Fatalf("should have warning")
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test with plain disk with correct setting for compaction
+	config["disk_type"] = "plain"
+	config["skip_compaction"] = true
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
@@ -169,6 +182,7 @@ func TestBuilderPrepare_DiskType(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
+
 }
 
 func TestBuilderPrepare_HardDriveInterface(t *testing.T) {
