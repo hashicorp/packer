@@ -114,6 +114,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("disk_type can only be expand, or plain"))
 	}
 
+	if b.config.DiskType == "plain" && !b.config.SkipCompaction {
+		b.config.SkipCompaction = true
+		warnings = append(warnings,
+			"'skip_compaction' is enforced to be true for plain disks.")
+	}
+
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
