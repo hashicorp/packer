@@ -145,6 +145,9 @@ builder.
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
+-   `disk_name` (string) - The name of the disk, if unset the instance name will be
+    used.
+
 -   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
@@ -177,15 +180,14 @@ builder.
 -   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
     `use_internal_ip` must be true if this property is true.
 
--   `preemptible` (boolean) - If true, launch a preembtible instance.
-
 -   `on_host_maintenance` (string) - Sets Host Maintenance Option. Valid
     choices are `MIGRATE` and `TERMINATE`. Please see [GCE Instance Scheduling
     Options](https://cloud.google.com/compute/docs/instances/setting-instance-scheduling-options),
-    as not all machine_types support `MIGRATE` (i.e. machines with GPUs).  The
-    default value depends on preemtability.
-    - when preemptible == true, defaults to `TERMINATE`
-    - when preemptible == false, defaults to `MIGRATE`
+    as not all machine_types support `MIGRATE` (i.e. machines with GPUs).
+    If preemptible is true this can only be `TERMINATE`. If preemptible
+    is false, it defaults to `MIGRATE`
+
+-   `preemptible` (boolean) - If true, launch a preembtible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
