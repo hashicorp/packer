@@ -77,6 +77,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	if b.config.PackerConfig.PackerForce {
+		b.config.AMIForceDeregister = true
+	}
+
 	if b.config.BundleDestination == "" {
 		b.config.BundleDestination = "/tmp"
 	}
