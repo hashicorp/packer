@@ -147,6 +147,12 @@ builder.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the source instance. No temporary key pair will
+    be used, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. Useful for when a temporary keypair can't be used, or when using
+    a certificate authority for SSH authentication.
+
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
     Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
