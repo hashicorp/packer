@@ -69,6 +69,7 @@ type InstanceConfig struct {
 	Network             string
 	NetworkProjectId    string
 	OmitExternalIP      bool
+	OnHostMaintenance   string
 	Preemptible         bool
 	Region              string
 	Scopes              []string

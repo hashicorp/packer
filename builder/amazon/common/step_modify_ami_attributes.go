@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
+	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type StepModifyAMIAttributes struct {
@@ -17,12 +18,20 @@ type StepModifyAMIAttributes struct {
 	SnapshotGroups []string
 	ProductCodes   []string
 	Description    string
+	Ctx            interpolate.Context
 }
 
 func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
+
+	var sourceAMI string
+	if rawSourceAMI, hasSourceAMI := state.GetOk("source_image"); hasSourceAMI {
+		sourceAMI = *rawSourceAMI.(*ec2.Image).ImageId
+	} else {
+		sourceAMI = ""
+	}
 	snapshots := state.Get("snapshots").(map[string][]string)
 
 	// Determine if there is any work to do.
@@ -36,6 +45,18 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 
 	if !valid {
 		return multistep.ActionContinue
+	}
+
+	var err error
+	s.Ctx.Data = &BuildInfoTemplate{
+		SourceAMI:   sourceAMI,
+		BuildRegion: *ec2conn.Config.Region,
+	}
+	s.Description, err = interpolate.Render(s.Description, &s.Ctx)
+	if err != nil {
+		err = fmt.Errorf("Error interpolating AMI description: %s", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	// Construct the modify image and snapshot attribute requests we're going

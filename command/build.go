@@ -92,14 +92,17 @@ func (c BuildCommand) Run(args []string) int {
 				Color: colors[i%len(colors)],
 				Ui:    ui,
 			}
+			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
+				ui.Say(fmt.Sprintf("%s output will be in this color.", b))
+				if i+1 == len(buildNames) {
+					// Add a newline between the color output and the actual output
+					c.Ui.Say("")
+				}
+			}
 		}
 
 		buildUis[b] = ui
-		ui.Say(fmt.Sprintf("%s output will be in this color.", b))
 	}
-
-	// Add a newline between the color output and the actual output
-	c.Ui.Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)

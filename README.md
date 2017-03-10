@@ -73,8 +73,8 @@ file as `quick-start.json`. Export your AWS credentials as the
     "access_key": "{{user `access_key`}}",
     "secret_key": "{{user `secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-de0d9eb7",
-    "instance_type": "t1.micro",
+    "source_ami": "ami-af22d9b9",
+    "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
   }]

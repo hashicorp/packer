@@ -39,6 +39,7 @@ type Config struct {
 	Network              string            `mapstructure:"network"`
 	NetworkProjectId     string            `mapstructure:"network_project_id"`
 	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
+	OnHostMaintenance    string            `mapstructure:"on_host_maintenance"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
@@ -91,6 +92,22 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
+	}
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible if Preemptible is false
+	//   "TERMINATE": Posssible if Preemptible is true
+	if c.OnHostMaintenance == "" && c.Preemptible {
+		c.OnHostMaintenance = "MIGRATE"
+	}
+
+	if c.OnHostMaintenance == "" && !c.Preemptible {
+		c.OnHostMaintenance = "TERMINATE"
+	}
+
+	// Make sure user sets a valid value for on_host_maintenance option
+	if !(c.OnHostMaintenance == "MIGRATE" || c.OnHostMaintenance == "TERMINATE") {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be one of MIGRATE or TERMINATE."))
 	}
 
 	if c.ImageName == "" {

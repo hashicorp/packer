@@ -21,6 +21,9 @@ const TestFixtures = "test-fixtures"
 func getDirectory(path string) []string {
 	var result []string
 	walk := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if info.IsDir() && !strings.HasSuffix(path, "/") {
 			path = path + "/"
 		}
