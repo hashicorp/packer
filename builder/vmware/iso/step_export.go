@@ -60,8 +60,7 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Export the VM
-	localDir := state.Get("localDir").(localOutputDir)
-	outputPath := localDir.dir
+	outputPath := state.Get("exportPath").(string)
 
 	if s.Format == "ova" {
 		os.MkdirAll(outputPath, 0755)
@@ -80,8 +79,6 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Message(fmt.Sprintf("%s", out.String()))
-
-	state.Put("exportPath", outputPath)
 
 	return multistep.ActionContinue
 }
