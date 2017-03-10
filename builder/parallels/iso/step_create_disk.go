@@ -22,6 +22,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	command := []string{
 		"set", vmName,
 		"--device-add", "hdd",
+		"--type", config.DiskType,
 		"--size", strconv.FormatUint(uint64(config.DiskSize), 10),
 		"--iface", config.HardDriveInterface,
 	}
