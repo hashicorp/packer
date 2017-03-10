@@ -87,7 +87,7 @@ func TestUpload(t *testing.T) {
 		t.Fatalf("error creating communicator: %s", err)
 	}
 
-	err = c.Upload("C:/Temp/terraform.cmd", bytes.NewReader([]byte("something")), nil)
+	err = c.Upload("C:/Temp/packer.cmd", bytes.NewReader([]byte("something")), nil)
 	if err != nil {
 		t.Fatalf("error uploading file: %s", err)
 	}

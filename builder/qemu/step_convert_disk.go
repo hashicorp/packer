@@ -38,7 +38,6 @@ func (s *stepConvertDisk) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	command = append(command, []string{
-		"-f", config.Format,
 		"-O", config.Format,
 		sourcePath,
 		targetPath,

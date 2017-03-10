@@ -127,7 +127,7 @@ a tarball, you might wright this:
             },
             {
                 "inline": [
-                    "jq ".builds[].files[].name" manifest.json | xargs tar cfz artifacts.tgz"
+                    "jq \".builds[].files[].name\" manifest.json | xargs tar cfz artifacts.tgz"
                 ],
                 "type": "shell-local"
             }

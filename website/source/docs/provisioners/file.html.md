@@ -20,7 +20,7 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
-``` {.javascript}
+``` {.json}
 {
   "type": "file",
   "source": "app.tar.gz",
@@ -71,3 +71,40 @@ directly.
 
 This behavior was adopted from the standard behavior of rsync. Note that under
 the covers, rsync may or may not be used.
+
+## Symbolic link uploads
+
+The behavior when uploading symbolic links depends on the communicator. The
+Docker communicator will preserve symlinks, but all other communicators will
+treat local symlinks as regular files. If you wish the preserve symlinks when
+uploading, it's recommended that you use `tar`. Below is an example of what
+that might look like:
+
+```
+ᐅ ls -l files
+total 16
+drwxr-xr-x  3 mwhooker  staff  102 Jan 27 17:10 a
+lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
+-rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 file1
+lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
+```
+
+```json
+"provisioners": [
+	{
+		"type": "shell-local",
+		"command": "mkdir -p toupload; tar cf toupload/files.tar files"
+	},
+	{
+		"destination": "/tmp/",
+		"source": "./toupload",
+		"type": "file"
+	},
+	{
+		"inline": [
+			"cd /tmp && tar xf toupload/files.tar",
+		],
+		"type": "shell"
+	}
+]
+```

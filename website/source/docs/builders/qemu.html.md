@@ -105,6 +105,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
+    This can also be a URL to an IMG or QCOW2 file, in which case QEMU will
+    boot directly from it. When passing a path to an IMG or QCOW2 file, you 
+    should set `disk_image` to "true".
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
@@ -432,7 +435,7 @@ CentOS 6.4 installer:
 "boot_command":
 [
   "<tab><wait>",
-  " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+  " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
 ]
 ```
 

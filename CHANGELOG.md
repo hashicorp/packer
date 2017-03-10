@@ -1,6 +1,36 @@
 ## (Unreleased)
 
-* builder/docker: create export dir if needed [GH-4439]
+### FEATURES:
+
+* **New builder:** `ebs-surrogate` for building AMIs from EBS volumes. [GH-4351]
+
+### IMPROVEMENTS:
+
+* builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
+* builder/amazon: Change EC2 Windows password timeout to 20 minutes. [GH-4590]
+* builder/amazon-chroot: support encrypted boot volume. [GH-4584]
+* builder/docker: create export dir if needed. [GH-4439]
+* builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
+* builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
+* communicator/docker: preserve file mode. [GH-4443]
+* communicator/winrm: support ProxyFromEnvironment. [GH-4463]
+* core: make VNC links clickable in terminal. [GH-4497] [GH-4498]
+* post-processor/amazon-import: support AMI attributes on import [GH-4216]
+* provisioner/ansible: use randomized staging dir [GH-4472]
+* communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
+* builder/amazon: enable ena when `enhanced_networking` is set. [GH-4578]
+
+### BUG FIXES:
+
+* builder/amazon: Fix ssh agent authentication. [GH-4597]
+* builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+* builder/googlecompute: fix bug when creating image from custom image_family.
+    [GH-4518]
+* builder/virtualbox: remove guest additions before saving image. [GH-4496]
+* builder/vmware: ESXi: VNC port timeout increased to 5 s. [GH-4480]
+* core: always check for an error first when walking a path. [GH-4467]
+* builder/docker: Don't force tag if using a docker version that doesn't
+    support it. [GH-4560]
 
 ## 0.12.2 (January 20, 2017)
 
@@ -33,6 +63,7 @@
 * provisioner/powershell: Allow equals sign in value of environment
     variables. [GH-4328]
 * provisioner/puppet-server: Add default facts.  [GH-4286]
+* builder/qemu: Detect input disk image format during copy/convert. [GH-4343]
 
 ### BUG FIXES:
 
@@ -650,38 +681,38 @@
 ### FEATURES:
 
 * **WinRM:** You can now connect via WinRM with almost every builder.
-	See the docs for more info. [GH-2239]
+    See the docs for more info. [GH-2239]
 * **Windows AWS Support:** Windows AMIs can now be built without any
-	external plugins: Packer will start a Windows instance, get the
-	admin password, and can use WinRM (above) to connect through. [GH-2240]
+    external plugins: Packer will start a Windows instance, get the
+    admin password, and can use WinRM (above) to connect through. [GH-2240]
 * **Disable SSH:** Set `communicator` to "none" in any builder to disable SSH
-	connections. Note that provisioners won't work if this is done. [GH-1591]
+    connections. Note that provisioners won't work if this is done. [GH-1591]
 * **SSH Agent Forwarding:** SSH Agent Forwarding will now be enabled
-	to allow access to remote servers such as private git repos. [GH-1066]
+    to allow access to remote servers such as private git repos. [GH-1066]
 * **SSH Bastion Hosts:** You can now specify a bastion host for
-	SSH access (works with all builders). [GH-387]
+    SSH access (works with all builders). [GH-387]
 * **OpenStack v3 Identity:** The OpenStack builder now supports the
-	v3 identity API.
+    v3 identity API.
 * **Docker builder supports SSH**: The Docker builder now supports containers
-	with SSH, just set `communicator` to "ssh" [GH-2244]
+    with SSH, just set `communicator` to "ssh" [GH-2244]
 * **File provisioner can download**: The file provisioner can now download
-	files out of the build process. [GH-1909]
+    files out of the build process. [GH-1909]
 * **New config function: `build_name`**: The name of the currently running
-	build. [GH-2232]
+    build. [GH-2232]
 * **New config function: `build_type`**: The type of the currently running
-	builder. This is useful for provisioners. [GH-2232]
+    builder. This is useful for provisioners. [GH-2232]
 * **New config function: `template_dir`**: The directory to the template
-	being built. This should be used for template-relative paths. [GH-54]
+    being built. This should be used for template-relative paths. [GH-54]
 * **New provisioner: shell-local**: Runs a local shell script. [GH-770]
 * **New provisioner: powershell**: Provision Windows machines
-	with PowerShell scripts. [GH-2243]
+    with PowerShell scripts. [GH-2243]
 * **New provisioner: windows-shell**: Provision Windows machines with
-	batch files. [GH-2243]
+    batch files. [GH-2243]
 * **New provisioner: windows-restart**: Restart a Windows machines and
-	wait for it to come back online. [GH-2243]
+    wait for it to come back online. [GH-2243]
 * **Compress post-processor supports multiple algorithms:** The compress
-	post-processor now supports lz4 compression and compresses gzip in
-	parallel for much faster throughput.
+    post-processor now supports lz4 compression and compresses gzip in
+    parallel for much faster throughput.
 
 ### IMPROVEMENTS:
 
@@ -809,10 +840,10 @@
 ### FEATURES:
 
 * **New command: `packer push`**: Push template and files to HashiCorp's
-	Atlas for building your templates automatically.
+    Atlas for building your templates automatically.
 * **New post-processor: `atlas`**: Send artifact to HashiCorp's Atlas for
-	versioning and storing artifacts. These artifacts can then be queried
-	using the API, Terraform, etc.
+    versioning and storing artifacts. These artifacts can then be queried
+    using the API, Terraform, etc.
 
 ### IMPROVEMENTS:
 

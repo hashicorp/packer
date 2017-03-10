@@ -3,13 +3,14 @@ package iso
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 type StepExport struct {
@@ -22,13 +23,14 @@ func (s *StepExport) generateArgs(c *Config, outputPath string, hidePassword boo
 	if hidePassword {
 		password = "****"
 	}
-	return []string{
+	args := []string{
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
 		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + c.VMName,
 		outputPath,
 	}
+	return append(c.OVFToolOptions, args...)
 }
 
 func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {

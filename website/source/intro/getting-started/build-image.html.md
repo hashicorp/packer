@@ -164,10 +164,14 @@ want to try to launch your AMI, get the ID from the Packer output.
 
 -> **Note:** If you see a `VPCResourceNotSpecified` error, Packer might not be
 able to determine the default VPC, which the `t2` instance types require. This
-can happen if you created you AWS account before `2013-12-04`.  You can either
+can happen if you created your AWS account before `2013-12-04`.  You can either
 change the `instance_type` to `m3.medium`, or specify a VPC. Please see
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
-information.
+information. If you specify a `vpc_id`, you will also need to set `subnet_id`. 
+Unless you modify your subnet's [IPv4 public addressing attribute](
+http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-ip-addressing.html#subnet-public-ip),
+you will also need to set `associate_public_ip_address` to `true`, or set up a 
+[VPN](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_VPN.html).
 
 ## Managing the Image
 

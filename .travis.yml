@@ -7,7 +7,7 @@ language: go
 
 go:
   - 1.7.4
-  - 1.8beta1
+  - 1.8
 
 install:
   - make deps

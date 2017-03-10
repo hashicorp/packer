@@ -100,6 +100,18 @@ From there, open your fork in your browser to open a new pull-request.
 
 ### Tips for Working on Packer
 
+#### Working on forks
+
+The easiest way to work on a fork is to set it as a remote of the packer project. After following the steps in "Setting up Go to work on Packer":
+
+1. Navigate to $GOPATH/src/github.com/mitchellh/packer
+2. Add the remote `git remote add <name of remote> <github url of fork>`. For example `git remote add mwhooker https://github.com/mwhooker/packer.git`.
+3. Checkout a feature branch: `git checkout -b new-feature`
+4. Make changes
+5. (Optional) Push your changes to the fork: `git push -u <name of remote> new-feature`
+
+This way you can push to your fork to create a PR, but the code on disk still lives in the spot where the go cli tools are expecting to find it.
+
 #### Govendor
 
 If you are submitting a change that requires new or updated dependencies, please include them in `vendor/vendor.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.

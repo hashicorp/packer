@@ -24,6 +24,10 @@ instance while the image is being created.
 The builder does *not* manage EBS Volumes. Once it creates volumes and stores
 it in your account, it is up to you to use, delete, etc. the volumes.
 
+-> **Note:** Temporary resources are, by default, all created with the prefix
+`packer`. This can be useful if you want to restrict the security groups and
+key pairs Packer is able to operate on.
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
@@ -79,7 +83,10 @@ builder.
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
     -   `tags` (map) - Tags to apply to the volume. These are retained after the
-        builder completes.
+        builder completes. This is a [configuration template]
+        (/docs/templates/configuration-templates.html) where the `SourceAMI`
+        variable is replaced with the source AMI ID and `BuildRegion` variable
+        is replaced with the value of `region`.
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -93,7 +100,7 @@ builder.
     Default `false`.
 
 -   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
+    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
@@ -102,7 +109,10 @@ builder.
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
-    resulting AMI unless they're duplicated in `tags`.
+    resulting AMI unless they're duplicated in `tags`. This is a
+    [configuration template](/docs/templates/configuration-templates.html)
+    where the `SourceAMI` variable is replaced with the source AMI ID and
+    `BuildRegion` variable is replaced with the value of `region`.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
     to assign to the instance. By default this is not set and Packer will
@@ -115,7 +125,7 @@ builder.
     `security_group_id`.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
-    incase packer exits ungracefully. Possible values are `stop` and `terminate`.
+    in case Packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
 
 -   `skip_region_validation` (boolean) - Set to `true` if you want to skip
@@ -180,14 +190,15 @@ builder.
     must be specified with this.
 
 -   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
-    IP if available.
+    IP if available. Also works for WinRM.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
-    to generate. By default, Packer generates a name with an UUID.
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you

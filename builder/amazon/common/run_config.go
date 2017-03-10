@@ -66,7 +66,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.WindowsPasswordTimeout == 0 {
-		c.WindowsPasswordTimeout = 10 * time.Minute
+		c.WindowsPasswordTimeout = 20 * time.Minute
 	}
 
 	if c.RunTags == nil {

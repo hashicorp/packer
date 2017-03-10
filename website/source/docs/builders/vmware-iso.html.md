@@ -240,6 +240,11 @@ builder.
     deploy the resulting artifact (VMX or OVA or whatever you used as `format`).
     Defaults to `false`.
 
+-   `ovftool_options` (array of strings) - Extra options to pass to ovftool
+    during export. Each item in the array is a new argument. The options
+    `--noSSLVerify`, `--skipManifestCheck`, and `--targetType` are reserved,
+    and should not be passed to this argument.
+
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
     default, this is empty, which means VMware tools won't be uploaded.
