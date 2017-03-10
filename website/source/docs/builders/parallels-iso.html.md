@@ -109,7 +109,7 @@ builder.
     defaults to `expand`. Valid options are `expand` (expanding disk) that the
     image file is small initially and grows in size as you add data to it, and
     `plain` (plain disk) that the image file has a fixed size from the moment it
-    is created (i.e the space is allocated for the drive fully). Plain disks
+    is created (i.e the space is allocated for the full drive). Plain disks
     perform faster than expanding disks. `skip_compaction` will be set to true
     automatically for plain disks.
 
