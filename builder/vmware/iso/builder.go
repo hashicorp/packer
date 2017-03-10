@@ -215,7 +215,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("dir", dir)
 	state.Put("driver", driver)
-	state.Put("exportPath", exportOutputPath)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -309,6 +308,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepExport{
 			Format:     b.config.Format,
 			SkipExport: b.config.SkipExport,
+			OutputDir:  exportOutputPath,
 		},
 	}
 
