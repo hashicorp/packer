@@ -78,6 +78,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	if b.config.PackerConfig.PackerForce {
+		b.config.AMIForceDeregister = true
+	}
+
 	// Defaults
 	if b.config.ChrootMounts == nil {
 		b.config.ChrootMounts = make([][]string, 0)
