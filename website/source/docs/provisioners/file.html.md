@@ -54,7 +54,9 @@ know.
 
 First, the destination directory must already exist. If you need to create it,
 use a shell provisioner just prior to the file provisioner in order to create
-the directory.
+the directory. Note that the `docker` builder does not have this requirement.
+It will create any needed destination directories, but it's generally best
+practice to not rely on this behavior.
 
 Next, the existence of a trailing slash on the source path will determine
 whether the directory name will be embedded within the destination, or whether
@@ -91,20 +93,20 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
 
 ```json
 "provisioners": [
-	{
-		"type": "shell-local",
-		"command": "mkdir -p toupload; tar cf toupload/files.tar files"
-	},
-	{
-		"destination": "/tmp/",
-		"source": "./toupload",
-		"type": "file"
-	},
-	{
-		"inline": [
-			"cd /tmp && tar xf toupload/files.tar",
-		],
-		"type": "shell"
-	}
+    {
+        "type": "shell-local",
+        "command": "mkdir -p toupload; tar cf toupload/files.tar files"
+    },
+    {
+        "destination": "/tmp/",
+        "source": "./toupload",
+        "type": "file"
+    },
+    {
+        "inline": [
+            "cd /tmp && tar xf toupload/files.tar",
+        ],
+        "type": "shell"
+    }
 ]
 ```
