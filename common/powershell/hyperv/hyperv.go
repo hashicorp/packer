@@ -217,6 +217,17 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 	}
 }
 
+func ImportVirtualMachine(vmName string, sourcePath string, path string) error {
+
+	var script = `
+param([string]$vmName, [string]$sourcePath, [string]$path)
+Get-Childitem $sourcePath -Recurse *.vmcx | % { $_.FullName } | Import-VM -Copy -GenerateNewId -VhdDestinationPath $path | % { $_.Name } | Rename-VM -NewName $vmName
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, sourcePath, path)
+	return err
+}
+
 func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
 
 	var script = `
