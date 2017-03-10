@@ -52,6 +52,9 @@ type Driver interface {
 	//Set the vlan to use for machine
 	SetVirtualMachineVlanId(string, string) error
 
+	//Replace the network adapter with a (non-)legacy adapter
+	ReplaceVirtualMachineNetworkAdapter(string, bool) error
+
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
 
 	CreateExternalVirtualSwitch(string, string) error

@@ -22,6 +22,7 @@ type StepCreateVM struct {
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
+	UseLegacyNetworkAdapter        bool
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -41,6 +42,16 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	if s.UseLegacyNetworkAdapter {
+		err := driver.ReplaceVirtualMachineNetworkAdapter(s.VMName, true)
+		if err != nil {
+			err := fmt.Errorf("Error creating legacy network adapter: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
