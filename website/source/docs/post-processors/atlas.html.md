@@ -60,10 +60,12 @@ you can also use `token` configuration option.
 
 -   `artifact_type` (string) - For uploading artifacts to Atlas.
     `artifact_type` can be set to any unique identifier, however, the following
-    are recommended for consistency - `amazon.image`, `digitalocean.image`,
-    `docker.image`, `googlecompute.image`, `openstack.image`,
-    `parallels.image`, `qemu.image`, `virtualbox.image`, `vmware.image`,
-    `custom.image`, and `vagrant.box`.
+    are recommended for consistency - `amazon.image`, `azure.image`,
+    `cloudstack.image`, `digitalocean.image`, `docker.image`,
+    `googlecompute.image`, `hyperv.image`, `oneandone.image`,
+    `openstack.image`, `parallels.image`, `profitbricks.image`, `qemu.image`,
+    `triton.image`, `virtualbox.image`, `vmware.image`, `custom.image`, and
+    `vagrant.box`.
 
 ### Optional:
 

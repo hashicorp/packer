@@ -48,7 +48,9 @@ Required:
 Optional:
 
 -   `command` (string) - The command to invoke ansible. Defaults
-    to "ansible-playbook".
+    to "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook".
+    Note, This disregards the value of `-color` when passed to `packer build`.
+    To disable colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
 
 -   `extra_arguments` (array of strings) - An array of extra arguments to pass
     to the ansible command. By default, this is empty.
@@ -103,7 +105,7 @@ chi-appservers
     on your local system to be copied to the remote machine as the
     `staging_directory` before all other files and directories.
 
--   `playbook_paths` (array of strings) - An array of paths to playbook files on
+-   `playbook_paths` (array of strings) - An array of directories of playbook files on
     your local system. These will be uploaded to the remote machine under
     `staging_directory`/playbooks. By default, this is empty.
 

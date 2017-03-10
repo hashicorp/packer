@@ -32,11 +32,11 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	}
 
 	if p.config.RestartTimeout != 5*time.Minute {
-		t.Errorf("unexpected remote path: %s", p.config.RestartTimeout)
+		t.Errorf("unexpected restart timeout: %s", p.config.RestartTimeout)
 	}
 
 	if p.config.RestartCommand != "shutdown /r /f /t 0 /c \"packer restart\"" {
-		t.Errorf("unexpected remote path: %s", p.config.RestartCommand)
+		t.Errorf("unexpected restart command: %s", p.config.RestartCommand)
 	}
 }
 
@@ -51,7 +51,7 @@ func TestProvisionerPrepare_ConfigRetryTimeout(t *testing.T) {
 	}
 
 	if p.config.RestartTimeout != 1*time.Minute {
-		t.Errorf("unexpected remote path: %s", p.config.RestartTimeout)
+		t.Errorf("unexpected restart timeout: %s", p.config.RestartTimeout)
 	}
 }
 

@@ -27,6 +27,11 @@ Packer supports the following builders at the moment:
     that device. This is an **advanced builder and should not be used by
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
+    
+-   [amazon-ebssurrogate](/docs/builders/amazone-ebssurrogate.html) - Create EBS
+    -backed AMIs from scratch. Works similarly to the `chroot` builder but does
+    not require running in AWS. This is an **advanced builder and should not be
+    used by newcomers**.
 
 -&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
@@ -144,7 +149,7 @@ Packer to work:
 
 ### Attaching IAM Policies to Roles
 
-IAM policies can be associated with user or roles. If you use packer with IAM
+IAM policies can be associated with users or roles. If you use packer with IAM
 roles, you may encounter an error like this one:
 
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.

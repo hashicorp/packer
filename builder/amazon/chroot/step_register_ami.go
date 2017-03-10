@@ -75,9 +75,14 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		registerOpts = buildRegisterOpts(config, image, newMappings)
 	}
 
-	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	if config.AMIEnhancedNetworking {
+		// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
+		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
+
+		// Set EnaSupport to true
+		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
+		registerOpts.EnaSupport = aws.Bool(true)
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)

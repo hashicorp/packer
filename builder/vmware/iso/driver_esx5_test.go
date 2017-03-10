@@ -88,11 +88,4 @@ func TestESX5Driver_CommHost(t *testing.T) {
 	if host != expected_host {
 		t.Errorf("bad host name: %s", host)
 	}
-	address, ok := state.GetOk("vm_address")
-	if !ok {
-		t.Error("state not updated with vm_address")
-	}
-	if address.(string) != expected_host {
-		t.Errorf("bad vm_address: %s", address.(string))
-	}
 }
