@@ -107,6 +107,7 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
     {
         "inline": [
             "cd /tmp && tar xf toupload/files.tar",
+            "rm toupload/files.tar"
         ],
         "type": "shell"
     }
