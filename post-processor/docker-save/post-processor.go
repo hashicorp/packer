@@ -55,7 +55,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	keep := p.config.KeepInputArtifact
 	path := p.config.Path
 
 	// Open the file that we're going to write to
@@ -82,6 +81,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	f.Close()
 	ui.Message("Saved to: " + path)
+
+	keep := p.config.KeepInputArtifact
 
 	return artifact, keep, nil
 }
