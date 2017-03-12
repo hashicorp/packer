@@ -234,6 +234,112 @@ if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 	return err
 }
 
+func DisableAutomaticCheckpoints(vmName string) error {
+	var script = `
+param([string]$vmName)
+if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
+	Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName)
+	return err
+}
+
+func CloneVirtualMachine(cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, ram int64, switchName string) error {
+
+	var script = `
+param([string]$CloneFromVMName, [string]$CloneFromSnapshotName, [string]CloneAllSnapshotsString, [string]$vmName, [string]$path, [long]$memoryStartupBytes, [string]$switchName)
+
+$CloneAllSnapshots = [System.Boolean]::Parse($CloneAllSnapshotsString)
+
+$ExportPath = Join-Path $path $VMName
+
+if ($CloneFromSnapshotName) {
+    $snapshot = Get-VMSnapshot -VMName $CloneFromVMName -Name $CloneFromSnapshotName
+    Export-VMSnapshot -VMSnapshot $snapshot -Path $ExportPath -ErrorAction Stop
+} else {
+    if (!$CloneAllSnapshots) {
+        #Use last snapshot if one was not specified
+        $snapshot = Get-VMSnapshot -VMName $CloneFromVMName | Select -Last 1
+    } else {
+        $snapshot = $null
+    }
+    
+    if (!$snapshot) {
+        #No snapshot clone
+        Export-VM -Name $CloneFromVMName -Path $ExportPath -ErrorAction Stop
+    } else {
+        #Snapshot clone
+        Export-VMSnapshot -VMSnapshot $snapshot -Path $ExportPath -ErrorAction Stop
+    }
+}
+
+$result = Get-ChildItem -Path (Join-Path $ExportPath $CloneFromVMName) | Move-Item -Destination $ExportPath -Force
+$result = Remove-Item -Path (Join-Path $ExportPath $CloneFromVMName)
+
+$VirtualMachinePath = Get-ChildItem -Path (Join-Path $ExportPath 'Virtual Machines') -Filter *.vmcx -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+if (!$VirtualMachinePath){
+    $VirtualMachinePath = Get-ChildItem -Path (Join-Path $ExportPath 'Virtual Machines') -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+}
+if (!$VirtualMachinePath){
+    $VirtualMachinePath = Get-ChildItem -Path $ExportPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+}
+
+$compatibilityReport = Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $ExportPath -SmartPagingFilePath $ExportPath -SnapshotFilePath $ExportPath -VhdDestinationPath (Join-Path -Path $ExportPath -ChildPath 'Virtual Hard Disks') -GenerateNewId -Copy:$false
+Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
+$networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
+Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
+Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName 
+$vm = Import-VM -CompatibilityReport $compatibilityReport
+
+if ($vm) {
+    $result = Rename-VM -VM $vm -NewName $VMName
+}
+`
+
+	CloneAllSnapshotsString := "False"
+	if cloneAllSnapshots {
+		CloneAllSnapshotsString = "True"
+	}
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, cloneFromVmName, cloneFromSnapshotName, CloneAllSnapshotsString, vmName, path, strconv.FormatInt(ram, 10), switchName)
+
+	if err != nil {
+		return err
+	}
+
+	return DeleteAllDvdDrives(vmName)
+
+}
+
+func GetVirtualMachineGeneration(vmName string) (uint, error) {
+	var script = `
+param([string]$vmName)
+$generation = Get-Vm -Name $vmName | %{$_.Generation}
+if (!$generation){
+    $generation = 1
+}
+return $generation
+`
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generationUint32, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 32)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generation := uint(generationUint32)
+
+	return generation, err
+}
+
 func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
 
 	var script = `
