@@ -301,6 +301,33 @@ $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 	return isRunning, err
 }
 
+func GetVirtualMachineGeneration(vmName string) (uint, error) {
+	var script = `
+param([string]$vmName)
+$generation = Get-Vm -Name $vmName | %{$_.Generation}
+if (!$generation){
+    $generation = 1
+}
+return $generation
+`
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generationUint32, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 32)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generation := uint(generationUint32)
+
+	return generation, err
+}
+
 func SetUnattendedProductKey(path string, productKey string) error {
 
 	var script = `
