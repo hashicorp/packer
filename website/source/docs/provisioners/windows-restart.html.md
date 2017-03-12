@@ -37,9 +37,7 @@ The reference of available configuration options is listed below.
 Optional parameters:
 
 -   `restart_command` (string) - The command to execute to initiate the
-    restart. By default this is `shutdown /r /c "packer restart" /t 5 && net
-    stop winrm`. A key action of this is to stop WinRM so that Packer can
-    detect it is rebooting.
+    restart. By default this is `shutdown /r /f /t 0 /c "packer restart"`.
 
 -   `restart_check_command` (string) - A command to execute to check if the
     restart succeeded. This will be done in a loop.
