@@ -14,7 +14,7 @@
 [report-badge]: https://goreportcard.com/badge/github.com/mitchellh/packer
 [report]: https://goreportcard.com/report/github.com/mitchellh/packer
 
-* Website: http://www.packer.io
+* Website: https://www.packer.io
 * IRC: `#packer-tool` on Freenode
 * Mailing list: [Google Groups](http://groups.google.com/group/packer-tool)
 
