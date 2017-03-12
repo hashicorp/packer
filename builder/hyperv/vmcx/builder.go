@@ -348,15 +348,23 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-		&common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			ResultKey:    "iso_path",
-			Url:          b.config.ISOUrls,
-			Extension:    b.config.TargetExtension,
-			TargetPath:   b.config.TargetPath,
-		},
+	}
+
+	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
+		steps = append(steps,
+			&common.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				ResultKey:    "iso_path",
+				Url:          b.config.ISOUrls,
+				Extension:    b.config.TargetExtension,
+				TargetPath:   b.config.TargetPath,
+			},
+		)
+	}
+
+	steps = append(steps,
 		&common.StepCreateFloppy{
 			Files: b.config.FloppyFiles,
 		},
@@ -449,7 +457,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 
 		// the clean up actions for each step will be executed reverse order
-	}
+	)
 
 	// Run the steps.
 	if b.config.PackerDebug {

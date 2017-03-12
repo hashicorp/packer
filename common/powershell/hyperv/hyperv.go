@@ -248,7 +248,7 @@ if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 func CloneVirtualMachine(cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, ram int64, switchName string) error {
 
 	var script = `
-param([string]$CloneFromVMName, [string]$CloneFromSnapshotName, [string]CloneAllSnapshotsString, [string]$vmName, [string]$path, [long]$memoryStartupBytes, [string]$switchName)
+param([string]$CloneFromVMName, [string]$CloneFromSnapshotName, [string]$CloneAllSnapshotsString, [string]$vmName, [string]$path, [long]$memoryStartupBytes, [string]$switchName)
 
 $CloneAllSnapshots = [System.Boolean]::Parse($CloneAllSnapshotsString)
 
