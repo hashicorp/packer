@@ -246,6 +246,61 @@ func HasVirtualMachineVirtualizationExtensions() (bool, error) {
 	return hasVirtualMachineVirtualizationExtensions, err
 }
 
+func DoesVirtualMachineExist(vmName string) (bool, error) {
+
+	var script = `
+param([string]$vmName)
+return (Get-VM | ?{$_.Name -eq $vmName}) -ne $null
+`
+
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return false, err
+	}
+
+	var exists = strings.TrimSpace(cmdOut) == "True"
+	return exists, err
+}
+
+func DoesVirtualMachineSnapshotExist(vmName string, snapshotName string) (bool, error) {
+
+	var script = `
+param([string]$vmName, [string]$snapshotName)
+return (Get-VMSnapshot -VMName $vmName | ?{$_.Name -eq $snapshotName}) -ne $null
+`
+
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName, snapshotName)
+
+	if err != nil {
+		return false, err
+	}
+
+	var exists = strings.TrimSpace(cmdOut) == "True"
+	return exists, err
+}
+
+func IsVirtualMachineOn(vmName string) (bool, error) {
+
+	var script = `
+param([string]$vmName)
+$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
+`
+
+	var ps PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return false, err
+	}
+
+	var isRunning = strings.TrimSpace(cmdOut) == "True"
+	return isRunning, err
+}
+
 func SetUnattendedProductKey(path string, productKey string) error {
 
 	var script = `
