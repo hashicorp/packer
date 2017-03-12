@@ -87,11 +87,11 @@ type Config struct {
 	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
 	VlanId                         string   `mapstructure:"vlan_id"`
 	Cpu                            uint     `mapstructure:"cpu"`
-	Generation                     uint     `mapstructure:"generation"`
-	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
-	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
+	Generation                     uint
+	EnableMacSpoofing              bool `mapstructure:"enable_mac_spoofing"`
+	EnableDynamicMemory            bool `mapstructure:"enable_dynamic_memory"`
+	EnableSecureBoot               bool `mapstructure:"enable_secure_boot"`
+	EnableVirtualizationExtensions bool `mapstructure:"enable_virtualization_extensions"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -118,9 +118,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 
-	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
-	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
+		isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+		warnings = append(warnings, isoWarnings...)
+		errs = packer.MultiErrorAppend(errs, isoErrs...)
+	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
@@ -146,6 +148,47 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.Cpu < 1 {
 		b.config.Cpu = 1
+	}
+
+	b.config.Generation = 1
+
+	if b.config.CloneFromVMName == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified."))
+	} else {
+		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone from exists: %s", err))
+		} else {
+			if !virtualMachineExists {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not exist.", b.config.CloneFromVMName))
+			} else {
+				b.config.Generation, err = powershell.GetVirtualMachineGeneration(b.config.CloneFromVMName)
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone from generation: %s", err))
+				}
+
+				if b.config.CloneFromSnapshotName != "" {
+					virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine snapshot to clone from exists: %s", err))
+					} else {
+						if !virtualMachineSnapshotExists {
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on virtual machine '%s' to clone from does not exist.", b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
+						}
+					}
+				}
+
+				virtualMachineOn, err := powershell.IsVirtualMachineOn(b.config.CloneFromVMName)
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone is running: %s", err))
+				} else {
+					if virtualMachineOn {
+						warning := fmt.Sprintf("Cloning from a virtual machine that is running.")
+						warnings = appendWarnings(warnings, warning)
+					}
+				}
+			}
+		}
 	}
 
 	if b.config.Generation != 2 {
@@ -233,36 +276,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		} else {
 			if !hasVirtualMachineVirtualizationExtensions {
 				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 or newer."))
-			}
-		}
-	}
-
-	virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone from exists: %s", err))
-	} else {
-		if !virtualMachineExists {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not exist.", b.config.CloneFromVMName))
-		} else {
-			if b.config.CloneFromSnapshotName != "" {
-				virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
-				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine snapshot to clone from exists: %s", err))
-				} else {
-					if !virtualMachineSnapshotExists {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on virtual machine '%s' to clone from does not exist.", b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
-					}
-				}
-			}
-
-			virtualMachineOn, err := powershell.IsVirtualMachineOn(b.config.CloneFromVMName)
-			if err != nil {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone is running: %s", err))
-			} else {
-				if virtualMachineOn {
-					warning := fmt.Sprintf("Cloning from a virtual machine that is running.")
-					warnings = appendWarnings(warnings, warning)
-				}
 			}
 		}
 	}
