@@ -1,4 +1,4 @@
-package iso
+package vhd
 
 import (
 	"errors"
@@ -10,28 +10,12 @@ import (
 	"github.com/mitchellh/multistep"
 	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
 	"github.com/mitchellh/packer/common"
-	powershell "github.com/mitchellh/packer/common/powershell"
+	"github.com/mitchellh/packer/common/powershell"
 	"github.com/mitchellh/packer/common/powershell/hyperv"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/helper/config"
 	"github.com/mitchellh/packer/packer"
 	"github.com/mitchellh/packer/template/interpolate"
-)
-
-const (
-	DefaultDiskSize = 40 * 1024        // ~40GB
-	MinDiskSize     = 256              // 256MB
-	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
-
-	DefaultRamSize                 = 1 * 1024  // 1GB
-	MinRamSize                     = 32        // 32MB
-	MaxRamSize                     = 32 * 1024 // 32GB
-	MinNestedVirtualizationRamSize = 4 * 1024  // 4GB
-
-	LowRam = 256 // 256MB
-
-	DefaultUsername = ""
-	DefaultPassword = ""
 )
 
 // Builder implements packer.Builder and builds the actual Hyperv
@@ -44,19 +28,12 @@ type Builder struct {
 type Config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	common.HTTPConfig           `mapstructure:",squash"`
-	common.ISOConfig            `mapstructure:",squash"`
 	hypervcommon.FloppyConfig   `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
 	hypervcommon.RunConfig      `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
-	// The size, in megabytes, of the computer memory in the VM.
-	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
 	// A list of files to place onto a floppy disk that is attached when the
 	// VM is booted. This is most useful for unattended Windows installs,
 	// which look for an Autounattend.xml file on removable media. By default,
@@ -80,17 +57,12 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	BootCommand                    []string `mapstructure:"boot_command"`
-	SwitchName                     string   `mapstructure:"switch_name"`
-	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
-	VlanId                         string   `mapstructure:"vlan_id"`
-	Cpu                            uint     `mapstructure:"cpu"`
-	Generation                     uint     `mapstructure:"generation"`
-	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
-	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
-	SourceDir                       string   `mapstructure:"source_dir"`
+	BootCommand  []string `mapstructure:"boot_command"`
+	SwitchName   string   `mapstructure:"switch_name"`
+	SwitchVlanId string   `mapstructure:"switch_vlan_id"`
+	VlanId       string   `mapstructure:"vlan_id"`
+	Generation   uint     `mapstructure:"generation"`
+	SourceDir    string   `mapstructure:"source_dir"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -117,22 +89,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 
+	if b.config.SourceDir == "" {
+		err = errors.New("Source Dir must be specified.")
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-
-	err = b.checkDiskSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
-	err = b.checkRamSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
@@ -142,10 +109,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.SwitchName == "" {
 		b.config.SwitchName = b.detectSwitchName()
-	}
-
-	if b.config.Cpu < 1 {
-		b.config.Cpu = 1
 	}
 
 	if b.config.Generation != 2 {
@@ -226,17 +189,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.EnableVirtualizationExtensions {
-		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization extensions support: %s", err))
-		} else {
-			if !hasVirtualMachineVirtualizationExtensions {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 or newer."))
-			}
-		}
-	}
-
 	// Warnings
 
 	if b.config.ShutdownCommand == "" {
@@ -245,32 +197,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
-	warning := b.checkHostAvailableMemory()
-	if warning != "" {
-		warnings = appendWarnings(warnings, warning)
-	}
-
-	if b.config.EnableVirtualizationExtensions {
-		if b.config.EnableDynamicMemory {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, dynamic memory should not be allowed.")
-			warnings = appendWarnings(warnings, warning)
-		}
-
-		if !b.config.EnableMacSpoofing {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, mac spoofing should be allowed.")
-			warnings = appendWarnings(warnings, warning)
-		}
-
-		if b.config.RamSize < MinNestedVirtualizationRamSize {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs.")
-			warnings = appendWarnings(warnings, warning)
-		}
-	}
-
 	if b.config.SwitchVlanId != "" {
 		if b.config.SwitchVlanId != b.config.VlanId {
-			warning = fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor vlan. The switch will not be able to see traffic from the VM.")
-			warnings = appendWarnings(warnings, warning)
+			warnings = append(warnings,
+				"Switch network adaptor vlan should match virtual machine network adaptor vlan. "+
+					"The switch will not be able to see traffic from the VM.")
 		}
 	}
 
@@ -317,7 +248,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepImportVM{
-			VMName:   b.config.VMName,
+			VMName:    b.config.VMName,
 			SourceDir: b.config.SourceDir,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
@@ -437,52 +368,6 @@ func appendWarnings(slice []string, data ...string) []string {
 	slice = slice[0:n]
 	copy(slice[m:n], data)
 	return slice
-}
-
-func (b *Builder) checkDiskSize() error {
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = DefaultDiskSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
-
-	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
-	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
-	}
-
-	return nil
-}
-
-func (b *Builder) checkRamSize() error {
-	if b.config.RamSize == 0 {
-		b.config.RamSize = DefaultRamSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
-
-	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
-	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
-	}
-
-	return nil
-}
-
-func (b *Builder) checkHostAvailableMemory() string {
-	powershellAvailable, _, _ := powershell.IsPowershellAvailable()
-
-	if powershellAvailable {
-		freeMB := powershell.GetHostAvailableMemory()
-
-		if (freeMB - float64(b.config.RamSize)) < LowRam {
-			return fmt.Sprintf("Hyper-V might fail to create a VM if there is not enough free memory in the system.")
-		}
-	}
-
-	return ""
 }
 
 func (b *Builder) detectSwitchName() string {

@@ -12,8 +12,8 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepImportVM struct {
-	VMName                         string
-	SourceDir                      string
+	VMName    string
+	SourceDir string
 }
 
 func (s *StepImportVM) Run(state multistep.StateBag) multistep.StepAction {

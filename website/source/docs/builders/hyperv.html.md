@@ -10,9 +10,14 @@ description: |-
 The HyperV Packer builder is able to create [Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
 virtual machines and export them.
 
-Packer currently only support building HyperV machines with an iso:
+Packer currently supports the following HyperV machine builders:
 
 * [hyperv-iso](/docs/builders/hyperv-iso.html) - Starts from
   an ISO file, creates a brand new Hyper-V VM, installs an OS,
   provisions software within the OS, then exports that machine to create
   an image. This is best for people who want to start from scratch.
+
+* [hyperv-vhd](/docs/builders/hyperv-vhd.html) - This builder imports
+  an existing hyper-v export, runs provisioners on top of that VM, and exports
+  that machine to create an image. This is best if you have an existing
+  hyper-v export you want to use as the source.
