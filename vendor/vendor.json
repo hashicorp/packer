@@ -9,6 +9,42 @@
 			"revisionTime": "2016-08-11T22:04:02Z"
 		},
 		{
+			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
+			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
+			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
+			"revisionTime": "2017-01-13T02:27:42Z"
+		},
+		{
+			"checksumSHA1": "InnjAEH008xuFzlslJn2IaG7McM=",
+			"path": "github.com/denverdino/aliyungo/common",
+			"revision": "4102657a3f4885557c5e19dee53decb1fbf49d2a",
+			"revisionTime": "2017-03-09T13:03:54Z"
+		},
+		{
+			"checksumSHA1": "yhWqkta/EcCfgSy1ZV7T/CR6VTo=",
+			"path": "github.com/denverdino/aliyungo/ecs",
+			"revision": "4102657a3f4885557c5e19dee53decb1fbf49d2a",
+			"revisionTime": "2017-03-09T13:03:54Z"
+		},
+		{
+			"checksumSHA1": "40PbgN4Emct6AIiJbhPoEdd+vIA=",
+			"path": "github.com/denverdino/aliyungo/ram",
+			"revision": "4102657a3f4885557c5e19dee53decb1fbf49d2a",
+			"revisionTime": "2017-03-09T13:03:54Z"
+		},
+		{
+			"checksumSHA1": "ufG04XwbDZklJlmRINMh4DErUiI=",
+			"path": "github.com/denverdino/aliyungo/slb",
+			"revision": "4102657a3f4885557c5e19dee53decb1fbf49d2a",
+			"revisionTime": "2017-03-09T13:03:54Z"
+		},
+		{
+			"checksumSHA1": "Lp0KtT7ycgq31ox3Uzhpxyw0U+Y=",
+			"path": "github.com/denverdino/aliyungo/util",
+			"revision": "4102657a3f4885557c5e19dee53decb1fbf49d2a",
+			"revisionTime": "2017-03-09T13:03:54Z"
+		},
+		{
 			"checksumSHA1": "/WG++Jij8INZ80tER+FAiIDMmws=",
 			"comment": "v3.1.0-beta",
 			"path": "github.com/Azure/azure-sdk-for-go/arm/compute",
