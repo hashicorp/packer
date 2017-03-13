@@ -49,10 +49,14 @@ can be configured for this builder.
 ### Required:
 
 -   `source_dir` (string) - The source directory of the existing export, which
-    should be the output of hyper-v iso builder or manually exports from hyper-v
-    manager. The directory should contains a virtual hard disk file, a .vmcx file
-    for VM configuration and .vmrs file for runtime state data. The builder will
-    try to find the .vmcx file and import virtual machine by PowerShell commands.
+    should be an output of hyper-v iso builder or a manually export from hyper-v
+    manager. The directory should contains two sub-directories, one for virtual 
+    hard disk file and another one for VM configuration file. The configuration
+    filename should be a GUID (virtual machine ID) with .xml extension (Windows 
+    Server 2012) or .vmcx extension (Windows Server 2016).
+    
+    The builder will try to find the **first match** configuration file and import
+    virtual machine by PowerShell commands.
 
 ### Optional:
 
