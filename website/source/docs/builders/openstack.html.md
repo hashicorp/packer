@@ -144,14 +144,21 @@ builder.
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
     generate a temporary keypair.
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
-    must be specified with this.
+    or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
-    authenticate connections to the source instance. No temporary key pair will
-    be used, and the values of `ssh_password` and `ssh_private_key_file` will
-    be ignored. Useful for when a temporary keypair can't be used, or when using
-    a certificate authority for SSH authentication.
+    authenticate connections to the source instance. No temporary keypair will
+    be created, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. To use this option with a key pair already configured in the source
+    image, leave the `ssh_keypair_name` blank. To associate an existing key pair
+    with the source instance, set the `ssh_keypair_name` field to the name
+    of the key pair.
+
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
