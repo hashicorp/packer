@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/mitchellh/packer/common/uuid"
 	"github.com/mitchellh/packer/helper/communicator"
 	"github.com/mitchellh/packer/template/interpolate"
 )
@@ -11,10 +12,11 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	Comm           communicator.Config `mapstructure:",squash"`
-	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
-	SSHInterface   string              `mapstructure:"ssh_interface"`
-	SSHIPVersion   string              `mapstructure:"ssh_ip_version"`
+	Comm                 communicator.Config `mapstructure:",squash"`
+	SSHKeyPairName       string              `mapstructure:"ssh_keypair_name"`
+	TemporaryKeyPairName string              `mapstructure:"temporary_key_pair_name"`
+	SSHInterface         string              `mapstructure:"ssh_interface"`
+	SSHIPVersion         string              `mapstructure:"ssh_ip_version"`
 
 	SourceImage      string            `mapstructure:"source_image"`
 	SourceImageName  string            `mapstructure:"source_image_name"`
@@ -38,6 +40,15 @@ type RunConfig struct {
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
+	// If we are not given an explicit ssh_keypair_name or
+	// ssh_private_key_file, then create a temporary one, but only if the
+	// temporary_key_pair_name has not been provided and we are not using
+	// ssh_password.
+	if c.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
+		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+
+		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+	}
 
 	if c.UseFloatingIp && c.FloatingIpPool == "" {
 		c.FloatingIpPool = "public"
