@@ -221,7 +221,8 @@ func ImportVirtualMachine(vmName string, sourcePath string, path string) error {
 
 	var script = `
 param([string]$vmName, [string]$sourcePath, [string]$path)
-Get-Childitem $sourcePath -Recurse *.vmcx | % { $_.FullName } | Import-VM -Copy -GenerateNewId -VhdDestinationPath $path | % { $_.Name } | Rename-VM -NewName $vmName
+$vmPattern = "*-*-*-*-*.vmcx", "*-*-*-*-*.xml"
+Get-Childitem $sourcePath -Recurse -Include $vmPattern | % { $_.FullName } | Import-VM -Copy -GenerateNewId -VhdDestinationPath $path | % { $_.Name } | Rename-VM -NewName $vmName
 `
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, sourcePath, path)
