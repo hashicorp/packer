@@ -184,7 +184,7 @@ each category, the available configuration keys are alphabetized.
         volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
         volumes
 
-    -   `root_device_name` (string) - The root device name. For example, `xvda`.
+-   `root_device_name` (string) - The root device name. For example, `xvda`.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
