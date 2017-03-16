@@ -1,4 +1,16 @@
-## (Unreleased)
+## 1.0rc1 (March 16, 2017)
+
+### BUG FIXES:
+
+* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
+* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+
+### IMRPOVEMENTS:
+
+* builder/amazon: validate ssh key name/file. [GH-4665]
+* builder/amazon: set force_deregister to true on -force. [GH-4649]
+* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
+* website: fix display on ios devices. [GH-4618]
 
 ### BUG FIXES:
 
