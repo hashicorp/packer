@@ -633,9 +633,10 @@
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
-			"checksumSHA1": "9Vh2o3Vs6HzI8P04ks4kvIpegco=",
+			"checksumSHA1": "5x1RX5m8SCkCRLyLL8wBc0qJpV8=",
 			"path": "github.com/mitchellh/multistep",
-			"revision": "162146fc57112954184d90266f4733e900ed05a5"
+			"revision": "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d",
+			"revisionTime": "2017-03-16T18:53:39Z"
 		},
 		{
 			"checksumSHA1": "VBo7ciCNRr7wNVFmBTW8sm4PQ14=",
