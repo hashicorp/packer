@@ -1,5 +1,20 @@
 ## (Unreleased)
 
+### BUG FIXES:
+
+* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
+* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+
+### IMRPOVEMENTS:
+
+* builder/amazon: validate ssh key name/file. [GH-4665]
+* builder/amazon: set force_deregister to true on -force. [GH-4649]
+* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
+* website: fix display on ios devices. [GH-4618]
+* builder/openstack: Add ssh agent support. [GH-4655]
+* builder/parallels-iso: Configuration of disk type, plain or expanding.
+    [GH-4621]
+
 ## 0.12.3 (March 1, 2017)
 
 ### FEATURES:
@@ -31,7 +46,6 @@
     [GH-4529]
 * builder/azure:: add two new config variables for temp_compute_name and
     temp_resource_group_name. [GH-4468]
-
 
 ### BUG FIXES:
 
