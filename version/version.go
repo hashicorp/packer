@@ -20,7 +20,7 @@ func FormattedVersion() string {
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "%s", Version)
 	if VersionPrerelease != "" {
-		fmt.Fprintf(&versionString, ".%s", VersionPrerelease)
+		fmt.Fprintf(&versionString, "-%s", VersionPrerelease)
 
 		if GitCommit != "" {
 			fmt.Fprintf(&versionString, " (%s)", GitCommit)
