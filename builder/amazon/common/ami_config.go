@@ -21,6 +21,7 @@ type AMIConfig struct {
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
+	AMISkipRegister         bool              `mapstructure:"skip_register_ami"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
@@ -29,7 +30,7 @@ type AMIConfig struct {
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
-	if c.AMIName == "" {
+	if c.AMIName == "" && !c.AMISkipRegister {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
 	}
 

@@ -15,10 +15,17 @@ import (
 type StepPreValidate struct {
 	DestAmiName     string
 	ForceDeregister bool
+	SkipRegister    bool
 }
 
 func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.SkipRegister {
+		ui.Say("Skip Register flag found, skipping prevalidating AMI Name")
+		return multistep.ActionContinue
+	}
+
 	if s.ForceDeregister {
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")
 		return multistep.ActionContinue

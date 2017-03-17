@@ -204,6 +204,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepPreValidate{
 			DestAmiName:     b.config.AMIName,
 			ForceDeregister: b.config.AMIForceDeregister,
+			SkipRegister:    b.config.AMISkipRegister,
 		},
 		&awscommon.StepSourceAMIInfo{
 			SourceAmi:          b.config.SourceAmi,
@@ -256,6 +257,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				b.config.RunConfig.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
+	}
+
+	amiCreationSteps := []multistep.Step{
 		&StepUploadX509Cert{},
 		&StepBundleVolume{
 			Debug: b.config.PackerDebug,
@@ -288,6 +292,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SnapshotTags: b.config.SnapshotTags,
 			Ctx:          b.config.ctx,
 		},
+	}
+
+	if !b.config.AMISkipRegister {
+		steps = append(steps, amiCreationSteps...)
 	}
 
 	// Run!
