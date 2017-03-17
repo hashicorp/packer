@@ -4,6 +4,9 @@
 
 * builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
 * builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+* core: show correct step name when debugging. [GH-4672]
+* builder/virtualbox: fix `none` communicator by allowing skipping upload of
+    version file. [GH-4678]
 
 ### IMRPOVEMENTS:
 
