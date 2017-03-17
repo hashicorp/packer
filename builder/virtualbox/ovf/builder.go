@@ -119,7 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			WinRMPort: vboxcommon.SSHPort,
 		},
 		&vboxcommon.StepUploadVersion{
-			Path: b.config.VBoxVersionFile,
+			Path: *b.config.VBoxVersionFile,
 		},
 		&vboxcommon.StepUploadGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,
