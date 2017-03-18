@@ -439,6 +439,10 @@ func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", path)
 }
 
+func (d *ESX5Driver) remove(path string) error {
+	return d.sh("rm", "-rf", path)
+}
+
 func (d *ESX5Driver) upload(dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {

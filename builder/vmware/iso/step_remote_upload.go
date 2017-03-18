@@ -2,17 +2,19 @@ package iso
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/mitchellh/multistep"
 	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
 	"github.com/mitchellh/packer/packer"
-	"log"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
 // (if it can) and stores that new remote path into the state bag.
 type stepRemoteUpload struct {
-	Key     string
-	Message string
+	Key       string
+	Message   string
+	DoCleanup bool
 }
 
 func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
@@ -48,4 +50,27 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
+	if !s.DoCleanup {
+		return
+	}
+
+	driver := state.Get("driver").(vmwcommon.Driver)
+	// ui := state.Get("ui").(packer.Ui)
+
+	remote, ok := driver.(RemoteDriver)
+	if !ok {
+		return
+	}
+
+	path, ok := state.Get(s.Key).(string)
+	if !ok {
+		return
+	}
+
+	log.Printf("Cleaning up remote path: %s", path)
+	err := remote.remove(path)
+	if err != nil {
+		log.Printf("Error cleaning up: %s", err)
+	}
+
 }
