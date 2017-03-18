@@ -20,6 +20,10 @@
 
 ## 0.12.3 (March 1, 2017)
 
+### BACKWARDS INCOMPATIBILITIES:
+
+* provisioner/ansible: by default, the staging dir will be randomized. [GH-4472]
+
 ### FEATURES:
 
 * **New builder:** `ebs-surrogate` for building AMIs from EBS volumes. [GH-4351]
@@ -36,7 +40,6 @@
 * communicator/winrm: support ProxyFromEnvironment. [GH-4463]
 * core: make VNC links clickable in terminal. [GH-4497] [GH-4498]
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
-* provisioner/ansible: use randomized staging dir [GH-4472]
 * communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
 * builder/amazon: enable ena when `enhanced_networking` is set. [GH-4578]
 * builder/vmware-esxi: try for longer to connect to vnc port. [GH-4480]
