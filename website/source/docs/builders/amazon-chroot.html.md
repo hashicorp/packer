@@ -367,7 +367,7 @@ provisioning commands to install the os and bootloader.
 ``` {.javascript}
 {
   "type": "amazon-chroot",
-  "ami_name": "packer-from-scratch {{timestamp}}"
+  "ami_name": "packer-from-scratch {{timestamp}}",
   "from_scratch": true,
   "ami_virtualization_type": "hvm",
   "pre_mount_commands": [
