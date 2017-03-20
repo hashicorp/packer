@@ -239,9 +239,9 @@ func (c *comm) newSession() (session *ssh.Session, err error) {
 		}
 
 		if c.client == nil {
-			err = errors.New("client not available")
+			return nil, errors.New("client not available")
 		} else {
-			session, err = c.client.NewSession()
+			return c.client.NewSession()
 		}
 	}
 
