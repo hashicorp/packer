@@ -8,6 +8,7 @@
 * builder/virtualbox: fix `none` communicator by allowing skipping upload of
     version file. [GH-4678]
 * communicator/ssh: fix nil pointer error. [GH-4690]
+* builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
 
 ### IMRPOVEMENTS:
 
