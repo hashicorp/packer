@@ -7,6 +7,7 @@
 * core: show correct step name when debugging. [GH-4672]
 * builder/virtualbox: fix `none` communicator by allowing skipping upload of
     version file. [GH-4678]
+* communicator/ssh: fix nil pointer error. [GH-4690]
 
 ### IMRPOVEMENTS:
 
