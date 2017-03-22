@@ -38,6 +38,9 @@ type Config struct {
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
 
+	// The dir where we will copy and execute the playbook file.
+	PlaybookFileDir string `mapstructure:"playbook_file_dir"`
+
 	// An array of local paths of playbook files to upload.
 	PlaybookPaths []string `mapstructure:"playbook_paths"`
 
@@ -168,7 +171,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	ui.Message("Uploading main Playbook file...")
 	src := p.config.PlaybookFile
-	dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+	dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, p.config.PlaybookFileDir, filepath.Base(src)))
 	if err := p.uploadFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Error uploading main playbook: %s", err)
 	}
@@ -291,7 +294,7 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 }
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
-	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
+	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, p.config.PlaybookFileDir, filepath.Base(p.config.PlaybookFile)))
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := ""
