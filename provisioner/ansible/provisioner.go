@@ -144,7 +144,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) getVersion() error {
 	out, err := exec.Command(p.config.Command, "--version").Output()
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"Error running \"%s --version\": %s", p.config.Command, err.Error())
 	}
 
 	versionRe := regexp.MustCompile(`\w (\d+\.\d+[.\d+]*)`)
