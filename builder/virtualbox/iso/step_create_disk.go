@@ -2,12 +2,13 @@ package iso
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/packer"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/multistep"
+	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
+	"github.com/mitchellh/packer/packer"
 )
 
 // This step creates the virtual disk that will be used as the
@@ -55,7 +56,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	// the IDE controller above because some other things (disks) require
 	// that.
 	if config.HardDriveInterface == "sata" || config.ISOInterface == "sata" {
-		if err := driver.CreateSATAController(vmName, "SATA Controller"); err != nil {
+		if err := driver.CreateSATAController(vmName, "SATA Controller", config.SATAPortCount); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
