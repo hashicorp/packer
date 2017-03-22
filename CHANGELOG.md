@@ -19,6 +19,8 @@
 * builder/openstack: Add ssh agent support. [GH-4655]
 * builder/parallels-iso: Configuration of disk type, plain or expanding.
     [GH-4621]
+* builder/ansible: Clearer error message when we have problems getting the
+    ansible version. [GH-4694]
 
 ## 0.12.3 (March 1, 2017)
 
