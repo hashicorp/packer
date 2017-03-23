@@ -9,6 +9,8 @@
     version file. [GH-4678]
 * communicator/ssh: fix nil pointer error. [GH-4690]
 * builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
+* builder/amazon: Fix b/c issue by reporting again the tags we create.
+    [GH-4704]
 
 ### IMRPOVEMENTS:
 
