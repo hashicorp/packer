@@ -452,7 +452,10 @@ func TestFileUriTransforms(t *testing.T) {
 	cwd = filepath.ToSlash(cwd)
 	volume = filepath.VolumeName(cwd)
 	share = volume
-	if share[len(share)-1] == ':' {
+
+	// if a volume was found (on windows), replace the ':' from
+	// C: to C$ to convert it into a hidden windows share.
+	if len(share) > 1 && share[len(share)-1] == ':' {
 		share = share[:len(share)-1] + "$"
 	}
 	cwd = cwd[len(volume):]
