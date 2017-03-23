@@ -289,6 +289,8 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
+	ReportTags(ui, ec2Tags)
+
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
 		Resources: []*string{instance.InstanceId},
