@@ -161,7 +161,6 @@ func (d *DownloadClient) Get() (string, error) {
 	local, ok := d.downloader.(LocalDownloader)
 	if !ok && !d.config.CopyFile {
 		return "", fmt.Errorf("Not allowed to use uri scheme %s in no copy file mode : %T", u.Scheme, d.downloader)
-		d.config.CopyFile = true
 	}
 
 	// If we're copying the file, then just use the actual downloader
