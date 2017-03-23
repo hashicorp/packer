@@ -44,6 +44,8 @@ func (s *StepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	ReportTags(ui, tags)
+
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Resources: volumeIds,
 		Tags:      tags,
