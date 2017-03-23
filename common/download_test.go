@@ -483,15 +483,19 @@ func TestFileUriTransforms(t *testing.T) {
 		t.Logf("TestFileUriTransforms : Result Path '%s'", res)
 	}
 
-	// ...and finally the oddball windows native path
-	// smb://host/sharename/file -> \\host\sharename\file
-	testcase := host + "/" + share + "/" + cwd[1:] + "/%s"
-	uri := "smb://" + fmt.Sprintf(testcase, testpath)
-	t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
-	res, err := SimulateFileUriDownload(t, uri)
-	if err != nil {
-		t.Errorf("Unable to transform uri '%s' into a path", uri)
-		return
+	// smb protocol depends on platform support which currently
+	// only exists on windows.
+	if runtime.GOOS == "windows" {
+		// ...and finally the oddball windows native path
+		// smb://host/sharename/file -> \\host\sharename\file
+		testcase := host + "/" + share + "/" + cwd[1:] + "/%s"
+		uri := "smb://" + fmt.Sprintf(testcase, testpath)
+		t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
+		res, err := SimulateFileUriDownload(t, uri)
+		if err != nil {
+			t.Errorf("Unable to transform uri '%s' into a path", uri)
+			return
+		}
+		t.Logf("TestFileUriTransforms : Result Path '%s'", res)
 	}
-	t.Logf("TestFileUriTransforms : Result Path '%s'", res)
 }

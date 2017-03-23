@@ -637,6 +637,12 @@ func (d *SMBDownloader) toPath(base string, uri url.URL) (string, error) {
 }
 
 func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
+
+	/* first we warn the world if we're not running windows */
+	if runtime.GOOS != "windows" {
+		return fmt.Errorf("Support for SMB based uri's are not supported on %s", runtime.GOOS)
+	}
+
 	d.active = false
 
 	/* convert the uri using the net/url module to a UNC path */
