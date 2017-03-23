@@ -110,6 +110,10 @@ builder.
     [ListSubnets](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/latest/Subnet/ListSubnets)
     operation available in the Core Services API.
 
+    Note: the subnet must be configured to allow access via your chosen
+    [communicator](/docs/templates/communicator.html) (communicator defaults to
+    [SSH tcp/22](/docs/templates/communicator.html#ssh_port)).
+
  -  `tenancy_ocid` (string) - The OCID of your tenancy. Overrides value provided
     by the
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
