@@ -54,7 +54,7 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 			}
 			vboxErr = driver.VBoxManage(command...)
 			if vboxErr != nil {
-				log.Printf("Error removing floppy controller. Retrying")
+				log.Printf("Error removing floppy controller. Retrying.")
 				return false, nil
 			}
 			return true, nil
