@@ -115,7 +115,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
     that will be copied into the chroot environment prior to provisioning. Defaults
-    to `/etc/resolv.conf` so that DNS lookups work.
+    to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip
+    copying `/etc/resolv.conf`.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
