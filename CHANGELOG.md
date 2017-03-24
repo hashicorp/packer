@@ -24,6 +24,9 @@
     [GH-4621]
 * builder/ansible: Clearer error message when we have problems getting the
     ansible version. [GH-4694]
+* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
+    prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
+    isn't given at all, the default behavior remains. [GH-4708]
 
 ## 0.12.3 (March 1, 2017)
 
