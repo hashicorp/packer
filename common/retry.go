@@ -8,13 +8,15 @@ import (
 
 var RetryExhaustedError error = fmt.Errorf("Function never succeeded in Retry")
 
+type RetryableFunc func() (bool, error)
+
 // Retry retries a function up to numTries times with exponential backoff.
 // If numTries == 0, retry indefinitely. If interval == 0, Retry will not delay retrying and there will be
 // no exponential backoff. If maxInterval == 0, maxInterval is set to +Infinity.
 // Intervals are in seconds.
 // Returns an error if initial > max intervals, if retries are exhausted, or if the passed function returns
 // an error.
-func Retry(initialInterval float64, maxInterval float64, numTries uint, function func() (bool, error)) error {
+func Retry(initialInterval float64, maxInterval float64, numTries uint, function RetryableFunc) error {
 	if maxInterval == 0 {
 		maxInterval = math.Inf(1)
 	} else if initialInterval < 0 || initialInterval > maxInterval {
