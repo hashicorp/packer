@@ -1,11 +1,10 @@
 ---
-description: Learn how Packer fits in with the rest of the HashiCorp ecosystem of tools
 layout: intro
-next_title: 'Getting Started: Install Packer'
-next_url: '/intro/getting-started/setup.html'
-page_title: Packer and the HashiCorp Ecosystem
-prev_url: '/intro/platforms.html'
-...
+sidebar_current: intro-ecosystem
+page_title: Packer and the HashiCorp Ecosystem - Introduction
+description: |-
+  Learn how Packer fits in with the rest of the HashiCorp ecosystem of tools
+---
 
 # Packer and the HashiCorp Ecosystem
 
