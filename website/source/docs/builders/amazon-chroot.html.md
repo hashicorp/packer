@@ -117,7 +117,7 @@ each category, the available configuration keys are alphabetized.
     that will be copied into the chroot environment prior to provisioning. Defaults
     to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip
     copying `/etc/resolv.conf`. You may need to do this if you're building
-    an image that used systemd.
+    an image that uses systemd.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
