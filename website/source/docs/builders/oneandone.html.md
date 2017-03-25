@@ -1,9 +1,10 @@
 ---
-description: |
-    The 1&1 builder is able to create images for 1&1 cloud.
 layout: docs
-page_title: 1&1 Builder
-...
+sidebar_current: docs-builders-oneandone
+page_title: 1&1 - Builders
+description: |-
+  The 1&1 builder is able to create images for 1&1 cloud.
+---
 
 # 1&1 Builder
 
@@ -23,21 +24,21 @@ builder.
 
 ### Required
 
--   `source_image_name` (string) - 1&1 Server Appliance name of type `IMAGE`.
+- `source_image_name` (string) - 1&1 Server Appliance name of type `IMAGE`.
 
--   `token` (string) - 1&1 REST API Token. This can be specified via environment variable `ONEANDONE_TOKEN`
+- `token` (string) - 1&1 REST API Token. This can be specified via environment variable `ONEANDONE_TOKEN`
 
 ### Optional
 
--   `data_center_name` - Name of virtual data center. Possible values "ES", "US", "GB", "DE". Default value "US"
- 
--   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
+- `data_center_name` - Name of virtual data center. Possible values "ES", "US", "GB", "DE". Default value "US"
 
--   `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
+- `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
--   `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
+- `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
 
--   `url` (string) - Endpoint for the 1&1 REST API. Default URL "https://cloudpanel-api.1and1.com/v1"
+- `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
+
+- `url` (string) - Endpoint for the 1&1 REST API. Default URL "https://cloudpanel-api.1and1.com/v1"
 
 
 ## Example
@@ -46,14 +47,14 @@ Here is a basic example:
 
 ```json
 {
-   "builders":[
-      {
-         "type":"oneandone",
-         "disk_size":"50",
-         "image_name":"test5",
-         "source_image_name":"ubuntu1604-64min",
-         "ssh_username" :"root"
-      }
-   ]
+  "builders":[
+    {
+      "type":"oneandone",
+      "disk_size":"50",
+      "image_name":"test5",
+      "source_image_name":"ubuntu1604-64min",
+      "ssh_username" :"root"
+    }
+  ]
 }
 ```

@@ -1,13 +1,15 @@
 ---
-description: |
-    The artifice post-processor overrides the artifact list from an upstream builder
-    or post-processor. All downstream post-processors will see the new artifacts you
-    specify. The primary use-case is to build artifacts inside a packer builder --
-    for example, spinning up an EC2 instance to build a docker container -- and then
-    extracting the docker container and throwing away the EC2 instance.
 layout: docs
-page_title: 'Artifice Post-Processor'
-...
+sidebar_current: docs-post-processors-artifice
+page_title: Artifice - Post-Processors
+description: |-
+  The artifice post-processor overrides the artifact list from an upstream
+  builder or post-processor. All downstream post-processors will see the new
+  artifacts you specify. The primary use-case is to build artifacts inside a
+  packer builder -- for example, spinning up an EC2 instance to build a docker
+  container -- and then extracting the docker container and throwing away the
+  EC2 instance.
+---
 
 # Artifice Post-Processor
 
@@ -35,12 +37,12 @@ jars, binaries, tarballs, msi installers, and more.
 
 Artifice helps you tie together a few other packer features:
 
--   A builder, which spins up a VM (or container) to build your artifact
--   A provisioner, which performs the steps to create your artifact
--   A file provisioner, which downloads the artifact from the VM
--   The artifice post-processor, which identifies which files have been
+- A builder, which spins up a VM (or container) to build your artifact
+- A provisioner, which performs the steps to create your artifact
+- A file provisioner, which downloads the artifact from the VM
+- The artifice post-processor, which identifies which files have been
     downloaded from the VM
--   Additional post-processors, which push the artifact to Atlas, Docker
+- Additional post-processors, which push the artifact to Atlas, Docker
     hub, etc.
 
 You will want to perform as much work as possible inside the VM. Ideally the
@@ -53,7 +55,7 @@ The configuration allows you to specify which files comprise your artifact.
 
 ### Required:
 
--   `files` (array of strings) - A list of files that comprise your artifact.
+- `files` (array of strings) - A list of files that comprise your artifact.
     These files must exist on your local disk after the provisioning phase of
     packer is complete. These will replace any of the builder's original
     artifacts (such as a VM snapshot).
@@ -62,16 +64,16 @@ The configuration allows you to specify which files comprise your artifact.
 
 This minimal example:
 
-1.  Spins up a cloned VMware virtual machine
-2.  Installs a [consul](https://www.consul.io/) release
-3.  Downloads the consul binary
-4.  Packages it into a `.tar.gz` file
-5.  Uploads it to Atlas.
+1. Spins up a cloned VMware virtual machine
+1. Installs a [consul](https://www.consul.io/) release
+1. Downloads the consul binary
+1. Packages it into a `.tar.gz` file
+1. Uploads it to Atlas.
 
 VMX is a fast way to build and test locally, but you can easily substitute
 another builder.
 
-``` {.javascript}
+```json
 {
   "builders": [
     {
@@ -126,21 +128,25 @@ proceeding artifact is passed to subsequent post-processors. If you use only one
 set of square braces the post-processors will run individually against the build
 artifact (the vmx file in this case) and it will not have the desired result.
 
-      "post-processors": [
-        [       <--- Start post-processor chain
-          {
-            "type": "artifice",
-            "files": ["consul"]
-          },
-          {
-            "type": "atlas",
-            ...
-          }
-        ],      <--- End post-processor chain
-        {
-          "type":"compress"  <-- Standalone post-processor
-        }
-      ]
+```javascript
+{
+  "post-processors": [
+    [       // <--- Start post-processor chain
+      {
+        "type": "artifice",
+        "files": ["consul"]
+      },
+      {
+        "type": "atlas",
+        ...
+      }
+    ],      // <--- End post-processor chain
+    {
+      "type":"compress"  // <-- Standalone post-processor
+    }
+  ]
+}
+```
 
 You can create multiple post-processor chains to handle multiple builders (for
 example, building linux and windows binaries during the same build).
