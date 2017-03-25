@@ -1,0 +1,50 @@
+//
+// NEW STUFF
+// ---------------------
+//
+
+// Colors
+$white: #FFFFFF;
+$black: #000000;
+
+$packer-blue: #1DAEFF;
+$packer-blue-dark: #1D94DD;
+$vagrant-blue: #1563FF;
+$vagrant-blue-dark: #104EB2;
+
+// Typography
+$font-family-klavika:   'klavika-web', 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-family-open-sans: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-family-monospace: 'Menlo', 'Monaco', 'Consolas', "Courier New", monospace;
+$font-size:             15px;
+$font-weight-reg:       400;
+$font-weight-bold:      600;
+
+// Body
+$body-font-color: $gray-darker;
+$body-link-color: $packer-blue-dark;
+
+// Sidebar
+$sidebar-background-color: $white;
+$sidebar-font-size: $font-size - 2;
+$sidebar-link-color: $body-font-color;
+$sidebar-link-color-hover: $black;
+$sidebar-link-color-active: $body-link-color;
+$sidebar-font-family: $font-family-open-sans;
+$sidebar-font-weight: $font-weight-reg;
+
+// Header
+$header-height: 92px;
+$header-font-size: $font-size - 2;
+$header-link-color: $body-font-color;
+$header-link-color-hover: $packer-blue-dark;
+
+// Footer
+$footer-font-size: $font-size - 2;
+$footer-link-color: $body-font-color;
+$footer-link-color-hover: $black;
+
+// Buttons
+$button-font-family: $font-family-klavika;
+$button-font-size: $font-size - 2;
+$button-font-weight: $font-weight-bold;

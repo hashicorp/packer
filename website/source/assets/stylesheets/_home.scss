@@ -1,0 +1,119 @@
+#page-home {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: $font-weight-bold;
+  }
+
+  h1 {
+    font-size: 36px;
+    letter-spacing: -0.02em
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 18px;
+  }
+
+  .hero {
+    margin-top: 140px;
+    text-align: center;
+
+    .button {
+      margin: 5px;
+    }
+  }
+
+  section {
+    background: $white;
+    padding: 100px 0;
+  }
+
+  section.marketing {
+    h2 {
+      font-family: $font-family-klavika;
+      font-size: 36px;
+      font-weight: $font-weight-bold;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin: 20px 0 10px 0;
+      padding: 0;
+    }
+
+    p {
+      font-family: $font-family-open-sans;
+      font-size: 16px;
+      letter-spacing: 0.01em;
+      line-height: 1.8;
+      margin: 0 0 10px;
+    }
+
+    span.callout {
+      background: $black;
+      color: $white;
+      display: inline-block;
+      font-family: $font-family-klavika;
+      font-size: 18px;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      margin: 0;
+      padding: 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    &.invert {
+      background: $packer-blue;
+
+      h2 {
+        color: $white;
+      }
+
+      p {
+        color: $white;
+        font-weight: $font-weight-bold;
+      }
+    }
+
+    &#automated {
+      img {
+        @media (min-width: 1024px) {
+          padding-right: 40px;
+        }
+
+        @media (max-width: 992px) {
+          padding-bottom: 40px;
+        }
+      }
+    }
+
+    &#integrations {
+      .integrations-list {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        margin-top: 30px;
+
+        @media (min-width: 1024px) {
+          padding-left: 40px;
+        }
+
+        .integration {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 5px solid $packer-blue;
+          height: 100px;
+          width: 33.3%;
+          background-color: $white;
+        }
+      }
+    }
+  }
+}
