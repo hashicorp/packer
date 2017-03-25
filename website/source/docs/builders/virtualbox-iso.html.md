@@ -100,6 +100,12 @@ builder.
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
+-   `disk_variant` (string) - Comma separated list of variant flags used during
+    the creation of the primary disk.
+    For possible values see the `--variant` parameter of the [VBoxManage createhd]
+    (https://www.virtualbox.org/manual/ch08.html#vboxmanage-createvdi) command.
+    The default value is Standard.
+
 -   `export_opts` (array of strings) - Additional options to pass to the
     [VBoxManage
     export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This

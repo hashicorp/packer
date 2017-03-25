@@ -39,6 +39,7 @@ type Config struct {
 
 	BootCommand            []string `mapstructure:"boot_command"`
 	DiskSize               uint     `mapstructure:"disk_size"`
+	DiskVariant            string   `mapstructure:"disk_variant"`
 	GuestAdditionsMode     string   `mapstructure:"guest_additions_mode"`
 	GuestAdditionsPath     string   `mapstructure:"guest_additions_path"`
 	GuestAdditionsSHA256   string   `mapstructure:"guest_additions_sha256"`
@@ -96,6 +97,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskVariant == "" {
+		b.config.DiskVariant = "Standard"
 	}
 
 	if b.config.GuestAdditionsMode == "" {
