@@ -1,17 +1,15 @@
 ---
-description: |
-    In the previous page of this guide, you created your first image with Packer.
-    The image you just built, however, was basically just a repackaging of a
-    previously existing base AMI. The real utility of Packer comes from being able
-    to install and configure software into the images as well. This stage is also
-    known as the *provision* step. Packer fully supports automated provisioning in
-    order to install software onto the machines prior to turning them into images.
 layout: intro
-next_title: Parallel Builds
-next_url: '/intro/getting-started/parallel-builds.html'
-page_title: Provision
-prev_url: '/intro/getting-started/build-image.html'
-...
+sidebar_current: intro-getting-started-provision
+page_title: Provision - Getting Started
+description: |-
+  In the previous page of this guide, you created your first image with Packer.
+  The image you just built, however, was basically just a repackaging of a
+  previously existing base AMI. The real utility of Packer comes from being able
+  to install and configure software into the images as well. This stage is also
+  known as the *provision* step. Packer fully supports automated provisioning in
+  order to install software onto the machines prior to turning them into images.
+---
 
 # Provision
 
@@ -39,7 +37,7 @@ shell provisioner that comes with Packer to install Redis. Modify the
 `example.json` template we made previously and add the following. We'll explain
 the various parts of the new configuration following the code block below.
 
-``` {.javascript}
+```json
 {
   "variables": ["..."],
   "builders": ["..."],
@@ -55,7 +53,7 @@ the various parts of the new configuration following the code block below.
 }
 ```
 
--&gt; **Note:** The `sleep 30` in the example above is very important. Because
+-> **Note:** The `sleep 30` in the example above is very important. Because
 Packer is able to detect and SSH into the instance as soon as SSH is available,
 Ubuntu actually doesn't get proper amounts of time to initialize. The sleep
 makes sure that the OS properly initializes.
