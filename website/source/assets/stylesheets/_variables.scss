@@ -1,16 +1,14 @@
-//
-// NEW STUFF
-// ---------------------
-//
-
 // Colors
 $white: #FFFFFF;
 $black: #000000;
+$gray-darker: #555555;
 
 $packer-blue: #1DAEFF;
 $packer-blue-dark: #1D94DD;
 $vagrant-blue: #1563FF;
 $vagrant-blue-dark: #104EB2;
+$vault-black: #000000;
+$vault-blue: #00ABE0;
 
 // Typography
 $font-family-klavika:   'klavika-web', 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -37,7 +35,7 @@ $sidebar-font-weight: $font-weight-reg;
 $header-height: 92px;
 $header-font-size: $font-size - 2;
 $header-link-color: $body-font-color;
-$header-link-color-hover: $packer-blue-dark;
+$header-link-color-hover: $black;
 
 // Footer
 $footer-font-size: $font-size - 2;
