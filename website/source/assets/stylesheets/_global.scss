@@ -25,15 +25,7 @@ h1 {
   margin-bottom: 24px;
 }
 
-.center {
-  text-align: center;
-}
-
-.alert p:last-child {
-  margin-bottom: 0;
-}
-
-//Typekit utilites for hiding FOUC
+// Avoid FOUT
 .wf-loading {
   visibility: hidden;
 }

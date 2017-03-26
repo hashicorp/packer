@@ -1,12 +1,10 @@
 <% wrap_layout :inner do %>
   <% content_for :sidebar do %>
-    <div class="docs-sidebar hidden-print affix-top" role="complementary">
-      <ul class="nav docs-sidenav">
-        <li<%= sidebar_current("guides-veewee-to-packer") %>>
-          <a href="/guides/veewee-to-packer.html">Veewee to Packer</a>
-        </li>
-      </ul>
-    </div>
+    <ul class="nav docs-sidenav">
+      <li<%= sidebar_current("guides-veewee-to-packer") %>>
+        <a href="/guides/veewee-to-packer.html">Veewee to Packer</a>
+      </li>
+    </ul>
   <% end %>
 
   <%= yield %>
