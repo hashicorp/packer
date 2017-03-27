@@ -84,29 +84,29 @@ Allowed metadata fields that can be changed are:
 
 - CMD
 	- String, supports both array (escaped) and string form
-	- EX: `”CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
-	- EX: `"CMD nginx -g daemon off;”`
+	- EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
+	- EX: `"CMD nginx -g daemon off;"`
 - ENTRYPOINT
 	- String 
-	- EX: `“ENTRYPOINT /var/www/start.sh”`
+	- EX: `"ENTRYPOINT /var/www/start.sh"`
 - ENV
 	- String, note there is no equal sign: 
-	- EX: `“ENV HOSTNAME www.example.com”` not `“ENV HOSTNAME=www.example.com”`
+	- EX: `"ENV HOSTNAME www.example.com"` not `"ENV HOSTNAME=www.example.com"`
 - EXPOSE
 	- String, space separated ports 
-	- EX: `“EXPOSE 80 443”`
+	- EX: `"EXPOSE 80 443"`
 - MAINTAINER
 	- String 
-	- EX: `“MAINTAINER NAME”`
+	- EX: `"MAINTAINER NAME"`
 - USER
 	- String 
-	- EX: `“USER USERNAME”`
+	- EX: `"USER USERNAME"`
 - VOLUME
 	- String 
-	- EX: `“VOLUME FROM TO“`
+	- EX: `"VOLUME FROM TO"`
 - WORKDIR
 	- String
-	- EX: `“WORKDIR PATH”`
+	- EX: `"WORKDIR PATH"`
 
 ## Configuration Reference
 
