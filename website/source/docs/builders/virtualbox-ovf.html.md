@@ -266,7 +266,8 @@ builder.
     upload a file that contains the VirtualBox version that was used to create
     the machine. This information can be useful for provisioning. By default
     this is ".vbox\_version", which will generally be upload it into the
-    home directory.
+    home directory. Set to an empty string to skip uploading this file, which
+    can be useful when using the `none` communicator.
 
 -   `vm_name` (string) - This is the name of the virtual machine when it is
     imported as well as the name of the OVF file when the virtual machine

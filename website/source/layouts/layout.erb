@@ -34,12 +34,14 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NR2SD7C"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+
+    <%= mega_nav :packer %>
+
     <div id="header" class="navigation white <%= current_page.data.page_title == "home" ? "" : "navbar-static-top" %>">
-    	<div class="container-fluid">
+      <div class="container">
 				<div class="navbar-header">
 					<div class="navbar-brand">
 						<a class="logo" href="/">Packer</a>
-						<a class="by-hashicorp white" href="https://www.hashicorp.com/"><span class="svg-wrap">by</span><%= partial "layouts/svg/svg-by-hashicorp" %><%= partial "layouts/svg/svg-hashicorp-logo" %>Hashicorp</a>
 					</div>
 					<button class="navbar-toggle white" type="button">
 						<span class="sr-only">Toggle navigation</span>
@@ -72,7 +74,7 @@
     <%= yield %>
     <div class="clearfix"></div>
     <footer id="footer" class="navigation white">
-      <div class="container-fluid">
+      <div class="container">
         <div class="row">
           <div class="col-xs-12">
             <% # current_page.path does not have an extension, but

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/mitchellh/packer/packer"
@@ -255,6 +256,18 @@ func TestAnsibleGetVersion(t *testing.T) {
 	err := p.getVersion()
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestAnsibleGetVersionError(t *testing.T) {
+	var p Provisioner
+	p.config.Command = "./test-fixtures/exit1"
+	err := p.getVersion()
+	if err == nil {
+		t.Fatal("Should return error")
+	}
+	if !strings.Contains(err.Error(), "./test-fixtures/exit1 --version") {
+		t.Fatal("Error message should include command name")
 	}
 }
 
