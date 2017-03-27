@@ -26,6 +26,7 @@ type Config struct {
 
 	BootCommand    []string `mapstructure:"boot_command"`
 	RemoteType     string   `mapstructure:"remote_type"`
+	SkipCleanFiles bool     `mapstructure:"skip_clean_files"`
 	SkipCompaction bool     `mapstructure:"skip_compaction"`
 	SourcePath     string   `mapstructure:"source_path"`
 	VMName         string   `mapstructure:"vm_name"`

@@ -134,6 +134,11 @@ builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
 
+- `skip_clean_files` (boolean) - Files that are not important for the function
+    of a VMware virtual machine are discarded as part of the
+    build. Set this to `true` if you would like to keep such files.
+    Defaults to `false`.
+
 - `skip_compaction` (boolean) - VMware-created disks are defragmented and
     compacted at the end of the build process using `vmware-vdiskmanager`. In
     certain rare cases, this might actually end up making the resulting disks
