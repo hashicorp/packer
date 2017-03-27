@@ -105,6 +105,14 @@ builder.
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
+-   `disk_type` (string) - The type for image file based virtual disk drives,
+    defaults to `expand`. Valid options are `expand` (expanding disk) that the
+    image file is small initially and grows in size as you add data to it, and
+    `plain` (plain disk) that the image file has a fixed size from the moment it
+    is created (i.e the space is allocated for the full drive). Plain disks
+    perform faster than expanding disks. `skip_compaction` will be set to true
+    automatically for plain disks.
+
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on
@@ -218,9 +226,10 @@ builder.
     "5m", or five minutes.
 
 -   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
-    the build process using `prl_disk_tool` utility. In certain rare cases, this
-    might corrupt the resulting disk image. If you find this to be the case,
-    you can disable compaction using this configuration value.
+    the build process using `prl_disk_tool` utility (except for the case that
+    `disk_type` is set to `plain`). In certain rare cases, this might corrupt
+    the resulting disk image. If you find this to be the case, you can disable
+    compaction using this configuration value.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is
@@ -273,7 +282,7 @@ proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
@@ -287,9 +296,9 @@ proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 

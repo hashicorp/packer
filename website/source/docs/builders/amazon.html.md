@@ -28,7 +28,7 @@ Packer supports the following builders at the moment:
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
 
--   [amazon-ebssurrogate](/docs/builders/amazone-ebssurrogate.html) - Create EBS
+-   [amazon-ebssurrogate](/docs/builders/amazon-ebssurrogate.html) - Create EBS
     -backed AMIs from scratch. Works similarly to the `chroot` builder but does
     not require running in AWS. This is an **advanced builder and should not be
     used by newcomers**.

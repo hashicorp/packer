@@ -46,13 +46,6 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 ### Required:
 
--   `token` (string) - Your access token for the Atlas API.
-
--&gt; Login to Atlas to [generate an Atlas
-Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
-configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
-you can also use `token` configuration option.
-
 -   `artifact` (string) - The shorthand tag for your artifact that maps to
     Atlas, i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`.
     You must have access to the organization—hashicorp in this example—in order
@@ -68,6 +61,13 @@ you can also use `token` configuration option.
     `vagrant.box`.
 
 ### Optional:
+
+-   `token` (string) - Your access token for the Atlas API.
+
+-&gt; Login to Atlas to [generate an Atlas
+Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
+configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
+you can also use `token` configuration option.
 
 -   `atlas_url` (string) - Override the base URL for Atlas. This is useful if
     you're using Atlas Enterprise in your own network. Defaults to
