@@ -58,6 +58,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	if b.config.PackerConfig.PackerForce {
+		b.config.AMIForceDeregister = true
+	}
+
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)

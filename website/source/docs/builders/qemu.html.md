@@ -172,13 +172,18 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     is attached as the first floppy device. Currently, no support exists for
     creating sub-directories on the floppy. Wildcard characters (\*, ?,
     and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
+    the files found in the directory to the floppy. The summary size of the
+    listed files must not exceed 1.44 MB. The supported ways to move large
+    files into the OS are using `http_directory` or [the file provisioner](
+    https://www.packer.io/docs/provisioners/file.html).
 
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
@@ -417,7 +422,10 @@ command, they will be replaced by the proper key:
 -   `<waitXX> ` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers. For example: to simulate ctrl+c use
+`<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The

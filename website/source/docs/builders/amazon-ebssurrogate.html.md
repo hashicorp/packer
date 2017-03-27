@@ -49,15 +49,15 @@ builder.
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine. `source_ami_filter` may be used instead to populate this
     automatically.
-    
+
 -   `ami_root_device` (block device mapping) - A block device mapping describing
     the root device of the AMI. This looks like the mappings in `ami_block_device_mapping`,
     except with an additional field:
-    
-    - `source_device_name` (string) - The device name of the block device on the
-      source instance to be used as the root device for the AMI. This must correspond
-      to a block device in `launch_block_device_mapping`.
-    
+
+-   `source_device_name` (string) - The device name of the block device on the
+    source instance to be used as the root device for the AMI. This must correspond
+    to a block device in `launch_block_device_mapping`.
+
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
