@@ -57,7 +57,7 @@ Optional parameters:
 
 - `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
-    The value of this is treated as [configuration template](/docs/templates/configuration-templates.html).
+    The value of this is treated as [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
     to run, `Vars`, which is the list of `environment_vars`, if configured.
 

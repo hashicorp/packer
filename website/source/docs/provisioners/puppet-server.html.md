@@ -83,7 +83,7 @@ listed below:
 
 - `execute_command` (string) - This is optional. The command used to execute Puppet. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information. By default, Packer uses the following command:
 
 ```liquid

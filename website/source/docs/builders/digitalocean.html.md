@@ -70,7 +70,7 @@ builder.
 - `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. This must be unique. To help make this unique, use a
     function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+    templates](/docs/templates/engine.html) for more info)
 
 - `state_timeout` (string) - The time to wait, as a duration string, for a
     droplet to enter a desired state (such as "active") before timing out. The

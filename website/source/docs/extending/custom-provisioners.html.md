@@ -18,7 +18,7 @@ provisioner](/docs/provisioners/shell.html), which runs shell scripts within the
 machines.
 
 Prior to reading this page, it is assumed you have read the page on [plugin
-development basics](/docs/extending/developing-plugins.html).
+development basics](/docs/extending/plugins.html).
 
 Provisioner plugins implement the `packer.Provisioner` interface and are served
 using the `plugin.ServeProvisioner` function.
