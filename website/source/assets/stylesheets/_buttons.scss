@@ -42,4 +42,13 @@ $button-primary-font-color: $white;
       background: lighten($button-primary-background, 5%);
     }
   }
+
+  &.secondary {
+    color: $button-font-color;
+
+    &:hover {
+      color: $white;
+      background-color: $black;
+    }
+  }
 }
