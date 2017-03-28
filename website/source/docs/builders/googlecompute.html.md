@@ -109,6 +109,32 @@ is assumed to be the path to the file containing the JSON.
 }
 ```
 
+### Windows Example
+
+Running WinRM requires that it is opened in the firewall and that the VM enables WinRM for the
+user used to connect in a startup-script.
+
+``` {.json}
+{
+  "builders": [{
+    "type": "googlecompute",
+    "account_file": "account.json",
+    "project_id": "my project",
+    "source_image": "windows-server-2016-dc-v20170227",
+    "disk_size": "50",
+    "machine_type": "n1-standard-1",
+    "communicator": "winrm",
+    "winrm_username": "packer_user",
+    "winrm_insecure": true,
+    "winrm_use_ssl": true,
+    "metadata": {
+      "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_packer & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+    },
+    "zone": "us-central1-a"
+  }]
+}
+```
+
 ## Configuration Reference
 
 Configuration options are organized below into two categories: required and
@@ -235,7 +261,10 @@ such support is implemented, startup scripts should be robust, as an image will 
 when a startup script fails.
 
 ### Windows
-Startup scripts do not work on Windows builds, at this time.
+
+A Windows startup script can only be provided via the 'windows-startup-script-cmd' instance
+creation `metadata` field. The builder will _not_ wait for a Windows startup scripts to
+terminate. You have to ensure that it finishes before the instance shuts down.
 
 ### Logging
 Startup script logs can be copied to a Google Cloud Storage (GCS) location specified via the
