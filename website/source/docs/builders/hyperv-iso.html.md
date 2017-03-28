@@ -114,7 +114,7 @@ can be configured for this builder.
 -   `generation` (integer) - The Hyper-V generation for the virtual machine. By
     default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
-    drives and dvd drives will also be scsi and not ide. 
+    drives and dvd drives will also be scsi and not ide.
 
 -   `guest_additions_mode` (string) - How should guest additions be installed.
     If value `attach` then attach iso image with by specified by `guest_additions_path`.
@@ -130,12 +130,10 @@ can be configured for this builder.
     available as variables in `boot_command`. This is covered in more detail
     below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
-    maximum port to use for the HTTP server started to serve the `http_directory`.
-    Because Packer often runs in parallel, Packer will choose a randomly available
-    port in this range to run the HTTP server. If you want to force the HTTP
-    server to be on one port, make this minimum and maximum port the same.
-    By default the values are 8000 and 9000, respectively.
+-   `http_port` (integer) - Port to use for the HTTP server started to serve
+    the `http_directory`.  Because Packer often runs in parallel, Packer will,
+    by default, let the kernel choose a randomly selected port to run the HTTP
+    server. If you want to force the HTTP server to be on one port, set this.
 
 -   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to download
@@ -160,10 +158,10 @@ can be configured for this builder.
 -   `ram_size` (integer) - The size, in megabytes, of the ram to create
     for the VM. By default, this is 1 GB.
 
-*   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a 
-    VM when it is booted. This is most useful for unattended Windows installs, which 
-    look for an `Autounattend.xml` file on removable media. By default, no 
-    secondary iso will be attached. 
+*   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a
+    VM when it is booted. This is most useful for unattended Windows installs, which
+    look for an `Autounattend.xml` file on removable media. By default, no
+    secondary iso will be attached.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the machine once all
     the provisioning is done. By default this is an empty string, which tells Packer to just
@@ -179,16 +177,16 @@ can be configured for this builder.
 -   `skip_compaction` (bool) - If true skip compacting the hard disk for virtual machine when
     exporting. This defaults to false.
 
--   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting 
+-   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting
     this to an empty string, Packer will try to determine the switch to use by looking for
     external switch that is up and running.
 
--   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card. 
+-   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
 
 -   `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
-    machine. By default none is set. If none is set then vlans are not set on the virtual machine's 
+    machine. By default none is set. If none is set then vlans are not set on the virtual machine's
     network card.
 
 -   `vm_name` (string) - This is the name of the virtual machine for the new virtual
@@ -241,7 +239,7 @@ will be replaced by the proper key:
 
 -   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
@@ -255,7 +253,7 @@ will be replaced by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.    
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html).
@@ -290,15 +288,15 @@ for the version of Hyper-V that is running.
 
 ## Generation 1 vs Generation 2
 
-Floppy drives are no longer supported by generation 2 machines. This requires you to 
+Floppy drives are no longer supported by generation 2 machines. This requires you to
 take another approach when dealing with preseed or answer files. Two possible options
 are using virtual dvd drives or using the built in web server.
 
-When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines. 
+When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines.
 
 ## Creating iso from directory
 
-Programs like mkisofs can be used to create an iso from a directory. 
+Programs like mkisofs can be used to create an iso from a directory.
 There is a [windows version of mkisofs](http://opensourcepack.blogspot.co.uk/p/cdrtools.html).
 
 Example powershell script. This is an actually working powershell script used to create a Windows answer iso:
@@ -323,7 +321,7 @@ copy windows\common\win-updates.ps1 $isoFolder\
 copy windows\common\run-sysprep.ps1 $isoFolder\
 copy windows\common\run-sysprep.cmd $isoFolder\
 
-$textFile = "$isoFolder\Autounattend.xml" 
+$textFile = "$isoFolder\Autounattend.xml"
 
 $c = Get-Content -Encoding UTF8 $textFile
 
@@ -365,7 +363,7 @@ Packer config:
     "winrm_username": "vagrant",
     "winrm_password": "vagrant",
     "winrm_timeout" : "4h",
-    "shutdown_command": "f:\\run-sysprep.cmd",  
+    "shutdown_command": "f:\\run-sysprep.cmd",
     "ram_size": 4096,
     "cpu": 4,
     "generation": 2,
@@ -480,10 +478,10 @@ autounattend.xml:
                             <Order>3</Order>
                             <Size>128</Size>
                             <Type>MSR</Type>
-                        </CreatePartition>         
+                        </CreatePartition>
                         <CreatePartition wcm:action="add">
                             <Order>4</Order>
-                            <Extend>true</Extend> 
+                            <Extend>true</Extend>
                             <Type>Primary</Type>
                         </CreatePartition>
                     </CreatePartitions>
@@ -575,8 +573,8 @@ autounattend.xml:
             <POLICYProxySettingsPerUser>0</POLICYProxySettingsPerUser>
             <HKLMProxyEnable>true</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
-        </component>  
-Finish Setup cache proxy during installation --> 
+        </component>
+Finish Setup cache proxy during installation -->
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <AutoLogon>
                 <Password>
@@ -808,13 +806,13 @@ sysprep-unattend.xml:
         </component>
     </settings>
     <settings pass="oobeSystem">
-<!-- Setup proxy after sysprep 
+<!-- Setup proxy after sysprep
        <component name="Microsoft-Windows-IE-ClientNetworkProtocolImplementation" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <POLICYProxySettingsPerUser>1</POLICYProxySettingsPerUser>
             <HKLMProxyEnable>false</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
         </component>
-Finish proxy after sysprep -->  
+Finish proxy after sysprep -->
         <component language="neutral" name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0809:00000809</InputLocale>
             <SystemLocale>en-GB</SystemLocale>

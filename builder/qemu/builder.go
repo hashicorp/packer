@@ -372,9 +372,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepCopyDisk),
 		new(stepResizeDisk),
 		&common.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
+			HTTPDir:  b.config.HTTPDir,
+			HTTPPort: b.config.HTTPPort,
 		},
 	)
 

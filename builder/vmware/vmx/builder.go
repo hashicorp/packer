@@ -75,9 +75,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&common.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
+			HTTPDir:  b.config.HTTPDir,
+			HTTPPort: b.config.HTTPPort,
 		},
 		&vmwcommon.StepConfigureVNC{
 			VNCBindAddress:     b.config.VNCBindAddress,

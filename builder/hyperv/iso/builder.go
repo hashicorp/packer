@@ -321,9 +321,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files: b.config.FloppyFiles,
 		},
 		&common.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
+			HTTPDir:  b.config.HTTPDir,
+			HTTPPort: b.config.HTTPPort,
 		},
 		&hypervcommon.StepCreateSwitch{
 			SwitchName: b.config.SwitchName,
