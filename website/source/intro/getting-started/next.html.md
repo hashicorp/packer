@@ -17,7 +17,7 @@ builds, provisioners, etc. At this point you're ready to begin playing with and
 using Packer in real scenarios.
 
 From this point forward, the most important reference for you will be the
-[documentation](/docs). The documentation is less of a guide and more of a
+[documentation](/docs/index.html). The documentation is less of a guide and more of a
 reference of all the overall features and options of Packer.
 
 If you're interested in learning more about how Packer fits into the HashiCorp

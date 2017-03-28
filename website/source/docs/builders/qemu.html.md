@@ -427,7 +427,7 @@ characters as well inside modifiers. For example: to simulate ctrl+c use
 `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server

@@ -19,7 +19,7 @@ transformation would be taking an artifact with some set of files, uploading
 those files, and returning an artifact with a single ID: the URL of the upload.
 
 Prior to reading this page, it is assumed you have read the page on [plugin
-development basics](/docs/extending/developing-plugins.html).
+development basics](/docs/extending/plugins.html).
 
 Post-processor plugins implement the `packer.PostProcessor` interface and are
 served using the `plugin.ServePostProcessor` function.

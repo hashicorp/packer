@@ -185,7 +185,7 @@ builder.
 - `parallels_tools_guest_path` (string) - The path in the virtual machine to
     upload Parallels Tools. This only takes effect if `parallels_tools_mode`
     is "upload". This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of
     `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
     which should upload into the login directory of the user.
@@ -204,7 +204,7 @@ builder.
     itself as an array of strings, where each string represents a single
     argument on the command-line to `prlctl` (but excluding `prlctl` itself).
     Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use `prlctl`
     are below.
 
@@ -305,7 +305,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -356,7 +356,6 @@ executed in the order defined. So in the above example, the memory will be set
 followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
-`prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+`prlctl`. Each argument is treated as a [template engine](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.

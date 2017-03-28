@@ -66,7 +66,7 @@ more details about certain options in following sections.
 
 - `output` (string) - The full path to the box file that will be created by
     this post-processor. This is a [configuration
-    template](/docs/templates/configuration-templates.html). The variable
+    template](/docs/templates/engine.html). The variable
     `Provider` is replaced by the Vagrant provider the box is for. The variable
     `ArtifactId` is replaced by the ID of the input artifact. The variable
     `BuildName` is replaced with the name of the build. By default, the value of

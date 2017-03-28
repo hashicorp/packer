@@ -12,7 +12,7 @@ description: |-
 # `validate` Command
 
 The `packer validate` Packer command is used to validate the syntax and
-configuration of a [template](/docs/templates/introduction.html). The command
+configuration of a [template](/docs/templates/index.html). The command
 will return a zero exit status on success, and a non-zero exit status on
 failure. Additionally, if a template doesn't validate, any error messages will
 be outputted.

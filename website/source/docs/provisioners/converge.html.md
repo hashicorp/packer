@@ -57,14 +57,14 @@ Optional parameters:
 
 - `execute_command` (string) - the command used to execute Converge. This has
   various
-  [configuration template variables](/docs/templates/configuration-templates.html) available.
+  [configuration template variables](/docs/templates/engine.html) available.
 
 - `prevent_sudo` (bool) - stop Converge from running with adminstrator
   privileges via sudo
 
 - `bootstrap_command` (string) - the command used to bootstrap Converge. This
   has various
-  [configuration template variables](/docs/templates/configuration-templates.html) available.
+  [configuration template variables](/docs/templates/engine.html) available.
 
 - `prevent_bootstrap_sudo` (bool) - stop Converge from bootstrapping with
   administrator privileges via sudo

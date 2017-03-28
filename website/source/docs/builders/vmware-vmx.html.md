@@ -147,7 +147,7 @@ builder.
 - `tools_upload_path` (string) - The path in the VM to upload the
     VMware tools. This only takes effect if `tools_upload_flavor` is non-empty.
     This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
     By default the upload path is set to `{{.Flavor}}.iso`.
 
@@ -243,7 +243,7 @@ command, they will be replaced by the proper key:
     for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
