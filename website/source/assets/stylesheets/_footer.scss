@@ -1,99 +1,22 @@
-#footer{
-  background-color: $black;
-  padding: 20px 0;
+#footer {
+  padding-top: 50px;
 
-  &.white{
-    background-color: $black;
-    .footer-links{
-      li > a {
-        @include project-footer-a-subpage-style();
-      }
-    }
-  }
+  ul.footer-links {
+    li {
+      a {
+        color: $footer-link-color;
+        font-size: $footer-font-size;
+        font-family: $font-family-open-sans;
+        text-decoration: none;
 
-  .footer-links{
-    li > a {
-      @include project-footer-a-style();
-    }
-  }
-
-  .hashicorp-project{
-    margin-top: 24px;
-    &:hover{
-      svg{
-        .svg-bg-line{
-          opacity: .4;
+        &:hover, &:focus, &:active {
+          background-color: transparent;
+          color: $footer-link-color-hover;
+          outline: 0;
         }
-      }
-    }
-  }
 
-  .pull-right{
-    padding-right: 15px;
-  }
-}
-
-body{
-  &.page-Community{
-    .edit-page-link{
-      position: absolute;
-      top: -70px;
-      right: 30px;
-    }
-  }
-}
-
-.edit-page-link{
-  position: absolute;
-  top: -150px;
-  right: 30px;;
-
-  a{
-    text-transform: uppercase;
-    color: $black;
-    font-size: 13px;
-  }
-}
-
-@media (min-width: 1500px) {
-  .edit-page-link{
-    top: -56px;
-  }
-}
-
-@media (max-width: 768px) {
-  #footer{
-    padding: 20px 0 80px;
-    text-align: center;
-
-    .footer-hashi{
-      display: block;
-      float: right !important;
-      .hashicorp-project{
-        margin-left: -30px;
-      }
-    }
-
-    ul{
-      display: block;
-      li{
-        display: block;
-        float: left;
-      }
-
-      &.external-links{
-        li{
-          a{
-            padding-left: 0 !important;
-            margin-left: -14px;
-          }
-          svg{
-            position: relative;
-            left: 0;
-            top: 2px;
-            margin-top: 0;
-            margin-right: 4px;
-          }
+        @media (max-width: 992px) {
+          text-align: center;
         }
       }
     }

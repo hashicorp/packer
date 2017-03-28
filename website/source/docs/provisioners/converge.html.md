@@ -1,9 +1,11 @@
 ---
-description: |-
-    The Converge Packer provisioner uses Converge modules to provision the machine.
 layout: docs
-page_title: Converge Provisioner
-...
+sidebar_current: docs-provisioners-converge
+page_title: Converge - Provisioners
+description: |-
+  The converge Packer provisioner uses Converge modules to provision the
+  machine.
+---
 
 # Converge Provisioner
 
@@ -20,7 +22,7 @@ new images.
 
 The example below is fully functional.
 
-``` {.javascript}
+```json
 {
   "type": "converge",
   "module": "https://raw.githubusercontent.com/asteris-llc/converge/master/samples/fileContent.hcl",
@@ -84,7 +86,7 @@ directory.
 
 By default, Packer uses the following command (broken across multiple lines for readability) to execute Converge:
 
-``` {.liquid}
+```liquid
 cd {{.WorkingDirectory}} && \
 {{if .Sudo}}sudo {{end}}converge apply \
   --local \
@@ -106,7 +108,7 @@ contain various template variables:
 
 By default, Packer uses the following command to bootstrap Converge:
 
-``` {.liquid}
+```liquid
 curl -s https://get.converge.sh | {{if .Sudo}}sudo {{end}}sh {{if ne .Version ""}}-s -- -v {{.Version}}{{end}}
 ```
 

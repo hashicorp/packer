@@ -1,15 +1,13 @@
 ---
-description: |
-    Up to this point in the guide, you have been running Packer on your local
-    machine to build and provision images on AWS and DigitalOcean. However, you can
-    use Atlas by HashiCorp to both run Packer builds remotely and store the output
-    of builds.
 layout: intro
-next_title: Next Steps
-next_url: '/intro/getting-started/next.html'
-page_title: Remote Builds and Storage
-prev_url: '/intro/getting-started/vagrant.html'
-...
+sidebar_current: intro-getting-started-remote-builds
+page_title: Remote Builds and Storage - Getting Started
+description: |-
+  Up to this point in the guide, you have been running Packer on your local
+  machine to build and provision images on AWS and DigitalOcean. However, you
+  can use Atlas by HashiCorp to both run Packer builds remotely and store the
+  output of builds.
+---
 
 # Remote Builds and Storage
 
@@ -35,7 +33,7 @@ is updating the variables section to read variables from the Atlas environment
 rather than the local environment. Remove the `post-processors` section for now
 if it is still in your template.
 
-``` {.javascript}
+```json
 {
   "variables": {
     "aws_access_key": "{{env `aws_access_key`}}",
@@ -80,7 +78,7 @@ with their respective values. Now restart the Packer build by either clicking
 'rebuild' in the Atlas UI or by running `packer push example.json` again. Now
 when you click on the active build, you can view the logs in real-time.
 
--&gt; **Note:** Whenever a change is made to the Packer template, you must
+-> **Note:** Whenever a change is made to the Packer template, you must
 `packer push` to update the configuration in Atlas.
 
 ## Store Packer Outputs
@@ -90,7 +88,7 @@ it's even better to store and version the AMI output so it can be easily
 deployed by a tool like [Terraform](https://www.terraform.io). The `atlas`
 [post-processor](/docs/post-processors/atlas.html) makes this process simple:
 
-``` {.javascript}
+```json
 {
   "variables": ["..."],
   "builders": ["..."],

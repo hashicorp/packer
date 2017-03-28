@@ -1,10 +1,11 @@
 ---
-description: |
-    The VirtualBox Packer builder is able to create VirtualBox virtual machines and
-    export them in the OVF format, starting from an ISO image.
 layout: docs
-page_title: 'VirtualBox Builder (from an ISO)'
-...
+sidebar_current: docs-builders-virtualbox-iso
+page_title: VirtualBox ISO - Builders
+description: |-
+  The VirtualBox Packer builder is able to create VirtualBox virtual machines
+  and export them in the OVF format, starting from an ISO image.
+---
 
 # VirtualBox Builder (from an ISO)
 
@@ -25,7 +26,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+```json
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
@@ -54,59 +55,59 @@ builder.
 
 ### Required:
 
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
+- `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
     files are so large, this is required and Packer will verify it prior to
     booting a virtual machine with the ISO attached. The type of the checksum is
     specified with `iso_checksum_type`, documented below. At least one of
     `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
     over `iso_checksum_url` type.
 
--   `iso_checksum_type` (string) - The type of the checksum specified in
+- `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
     recommended since ISO files are generally large and corruption does happen
     from time to time.
 
--   `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
+- `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
     containing a checksum for the OS ISO file. At least one of `iso_checksum`
     and `iso_checksum_url` must be defined. This will be ignored if
     `iso_checksum` is non empty.
 
--   `iso_url` (string) - A URL to the ISO containing the installation image.
+- `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
+- `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
 
--   `ssh_password` (string) - The password to use to SSH into the machine once
+- `ssh_password` (string) - The password to use to SSH into the machine once
     the OS is installed.
 
 ### Optional:
 
--   `boot_command` (array of strings) - This is an array of commands to type
+- `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
     be to type just enough to initialize the operating system installer. Special
     keys can be typed as well, and are covered in the section below on the
     boot command. If this is not specified, it is assumed the installer will
     start itself.
 
--   `boot_wait` (string) - The time to wait after booting the initial virtual
+- `boot_wait` (string) - The time to wait after booting the initial virtual
     machine before typing the `boot_command`. The value of this should be
     a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+- `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
--   `export_opts` (array of strings) - Additional options to pass to the
+- `export_opts` (array of strings) - Additional options to pass to the
     [VBoxManage
     export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
-    ``` {.json}
+    ```json
     {
       "type": "virtualbox-iso",
       "export_opts":
@@ -142,7 +143,7 @@ builder.
         "packer_conf.json"
     ```
 
--   `floppy_files` (array of strings) - A list of files to place onto a floppy
+- `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on
     removable media. By default, no floppy will be attached. All files listed in
@@ -152,16 +153,16 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
+- `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
--   `format` (string) - Either "ovf" or "ova", this specifies the output format
+- `format` (string) - Either "ovf" or "ova", this specifies the output format
     of the exported virtual machine. This defaults to "ovf".
 
--   `guest_additions_mode` (string) - The method by which guest additions are
+- `guest_additions_mode` (string) - The method by which guest additions are
     made available to the guest for installation. Valid options are "upload",
     "attach", or "disable". If the mode is "attach" the guest additions ISO will
     be attached as a CD device to the virtual machine. If the mode is "upload"
@@ -169,96 +170,96 @@ builder.
     `guest_additions_path`. The default value is "upload". If "disable" is used,
     guest additions won't be downloaded, either.
 
--   `guest_additions_path` (string) - The path on the guest virtual machine
+- `guest_additions_path` (string) - The path on the guest virtual machine
     where the VirtualBox guest additions ISO will be uploaded. By default this
     is "VBoxGuestAdditions.iso" which should upload into the login directory of
     the user. This is a [configuration
     template](/docs/templates/configuration-templates.html) where the `Version`
     variable is replaced with the VirtualBox version.
 
--   `guest_additions_sha256` (string) - The SHA256 checksum of the guest
+- `guest_additions_sha256` (string) - The SHA256 checksum of the guest
     additions ISO that will be uploaded to the guest VM. By default the
     checksums will be downloaded from the VirtualBox website, so this only needs
     to be set if you want to be explicit about the checksum.
 
--   `guest_additions_url` (string) - The URL to the guest additions ISO
+- `guest_additions_url` (string) - The URL to the guest additions ISO
     to upload. This can also be a file URL if the ISO is at a local path. By
     default, the VirtualBox builder will attempt to find the guest additions ISO
     on the local file system. If it is not available locally, the builder will
     download the proper guest additions ISO from the internet.
 
--   `guest_os_type` (string) - The guest OS type being installed. By default
+- `guest_os_type` (string) - The guest OS type being installed. By default
     this is "other", but you can get *dramatic* performance improvements by
     setting this to the proper value. To view all available values for this run
     `VBoxManage list ostypes`. Setting the correct value hints to VirtualBox how
     to optimize the virtual hardware to work best with that operating system.
 
--   `hard_drive_interface` (string) - The type of controller that the primary
+- `hard_drive_interface` (string) - The type of controller that the primary
     hard drive is attached to, defaults to "ide". When set to "sata", the drive
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
 
--   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
+- `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
     Also set `hard_drive_Discard` to `true` to enable TRIM support.
 
--   `hard_drive_discard` (boolean) - When this value is set to `true`, a VDI
+- `hard_drive_discard` (boolean) - When this value is set to `true`, a VDI
     image will be shrunk in response to the trim command from the guest OS.
     The size of the cleared area must be at least 1MB. Also set
     `hard_drive_nonrotational` to `true` to enable TRIM support.
 
--   `headless` (boolean) - Packer defaults to building VirtualBox virtual
+- `headless` (boolean) - Packer defaults to building VirtualBox virtual
     machines by launching a GUI that shows the console of the machine
     being built. When this value is set to `true`, the machine will start without
     a console.
 
--   `http_directory` (string) - Path to a directory to serve using an
+- `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
     will be requestable from the virtual machine. This is useful for hosting
     kickstart files and so on. By default this is "", which means no HTTP server
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+- `http_port_min` and `http_port_max` (integer) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
--   `iso_interface` (string) - The type of controller that the ISO is attached
+- `iso_interface` (string) - The type of controller that the ISO is attached
     to, defaults to "ide". When set to "sata", the drive is attached to an AHCI
     SATA controller.
 
--   `iso_target_extension` (string) - The extension of the iso file after
+- `iso_target_extension` (string) - The extension of the iso file after
     download. This defaults to "iso".
 
--   `iso_target_path` (string) - The path where the iso should be saved
+- `iso_target_path` (string) - The path where the iso should be saved
     after download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
+- `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
--   `keep_registered` (boolean) - Set this to `true` if you would like to keep
+- `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with virtualbox. Defaults to `false`.
 
--   `output_directory` (string) - This is the path to the directory where the
+- `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
 
--   `post_shutdown_delay` (string) - The amount of time to wait after shutting
+- `post_shutdown_delay` (string) - The amount of time to wait after shutting
     down the virtual machine. If you get the error
     `Error removing floppy controller`, you might need to set this to `5m`
     or so. By default, the delay is `0s`, or disabled.
 
--   `shutdown_command` (string) - The command to use to gracefully shut down the
+- `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a
     shutdown command takes place inside script so this may safely be omitted. If
@@ -266,26 +267,26 @@ builder.
     since reboots may fail and specify the final shutdown command in your
     last script.
 
--   `shutdown_timeout` (string) - The amount of time to wait after executing the
+- `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     `5m`, or five minutes.
 
--   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
+- `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+- `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
     host port. By default this is 2222 to 4444.
 
--   `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
+- `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
     on the host to communicate to the virtual machine
 
--   `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
+- `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
     execute in order to further customize the virtual machine being created. The
     value of this is an array of commands to execute. The commands are executed
     in the order defined in the template. For each command, the command is
@@ -296,26 +297,26 @@ builder.
     variable is replaced with the VM name. More details on how to use
     `VBoxManage` are below.
 
--   `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
+- `vboxmanage_post` (array of array of strings) - Identical to `vboxmanage`,
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
--   `virtualbox_version_file` (string) - The path within the virtual machine to
+- `virtualbox_version_file` (string) - The path within the virtual machine to
     upload a file that contains the VirtualBox version that was used to create
     the machine. This information can be useful for provisioning. By default
     this is ".vbox\_version", which will generally be upload it into the
     home directory. Set to an empty string to skip uploading this file, which
     can be useful when using the `none` communicator.
 
--   `vm_name` (string) - This is the name of the OVF file for the new virtual
+- `vm_name` (string) - This is the name of the OVF file for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
--   `vrdp_bind_address` (string / IP address) - The IP address that should be
+- `vrdp_bind_address` (string / IP address) - The IP address that should be
     binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
     wish to bind to all interfaces use 0.0.0.0
 
--   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+- `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
@@ -336,49 +337,49 @@ machine, simulating a human actually typing the keyboard. There are a set of
 special keys available. If these are in your boot command, they will be replaced
 by the proper key:
 
--   `<bs>` - Backspace
+- `<bs>` - Backspace
 
--   `<del>` - Delete
+- `<del>` - Delete
 
--   `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
+- `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
--   `<esc>` - Simulates pressing the escape key.
+- `<esc>` - Simulates pressing the escape key.
 
--   `<tab>` - Simulates pressing the tab key.
+- `<tab>` - Simulates pressing the tab key.
 
--   `<f1>` - `<f12>` - Simulates pressing a function key.
+- `<f1>` - `<f12>` - Simulates pressing a function key.
 
--   `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+- `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
 
--   `<spacebar>` - Simulates pressing the spacebar.
+- `<spacebar>` - Simulates pressing the spacebar.
 
--   `<insert>` - Simulates pressing the insert key.
+- `<insert>` - Simulates pressing the insert key.
 
--   `<home>` `<end>` - Simulates pressing the home and end keys.
+- `<home>` `<end>` - Simulates pressing the home and end keys.
 
--   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
+- `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
+- `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
--   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+- `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
--   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+- `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
+- `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
+- `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the
     ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
+- `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
     shift key.
 
--   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
+- `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
--   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+- `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
--   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+- `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
 
--   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
+- `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
@@ -392,7 +393,7 @@ In addition to the special keys, each command to type is treated as a
 [configuration template](/docs/templates/configuration-templates.html). The
 available variables are:
 
--   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+- `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
     blank!
@@ -400,7 +401,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+```text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -441,7 +442,7 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
-``` {.javascript}
+```json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],

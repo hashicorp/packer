@@ -1,15 +1,13 @@
 ---
-description: |
-    With Packer installed, let's just dive right into it and build our first image.
-    Our first image will be an Amazon EC2 AMI with Redis pre-installed. This is just
-    an example. Packer can create images for many platforms with anything
-    pre-installed.
 layout: intro
-next_title: Provision
-next_url: '/intro/getting-started/provision.html'
-page_title: Build an Image
-prev_url: '/intro/getting-started/setup.html'
-...
+sidebar_current: intro-getting-started-build-image
+page_title: Build an Image - Getting Started
+description: |-
+  With Packer installed, let's just dive right into it and build our first
+  image. Our first image will be an Amazon EC2 AMI with Redis pre-installed.
+  This is just an example. Packer can create images for many platforms with
+  anything pre-installed.
+---
 
 # Build an Image
 
@@ -24,7 +22,7 @@ qualifies under the AWS [free-tier](https://aws.amazon.com/free/), meaning it
 will be free. If you already have an AWS account, you may be charged some amount
 of money, but it shouldn't be more than a few cents.
 
--&gt; **Note:** If you're not using an account that qualifies under the AWS
+-> **Note:** If you're not using an account that qualifies under the AWS
 free-tier, you may be charged to run these examples. The charge should only be a
 few cents, but we're not responsible if it ends up being more.
 
@@ -46,7 +44,7 @@ as machine generated templates to easily be made.
 We'll start by creating the entire template, then we'll go over each section
 briefly. Create a file `example.json` and fill it with the following contents:
 
-``` {.javascript}
+```json
 {
   "variables": {
     "aws_access_key": "",
@@ -94,7 +92,7 @@ syntax as well as the configuration values to verify they look valid. The output
 should look similar to below, because the template should be valid. If there are
 any errors, this command will tell you.
 
-``` {.text}
+```text
 $ packer validate example.json
 Template validated successfully.
 ```
@@ -113,14 +111,14 @@ With a properly validated template. It is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
--&gt; **Note:** For the tutorial it is convenient to use the credentials in the
+-> **Note:** For the tutorial it is convenient to use the credentials in the
 command line. However, it is potentially insecure. See our documentation for
 other ways to [specify Amazon credentials](/docs/builders/amazon.html#specifying-amazon-credentials).
 
--&gt; **Note:** When using packer on Windows, replace the single-quotes in the 
+-> **Note:** When using packer on Windows, replace the single-quotes in the
 command below with double-quotes.
 
-``` {.text}
+```text
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \
@@ -158,7 +156,7 @@ artifact: the AMI in us-east-1 that was created.
 This AMI is ready to use. If you wanted you could go and launch this AMI right now
 and it would work great.
 
--&gt; **Note:** Your AMI ID will surely be different than the one above. If you
+-> **Note:** Your AMI ID will surely be different than the one above. If you
 try to launch the one in the example output above, you will get an error. If you
 want to try to launch your AMI, get the ID from the Packer output.
 
@@ -167,10 +165,10 @@ able to determine the default VPC, which the `t2` instance types require. This
 can happen if you created your AWS account before `2013-12-04`.  You can either
 change the `instance_type` to `m3.medium`, or specify a VPC. Please see
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
-information. If you specify a `vpc_id`, you will also need to set `subnet_id`. 
+information. If you specify a `vpc_id`, you will also need to set `subnet_id`.
 Unless you modify your subnet's [IPv4 public addressing attribute](
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-ip-addressing.html#subnet-public-ip),
-you will also need to set `associate_public_ip_address` to `true`, or set up a 
+you will also need to set `associate_public_ip_address` to `true`, or set up a
 [VPN](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_VPN.html).
 
 ## Managing the Image
