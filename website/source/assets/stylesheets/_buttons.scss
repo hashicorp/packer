@@ -1,11 +1,3 @@
-$gray-mid: #7b8A8E;
-$gray-light: #E6E6E6;
-
-$button-background: $white;
-$button-font-color: $gray-mid;
-$button-primary-background: $packer-blue;
-$button-primary-font-color: $white;
-
 .button {
   background: $button-background;
   border: 1px solid $button-font-color;
@@ -40,15 +32,6 @@ $button-primary-font-color: $white;
 
     &:hover {
       background: lighten($button-primary-background, 5%);
-    }
-  }
-
-  &.secondary {
-    color: $button-font-color;
-
-    &:hover {
-      color: $white;
-      background-color: $black;
     }
   }
 }
