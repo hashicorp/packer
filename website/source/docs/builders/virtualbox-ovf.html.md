@@ -167,7 +167,7 @@ builder.
     where the VirtualBox guest additions ISO will be uploaded. By default this
     is "VBoxGuestAdditions.iso" which should upload into the login directory of
     the user. This is a [configuration
-    template](/docs/templates/configuration-templates.html) where the `Version`
+    template](/docs/templates/engine.html) where the `Version`
     variable is replaced with the VirtualBox version.
 
 - `guest_additions_sha256` (string) - The SHA256 checksum of the guest
@@ -257,7 +257,7 @@ builder.
     defined itself as an array of strings, where each string represents a single
     argument on the command-line to `VBoxManage` (but excluding
     `VBoxManage` itself). Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use
     `VBoxManage` are below.
 
@@ -347,7 +347,7 @@ by the proper key:
     for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -414,6 +414,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.

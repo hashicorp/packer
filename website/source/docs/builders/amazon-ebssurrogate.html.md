@@ -104,7 +104,7 @@ builder.
 
 - `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -184,14 +184,14 @@ builder.
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
 - `run_volume_tags` (object of key/value strings) - Tags to apply to the volumes
     that are *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -222,7 +222,7 @@ builder.
 
 - `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
      They will override AMI tags if already applied to snapshot. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -296,7 +296,7 @@ builder.
 
 - `tags` (object of key/value strings) - Tags applied to the AMI and
     relevant snapshots. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 

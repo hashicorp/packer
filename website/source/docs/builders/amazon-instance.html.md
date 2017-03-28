@@ -62,7 +62,7 @@ builder.
 - `ami_name` (string) - The name of the resulting AMI that will appear when
     managing AMIs in the AWS console or via APIs. This must be unique. To help
     make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+    templates](/docs/templates/engine.html) for more info)
 
 - `instance_type` (string) - The EC2 instance type to use while building the
     AMI, such as `m1.small`.
@@ -133,7 +133,7 @@ builder.
 
 - `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -207,7 +207,7 @@ builder.
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -304,7 +304,7 @@ builder.
     required if you are using an non-default VPC.
 
 - `tags` (object of key/value strings) - Tags applied to the AMI. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -380,7 +380,7 @@ AMI.
 
 These are configured with `bundle_vol_command` and `bundle_upload_command`. Both
 of these configurations are [configuration
-templates](/docs/templates/configuration-templates.html) and have support for
+templates](/docs/templates/engine.html) and have support for
 their own set of template variables.
 
 ### Bundle Volume Command

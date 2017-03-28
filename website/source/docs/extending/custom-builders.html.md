@@ -17,7 +17,7 @@ builder, etc. However, it is possible to write custom builders using the Packer
 plugin interface, and this page documents how to do that.
 
 Prior to reading this page, it is assumed you have read the page on [plugin
-development basics](/docs/extending/developing-plugins.html).
+development basics](/docs/extending/plugins.html).
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.

@@ -66,7 +66,7 @@ configuration is actually required, but at least `run_list` is recommended.
 
 - `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 - `guest_os_type` (string) - The target guest OS type, either "unix" or
@@ -75,7 +75,7 @@ configuration is actually required, but at least `run_list` is recommended.
 
 - `install_command` (string) - The command used to install Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 - `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -125,7 +125,7 @@ cookbook_path [{{.CookbookPaths}}]
 ```
 
 This template is a [configuration
-template](/docs/templates/configuration-templates.html) and has a set of
+template](/docs/templates/engine.html) and has a set of
 variables available to use:
 
 - `ChefEnvironment` - The current enabled environment. Only non-empty if the

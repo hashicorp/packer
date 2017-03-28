@@ -84,8 +84,8 @@ builder.
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
     - `tags` (map) - Tags to apply to the volume. These are retained after the
-        builder completes. This is a [configuration template]
-        (/docs/templates/configuration-templates.html) where the `SourceAMI`
+        builder completes. This is a [template engine]
+        (/docs/templates/engine.html) where the `SourceAMI`
         variable is replaced with the source AMI ID and `BuildRegion` variable
         is replaced with the value of `region`.
 
@@ -111,7 +111,7 @@ builder.
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 

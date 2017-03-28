@@ -19,7 +19,7 @@ as Plugins that are simply hardcoded to load with Packer.
 
 This page will cover how to install and use plugins. If you're interested in
 developing plugins, the documentation for that is available the [developing
-plugins](/docs/extending/developing-plugins.html) page.
+plugins](/docs/extending/plugins.html) page.
 
 Because Packer is so young, there is no official listing of available Packer
 plugins. Plugins are best found via Google. Typically, searching "packer plugin
