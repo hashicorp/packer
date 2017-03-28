@@ -47,7 +47,9 @@
           <div class="col-xs-12">
             <div class="navbar-header">
               <div class="navbar-brand">
-                <a class="logo" href="/">Packer</a>
+                <a href="/">
+                  <%= inline_svg "logo-text.svg", height: 50, class: "logo" %>
+                </a>
               </div>
               <button class="navbar-toggle" type="button">
                 <span class="sr-only">Toggle navigation</span>
@@ -112,25 +114,7 @@
 
       ga('create', 'UA-43075859-1', 'packer.io');
       ga('require', 'linkid');
-      ga('send', 'pageview');
-    </script>
-
-    <script type="text/javascript">
-    adroll_adv_id = "6QAAFJDIWBG3DJBDRJ7BEX";
-    adroll_pix_id = "PYT5HSNKNRDS7LMUR5B6YG";
-    (function () {
-    var oldonload = window.onload;
-    window.onload = function(){
-       __adroll_loaded=true;
-       var scr = document.createElement("script");
-       var host = (("https:" == document.location.protocol) ? "https://s.adroll.com" : "http://a.adroll.com");
-       scr.setAttribute('async', 'true');
-       scr.type = "text/javascript";
-       scr.src = host + "/j/roundtrip.js";
-       ((document.getElementsByTagName('head') || [null])[0] ||
-        document.getElementsByTagName('script')[0].parentNode).appendChild(scr);
-       if(oldonload){oldonload()}};
-    }());
+      ga('send', 'pageview', location.pathname);
     </script>
 
     <script type="application/ld+json">
