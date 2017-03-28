@@ -55,6 +55,15 @@ helpers do
     if page.url == "/" || page.url == "/index.html"
       return "page-home"
     end
+    if !(title = page.data.page_title).blank?
+      return title
+        .downcase
+        .gsub('"', '')
+        .gsub(/[^\w]+/, '-')
+        .gsub(/_+/, '-')
+        .squeeze('-')
+        .squeeze(' ')
+    end
     return ""
   end
 
@@ -63,8 +72,19 @@ helpers do
   def body_classes_for(page)
     classes = []
 
-    if page && page.data.layout
+    if !(layout = page.data.layout).blank?
       classes << "layout-#{page.data.layout}"
+    end
+
+    if !(title = page.data.page_title).blank?
+      title = title
+        .downcase
+        .gsub('"', '')
+        .gsub(/[^\w]+/, '-')
+        .gsub(/_+/, '-')
+        .squeeze('-')
+        .squeeze(' ')
+      classes << "page-#{title}"
     end
 
     return classes.join(" ")
