@@ -1,79 +1,67 @@
+// TODO: remove
+$hero-height: 350px;
+$baseline: 20px;
+
+
 #page-home {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: $font-weight-bold;
-  }
+  // Override the main header
+  #header {
+    background: $home-header-background-color;
 
-  h1 {
-    font-size: 36px;
-    letter-spacing: -0.02em
-  }
-
-  h2 {
-    font-size: 24px;
-  }
-
-  h3 {
-    font-size: 18px;
-  }
-
-  .hero {
-    height: $hero-height + 100px;
-    margin-bottom: ($baseline * 4);
-    background: image-url('hero-image.svg') no-repeat;
-    background-position: top right;
-
-    h1 { color: $black;}
-
-    @media (min-width: 1200px) {
-      h1 {
-        margin-top: 100px;
+    .navbar-toggle {
+      .icon-bar {
+        border: 1px solid $home-header-link-color;
       }
     }
 
-    @media (max-width: $screen-md-max) {
-      height: $hero-height;
-
-      h1 {
-        font-size: 36px;
-        padding-top: 1em;
-        padding-bottom: 1em;
+    .navbar-brand {
+      a {
+        svg.logo {
+          @extend svg.logo.color;
+        }
       }
     }
 
-    @media (max-width: $screen-sm-max) {
-      height: auto;
-      background: none;
+    ul.nav {
+      li {
+        a {
+          color: $home-header-link-color;
 
-      h1 {
-        margin: 0;
-        padding-top: 1em;
-        margin-bottom: 1em;
+          &:hover, &:focus, &:active {
+            background-color: transparent;
+            color: $home-header-link-color-hover;
+
+            svg {
+              fill: $home-header-link-color-hover;
+            }
+          }
+
+          svg {
+            fill: $home-header-link-color;
+          }
+        }
       }
     }
   }
 
-  .download-module {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: $baseline*6 0 $baseline 0;
-    padding: $baseline;
-    background-color: $white;
-    border: 1px solid $gray-light;
+  header {
+    .hero {
+      margin: 140px auto 160px auto;
+      text-align: center;
 
-    p {
-      padding-top: 7px;
-    }
+      .button {
+        margin: 5px;
 
-    .button {
-      display: block;
-      margin: 0 0 0 $baseline;
-      background-color: $white;
+        @media (max-width: 768px) {
+          display: block;
+          margin-top: 10px;
+          text-align: center;
+        }
+      }
+
+      svg {
+        max-width: 90%;
+      }
     }
   }
 
