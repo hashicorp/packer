@@ -62,8 +62,8 @@ each category, the available configuration keys are alphabetized.
 
 - `ami_name` (string) - The name of the resulting AMI that will appear when
   managing AMIs in the AWS console or via APIs. This must be unique. To help
-  make this unique, use a function like `timestamp` (see [configuration
-  templates](/docs/templates/configuration-templates.html) for more info)
+  make this unique, use a function like `timestamp` (see [template
+  engine](/docs/templates/engine.html) for more info)
 
 - `secret_key` (string) - The secret key used to communicate with AWS. [Learn
   how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
@@ -77,7 +77,7 @@ each category, the available configuration keys are alphabetized.
 
 - `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.
@@ -226,7 +226,7 @@ each category, the available configuration keys are alphabetized.
 
 - `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.
@@ -270,7 +270,7 @@ each category, the available configuration keys are alphabetized.
          This is most useful for selecting a daily distro build.
 
 - `tags` (object of key/value strings) - Tags applied to the AMI. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.

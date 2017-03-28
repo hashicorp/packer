@@ -19,7 +19,7 @@ and other types of information out of your templates. This maximizes the
 portability and shareability of the template.
 
 Using user variables expects you know how [configuration
-templates](/docs/templates/configuration-templates.html) work. If you don't know
+templates](/docs/templates/engine.html) work. If you don't know
 how configuration templates work yet, please read that page first.
 
 ## Usage

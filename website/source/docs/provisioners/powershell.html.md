@@ -63,7 +63,7 @@ Optional parameters:
 - `execute_command` (string) - The command to use to execute the script. By
     default this is `powershell "& { {{.Vars}}{{.Path}}; exit $LastExitCode}"`.
     The value of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 

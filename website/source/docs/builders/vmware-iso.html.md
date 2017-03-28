@@ -253,7 +253,7 @@ builder.
 - `tools_upload_path` (string) - The path in the VM to upload the
     VMware tools. This only takes effect if `tools_upload_flavor` is non-empty.
     This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is "esx5".
@@ -279,7 +279,7 @@ builder.
     virtual machine is exported.
 
 - `vmx_template_path` (string) - Path to a [configuration
-    template](/docs/templates/configuration-templates.html) that defines the
+    template](/docs/templates/engine.html) that defines the
     contents of the virtual machine VMX file for VMware. This is for **advanced
     users only** as this can render the virtual machine non-functional. See
     below for more information. For basic VMX modifications, try
@@ -371,7 +371,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server

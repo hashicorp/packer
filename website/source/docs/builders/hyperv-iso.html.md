@@ -260,7 +260,7 @@ will be replaced by the proper key:
 When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.    
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html).
+[template engine](/docs/templates/engine.html).
 The available variables are:
 
 * `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server

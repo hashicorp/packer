@@ -56,7 +56,7 @@ Optional parameters:
 
 - `execute_command` (string) - The command used to execute Puppet. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 - `extra_arguments` (array of strings) - This is an array of additional options to

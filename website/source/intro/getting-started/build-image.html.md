@@ -14,7 +14,7 @@ description: |-
 With Packer installed, let's just dive right into it and build our first image.
 Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) with
 Redis pre-installed. This is just an example. Packer can create images for [many
-platforms](/intro/platforms.html) with anything pre-installed.
+platforms][platforms] with anything pre-installed.
 
 If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
 For the example, we'll use a "t2.micro" instance to build our image, which
@@ -26,7 +26,7 @@ of money, but it shouldn't be more than a few cents.
 free-tier, you may be charged to run these examples. The charge should only be a
 few cents, but we're not responsible if it ends up being more.
 
-Packer can build images for [many platforms](/intro/platforms.html) other than
+Packer can build images for [many platforms][platforms] other than
 AWS, but AWS requires no additional software installed on your computer and
 their [free-tier](https://aws.amazon.com/free/) makes it free to use for most
 people. This is why we chose to use AWS for the example. If you're uncomfortable
@@ -84,7 +84,7 @@ re-packaging it into a new AMI.
 The additional keys within the object are configuration for this builder,
 specifying things such as access keys, the source AMI to build from and more.
 The exact set of configuration variables available for a builder are specific to
-each builder and can be found within the [documentation](/docs).
+each builder and can be found within the [documentation](/docs/index.html).
 
 Before we take this template and build an image from it, let's validate the
 template by running `packer validate example.json`. This command checks the
@@ -191,3 +191,5 @@ Congratulations! You've just built your first image with Packer. Although the
 image was pretty useless in this case (nothing was changed about it), this page
 should've given you a general idea of how Packer works, what templates are and
 how to validate and build templates into machine images.
+
+[platforms]: /docs/builders/index.html
