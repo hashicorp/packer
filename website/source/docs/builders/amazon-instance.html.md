@@ -203,6 +203,9 @@ builder.
     preserved when booting from the AMI built with Packer. See
     `ami_block_device_mappings`, above, for details.
 
+-   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the time.
+
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a

@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/mitchellh/multistep"
@@ -84,17 +83,13 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	snapshotIds := []string{}
 
 	// Connect to the region where the AMI will be copied to
-	awsConfig, err := config.Config()
+	session, err := config.Session()
 	if err != nil {
 		return "", snapshotIds, err
 	}
-	awsConfig.Region = aws.String(target)
-
-	session, err := session.NewSession(awsConfig)
-	if err != nil {
-		return "", snapshotIds, err
-	}
-	regionconn := ec2.New(session)
+	regionconn := ec2.New(session.Copy(&aws.Config{
+		Region: aws.String(target)},
+	))
 
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,

@@ -107,6 +107,9 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
+-   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the time.
+
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
@@ -221,7 +224,7 @@ builder.
 
 ## Basic Example
 
-```
+``` {.javascript}
 {
    "type" : "amazon-ebsvolume",
    "secret_key" : "YOUR SECRET KEY HERE",
