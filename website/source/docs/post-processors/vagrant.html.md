@@ -1,12 +1,13 @@
 ---
-description: |
-    The Packer Vagrant post-processor takes a build and converts the artifact into a
-    valid Vagrant box, if it can. This lets you use Packer to automatically create
-    arbitrarily complex Vagrant boxes, and is in fact how the official boxes
-    distributed by Vagrant are created.
 layout: docs
-page_title: 'Vagrant Post-Processor'
-...
+sidebar_current: docs-post-processors-vagrant-box
+page_title: Vagrant - Post-Processors
+description: |-
+  The Packer Vagrant post-processor takes a build and converts the artifact into
+  a valid Vagrant box, if it can. This lets you use Packer to automatically
+  create arbitrarily complex Vagrant boxes, and is in fact how the official
+  boxes distributed by Vagrant are created.
+---
 
 # Vagrant Post-Processor
 
@@ -29,15 +30,15 @@ certain builders into proper boxes for their respective providers.
 Currently, the Vagrant post-processor can create boxes for the following
 providers.
 
--   AWS
--   DigitalOcean
--   Hyper-V
--   Parallels
--   QEMU
--   VirtualBox
--   VMware
+- AWS
+- DigitalOcean
+- Hyper-V
+- Parallels
+- QEMU
+- VirtualBox
+- VMware
 
--&gt; **Support for additional providers** is planned. If the Vagrant
+-> **Support for additional providers** is planned. If the Vagrant
 post-processor doesn't support creating boxes for a provider you care about,
 please help by contributing to Packer and adding support for it.
 
@@ -51,19 +52,19 @@ However, if you want to configure things a bit more, the post-processor does
 expose some configuration options. The available options are listed below, with
 more details about certain options in following sections.
 
--   `compression_level` (integer) - An integer representing the compression
+- `compression_level` (integer) - An integer representing the compression
     level to use when creating the Vagrant box. Valid values range from 0 to 9,
     with 0 being no compression and 9 being the best compression. By default,
     compression is enabled at level 6.
 
--   `include` (array of strings) - Paths to files to include in the Vagrant box.
+- `include` (array of strings) - Paths to files to include in the Vagrant box.
     These files will each be copied into the top level directory of the Vagrant
     box (regardless of their paths). They can then be used from the Vagrantfile.
 
--   `keep_input_artifact` (boolean) - If set to true, do not delete the
+- `keep_input_artifact` (boolean) - If set to true, do not delete the
     `output_directory` on a successful build. Defaults to false.
 
--   `output` (string) - The full path to the box file that will be created by
+- `output` (string) - The full path to the box file that will be created by
     this post-processor. This is a [configuration
     template](/docs/templates/configuration-templates.html). The variable
     `Provider` is replaced by the Vagrant provider the box is for. The variable
@@ -71,7 +72,7 @@ more details about certain options in following sections.
     `BuildName` is replaced with the name of the build. By default, the value of
     this config is `packer_{{.BuildName}}_{{.Provider}}.box`.
 
--   `vagrantfile_template` (string) - Path to a template to use for the
+- `vagrantfile_template` (string) - Path to a template to use for the
     Vagrantfile that is packaged with the box.
 
 ## Provider-Specific Overrides
@@ -84,7 +85,7 @@ post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-``` {.javascript}
+```json
 {
   "type": "vagrant",
   "compression_level": 1,
