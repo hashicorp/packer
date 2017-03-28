@@ -12,7 +12,8 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"server_url": "foo",
+		"server_url":    "foo",
+		"guest_os_type": "unix",
 	}
 }
 
@@ -199,6 +200,10 @@ func TestProvisioner_createDir(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
+		if err := p.prepareGuestOS(comm); err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
 		if err := p.createDir(ui, comm, "/tmp/foo"); err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -227,6 +232,10 @@ func TestProvisioner_removeDir(t *testing.T) {
 
 		err := p.Prepare(config)
 		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		if err := p.prepareGuestOS(comm); err != nil {
 			t.Fatalf("err: %s", err)
 		}
 

@@ -120,7 +120,7 @@ func newMockBrokenServer(t *testing.T) string {
 
 func TestCommIsCommunicator(t *testing.T) {
 	var raw interface{}
-	raw = &comm{}
+	raw = &Communicator{}
 	if _, ok := raw.(packer.Communicator); !ok {
 		t.Fatalf("comm must be a communicator")
 	}

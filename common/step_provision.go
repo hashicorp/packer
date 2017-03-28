@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // StepProvision runs the provisioners.
