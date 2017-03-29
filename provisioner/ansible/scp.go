@@ -321,7 +321,7 @@ func scpResponse(r *bufio.Reader) error {
 
 		// 1 is a warning. Anything higher (really just 2) is an error.
 		if code > 1 {
-			return errors.New(string(message))
+			return errors.New(message)
 		}
 
 		log.Println("WARNING:", err)
