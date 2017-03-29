@@ -83,59 +83,31 @@ Example uses of all of the options, assuming one is building an NGINX image from
 
 Allowed metadata fields that can be changed are:
 
-<<<<<<< HEAD
-- `CMD`
-  - String, supports both array (escaped) and string form
-  - EX: `”CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
-  - EX: `"CMD nginx -g daemon off;”`
-- `ENTRYPOINT`
-  - String
-  - EX: `“ENTRYPOINT /var/www/start.sh”`
-- `ENV`
-  - String, note there is no equal sign:
-  - EX: `“ENV HOSTNAME www.example.com”` not `“ENV HOSTNAME=www.example.com”`
-- `EXPOSE`
-  - String, space separated ports
-  - EX: `“EXPOSE 80 443”`
-- `MAINTAINER`
-  - String
-  - EX: `“MAINTAINER NAME”`
-- `USER`
-  - String
-  - EX: `“USER USERNAME”`
-- `VOLUME`
-  - String
-  - EX: `“VOLUME FROM TO“`
-- `WORKDIR`
-  - String
-  - EX: `“WORKDIR PATH”`
-=======
 - CMD
 	- String, supports both array (escaped) and string form
 	- EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
 	- EX: `"CMD nginx -g daemon off;"`
 - ENTRYPOINT
-	- String 
+	- String
 	- EX: `"ENTRYPOINT /var/www/start.sh"`
 - ENV
-	- String, note there is no equal sign: 
+	- String, note there is no equal sign:
 	- EX: `"ENV HOSTNAME www.example.com"` not `"ENV HOSTNAME=www.example.com"`
 - EXPOSE
-	- String, space separated ports 
+	- String, space separated ports
 	- EX: `"EXPOSE 80 443"`
 - MAINTAINER
-	- String 
+	- String
 	- EX: `"MAINTAINER NAME"`
 - USER
-	- String 
+	- String
 	- EX: `"USER USERNAME"`
 - VOLUME
-	- String 
+	- String
 	- EX: `"VOLUME FROM TO"`
 - WORKDIR
 	- String
 	- EX: `"WORKDIR PATH"`
->>>>>>> mitchellh/master
 
 ## Configuration Reference
 
