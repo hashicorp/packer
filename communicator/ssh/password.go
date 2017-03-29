@@ -1,8 +1,9 @@
 package ssh
 
 import (
-	"golang.org/x/crypto/ssh"
 	"log"
+
+	"golang.org/x/crypto/ssh"
 )
 
 // An implementation of ssh.KeyboardInteractiveChallenge that simply sends
@@ -19,7 +20,7 @@ func PasswordKeyboardInteractive(password string) ssh.KeyboardInteractiveChallen
 		// Just send the password back for all questions
 		answers := make([]string, len(questions))
 		for i := range answers {
-			answers[i] = string(password)
+			answers[i] = password
 		}
 
 		return answers, nil

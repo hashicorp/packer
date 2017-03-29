@@ -355,7 +355,9 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stderr)
 
 	log.Printf("Executing Ansible: %s", strings.Join(cmd.Args, " "))
-	cmd.Start()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
 	wg.Wait()
 	err = cmd.Wait()
 	if err != nil {
