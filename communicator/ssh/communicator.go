@@ -620,14 +620,10 @@ func (c *comm) scpDownloadSession(path string, output io.Writer) error {
 
 		fmt.Fprint(w, "\x00")
 
-		if err := checkSCPStatus(stdoutR); err != nil {
-			return err
-		}
-
-		return nil
+		return checkSCPStatus(stdoutR)
 	}
 
-	if strings.Index(path, " ") == -1 {
+	if !strings.Contains(path, " ") {
 		return c.scpSession("scp -vf "+path, scpFunc)
 	}
 	return c.scpSession("scp -vf "+strconv.Quote(path), scpFunc)
@@ -805,11 +801,7 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 	}
 
 	fmt.Fprint(w, "\x00")
-	if err := checkSCPStatus(r); err != nil {
-		return err
-	}
-
-	return nil
+	return checkSCPStatus(r)
 }
 
 func scpUploadDirProtocol(name string, w io.Writer, r *bufio.Reader, f func() error, fi os.FileInfo) error {
@@ -830,11 +822,7 @@ func scpUploadDirProtocol(name string, w io.Writer, r *bufio.Reader, f func() er
 	}
 
 	fmt.Fprintln(w, "E")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func scpUploadDir(root string, fs []os.FileInfo, w io.Writer, r *bufio.Reader) error {

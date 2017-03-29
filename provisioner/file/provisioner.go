@@ -112,7 +112,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 			}
 		}
 		// if the src was a dir, download the dir
-		if strings.HasSuffix(src, "/") || strings.IndexAny(src, "*?[") >= 0 {
+		if strings.HasSuffix(src, "/") || strings.ContainsAny(src, "*?[") {
 			return comm.DownloadDir(src, dst, nil)
 		}
 
