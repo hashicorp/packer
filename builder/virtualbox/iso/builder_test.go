@@ -130,7 +130,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	b = Builder{}
 	_, errs := b.Prepare(config)
 	if errs == nil {
-		t.Fatalf("Non existent floppies should trigger multierror")
+		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
 	if len(errs.(*packer.MultiError).Errors) != 2 {
