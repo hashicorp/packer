@@ -150,11 +150,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if errs != nil {
-		return errs
-	}
-
-	return nil
+	return errs
 }
 
 // This function takes the inline scripts, concatenates them
