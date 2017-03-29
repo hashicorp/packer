@@ -116,7 +116,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 		cmd = &packer.RemoteCmd{Command: trycommand}
 		err = cmd.StartWithUi(comm, ui)
 		if err != nil {
-			// Couldnt execute, we asume machine is rebooting already
+			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
@@ -175,8 +175,8 @@ var waitForCommunicator = func(p *Provisioner) error {
 	for {
 		select {
 		case <-p.cancel:
-			log.Println("Communicator wait cancelled, exiting loop")
-			return fmt.Errorf("Communicator wait cancelled")
+			log.Println("Communicator wait canceled, exiting loop")
+			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
 

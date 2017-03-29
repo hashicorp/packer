@@ -211,7 +211,7 @@ func (c BuildCommand) Run(args []string) int {
 
 		c.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
 		for name, err := range errors {
-			// Create a UI for the machine readable stuff to be targetted
+			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargettedUi{
 				Target: name,
 				Ui:     c.Ui,
@@ -226,7 +226,7 @@ func (c BuildCommand) Run(args []string) int {
 	if len(artifacts.m) > 0 {
 		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts.m {
-			// Create a UI for the machine readable stuff to be targetted
+			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargettedUi{
 				Target: name,
 				Ui:     c.Ui,

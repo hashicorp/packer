@@ -54,7 +54,7 @@ func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, com
 	// directory on the remote side, but ansible only sends files, so there's no
 	// need to set targetIsDir, because it can be safely assumed that rest is
 	// intended to be a file, and whatever names are used in 'C' commands are
-	// irrelavant.
+	// irrelevant.
 	state := &scpUploadState{target: rest, srcRoot: d, comm: comm}
 
 	fmt.Fprintf(out, scpOK) // signal the client to start the transfer.
