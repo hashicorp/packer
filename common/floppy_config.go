@@ -23,7 +23,7 @@ func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	for _, path := range c.FloppyFiles {
-		if strings.IndexAny(path, "*?[") >= 0 {
+		if strings.ContainsAny(path, "*?[") {
 			_, err = filepath.Glob(path)
 		} else {
 			_, err = os.Stat(path)
@@ -38,7 +38,7 @@ func (c *FloppyConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	for _, path := range c.FloppyDirectories {
-		if strings.IndexAny(path, "*?[") >= 0 {
+		if strings.ContainsAny(path, "*?[") {
 			_, err = filepath.Glob(path)
 		} else {
 			_, err = os.Stat(path)

@@ -48,7 +48,7 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 			if !c.AMISkipRegionValidation {
 				// Verify the region is real
-				if valid := ValidateRegion(region); valid == false {
+				if valid := ValidateRegion(region); !valid {
 					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
 					continue
 				}
