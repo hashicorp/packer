@@ -187,8 +187,6 @@ func wrappedMain() int {
 		Ui:    ui,
 	}
 
-	//setupSignalHandlers(env)
-
 	cli := &cli.CLI{
 		Args:       args,
 		Commands:   Commands,
