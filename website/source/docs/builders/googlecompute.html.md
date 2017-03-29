@@ -136,7 +136,7 @@ user used to connect in a startup-script.
     "winrm_insecure": true,
     "winrm_use_ssl": true,
     "metadata": {
-      "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_packer & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+      "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
     },
     "zone": "us-central1-a"
   }]
