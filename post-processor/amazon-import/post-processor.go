@@ -239,7 +239,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
-		ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
 			ImageId: &createdami,
 		})
 

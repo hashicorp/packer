@@ -28,7 +28,10 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	if snapshot.StatusCode > 299 {
 		var restError RestError
-		json.Unmarshal([]byte(snapshot.Response), &restError)
+		if err := json.Unmarshal([]byte(snapshot.Response), &restError); err != nil {
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 		if len(restError.Messages) > 0 {
 			ui.Error(restError.Messages[0].Message)
 		} else {
