@@ -1,8 +1,9 @@
 package rpc
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"net/rpc"
+
+	"github.com/mitchellh/packer/packer"
 )
 
 // An implementation of packer.PostProcessor where the PostProcessor is actually
@@ -15,9 +16,8 @@ type postProcessor struct {
 // PostProcessorServer wraps a packer.PostProcessor implementation and makes it
 // exportable as part of a Golang RPC server.
 type PostProcessorServer struct {
-	client *rpc.Client
-	mux    *muxBroker
-	p      packer.PostProcessor
+	mux *muxBroker
+	p   packer.PostProcessor
 }
 
 type PostProcessorConfigureArgs struct {

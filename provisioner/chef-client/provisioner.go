@@ -319,20 +319,6 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
-	if err := p.createDir(ui, comm, dst); err != nil {
-		return err
-	}
-
-	// Make sure there is a trailing "/" so that the directory isn't
-	// created on the other side.
-	if src[len(src)-1] != '/' {
-		src = src + "/"
-	}
-
-	return comm.UploadDir(dst, src, nil)
-}
-
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {
 	ui.Message(fmt.Sprintf("Uploading %s...", localPath))
 
