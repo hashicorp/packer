@@ -104,8 +104,7 @@ func (state *scpDownloadState) FileProtocol(path string, info os.FileInfo, in *b
 	size := info.Size()
 	perms := fmt.Sprintf("C%04o", info.Mode().Perm())
 	fmt.Fprintln(out, perms, size, info.Name())
-	err := scpResponse(in)
-	if err != nil {
+	if err := scpResponse(in); err != nil {
 		return err
 	}
 
@@ -194,8 +193,7 @@ func (state *scpUploadState) FileProtocol(in *bufio.Reader, out io.Writer) error
 		return err
 	}
 
-	err = scpResponse(in)
-	if err != nil {
+	if err := scpResponse(in); err != nil {
 		return err
 	}
 
@@ -260,7 +258,9 @@ type scpDownloadState struct {
 func (state *scpDownloadState) Protocol(in *bufio.Reader, out io.Writer) error {
 	r := bufio.NewReader(in)
 	// read the byte sent by the other side to start the transfer
-	scpResponse(r)
+	if err := scpResponse(r); err != nil {
+		return err
+	}
 
 	return filepath.Walk(state.srcRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

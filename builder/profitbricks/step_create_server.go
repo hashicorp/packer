@@ -72,7 +72,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	if datacenter.StatusCode > 299 {
 		if datacenter.StatusCode > 299 {
 			var restError RestError
-			json.Unmarshal([]byte(datacenter.Response), &restError)
+			err := json.Unmarshal([]byte(datacenter.Response), &restError)
+			if err != nil {
+				ui.Error(fmt.Sprintf("Error decoding json response: %s", err.Error()))
+				return multistep.ActionHalt
+			}
 			if len(restError.Messages) > 0 {
 				ui.Error(restError.Messages[0].Message)
 			} else {
@@ -147,9 +151,11 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 	if dcId, ok := state.GetOk("datacenter_id"); ok {
 		resp := profitbricks.DeleteDatacenter(dcId.(string))
-		s.checkForErrors(resp)
-		err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
-		if err != nil {
+		if err := s.checkForErrors(resp); err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
+		}
+		if err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
 		}
