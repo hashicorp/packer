@@ -250,7 +250,7 @@ func (c *comm) newSession() (session *ssh.Session, err error) {
 
 func (c *comm) reconnect() (err error) {
 	if c.conn != nil {
-		c.conn.Close()
+		return c.conn.Close()
 	}
 
 	// Set the conn and client to nil since we'll recreate it
