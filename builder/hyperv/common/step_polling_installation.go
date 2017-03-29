@@ -3,18 +3,18 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 const port string = "13000"
 
 type StepPollingInstalation struct {
-	step int
 }
 
 func (s *StepPollingInstalation) Run(state multistep.StateBag) multistep.StepAction {

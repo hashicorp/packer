@@ -90,10 +90,7 @@ func (c *CLIConfig) Prepare(name string) error {
 		c.SourceProfile = c.ProfileName
 	}
 	c.profileCred, err = credsFromName(c.SourceProfile)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (c *CLIConfig) getSessionName(rawName string) (string, error) {

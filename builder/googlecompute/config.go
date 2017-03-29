@@ -54,7 +54,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	Account            AccountFile
-	privateKeyBytes    []byte
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context

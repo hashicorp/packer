@@ -155,13 +155,8 @@ func (c *config) discover(path string) error {
 		return err
 	}
 
-	err = c.discoverSingle(
+	return c.discoverSingle(
 		filepath.Join(path, "packer-provisioner-*"), &c.Provisioners)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (c *config) discoverSingle(glob string, m *map[string]string) error {

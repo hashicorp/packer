@@ -31,11 +31,11 @@ func TestDigitalOceanProvider_ArtifactId(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 	image := `digital_ocean.image = "42"`
-	if strings.Index(vagrantfile, image) == -1 {
+	if !strings.Contains(vagrantfile, image) {
 		t.Fatalf("wrong image substitution: %s", vagrantfile)
 	}
 	region := `digital_ocean.region = "San Francisco"`
-	if strings.Index(vagrantfile, region) == -1 {
+	if !strings.Contains(vagrantfile, region) {
 		t.Fatalf("wrong region substitution: %s", vagrantfile)
 	}
 }

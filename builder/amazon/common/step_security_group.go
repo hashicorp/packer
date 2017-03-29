@@ -77,7 +77,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// We loop and retry this a few times because sometimes the security
-	// group isn't available immediately because AWS resources are eventaully
+	// group isn't available immediately because AWS resources are eventually
 	// consistent.
 	ui.Say(fmt.Sprintf(
 		"Authorizing access to port %d the temporary security group...",

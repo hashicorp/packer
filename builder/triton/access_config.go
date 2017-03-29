@@ -59,7 +59,7 @@ func (c *AccessConfig) CreateTritonClient() (*cloudapi.Client, error) {
 		return nil, err
 	}
 
-	userauth, err := auth.NewAuth(c.Account, string(keyData), "rsa-sha256")
+	userauth, err := auth.NewAuth(c.Account, keyData, "rsa-sha256")
 	if err != nil {
 		return nil, err
 	}
