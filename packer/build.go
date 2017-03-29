@@ -211,7 +211,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	artifacts := make([]Artifact, 0, 1)
 
 	// The builder just has a normal Ui, but targeted
-	builderUi := &TargettedUi{
+	builderUi := &TargetedUI{
 		Target: b.Name(),
 		Ui:     originalUi,
 	}
@@ -236,7 +236,7 @@ PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
-			ppUi := &TargettedUi{
+			ppUi := &TargetedUI{
 				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
 				Ui:     originalUi,
 			}
