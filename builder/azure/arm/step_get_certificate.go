@@ -13,12 +13,11 @@ import (
 )
 
 type StepGetCertificate struct {
-	client   *AzureClient
-	template string
-	get      func(keyVaultName string, secretName string) (string, error)
-	say      func(message string)
-	error    func(e error)
-	pause    func()
+	client *AzureClient
+	get    func(keyVaultName string, secretName string) (string, error)
+	say    func(message string)
+	error  func(e error)
+	pause  func()
 }
 
 func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificate {

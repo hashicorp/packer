@@ -2,8 +2,6 @@ package profitbricks
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"time"
 
 	"github.com/mitchellh/multistep"
@@ -46,13 +44,6 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepTakeSnapshot) Cleanup(state multistep.StateBag) {
-}
-
-func (d *stepTakeSnapshot) checkForErrors(instance profitbricks.Resp) error {
-	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
-	}
-	return nil
 }
 
 func (d *stepTakeSnapshot) waitTillProvisioned(path string, config Config) {
