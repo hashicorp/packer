@@ -44,7 +44,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
 		}
 
-		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+		signer, err := ssh.ParsePrivateKey(privateKey)
 		if err != nil {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}

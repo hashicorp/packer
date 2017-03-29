@@ -115,5 +115,5 @@ func GetInstanceMetaData(path string) (contents []byte, err error) {
 	if err != nil {
 		return
 	}
-	return []byte(body), err
+	return body, err
 }
