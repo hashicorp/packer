@@ -33,7 +33,7 @@ type Config struct {
 	Name        string            `mapstructure:"ami_name"`
 	Description string            `mapstructure:"ami_description"`
 	Users       []string          `mapstructure:"ami_users"`
-	Groups      []string          `mapstrcuture:"ami_groups"`
+	Groups      []string          `mapstructure:"ami_groups"`
 
 	ctx interpolate.Context
 }
@@ -42,7 +42,7 @@ type PostProcessor struct {
 	config Config
 }
 
-// Entry point for configuration parisng when we've defined
+// Entry point for configuration parsing when we've defined
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -74,7 +74,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check we have AWS access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
-	// define all our required paramaters
+	// define all our required parameters
 	templates := map[string]*string{
 		"s3_bucket_name": &p.config.S3Bucket,
 	}
@@ -178,7 +178,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
 
-	// Wait for import process to complete, this takess a while
+	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 
 	stateChange := awscommon.StateChangeConf{
@@ -307,7 +307,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	}
 
-	// Apply atttributes for AMI specified in config
+	// Apply attributes for AMI specified in config
 	// (duped from builder/amazon/common/step_modify_ami_attributes.go)
 	options := make(map[string]*ec2.ModifyImageAttributeInput)
 	if p.config.Description != "" {
