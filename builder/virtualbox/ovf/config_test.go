@@ -45,7 +45,7 @@ func TestNewConfig_InvalidFloppies(t *testing.T) {
 	c["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	_, _, errs := NewConfig(c)
 	if errs == nil {
-		t.Fatalf("Non existent floppies should trigger multierror")
+		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
 	if len(errs.(*packer.MultiError).Errors) != 2 {
