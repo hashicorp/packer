@@ -3,10 +3,11 @@ package digitalocean
 import (
 	"fmt"
 
+	"io/ioutil"
+
 	"github.com/digitalocean/godo"
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
-	"io/ioutil"
 )
 
 type stepCreateDroplet struct {
@@ -41,7 +42,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			Slug: c.Image,
 		},
 		SSHKeys: []godo.DropletCreateSSHKey{
-			{ID: int(sshKeyId)},
+			{ID: sshKeyId},
 		},
 		PrivateNetworking: c.PrivateNetworking,
 		UserData:          userData,
