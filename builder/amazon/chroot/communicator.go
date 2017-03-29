@@ -69,7 +69,10 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 		return fmt.Errorf("Error preparing shell script: %s", err)
 	}
 	defer os.Remove(tf.Name())
-	io.Copy(tf, r)
+
+	if _, err := io.Copy(tf, r); err != nil {
+		return err
+	}
 
 	cpCmd, err := c.CmdWrapper(fmt.Sprintf("cp %s %s", tf.Name(), dst))
 	if err != nil {
