@@ -126,11 +126,11 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	config["floppy_files"] = []string{"nonexistant.bat", "nonexistant.ps1"}
+	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
 	_, errs := b.Prepare(config)
 	if errs == nil {
-		t.Fatalf("Non existant floppies should trigger multierror")
+		t.Fatalf("Non existent floppies should trigger multierror")
 	}
 
 	if len(errs.(*packer.MultiError).Errors) != 2 {

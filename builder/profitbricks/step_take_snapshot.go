@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/mitchellh/multistep"
 	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"time"
 )
 
 type stepTakeSnapshot struct{}
@@ -49,7 +50,7 @@ func (s *stepTakeSnapshot) Cleanup(state multistep.StateBag) {
 
 func (d *stepTakeSnapshot) checkForErrors(instance profitbricks.Resp) error {
 	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occured %s", string(instance.Body)))
+		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
 	}
 	return nil
 }

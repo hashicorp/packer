@@ -56,7 +56,7 @@ type Build interface {
 	Run(Ui, Cache) ([]Artifact, error)
 
 	// Cancel will cancel a running build. This will block until the build
-	// is actually completely cancelled.
+	// is actually completely canceled.
 	Cancel()
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
@@ -210,7 +210,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	hook := &DispatchHook{Mapping: hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	// The builder just has a normal Ui, but targetted
+	// The builder just has a normal Ui, but targeted
 	builderUi := &TargettedUi{
 		Target: b.Name(),
 		Ui:     originalUi,
