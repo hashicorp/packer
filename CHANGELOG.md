@@ -1,3 +1,27 @@
+## 1.0rc2 (March 29, 2017)
+
+### BUG FIXES:
+
+* core: Invoking packer `--help` or `--version` now exits with status 0.
+    [GH-4723]
+* core: show correct step name when debugging. [GH-4672]
+* builder/virtualbox: fix `none` communicator by allowing skipping upload of
+    version file. [GH-4678]
+* communicator/ssh: fix nil pointer error. [GH-4690]
+* builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
+* builder/amazon: Fix b/c issue by reporting again the tags we create.
+    [GH-4704]
+* builder/virtualbox: retry removing floppy controller. [GH-4705]
+
+### IMRPOVEMENTS:
+
+* builder/ansible: Clearer error message when we have problems getting the
+    ansible version. [GH-4694]
+* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
+    prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
+    isn't given at all, the default behavior remains. [GH-4708]
+
+
 ## 1.0rc1 (March 16, 2017)
 
 ### BUG FIXES:
@@ -11,34 +35,6 @@
 * builder/amazon: set force_deregister to true on -force. [GH-4649]
 * builder/hyper-v: validate output dir in step, not in config. [GH-4645]
 * website: fix display on ios devices. [GH-4618]
-
-### BUG FIXES:
-
-* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
-* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
-* core: show correct step name when debugging. [GH-4672]
-* builder/virtualbox: fix `none` communicator by allowing skipping upload of
-    version file. [GH-4678]
-* communicator/ssh: fix nil pointer error. [GH-4690]
-* builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
-* builder/amazon: Fix b/c issue by reporting again the tags we create.
-    [GH-4704]
-* builder/virtualbox: retry removing floppy controller. [GH-4705]
-
-### IMRPOVEMENTS:
-
-* builder/amazon: validate ssh key name/file. [GH-4665]
-* builder/amazon: set force_deregister to true on -force. [GH-4649]
-* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
-* website: fix display on ios devices. [GH-4618]
-* builder/openstack: Add ssh agent support. [GH-4655]
-* builder/parallels-iso: Configuration of disk type, plain or expanding.
-    [GH-4621]
-* builder/ansible: Clearer error message when we have problems getting the
-    ansible version. [GH-4694]
-* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
-    prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
-    isn't given at all, the default behavior remains. [GH-4708]
 
 ## 0.12.3 (March 1, 2017)
 
