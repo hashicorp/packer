@@ -1,10 +1,10 @@
-## 1.0rc3 (March 30, 2017)
+## 1.0.0-rc3 (March 30, 2017)
 
 ### BUG FIXES:
 * core: fix version number
 * communicator/ssh: don't return error if we can't close connection. #4741
 
-## 1.0rc2 (March 29, 2017)
+## 1.0.0-rc2 (March 29, 2017)
 
 ### BUG FIXES:
 
@@ -28,7 +28,7 @@
     isn't given at all, the default behavior remains. [GH-4708]
 
 
-## 1.0rc1 (March 16, 2017)
+## 1.0.0-rc1 (March 16, 2017)
 
 ### BUG FIXES:
 
