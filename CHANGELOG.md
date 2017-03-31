@@ -1,3 +1,9 @@
+## 1.0rc3 (March 30, 2017)
+
+### BUG FIXES:
+* core: fix version number
+* communicator/ssh: don't return error if we can't close connection. #4741
+
 ## 1.0rc2 (March 29, 2017)
 
 ### BUG FIXES:
