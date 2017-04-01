@@ -36,9 +36,29 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	switch name {
+	case "atlas.artifact.metadata":
+		return a.stateAtlasMetadata()
+	default:
+		return nil
+	}
 }
 
 func (a *Artifact) Destroy() error {
 	return os.Remove(a.Path)
+}
+
+func (a *Artifact) stateAtlasMetadata() map[string]string {
+	return map[string]string{"provider": a.vagrantProvider()}
+}
+
+func (a *Artifact) vagrantProvider() string {
+	switch a.Provider {
+	case "digitalocean":
+		return "digital_ocean"
+	case "vmware":
+		return "vmware_desktop"
+	default:
+		return a.Provider
+	}
 }
