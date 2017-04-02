@@ -391,7 +391,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
 			{
-				Email:  c.ServiceAccountEmail,
+				Email:  "default",
 				Scopes: c.Scopes,
 			},
 		},
