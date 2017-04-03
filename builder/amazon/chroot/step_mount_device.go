@@ -82,7 +82,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 
-	// build mount options from mount_options config, usefull for nouuid options
+	// build mount options from mount_options config, useful for nouuid options
 	// or other specific device type settings for mount
 	opts := ""
 	if len(s.MountOptions) > 0 {
