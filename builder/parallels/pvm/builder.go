@@ -36,7 +36,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Create the driver that we'll use to communicate with Parallels
 	driver, err := parallelscommon.NewDriver()
 	if err != nil {
-		return nil, fmt.Errorf("Failed creating Paralles driver: %s", err)
+		return nil, fmt.Errorf("Failed creating Parallels driver: %s", err)
 	}
 
 	// Set up the state.

@@ -1,11 +1,12 @@
 ---
-description: |
-    The shell Packer provisioner provisions machines built by Packer using shell
-    scripts. Shell provisioning is the easiest way to get software installed and
-    configured on a machine.
 layout: docs
-page_title: Shell Provisioner
-...
+sidebar_current: docs-provisioners-shell-remote
+page_title: Shell - Provisioners
+description: |-
+  The shell Packer provisioner provisions machines built by Packer using shell
+  scripts. Shell provisioning is the easiest way to get software installed and
+  configured on a machine.
+---
 
 # Shell Provisioner
 
@@ -15,7 +16,7 @@ The shell Packer provisioner provisions machines built by Packer using shell
 scripts. Shell provisioning is the easiest way to get software installed and
 configured on a machine.
 
--&gt; **Building Windows images?** You probably want to use the
+-> **Building Windows images?** You probably want to use the
 [PowerShell](/docs/provisioners/powershell.html) or [Windows
 Shell](/docs/provisioners/windows-shell.html) provisioners.
 
@@ -23,7 +24,7 @@ Shell](/docs/provisioners/windows-shell.html) provisioners.
 
 The example below is fully functional.
 
-``` {.javascript}
+```json
 {
   "type": "shell",
   "inline": ["echo foo"]
@@ -37,66 +38,66 @@ required element is either "inline" or "script". Every other option is optional.
 
 Exactly *one* of the following is required:
 
--   `inline` (array of strings) - This is an array of commands to execute. The
+- `inline` (array of strings) - This is an array of commands to execute. The
     commands are concatenated by newlines and turned into a single file, so they
     are all executed within the same context. This allows you to change
     directories in one command and use something in the directory in the next
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
 
--   `script` (string) - The path to a script to upload and execute in
+- `script` (string) - The path to a script to upload and execute in
     the machine. This path can be absolute or relative. If it is relative, it is
     relative to the working directory when Packer is executed.
 
--   `scripts` (array of strings) - An array of scripts to execute. The scripts
+- `scripts` (array of strings) - An array of scripts to execute. The scripts
     will be uploaded and executed in the order specified. Each script is
     executed in isolation, so state such as variables from one script won't
     carry on to the next.
 
 Optional parameters:
 
--   `binary` (boolean) - If true, specifies that the script(s) are binary files,
+- `binary` (boolean) - If true, specifies that the script(s) are binary files,
     and Packer should therefore not convert Windows line endings to Unix line
     endings (if there are any). By default this is false.
 
--   `environment_vars` (array of strings) - An array of key/value pairs to
+- `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
--   `execute_command` (string) - The command to use to execute the script. By
+- `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
     of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
--   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+- `expect_disconnect` (bool) - Defaults to true. Whether to error if the
     server disconnects us. A disconnect might happen if you restart the ssh
     server or reboot the host. May default to false in the future.
 
--   `inline_shebang` (string) - The
+- `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
     you're not using `inline`, then this configuration has no effect.
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
--   `remote_folder` (string) - The folder where the uploaded script will reside on
+- `remote_folder` (string) - The folder where the uploaded script will reside on
     the machine. This defaults to '/tmp'.
 
--   `remote_file` (string) - The filename the uploaded script will have on the machine.
+- `remote_file` (string) - The filename the uploaded script will have on the machine.
     This defaults to 'script_nnn.sh'.
 
--   `remote_path` (string) - The full path to the uploaded script will have on the
+- `remote_path` (string) - The full path to the uploaded script will have on the
      machine. By default this is remote_folder/remote_file, if set this option will
      override both remote_folder and remote_file.
 
--   `skip_clean` (boolean) - If true, specifies that the helper scripts
+- `skip_clean` (boolean) - If true, specifies that the helper scripts
     uploaded to the system will not be removed by Packer. This defaults to
     false (clean scripts from the system).
 
--   `start_retry_timeout` (string) - The amount of time to attempt to *start*
+- `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is `5m` or 5 minutes. This setting
     exists in order to deal with times when SSH may restart, such as a
     system reboot. Set this to a higher value if reboots take a longer amount
@@ -115,7 +116,7 @@ Some operating systems default to a non-root user. For example if you login as
 `ubuntu` and can sudo using the password `packer`, then you'll want to change
 `execute_command` to be:
 
-``` {.text}
+```text
 "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
 ```
 
@@ -131,7 +132,9 @@ FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
-    chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+```text
+chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+```
 
 Note the addition of `env` before `{{ .Vars }}`.
 
@@ -141,15 +144,15 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
--   `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+- `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 
--   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
+- `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
 
--   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+- `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
     transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
     will be set to the address. You can use this address in your provisioner to
     download large files over http. This may be useful if you're experiencing
@@ -170,7 +173,7 @@ Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
 machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
 
-``` {.javascript}
+```json
 {
   "type": "shell",
   "script": "script.sh",
@@ -183,7 +186,7 @@ causing the provisioner to hang despite a reboot occurring. In this case, make
 sure you shut down the network interfaces on reboot or in your shell script. For
 example, on Gentoo:
 
-``` {.text}
+```text
 /etc/init.d/net.eth0 stop
 ```
 
@@ -203,7 +206,7 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-``` {.javascript}
+```json
 {
   "type": "shell",
   "inline": [
@@ -218,7 +221,7 @@ would be:
 
 *My shell script doesn't work correctly on Ubuntu*
 
--   On Ubuntu, the `/bin/sh` shell is
+- On Ubuntu, the `/bin/sh` shell is
     [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
     has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific
     commands in it, then put `#!/bin/bash -e` at the top of your script.
@@ -227,26 +230,26 @@ would be:
 
 *My shell works when I login but fails with the shell provisioner*
 
--   See the above tip. More than likely, your login shell is using `/bin/bash`
+- See the above tip. More than likely, your login shell is using `/bin/bash`
     while the provisioner is using `/bin/sh`.
 
 *My installs hang when using `apt-get` or `yum`*
 
--   Make sure you add a `-y` to the command to prevent it from requiring user
+- Make sure you add a `-y` to the command to prevent it from requiring user
     input before proceeding.
 
 *How do I tell what my shell script is doing?*
 
--   Adding a `-x` flag to the shebang at the top of the script (`#!/bin/sh -x`)
+- Adding a `-x` flag to the shebang at the top of the script (`#!/bin/sh -x`)
     will echo the script statements as it is executing.
 
 *My builds don't always work the same*
 
--   Some distributions start the SSH daemon before other core services which can
+- Some distributions start the SSH daemon before other core services which can
     create race conditions. Your first provisioner can tell the machine to wait
     until it completely boots.
 
-``` {.javascript}
+```json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]

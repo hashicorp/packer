@@ -2,10 +2,6 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-fs"
-	"github.com/mitchellh/go-fs/fat"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +9,11 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/go-fs"
+	"github.com/mitchellh/go-fs/fat"
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.
@@ -96,7 +97,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	// Utility functions for walking through a directory grabbing all files flatly
 	globFiles := func(files []string, list chan string) {
 		for _, filename := range files {
-			if strings.IndexAny(filename, "*?[") >= 0 {
+			if strings.ContainsAny(filename, "*?[") {
 				matches, _ := filepath.Glob(filename)
 				if err != nil {
 					continue
@@ -173,7 +174,7 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Message("Collecting paths from floppy_dirs")
 	var pathqueue []string
 	for _, filename := range s.Directories {
-		if strings.IndexAny(filename, "*?[") >= 0 {
+		if strings.ContainsAny(filename, "*?[") {
 			matches, err := filepath.Glob(filename)
 			if err != nil {
 				state.Put("error", fmt.Errorf("Error adding path %s to floppy: %s", filename, err))

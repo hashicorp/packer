@@ -144,7 +144,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) getVersion() error {
 	out, err := exec.Command(p.config.Command, "--version").Output()
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"Error running \"%s --version\": %s", p.config.Command, err.Error())
 	}
 
 	versionRe := regexp.MustCompile(`\w (\d+\.\d+[.\d+]*)`)
@@ -354,7 +355,9 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stderr)
 
 	log.Printf("Executing Ansible: %s", strings.Join(cmd.Args, " "))
-	cmd.Start()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
 	wg.Wait()
 	err = cmd.Wait()
 	if err != nil {
