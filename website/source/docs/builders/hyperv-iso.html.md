@@ -1,8 +1,10 @@
 ---
+layout: docs
+sidebar_current: docs-builders-hyperv-iso
+page_title: Hyper-V ISO - Builders
 description: |-
-  The Hyper-V Packer builder is able to create Hyper-V virtual machines and export them.
-layout: "docs"
-page_title: "Hyper-V Builder (from an ISO)"
+  The Hyper-V Packer builder is able to create Hyper-V virtual machines and
+  export them.
 ---
 
 # Hyper-V Builder (from an ISO)
@@ -23,7 +25,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-```javascript
+```json
 {
   "type": "hyperv-iso",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
@@ -51,78 +53,78 @@ can be configured for this builder.
 
 ### Required:
 
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
+- `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
     files are so large, this is required and Packer will verify it prior
     to booting a virtual machine with the ISO attached. The type of the
     checksum is specified with `iso_checksum_type`, documented below.
 
--   `iso_checksum_type` (string) - The type of the checksum specified in
+- `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
     recommended since ISO files are generally large and corruption does happen
     from time to time.
 
--   `iso_url` (string) - A URL to the ISO containing the installation image.
+- `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file).
     If this is an HTTP URL, Packer will download iso and cache it between
     runs.
 
 ### Optional:
 
--   `boot_command` (array of strings) - This is an array of commands to type
+- `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
     be to type just enough to initialize the operating system installer. Special
     keys can be typed as well, and are covered in the section below on the boot
     command. If this is not specified, it is assumed the installer will start
     itself.
 
--   `boot_wait` (string) - The time to wait after booting the initial virtual
+- `boot_wait` (string) - The time to wait after booting the initial virtual
     machine before typing the `boot_command`. The value of this should be
     a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't specified,
     the default is 10 seconds.
 
--   `cpu` (integer) - The number of cpus the virtual machine should use. If this isn't specified,
+- `cpu` (integer) - The number of cpus the virtual machine should use. If this isn't specified,
     the default is 1 cpu.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+- `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 
--   `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual machine.
+- `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual machine.
     This defaults to false.
 
--   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
+- `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
     This defaults to false.
 
--   `enable_secure_boot` (bool) - If true enable secure boot for virtual machine.
+- `enable_secure_boot` (bool) - If true enable secure boot for virtual machine.
     This defaults to false.
 
--   `enable_virtualization_extensions` (bool) - If true enable virtualization extensions for virtual machine.
+- `enable_virtualization_extensions` (bool) - If true enable virtualization extensions for virtual machine.
     This defaults to false. For nested virtualization you need to enable mac spoofing, disable dynamic memory
     and have at least 4GB of RAM for virtual machine.
 
--   `floppy_files` (array of strings) - A list of files to place onto a floppy
+- `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful
     for unattended Windows installs, which look for an `Autounattend.xml` file
     on removable media. By default, no floppy will be attached. All files
     listed in this setting get placed into the root directory of the floppy
     and the floppy is attached as the first floppy device. Currently, no
     support exists for creating sub-directories on the floppy. Wildcard
-    characters (*, ?, and []) are allowed. Directory names are also allowed,
+    characters (`*`, `?`, and `[]`) are allowed. Directory names are also allowed,
     which will add all the files found in the directory to the floppy.
 
--   `generation` (integer) - The Hyper-V generation for the virtual machine. By
+- `generation` (integer) - The Hyper-V generation for the virtual machine. By
     default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
-    drives and dvd drives will also be scsi and not ide. 
+    drives and dvd drives will also be scsi and not ide.
 
--   `guest_additions_mode` (string) - How should guest additions be installed.
+- `guest_additions_mode` (string) - How should guest additions be installed.
     If value `attach` then attach iso image with by specified by `guest_additions_path`.
     Otherwise guest additions is not installed.
 
--   `guest_additions_path` (string) - The path to the iso image for guest additions.
+- `guest_additions_path` (string) - The path to the iso image for guest additions.
 
--   `http_directory` (string) - Path to a directory to serve using an HTTP
+- `http_directory` (string) - Path to a directory to serve using an HTTP
     server. The files in this directory will be available over HTTP that will
     be requestable from the virtual machine. This is useful for hosting
     kickstart files and so on. By default this is "", which means no HTTP
@@ -130,68 +132,68 @@ can be configured for this builder.
     available as variables in `boot_command`. This is covered in more detail
     below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+- `http_port_min` and `http_port_max` (integer) - These are the minimum and
     maximum port to use for the HTTP server started to serve the `http_directory`.
     Because Packer often runs in parallel, Packer will choose a randomly available
     port in this range to run the HTTP server. If you want to force the HTTP
     server to be on one port, make this minimum and maximum port the same.
     By default the values are 8000 and 9000, respectively.
 
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
+- `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to download
     or while downloading a single URL, it will move on to the next. All URLs
     must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
--   `iso_target_extension` (string) - The extension of the iso file after
+- `iso_target_extension` (string) - The extension of the iso file after
     download. This defaults to "iso".
 
--   `iso_target_path` (string) - The path where the iso should be saved after
+- `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
--   `output_directory` (string) - This is the path to the directory where the
+- `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running the builder.
     By default this is "output-BUILDNAME" where "BUILDNAME" is the name
     of the build.
 
--   `ram_size` (integer) - The size, in megabytes, of the ram to create
+- `ram_size` (integer) - The size, in megabytes, of the ram to create
     for the VM. By default, this is 1 GB.
 
-*   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a 
-    VM when it is booted. This is most useful for unattended Windows installs, which 
-    look for an `Autounattend.xml` file on removable media. By default, no 
-    secondary iso will be attached. 
+*   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a
+    VM when it is booted. This is most useful for unattended Windows installs, which
+    look for an `Autounattend.xml` file on removable media. By default, no
+    secondary iso will be attached.
 
--   `shutdown_command` (string) - The command to use to gracefully shut down the machine once all
+- `shutdown_command` (string) - The command to use to gracefully shut down the machine once all
     the provisioning is done. By default this is an empty string, which tells Packer to just
     forcefully shut down the machine unless a shutdown command takes place inside script so this may
     safely be omitted. If one or more scripts require a reboot it is suggested to leave this blank
     since reboots may fail and specify the final shutdown command in your last script.
 
--   `shutdown_timeout` (string) - The amount of time to wait after executing
+- `shutdown_timeout` (string) - The amount of time to wait after executing
     the `shutdown_command` for the virtual machine to actually shut down.
     If it doesn't shut down in this time, it is an error. By default, the timeout
     is "5m", or five minutes.
 
--   `skip_compaction` (bool) - If true skip compacting the hard disk for virtual machine when
+- `skip_compaction` (bool) - If true skip compacting the hard disk for virtual machine when
     exporting. This defaults to false.
 
--   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting 
+- `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting
     this to an empty string, Packer will try to determine the switch to use by looking for
     external switch that is up and running.
 
--   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card. 
+- `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
 
--   `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
-    machine. By default none is set. If none is set then vlans are not set on the virtual machine's 
+- `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
+    machine. By default none is set. If none is set then vlans are not set on the virtual machine's
     network card.
 
--   `vm_name` (string) - This is the name of the virtual machine for the new virtual
+- `vm_name` (string) - This is the name of the virtual machine for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
@@ -211,54 +213,54 @@ to the machine, simulating a human actually typing the keyboard. There are
 a set of special keys available. If these are in your boot command, they
 will be replaced by the proper key:
 
--   `<bs>` - Backspace
+- `<bs>` - Backspace
 
--   `<del>` - Delete
+- `<del>` - Delete
 
--   `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
+- `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
--   `<esc>` - Simulates pressing the escape key.
+- `<esc>` - Simulates pressing the escape key.
 
--   `<tab>` - Simulates pressing the tab key.
+- `<tab>` - Simulates pressing the tab key.
 
--   `<f1>` - `<f12>` - Simulates pressing a function key.
+- `<f1>` - `<f12>` - Simulates pressing a function key.
 
--   `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+- `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
 
--   `<spacebar>` - Simulates pressing the spacebar.
+- `<spacebar>` - Simulates pressing the spacebar.
 
--   `<insert>` - Simulates pressing the insert key.
+- `<insert>` - Simulates pressing the insert key.
 
--   `<home>` `<end>` - Simulates pressing the home and end keys.
+- `<home>` `<end>` - Simulates pressing the home and end keys.
 
--   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
+- `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+- `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
 
--   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+- `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
--   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+- `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+- `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+- `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+- `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+- `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
 
--   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+- `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
--   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+- `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
 
--   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
+- `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
 When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.    
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html).
+[template engine](/docs/templates/engine.html).
 The available variables are:
 
 * `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -269,7 +271,7 @@ The available variables are:
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```text
+```json
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -290,20 +292,20 @@ for the version of Hyper-V that is running.
 
 ## Generation 1 vs Generation 2
 
-Floppy drives are no longer supported by generation 2 machines. This requires you to 
+Floppy drives are no longer supported by generation 2 machines. This requires you to
 take another approach when dealing with preseed or answer files. Two possible options
 are using virtual dvd drives or using the built in web server.
 
-When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines. 
+When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines.
 
 ## Creating iso from directory
 
-Programs like mkisofs can be used to create an iso from a directory. 
+Programs like mkisofs can be used to create an iso from a directory.
 There is a [windows version of mkisofs](http://opensourcepack.blogspot.co.uk/p/cdrtools.html).
 
 Example powershell script. This is an actually working powershell script used to create a Windows answer iso:
 
-```text
+```powershell
 $isoFolder = "answer-iso"
 if (test-path $isoFolder){
   remove-item $isoFolder -Force -Recurse
@@ -323,7 +325,7 @@ copy windows\common\win-updates.ps1 $isoFolder\
 copy windows\common\run-sysprep.ps1 $isoFolder\
 copy windows\common\run-sysprep.cmd $isoFolder\
 
-$textFile = "$isoFolder\Autounattend.xml" 
+$textFile = "$isoFolder\Autounattend.xml"
 
 $c = Get-Content -Encoding UTF8 $textFile
 
@@ -342,49 +344,52 @@ if (test-path $isoFolder){
 
 Packer config:
 
-```javascript
+```json
 {
   "builders": [
-  {
-    "vm_name":"windows2012r2",
-    "type": "hyperv-iso",
-    "disk_size": 61440,
-    "floppy_files": [],
-    "secondary_iso_images": [
-      "./windows/windows-2012R2-serverdatacenter-amd64/answer.iso"
-    ],
-    "http_directory": "./windows/common/http/",
-    "boot_wait": "0s",
-    "boot_command": [
-      "a<wait>a<wait>a"
-    ],
-    "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
-    "iso_checksum_type": "md5",
-    "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
-    "communicator":"winrm",
-    "winrm_username": "vagrant",
-    "winrm_password": "vagrant",
-    "winrm_timeout" : "4h",
-    "shutdown_command": "f:\\run-sysprep.cmd",  
-    "ram_size": 4096,
-    "cpu": 4,
-    "generation": 2,
-    "switch_name":"LAN",
-    "enable_secure_boot":true
-  }],
-  "provisioners": [{
-    "type": "powershell",
-    "elevated_user":"vagrant",
-    "elevated_password":"vagrant",
-    "scripts": [
-      "./windows/common/install-7zip.ps1",
-      "./windows/common/install-chef.ps1",
-      "./windows/common/compile-dotnet-assemblies.ps1",
-      "./windows/common/cleanup.ps1",
-      "./windows/common/ultradefrag.ps1",
-      "./windows/common/sdelete.ps1"
-    ]
-  }],
+    {
+      "vm_name":"windows2012r2",
+      "type": "hyperv-iso",
+      "disk_size": 61440,
+      "floppy_files": [],
+      "secondary_iso_images": [
+        "./windows/windows-2012R2-serverdatacenter-amd64/answer.iso"
+      ],
+      "http_directory": "./windows/common/http/",
+      "boot_wait": "0s",
+      "boot_command": [
+        "a<wait>a<wait>a"
+      ],
+      "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
+      "iso_checksum_type": "md5",
+      "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
+      "communicator":"winrm",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "winrm_timeout" : "4h",
+      "shutdown_command": "f:\\run-sysprep.cmd",  
+      "ram_size": 4096,
+      "cpu": 4,
+      "generation": 2,
+      "switch_name":"LAN",
+      "enable_secure_boot":true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "elevated_user":"vagrant",
+      "elevated_password":"vagrant",
+      "scripts": [
+        "./windows/common/install-7zip.ps1",
+        "./windows/common/install-chef.ps1",
+        "./windows/common/compile-dotnet-assemblies.ps1",
+        "./windows/common/cleanup.ps1",
+        "./windows/common/ultradefrag.ps1",
+        "./windows/common/sdelete.ps1"
+      ]
+    }
+  ],
   "post-processors": [
     {
       "type": "vagrant",
@@ -483,7 +488,7 @@ autounattend.xml:
                         </CreatePartition>         
                         <CreatePartition wcm:action="add">
                             <Order>4</Order>
-                            <Extend>true</Extend> 
+                            <Extend>true</Extend>
                             <Type>Primary</Type>
                         </CreatePartition>
                     </CreatePartitions>
@@ -576,7 +581,7 @@ autounattend.xml:
             <HKLMProxyEnable>true</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
         </component>  
-Finish Setup cache proxy during installation --> 
+Finish Setup cache proxy during installation -->
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <AutoLogon>
                 <Password>
@@ -808,7 +813,7 @@ sysprep-unattend.xml:
         </component>
     </settings>
     <settings pass="oobeSystem">
-<!-- Setup proxy after sysprep 
+<!-- Setup proxy after sysprep
        <component name="Microsoft-Windows-IE-ClientNetworkProtocolImplementation" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <POLICYProxySettingsPerUser>1</POLICYProxySettingsPerUser>
             <HKLMProxyEnable>false</HKLMProxyEnable>
@@ -868,7 +873,7 @@ a virtual switch with an `External` connection type.
 
 ### Packer config:
 
-```javascript
+```json
 {
   "variables": {
     "vm_name": "ubuntu-xenial",
@@ -880,39 +885,40 @@ a virtual switch with an `External` connection type.
     "iso_checksum": "DE5EE8665048F009577763EFBF4A6F0558833E59"
   },
   "builders": [
-  {
-    "vm_name":"{{user `vm_name`}}",
-    "type": "hyperv-iso",
-    "disk_size": "{{user `disk_size`}}",
-    "guest_additions_mode": "disable",
-    "iso_url": "{{user `iso_url`}}",
-    "iso_checksum_type": "{{user `iso_checksum_type`}}",
-    "iso_checksum": "{{user `iso_checksum`}}",
-    "communicator":"ssh",
-    "ssh_username": "packer",
-    "ssh_password": "packer",
-    "ssh_timeout" : "4h",
-    "http_directory": "./",
-    "boot_wait": "5s",
-    "boot_command": [
-      "<esc><wait10><esc><esc><enter><wait>",
-      "set gfxpayload=1024x768<enter>",
-      "linux /install/vmlinuz ",
-      "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/hyperv-taliesins.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-      "hostname={{.Name}} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false <enter>",
-      "initrd /install/initrd.gz<enter>",
-      "boot<enter>"
-    ],
-    "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
-    "ram_size": "{{user `ram_size`}}",
-    "cpu": "{{user `cpu`}}",
-    "generation": 2,
-    "enable_secure_boot": false
-  }]
+    {
+      "vm_name":"{{user `vm_name`}}",
+      "type": "hyperv-iso",
+      "disk_size": "{{user `disk_size`}}",
+      "guest_additions_mode": "disable",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "communicator":"ssh",
+      "ssh_username": "packer",
+      "ssh_password": "packer",
+      "ssh_timeout" : "4h",
+      "http_directory": "./",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<esc><wait10><esc><esc><enter><wait>",
+        "set gfxpayload=1024x768<enter>",
+        "linux /install/vmlinuz ",
+        "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/hyperv-taliesins.cfg ",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+        "hostname={{.Name}} ",
+        "fb=false debconf/frontend=noninteractive ",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+        "keyboard-configuration/variant=USA console-setup/ask_detect=false <enter>",
+        "initrd /install/initrd.gz<enter>",
+        "boot<enter>"
+      ],
+      "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
+      "ram_size": "{{user `ram_size`}}",
+      "cpu": "{{user `cpu`}}",
+      "generation": 2,
+      "enable_secure_boot": false
+    }
+]
 }
 ```
 

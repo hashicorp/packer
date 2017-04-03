@@ -2,10 +2,11 @@ package vagrantcloud
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"time"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 type stepVerifyUpload struct {
@@ -88,8 +89,8 @@ func (s *stepVerifyUpload) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		ui.Message(fmt.Sprintf("Upload succesfully verified with token %s", providerCheck.HostedToken))
-		log.Printf("Box succesfully verified %s == %s", upload.Token, providerCheck.HostedToken)
+		ui.Message(fmt.Sprintf("Upload successfully verified with token %s", providerCheck.HostedToken))
+		log.Printf("Box successfully verified %s == %s", upload.Token, providerCheck.HostedToken)
 
 		return multistep.ActionContinue
 	case <-time.After(600 * time.Second):

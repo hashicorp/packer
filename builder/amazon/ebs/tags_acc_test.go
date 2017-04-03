@@ -84,11 +84,11 @@ func checkTags() builderT.TestCheckFunc {
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error retreiving Snapshots for AMI Artifcat (%#v) in Tags Test: %s", artifact, err)
+			return fmt.Errorf("Error retrieving Snapshots for AMI Artifact (%#v) in Tags Test: %s", artifact, err)
 		}
 
 		if len(resp.Snapshots) == 0 {
-			return fmt.Errorf("No Snapshots found for AMI Artifcat (%#v) in Tags Test", artifact)
+			return fmt.Errorf("No Snapshots found for AMI Artifact (%#v) in Tags Test", artifact)
 		}
 
 		// Grab the snapshots, check the tags

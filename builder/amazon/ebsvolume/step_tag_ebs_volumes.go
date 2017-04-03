@@ -50,6 +50,7 @@ func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+			awscommon.ReportTags(ui, tags)
 
 			for _, v := range instance.BlockDeviceMappings {
 				if *v.DeviceName == mapping.DeviceName {

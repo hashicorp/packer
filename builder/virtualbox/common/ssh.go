@@ -15,7 +15,7 @@ func CommHost(host string) func(multistep.StateBag) (string, error) {
 
 func SSHPort(state multistep.StateBag) (int, error) {
 	sshHostPort := state.Get("sshHostPort").(int)
-	return int(sshHostPort), nil
+	return sshHostPort, nil
 }
 
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {
