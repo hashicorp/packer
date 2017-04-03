@@ -12,6 +12,7 @@
 * builder/amazon: Fix b/c issue by reporting again the tags we create.
     [GH-4704]
 * builder/virtualbox: retry removing floppy controller. [GH-4705]
+* builder/googlecompute: Use "default" service account. [GH-4749]
 
 ### IMRPOVEMENTS:
 
