@@ -1,3 +1,8 @@
+## (Unreleased)
+
+### BUG FIXES:
+* builder/googlecompute: Use "default" service account. [GH-4749]
+
 ## 1.0.0-rc3 (March 30, 2017)
 
 ### BUG FIXES:
