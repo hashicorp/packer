@@ -53,6 +53,7 @@ type Config struct {
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
+	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	inventoryFile        string
 }
 
@@ -249,7 +250,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	go p.adapter.Serve()
 
 	if len(p.config.inventoryFile) == 0 {
-		tf, err := ioutil.TempFile("", "packer-provisioner-ansible")
+		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
@@ -300,9 +301,16 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
+func (p *Provisioner) getInventoryArg() string {
+	if len(p.config.InventoryDirectory) != 0 {
+		return p.config.InventoryDirectory
+	}
+	return p.config.inventoryFile
+}
+
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.inventoryFile
+	inventory := p.getInventoryArg()
 	var envvars []string
 
 	args := []string{playbook, "-i", inventory}
