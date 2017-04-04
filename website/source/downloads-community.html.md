@@ -47,9 +47,10 @@ power of Packer templates.
 
 ## Community Maintained Plugins
 
-The following plugins are maintained by HashiCorp. Any plugins not on this list
-are maintained by the community, and not actively contributed to by HashiCorp,
-although they are still distributed with Packer.
+The following plugins (i.e. Builders, Provisioners, and Post-Processors) are
+maintained by HashiCorp. Any plugins not on this list are maintained by the
+community, and not actively contributed to by HashiCorp, although they are
+still distributed with Packer.
 
 ### Builders
 
@@ -57,7 +58,7 @@ although they are still distributed with Packer.
 - Azure
 - Docker
 - Google Cloud
-- VMWare
+- VMware
 - VirtualBox
 
 ### Provisioners
