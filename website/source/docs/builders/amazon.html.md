@@ -1,10 +1,11 @@
 ---
-description: |
-    Packer is able to create Amazon AMIs. To achieve this, Packer comes with
-    multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
-page_title: Amazon AMI Builder
-...
+sidebar_current: docs-builders-amazon
+page_title: Amazon AMI - Builders
+description: |-
+  Packer is able to create Amazon AMIs. To achieve this, Packer comes with
+  multiple builders depending on the strategy you want to use to build the AMI.
+---
 
 # Amazon AMI Builder
 
@@ -33,7 +34,7 @@ Packer supports the following builders at the moment:
     not require running in AWS. This is an **advanced builder and should not be
     used by newcomers**.
 
--&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
+-> **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
@@ -86,7 +87,7 @@ following steps:
 
 3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
 
-\~&gt; **Subtle details of automatic lookup may change over time.** The most
+~> **Subtle details of automatic lookup may change over time.** The most
 reliable way to specify your configuration is by setting them in template
 variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY` environment variables.
@@ -104,7 +105,7 @@ the instance's IAM profile, if it has one.
 The following policy document provides the minimal set permissions necessary for
 Packer to work:
 
-``` {.javascript}
+```javascript
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -163,7 +164,7 @@ The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.
 
-``` {.json}
+```json
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
