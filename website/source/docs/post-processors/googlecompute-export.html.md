@@ -1,11 +1,13 @@
 ---
-description: |
-    The Google Compute Image Exporter post-processor exports an image from a Packer
-    googlecompute builder run and uploads it to Google Cloud Storage. The exported
-    images can be easily shared and uploaded to other Google Cloud Projects.
 layout: docs
-page_title: 'Google Compute Image Exporter'
-...
+sidebar_current: docs-post-processors-googlecompute-export
+page_title: Google Compute Image Exporter - Post-Processors
+description: |-
+  The Google Compute Image Exporter post-processor exports an image from a
+  Packer googlecompute builder run and uploads it to Google Cloud Storage. The
+  exported images can be easily shared and uploaded to other Google Cloud
+  Projects.
+---
 
 # Google Compute Image Exporter Post-Processor
 
@@ -28,12 +30,12 @@ permissions to the GCS `paths`.
 
 ### Required
 
--   `paths` (list of string) - The list of GCS paths, e.g.
+- `paths` (list of string) - The list of GCS paths, e.g.
     'gs://mybucket/path/to/file.tar.gz', where the image will be exported.
 
 ### Optional
 
--   `keep_input_artifact` (bool) - If true, do not delete the Google Compute Engine
+- `keep_input_artifact` (bool) - If true, do not delete the Google Compute Engine
     (GCE) image being exported.
 
 ## Basic Example
@@ -48,7 +50,7 @@ In order for this example to work, the account associated with `account.json` mu
 have write access to both `gs://mybucket1/path/to/file1.tar.gz` and
 `gs://mybucket2/path/to/file2.tar.gz`.
 
-``` {.json}
+```json
 {
   "builders": [
     {
@@ -65,7 +67,7 @@ have write access to both `gs://mybucket1/path/to/file1.tar.gz` and
       "paths": [
         "gs://mybucket1/path/to/file1.tar.gz",
         "gs://mybucket2/path/to/file2.tar.gz"
-      ]
+      ],
       "keep_input_artifact": true
     }
   ]
