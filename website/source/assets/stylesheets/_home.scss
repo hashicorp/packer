@@ -45,12 +45,42 @@ $baseline: 20px;
   }
 
   header {
-    .hero {
-      margin: 140px auto 160px auto;
+    display: flex;
+    flex-direction: row;
+    background: url('../images/hero-image.svg') no-repeat;
+
+    @media (max-width: 991px) {
+      align-items: flex-end;
+      padding-top: 60%;
+      background-size: 80%;
+      background-position: top right;
       text-align: center;
+    }
+
+    @media (min-width: 992px) {
+      height: 400px;
+      text-align: left;
+      align-items: center;
+      background-size: 50%;
+      background-position: right;
+    }
+
+    @media (min-width: 1280px) {
+      height: 700px;
+    }
+
+    @media (min-width: 1800px) {
+      background-size: 1054px 700px;
+    }
+
+    .hero {
+      h1 {
+        font-weight: $font-weight-bold;
+        color: $black;
+      }
 
       .button {
-        margin: 5px;
+        margin: 5px 5px 5px 2px;
 
         @media (max-width: 768px) {
           display: block;
