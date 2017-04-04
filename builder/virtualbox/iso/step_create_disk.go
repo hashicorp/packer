@@ -2,9 +2,9 @@ package iso
 
 import (
 	"fmt"
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/packer"
 	"path/filepath"
 	"strconv"
 	"strings"

@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // PrlctlVersionConfig contains the configuration for `prlctl` version.

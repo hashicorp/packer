@@ -12,8 +12,8 @@ import (
 	"sync"
 
 	"github.com/hashicorp/go-version"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type DockerDriver struct {

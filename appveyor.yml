@@ -29,9 +29,9 @@ build_script:
   - ps: |
       go.exe test (go.exe list ./... `
       |? { -not $_.Contains('/vendor/') } `
-      |? { $_ -ne 'github.com/mitchellh/packer/builder/parallels/common' } `
-      |? { $_ -ne 'github.com/mitchellh/packer/common' }`
-      |? { $_ -ne 'github.com/mitchellh/packer/provisioner/ansible' })
+      |? { $_ -ne 'github.com/hashicorp/packer/builder/parallels/common' } `
+      |? { $_ -ne 'github.com/hashicorp/packer/common' }`
+      |? { $_ -ne 'github.com/hashicorp/packer/provisioner/ansible' })
 
 test: off
 

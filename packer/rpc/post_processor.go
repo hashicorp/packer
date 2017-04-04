@@ -3,7 +3,7 @@ package rpc
 import (
 	"net/rpc"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.PostProcessor where the PostProcessor is actually
