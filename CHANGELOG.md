@@ -1,7 +1,11 @@
 ## (Unreleased)
 
 ### BUG FIXES:
+
 * builder/googlecompute: Use "default" service account. [GH-4749]
+
+### IMPROVEMENTS:
+* More diligently try to complete azure-setup.sh. [GH-4752]
 
 ## 1.0.0-rc3 (March 30, 2017)
 
