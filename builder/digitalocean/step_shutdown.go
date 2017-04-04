@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepShutdown struct{}

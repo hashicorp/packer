@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/dylanmei/winrmtest"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func newMockWinRMServer(t *testing.T) *winrmtest.Remote {

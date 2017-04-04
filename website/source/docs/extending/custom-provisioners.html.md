@@ -86,7 +86,7 @@ some sort) or it may be remote (in a cloud). The communicator interface
 abstracts this away so that communication is the same overall.
 
 The documentation around the [code
-itself](https://github.com/mitchellh/packer/blob/master/packer/communicator.go)
+itself](https://github.com/hashicorp/packer/blob/master/packer/communicator.go)
 is really great as an overview of how to use the interface. You should begin by
 reading this. Once you have read it, you can see some example usage below:
 

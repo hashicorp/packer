@@ -7,7 +7,7 @@ import (
 	"net/rpc"
 	"os"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Communicator where the communicator is actually

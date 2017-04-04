@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
