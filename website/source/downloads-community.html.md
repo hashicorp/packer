@@ -47,8 +47,9 @@ power of Packer templates.
 
 ## Community Maintained Plugins
 
-The following plugins are maintained by HashiCorp. Any plugin not on this list
-are maintained by the community, and not actively contributed to by HashiCorp.
+The following plugins are maintained by HashiCorp. Any plugins not on this list
+are maintained by the community, and not actively contributed to by HashiCorp,
+although they are still distributed with Packer.
 
 ### Builders
 
