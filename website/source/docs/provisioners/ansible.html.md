@@ -113,6 +113,15 @@ Optional Parameters:
 - `user` (string) - The `ansible_user` to use. Defaults to the user running
   packer.
 
+- `inventory_directory` (string) - The directory in which to place the
+  generated ansible inventory file. If this is specified, then this directory
+  is what will get passed to the `-i` argument of the `ansible` command when
+  this provisioner runs Ansible.  By default, the generated ansible inventory
+  will be placed in a temporary file in the system-specific temporary file
+  location, and the fully-qualified name of this temporary file will be passed
+  to the `-i` argument of the `ansible` command when this provisioner runs
+  ansible.
+
 ## Limitations
 
 ### Redhat / CentOS
