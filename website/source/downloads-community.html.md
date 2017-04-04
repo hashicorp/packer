@@ -44,3 +44,37 @@ power of Packer templates.
 ## Other
 
 - [suitcase](https://github.com/tmclaugh/suitcase) - Packer based build system for CentOS OS images
+
+## Community Maintained Plugins
+
+The following plugins are maintained by HashiCorp. Any plugins not on this list
+are maintained by the community, and not actively contributed to by HashiCorp,
+although they are still distributed with Packer.
+
+### Builders
+
+- Amazon EC2
+- Azure
+- Docker
+- Google Cloud
+- VMWare
+- VirtualBox
+
+### Provisioners
+
+- File
+- PowerShell
+- Shell
+- Windows Restart
+- Windows Shell
+
+### Post-Processors
+
+- Amazon Import
+- Artifice
+- Atlas
+- Docker
+- Local Shell
+- Manifest
+- Vagrant
+- Vagrant Cloud
