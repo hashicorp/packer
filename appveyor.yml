@@ -22,9 +22,11 @@ install:
   - go env
   - go get github.com/mitchellh/gox
   - go get golang.org/x/tools/cmd/stringer
+  - choco install putty
 
 build_script:
   - git rev-parse HEAD
+  - ps: Start-Process pageant.exe --shimgen-log --shimgen-waitforexit
  # go test $(go list ./... | grep -v vendor)
   - ps: |
       go.exe test (go.exe list ./... `
