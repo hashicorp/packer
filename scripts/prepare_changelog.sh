@@ -19,7 +19,7 @@ do
     fi
 done | while read line
 do
-    echo "https://github.com/mitchellh/packer/pull/${line}"
+    echo "https://github.com/hashicorp/packer/pull/${line}"
     #TODO get tags. ignore docs
     echo $line
     vared -ch ok

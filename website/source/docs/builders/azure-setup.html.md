@@ -61,7 +61,7 @@ $ npm install -g azure-cli --no-progress
 
 ## Guided Setup
 
-The Packer project includes a [setup script](https://github.com/mitchellh/packer/blob/master/contrib/azure-setup.sh) that can help you setup your account. It uses an interactive bash script to log you into Azure, name your resources, and export your Packer configuration.
+The Packer project includes a [setup script](https://github.com/hashicorp/packer/blob/master/contrib/azure-setup.sh) that can help you setup your account. It uses an interactive bash script to log you into Azure, name your resources, and export your Packer configuration.
 
 ## Manual Setup
 

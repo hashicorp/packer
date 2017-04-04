@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // Communicator is a special communicator that works by executing

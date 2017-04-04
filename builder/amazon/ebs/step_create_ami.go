@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepCreateAMI struct {

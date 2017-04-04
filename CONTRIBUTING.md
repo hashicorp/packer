@@ -78,8 +78,8 @@ following steps in order to be able to compile and test Packer. These instructio
    rebuilding. If you don't have `make` you can simply run `go build -o bin/packer .` from the project root.
 
 6. After running building packer successfully, use
-   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine and
-   verify your changes work. For instance: `$GOPATH/src/github.com/mitchellh/packer/bin/packer build template.json`.
+   `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
+   verify your changes work. For instance: `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
