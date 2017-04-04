@@ -47,7 +47,7 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionContinue
 	}
 
-	// Get the Paralells Tools path on the host machine
+	// Get the Parallels Tools path on the host machine
 	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
 	f, err := os.Open(parallelsToolsPath)

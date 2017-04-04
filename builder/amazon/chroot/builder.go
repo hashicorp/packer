@@ -87,10 +87,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.ChrootMounts = make([][]string, 0)
 	}
 
-	if b.config.CopyFiles == nil {
-		b.config.CopyFiles = make([]string, 0)
-	}
-
 	if len(b.config.ChrootMounts) == 0 {
 		b.config.ChrootMounts = [][]string{
 			{"proc", "proc", "/proc"},
@@ -101,8 +97,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if len(b.config.CopyFiles) == 0 && !b.config.FromScratch {
-		b.config.CopyFiles = []string{"/etc/resolv.conf"}
+	// set default copy file if we're not giving our own
+	if b.config.CopyFiles == nil {
+		b.config.CopyFiles = make([]string, 0)
+		if !b.config.FromScratch {
+			b.config.CopyFiles = []string{"/etc/resolv.conf"}
+		}
 	}
 
 	if b.config.CommandWrapper == "" {

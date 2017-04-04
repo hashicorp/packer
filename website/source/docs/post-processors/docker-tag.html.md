@@ -1,12 +1,13 @@
 ---
-description: |
-    The Packer Docker Tag post-processor takes an artifact from the docker builder
-    that was committed and tags it into a repository. This allows you to use the
-    other Docker post-processors such as docker-push to push the image to a
-    registry.
 layout: docs
-page_title: 'docker-tag Post-Processor'
-...
+sidebar_current: docs-post-processors-docker-tag
+page_title: Docker Tag - Post-Processors
+description: |-
+  The Packer Docker Tag post-processor takes an artifact from the docker builder
+  that was committed and tags it into a repository. This allows you to use the
+  other Docker post-processors such as docker-push to push the image to a
+  registry.
+---
 
 # Docker Tag Post-Processor
 
@@ -27,11 +28,11 @@ that this works with committed resources, rather than exported.
 The configuration for this post-processor is extremely simple. At least a
 repository is required.
 
--   `repository` (string) - The repository of the image.
+- `repository` (string) - The repository of the image.
 
--   `tag` (string) - The tag for the image. By default this is not set.
+- `tag` (string) - The tag for the image. By default this is not set.
 
--   `force` (boolean) - If true, this post-processor forcibly tag the image even
+- `force` (boolean) - If true, this post-processor forcibly tag the image even
     if tag name is collided. Default to `false`.
     But it will be ignored if Docker &gt;= 1.12.0 was detected,
     since the `force` option was removed after 1.12.0. [reference](https://docs.docker.com/engine/deprecated/#/f-flag-on-docker-tag)
@@ -40,7 +41,7 @@ repository is required.
 
 An example is shown below, showing only the post-processor configuration:
 
-``` {.javascript}
+```json
 {
   "type": "docker-tag",
   "repository": "mitchellh/packer",

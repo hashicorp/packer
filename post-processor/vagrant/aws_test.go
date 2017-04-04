@@ -31,7 +31,7 @@ func TestAWSProvider_ArtifactId(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 	result := `aws.region_config "us-east-1", ami: "ami-1234"`
-	if strings.Index(vagrantfile, result) == -1 {
+	if !strings.Contains(vagrantfile, result) {
 		t.Fatalf("wrong substitution: %s", vagrantfile)
 	}
 }

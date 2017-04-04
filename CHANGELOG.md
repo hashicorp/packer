@@ -9,6 +9,10 @@
     version file. [GH-4678]
 * communicator/ssh: fix nil pointer error. [GH-4690]
 * builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
+* builder/amazon: Fix b/c issue by reporting again the tags we create.
+    [GH-4704]
+* builder/virtualbox: retry removing floppy controller. [GH-4705]
+* builder/googlecompute: Use "default" service account. [GH-4749]
 
 ### IMRPOVEMENTS:
 
@@ -21,6 +25,9 @@
     [GH-4621]
 * builder/ansible: Clearer error message when we have problems getting the
     ansible version. [GH-4694]
+* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
+    prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
+    isn't given at all, the default behavior remains. [GH-4708]
 
 ## 0.12.3 (March 1, 2017)
 

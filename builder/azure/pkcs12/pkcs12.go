@@ -30,23 +30,6 @@ type contentInfo struct {
 	Content     asn1.RawValue `asn1:"tag:0,explicit,optional"`
 }
 
-type encryptedData struct {
-	Version              int
-	EncryptedContentInfo encryptedContentInfo
-}
-
-type encryptedContentInfo struct {
-	ContentType                asn1.ObjectIdentifier
-	ContentEncryptionAlgorithm pkix.AlgorithmIdentifier
-	EncryptedContent           []byte `asn1:"tag:0,optional"`
-}
-
-func (i encryptedContentInfo) GetAlgorithm() pkix.AlgorithmIdentifier {
-	return i.ContentEncryptionAlgorithm
-}
-
-func (i encryptedContentInfo) GetData() []byte { return i.EncryptedContent }
-
 type safeBag struct {
 	Id         asn1.ObjectIdentifier
 	Value      asn1.RawValue     `asn1:"tag:0,explicit"`
