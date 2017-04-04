@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 	"time"
 )
 

@@ -151,7 +151,7 @@ Here is a basic example for Azure.
 
 Azure VMs should be deprovisioned at the end of every build.  For Windows this means executing sysprep, and for Linux this means executing the waagent deprovision process.
 
-Please refer to the Azure [examples](https://github.com/mitchellh/packer/tree/master/examples/azure) for complete examples showing the deprovision process.
+Please refer to the Azure [examples](https://github.com/hashicorp/packer/tree/master/examples/azure) for complete examples showing the deprovision process.
 
 ### Windows
 
@@ -286,5 +286,5 @@ minimal, so overall impact is small.
  > The KeyVault certificate is protected using the object_id of the SPN.  This is why Windows builds require object_id,
  and an SPN.  The KeyVault is deleted when the resource group is deleted.
 
-See the [examples/azure](https://github.com/mitchellh/packer/tree/master/examples/azure) folder in the packer project
+See the [examples/azure](https://github.com/hashicorp/packer/tree/master/examples/azure) folder in the packer project
 for more examples.

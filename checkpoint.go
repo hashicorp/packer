@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/go-checkpoint"
-	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/packer"
-	packerVersion "github.com/mitchellh/packer/version"
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer"
+	packerVersion "github.com/hashicorp/packer/version"
 )
 
 func init() {

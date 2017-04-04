@@ -11,9 +11,9 @@ import (
 	"runtime"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 

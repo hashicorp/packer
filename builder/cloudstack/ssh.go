@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 	"golang.org/x/crypto/ssh"
 )

@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.

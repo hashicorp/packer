@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step creates and runs the HTTP server that is serving files from the
