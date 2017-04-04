@@ -13,6 +13,8 @@
     [GH-4704]
 * builder/virtualbox: retry removing floppy controller. [GH-4705]
 * builder/googlecompute: Use "default" service account. [GH-4749]
+* core: Invoking packer `--help` or `--version` now exits with status 0.
+    [GH-4723]
 
 ### IMRPOVEMENTS:
 
@@ -28,6 +30,7 @@
 * builder/amazon-chroot: Ability to give an empty list in `copy_files` to
     prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
     isn't given at all, the default behavior remains. [GH-4708]
+* More diligently try to complete azure-setup.sh. [GH-4752]
 
 ## 0.12.3 (March 1, 2017)
 
