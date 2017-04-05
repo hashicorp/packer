@@ -1,9 +1,21 @@
 ## (Unreleased)
 
+### IMPROVEMENTS:
+
+* builder/openstack: Add ssh agent support. [GH-4655]
+* builder/parallels-iso: Configuration of disk type, plain or expanding.
+    [GH-4621]
+* builder/amazon: validate ami name. [GH-4762]
+
+## 1.0.0 (April 4, 2017)
+
 ### BUG FIXES:
 
-* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
-* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+* core: fix version number
+* communicator/ssh: don't return error if we can't close connection. #4741
+* builder/googlecompute: Use "default" service account. [GH-4749]
+* core: Invoking packer `--help` or `--version` now exits with status 0.
+    [GH-4723]
 * core: show correct step name when debugging. [GH-4672]
 * builder/virtualbox: fix `none` communicator by allowing skipping upload of
     version file. [GH-4678]
@@ -12,26 +24,21 @@
 * builder/amazon: Fix b/c issue by reporting again the tags we create.
     [GH-4704]
 * builder/virtualbox: retry removing floppy controller. [GH-4705]
-* builder/googlecompute: Use "default" service account. [GH-4749]
-* core: Invoking packer `--help` or `--version` now exits with status 0.
-    [GH-4723]
+* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
+* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
 
 ### IMPROVEMENTS:
 
-* builder/amazon: validate ssh key name/file. [GH-4665]
-* builder/amazon: set force_deregister to true on -force. [GH-4649]
-* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
-* website: fix display on ios devices. [GH-4618]
-* builder/openstack: Add ssh agent support. [GH-4655]
-* builder/parallels-iso: Configuration of disk type, plain or expanding.
-    [GH-4621]
+* More diligently try to complete azure-setup.sh. [GH-4752]
 * builder/ansible: Clearer error message when we have problems getting the
     ansible version. [GH-4694]
 * builder/amazon-chroot: Ability to give an empty list in `copy_files` to
     prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
     isn't given at all, the default behavior remains. [GH-4708]
-* More diligently try to complete azure-setup.sh. [GH-4752]
-* builder/amazon: validate ami name. [GH-4762]
+* builder/amazon: validate ssh key name/file. [GH-4665]
+* builder/amazon: set force_deregister to true on -force. [GH-4649]
+* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
+* website: fix display on ios devices. [GH-4618]
 
 ## 0.12.3 (March 1, 2017)
 
