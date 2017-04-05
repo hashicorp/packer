@@ -125,7 +125,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if len(p.config.InventoryDirectory) > 0 {
-		err = validateDirectoryConfig(p.config.InventoryDirectory, "inventory_directory", true)
+		err = validateDirectoryConfig(p.config.InventoryDirectory, "inventory_directory")
 		if err != nil {
 			log.Println(p.config.InventoryDirectory, "does not exist")
 			errs = packer.MultiErrorAppend(errs, err)
@@ -391,12 +391,7 @@ func validateFileConfig(name string, config string, req bool) error {
 	return nil
 }
 
-func validateDirectoryConfig(name string, config string, req bool) error {
-	if req {
-		if name == "" {
-			return fmt.Errorf("%s must be specified.", config)
-		}
-	}
+func validateDirectoryConfig(name string, config string) error {
 	info, err := os.Stat(name)
 	if err != nil {
 		return fmt.Errorf("%s: %s is invalid: %s", config, name, err)
