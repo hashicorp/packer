@@ -102,4 +102,9 @@ func TestAMINameValidation(t *testing.T) {
 		t.Fatal("expected 'foobar' to be a valid ami name")
 	}
 
+	c.AMIName = `xyz-base-2017-04-05-1934`
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("expected `xyz-base-2017-04-05-1934` to pass validation.")
+	}
+
 }
