@@ -28,7 +28,7 @@
     [GH-4704]
 * builder/virtualbox: retry removing floppy controller. [GH-4705]
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
 * builder/ansible: Clearer error message when we have problems getting the
     ansible version. [GH-4694]
