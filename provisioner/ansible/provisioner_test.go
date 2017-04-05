@@ -76,12 +76,6 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-
-	config["inventory_directory"] = "some_directory"
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
 }
 
 func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
@@ -246,6 +240,52 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	}
 
 	config["local_port"] = "22222"
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_InventoryDirectory(t *testing.T) {
+	var p Provisioner
+	config := testConfig(t)
+	defer os.Remove(config["command"].(string))
+
+	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(hostkey_file.Name())
+
+	publickey_file, err := ioutil.TempFile("", "publickey")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(publickey_file.Name())
+
+	playbook_file, err := ioutil.TempFile("", "playbook")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(playbook_file.Name())
+
+	config["ssh_host_key_file"] = hostkey_file.Name()
+	config["ssh_authorized_key_file"] = publickey_file.Name()
+	config["playbook_file"] = playbook_file.Name()
+
+	config["inventory_directory"] = "doesnotexist"
+	err = p.Prepare(config)
+	if err == nil {
+		t.Errorf("should error if inventory_directory does not exist")
+	}
+
+	inventoryDirectory, err := ioutil.TempDir("", "some_inventory_dir")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(inventoryDirectory)
+
+	config["inventory_directory"] = inventoryDirectory
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
