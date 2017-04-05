@@ -74,3 +74,26 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
 	}
 }
+
+func TestAMINameValidation(t *testing.T) {
+	c := testAMIConfig()
+
+	c.AMIName = "aa"
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("shouldn't be able to have an ami name with less than 3 characters")
+	}
+
+	var longAmiName string
+	for i := 0; i < 129; i++ {
+		longAmiName += "a"
+	}
+	c.AMIName = longAmiName
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("shouldn't be able to have an ami name with great than 128 characters")
+	}
+
+	c.AMIName = "+"
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("shouldn't be able to have an ami name with invalid characters")
+	}
+}
