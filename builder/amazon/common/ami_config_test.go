@@ -96,4 +96,10 @@ func TestAMINameValidation(t *testing.T) {
 	if err := c.Prepare(nil); err == nil {
 		t.Fatal("shouldn't be able to have an ami name with invalid characters")
 	}
+
+	c.AMIName = "foo().-/_bar"
+	if err := c.Prepare(nil); err != nil {
+		t.Fatal("expected 'foobar' to be a valid ami name")
+	}
+
 }

@@ -73,8 +73,8 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("AMIName must be between 3 and 128 characters long"))
 	}
 
-	var IsValidName = regexp.MustCompile(`^[a-zA-Z().-/_]+$`).MatchString
-	if !IsValidName(c.AMIName) {
+	amiNameRe := regexp.MustCompile(`^[a-zA-Z().\-/_]+$`)
+	if !amiNameRe.MatchString(c.AMIName) {
 		errs = append(errs, fmt.Errorf("AMIName should only contain letters, numbers, '(', ')', '.', '-', '/' and '_'"))
 	}
 
