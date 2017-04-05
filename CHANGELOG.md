@@ -16,7 +16,7 @@
 * core: Invoking packer `--help` or `--version` now exits with status 0.
     [GH-4723]
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
 * builder/amazon: validate ssh key name/file. [GH-4665]
 * builder/amazon: set force_deregister to true on -force. [GH-4649]
