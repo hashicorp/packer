@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"regexp"
+	
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
