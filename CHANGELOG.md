@@ -31,6 +31,7 @@
     prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
     isn't given at all, the default behavior remains. [GH-4708]
 * More diligently try to complete azure-setup.sh. [GH-4752]
+* builder/amazon: validate ami name. [GH-4762]
 
 ## 0.12.3 (March 1, 2017)
 
