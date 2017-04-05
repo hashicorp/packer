@@ -964,5 +964,5 @@
 			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
-	"rootPath": "github.com/mitchellh/packer"
+	"rootPath": "github.com/hashicorp/packer"
 }
