@@ -92,7 +92,7 @@ func TestAMINameValidation(t *testing.T) {
 		t.Fatal("shouldn't be able to have an ami name with great than 128 characters")
 	}
 
-	c.AMIName = "+"
+	c.AMIName = "+aaa"
 	if err := c.Prepare(nil); err == nil {
 		t.Fatal("shouldn't be able to have an ami name with invalid characters")
 	}
