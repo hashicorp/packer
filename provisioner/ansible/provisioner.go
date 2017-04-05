@@ -301,16 +301,9 @@ func (p *Provisioner) Cancel() {
 	os.Exit(0)
 }
 
-func (p *Provisioner) getInventoryArg() string {
-	if len(p.config.InventoryDirectory) != 0 {
-		return p.config.InventoryDirectory
-	}
-	return p.config.inventoryFile
-}
-
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.getInventoryArg()
+	inventory := p.config.inventoryFile
 	var envvars []string
 
 	args := []string{playbook, "-i", inventory}
