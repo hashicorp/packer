@@ -114,13 +114,12 @@ Optional Parameters:
   packer.
 
 - `inventory_directory` (string) - The directory in which to place the
-  generated ansible inventory file. If this is specified, then this directory
-  is what will get passed to the `-i` argument of the `ansible` command when
-  this provisioner runs Ansible.  By default, the generated ansible inventory
-  will be placed in a temporary file in the system-specific temporary file
-  location, and the fully-qualified name of this temporary file will be passed
-  to the `-i` argument of the `ansible` command when this provisioner runs
-  ansible.
+  temporary generated Ansible inventory file. By default, this is the
+  system-specific temporary file location.  The fully-qualified name of this
+  temporary file will be passed to the `-i` argument of the `ansible` command
+  when this provisioner runs ansible.  Specify this if you have an existing
+  inventory directory with `host_vars` `group_vars` that you would like to use
+  in the playbook that this provisioner will run.
 
 ## Limitations
 
