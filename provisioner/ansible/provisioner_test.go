@@ -252,55 +252,6 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	}
 }
 
-func TestProvisioner_getInventoryArg(t *testing.T) {
-	var p Provisioner
-	config := testConfig(t)
-	defer os.Remove(config["command"].(string))
-
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(hostkey_file.Name())
-
-	publickey_file, err := ioutil.TempFile("", "publickey")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(publickey_file.Name())
-
-	playbook_file, err := ioutil.TempFile("", "playbook")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.Remove(playbook_file.Name())
-
-	config["ssh_host_key_file"] = hostkey_file.Name()
-	config["ssh_authorized_key_file"] = publickey_file.Name()
-	config["playbook_file"] = playbook_file.Name()
-
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	p.config.inventoryFile = "somefile"
-	if p.getInventoryArg() != "somefile" {
-		t.Fatal("getInventoryArg should return inventoryFile if InventoryDirectory is not set.")
-	}
-
-	// Uses InventoryDirectory if set
-	config["inventory_directory"] = "somedirectory"
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if p.getInventoryArg() != "somedirectory" {
-		t.Fatal("getInventoryArg should return InventoryDirectory if InventoryDirectory is set.")
-	}
-}
-
 func TestAnsibleGetVersion(t *testing.T) {
 	if os.Getenv("PACKER_ACC") == "" {
 		t.Skip("This test is only run with PACKER_ACC=1 and it requires Ansible to be installed")
