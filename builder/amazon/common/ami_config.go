@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -66,6 +67,15 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if len(c.SnapshotUsers) > 0 && len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+	}
+
+	if len(c.AMIName) < 3 || len(c.AMIName) > 128 {
+		errs = append(errs, fmt.Errorf("AMIName must be between 3 and 128 characters long"))
+	}
+
+	var IsValidName = regexp.MustCompile(`^[a-zA-Z().-/_]+$`).MatchString
+	if !IsValidName(c.AMIName) {
+		errs = append(errs, fmt.Errorf("AMIName should only contain letters, numbers, '(', ')', '.', '-', '/' and '_'"))
 	}
 
 	if len(errs) > 0 {
