@@ -38,6 +38,7 @@ comes out of the box with support for the following platforms:
 * Parallels
 * ProfitBricks
 * QEMU. Both KVM and Xen images.
+* Scaleway
 * Triton (Joyent Public Cloud)
 * VMware
 * VirtualBox
