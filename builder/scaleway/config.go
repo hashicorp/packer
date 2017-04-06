@@ -3,6 +3,7 @@ package scaleway
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -50,6 +51,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	c.UserAgent = "Packer - Scaleway builder"
+
+	if c.Organization == "" {
+		c.Organization = os.Getenv("SCALEWAY_API_ORGANIZATION")
+	}
+
+	if c.Token == "" {
+		c.Token = os.Getenv("SCALEWAY_API_TOKEN")
+	}
 
 	if c.SnapshotName == "" {
 		def, err := interpolate.Render("packer-{{timestamp}}", nil)
