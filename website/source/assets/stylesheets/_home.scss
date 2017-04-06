@@ -1,8 +1,3 @@
-// TODO: remove
-$hero-height: 350px;
-$baseline: 20px;
-
-
 #page-home {
   // Override the main header
   #header {
@@ -149,6 +144,48 @@ $baseline: 20px;
           background-color: $white;
         }
       }
+    }
+  }
+
+  .terminal {
+    border: 1px solid $white;
+    background-color: $black;
+    box-sizing: border-box;
+    color: $white;
+    font-family: $font-family-monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 20px auto;
+    padding: 10px 20px 20px 20px;
+
+    .terminal-content {
+      margin-top: 15px;
+      overflow-x: scroll;
+      width: 100%;
+      white-space: nowrap;
+
+      span {
+        display: block;
+        white-space: pre;
+      }
+    }
+
+    span.circle {
+      &:before {
+        content: '\25CF';
+        color: $white;
+        font-size: 20px;
+        line-height: 100%;
+        height: 100%;
+      }
+    }
+
+    span.vbox {
+      color: rgb(91, 251, 90);
+    }
+
+    span.vmware {
+      color: rgb(83, 255, 255);
     }
   }
 }

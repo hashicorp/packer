@@ -28,7 +28,34 @@ description: |-
   <div class="container">
     <div class="row">
       <div class="col-md-6">
-        <%= image_tag 'screenshots/vmware_and_virtualbox.png', class: 'img-responsive' %>
+        <div class="terminal">
+          <span class="circle"></span>
+          <span class="circle"></span>
+          <span class="circle"></span>
+          <div class="terminal-content">
+            <span>$ packer build template.json</span>
+            <span class="vbox">==> virtualbox: virtualbox output will be in this color.</span>
+            <span class="vmware">==> vmware: vmware output will be in this color.</span>
+            <span></span>
+            <span class="vmware">==> vmware: Copying or downloading ISO. Progress will be reported periodically.</span>
+            <span class="vmware">==> vmware: Creating virtual machine disk</span>
+            <span class="vmware">==> vmware: Building and writing VMX file</span>
+            <span class="vmware">==> vmware: Starting HTTP server on port 8964</span>
+            <span class="vmware">==> vmware: Starting virtual machine...</span>
+            <span class="vbox">==> virtualbox: Downloading VirtualBox guest additions. Progress will be shown periodically.</span>
+            <span class="vbox">==> virtualbox: Copying or downloading ISO. Progress will be reported periodically.</span>
+            <span class="vbox">==> virtualbox: Starting HTTP server on port 8081</span>
+            <span class="vbox">==> virtualbox: Creating virtual machine...</span>
+            <span class="vbox">==> virtualbox: Creating hard drive...</span>
+            <span class="vbox">==> virtualbox: Creating forwarded port mapping for SSH (host port 3213)</span>
+            <span class="vbox">==> virtualbox: Executing custom VBoxManage commands...</span>
+            <span class="vbox">    virtualbox: Executing: modifyvm packer --memory 480</span>
+            <span class="vbox">    virtualbox: Executing: modifyvm packer --cpus 1</span>
+            <span class="vbox">==> virtualbox: Starting the virtual machine...</span>
+            <span class="vmware">==> vmware: Waiting 10s for boot...</span>
+            <span class="vbox">==> virtualbox: Waiting 10s for boot...</span>
+          </div>
+        </div>
       </div>
       <div class="col-md-6">
         <span class="callout">Infrastructure as code</span>
