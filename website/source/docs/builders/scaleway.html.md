@@ -37,8 +37,12 @@ builder.
 ### Required:
 
 - `api_organization` (string) - The organization ID to use to access your account.
+    It can also be specified via
+    environment variable `SCALEWAY_API_ORGANIZATION`.
 
 - `api_token` (string) - The organization TOKEN to use to access your account.
+    It can also be specified via
+    environment variable `SCALEWAY_API_TOKEN`.
 
 - `image` (string) - The UUID of the base image to use. This is the
     image that will be used to launch a new server and provision it. See
