@@ -189,6 +189,8 @@ func providerFromBuilderName(name string) string {
 	switch name {
 	case "aws":
 		return "aws"
+	case "scaleway":
+		return "scaleway"
 	case "digitalocean":
 		return "digitalocean"
 	case "virtualbox":
