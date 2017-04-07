@@ -10,10 +10,10 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
 )
 
 // TODO(apryde): It would be good not to have to write a key file to disk to

@@ -7,7 +7,7 @@
 package bmcs
 
 import (
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
 )
 
 // Driver interfaces between the builder steps and the BMCS SDK.

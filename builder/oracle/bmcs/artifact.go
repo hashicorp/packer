@@ -8,7 +8,7 @@ package bmcs
 
 import (
 	"fmt"
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
 )
 
 // Artifact is an artifact implementation that contains a built Custom Image.

@@ -12,11 +12,11 @@ import (
 	"fmt"
 	"log"
 
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 )
 
 // BuilderId uniquely identifies the builder
