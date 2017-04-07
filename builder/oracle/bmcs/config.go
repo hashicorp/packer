@@ -12,12 +12,12 @@ import (
 	"os"
 	"path/filepath"
 
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 
 	"github.com/mitchellh/go-homedir"
 )

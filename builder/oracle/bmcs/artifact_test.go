@@ -9,7 +9,7 @@ package bmcs
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifactImpl(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
 )
 
 // driverBMCS implements the Driver interface and communicates with Oracle
