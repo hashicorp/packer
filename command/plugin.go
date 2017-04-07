@@ -29,6 +29,7 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
+	oraclebmcsbuilder "github.com/hashicorp/packer/builder/oracle/bmcs"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -68,7 +69,6 @@ import (
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
-	oraclebmcsbuilder "github.com/mitchellh/packer/builder/oracle/bmcs"
 )
 
 type PluginCommand struct {

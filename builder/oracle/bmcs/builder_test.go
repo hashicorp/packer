@@ -9,7 +9,7 @@ package bmcs
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {

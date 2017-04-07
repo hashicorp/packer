@@ -7,7 +7,7 @@
 package bmcs
 
 import (
-	client "github.com/mitchellh/packer/builder/oracle/bmcs/client"
+	client "github.com/hashicorp/packer/builder/oracle/bmcs/client"
 )
 
 // driverMock implements the Driver interface and communicates with Oracle
