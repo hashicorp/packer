@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -16,8 +17,9 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(int)
+	ctx := context.TODO()
 
-	droplet, _, err := client.Droplets.Get(dropletId)
+	droplet, _, err := client.Droplets.Get(ctx, dropletId)
 	if err != nil {
 		err := fmt.Errorf("Error checking droplet state: %s", err)
 		state.Put("error", err)
@@ -32,7 +34,7 @@ func (s *stepPowerOff) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Pull the plug on the Droplet
 	ui.Say("Forcefully shutting down Droplet...")
-	_, _, err = client.DropletActions.PowerOff(dropletId)
+	_, _, err = client.DropletActions.PowerOff(ctx, dropletId)
 	if err != nil {
 		err := fmt.Errorf("Error powering off droplet: %s", err)
 		state.Put("error", err)

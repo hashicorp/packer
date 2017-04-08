@@ -2,6 +2,7 @@ package godo
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,7 +18,7 @@ import (
 )
 
 const (
-	libraryVersion = "0.1.0"
+	libraryVersion = "1.0.0"
 	defaultBaseURL = "https://api.digitalocean.com/"
 	userAgent      = "godo/" + libraryVersion
 	mediaType      = "application/json"
@@ -55,6 +56,12 @@ type Client struct {
 	Sizes             SizesService
 	FloatingIPs       FloatingIPsService
 	FloatingIPActions FloatingIPActionsService
+	Snapshots         SnapshotsService
+	Storage           StorageService
+	StorageActions    StorageActionsService
+	Tags              TagsService
+	LoadBalancers     LoadBalancersService
+	Certificates      CertificatesService
 
 	// Optional function called after every successful request made to the DO APIs
 	onRequestCompleted RequestCompletionCallback
@@ -93,7 +100,10 @@ type ErrorResponse struct {
 	Response *http.Response
 
 	// Error message
-	Message string
+	Message string `json:"message"`
+
+	// RequestID returned from the API, useful to contact support.
+	RequestID string `json:"request_id"`
 }
 
 // Rate contains the rate limit for the current client.
@@ -149,21 +159,63 @@ func NewClient(httpClient *http.Client) *Client {
 	c.Domains = &DomainsServiceOp{client: c}
 	c.Droplets = &DropletsServiceOp{client: c}
 	c.DropletActions = &DropletActionsServiceOp{client: c}
+	c.FloatingIPs = &FloatingIPsServiceOp{client: c}
+	c.FloatingIPActions = &FloatingIPActionsServiceOp{client: c}
 	c.Images = &ImagesServiceOp{client: c}
 	c.ImageActions = &ImageActionsServiceOp{client: c}
 	c.Keys = &KeysServiceOp{client: c}
 	c.Regions = &RegionsServiceOp{client: c}
+	c.Snapshots = &SnapshotsServiceOp{client: c}
 	c.Sizes = &SizesServiceOp{client: c}
-	c.FloatingIPs = &FloatingIPsServiceOp{client: c}
-	c.FloatingIPActions = &FloatingIPActionsServiceOp{client: c}
+	c.Storage = &StorageServiceOp{client: c}
+	c.StorageActions = &StorageActionsServiceOp{client: c}
+	c.Tags = &TagsServiceOp{client: c}
+	c.LoadBalancers = &LoadBalancersServiceOp{client: c}
+	c.Certificates = &CertificatesServiceOp{client: c}
 
 	return c
+}
+
+// ClientOpt are options for New.
+type ClientOpt func(*Client) error
+
+// New returns a new DIgitalOcean API client instance.
+func New(httpClient *http.Client, opts ...ClientOpt) (*Client, error) {
+	c := NewClient(httpClient)
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+
+	return c, nil
+}
+
+// SetBaseURL is a client option for setting the base URL.
+func SetBaseURL(bu string) ClientOpt {
+	return func(c *Client) error {
+		u, err := url.Parse(bu)
+		if err != nil {
+			return err
+		}
+
+		c.BaseURL = u
+		return nil
+	}
+}
+
+// SetUserAgent is a client option for setting the user agent.
+func SetUserAgent(ua string) ClientOpt {
+	return func(c *Client) error {
+		c.UserAgent = fmt.Sprintf("%s+%s", ua, c.UserAgent)
+		return nil
+	}
 }
 
 // NewRequest creates an API request. A relative URL can be provided in urlStr, which will be resolved to the
 // BaseURL of the Client. Relative URLS should always be specified without a preceding slash. If specified, the
 // value pointed to by body is JSON encoded and included in as the request body.
-func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+func (c *Client) NewRequest(ctx context.Context, method, urlStr string, body interface{}) (*http.Request, error) {
 	rel, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
@@ -173,7 +225,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 
 	buf := new(bytes.Buffer)
 	if body != nil {
-		err := json.NewEncoder(buf).Encode(body)
+		err = json.NewEncoder(buf).Encode(body)
 		if err != nil {
 			return nil, err
 		}
@@ -184,9 +236,10 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		return nil, err
 	}
 
+	req = req.WithContext(ctx)
 	req.Header.Add("Content-Type", mediaType)
 	req.Header.Add("Accept", mediaType)
-	req.Header.Add("User-Agent", userAgent)
+	req.Header.Add("User-Agent", c.UserAgent)
 	return req, nil
 }
 
@@ -265,12 +318,12 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
-			_, err := io.Copy(w, resp.Body)
+			_, err = io.Copy(w, resp.Body)
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			err := json.NewDecoder(resp.Body).Decode(v)
+			err = json.NewDecoder(resp.Body).Decode(v)
 			if err != nil {
 				return nil, err
 			}
@@ -280,6 +333,10 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	return response, err
 }
 func (r *ErrorResponse) Error() string {
+	if r.RequestID != "" {
+		return fmt.Sprintf("%v %v: %d (request %q) %v",
+			r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.RequestID, r.Message)
+	}
 	return fmt.Sprintf("%v %v: %d %v",
 		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message)
 }

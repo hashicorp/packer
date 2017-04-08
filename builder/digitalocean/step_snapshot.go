@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -18,9 +19,10 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	dropletId := state.Get("droplet_id").(int)
+	ctx := context.TODO()
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	action, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
+	action, _, err := client.DropletActions.Snapshot(ctx, dropletId, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)
@@ -51,7 +53,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	images, _, err := client.Droplets.Snapshots(dropletId, nil)
+	images, _, err := client.Droplets.Snapshots(ctx, dropletId, nil)
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
