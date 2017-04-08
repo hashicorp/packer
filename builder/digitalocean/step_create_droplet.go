@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 
 	"io/ioutil"
@@ -19,6 +20,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	sshKeyId := state.Get("ssh_key_id").(int)
+	ctx := context.TODO()
 
 	// Create the droplet based on configuration
 	ui.Say("Creating droplet...")
@@ -34,7 +36,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 		userData = string(contents)
 	}
 
-	droplet, _, err := client.Droplets.Create(&godo.DropletCreateRequest{
+	droplet, _, err := client.Droplets.Create(ctx, &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
@@ -45,6 +47,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			{ID: sshKeyId},
 		},
 		PrivateNetworking: c.PrivateNetworking,
+		Monitoring:        c.Monitoring,
 		UserData:          userData,
 	})
 	if err != nil {
@@ -71,10 +74,11 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
+	ctx := context.TODO()
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
-	_, err := client.Droplets.Delete(s.dropletId)
+	_, err := client.Droplets.Delete(ctx, s.dropletId)
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %s", err))

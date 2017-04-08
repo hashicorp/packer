@@ -27,6 +27,7 @@ type Config struct {
 	Image  string `mapstructure:"image"`
 
 	PrivateNetworking bool          `mapstructure:"private_networking"`
+	Monitoring        bool          `mapstructure:"monitoring"`
 	SnapshotName      string        `mapstructure:"snapshot_name"`
 	StateTimeout      time.Duration `mapstructure:"state_timeout"`
 	DropletName       string        `mapstructure:"droplet_name"`

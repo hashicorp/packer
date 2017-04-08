@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -17,13 +18,14 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	dropletId := state.Get("droplet_id").(int)
+	ctx := context.TODO()
 
 	// Gracefully power off the droplet. We have to retry this a number
 	// of times because sometimes it says it completed when it actually
 	// did absolutely nothing (*ALAKAZAM!* magic!). We give up after
 	// a pretty arbitrary amount of time.
 	ui.Say("Gracefully shutting down droplet...")
-	_, _, err := client.DropletActions.Shutdown(dropletId)
+	_, _, err := client.DropletActions.Shutdown(ctx, dropletId)
 	if err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
@@ -50,7 +52,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 		for attempts := 2; attempts > 0; attempts++ {
 			log.Printf("ShutdownDroplet attempt #%d...", attempts)
-			_, _, err := client.DropletActions.Shutdown(dropletId)
+			_, _, err := client.DropletActions.Shutdown(ctx, dropletId)
 			if err != nil {
 				log.Printf("Shutdown retry error: %s", err)
 			}
