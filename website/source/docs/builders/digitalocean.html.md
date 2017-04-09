@@ -67,6 +67,9 @@ builder.
 - `private_networking` (boolean) - Set to `true` to enable private networking
     for the droplet being created. This defaults to `false`, or not enabled.
 
+- `monitoring` (boolean) - Set to `true` to enable monitoring
+    for the droplet being created. This defaults to `false`, or not enabled.
+
 - `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. This must be unique. To help make this unique, use a
     function like `timestamp` (see [configuration
