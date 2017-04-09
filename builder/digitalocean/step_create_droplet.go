@@ -20,7 +20,6 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	sshKeyId := state.Get("ssh_key_id").(int)
-	ctx := context.TODO()
 
 	// Create the droplet based on configuration
 	ui.Say("Creating droplet...")
@@ -36,7 +35,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 		userData = string(contents)
 	}
 
-	droplet, _, err := client.Droplets.Create(ctx, &godo.DropletCreateRequest{
+	droplet, _, err := client.Droplets.Create(context.TODO(), &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
@@ -74,11 +73,10 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	ctx := context.TODO()
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
-	_, err := client.Droplets.Delete(ctx, s.dropletId)
+	_, err := client.Droplets.Delete(context.TODO(), s.dropletId)
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %s", err))
