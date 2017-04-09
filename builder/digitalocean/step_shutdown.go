@@ -51,7 +51,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 		for attempts := 2; attempts > 0; attempts++ {
 			log.Printf("ShutdownDroplet attempt #%d...", attempts)
-			_, _, err := client.DropletActions.Shutdown(contect.TODO(), dropletId)
+			_, _, err := client.DropletActions.Shutdown(context.TODO(), dropletId)
 			if err != nil {
 				log.Printf("Shutdown retry error: %s", err)
 			}
