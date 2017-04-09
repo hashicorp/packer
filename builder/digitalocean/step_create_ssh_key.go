@@ -28,7 +28,6 @@ type stepCreateSSHKey struct {
 func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	ctx := context.TODO()
 
 	ui.Say("Creating temporary ssh key for droplet...")
 
@@ -54,7 +53,7 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
-	key, _, err := client.Keys.Create(ctx, &godo.KeyCreateRequest{
+	key, _, err := client.Keys.Create(context.TODO(), &godo.KeyCreateRequest{
 		Name:      name,
 		PublicKey: pub_sshformat,
 	})
@@ -109,10 +108,9 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	ctx := context.TODO()
 
 	ui.Say("Deleting temporary ssh key...")
-	_, err := client.Keys.DeleteByID(ctx, s.keyId)
+	_, err := client.Keys.DeleteByID(context.TODO(), s.keyId)
 	if err != nil {
 		log.Printf("Error cleaning up ssh key: %s", err)
 		ui.Error(fmt.Sprintf(

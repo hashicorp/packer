@@ -13,7 +13,6 @@ import (
 // avoid "pending" errors when making state changes.
 func waitForDropletUnlocked(
 	client *godo.Client, dropletId int, timeout time.Duration) error {
-	ctx := context.TODO()
 	done := make(chan struct{})
 	defer close(done)
 
@@ -24,7 +23,7 @@ func waitForDropletUnlocked(
 			attempts += 1
 
 			log.Printf("[DEBUG] Checking droplet lock state... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(ctx, dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -64,7 +63,6 @@ func waitForDropletUnlocked(
 func waitForDropletState(
 	desiredState string, dropletId int,
 	client *godo.Client, timeout time.Duration) error {
-	ctx := context.TODO()
 	done := make(chan struct{})
 	defer close(done)
 
@@ -75,7 +73,7 @@ func waitForDropletState(
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(ctx, dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -115,7 +113,6 @@ func waitForDropletState(
 func waitForActionState(
 	desiredState string, dropletId, actionId int,
 	client *godo.Client, timeout time.Duration) error {
-	ctx := context.TODO()
 	done := make(chan struct{})
 	defer close(done)
 
@@ -126,7 +123,7 @@ func waitForActionState(
 			attempts += 1
 
 			log.Printf("Checking action status... (attempt: %d)", attempts)
-			action, _, err := client.DropletActions.Get(ctx, dropletId, actionId)
+			action, _, err := client.DropletActions.Get(context.TODO(), dropletId, actionId)
 			if err != nil {
 				result <- err
 				return
