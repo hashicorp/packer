@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 
 	"io/ioutil"
@@ -34,7 +35,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 		userData = string(contents)
 	}
 
-	droplet, _, err := client.Droplets.Create(&godo.DropletCreateRequest{
+	droplet, _, err := client.Droplets.Create(context.TODO(), &godo.DropletCreateRequest{
 		Name:   c.DropletName,
 		Region: c.Region,
 		Size:   c.Size,
@@ -45,6 +46,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 			{ID: sshKeyId},
 		},
 		PrivateNetworking: c.PrivateNetworking,
+		Monitoring:        c.Monitoring,
 		UserData:          userData,
 	})
 	if err != nil {
@@ -74,7 +76,7 @@ func (s *stepCreateDroplet) Cleanup(state multistep.StateBag) {
 
 	// Destroy the droplet we just created
 	ui.Say("Destroying droplet...")
-	_, err := client.Droplets.Delete(s.dropletId)
+	_, err := client.Droplets.Delete(context.TODO(), s.dropletId)
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error destroying droplet. Please destroy it manually: %s", err))
