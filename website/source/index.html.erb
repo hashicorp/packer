@@ -8,7 +8,7 @@ description: |-
   <div class="container hero">
     <div class="row">
       <div class="col-md-6">
-        <!-- <%= inline_svg "logo-text.svg", height: 120, class: "logo" %> -->
+        <%= inline_svg "logo-text.svg", height: 120, class: "logo" %>
 
         <h1>
           Build Automated Machine Images
@@ -17,7 +17,9 @@ description: |-
         <a class="button primary" href="/intro/index.html">Get Started</a>
         <a class="button" href="/downloads.html">Download <%= latest_version %></a>
       </div>
-
+      <div class="col-md-6">
+        <%= inline_svg "hero-image.svg" %>
+      </div>
     </div>
   </div>
 </header>
