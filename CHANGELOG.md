@@ -2,10 +2,11 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon: validate ami name. [GH-4762]
+* builder/digitalocean: Added support for monitoring. [GH-4782]
 * builder/openstack: Add ssh agent support. [GH-4655]
 * builder/parallels-iso: Configuration of disk type, plain or expanding.
     [GH-4621]
-* builder/amazon: validate ami name. [GH-4762]
 
 ## 1.0.0 (April 4, 2017)
 
