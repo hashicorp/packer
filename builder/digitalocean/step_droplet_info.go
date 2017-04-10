@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/digitalocean/godo"
@@ -27,7 +28,7 @@ func (s *stepDropletInfo) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Set the IP on the state for later
-	droplet, _, err := client.Droplets.Get(dropletID)
+	droplet, _, err := client.Droplets.Get(context.TODO(), dropletID)
 	if err != nil {
 		err := fmt.Errorf("Error retrieving droplet: %s", err)
 		state.Put("error", err)
