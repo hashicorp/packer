@@ -15,21 +15,12 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
-	volumeId := state.Get("root_volume_id").(string)
+	volumeID := state.Get("root_volume_id").(string)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	snapshot, err := client.PostSnapshot(volumeId, c.SnapshotName)
+	snapshot, err := client.PostSnapshot(volumeID, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	_, err = client.GetSnapshot(snapshot)
-	if err != nil {
-		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

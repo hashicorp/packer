@@ -8,11 +8,17 @@ import (
 )
 
 type Artifact struct {
+	// The name of the image
+	imageName string
+
+	// The ID of the image
+	imageID string
+
 	// The name of the snapshot
 	snapshotName string
 
 	// The ID of the snapshot
-	snapshotId string
+	snapshotID string
 
 	// The name of the region
 	regionName string
@@ -31,11 +37,12 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return fmt.Sprintf("%s:%s", a.regionName, a.snapshotId)
+	return fmt.Sprintf("%s:%s", a.regionName, a.imageID)
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A snapshot was created: '%v' (ID: %v) in region '%v'", a.snapshotName, a.snapshotId, a.regionName)
+	return fmt.Sprintf("An image was created: '%v' (ID: %v) in region '%v' based on snapshot '%v' (ID: %v)",
+		a.imageName, a.imageID, a.regionName, a.snapshotName, a.snapshotID)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -43,7 +50,13 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	log.Printf("Destroying image: %s (%s)", a.snapshotId, a.snapshotName)
-	err := a.client.DeleteSnapshot(a.snapshotId)
-	return err
+	log.Printf("Destroying image: %s (%s)", a.imageID, a.imageName)
+	if err := a.client.DeleteImage(a.imageID); err != nil {
+		return err
+	}
+	log.Printf("Destroying snapshot: %s (%s)", a.snapshotID, a.snapshotName)
+	if err := a.client.DeleteSnapshot(a.snapshotID); err != nil {
+		return err
+	}
+	return nil
 }

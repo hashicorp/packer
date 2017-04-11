@@ -2,14 +2,15 @@ package scaleway
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 	"github.com/scaleway/scaleway-cli/pkg/api"
-	"strings"
 )
 
 type stepCreateServer struct {
-	serverId string
+	serverID string
 }
 
 func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
@@ -37,7 +38,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.serverId = server
+	s.serverID = server
 
 	state.Put("server_id", server)
 
@@ -45,7 +46,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
-	if s.serverId != "" {
+	if s.serverID != "" {
 		return
 	}
 
@@ -53,7 +54,7 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Destroying server...")
-	err := client.PostServerAction(s.serverId, "terminate")
+	err := client.PostServerAction(s.serverID, "terminate")
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error destroying server. Please destroy it manually: %s", err))

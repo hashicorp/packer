@@ -13,11 +13,11 @@ type stepShutdown struct{}
 func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	serverId := state.Get("server_id").(string)
+	serverID := state.Get("server_id").(string)
 
 	ui.Say("Shutting down server...")
 
-	err := client.PostServerAction(serverId, "poweroff")
+	err := client.PostServerAction(serverID, "poweroff")
 
 	if err != nil {
 		err := fmt.Errorf("Error stopping server: %s", err)
@@ -26,7 +26,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	_, err = api.WaitForServerState(client, serverId, "stopped")
+	_, err = api.WaitForServerState(client, serverID, "stopped")
 
 	if err != nil {
 		err := fmt.Errorf("Error shutting down server: %s", err)
