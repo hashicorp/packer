@@ -9,12 +9,12 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"api_organization": "foo",
-		"api_token":        "bar",
-		"region":           "ams1",
-		"commercial_type":  "VC1S",
-		"ssh_username":     "root",
-		"image":            "image-uuid",
+		"api_access_key":  "foo",
+		"api_token":       "bar",
+		"region":          "ams1",
+		"commercial_type": "VC1S",
+		"ssh_username":    "root",
+		"image":           "image-uuid",
 	}
 }
 

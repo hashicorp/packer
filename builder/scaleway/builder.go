@@ -56,6 +56,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(common.StepProvision),
 		new(stepShutdown),
 		new(stepSnapshot),
+		new(stepImage),
 		new(stepTerminate),
 	}
 
@@ -72,8 +73,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
+		imageName:    state.Get("image_name").(string),
+		imageID:      state.Get("image_id").(string),
 		snapshotName: state.Get("snapshot_name").(string),
-		snapshotId:   state.Get("snapshot_id").(string),
+		snapshotID:   state.Get("snapshot_id").(string),
 		regionName:   state.Get("region").(string),
 		client:       client,
 	}

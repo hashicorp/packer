@@ -13,11 +13,11 @@ type stepTerminate struct{}
 func (s *stepTerminate) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	serverId := state.Get("server_id").(string)
+	serverID := state.Get("server_id").(string)
 
 	ui.Say("Terminating server...")
 
-	err := client.DeleteServerForce(serverId)
+	err := client.DeleteServerForce(serverID)
 
 	if err != nil {
 		err := fmt.Errorf("Error terminating server: %s", err)
