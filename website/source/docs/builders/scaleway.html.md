@@ -3,7 +3,7 @@ layout: docs
 sidebar_current: docs-builders-scaleway
 page_title: Scaleway - Builders
 description: |-
-  The Scaleway Packer builder is able to create new snapshots for use with
+  The Scaleway Packer builder is able to create new images for use with
   Scaleway BareMetal and Virtual cloud server. The builder takes a source image, runs any provisioning
   necessary on the image after launching it, then snapshots it into a reusable
   image. This reusable image can then be used as the foundation of new servers
@@ -15,7 +15,7 @@ description: |-
 
 Type: `scaleway`
 
-The `scaleway` Packer builder is able to create new snapshots for use with
+The `scaleway` Packer builder is able to create new images for use with
 [Scaleway](https://www.scaleway.com). The builder takes a source image,
 runs any provisioning necessary on the image after launching it, then snapshots
 it into a reusable image. This reusable image can then be used as the foundation
@@ -36,13 +36,15 @@ builder.
 
 ### Required:
 
-- `api_organization` (string) - The organization ID to use to access your account.
+- `api_access_key` (string) - The api_access_key to use to access your account.
     It can also be specified via
-    environment variable `SCALEWAY_API_ORGANIZATION`.
+    environment variable `SCALEWAY_API_ACCESS_KEY`.
+    Your access key is available in the ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the control panel.
 
 - `api_token` (string) - The organization TOKEN to use to access your account.
     It can also be specified via
     environment variable `SCALEWAY_API_TOKEN`.
+    Your tokens are available in the ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the control panel.
 
 - `image` (string) - The UUID of the base image to use. This is the
     image that will be used to launch a new server and provision it. See
@@ -60,6 +62,9 @@ builder.
 
 - `server_name` (string) - The name assigned to the server.
 
+- `image_name` (string) - The name of the resulting image that will
+    appear in your account.
+
 - `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account.
 
@@ -71,7 +76,7 @@ access tokens:
 ```json
 {
   "type": "scaleway",
-  "api_organization": "YOUR ORGANIZATION KEY",
+  "api_access_key": "YOUR API ACCESS KEY",
   "api_token": "YOUR TOKEN",
   "image": "f01f8a48-c026-48ac-9771-a70eaac0890e",
   "region": "par1",

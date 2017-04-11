@@ -19,13 +19,14 @@ type Config struct {
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	Token        string `mapstructure:"api_token"`
-	Organization string `mapstructure:"api_organization"`
+	Organization string `mapstructure:"api_access_key"`
 
 	Region         string `mapstructure:"region"`
 	Image          string `mapstructure:"image"`
 	CommercialType string `mapstructure:"commercial_type"`
 
 	SnapshotName string `mapstructure:"snapshot_name"`
+	ImageName    string `mapstructure:"image_name"`
 	ServerName   string `mapstructure:"server_name"`
 
 	UserAgent string
@@ -53,7 +54,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.UserAgent = "Packer - Scaleway builder"
 
 	if c.Organization == "" {
-		c.Organization = os.Getenv("SCALEWAY_API_ORGANIZATION")
+		c.Organization = os.Getenv("SCALEWAY_API_ACCESS_KEY")
 	}
 
 	if c.Token == "" {
@@ -61,12 +62,21 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.SnapshotName == "" {
-		def, err := interpolate.Render("packer-{{timestamp}}", nil)
+		def, err := interpolate.Render("snapshot-packer-{{timestamp}}", nil)
 		if err != nil {
 			panic(err)
 		}
 
 		c.SnapshotName = def
+	}
+
+	if c.ImageName == "" {
+		def, err := interpolate.Render("image-packer-{{timestamp}}", nil)
+		if err != nil {
+			panic(err)
+		}
+
+		c.ImageName = def
 	}
 
 	if c.ServerName == "" {
