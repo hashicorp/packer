@@ -148,6 +148,11 @@ $baseline: 20px;
           height: 100px;
           width: 33.3%;
           background-color: $white;
+          padding: 5px;
+
+          img {
+            max-width: 100%;
+          }
         }
       }
     }
