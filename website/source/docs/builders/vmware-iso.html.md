@@ -207,7 +207,7 @@ builder.
 
 -   `parallel` (string) - This specifies a parallel port to add to the VM. It
     has the format of `Type:option1,option2,...`. Type can be one of the
-    following values: "FILE", "DEVICE", or "AUTO".
+    following values: "FILE", "DEVICE", "AUTO", or "NONE".
 
     * `FILE:path` - Specifies the path to the local file to be used for the
                     parallel port.
@@ -217,6 +217,7 @@ builder.
                          parallel port. Direction can be `BI` to specify
                          bidirectional communication or `UNI` to specify
                          unidirectional communication.
+    * `NONE` - Specifies to not use a parallel port. (default)
 
 -   `remote_cache_datastore` (string) - The path to the datastore where
     supporting files will be stored during the build on the remote machine. By
@@ -254,7 +255,7 @@ builder.
 
 -   `serial` (string) - This specifies a serial port to add to the VM.
     It has a format of `Type:option1,option2,...`. The field `Type` can be one
-    of the following values: `FILE`, `DEVICE`, `PIPE`, or `AUTO`.
+    of the following values: `FILE`, `DEVICE`, `PIPE`, `AUTO`, or `NONE`.
 
     * `FILE:path(,yield)` - Specifies the path to the local file to be used as the
                             serial port.
@@ -285,6 +286,7 @@ builder.
         * `yield` (bool) - This is an optional boolean that specifies whether
                            the vm should yield the cpu when polling the port.
                            By default, the builder will assume this as `FALSE`.
+    * `NONE` - Specifies to not use a serial port. (default)
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
