@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/object"
 )
 
 func authentificate(URL, username, password string) (*govmomi.Client, context.Context) {
@@ -33,7 +34,7 @@ func authentificate(URL, username, password string) (*govmomi.Client, context.Co
 	return client, ctx
 }
 
-func reconfigureVM(client *govmomi.Client, ctx context.Context, dc_name, vm_name string, cpus int) {
+func createFinder(ctx context.Context, client *govmomi.Client, dc_name string) (*find.Finder, context.Context) {
 	// Create a finder to search for a vm with the specified name
 	finder := find.NewFinder(client.Client, false)
 	// Need to specify the datacenter
@@ -56,17 +57,29 @@ func reconfigureVM(client *govmomi.Client, ctx context.Context, dc_name, vm_name
 		}
 		finder.SetDatacenter(dc)
 	}
-	vm, err := finder.VirtualMachine(ctx, vm_name)
+	return finder, ctx
+}
+
+func findVM_by_name(ctx context.Context, finder *find.Finder, vm_name string) (*object.VirtualMachine, context.Context) {
+	vm_o, err := finder.VirtualMachine(ctx, vm_name)
 	if err != nil {
 		panic(err)
 	}
+	return vm_o, ctx
+}
+
+//func reconfigureVM(ctx context.Context, vm *object.VirtualMachine, cpus int) {
+func reconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
+	client, ctx := authentificate(URL, username, password)
+	finder, ctx := createFinder(ctx, client, dc_name)
+	vm_o, ctx := findVM_by_name(ctx, finder, vm_name)
 
 	// creating new configuration for vm
 	vmConfigSpec := types.VirtualMachineConfigSpec{}
 	vmConfigSpec.NumCPUs = int32(cpus)
 
 	// finally reconfiguring
-	task, err := vm.Reconfigure(ctx, vmConfigSpec)
+	task, err := vm_o.Reconfigure(ctx, vmConfigSpec)
 	if err != nil {
 		panic(err)
 	}
@@ -74,6 +87,52 @@ func reconfigureVM(client *govmomi.Client, ctx context.Context, dc_name, vm_name
 	if err != nil {
 		panic(err)
 	}
+}
+
+func cloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, cpus int) {
+	// Prepare entities: authentification, finder, folder, virtual machine
+	client, ctx := authentificate(URL, username, password)
+	finder, ctx := createFinder(ctx, client, dc_name)
+	folder, err := finder.FolderOrDefault(ctx, "") // folder_name
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Printf("expected folder: %v\n", folder_name)
+		fmt.Printf("folder.Name(): %v\nfolder.InventoryPath(): %v\n", folder.Name(), folder.InventoryPath)
+	}
+	vm_src, ctx := findVM_by_name(ctx, finder, source_name)
+
+	// Creating spec's for cloning
+	var relocateSpec types.VirtualMachineRelocateSpec
+	var confSpec types.VirtualMachineConfigSpec
+	if cpus != -1 {
+		confSpec.NumCPUs = int32(cpus)
+	}
+	cloneSpec := types.VirtualMachineCloneSpec{
+		Location: relocateSpec,
+		Config:   &confSpec,
+		PowerOn:  false,
+	}
+
+	// Cloning itself
+	task, err := vm_src.Clone(ctx, folder, target_name, cloneSpec)
+	if err != nil {
+		panic(err)
+	}
+	info, err := task.WaitForResult(ctx, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	vm_new_mor := info.Result.(types.ManagedObjectReference)
+	vm_new := object.NewVirtualMachine(client.Client, vm_new_mor)
+	var vm_new_mo mo.VirtualMachine
+	err = vm_new.Properties(ctx, vm_new.Reference(), []string{"summary"}, &vm_new_mo)
+	cpus_new := vm_new_mo.Summary.Config.NumCpu
+	var vm_src_mo mo.VirtualMachine
+	err = vm_src.Properties(ctx, vm_src.Reference(), []string{"summary"}, &vm_src_mo)
+	cpus_src := vm_src_mo.Summary.Config.NumCpu
+	fmt.Printf("Num of cpus on the newly created machine %v vs on the initial one %v\n", cpus_new, cpus_src)
 }
 
 func main() {
@@ -87,6 +146,5 @@ func main() {
 		panic(err)
 	}
 
-	client, ctx := authentificate(URL, username, password)
-	reconfigureVM(client, ctx, dc_name, vm_name, cpus)
+	cloneVM(URL, username, password, dc_name, "", vm_name, vm_name + "_cloned", cpus)
 }
