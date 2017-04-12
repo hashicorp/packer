@@ -13,7 +13,7 @@ import (
 	"github.com/vmware/govmomi/object"
 )
 
-func authentificate(URL, username, password string) (*govmomi.Client, context.Context) {
+func createClient(URL, username, password string) (*govmomi.Client, context.Context) {
 	// create context
 	ctx := context.TODO() // an empty, default context (for those, who is unsure)
 
@@ -68,9 +68,8 @@ func findVM_by_name(ctx context.Context, finder *find.Finder, vm_name string) (*
 	return vm_o, ctx
 }
 
-//func reconfigureVM(ctx context.Context, vm *object.VirtualMachine, cpus int) {
-func reconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
-	client, ctx := authentificate(URL, username, password)
+func ReconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
+	client, ctx := createClient(URL, username, password)
 	finder, ctx := createFinder(ctx, client, dc_name)
 	vm_o, ctx := findVM_by_name(ctx, finder, vm_name)
 
@@ -89,9 +88,9 @@ func reconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
 	}
 }
 
-func cloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, cpus int) {
-	// Prepare entities: authentification, finder, folder, virtual machine
-	client, ctx := authentificate(URL, username, password)
+func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, cpus int) {
+	// Prepare entities: client (authentification), finder, folder, virtual machine
+	client, ctx := createClient(URL, username, password)
 	finder, ctx := createFinder(ctx, client, dc_name)
 	folder, err := finder.FolderOrDefault(ctx, "") // folder_name
 	if err != nil {
@@ -124,6 +123,7 @@ func cloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 		panic(err)
 	}
 
+	// Just to output something for clarity
 	vm_new_mor := info.Result.(types.ManagedObjectReference)
 	vm_new := object.NewVirtualMachine(client.Client, vm_new_mor)
 	var vm_new_mo mo.VirtualMachine
@@ -146,5 +146,6 @@ func main() {
 		panic(err)
 	}
 
-	cloneVM(URL, username, password, dc_name, "", vm_name, vm_name + "_cloned", cpus)
+	CloneVM(URL, username, password, dc_name, "", vm_name, vm_name + "_cloned", cpus)
+	// ReconfigureVM(URL, username, password, dc_name, vm_name, cpus)
 }
