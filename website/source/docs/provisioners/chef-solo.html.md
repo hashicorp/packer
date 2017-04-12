@@ -178,7 +178,7 @@ readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
 ```text
-curl -L https://www.chef.io/chef/install.sh | \
+curl -L https://omnitruck.chef.io/install.sh | \
   {{if .Sudo}}sudo{{end}} bash -s --{{if .Version}} -v {{.Version}}{{end}}
 ```
 
@@ -186,7 +186,7 @@ When guest_os_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
 ```text
-powershell.exe -Command "(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait"
+powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"
 ```
 
 This command can be customized using the `install_command` configuration.
