@@ -12,17 +12,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 )
 
-func main() {
-	var URL = os.Args[1]
-	var username = os.Args[2]
-	var password = os.Args[3]
-	var dc_name = os.Args[6]
-	var vm_name = os.Args[4]
-	var cpus, err = strconv.Atoi(os.Args[5])
-	if err != nil {
-		panic(err)
-	}
-
+func authentificate(URL, username, password string) (*govmomi.Client, context.Context) {
 	// create context
 	ctx := context.TODO() // an empty, default context (for those, who is unsure)
 
@@ -40,6 +30,10 @@ func main() {
 		panic(err)
 	}
 
+	return client, ctx
+}
+
+func reconfigureVM(client *govmomi.Client, ctx context.Context, dc_name, vm_name string, cpus int) {
 	// Create a finder to search for a vm with the specified name
 	finder := find.NewFinder(client.Client, false)
 	// Need to specify the datacenter
@@ -80,4 +74,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	var URL = os.Args[1]
+	var username = os.Args[2]
+	var password = os.Args[3]
+	var dc_name = os.Args[6]
+	var vm_name = os.Args[4]
+	var cpus, err = strconv.Atoi(os.Args[5])
+	if err != nil {
+		panic(err)
+	}
+
+	client, ctx := authentificate(URL, username, password)
+	reconfigureVM(client, ctx, dc_name, vm_name, cpus)
 }
