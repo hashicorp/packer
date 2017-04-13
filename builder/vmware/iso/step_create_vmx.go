@@ -370,7 +370,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// Check the network type that the user specified
 	network := config.Network
-	driver := state.Get("driver").(vmwcommon.VmwareDriver)
+	driver := state.Get("driver").(vmwcommon.Driver).GetVmwareDriver()
 
 	// read netmap config
 	pathNetmap := driver.NetmapConfPath()

@@ -173,3 +173,7 @@ const fusionSuppressPlist = `<?xml version="1.0" encoding="UTF-8"?>
 	<true/>
 </dict>
 </plist>`
+
+func (d *Fusion5Driver) GetVmwareDriver() VmwareDriver {
+	return d.VmwareDriver
+}
