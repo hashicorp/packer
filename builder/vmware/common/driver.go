@@ -64,6 +64,7 @@ type Driver interface {
 	/// These methods are generally implemented by the VmwareDriver
 	/// structure within this file. A driver implementation can
 	/// reimplement these, though, if it wants.
+	GetVmwareDriver() VmwareDriver
 
 	// Get the guest hw address for the vm
 	GuestAddress(multistep.StateBag) (string, error)
