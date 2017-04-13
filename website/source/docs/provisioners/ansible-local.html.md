@@ -127,9 +127,12 @@ chi-appservers
     `staging_directory`/roles. By default, this is empty.
 
 - `staging_directory` (string) - The directory where all the configuration of
-    Ansible by Packer will be placed. By default this
-    is "/tmp/packer-provisioner-ansible-local". This directory doesn't need to
-    exist but must have proper permissions so that the SSH user that Packer uses
-    is able to create directories and write into this folder. If the permissions
-    are not correct, use a shell provisioner prior to this to configure
-    it properly.
+    Ansible by Packer will be placed. By default this is
+    `/tmp/packer-provisioner-ansible-local/<uuid>`, where `<uuid>` is replaced
+    with a unique ID so that this provisioner can be run more than once. If
+    you'd like to know the location of the staging directory in advance, you
+    should set this to a known location. This directory doesn't need to exist
+    but must have proper permissions so that the SSH user that Packer uses is
+    able to create directories and write into this folder. If the permissions
+    are not correct, use a shell provisioner prior to this to configure it
+    properly.

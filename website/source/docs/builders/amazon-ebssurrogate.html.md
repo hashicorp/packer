@@ -324,33 +324,6 @@ builder.
 
 ## Basic Example
 
-Here is a basic example. You will need to provide access keys, and may need to
-change the AMI IDs according to what images exist at the time the template is run:
-
-```javascript
-{
-  "type": "amazon-ebs",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "region": "us-east-1",
-  "source_ami": "ami-fce3c696",
-  "instance_type": "t2.micro",
-  "ssh_username": "ubuntu",
-  "ami_name": "packer-quick-start {{timestamp}}"
-}
-```
-
--> **Note:** Packer can also read the access key and secret access key from
-environmental variables. See the configuration reference in the section above
-for more information on what environmental variables Packer will look for.
-
-Further information on locating AMI IDs and their relationship to instance types
-and regions can be found in the AWS EC2 Documentation
-[for Linux](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
-or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-an-ami.html).
-
-## Basic Example
-
 ```javascript
 {
    "type" : "amazon-surrogate",

@@ -16,11 +16,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-uuid"
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
-	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/mitchellh/packer/version"
 	"github.com/mitchellh/panicwrap"
 	"github.com/mitchellh/prefixedio"
 )
