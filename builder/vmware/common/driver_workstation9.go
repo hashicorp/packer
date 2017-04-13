@@ -170,3 +170,7 @@ func (d *Workstation9Driver) ToolsIsoPath(flavor string) string {
 func (d *Workstation9Driver) ToolsInstall() error {
 	return nil
 }
+
+func (d *Workstation9Driver) GetVmwareDriver() VmwareDriver {
+	return d.VmwareDriver
+}

@@ -68,3 +68,7 @@ func (d *Fusion6Driver) Verify() error {
 
 	return compareVersions(matches[1], VMWARE_FUSION_VERSION, "Fusion Professional")
 }
+
+func (d *Fusion6Driver) GetVmwareDriver() VmwareDriver {
+	return d.Fusion5Driver.VmwareDriver
+}
