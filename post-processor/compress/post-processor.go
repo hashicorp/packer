@@ -12,11 +12,11 @@ import (
 	"runtime"
 
 	"github.com/biogo/hts/bgzf"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/klauspost/pgzip"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 	"github.com/pierrec/lz4"
 )
 

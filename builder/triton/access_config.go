@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/joyent/gocommon/client"
 	"github.com/joyent/gosdc/cloudapi"
 	"github.com/joyent/gosign/auth"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to Triton access

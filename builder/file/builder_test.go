@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
-	"github.com/mitchellh/packer/packer"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilder_implBuilder(t *testing.T) {

@@ -3,7 +3,7 @@ package file
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestNullArtifact(t *testing.T) {

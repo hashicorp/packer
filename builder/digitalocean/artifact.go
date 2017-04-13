@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -45,6 +46,6 @@ func (a *Artifact) State(name string) interface{} {
 
 func (a *Artifact) Destroy() error {
 	log.Printf("Destroying image: %d (%s)", a.snapshotId, a.snapshotName)
-	_, err := a.client.Images.Delete(a.snapshotId)
+	_, err := a.client.Images.Delete(context.TODO(), a.snapshotId)
 	return err
 }
