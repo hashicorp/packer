@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
-	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/version"
 )
 
 // Commands is the mapping of all the available Packer commands.

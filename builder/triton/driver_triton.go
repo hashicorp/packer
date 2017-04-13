@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/joyent/gosdc/cloudapi"
-	"github.com/mitchellh/packer/packer"
 )
 
 type driverTriton struct {

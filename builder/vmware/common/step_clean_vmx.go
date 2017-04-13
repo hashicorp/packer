@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step cleans up the VMX by removing or changing this prior to

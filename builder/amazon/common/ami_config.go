@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
+	"regexp"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AMIConfig is for common configuration related to creating AMIs.
@@ -66,6 +67,18 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if len(c.SnapshotUsers) > 0 && len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+	}
+
+	if len(c.AMIName) < 3 || len(c.AMIName) > 128 {
+		errs = append(errs, fmt.Errorf("AMIName must be between 3 and 128 characters long"))
+	}
+
+	amiNameRe := regexp.MustCompile(`^[0-9a-zA-Z().\-/_]+$`)
+	if !amiNameRe.MatchString(c.AMIName) {
+		errs = append(errs, fmt.Errorf("AMIName should only contain letters,"+
+			" numbers, '(', ')', '.', '-', '/' and '_'. You can use the "+
+			"`clean_ami_name` template filter to automatically clean your ami "+
+			"name."))
 	}
 
 	if len(errs) > 0 {

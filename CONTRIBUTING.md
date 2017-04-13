@@ -65,28 +65,28 @@ following steps in order to be able to compile and test Packer. These instructio
     ```
 
 3. Download the Packer source (and its dependencies) by running `go get
-   github.com/mitchellh/packer`. This will download the Packer source to
-   `$GOPATH/src/github.com/mitchellh/packer`.
+   github.com/hashicorp/packer`. This will download the Packer source to
+   `$GOPATH/src/github.com/hashicorp/packer`.
 
-4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
+4. When working on packer `cd $GOPATH/src/github.com/hashicorp/packer` so you
    can run `make` and easily access other files. Run `make help` to get
    information about make targets.
 
 5. Make your changes to the Packer source. You can run `make` in
-   `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer
+   `$GOPATH/src/github.com/hashicorp/packer` to run tests and build the packer
    binary. Any compilation errors will be shown when the binaries are
    rebuilding. If you don't have `make` you can simply run `go build -o bin/packer .` from the project root.
 
 6. After running building packer successfully, use
-   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine and
-   verify your changes work. For instance: `$GOPATH/src/github.com/mitchellh/packer/bin/packer build template.json`.
+   `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
+   verify your changes work. For instance: `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
 
 ### Opening an Pull Request
 
-When you are ready to open a pull-request, you will need to [fork packer](https://github.com/mitchellh/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
+When you are ready to open a pull-request, you will need to [fork packer](https://github.com/hashicorp/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
 
 For example, my github username is `cbednarski` so I would do the following:
 
@@ -104,7 +104,7 @@ From there, open your fork in your browser to open a new pull-request.
 
 The easiest way to work on a fork is to set it as a remote of the packer project. After following the steps in "Setting up Go to work on Packer":
 
-1. Navigate to $GOPATH/src/github.com/mitchellh/packer
+1. Navigate to $GOPATH/src/github.com/hashicorp/packer
 2. Add the remote `git remote add <name of remote> <github url of fork>`. For example `git remote add mwhooker https://github.com/mwhooker/packer.git`.
 3. Checkout a feature branch: `git checkout -b new-feature`
 4. Make changes

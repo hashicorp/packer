@@ -1,14 +1,15 @@
 package digitalocean
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepSnapshot struct{}
@@ -20,7 +21,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dropletId := state.Get("droplet_id").(int)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
-	action, _, err := client.DropletActions.Snapshot(dropletId, c.SnapshotName)
+	action, _, err := client.DropletActions.Snapshot(context.TODO(), dropletId, c.SnapshotName)
 	if err != nil {
 		err := fmt.Errorf("Error creating snapshot: %s", err)
 		state.Put("error", err)
@@ -51,7 +52,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
-	images, _, err := client.Droplets.Snapshots(dropletId, nil)
+	images, _, err := client.Droplets.Snapshots(context.TODO(), dropletId, nil)
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
 		state.Put("error", err)
