@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/provisioner/shell"
-	"github.com/mitchellh/packer/template"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner/shell"
+	"github.com/hashicorp/packer/template"
 	"testing"
 )
 
