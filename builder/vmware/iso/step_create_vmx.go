@@ -404,7 +404,9 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	state.Put("vmnetwork", network)
 
 	/// check if serial port has been configured
-	if config.Serial != "" {
+	if config.Serial == "" {
+		templateData.Serial_Present = "FALSE"
+	} else {
 		serial, err := unformat_serial(config.Serial)
 		if err != nil {
 			err := fmt.Errorf("Error procesing VMX template: %s", err)
@@ -439,6 +441,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			templateData.Serial_Yield = serial.auto.yield
 			templateData.Serial_Auto = "TRUE"
 		case nil:
+			templateData.Serial_Present = "FALSE"
 			break
 
 		default:
@@ -450,7 +453,9 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	}
 
 	/// check if parallel port has been configured
-	if config.Parallel != "" {
+	if config.Parallel == "" {
+		templateData.Parallel_Present = "FALSE"
+	} else {
 		parallel, err := unformat_parallel(config.Parallel)
 		if err != nil {
 			err := fmt.Errorf("Error procesing VMX template: %s", err)
@@ -473,6 +478,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			templateData.Parallel_Auto = "TRUE"
 			templateData.Parallel_Bidirectional = parallel.auto.bidirectional
 		case nil:
+			templateData.Parallel_Present = "FALSE"
 			break
 
 		default:
