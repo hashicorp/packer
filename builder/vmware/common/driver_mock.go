@@ -206,3 +206,20 @@ func (d *DriverMock) Verify() error {
 	d.VerifyCalled = true
 	return d.VerifyErr
 }
+
+func (d *DriverMock) GetVmwareDriver() VmwareDriver {
+	var state VmwareDriver
+	state.DhcpLeasesPath = func(string) string {
+		return "/path/to/dhcp.leases"
+	}
+	state.DhcpConfPath = func(string) string {
+		return "/path/to/dhcp.conf"
+	}
+	state.VmnetnatConfPath = func(string) string {
+		return "/path/to/vmnetnat.conf"
+	}
+	state.NetmapConfPath = func() string {
+		return "/path/to/netmap.conf"
+	}
+	return state
+}
