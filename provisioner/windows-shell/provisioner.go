@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-const DefaultRemotePath = "c:/Windows/Temp/script.bat"
+const DefaultRemotePath = "c:\\Windows\\Temp\\script.bat"
 
 var retryableSleep = 2 * time.Second
 
@@ -61,6 +61,9 @@ type Config struct {
 	// This is used in the template generation to format environment variables
 	// inside the `ExecuteCommand` template.
 	EnvVarFormat string
+
+	// Whether to clean scripts up
+	SkipClean bool `mapstructure:"skip_clean"`
 
 	ctx interpolate.Context
 }
@@ -233,15 +236,42 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			cmd = &packer.RemoteCmd{Command: command}
 			return cmd.StartWithUi(comm, ui)
 		})
+
 		if err != nil {
 			return err
 		}
 
-		// Close the original file since we copied it
-		f.Close()
+		if !p.config.SkipClean {
 
-		if cmd.ExitStatus != 0 {
-			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
+			// Delete the temporary file we created. We retry this a few times
+			// since if the above rebooted we have to wait until the reboot
+			// completes.
+			err = p.retryable(func() error {
+				cmd = &packer.RemoteCmd{
+					Command: fmt.Sprintf("del /f /q %s", p.config.RemotePath),
+				}
+				ui.Say(fmt.Sprintf("Removing script from %s folder...", p.config.RemotePath))
+				if err := comm.Start(cmd); err != nil {
+					return fmt.Errorf(
+						"Error removing temporary script at %s: %s",
+						p.config.RemotePath, err)
+				}
+				cmd.Wait()
+				// treat disconnects as retryable by returning an error
+				if cmd.ExitStatus == packer.CmdDisconnect {
+					return fmt.Errorf("Disconnect while removing temporary script.")
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+			if cmd.ExitStatus != 0 {
+				return fmt.Errorf(
+					"Error removing temporary script at %s!",
+					p.config.RemotePath)
+			}
 		}
 	}
 
