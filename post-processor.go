@@ -16,6 +16,11 @@ import (
 	"strconv"
 )
 
+type HwConfig struct {
+	Cpu_sockets int
+	Ram  int
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -27,8 +32,9 @@ type Config struct {
 	Vm_source_name string `mapstructure:"vm_source_name"`
 	Vm_target_name string `mapstructure:"vm_target_name"`
 	Cpu_sockets    string `mapstructure:"cpus"`
+	Ram            string `mapstructure:"RAM"`
 
-	cpus           int
+	hwConfig       HwConfig
 	ctx            interpolate.Context
 }
 
@@ -53,9 +59,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.Vm_target_name == "" {
 		p.config.Vm_target_name = p.config.Vm_source_name + "_cloned"
 	}
-	p.config.cpus = -1
+	p.config.hwConfig.Cpu_sockets = -1
 	if p.config.Cpu_sockets != "" {
-		p.config.cpus, err = strconv.Atoi(p.config.Cpu_sockets)
+		p.config.hwConfig.Cpu_sockets, err = strconv.Atoi(p.config.Cpu_sockets)
+		if err != nil {
+			panic(err)
+		}
+	}
+	p.config.hwConfig.Ram = -1
+	if p.config.Ram != "" {
+		p.config.hwConfig.Ram, err = strconv.Atoi(p.config.Ram)
 		if err != nil {
 			panic(err)
 		}
@@ -85,8 +98,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-// TODO: replace `cpus` with a more generic hw config structure
-func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, cpus int) {
+func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, hwConfig HwConfig) {
 	// Prepare entities: client (authentification), finder, folder, virtual machine
 	client, ctx := createClient(URL, username, password)
 	finder, ctx := createFinder(ctx, client, dc_name)
@@ -103,9 +115,12 @@ func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 	var relocateSpec types.VirtualMachineRelocateSpec
 
 	var confSpec types.VirtualMachineConfigSpec
-	// configure CPUs
-	if cpus != -1 {
-		confSpec.NumCPUs = int32(cpus)
+	// configure HW
+	if hwConfig.Cpu_sockets != -1 {
+		confSpec.NumCPUs = int32(hwConfig.Cpu_sockets)
+	}
+	if hwConfig.Ram != -1 {
+		confSpec.MemoryMB = int64(hwConfig.Ram)
 	}
 
 	cloneSpec := types.VirtualMachineCloneSpec{
@@ -126,7 +141,7 @@ func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, error) {
-	CloneVM(p.config.Url, p.config.Username, p.config.Password, p.config.Dc_name, p.config.Folder_name, p.config.Vm_source_name, p.config.Vm_target_name, p.config.cpus)
+	CloneVM(p.config.Url, p.config.Username, p.config.Password, p.config.Dc_name, p.config.Folder_name, p.config.Vm_source_name, p.config.Vm_target_name, p.config.hwConfig)
 	return source, true, nil
 }
 
