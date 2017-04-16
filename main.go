@@ -88,6 +88,29 @@ func ReconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
 	}
 }
 
+func createDisk() (object.VirtualDeviceList, error) {
+	var devices object.VirtualDeviceList
+	controller, err := devices.FindDiskController("")
+	if err != nil {
+		return nil, err
+	}
+
+	disk := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Key: devices.NewKey(),
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: types.NewBool(true),
+			},
+		},
+	}
+
+	devices.AssignController(disk, controller)
+	devices = append(devices, disk)
+
+	return devices, nil
+}
+
 func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, cpus int) {
 	// Prepare entities: client (authentification), finder, folder, virtual machine
 	client, ctx := createClient(URL, username, password)
@@ -103,10 +126,23 @@ func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 
 	// Creating spec's for cloning
 	var relocateSpec types.VirtualMachineRelocateSpec
+
 	var confSpec types.VirtualMachineConfigSpec
+	// configure CPUs
 	if cpus != -1 {
 		confSpec.NumCPUs = int32(cpus)
 	}
+	// make the thin provisioned disk
+	devices, err := createDisk()
+	if err != nil {
+		panic(err)
+	}
+	deviceChange, err := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	if err != nil {
+		panic(err)
+	}
+	confSpec.DeviceChange = deviceChange
+
 	cloneSpec := types.VirtualMachineCloneSpec{
 		Location: relocateSpec,
 		Config:   &confSpec,
