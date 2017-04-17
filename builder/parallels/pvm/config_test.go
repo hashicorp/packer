@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig(t *testing.T) map[string]interface{} {
@@ -87,7 +87,7 @@ func TestNewConfig_InvalidFloppies(t *testing.T) {
 	c["floppy_files"] = []string{"nonexistant.bat", "nonexistant.ps1"}
 	_, _, errs := NewConfig(c)
 	if errs == nil {
-		t.Fatalf("Non existant floppies should trigger multierror")
+		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
 	if len(errs.(*packer.MultiError).Errors) != 2 {

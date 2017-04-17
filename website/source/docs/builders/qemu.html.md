@@ -1,10 +1,11 @@
 ---
-description: |
-    The Qemu Packer builder is able to create KVM and Xen virtual machine images.
-    Support for Xen is experimental at this time.
 layout: docs
-page_title: QEMU Builder
-...
+sidebar_current: docs-builders-qemu
+page_title: QEMU - Builders
+description: |-
+  The Qemu Packer builder is able to create KVM and Xen virtual machine images.
+  Support for Xen is experimental at this time.
+---
 
 # QEMU Builder
 
@@ -25,7 +26,7 @@ necessary to run the virtual machine on KVM or Xen.
 Here is a basic example. This example is functional so long as you fixup paths
 to files, URLS for ISOs and checksums.
 
-``` {.javascript}
+```json
 {
   "builders":
   [
@@ -53,8 +54,7 @@ to files, URLS for ISOs and checksums.
       "net_device": "virtio-net",
       "disk_interface": "virtio",
       "boot_wait": "5s",
-      "boot_command":
-      [
+      "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
       ]
     }
@@ -84,71 +84,71 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 ### Required:
 
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
+- `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
     files are so large, this is required and Packer will verify it prior to
     booting a virtual machine with the ISO attached. The type of the checksum is
     specified with `iso_checksum_type`, documented below. At least one of
     `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
     over `iso_checksum_url` type.
 
--   `iso_checksum_type` (string) - The type of the checksum specified in
+- `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
     recommended since ISO files are generally large and corruption does happen
     from time to time.
 
--   `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
+- `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
     containing a checksum for the OS ISO file. At least one of `iso_checksum`
     and `iso_checksum_url` must be defined. This will be ignored if
     `iso_checksum` is non empty.
 
--   `iso_url` (string) - A URL to the ISO containing the installation image.
+- `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
     This can also be a URL to an IMG or QCOW2 file, in which case QEMU will
-    boot directly from it. When passing a path to an IMG or QCOW2 file, you 
+    boot directly from it. When passing a path to an IMG or QCOW2 file, you
     should set `disk_image` to "true".
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
+- `ssh_username` (string) - The username to use to SSH into the machine once
     the OS is installed.
 
 ### Optional:
 
--   `accelerator` (string) - The accelerator type to use when running the VM.
+- `accelerator` (string) - The accelerator type to use when running the VM.
     This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
     already been installed on your build machine to use the accelerator you
     specified. When no accelerator is specified, Packer will try to use `kvm`
     if it is available but will default to `tcg` otherwise.
 
--   `boot_command` (array of strings) - This is an array of commands to type
+- `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
     be to type just enough to initialize the operating system installer. Special
     keys can be typed as well, and are covered in the section below on the
     boot command. If this is not specified, it is assumed the installer will
     start itself.
 
--   `boot_wait` (string) - The time to wait after booting the initial virtual
+- `boot_wait` (string) - The time to wait after booting the initial virtual
     machine before typing the `boot_command`. The value of this should be
     a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_cache` (string) - The cache mode to use for disk. Allowed values
+- `disk_cache` (string) - The cache mode to use for disk. Allowed values
     include any of "writethrough", "writeback", "none", "unsafe"
     or "directsync". By default, this is set to "writeback".
 
--   `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
+- `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
     using `qemu-img convert`. Defaults to `false`.
 
--   `disk_discard` (string) - The discard mode to use for disk. Allowed values
+- `disk_discard` (string) - The discard mode to use for disk. Allowed values
     include any of "unmap" or "ignore". By default, this is set to "ignore".
 
--   `disk_image` (boolean) - Packer defaults to building from an ISO file, this
+- `disk_image` (boolean) - Packer defaults to building from an ISO file, this
     parameter controls whether the ISO URL supplied is actually a bootable
     QEMU image. When this value is set to true, the machine will clone the
     source, resize it according to `disk_size` and boot the image.
 
--   `disk_interface` (string) - The interface to use for the disk. Allowed
+- `disk_interface` (string) - The interface to use for the disk. Allowed
     values include any of "ide", "scsi", "virtio" or "virtio-scsi"^* . Note also
     that any boot commands or kickstart type scripts must have proper
     adjustments for resulting device names. The Qemu builder uses "virtio" by
@@ -161,10 +161,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     *must* choose one of the other listed interfaces. Using the "scsi"
     interface under these circumstances will cause the build to fail.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+- `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
--   `floppy_files` (array of strings) - A list of files to place onto a floppy
+- `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on
     removable media. By default, no floppy will be attached. All files listed in
@@ -172,88 +172,93 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     is attached as the first floppy device. Currently, no support exists for
     creating sub-directories on the floppy. Wildcard characters (\*, ?,
     and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
+    the files found in the directory to the floppy. The summary size of the
+    listed files must not exceed 1.44 MB. The supported ways to move large
+    files into the OS are using `http_directory` or [the file provisioner](
+    https://www.packer.io/docs/provisioners/file.html).
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
+- `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's
     contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
--   `format` (string) - Either "qcow2" or "raw", this specifies the output
+- `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
 
--   `headless` (boolean) - Packer defaults to building QEMU virtual machines by
+- `headless` (boolean) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
     value is set to true, the machine will start without a console.
 
     You can still see the console if you make a note of the VNC display
     number chosen, and then connect using `vncviewer -Shared <host>:<display>`
 
--   `http_directory` (string) - Path to a directory to serve using an
+- `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
     will be requestable from the virtual machine. This is useful for hosting
     kickstart files and so on. By default this is "", which means no HTTP server
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+- `http_port_min` and `http_port_max` (integer) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
     port the same. By default the values are 8000 and 9000, respectively.
 
--   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
+- `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
 
--   `iso_target_extension` (string) - The extension of the iso file after
+- `iso_target_extension` (string) - The extension of the iso file after
     download. This defaults to "iso".
 
--   `iso_target_path` (string) - The path where the iso should be saved after
+- `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
     original filename as its name.
 
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
+- `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
     Packer will try these in order. If anything goes wrong attempting to
     download or while downloading a single URL, it will move on to the next. All
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
--   `machine_type` (string) - The type of machine emulation to use. Run your
+- `machine_type` (string) - The type of machine emulation to use. Run your
     qemu binary with the flags `-machine help` to list available types for
     your system. This defaults to "pc".
 
--   `net_device` (string) - The driver to use for the network interface. Allowed
+- `net_device` (string) - The driver to use for the network interface. Allowed
     values "ne2k\_pci", "i82551", "i82557b", "i82559er", "rtl8139", "e1000",
     "pcnet", "virtio", "virtio-net", "virtio-net-pci", "usb-net", "i82559a",
     "i82559b", "i82559c", "i82550", "i82562", "i82557a", "i82557c", "i82801",
     "vmxnet3", "i82558a" or "i82558b".  The Qemu builder uses "virtio-net" by
     default.
 
--   `output_directory` (string) - This is the path to the directory where the
+- `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
 
--   `qemu_binary` (string) - The name of the Qemu binary to look for. This
+- `qemu_binary` (string) - The name of the Qemu binary to look for. This
     defaults to "qemu-system-x86\_64", but may need to be changed for
     some platforms. For example "qemu-kvm", or "qemu-system-i386" may be a
     better choice for some systems.
 
--   `qemuargs` (array of array of strings) - Allows complete control over the
+- `qemuargs` (array of array of strings) - Allows complete control over the
     qemu command line (though not, at this time, qemu-img). Each array of
     strings makes up a command line switch that overrides matching default
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
--   `use_default_display` (boolean) - If true, do not pass a `-display` option
+- `use_default_display` (boolean) - If true, do not pass a `-display` option
     to qemu, allowing it to choose the default. This may be needed when running
     under OS X.
 
-\~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
+~> **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
 shutdown -P now) to the virtual machine, thus preventing proper shutdown. To see
@@ -262,8 +267,8 @@ command. The arguments are all printed for review.
 
 The following shows a sample usage:
 
-``` {.javascript}
-  // ...
+```json
+{
   "qemuargs": [
     [ "-m", "1024M" ],
     [ "--no-acpi", "" ],
@@ -275,43 +280,42 @@ The following shows a sample usage:
     ],
     [ "-device", "virtio-net,netdev=mynet0" ]
   ]
-  // ...
+}
 ```
 
 would produce the following (not including other defaults supplied by the
 builder and not otherwise conflicting with the qemuargs):
 
-<pre class="prettyprint">
-  qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
-</pre>
+```text
+qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+```
 
-\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+~> **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
 to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
 
 The following shows the environment variable that needs to be set for Windows QEMU support:
 
-```json
-  setx SDL_STDIO_REDIRECT=0
+```text
+setx SDL_STDIO_REDIRECT=0
 ```
 
 You can also use the `SSHHostPort` template variable to produce a packer
 template that can be invoked by `make` in parallel:
 
-``` {.javascript}
-  // ...
+```json
+{
   "qemuargs": [
-          [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
-          [ "-device", "virtio-net,netdev=forward,id=net0"],
-          ...
-        ]
-  // ...
+    [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+    [ "-device", "virtio-net,netdev=forward,id=net0"]
+  ]
+}
 ```
 `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
 will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
 default port of `5985` or whatever value you have the service set to listen on.
 
--   `shutdown_command` (string) - The command to use to gracefully shut down the
+- `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a
     shutdown command takes place inside script so this may safely be omitted. If
@@ -319,30 +323,30 @@ default port of `5985` or whatever value you have the service set to listen on.
     since reboots may fail and specify the final shutdown command in your
     last script.
 
--   `shutdown_timeout` (string) - The amount of time to wait after executing the
+- `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     `5m`, or five minutes.
 
--   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
+- `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
     Set this option to `true` to disable compacting. Defaults to `false`.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+- `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
     host port. By default this is 2222 to 4444.
 
--   `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
+- `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
     the new virtual machine. By default this is "packer-BUILDNAME", where
     `BUILDNAME` is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
+- `vnc_bind_address` (string / IP address) - The IP address that should be binded
     to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
     to all interfaces use 0.0.0.0
 
--   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
+- `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
@@ -370,60 +374,63 @@ machine, simulating a human actually typing the keyboard.
 There are a set of special keys available. If these are in your boot
 command, they will be replaced by the proper key:
 
--   `<bs>` - Backspace
+- `<bs>` - Backspace
 
--   `<del>` - Delete
+- `<del>` - Delete
 
--   `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
+- `<enter>` and `<return>` - Simulates an actual "enter" or "return" keypress.
 
--   `<esc>` - Simulates pressing the escape key.
+- `<esc>` - Simulates pressing the escape key.
 
--   `<tab>` - Simulates pressing the tab key.
+- `<tab>` - Simulates pressing the tab key.
 
--   `<f1>` - `<f12>` - Simulates pressing a function key.
+- `<f1>` - `<f12>` - Simulates pressing a function key.
 
--   `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
+- `<up>` `<down>` `<left>` `<right>` - Simulates pressing an arrow key.
 
--   `<spacebar>` - Simulates pressing the spacebar.
+- `<spacebar>` - Simulates pressing the spacebar.
 
--   `<insert>` - Simulates pressing the insert key.
+- `<insert>` - Simulates pressing the insert key.
 
--   `<home>` `<end>` - Simulates pressing the home and end keys.
+- `<home>` `<end>` - Simulates pressing the home and end keys.
 
--   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
+- `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+- `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
 
--   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+- `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
--   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+- `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+- `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
+- `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+- `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+- `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
 
--   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+- `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
--   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+- `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
 
--   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
+- `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
--   `<waitXX> ` - Add user defined time.Duration pause before sending any
+- `<waitXX> ` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers. For example: to simulate ctrl+c use
+`<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
--   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+- `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
     blank!
@@ -431,12 +438,13 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 CentOS 6.4 installer:
 
-``` {.javascript}
-"boot_command":
-[
-  "<tab><wait>",
-  " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
-]
+```json
+{
+"boot_command": [
+    "<tab><wait>",
+    " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+  ]
+}
 ```
 
 ### Troubleshooting

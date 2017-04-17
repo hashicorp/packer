@@ -58,25 +58,24 @@ type Driver interface {
 }
 
 type InstanceConfig struct {
-	Address             string
-	Description         string
-	DiskSizeGb          int64
-	DiskType            string
-	Image               *Image
-	MachineType         string
-	Metadata            map[string]string
-	Name                string
-	Network             string
-	NetworkProjectId    string
-	OmitExternalIP      bool
-	OnHostMaintenance   string
-	Preemptible         bool
-	Region              string
-	Scopes              []string
-	ServiceAccountEmail string
-	Subnetwork          string
-	Tags                []string
-	Zone                string
+	Address           string
+	Description       string
+	DiskSizeGb        int64
+	DiskType          string
+	Image             *Image
+	MachineType       string
+	Metadata          map[string]string
+	Name              string
+	Network           string
+	NetworkProjectId  string
+	OmitExternalIP    bool
+	OnHostMaintenance string
+	Preemptible       bool
+	Region            string
+	Scopes            []string
+	Subnetwork        string
+	Tags              []string
+	Zone              string
 }
 
 // WindowsPasswordConfig is the data structue that GCE needs to encrypt the created

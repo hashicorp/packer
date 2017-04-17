@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
@@ -66,7 +66,7 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
 		if !c.SkipValidation {
-			if valid := ValidateRegion(c.RawRegion); valid == false {
+			if valid := ValidateRegion(c.RawRegion); !valid {
 				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
 			}
 		}
@@ -85,7 +85,7 @@ func (c *AccessConfig) Region() (string, error) {
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if c.RawRegion != "" && !c.SkipValidation {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
+		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
@@ -115,5 +115,5 @@ func GetInstanceMetaData(path string) (contents []byte, err error) {
 	if err != nil {
 		return
 	}
-	return []byte(body), err
+	return body, err
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepDeleteMachine deletes the machine with the ID specified in state["machine"]

@@ -5,10 +5,12 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
 )
 
@@ -129,6 +131,9 @@ func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) erro
 
 // UploadDir implementation of communicator.Communicator interface
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+	if !strings.HasSuffix(src, "/") {
+		dst = fmt.Sprintf("%s\\%s", dst, filepath.Base(src))
+	}
 	log.Printf("Uploading dir '%s' to '%s'", src, dst)
 	wcp, err := c.newCopyClient()
 	if err != nil {
