@@ -1,0 +1,11 @@
+<% wrap_layout :inner do %>
+  <% content_for :sidebar do %>
+    <ul class="nav docs-sidenav">
+      <li<%= sidebar_current("guides-veewee-to-packer") %>>
+        <a href="/guides/veewee-to-packer.html">Veewee to Packer</a>
+      </li>
+    </ul>
+  <% end %>
+
+  <%= yield %>
+<% end %>

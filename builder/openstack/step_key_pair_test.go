@@ -2,10 +2,11 @@ package openstack
 
 import (
 	"bytes"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
 	"os/exec"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
+	"golang.org/x/crypto/ssh"
 )
 
 var ber_encoded_key = `
@@ -71,7 +72,7 @@ mKMH6Gf6COfSIbLuejdzSOUAmjkFpm+nwBkka1eHdAy4ALn9wNQz3w==
 func TestBerToDer(t *testing.T) {
 	_, err := exec.LookPath("openssl")
 	if err != nil {
-		t.Skipf("OpenSSL not availible skippint test.")
+		t.Skipf("OpenSSL not available skipping test.")
 	}
 
 	msg := new(bytes.Buffer)

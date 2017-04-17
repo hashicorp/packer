@@ -1,9 +1,9 @@
 package common
 
 import (
+	commonssh "github.com/hashicorp/packer/common/ssh"
+	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	commonssh "github.com/mitchellh/packer/common/ssh"
-	"github.com/mitchellh/packer/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -15,7 +15,7 @@ func CommHost(host string) func(multistep.StateBag) (string, error) {
 
 func SSHPort(state multistep.StateBag) (int, error) {
 	sshHostPort := state.Get("sshHostPort").(int)
-	return int(sshHostPort), nil
+	return sshHostPort, nil
 }
 
 func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConfig, error) {

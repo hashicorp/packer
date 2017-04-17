@@ -1,8 +1,10 @@
 ---
-layout: "docs"
-page_title: "Ansible Provisioner"
+layout: docs
+sidebar_current: docs-provisioners-ansible-remote
+page_title: Ansible - Provisioners
 description: |-
-  The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine.
+  The ansible Packer provisioner allows Ansible playbooks to be run to
+  provision the machine.
 ---
 
 # Ansible Provisioner
@@ -92,17 +94,21 @@ Optional Parameters:
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
   Usage example:
 
-```
-"extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
-```
+    ```json
+    {
+      "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
+    }
+    ```
 
 - `ansible_env_vars` (array of strings) - Environment variables to set before
   running Ansible.
   Usage example:
 
-```
-"ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
-```
+    ```json
+    {
+      "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
+    }
+    ```
 
 - `user` (string) - The `ansible_user` to use. Defaults to the user running
   packer.
@@ -113,7 +119,7 @@ Optional Parameters:
 
 Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
 
-```
+```text
 ==> virtualbox-ovf: starting sftp subsystem
     virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
 ```
@@ -122,26 +128,26 @@ Redhat / CentOS builds have been known to fail with the following error due to `
 
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
 
-```
+```json
 {
-    "builders": [
-        {
-            "type": "amazon-chroot",
-            "mount_path": "/mnt/packer-amazon-chroot",
-            "region": "us-east-1",
-            "source_ami": "ami-123456"
-        }
-    ],
-    "provisioners": [
-        {
-            "type": "ansible",
-            "extra_arguments": [
-                "--connection=chroot",
-                "--inventory-file=/mnt/packer-amazon-chroot,"
-            ],
-            "playbook_file": "main.yml"
-        }
-    ]
+  "builders": [
+    {
+      "type": "amazon-chroot",
+      "mount_path": "/mnt/packer-amazon-chroot",
+      "region": "us-east-1",
+      "source_ami": "ami-123456"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "extra_arguments": [
+        "--connection=chroot",
+        "--inventory-file=/mnt/packer-amazon-chroot,"
+      ],
+      "playbook_file": "main.yml"
+    }
+  ]
 }
 ```
 
@@ -149,7 +155,7 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
 
-```
+```python
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
@@ -170,34 +176,34 @@ class Connection(SSHConnection):
 
 This template should build a Windows Server 2012 image on Google Cloud Platform:
 
-```
+```json
 {
-    "variables": {},
-    "provisioners": [
-      {
-        "type":  "ansible",
-        "playbook_file": "./win-playbook.yml",
-        "extra_arguments": [
-          "--connection", "packer",
-          "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
-        ]
+  "variables": {},
+  "provisioners": [
+    {
+      "type":  "ansible",
+      "playbook_file": "./win-playbook.yml",
+      "extra_arguments": [
+        "--connection", "packer",
+        "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+      ]
+    }
+  ],
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "{{user `account_file`}}",
+      "project_id": "{{user `project_id`}}",
+      "source_image": "windows-server-2012-r2-dc-v20160916",
+      "communicator": "winrm",
+      "zone": "us-central1-a",
+      "disk_size": 50,
+      "winrm_username": "packer",
+      "winrm_use_ssl": true,
+      "winrm_insecure": true,
+      "metadata": {
+        "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
       }
-    ],
-    "builders": [
-      {
-        "type": "googlecompute",
-        "account_file": "{{user `account_file`}}",
-        "project_id": "{{user `project_id`}}",
-        "source_image": "windows-server-2012-r2-dc-v20160916",
-        "communicator": "winrm",
-        "zone": "us-central1-a",
-        "disk_size": 50,
-        "winrm_username": "packer",
-        "winrm_use_ssl": true,
-        "winrm_insecure": true,
-        "metadata": {
-                  "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
-        }
-      }
-    ]
+    }
+  ]
 }

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step attaches the ISO to the virtual machine.

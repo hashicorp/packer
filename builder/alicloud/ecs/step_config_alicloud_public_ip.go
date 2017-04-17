@@ -3,8 +3,8 @@ package ecs
 import (
 	"fmt"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepConfigAlicloudPublicIP struct {

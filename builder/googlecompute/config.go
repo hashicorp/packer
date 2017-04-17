@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -54,7 +54,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	Account            AccountFile
-	privateKeyBytes    []byte
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
@@ -93,15 +92,20 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
 	}
-	// Setting OnHostMaintenance Correct Defaults
-	//   "MIGRATE" : Possible if Preemptible is false
-	//   "TERMINATE": Posssible if Preemptible is true
-	if c.OnHostMaintenance == "" && c.Preemptible {
-		c.OnHostMaintenance = "MIGRATE"
-	}
 
-	if c.OnHostMaintenance == "" && !c.Preemptible {
+	if c.OnHostMaintenance == "MIGRATE" && c.Preemptible {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be TERMINATE when using preemptible instances."))
+	}
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible and default if Preemptible is false
+	//   "TERMINATE": Required if Preemptible is true
+	if c.Preemptible {
 		c.OnHostMaintenance = "TERMINATE"
+	} else {
+		if c.OnHostMaintenance == "" {
+			c.OnHostMaintenance = "MIGRATE"
+		}
 	}
 
 	// Make sure user sets a valid value for on_host_maintenance option

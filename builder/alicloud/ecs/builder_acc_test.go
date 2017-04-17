@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
-	"github.com/mitchellh/packer/packer"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -313,7 +313,7 @@ const testBuilderAccWindows = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"win2008_64_ent_r2_zh-cn_40G_alibase_20170118.vhd",
+		"source_image":"win2008_64_ent_r2_zh-cn_40G_alibase_20170301.vhd",
 		"io_optimized":"true",
 		"image_force_delete":"true",
 		"communicator": "winrm",

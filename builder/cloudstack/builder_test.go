@@ -3,7 +3,7 @@ package cloudstack
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilder_Impl(t *testing.T) {

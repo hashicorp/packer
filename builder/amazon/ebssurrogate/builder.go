@@ -10,13 +10,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/errwrap"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderId = "mitchellh.amazon.ebssurrogate"
@@ -56,6 +56,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}, raws...)
 	if err != nil {
 		return nil, err
+	}
+
+	if b.config.PackerConfig.PackerForce {
+		b.config.AMIForceDeregister = true
 	}
 
 	// Accumulate any errors

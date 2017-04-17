@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 var testBuildArtifact = &packer.MockArtifact{}

@@ -56,7 +56,7 @@ func TestRetry(t *testing.T) {
 		return false, nil
 	})
 	if numTries != expectedTries {
-		t.Fatalf("Unsuccessul retry function should have been called %d times. Only called %d times.", expectedTries, numTries)
+		t.Fatalf("Unsuccessful retry function should have been called %d times. Only called %d times.", expectedTries, numTries)
 	}
 	if err != RetryExhaustedError {
 		t.Fatalf("Unsuccessful retry function should have returned a retry exhausted error. Actual error: %s", err)

@@ -2,15 +2,14 @@ package common
 
 import (
 	"fmt"
-
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepAMIRegionCopy struct {
@@ -128,7 +127,7 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	}
 
 	for _, blockDeviceMapping := range describeImageResp.Images[0].BlockDeviceMappings {
-		if blockDeviceMapping.Ebs != nil {
+		if blockDeviceMapping.Ebs != nil && blockDeviceMapping.Ebs.SnapshotId != nil {
 			snapshotIds = append(snapshotIds, *blockDeviceMapping.Ebs.SnapshotId)
 		}
 	}

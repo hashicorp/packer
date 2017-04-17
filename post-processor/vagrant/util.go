@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/klauspost/pgzip"
-	"github.com/mitchellh/packer/packer"
 )
 
 var (

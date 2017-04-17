@@ -3,7 +3,7 @@ package ecs
 import (
 	"fmt"
 	"github.com/denverdino/aliyungo/common"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type AlicloudDiskDevice struct {

@@ -3,7 +3,7 @@ package ecs
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testBuilderConfig() map[string]interface{} {

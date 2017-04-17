@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 func TestDecode(t *testing.T) {

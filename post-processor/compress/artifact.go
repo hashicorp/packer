@@ -8,8 +8,7 @@ import (
 const BuilderId = "packer.post-processor.compress"
 
 type Artifact struct {
-	Path  string
-	files []string
+	Path string
 }
 
 func (a *Artifact) BuilderId() string {
