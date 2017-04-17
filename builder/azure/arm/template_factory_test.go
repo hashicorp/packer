@@ -7,8 +7,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/approvals/go-approval-tests"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/builder/azure/common/template"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/template"
 )
 
 // Ensure the link values are not set, and the concrete values are set.

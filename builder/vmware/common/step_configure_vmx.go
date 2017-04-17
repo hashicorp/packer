@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step configures a VMX by setting some default settings as well

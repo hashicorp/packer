@@ -3,8 +3,8 @@ package common
 import (
 	"testing"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 func TestStepUploadVersion_impl(t *testing.T) {

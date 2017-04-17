@@ -1,10 +1,12 @@
 package godo
 
+import "context"
+
 // AccountService is an interface for interfacing with the Account
 // endpoints of the DigitalOcean API
 // See: https://developers.digitalocean.com/documentation/v2/#account
 type AccountService interface {
-	Get() (*Account, *Response, error)
+	Get(context.Context) (*Account, *Response, error)
 }
 
 // AccountServiceOp handles communication with the Account related methods of
@@ -35,10 +37,11 @@ func (r Account) String() string {
 }
 
 // Get DigitalOcean account info
-func (s *AccountServiceOp) Get() (*Account, *Response, error) {
+func (s *AccountServiceOp) Get(ctx context.Context) (*Account, *Response, error) {
+
 	path := "v2/account"
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}

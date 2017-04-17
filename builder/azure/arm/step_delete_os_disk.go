@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepDeleteOSDisk struct {

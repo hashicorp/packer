@@ -19,8 +19,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/version"
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/version"
 )
 
 const (

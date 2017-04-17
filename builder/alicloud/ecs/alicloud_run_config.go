@@ -3,9 +3,9 @@ package ecs
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 	"os"
 )
 
@@ -40,7 +40,7 @@ type RunConfig struct {
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
-		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" && c.Comm.WinRMPassword == "" {
 
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}

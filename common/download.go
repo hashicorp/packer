@@ -205,7 +205,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 	log.Printf("Verifying checksum of %s", path)
 	d.config.Hash.Reset()
 	io.Copy(d.config.Hash, f)
-	return bytes.Compare(d.config.Hash.Sum(nil), d.config.Checksum) == 0, nil
+	return bytes.Equal(d.config.Hash.Sum(nil), d.config.Checksum), nil
 }
 
 // HTTPDownloader is an implementation of Downloader that downloads

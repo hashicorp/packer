@@ -11,10 +11,10 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/command"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/kardianos/osext"
-	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
 )
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -155,13 +155,8 @@ func (c *config) discover(path string) error {
 		return err
 	}
 
-	err = c.discoverSingle(
+	return c.discoverSingle(
 		filepath.Join(path, "packer-provisioner-*"), &c.Provisioners)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (c *config) discoverSingle(glob string, m *map[string]string) error {

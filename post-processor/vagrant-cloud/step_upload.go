@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepUpload struct {
@@ -54,7 +54,7 @@ func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Message("Box succesfully uploaded")
+	ui.Message("Box successfully uploaded")
 
 	return multistep.ActionContinue
 }

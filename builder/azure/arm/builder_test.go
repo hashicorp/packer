@@ -6,7 +6,7 @@ package arm
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 )
 
 func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
