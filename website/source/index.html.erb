@@ -7,8 +7,9 @@ description: |-
 <header>
   <div class="container hero">
     <div class="row">
-      <div class="col-md-6">
-        <%= inline_svg "logo-hashicorp.svg", height: 120, class: "logo" %>
+
+      <div class="col-md-offset-3 col-md-6 col-sm-offset-2 col-sm-8">
+        <%= inline_svg "logo-text.svg", height: 120, class: "logo" %>
 
         <h1>
           Build Automated Machine Images
@@ -16,9 +17,6 @@ description: |-
 
         <a class="button primary" href="/intro/index.html">Get Started</a>
         <a class="button" href="/downloads.html">Download <%= latest_version %></a>
-      </div>
-      <div class="col-md-6">
-        <%= inline_svg "hero-image.svg" %>
       </div>
     </div>
   </div>
@@ -105,7 +103,7 @@ description: |-
             <%= image_tag("integrations/docker.svg", alt: "Docker") %>
           </div>
           <div class="integration">
-            <%= image_tag("integrations/aws.svg", alt: "Virtual Box") %>
+            <%= image_tag("integrations/digitalocean.svg", alt: "Digital Ocean") %>
           </div>
         </div>
       </div>
