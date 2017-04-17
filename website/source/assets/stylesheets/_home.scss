@@ -74,6 +74,7 @@
       letter-spacing: -0.02em;
       margin: 20px 0 10px 0;
       padding: 0;
+      color: $black;
     }
 
     p {
@@ -93,7 +94,7 @@
       font-weight: $font-weight-bold;
       line-height: 1;
       margin: 0;
-      padding: 5px;
+      padding: 7px 5px 5px 5px;
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
@@ -142,6 +143,11 @@
           height: 100px;
           width: 33.3%;
           background-color: $white;
+          padding: 5px;
+
+          img {
+            max-width: 100%;
+          }
         }
       }
     }
