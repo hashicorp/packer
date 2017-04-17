@@ -1,7 +1,8 @@
 // Colors
 $white: #FFFFFF;
 $black: #000000;
-$gray-darker: #555555;
+$gray: #555555;
+$gray-darker: #24292e;
 
 $consul-pink: #D62783;
 $consul-pink-dark: #961D59;
@@ -29,7 +30,7 @@ $body-link-color: $packer-blue;
 
 // Home
 $home-header-background-color: transparent;
-$home-header-link-color: $gray-darker;
+$home-header-link-color: $gray;
 $home-header-link-color-hover: $black;
 
 // Sidebar
