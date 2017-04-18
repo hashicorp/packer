@@ -3,7 +3,6 @@ package template
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/flynn/json5"
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
 )
@@ -270,7 +270,7 @@ func Parse(r io.Reader) (*Template, error) {
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json.NewDecoder(r).Decode(&raw); err != nil {
+	if err := json5.NewDecoder(r).Decode(&raw); err != nil {
 		return nil, err
 	}
 
@@ -336,7 +336,7 @@ func ParseFile(path string) (*Template, error) {
 	}
 	tpl, err := Parse(f)
 	if err != nil {
-		syntaxErr, ok := err.(*json.SyntaxError)
+		syntaxErr, ok := err.(*json5.SyntaxError)
 		if !ok {
 			return nil, err
 		}

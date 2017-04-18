@@ -357,7 +357,7 @@ func TestParse_bad(t *testing.T) {
 		Expected string
 	}{
 		{"error-beginning.json", "line 1, column 1 (offset 1)"},
-		{"error-middle.json", "line 5, column 6 (offset 50)"},
+		{"error-middle.json", "line 4, column 23 (offset 46)"},
 		{"error-end.json", "line 1, column 30 (offset 30)"},
 	}
 	for _, tc := range cases {
