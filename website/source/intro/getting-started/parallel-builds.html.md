@@ -73,7 +73,7 @@ array.
 You'll also need to modify the `variables` section of the template to include
 the access keys for DigitalOcean.
 
-```javascript
+```json
 "variables": {
   "do_api_token": "",
   // ...

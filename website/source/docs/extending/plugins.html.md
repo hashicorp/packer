@@ -202,7 +202,7 @@ While developing plugins, you can configure your Packer configuration to point
 directly to the compiled plugin in order to test it. For example, building the
 CustomCloud plugin, I may configure packer like so:
 
-```javascript
+```json
 {
   "builders": {
     "custom-cloud": "/an/absolute/path/to/packer-builder-custom-cloud"
