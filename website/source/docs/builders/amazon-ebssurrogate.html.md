@@ -143,7 +143,7 @@ builder.
     stop the instance and will wait for you to stop it manually. You can do this
     with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
 
-    ```javascript
+    ```json
     {
       "type": "windows-shell",
       "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -324,7 +324,7 @@ builder.
 
 ## Basic Example
 
-```javascript
+```json
 {
    "type" : "amazon-surrogate",
    "secret_key" : "YOUR SECRET KEY HERE",

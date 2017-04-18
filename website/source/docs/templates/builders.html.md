@@ -23,7 +23,7 @@ referenced from the documentation for that specific builder.
 
 Within a template, a section of builder definitions looks like this:
 
-```javascript
+```json
 {
   "builders": [
     // ... one or more builder definitions here
