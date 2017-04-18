@@ -330,6 +330,12 @@
 			"revision": "025617847eb2cf9bd1d851bc3b22ed28e6245ce5"
 		},
 		{
+			"checksumSHA1": "sSN95w+Dr+M4UtX0eXBveyc79Qs=",
+			"path": "github.com/flynn/json5",
+			"revision": "7620272ed63390e979cf5882d2fa0506fe2a8db5",
+			"revisionTime": "2016-07-17T19:56:20Z"
+		},
+		{
 			"checksumSHA1": "PkPgpx/FYoIJCbihlRZEp7oHG9Q=",
 			"comment": "v1.8.6",
 			"path": "github.com/go-ini/ini",
