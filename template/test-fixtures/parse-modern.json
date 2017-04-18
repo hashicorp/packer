@@ -1,0 +1,21 @@
+{
+  "builders": [
+    {
+      // Bare keywords
+      type: "vmware-iso",
+      boot_commands: [
+            // Documented boot commands and descriptions of what should at each
+            // step.
+            "step1",
+            /* some other step */
+            "step2",
+            // Naked int
+            42,
+            // Hex int
+            0x42,
+            // Single quoted
+            'noice',
+        ],
+    },
+  ],
+}

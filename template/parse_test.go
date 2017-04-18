@@ -31,6 +31,27 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
+			"parse-modern.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"vmware-iso": {
+						Name: "vmware-iso",
+						Type: "vmware-iso",
+						Config: map[string]interface{}{
+							"boot_commands": []interface{}{
+								"step1",
+								"step2",
+								42,
+								66,
+								"noice",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
 			"parse-builder-no-type.json",
 			nil,
 			true,
