@@ -2,10 +2,11 @@ package template
 
 import (
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kylelemons/godebug/pretty"
 )
 
 func TestParse(t *testing.T) {
@@ -332,8 +333,8 @@ func TestParse(t *testing.T) {
 		if tpl != nil {
 			tpl.RawContents = nil
 		}
-		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
+		if diff := pretty.Compare(tpl, tc.Result); diff != "" {
+			t.Fatalf("bad: %s: (-got +want)\n%s", tc.File, diff)
 		}
 	}
 }
