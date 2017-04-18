@@ -33,7 +33,7 @@ The `variables` section is a simple key/value mapping of the variable name to a
 default value. A default value can be the empty string. An example is shown
 below:
 
-```javascript
+```json
 {
   "variables": {
     "aws_access_key": "",

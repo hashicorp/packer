@@ -150,7 +150,7 @@ builder.
   stop the instance and will wait for you to stop it manually. You can do this
   with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
 
-    ```javascript
+    ```json
     {
       "type": "windows-shell",
       "inline": ["\"c:\\Program Files\\Amazon\\Ec2ConfigService\\ec2config.exe\" -sysprep"]
@@ -335,7 +335,7 @@ builder.
 Here is a basic example. You will need to provide access keys, and may need to
 change the AMI IDs according to what images exist at the time the template is run:
 
-```javascript
+```json
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -372,7 +372,7 @@ configuration of `launch_block_device_mappings` will expand the root volume
 `ami_block_device_mappings` AWS will attach additional volumes `/dev/sdb` and
 `/dev/sdc` when we boot a new instance of our AMI.
 
-```javascript
+```json
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
@@ -410,7 +410,7 @@ Here is an example using the optional AMI tags. This will add the tags
 provide your access keys, and may need to change the source AMI ID based on what
 images exist when this template is run:
 
-```javascript
+```json
 {
   "type": "amazon-ebs",
   "access_key": "YOUR KEY HERE",
