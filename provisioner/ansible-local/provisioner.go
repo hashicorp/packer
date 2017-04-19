@@ -321,6 +321,10 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 				"PATH after connecting to the machine.",
 				p.config.Command)
 		}
+		if cmd.ExitStatus == packer.CmdDisconnect {
+			ui.Message("Remote end disconnected while executing Ansible. Ignoring.")
+			return nil
+		}
 
 		return fmt.Errorf("Non-zero exit status: %d", cmd.ExitStatus)
 	}
