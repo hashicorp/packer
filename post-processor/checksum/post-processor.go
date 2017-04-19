@@ -30,6 +30,13 @@ type PostProcessor struct {
 	config Config
 }
 
+type outputPathTemplate struct {
+	BuildName   string
+	BuilderType string
+	ArtifactID  string
+	HashType    string
+}
+
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate: true,
@@ -46,7 +53,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}" + ".checksum"
+		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}_{{.HashType}}.checksum"
 	}
 
 	errs := new(packer.MultiError)
@@ -85,15 +92,24 @@ func getHash(t string) hash.Hash {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	files := artifact.Files()
 	var h hash.Hash
-	var checksumFile string
 
 	newartifact := NewArtifact(artifact.Files())
+	opTpl := &outputPathTemplate{
+		BuildName:   p.config.PackerBuildName,
+		BuilderType: p.config.PackerBuilderType,
+		ArtifactID:  artifact.Id(),
+	}
 
 	for _, ct := range p.config.ChecksumTypes {
 		h = getHash(ct)
+		opTpl.HashType = ct
+		p.config.ctx.Data = &opTpl
 
 		for _, art := range files {
-			checksumFile = p.config.OutputPath
+			checksumFile, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
+			if err != nil {
+				return nil, false, err
+			}
 
 			if _, err := os.Stat(checksumFile); err != nil {
 				newartifact.files = append(newartifact.files, checksumFile)
