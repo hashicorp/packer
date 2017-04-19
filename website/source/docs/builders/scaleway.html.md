@@ -68,6 +68,8 @@ builder.
 - `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account.
 
+- `ssh_private_key_file` (string) - Path to a PEM encoded private key file to use to authentiate with SSH.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
@@ -81,6 +83,10 @@ access tokens:
   "image": "f01f8a48-c026-48ac-9771-a70eaac0890e",
   "region": "par1",
   "commercial_type": "X64-2GB",
-  "ssh_username": "root"
+  "ssh_username": "root",
+  "ssh_private_key_file": "~/.ssh/id_rsa",
 }
 ```
+
+When you do not specified the `ssh_private_key_file`, a temporarily SSH keypair is generated to connect the server.
+This key will only allows the `root` user to connect the server.

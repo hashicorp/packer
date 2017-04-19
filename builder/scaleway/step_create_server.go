@@ -18,15 +18,20 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	sshPubKey := state.Get("ssh_pubkey").(string)
+	tags := []string{}
 
 	ui.Say("Creating server...")
+
+	if sshPubKey != "" {
+		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.TrimSpace(sshPubKey))}
+	}
 
 	server, err := client.PostServer(api.ScalewayServerDefinition{
 		Name:           c.ServerName,
 		Image:          &c.Image,
 		Organization:   c.Organization,
 		CommercialType: c.CommercialType,
-		Tags:           []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.TrimSpace(sshPubKey))},
+		Tags:           tags,
 	})
 
 	err = client.PostServerAction(server, "poweron")

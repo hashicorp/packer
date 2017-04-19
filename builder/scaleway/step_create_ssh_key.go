@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -17,12 +18,28 @@ import (
 )
 
 type stepCreateSSHKey struct {
-	Debug        bool
-	DebugKeyPath string
+	Debug          bool
+	DebugKeyPath   string
+	PrivateKeyFile string
 }
 
 func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.PrivateKeyFile != "" {
+		ui.Say("Using existing SSH private key")
+		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		if err != nil {
+			state.Put("error", fmt.Errorf(
+				"Error loading configured private key file: %s", err))
+			return multistep.ActionHalt
+		}
+
+		state.Put("privateKey", string(privateKeyBytes))
+		state.Put("ssh_pubkey", "")
+
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Creating temporary ssh key for server...")
 
