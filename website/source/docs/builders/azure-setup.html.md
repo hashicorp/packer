@@ -17,6 +17,8 @@ In order to build VMs in Azure Packer needs 6 configuration options to be specif
 
 - `client_secret` - service principal secret / password
 
+- `object_id` - service principal object id (OSType = Windows Only)
+
 - `resource_group_name` - name of the resource group where your VHD(s) will be stored
 
 - `storage_account` - name of the storage account where your VHD(s) will be stored
@@ -191,6 +193,12 @@ $ azure ad app list --json \
 Get `client_secret`
 
 This cannot be retrieved. If you forgot this, you will have to delete and re-create your service principal and the associated permissions.
+
+Get `object_id` (OSTYpe=Windows only)
+
+```shell
+azure ad sp show -n CLIENT_ID
+```
 
 Get `resource_group_name`
 
