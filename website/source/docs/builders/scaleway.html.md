@@ -68,8 +68,6 @@ builder.
 - `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account.
 
-- `ssh_private_key_file` (string) - Path to a PEM encoded private key file to use to authentiate with SSH.
-
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
