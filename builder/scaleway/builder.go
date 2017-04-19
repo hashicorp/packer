@@ -43,8 +43,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps := []multistep.Step{
 		&stepCreateSSHKey{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("scw_%s.pem", b.config.PackerBuildName),
+			Debug:          b.config.PackerDebug,
+			DebugKeyPath:   fmt.Sprintf("scw_%s.pem", b.config.PackerBuildName),
+			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
 		},
 		new(stepCreateServer),
 		new(stepServerInfo),
