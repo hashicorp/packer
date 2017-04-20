@@ -31,10 +31,9 @@ type PostProcessor struct {
 }
 
 type outputPathTemplate struct {
-	BuildName   string
-	BuilderType string
-	ArtifactID  string
-	HashType    string
+	BuildName    string
+	BuilderType  string
+	ChecksumType string
 }
 
 func getHash(t string) hash.Hash {
@@ -80,7 +79,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}_{{.HashType}}.checksum"
+		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum"
 	}
 
 	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
@@ -103,12 +102,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	opTpl := &outputPathTemplate{
 		BuildName:   p.config.PackerBuildName,
 		BuilderType: p.config.PackerBuilderType,
-		ArtifactID:  artifact.Id(),
 	}
 
 	for _, ct := range p.config.ChecksumTypes {
 		h = getHash(ct)
-		opTpl.HashType = ct
+		opTpl.ChecksumType = ct
 		p.config.ctx.Data = &opTpl
 
 		for _, art := range files {
