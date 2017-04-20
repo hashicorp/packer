@@ -25,7 +25,7 @@ post-processor.
 
 Within a template, a section of post-processor definitions looks like this:
 
-```javascript
+```json
 {
   "post-processors": [
     // ... one or more post-processor definitions here

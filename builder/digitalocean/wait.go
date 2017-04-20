@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ func waitForDropletUnlocked(
 			attempts += 1
 
 			log.Printf("[DEBUG] Checking droplet lock state... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -72,7 +73,7 @@ func waitForDropletState(
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -122,7 +123,7 @@ func waitForActionState(
 			attempts += 1
 
 			log.Printf("Checking action status... (attempt: %d)", attempts)
-			action, _, err := client.DropletActions.Get(dropletId, actionId)
+			action, _, err := client.DropletActions.Get(context.TODO(), dropletId, actionId)
 			if err != nil {
 				result <- err
 				return

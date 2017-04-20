@@ -5,8 +5,8 @@
 [![GoDoc][godoc-badge]][godoc]
 [![GoReportCard][report-badge]][report]
 
-[travis-badge]: https://travis-ci.org/mitchellh/packer.svg?branch=master
-[travis]: https://travis-ci.org/mitchellh/packer
+[travis-badge]: https://travis-ci.org/hashicorp/packer.svg?branch=master
+[travis]: https://travis-ci.org/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true
 [appveyor]: https://ci.appveyor.com/project/hashicorp/packer
 [godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
@@ -49,7 +49,7 @@ The images that Packer creates can easily be turned into
 ## Quick Start
 Download and install packages and dependencies
 ```
-go get github.com/mitchellh/packer
+go get github.com/hashicorp/packer
 ```
 
 **Note:** There is a great
@@ -107,4 +107,4 @@ http://www.packer.io/docs
 
 ## Developing Packer
 
-See [CONTRIBUTING.md](https://github.com/mitchellh/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.
+See [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.
