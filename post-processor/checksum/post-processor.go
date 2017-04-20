@@ -37,15 +37,23 @@ type outputPathTemplate struct {
 	HashType    string
 }
 
-func getHashMap() map[string]func() hash.Hash {
-	return map[string]func() hash.Hash{
-		"md5":    func() hash.Hash { return md5.New() },
-		"sha1":   func() hash.Hash { return sha1.New() },
-		"sha224": func() hash.Hash { return sha256.New224() },
-		"sha256": func() hash.Hash { return sha256.New() },
-		"sha384": func() hash.Hash { return sha512.New384() },
-		"sha512": func() hash.Hash { return sha512.New() },
+func getHash(t string) hash.Hash {
+	var h hash.Hash
+	switch t {
+	case "md5":
+		h = md5.New()
+	case "sha1":
+		h = sha1.New()
+	case "sha224":
+		h = sha256.New224()
+	case "sha256":
+		h = sha256.New()
+	case "sha384":
+		h = sha512.New384()
+	case "sha512":
+		h = sha512.New()
 	}
+	return h
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -64,9 +72,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.ChecksumTypes = []string{"md5"}
 	}
 
-	hashMap := getHashMap()
 	for _, k := range p.config.ChecksumTypes {
-		if _, ok := hashMap[k]; !ok {
+		if h := getHash(k); h == nil {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Unrecognized checksum type: %s", k))
 		}
@@ -100,7 +107,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	for _, ct := range p.config.ChecksumTypes {
-		h = getHashMap()[ct]()
+		h = getHash(ct)
 		opTpl.HashType = ct
 		p.config.ctx.Data = &opTpl
 
