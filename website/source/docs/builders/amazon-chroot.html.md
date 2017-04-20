@@ -280,7 +280,7 @@ each category, the available configuration keys are alphabetized.
 
 Here is a basic example. It is completely valid except for the access keys:
 
-```javascript
+```json
 {
   "type": "amazon-chroot",
   "access_key": "YOUR KEY HERE",
@@ -307,7 +307,7 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/prod` and `/dev`:
 
-```javascript
+```json
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
@@ -347,7 +347,7 @@ For debian based distributions you can setup a
 file which will prevent packages installed by your provisioners from starting
 services:
 
-```javascript
+```json
 {
   "type": "shell",
   "inline": [

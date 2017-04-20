@@ -128,7 +128,7 @@ proceeding artifact is passed to subsequent post-processors. If you use only one
 set of square braces the post-processors will run individually against the build
 artifact (the vmx file in this case) and it will not have the desired result.
 
-```javascript
+```json
 {
   "post-processors": [
     [       // <--- Start post-processor chain

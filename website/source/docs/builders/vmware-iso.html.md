@@ -401,7 +401,7 @@ Ubuntu 12.04 installer:
 The heart of a VMware machine is the "vmx" file. This contains all the virtual
 hardware metadata necessary for the VM to function. Packer by default uses a
 [safe, flexible VMX
-file](https://github.com/mitchellh/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
+file](https://github.com/hashicorp/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
 But for advanced users, this template can be customized. This allows Packer to
 build virtual machines of effectively any guest operating system type.
 

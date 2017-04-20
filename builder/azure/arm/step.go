@@ -4,9 +4,9 @@
 package arm
 
 import (
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func processInterruptibleResult(

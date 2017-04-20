@@ -313,10 +313,11 @@
 			"revision": "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
 		},
 		{
-			"checksumSHA1": "tPavbOLszj9IKgu9ba2TIuRlWLc=",
+			"checksumSHA1": "W1LGm0UNirwMDVCMFv5vZrOpUJI=",
 			"comment": "v0.9.0-24-g6ca5b77",
 			"path": "github.com/digitalocean/godo",
-			"revision": "6ca5b770f203b82a0fca68d0941736458efa8a4f"
+			"revision": "4c04abe183f449bd9ede285f0e5c7ee575d0dbe4",
+			"revisionTime": "2017-04-07T15:15:42Z"
 		},
 		{
 			"checksumSHA1": "GCskdwYAPW2S34918Z5CgNMJ2Wc=",
@@ -964,5 +965,5 @@
 			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
-	"rootPath": "github.com/mitchellh/packer"
+	"rootPath": "github.com/hashicorp/packer"
 }

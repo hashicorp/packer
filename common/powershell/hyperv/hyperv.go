@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell"
 )
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {

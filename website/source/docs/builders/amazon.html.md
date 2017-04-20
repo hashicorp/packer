@@ -105,7 +105,7 @@ the instance's IAM profile, if it has one.
 The following policy document provides the minimal set permissions necessary for
 Packer to work:
 
-```javascript
+```json
 {
   "Version": "2012-10-17",
   "Statement": [{

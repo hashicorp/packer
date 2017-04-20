@@ -25,7 +25,7 @@ be referenced from the documentation for that specific provisioner.
 
 Within a template, a section of provisioner definitions looks like this:
 
-```javascript
+```json
 {
   "provisioners": [
     // ... one or more provisioner definitions here

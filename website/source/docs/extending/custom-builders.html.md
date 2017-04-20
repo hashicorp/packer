@@ -123,7 +123,7 @@ the artifact results, so it is important it never changes.
 
 Other than the builder ID, the rest should be self-explanatory by reading the
 [packer.Artifact interface
-documentation](https://github.com/mitchellh/packer/blob/master/packer/artifact.go).
+documentation](https://github.com/hashicorp/packer/blob/master/packer/artifact.go).
 
 ## Provisioning
 
@@ -166,5 +166,5 @@ The locking mechanisms of the cache allow one of the builders to download it
 only once, but allow both builders to share the downloaded file.
 
 The [documentation for
-packer.Cache](https://github.com/mitchellh/packer/blob/master/packer/cache.go)
+packer.Cache](https://github.com/hashicorp/packer/blob/master/packer/cache.go)
 is very detailed in how it works.

@@ -1,6 +1,9 @@
 package godo
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 const (
 	actionsBasePath = "v2/actions"
@@ -15,8 +18,8 @@ const (
 // ActionsService handles communction with action related methods of the
 // DigitalOcean API: https://developers.digitalocean.com/documentation/v2#actions
 type ActionsService interface {
-	List(*ListOptions) ([]Action, *Response, error)
-	Get(int) (*Action, *Response, error)
+	List(context.Context, *ListOptions) ([]Action, *Response, error)
+	Get(context.Context, int) (*Action, *Response, error)
 }
 
 // ActionsServiceOp handles communition with the image action related methods of the
@@ -33,7 +36,7 @@ type actionsRoot struct {
 }
 
 type actionRoot struct {
-	Event Action `json:"action"`
+	Event *Action `json:"action"`
 }
 
 // Action represents a DigitalOcean Action
@@ -50,14 +53,14 @@ type Action struct {
 }
 
 // List all actions
-func (s *ActionsServiceOp) List(opt *ListOptions) ([]Action, *Response, error) {
+func (s *ActionsServiceOp) List(ctx context.Context, opt *ListOptions) ([]Action, *Response, error) {
 	path := actionsBasePath
 	path, err := addOptions(path, opt)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -75,13 +78,13 @@ func (s *ActionsServiceOp) List(opt *ListOptions) ([]Action, *Response, error) {
 }
 
 // Get an action by ID.
-func (s *ActionsServiceOp) Get(id int) (*Action, *Response, error) {
+func (s *ActionsServiceOp) Get(ctx context.Context, id int) (*Action, *Response, error) {
 	if id < 1 {
 		return nil, nil, NewArgError("id", "cannot be less than 1")
 	}
 
 	path := fmt.Sprintf("%s/%d", actionsBasePath, id)
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -92,7 +95,7 @@ func (s *ActionsServiceOp) Get(id int) (*Action, *Response, error) {
 		return nil, resp, err
 	}
 
-	return &root.Event, resp, err
+	return root.Event, resp, err
 }
 
 func (a Action) String() string {

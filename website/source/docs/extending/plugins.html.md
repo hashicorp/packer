@@ -116,7 +116,7 @@ dependencies.
 -   `github.com/mitchellh/packer` - Contains all the interfaces that you have to
     implement for any given plugin.
 
--   `github.com/mitchellh/packer/packer/plugin` - Contains the code to serve
+-   `github.com/hashicorp/packer/packer/plugin` - Contains the code to serve
     the plugin. This handles all the inter-process communication stuff.
 
 There are two steps involved in creating a plugin:
@@ -132,7 +132,7 @@ implements the `packer.Builder` interface:
 
 ```go
 import (
-  "github.com/mitchellh/packer/packer/plugin"
+  "github.com/hashicorp/packer/packer/plugin"
 )
 
 // Assume this implements packer.Builder
@@ -202,7 +202,7 @@ While developing plugins, you can configure your Packer configuration to point
 directly to the compiled plugin in order to test it. For example, building the
 CustomCloud plugin, I may configure packer like so:
 
-```javascript
+```json
 {
   "builders": {
     "custom-cloud": "/an/absolute/path/to/packer-builder-custom-cloud"
