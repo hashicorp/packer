@@ -1,13 +1,14 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type stepShutdown struct{}
@@ -23,7 +24,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	// did absolutely nothing (*ALAKAZAM!* magic!). We give up after
 	// a pretty arbitrary amount of time.
 	ui.Say("Gracefully shutting down droplet...")
-	_, _, err := client.DropletActions.Shutdown(dropletId)
+	_, _, err := client.DropletActions.Shutdown(context.TODO(), dropletId)
 	if err != nil {
 		// If we get an error the first time, actually report it
 		err := fmt.Errorf("Error shutting down droplet: %s", err)
@@ -50,7 +51,7 @@ func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 
 		for attempts := 2; attempts > 0; attempts++ {
 			log.Printf("ShutdownDroplet attempt #%d...", attempts)
-			_, _, err := client.DropletActions.Shutdown(dropletId)
+			_, _, err := client.DropletActions.Shutdown(context.TODO(), dropletId)
 			if err != nil {
 				log.Printf("Shutdown retry error: %s", err)
 			}

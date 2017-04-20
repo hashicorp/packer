@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 func TestStepShutdown_impl(t *testing.T) {

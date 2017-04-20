@@ -5,9 +5,9 @@ package arm
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 	"testing"
 )
 

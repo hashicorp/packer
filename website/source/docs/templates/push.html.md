@@ -22,7 +22,7 @@ services will come in the form of plugins in the future.
 
 Within a template, a push configuration section looks like this:
 
-```javascript
+```json
 {
   "push": {
     // ... push configuration here

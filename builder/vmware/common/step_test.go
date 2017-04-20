@@ -2,8 +2,8 @@ package common
 
 import (
 	"bytes"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"testing"
 )
 

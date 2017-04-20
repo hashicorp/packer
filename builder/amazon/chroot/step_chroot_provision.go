@@ -3,8 +3,8 @@ package chroot
 import (
 	"log"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepChrootProvision provisions the instance within a chroot.

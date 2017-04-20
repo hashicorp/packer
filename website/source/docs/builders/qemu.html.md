@@ -254,10 +254,6 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
-- `use_default_display` (boolean) - If true, do not pass a `-display` option
-    to qemu, allowing it to choose the default. This may be needed when running
-    under OS X.
-
 ~> **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
@@ -314,6 +310,10 @@ template that can be invoked by `make` in parallel:
 will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
 default port of `5985` or whatever value you have the service set to listen on.
+
+- `use_default_display` (boolean) - If true, do not pass a `-display` option
+    to qemu, allowing it to choose the default. This may be needed when running
+    under OS X.
 
 - `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
