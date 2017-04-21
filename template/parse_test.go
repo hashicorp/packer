@@ -31,7 +31,7 @@ func TestParse(t *testing.T) {
 			false,
 		},
 		{
-			"parse-modern.json",
+			"parse-modern.json5",
 			&Template{
 				Builders: map[string]*Builder{
 					"vmware-iso": {
@@ -388,7 +388,7 @@ func TestParse_bad(t *testing.T) {
 			t.Fatalf("expected error")
 		}
 		if !strings.Contains(err.Error(), tc.Expected) {
-			t.Fatalf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
+			t.Fatalf("file: %s\nExpected: %s\n%v\n", tc.File, tc.Expected, err)
 		}
 	}
 }

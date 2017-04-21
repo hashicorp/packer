@@ -3,6 +3,7 @@ package template
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,6 +32,13 @@ type rawTemplate struct {
 
 	RawContents []byte
 }
+
+type InputFormat string
+
+const (
+	FormatECMA404 InputFormat = "ECMA-404"
+	FormatJSON5   InputFormat = "JSON5"
+)
 
 // Template returns the actual Template object built from this raw
 // structure.
@@ -262,6 +270,12 @@ func (r *rawTemplate) parsePostProcessor(
 
 // Parse takes the given io.Reader and parses a Template object out of it.
 func Parse(r io.Reader) (*Template, error) {
+	return ParseInput(r, FormatECMA404)
+}
+
+// ParseInput takes the given io.Reader and parses a Template object out of it
+// based on the input format.
+func ParseInput(r io.Reader, inputFormat InputFormat) (*Template, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
 	r = io.TeeReader(r, &buf)
@@ -270,8 +284,17 @@ func Parse(r io.Reader) (*Template, error) {
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json5.NewDecoder(r).Decode(&raw); err != nil {
-		return nil, err
+	switch inputFormat {
+	case FormatECMA404:
+		if err := json.NewDecoder(r).Decode(&raw); err != nil {
+			return nil, err
+		}
+	case FormatJSON5:
+		if err := json5.NewDecoder(r).Decode(&raw); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("Unsupported input format %q (supported values: %s)", inputFormat)
 	}
 
 	// Create our decoder
@@ -315,9 +338,13 @@ func Parse(r io.Reader) (*Template, error) {
 // ParseFile is the same as Parse but is a helper to automatically open
 // a file for parsing.
 func ParseFile(path string) (*Template, error) {
+	inputFormat := FormatECMA404
 	var f *os.File
 	var err error
 	if path == "-" {
+		// Treat templates from stdin as human-compatible input
+		inputFormat = FormatJSON5
+
 		// Create a temp file for stdin in case of errors
 		f, err = ioutil.TempFile(os.TempDir(), "packer")
 		if err != nil {
@@ -328,23 +355,34 @@ func ParseFile(path string) (*Template, error) {
 		io.Copy(f, os.Stdin)
 		f.Seek(0, os.SEEK_SET)
 	} else {
+		switch {
+		case strings.HasSuffix(path, ".json5"):
+			inputFormat = FormatJSON5
+		}
+
 		f, err = os.Open(path)
 		if err != nil {
 			return nil, err
 		}
 		defer f.Close()
 	}
-	tpl, err := Parse(f)
+	tpl, err := ParseInput(f, inputFormat)
 	if err != nil {
-		syntaxErr, ok := err.(*json5.SyntaxError)
-		if !ok {
+		var offset int64
+		switch syntaxErr := err.(type) {
+		case *json.SyntaxError:
+			offset = syntaxErr.Offset
+		case *json5.SyntaxError:
+			offset = syntaxErr.Offset
+		default:
 			return nil, err
 		}
+
 		// Rewind the file and get a better error
 		f.Seek(0, os.SEEK_SET)
 		// Grab the error location, and return a string to point to offending syntax error
-		line, col, highlight := highlightPosition(f, syntaxErr.Offset)
-		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, syntaxErr.Offset, highlight)
+		line, col, highlight := highlightPosition(f, offset)
+		err = fmt.Errorf("Error parsing JSON: %s\nAt line %d, column %d (offset %d):\n%s", err, line, col, offset, highlight)
 		return nil, err
 	}
 
