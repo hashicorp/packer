@@ -176,7 +176,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packe
 	if err != nil {
 		return nil, false, err
 	}
-	return source, true, nil
+	
+	// Return:
+	// 	source -- the given artifact -- since we didn't change anything;
+	//	false  -- don't force packer to keep the source artifact
+	// 	nil    -- no error occured here
+	return source, false, nil
 }
 
 func createClient(URL, username, password string) (*govmomi.Client, context.Context, error) {
