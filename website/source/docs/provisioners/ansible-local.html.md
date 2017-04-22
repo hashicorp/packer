@@ -136,3 +136,24 @@ chi-appservers
     able to create directories and write into this folder. If the permissions
     are not correct, use a shell provisioner prior to this to configure it
     properly.
+
+## Default Extra Variables
+
+In addition to being able to specify extra arguments using the
+`extra_arguments` configuration, the provisioner automatically defines certain
+commonly useful Ansible variables:
+
+- `packer_build_name` is set to the name of the build that Packer is running.
+    This is most useful when Packer is making multiple builds and you want to
+    distinguish them slightly when using a common playbook.
+
+- `packer_builder_type` is the type of the builder that was used to create the
+    machine that the script is running on. This is useful if you want to run
+    only certain parts of the playbook on systems built with certain builders.
+
+- `packer_http_addr` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
