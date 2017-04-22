@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-const BuilderId = "packer.post-processor.vsphere-device"
+const BuilderId = "LizaTretyakova.post-processor.vsphere-device"
 
 type ArtifactFile struct {
 	Name string `json:"name"`
