@@ -16,10 +16,27 @@ import (
 	"strconv"
 )
 
-type HwConfig struct {
+type VMOptionalParams struct {
 	Cpu_sockets int
-	Ram  int
+	Ram         int
+	// TODO: add more options
 }
+
+type VMRequiredParams struct {
+	Url            string
+	Username       string
+	Password       string
+	Dc_name        string
+	Folder_name    string
+	Vm_source_name string
+	Vm_target_name string
+}
+
+const DefaultFolder = ""
+const Unspecified = -1
+
+var vm_opt_params VMOptionalParams
+var vm_req_params VMRequiredParams
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -28,14 +45,12 @@ type Config struct {
 	Username       string `mapstructure:"username"`
 	Password       string `mapstructure:"password"`
 	Dc_name        string `mapstructure:"dc_name"`
-	Folder_name    string
 	Vm_source_name string `mapstructure:"vm_source_name"`
 	Vm_target_name string `mapstructure:"vm_target_name"`
 	Cpu_sockets    string `mapstructure:"cpus"`
 	Ram            string `mapstructure:"RAM"`
 
-	hwConfig       HwConfig
-	ctx            interpolate.Context
+	ctx      interpolate.Context
 }
 
 type PostProcessor struct {
@@ -54,30 +69,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	// Defaults
-	p.config.Folder_name = ""
-	if p.config.Vm_target_name == "" {
-		p.config.Vm_target_name = p.config.Vm_source_name + "_cloned"
-	}
-	p.config.hwConfig.Cpu_sockets = -1
-	if p.config.Cpu_sockets != "" {
-		p.config.hwConfig.Cpu_sockets, err = strconv.Atoi(p.config.Cpu_sockets)
-		if err != nil {
-			panic(err)
-		}
-	}
-	p.config.hwConfig.Ram = -1
-	if p.config.Ram != "" {
-		p.config.hwConfig.Ram, err = strconv.Atoi(p.config.Ram)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	// Accumulate any errors
 	errs := new(packer.MultiError)
 
-	// First define all our templatable parameters that are _required_
+	// Check the required params
 	templates := map[string]*string{
 		"url":            &p.config.Url,
 		"username":       &p.config.Username,
@@ -95,32 +90,60 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
+	// Set optional params
+	vm_req_params.Folder_name = DefaultFolder
+	vm_opt_params.Cpu_sockets = Unspecified
+	if p.config.Cpu_sockets != "" {
+		vm_opt_params.Cpu_sockets, err = strconv.Atoi(p.config.Cpu_sockets)
+		if err != nil {
+			panic(err)
+		}
+	}
+	vm_opt_params.Ram = Unspecified
+	if p.config.Ram != "" {
+		vm_opt_params.Ram, err = strconv.Atoi(p.config.Ram)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Set required params
+	vm_req_params.Url = p.config.Url
+	vm_req_params.Username = p.config.Username
+	vm_req_params.Password = p.config.Password
+	vm_req_params.Dc_name = p.config.Dc_name
+	vm_req_params.Vm_source_name = p.config.Vm_source_name
+	vm_req_params.Vm_target_name = vm_req_params.Vm_source_name + "_clone"
+	if p.config.Vm_target_name != "" {
+		vm_req_params.Vm_target_name = p.config.Vm_target_name
+	}
+
 	return nil
 }
 
-func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_name string, hwConfig HwConfig) {
+func CloneVM(req_params VMRequiredParams, opt_params VMOptionalParams) {
 	// Prepare entities: client (authentification), finder, folder, virtual machine
-	client, ctx := createClient(URL, username, password)
-	finder, ctx := createFinder(ctx, client, dc_name)
-	folder, err := finder.FolderOrDefault(ctx, "") // folder_name
+	client, ctx := createClient(req_params.Url, req_params.Username, req_params.Password)
+	finder, ctx := createFinder(ctx, client, req_params.Dc_name)
+	folder, err := finder.FolderOrDefault(ctx, req_params.Folder_name)
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Printf("expected folder: %v\n", folder_name)
+		fmt.Printf("expected folder: %v\n", req_params.Folder_name)
 		fmt.Printf("folder.Name(): %v\nfolder.InventoryPath(): %v\n", folder.Name(), folder.InventoryPath)
 	}
-	vm_src, ctx := findVM_by_name(ctx, finder, source_name)
+	vm_src, ctx := findVM_by_name(ctx, finder, req_params.Vm_source_name)
 
 	// Creating spec's for cloning
 	var relocateSpec types.VirtualMachineRelocateSpec
 
 	var confSpec types.VirtualMachineConfigSpec
 	// configure HW
-	if hwConfig.Cpu_sockets != -1 {
-		confSpec.NumCPUs = int32(hwConfig.Cpu_sockets)
+	if opt_params.Cpu_sockets != Unspecified {
+		confSpec.NumCPUs = int32(opt_params.Cpu_sockets)
 	}
-	if hwConfig.Ram != -1 {
-		confSpec.MemoryMB = int64(hwConfig.Ram)
+	if opt_params.Ram != Unspecified {
+		confSpec.MemoryMB = int64(opt_params.Ram)
 	}
 
 	cloneSpec := types.VirtualMachineCloneSpec{
@@ -130,7 +153,7 @@ func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 	}
 
 	// Cloning itself
-	task, err := vm_src.Clone(ctx, folder, target_name, cloneSpec)
+	task, err := vm_src.Clone(ctx, folder, req_params.Vm_target_name, cloneSpec)
 	if err != nil {
 		panic(err)
 	}
@@ -141,7 +164,7 @@ func CloneVM(URL, username, password, dc_name, folder_name, source_name, target_
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, error) {
-	CloneVM(p.config.Url, p.config.Username, p.config.Password, p.config.Dc_name, p.config.Folder_name, p.config.Vm_source_name, p.config.Vm_target_name, p.config.hwConfig)
+	CloneVM(vm_req_params, vm_opt_params)
 	return source, true, nil
 }
 
