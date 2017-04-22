@@ -121,18 +121,24 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	return nil
 }
 
-func CloneVM(req_params VMRequiredParams, opt_params VMOptionalParams) {
+func CloneVM(req_params VMRequiredParams, opt_params VMOptionalParams) error {
 	// Prepare entities: client (authentification), finder, folder, virtual machine
-	client, ctx := createClient(req_params.Url, req_params.Username, req_params.Password)
-	finder, ctx := createFinder(ctx, client, req_params.Dc_name)
+	client, ctx, err := createClient(req_params.Url, req_params.Username, req_params.Password)
+	if err != nil {
+		return err
+	}
+	finder, ctx, err := createFinder(ctx, client, req_params.Dc_name)
+	if err != nil {
+		return err
+	}
 	folder, err := finder.FolderOrDefault(ctx, req_params.Folder_name)
 	if err != nil {
-		panic(err)
-	} else {
-		fmt.Printf("expected folder: %v\n", req_params.Folder_name)
-		fmt.Printf("folder.Name(): %v\nfolder.InventoryPath(): %v\n", folder.Name(), folder.InventoryPath)
+		return err
 	}
-	vm_src, ctx := findVM_by_name(ctx, finder, req_params.Vm_source_name)
+	vm_src, ctx, err := findVM_by_name(ctx, finder, req_params.Vm_source_name)
+	if err != nil {
+		return err
+	}
 
 	// Creating spec's for cloning
 	var relocateSpec types.VirtualMachineRelocateSpec
@@ -155,20 +161,25 @@ func CloneVM(req_params VMRequiredParams, opt_params VMOptionalParams) {
 	// Cloning itself
 	task, err := vm_src.Clone(ctx, folder, req_params.Vm_target_name, cloneSpec)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	_, err = task.WaitForResult(ctx, nil)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, source packer.Artifact) (packer.Artifact, bool, error) {
-	CloneVM(vm_req_params, vm_opt_params)
+	err := CloneVM(vm_req_params, vm_opt_params)
+	if err != nil {
+		return nil, false, err
+	}
 	return source, true, nil
 }
 
-func createClient(URL, username, password string) (*govmomi.Client, context.Context) {
+func createClient(URL, username, password string) (*govmomi.Client, context.Context, error) {
 	// create context
 	ctx := context.TODO() // an empty, default context (for those, who is unsure)
 
@@ -177,56 +188,65 @@ func createClient(URL, username, password string) (*govmomi.Client, context.Cont
 	// logged in with the username-password)
 	u, err := url.Parse(URL) // create a URL object from string
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 	u.User = url.UserPassword(username, password) // set username and password for automatical authentification
 	fmt.Println(u.String())
 	client, err := govmomi.NewClient(ctx, u,true) // creating a client (logs in with given uname&pswd)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
-	return client, ctx
+	return client, ctx, nil
 }
 
-func createFinder(ctx context.Context, client *govmomi.Client, dc_name string) (*find.Finder, context.Context) {
+func createFinder(ctx context.Context, client *govmomi.Client, dc_name string) (*find.Finder, context.Context, error) {
 	// Create a finder to search for a vm with the specified name
 	finder := find.NewFinder(client.Client, false)
 	// Need to specify the datacenter
 	if dc_name == "" {
 		dc, err := finder.DefaultDatacenter(ctx)
 		if err != nil {
-			panic(fmt.Errorf("Error reading default datacenter: %s", err))
+			return nil, nil, err
 		}
 		var dc_mo mo.Datacenter
 		err = dc.Properties(ctx, dc.Reference(), []string{"name"}, &dc_mo)
 		if err != nil {
-			panic(fmt.Errorf("Error reading datacenter name: %s", err))
+			return nil, nil, err
 		}
 		dc_name = dc_mo.Name
 		finder.SetDatacenter(dc)
 	} else {
 		dc, err := finder.Datacenter(ctx, fmt.Sprintf("/%v", dc_name))
 		if err != nil {
-			panic(err)
+			return nil, nil, err
 		}
 		finder.SetDatacenter(dc)
 	}
-	return finder, ctx
+	return finder, ctx, nil
 }
 
-func findVM_by_name(ctx context.Context, finder *find.Finder, vm_name string) (*object.VirtualMachine, context.Context) {
+func findVM_by_name(ctx context.Context, finder *find.Finder, vm_name string) (*object.VirtualMachine, context.Context, error) {
 	vm_o, err := finder.VirtualMachine(ctx, vm_name)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
-	return vm_o, ctx
+	return vm_o, ctx, nil
 }
 
-func ReconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
-	client, ctx := createClient(URL, username, password)
-	finder, ctx := createFinder(ctx, client, dc_name)
-	vm_o, ctx := findVM_by_name(ctx, finder, vm_name)
+func ReconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) error {
+	client, ctx, err := createClient(URL, username, password)
+	if err != nil {
+		return err
+	}
+	finder, ctx, err := createFinder(ctx, client, dc_name)
+	if err != nil {
+		return err
+	}
+	vm_o, ctx, err := findVM_by_name(ctx, finder, vm_name)
+	if err != nil {
+		return err
+	}
 
 	// creating new configuration for vm
 	vmConfigSpec := types.VirtualMachineConfigSpec{}
@@ -235,10 +255,12 @@ func ReconfigureVM(URL, username, password, dc_name, vm_name string, cpus int) {
 	// finally reconfiguring
 	task, err := vm_o.Reconfigure(ctx, vmConfigSpec)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	_, err = task.WaitForResult(ctx, nil)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
