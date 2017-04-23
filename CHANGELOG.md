@@ -7,6 +7,11 @@
 * builder/openstack: Add ssh agent support. [GH-4655]
 * builder/parallels-iso: Configuration of disk type, plain or expanding.
     [GH-4621]
+* provisioner/ansible: Add extra-vars `packer_build_name` and
+    `packer_builder_type`. [GH-4821]
+* provisioner/ansible-local: Add extra-vars `packer_build_name`, 
+    `packer_builder_type`, and `packer_http_addr`. [GH-4821]
+
 
 ## 1.0.0 (April 4, 2017)
 
