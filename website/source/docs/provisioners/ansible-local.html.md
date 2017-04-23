@@ -53,7 +53,8 @@ Optional:
     To disable colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
 
 - `extra_arguments` (array of strings) - An array of extra arguments to pass
-    to the ansible command. By default, this is empty.
+    to the ansible command. By default, this is empty. These arguments _will_
+    be passed through a shell and arguments should be quoted accordingly.
     Usage example:
 
 ```
