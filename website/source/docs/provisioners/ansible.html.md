@@ -92,7 +92,8 @@ Optional Parameters:
   Defaults to false.
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
-  Usage example:
+  These arguments _will not_ be passed through a shell and arguments should
+  not be quoted. Usage example:
 
     ```json
     {
