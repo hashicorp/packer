@@ -96,14 +96,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if p.config.Cpu_sockets != "" {
 		vm_opt_params.Cpu_sockets, err = strconv.Atoi(p.config.Cpu_sockets)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 	vm_opt_params.Ram = Unspecified
 	if p.config.Ram != "" {
 		vm_opt_params.Ram, err = strconv.Atoi(p.config.Ram)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
