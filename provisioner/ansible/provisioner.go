@@ -305,7 +305,9 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	inventory := p.config.inventoryFile
 	var envvars []string
 
-	args := []string{playbook, "-i", inventory}
+	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
+		p.config.PackerBuildName, p.config.PackerBuilderType),
+		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
 		args = append(args, "--private-key", privKeyFile)
 	}
@@ -354,7 +356,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	log.Printf("Executing Ansible: %s", strings.Join(cmd.Args, " "))
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
 	if err := cmd.Start(); err != nil {
 		return err
 	}
