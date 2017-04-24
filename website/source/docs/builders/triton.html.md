@@ -76,9 +76,10 @@ builder.
 ### Optional:
 
 - `triton_url` (string) - The URL of the Triton cloud API to use. If omitted
-    it will default to the URL of the Joyent Public cloud. If you are using your
-    own private Triton installation you will have to supply the URL of the cloud
-    API of your own Triton installation.
+    it will default to the `us-sw-1` data center URL of the Joyent Public cloud.
+    If you are using your own private Triton installation or want to use another
+    data center you will have to supply the URL of the cloud API of your own
+    Triton installation.
 
 - `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
