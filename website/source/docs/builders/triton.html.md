@@ -76,9 +76,9 @@ builder.
 ### Optional:
 
 - `triton_url` (string) - The URL of the Triton cloud API to use. If omitted
-    it will default to the URL of the Joyent Public cloud. If you are using your
-    own private Triton installation you will have to supply the URL of the cloud
-    API of your own Triton installation.
+    it will default to the `us-sw-1` region of the Joyent Public cloud. If
+    you are using your own private Triton installation you will have to supply
+    the URL of the cloud API of your own Triton installation.
 
 - `triton_key_material` (string) - Path to the file in which the private key
     of `triton_key_id` is stored. For example `~/.ssh/id_rsa`. If this is not
@@ -141,14 +141,13 @@ cloud:
       "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
 
       "source_machine_name": "image-builder",
-      "source_machine_package": "g3-standard-0.5-smartos",
-      "source_machine_image": "70e3ae72-96b6-11e6-9056-9737fd4d0764",
+      "source_machine_package": "g4-highcpu-128M",
+      "source_machine_image": "f6acf198-2037-11e7-8863-8fdd4ce58b6a",
 
       "ssh_username": "root",
-      "ssh_private_key_file": "~/.ssh/id_rsa",
 
       "image_name": "my_new_image",
-      "image_version": "1.0.0",
+      "image_version": "1.0.0"
     }
   ]
 }
@@ -160,3 +159,9 @@ started) are the same. This is because Triton automatically configures the root
 users to be able to login via SSH with the same key used to create the VM via
 the Cloud API. In more advanced scenarios for example when using a
 `source_machine_image` one might use different credentials.
+
+Available `triton_key_id`, `source_machine_package`, `source_machine_image`, and
+`source_machine_networks` can be found by using the following
+[Triton CLI](https://docs.joyent.com/public-cloud/api-access/cloudapi)
+commands: `triton key list`, `triton package list`, `triton image list`, and
+`triton network list` respectively.
