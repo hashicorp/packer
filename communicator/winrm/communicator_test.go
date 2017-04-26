@@ -3,12 +3,16 @@ package winrm
 import (
 	"bytes"
 	"io"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/dylanmei/winrmtest"
 	"github.com/hashicorp/packer/packer"
 )
+
+const PAYLOAD = "stuff"
+const BASE64_ENCODED_PAYLOAD = "c3R1ZmY="
 
 func newMockWinRMServer(t *testing.T) *winrmtest.Remote {
 	wrm := winrmtest.NewRemote()
@@ -27,8 +31,15 @@ func newMockWinRMServer(t *testing.T) *winrmtest.Remote {
 		})
 
 	wrm.CommandFunc(
+		winrmtest.MatchPattern(`^echo `+BASE64_ENCODED_PAYLOAD+` >> ".*"$`),
+		func(out, err io.Writer) int {
+			return 0
+		})
+
+	wrm.CommandFunc(
 		winrmtest.MatchPattern(`^powershell.exe -EncodedCommand .*$`),
 		func(out, err io.Writer) int {
+			out.Write([]byte(BASE64_ENCODED_PAYLOAD))
 			return 0
 		})
 
@@ -86,9 +97,21 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error creating communicator: %s", err)
 	}
-
-	err = c.Upload("C:/Temp/packer.cmd", bytes.NewReader([]byte("something")), nil)
+	file := "C:/Temp/packer.cmd"
+	err = c.Upload(file, strings.NewReader(PAYLOAD), nil)
 	if err != nil {
 		t.Fatalf("error uploading file: %s", err)
 	}
+
+	dest := new(bytes.Buffer)
+	err = c.Download(file, dest)
+	if err != nil {
+		t.Fatalf("error downloading file: %s", err)
+	}
+	downloadedPayload := strings.TrimRight(dest.String(), "\x00")
+
+	if downloadedPayload != PAYLOAD {
+		t.Fatalf("files are not equal: expected [%s] length: %v, got [%s] length %v", PAYLOAD, len(PAYLOAD), downloadedPayload, len(downloadedPayload))
+	}
+
 }
