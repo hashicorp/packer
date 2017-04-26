@@ -27,7 +27,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.Endpoint == "" {
 		// Use Joyent public cloud as the default endpoint if none is in environment
-		c.Endpoint = "https://us-east-1.api.joyent.com"
+		c.Endpoint = "https://us-sw-1.api.joyent.com"
 	}
 
 	if c.Account == "" {

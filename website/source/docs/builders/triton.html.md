@@ -76,9 +76,10 @@ builder.
 ### Optional:
 
 - `triton_url` (string) - The URL of the Triton cloud API to use. If omitted
-    it will default to the URL of the Joyent Public cloud. If you are using your
-    own private Triton installation you will have to supply the URL of the cloud
-    API of your own Triton installation.
+    it will default to the `us-sw-1` data center URL of the Joyent Public cloud.
+    If you are using your own private Triton installation or want to use another
+    data center you will have to supply the URL of the cloud API of your own
+    Triton installation.
 
 - `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
@@ -130,17 +131,20 @@ cloud:
     {
       "type": "triton",
       "triton_account": "triton_username",
-      "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
-      "triton_key_material": "~/.ssh/id_rsa",
-      "source_machine_name": "image-builder",
-      "source_machine_package": "g3-standard-0.5-smartos",
+      "triton_key_id": "90:30:b4:f8:c7:d6:7b:b9:f7:e1:8b:43:bd:00:00:00",
+      "triton_key_material": "/Users/rickard/.ssh/joyent_id_rsa",
+      "source_machine_package": "g4-highcpu-512M",
       "source_machine_image": "70e3ae72-96b6-11e6-9056-9737fd4d0764",
+      "source_machine_networks": [
+        "1fc62c97-c1f0-41c6-9ef7-1f7ebe0ff09a",
+        "f7ed95d3-faaf-43ef-9346-15644403b963"
+      ],
       "ssh_username": "root",
-      "ssh_private_key_file": "~/.ssh/id_rsa",
+      "ssh_private_key_file": "/Users/rickard/.ssh/joyent_id_rsa",
       "image_name": "my_new_image",
-      "image_version": "1.0.0",
-  }
-]
+      "image_version": "1.0.0"
+    }
+  ]
 }
 ```
 
@@ -150,3 +154,9 @@ started) are the same. This is because Triton automatically configures the root
 users to be able to login via SSH with the same key used to create the VM via
 the Cloud API. In more advanced scenarios for example when using a
 `source_machine_image` one might use different credentials.
+
+Available `triton_key_id`, `source_machine_package`, `source_machine_image`, and
+`source_machine_networks` can be found by using the following
+[Triton CLI](https://docs.joyent.com/public-cloud/api-access/cloudapi)
+commands: `triton key list`, `triton packages`, `triton images`, and
+`triton network list` respectively.
