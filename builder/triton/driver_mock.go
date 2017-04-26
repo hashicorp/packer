@@ -69,7 +69,7 @@ func (d *DriverMock) DeleteMachine(machineId string) error {
 	return nil
 }
 
-func (d *DriverMock) GetMachine(machineId string) (string, error) {
+func (d *DriverMock) GetMachineIP(machineId string) (string, error) {
 	if d.GetMachineErr != nil {
 		return "", d.GetMachineErr
 	}
