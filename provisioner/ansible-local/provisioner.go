@@ -86,7 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID())
+		p.config.StagingDir = filepath.ToSlash(filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID()))
 	}
 
 	// Validation
