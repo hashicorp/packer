@@ -16,6 +16,11 @@
 * provisioner/ansible-local: Add extra-vars `packer_build_name`, 
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
 
+### BUG FIXES:
+
+* provisioner/ansible-local: Correctly set the default staging directory under
+    Windows. [GH-4792]
+
 
 ## 1.0.0 (April 4, 2017)
 
