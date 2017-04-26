@@ -326,7 +326,7 @@ builder.
 
 ```json
 {
-   "type" : "amazon-surrogate",
+   "type" : "amazon-ebssurrogate",
    "secret_key" : "YOUR SECRET KEY HERE",
    "access_key" : "YOUR KEY HERE",
    "region" : "us-east-1",

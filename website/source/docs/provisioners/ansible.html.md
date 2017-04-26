@@ -92,7 +92,8 @@ Optional Parameters:
   Defaults to false.
 
 - `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
-  Usage example:
+  These arguments _will not_ be passed through a shell and arguments should
+  not be quoted. Usage example:
 
     ```json
     {
@@ -120,6 +121,20 @@ Optional Parameters:
   when this provisioner runs ansible.  Specify this if you have an existing
   inventory directory with `host_vars` `group_vars` that you would like to use
   in the playbook that this provisioner will run.
+
+## Default Extra Variables
+
+In addition to being able to specify extra arguments using the
+`extra_arguments` configuration, the provisioner automatically defines certain
+commonly useful Ansible variables:
+
+- `packer_build_name` is set to the name of the build that Packer is running.
+    This is most useful when Packer is making multiple builds and you want to
+    distinguish them slightly when using a common playbook.
+
+- `packer_builder_type` is the type of the builder that was used to create the
+    machine that the script is running on. This is useful if you want to run
+    only certain parts of the playbook on systems built with certain builders.
 
 ## Limitations
 
