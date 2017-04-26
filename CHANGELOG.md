@@ -7,6 +7,10 @@
 * builder/openstack: Add ssh agent support. [GH-4655]
 * builder/parallels-iso: Configuration of disk type, plain or expanding.
     [GH-4621]
+* builder.triton: An SSH agent can be used to authenticate requests, making
+    `triton_key_material` optional. [GH-4838]
+* builder/triton: If no source machine networks are specified, instances are
+    started on the default public and internal networks. [GH-4838]
 * provisioner/ansible: Add extra-vars `packer_build_name` and
     `packer_builder_type`. [GH-4821]
 * provisioner/ansible-local: Add extra-vars `packer_build_name`, 
