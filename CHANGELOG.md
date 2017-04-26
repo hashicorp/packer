@@ -1,3 +1,10 @@
+## Unreleased
+
+### BUG FIXES:
+
+* provisioner/ansible-local: Correctly set the default staging directory under
+
+
 ## 1.0.0 (April 4, 2017)
 
 ### BUG FIXES:
