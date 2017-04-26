@@ -81,9 +81,9 @@ builder.
     the URL of the cloud API of your own Triton installation.
 
 - `triton_key_material` (string) - Path to the file in which the private key
-    of `triton_key_id` is stored. For example `~/.ssh/id_rsa`. If this is not
-    specified, the SSH agent is used to sign requests with the `triton_key_id`
-    specified.
+    of `triton_key_id` is stored. For example `/home/soandso/.ssh/id_rsa`. If
+    this is not specified, the SSH agent is used to sign requests with the
+    `triton_key_id` specified.
 
 - `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
