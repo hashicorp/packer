@@ -203,9 +203,10 @@ func (d *Base64Pipe) ReadFrom(r io.Reader) (int64, error) {
 func (d *Base64Pipe) Write(p []byte) (int, error) {
 	dst := make([]byte, base64.StdEncoding.DecodedLen(len(p)))
 
-	if _, err := base64.StdEncoding.Decode(dst, p); err != nil {
+	decodedBytes, err := base64.StdEncoding.Decode(dst, p)
+	if err != nil {
 		return 0, err
 	}
 
-	return d.w.Write(dst)
+	return d.w.Write(dst[0:decodedBytes])
 }
