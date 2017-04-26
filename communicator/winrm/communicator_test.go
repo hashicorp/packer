@@ -108,7 +108,7 @@ func TestUpload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error downloading file: %s", err)
 	}
-	downloadedPayload := strings.TrimRight(dest.String(), "\x00")
+	downloadedPayload := dest.String()
 
 	if downloadedPayload != PAYLOAD {
 		t.Fatalf("files are not equal: expected [%s] length: %v, got [%s] length %v", PAYLOAD, len(PAYLOAD), downloadedPayload, len(downloadedPayload))
