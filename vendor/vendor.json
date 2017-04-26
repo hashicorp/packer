@@ -576,10 +576,10 @@
 			"revision": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"checksumSHA1": "6uNzRk3ScsTC+olpCXkW4M/L3fg=",
+			"checksumSHA1": "kWWDtHJJp7Hiq0zj0xecRGqMoeU=",
 			"path": "github.com/masterzen/winrm",
-			"revision": "b7e3d2de4979ce5eae5c1c1ef450040c5d675a89",
-			"revisionTime": "2017-01-26T07:02:57Z"
+			"revision": "acf371f6aff113fc0104a61cd72db45a7c27d310",
+			"revisionTime": "2017-03-29T23:04:57Z"
 		},
 		{
 			"checksumSHA1": "KTsgWipT3ennAAtaKxEZairxero=",
