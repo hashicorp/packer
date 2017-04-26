@@ -25,7 +25,7 @@ Docker images on Triton you should use the Packer Docker builder.
 The builder creates and launches a temporary VM based on a specified source
 image, runs any provisioning necessary, uses the Triton "VM to image"
 functionality to create a reusable image and finally destroys the temporary VM.
-This reusable image can then be used to launch new VM's.
+This reusable image can then be used to launch new machines.
 
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
@@ -44,9 +44,9 @@ builder.
 - `triton_account` (string) - The username of the Triton account to use when
     using the Triton Cloud API.
 - `triton_key_id` (string) - The fingerprint of the public key of the SSH key
-    pair to use for authentication with the Triton Cloud API.
-- `triton_key_material` (string) - Path to the file in which the private key
-    of `triton_key_id` is stored. For example `~/.ssh/id_rsa`.
+    pair to use for authentication with the Triton Cloud API. If
+    `triton_key_material` is not set, it is assumed that the SSH agent has the
+    private key corresponding to this key ID loaded.
 
 - `source_machine_image` (string) - The UUID of the image to base the new
     image on. Triton supports multiple types of images, called 'brands' in
@@ -80,6 +80,11 @@ builder.
     own private Triton installation you will have to supply the URL of the cloud
     API of your own Triton installation.
 
+- `triton_key_material` (string) - Path to the file in which the private key
+    of `triton_key_id` is stored. For example `~/.ssh/id_rsa`. If this is not
+    specified, the SSH agent is used to sign requests with the `triton_key_id`
+    specified.
+
 - `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
     filters inbound traffic to the VM. All outbound traffic is always allowed.
@@ -104,7 +109,9 @@ builder.
 - `source_machine_networks` (array of strings) - The UUID's of Triton networks
     added to the source machine used for creating the image. For example if any
     of the provisioners which are run need Internet access you will need to add
-    the UUID's of the appropriate networks here.
+    the UUID's of the appropriate networks here. If this is not specified,
+    instances will be placed into the default Triton public and internal 
+    networks.
 - `source_machine_tags` (object of key/value strings) - Tags applied to the VM
     used to create the image.
 
@@ -129,18 +136,21 @@ cloud:
   "builders": [
     {
       "type": "triton",
+
       "triton_account": "triton_username",
       "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
-      "triton_key_material": "~/.ssh/id_rsa",
+
       "source_machine_name": "image-builder",
       "source_machine_package": "g3-standard-0.5-smartos",
       "source_machine_image": "70e3ae72-96b6-11e6-9056-9737fd4d0764",
+
       "ssh_username": "root",
       "ssh_private_key_file": "~/.ssh/id_rsa",
+
       "image_name": "my_new_image",
       "image_version": "1.0.0",
-  }
-]
+    }
+  ]
 }
 ```
 
