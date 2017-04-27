@@ -60,8 +60,8 @@ validation will fail.
 
 Using the variables is extremely easy. Variables are used by calling the user
 function in the form of <code>{{user \`variable\`}}</code>. This function can be
-used in *most any value* within the template; in builders (except for the `type` 
-value), provisioners, *anywhere outside the `variables` section*.   The user 
+used in any value but `type` within the template: in builders, provisioners, and 
+post-processors *anywhere outside the `variables` section*.   The user 
 variable is available globally within the rest of the template.
 
 ## Environment Variables
