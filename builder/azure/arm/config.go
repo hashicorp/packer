@@ -248,11 +248,11 @@ func setSshValues(c *Config) error {
 	if c.Comm.SSHPrivateKey != "" {
 		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKey)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		signer, err := ssh.ParsePrivateKey(privateKeyBytes)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		publicKey := signer.PublicKey()
