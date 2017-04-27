@@ -20,6 +20,7 @@
 
 * provisioner/ansible-local: Correctly set the default staging directory under
     Windows. [GH-4792]
+* builder/azure: Replace calls to panic with error returns. [GH-4846]
 
 
 ## 1.0.0 (April 4, 2017)
