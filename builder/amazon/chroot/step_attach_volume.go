@@ -99,9 +99,8 @@ func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func statDevice(attachVolume string, state multistep.StateBag) error {
-	statAttempts := 0
 	deviceAltName := strings.Replace(attachVolume, "/sd", "/xvd", 1)
-	for statAttempts < 30 {
+	for statAttempts := 0; statAttempts < 30; statAttempts++ {
 		if _, err := os.Stat(attachVolume); err == nil {
 			state.Put("device", attachVolume)
 			return nil
