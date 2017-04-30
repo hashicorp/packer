@@ -6,8 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepCreateEncryptedAMICopy struct {
@@ -25,7 +25,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Encrypt boot not set, so skip step
 	if !s.EncryptBootVolume {
 		if kmsKeyId != "" {
-			log.Printf(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
+			log.Printf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId)
 		}
 		return multistep.ActionContinue
 	}

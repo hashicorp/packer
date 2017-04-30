@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/profitbricks/profitbricks-sdk-go"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepCreateServer struct{}
@@ -71,7 +72,11 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	if datacenter.StatusCode > 299 {
 		if datacenter.StatusCode > 299 {
 			var restError RestError
-			json.Unmarshal([]byte(datacenter.Response), &restError)
+			err := json.Unmarshal([]byte(datacenter.Response), &restError)
+			if err != nil {
+				ui.Error(fmt.Sprintf("Error decoding json response: %s", err.Error()))
+				return multistep.ActionHalt
+			}
 			if len(restError.Messages) > 0 {
 				ui.Error(restError.Messages[0].Message)
 			} else {
@@ -83,7 +88,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	err := s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a datacenter %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a datacenter %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
@@ -97,13 +102,13 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(lan.Response)))
+		ui.Error(fmt.Sprintf("Error occurred %s", parseErrorMessage(lan.Response)))
 		return multistep.ActionHalt
 	}
 
 	err = s.waitTillProvisioned(lan.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a LAN %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a LAN %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
@@ -117,13 +122,13 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(nic.Response)))
+		ui.Error(fmt.Sprintf("Error occurred %s", parseErrorMessage(nic.Response)))
 		return multistep.ActionHalt
 	}
 
 	err = s.waitTillProvisioned(nic.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a NIC %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a NIC %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
@@ -146,9 +151,11 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 	if dcId, ok := state.GetOk("datacenter_id"); ok {
 		resp := profitbricks.DeleteDatacenter(dcId.(string))
-		s.checkForErrors(resp)
-		err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
-		if err != nil {
+		if err := s.checkForErrors(resp); err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
+		}
+		if err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
 		}
@@ -182,7 +189,7 @@ func (d *stepCreateServer) setPB(username string, password string, url string) {
 
 func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occured %s", string(instance.Body)))
+		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
 	}
 	return nil
 }

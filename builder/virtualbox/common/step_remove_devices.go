@@ -2,8 +2,11 @@ package common
 
 import (
 	"fmt"
+	"log"
+
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step removes any devices (floppy disks, ISOs, etc.) from the
@@ -39,14 +42,25 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		// Don't forget to remove the floppy controller as well
-		command = []string{
-			"storagectl", vmName,
-			"--name", "Floppy Controller",
-			"--remove",
-		}
-		if err := driver.VBoxManage(command...); err != nil {
-			err := fmt.Errorf("Error removing floppy controller: %s", err)
+		var vboxErr error
+		// Retry for 10 minutes to remove the floppy controller.
+		log.Printf("Trying for 10 minutes to remove floppy controller.")
+		err := common.Retry(15, 15, 40, func() (bool, error) {
+			// Don't forget to remove the floppy controller as well
+			command = []string{
+				"storagectl", vmName,
+				"--name", "Floppy Controller",
+				"--remove",
+			}
+			vboxErr = driver.VBoxManage(command...)
+			if vboxErr != nil {
+				log.Printf("Error removing floppy controller. Retrying.")
+				return false, nil
+			}
+			return true, nil
+		})
+		if err == common.RetryExhaustedError {
+			err := fmt.Errorf("Error removing floppy controller: %s", vboxErr)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

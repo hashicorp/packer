@@ -18,5 +18,5 @@ func GlueStrings(a, b string) string {
 		shift++
 	}
 
-	return string(a[:shift]) + b
+	return a[:shift] + b
 }

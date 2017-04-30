@@ -1,0 +1,200 @@
+#page-home {
+  // Override the main header
+  #header {
+    background: $home-header-background-color;
+
+    .navbar-toggle {
+      .icon-bar {
+        border: 1px solid $home-header-link-color;
+      }
+    }
+
+    .navbar-brand {
+      a {
+        svg.logo {
+          @extend svg.logo.color;
+        }
+      }
+    }
+
+    ul.nav {
+      li {
+        a {
+          color: $home-header-link-color;
+
+          &:hover, &:focus, &:active {
+            background-color: transparent;
+            color: $home-header-link-color-hover;
+
+            svg {
+              fill: $home-header-link-color-hover;
+            }
+          }
+
+          svg {
+            fill: $home-header-link-color;
+          }
+        }
+      }
+    }
+  }
+
+  header {
+    .hero {
+      margin: 140px auto 160px auto;
+      text-align: center;
+
+      .button {
+        margin: 5px;
+
+        @media (max-width: 768px) {
+          display: block;
+          margin-top: 10px;
+          text-align: center;
+        }
+      }
+
+      svg {
+        max-width: 90%;
+      }
+    }
+  }
+
+  section {
+    background: $white;
+    padding: 100px 0;
+  }
+
+  section.marketing {
+    h2 {
+      font-family: $font-family-klavika;
+      font-size: 36px;
+      font-weight: $font-weight-bold;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin: 20px 0 10px 0;
+      padding: 0;
+      color: $black;
+    }
+
+    p {
+      font-family: $font-family-open-sans;
+      font-size: 16px;
+      letter-spacing: 0.01em;
+      line-height: 1.8;
+      margin: 0 0 10px;
+    }
+
+    span.callout {
+      background: $black;
+      color: $white;
+      display: inline-block;
+      font-family: $font-family-klavika;
+      font-size: 18px;
+      font-weight: $font-weight-bold;
+      line-height: 1;
+      margin: 0;
+      padding: 7px 5px 5px 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    &.invert {
+      background: $packer-blue;
+
+      h2 {
+        color: $white;
+      }
+
+      p {
+        color: $white;
+        font-weight: $font-weight-bold;
+      }
+    }
+
+    &#automated {
+      img {
+        @media (min-width: 1024px) {
+          padding-right: 40px;
+        }
+
+        @media (max-width: 992px) {
+          padding-bottom: 40px;
+        }
+      }
+    }
+
+    &#integrations {
+      .integrations-list {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        margin-top: 30px;
+
+        @media (min-width: 1024px) {
+          padding-left: 40px;
+        }
+
+        .integration {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 5px solid $packer-blue;
+          height: 100px;
+          width: 33.3%;
+          background-color: $white;
+          padding: 5px;
+
+          img {
+            max-width: 100%;
+          }
+        }
+      }
+    }
+  }
+
+  .terminal {
+    border: 1px solid $white;
+    background-color: $black;
+    box-sizing: border-box;
+    color: $white;
+    font-family: $font-family-monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 20px auto;
+    padding: 10px 20px 20px 20px;
+
+    .terminal-content {
+      margin-top: 5px;
+      overflow-x: scroll;
+      width: 100%;
+      white-space: nowrap;
+
+      span {
+        display: block;
+        white-space: pre;
+      }
+    }
+
+    span.circle {
+      &:before {
+        content: '\25CF';
+        color: $white;
+        font-family: $font-family-monospace;
+        font-size: 30px;
+        line-height: 1;
+        margin: 0 0 0 -4px;
+        padding: 0;
+        height: 100%;
+      }
+    }
+
+    span.vbox {
+      color: rgb(91, 251, 90);
+    }
+
+    span.vmware {
+      color: rgb(83, 255, 255);
+    }
+  }
+}

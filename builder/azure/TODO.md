@@ -13,3 +13,4 @@ Here's a list of things we like to get done in no particular order:
 - [ ] windows sysprep provisioner (since it seems to generate a certain issue volume)
 - [ ] allow arbitrary json patching for deployment document
 - [ ] tag all resources with user-supplied tag
+- [ ] managed disk support

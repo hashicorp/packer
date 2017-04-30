@@ -1,14 +1,15 @@
 ---
-description: |
-    The checksum post-processor computes specified checksum for the artifact list
-    from an upstream builder or post-processor. All downstream post-processors will
-    see the new artifacts. The primary use-case is compute checksum for artifacts
-    allows to verify it later.
-    So firstly this post-processor get artifact, compute it checksum and pass to
-    next post-processor original artifacts and checksum files.
 layout: docs
-page_title: 'Checksum Post-Processor'
-...
+sidebar_current: docs-post-processors-checksum
+page_title: Checksum - Post-Processors
+description: |-
+  The checksum post-processor computes specified checksum for the artifact list
+  from an upstream builder or post-processor. All downstream post-processors
+  will see the new artifacts. The primary use-case is compute checksum for
+  artifacts allows to verify it later. So firstly this post-processor get
+  artifact, compute it checksum and pass to next post-processor original
+  artifacts and checksum files.
+---
 
 # Checksum Post-Processor
 
@@ -31,9 +32,9 @@ post-processor.
 
 The example below is fully functional.
 
-``` {.javascript}
+```json
 {
-"type": "checksum"
+  "type": "checksum"
 }
 ```
 
@@ -41,6 +42,6 @@ The example below is fully functional.
 
 Optional parameters:
 
--   `checksum_types` (array of strings) - An array of strings of checksum types
+- `checksum_types` (array of strings) - An array of strings of checksum types
 to compute. Allowed values are md5, sha1, sha224, sha256, sha384, sha512.
--   `output` (string) - Specify filename to store checksums.
+- `output` (string) - Specify filename to store checksums.
