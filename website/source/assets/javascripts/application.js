@@ -1,10 +1,5 @@
 //= require jquery
-//= require bootstrap
-
-//= require lib/Base
+//= require turbolinks
 
 //= require hashicorp/mega-nav
-
-//= require docs
-//= require app/Sidebar
-////= require app/Init
+//= require hashicorp/sidebar

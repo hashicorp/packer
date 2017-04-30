@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )

@@ -3,8 +3,8 @@ package triton
 import (
 	"fmt"
 
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"io/ioutil"
@@ -17,7 +17,7 @@ func commHost(state multistep.StateBag) (string, error) {
 	driver := state.Get("driver").(Driver)
 	machineID := state.Get("machine").(string)
 
-	machine, err := driver.GetMachine(machineID)
+	machine, err := driver.GetMachineIP(machineID)
 	if err != nil {
 		return "", err
 	}

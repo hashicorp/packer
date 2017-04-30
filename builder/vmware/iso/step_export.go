@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepExport struct {

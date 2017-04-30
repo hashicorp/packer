@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 const (
@@ -54,7 +54,7 @@ func scpUploadSession(opts []byte, rest string, in io.Reader, out io.Writer, com
 	// directory on the remote side, but ansible only sends files, so there's no
 	// need to set targetIsDir, because it can be safely assumed that rest is
 	// intended to be a file, and whatever names are used in 'C' commands are
-	// irrelavant.
+	// irrelevant.
 	state := &scpUploadState{target: rest, srcRoot: d, comm: comm}
 
 	fmt.Fprintf(out, scpOK) // signal the client to start the transfer.
@@ -104,8 +104,7 @@ func (state *scpDownloadState) FileProtocol(path string, info os.FileInfo, in *b
 	size := info.Size()
 	perms := fmt.Sprintf("C%04o", info.Mode().Perm())
 	fmt.Fprintln(out, perms, size, info.Name())
-	err := scpResponse(in)
-	if err != nil {
+	if err := scpResponse(in); err != nil {
 		return err
 	}
 
@@ -194,8 +193,7 @@ func (state *scpUploadState) FileProtocol(in *bufio.Reader, out io.Writer) error
 		return err
 	}
 
-	err = scpResponse(in)
-	if err != nil {
+	if err := scpResponse(in); err != nil {
 		return err
 	}
 
@@ -260,7 +258,9 @@ type scpDownloadState struct {
 func (state *scpDownloadState) Protocol(in *bufio.Reader, out io.Writer) error {
 	r := bufio.NewReader(in)
 	// read the byte sent by the other side to start the transfer
-	scpResponse(r)
+	if err := scpResponse(r); err != nil {
+		return err
+	}
 
 	return filepath.Walk(state.srcRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -321,7 +321,7 @@ func scpResponse(r *bufio.Reader) error {
 
 		// 1 is a warning. Anything higher (really just 2) is an error.
 		if code > 1 {
-			return errors.New(string(message))
+			return errors.New(message)
 		}
 
 		log.Println("WARNING:", err)

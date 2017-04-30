@@ -9,7 +9,7 @@ type Driver interface {
 	CreateMachine(config Config) (string, error)
 	DeleteImage(imageId string) error
 	DeleteMachine(machineId string) error
-	GetMachine(machineId string) (string, error)
+	GetMachineIP(machineId string) (string, error)
 	StopMachine(machineId string) error
 	WaitForImageCreation(imageId string, timeout time.Duration) error
 	WaitForMachineDeletion(machineId string, timeout time.Duration) error

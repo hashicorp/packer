@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/command"
 	"github.com/mitchellh/cli"
-	"github.com/mitchellh/packer/command"
 )
 
 func TestExcludeHelpFunc(t *testing.T) {

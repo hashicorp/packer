@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -319,7 +319,7 @@ func TestRetryable(t *testing.T) {
 	err := p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err != nil {
-		t.Fatalf("should not have error retrying funuction")
+		t.Fatalf("should not have error retrying function")
 	}
 
 	count = 0
@@ -327,7 +327,7 @@ func TestRetryable(t *testing.T) {
 	err = p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err == nil {
-		t.Fatalf("should have error retrying funuction")
+		t.Fatalf("should have error retrying function")
 	}
 }
 
@@ -368,7 +368,7 @@ func TestProvision_Cancel(t *testing.T) {
 	}()
 	<-waitDone
 
-	// Expect interupt error
+	// Expect interrupt error
 	if err == nil {
 		t.Fatal("should have error")
 	}

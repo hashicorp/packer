@@ -2,13 +2,14 @@ package iso
 
 import (
 	"fmt"
+
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step creates the virtual disk that will be used as the

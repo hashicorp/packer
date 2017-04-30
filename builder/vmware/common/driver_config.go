@@ -3,7 +3,7 @@ package common
 import (
 	"os"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type DriverConfig struct {
