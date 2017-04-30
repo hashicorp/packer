@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepSourceAMIInfo extracts critical information from the source AMI
@@ -85,7 +85,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if len(imageResp.Images) > 1 && s.AmiFilters.MostRecent == false {
+	if len(imageResp.Images) > 1 && !s.AmiFilters.MostRecent {
 		err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set most_recent to true.")
 		state.Put("error", err)
 		ui.Error(err.Error())

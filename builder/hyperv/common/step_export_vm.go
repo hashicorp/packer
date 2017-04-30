@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 const (
@@ -67,7 +68,7 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	ui.Say("Coping to output dir...")
+	ui.Say("Copying to output dir...")
 	err = driver.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
 	if err != nil {
 		errorMsg = "Error exporting vm: %s"

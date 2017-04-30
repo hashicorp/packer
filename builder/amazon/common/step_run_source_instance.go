@@ -11,9 +11,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type StepRunSourceInstance struct {
@@ -289,6 +289,8 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
+	ReportTags(ui, ec2Tags)
+
 	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 		Tags:      ec2Tags,
 		Resources: []*string{instance.InstanceId},
@@ -340,7 +342,10 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "cancelled",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 
 	}
 
@@ -357,6 +362,9 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "terminated",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 	}
 }

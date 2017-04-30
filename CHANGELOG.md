@@ -1,26 +1,60 @@
 ## (Unreleased)
 
+### IMPROVEMENTS:
+
+* builder/amazon: validate ami name. [GH-4762]
+* builder/digitalocean: Added support for monitoring. [GH-4782]
+* builder/openstack: Add ssh agent support. [GH-4655]
+* builder/parallels-iso: Configuration of disk type, plain or expanding.
+    [GH-4621]
+* builder.triton: An SSH agent can be used to authenticate requests, making
+    `triton_key_material` optional. [GH-4838]
+* builder/triton: If no source machine networks are specified, instances are
+    started on the default public and internal networks. [GH-4838]
+* provisioner/ansible: Add extra-vars `packer_build_name` and
+    `packer_builder_type`. [GH-4821]
+* provisioner/ansible-local: Add extra-vars `packer_build_name`, 
+    `packer_builder_type`, and `packer_http_addr`. [GH-4821]
+
 ### BUG FIXES:
 
-* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
-* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+* provisioner/ansible-local: Correctly set the default staging directory under
+    Windows. [GH-4792]
+* builder/azure: Replace calls to panic with error returns. [GH-4846]
+
+
+## 1.0.0 (April 4, 2017)
+
+### BUG FIXES:
+
+* core: fix version number
+* communicator/ssh: don't return error if we can't close connection. #4741
+* builder/googlecompute: Use "default" service account. [GH-4749]
+* core: Invoking packer `--help` or `--version` now exits with status 0.
+    [GH-4723]
 * core: show correct step name when debugging. [GH-4672]
 * builder/virtualbox: fix `none` communicator by allowing skipping upload of
     version file. [GH-4678]
 * communicator/ssh: fix nil pointer error. [GH-4690]
 * builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
+* builder/amazon: Fix b/c issue by reporting again the tags we create.
+    [GH-4704]
+* builder/virtualbox: retry removing floppy controller. [GH-4705]
+* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
+* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
+* More diligently try to complete azure-setup.sh. [GH-4752]
+* builder/ansible: Clearer error message when we have problems getting the
+    ansible version. [GH-4694]
+* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
+    prevent the default `/etc/resolv.conf` file from being copied. If `copy_files`
+    isn't given at all, the default behavior remains. [GH-4708]
 * builder/amazon: validate ssh key name/file. [GH-4665]
 * builder/amazon: set force_deregister to true on -force. [GH-4649]
 * builder/hyper-v: validate output dir in step, not in config. [GH-4645]
 * website: fix display on ios devices. [GH-4618]
-* builder/openstack: Add ssh agent support. [GH-4655]
-* builder/parallels-iso: Configuration of disk type, plain or expanding.
-    [GH-4621]
-* builder/ansible: Clearer error message when we have problems getting the
-    ansible version. [GH-4694]
 
 ## 0.12.3 (March 1, 2017)
 

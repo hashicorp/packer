@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
 )
 
