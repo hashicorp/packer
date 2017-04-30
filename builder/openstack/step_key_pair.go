@@ -22,7 +22,8 @@ type StepKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 
-	keyName string
+	keyName   string
+	doCleanup bool
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
@@ -84,6 +85,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPairName))
+	s.doCleanup = true
 
 	keypair.PrivateKey = berToDer(keypair.PrivateKey, ui)
 
@@ -167,13 +169,7 @@ func berToDer(ber string, ui packer.Ui) string {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
-	// If we used an SSH private key file, do not go about deleting
-	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
-		return
-	}
-	// If no key name is set, then we never created it, so just return
-	if s.TemporaryKeyPairName == "" {
+	if !s.doCleanup {
 		return
 	}
 
