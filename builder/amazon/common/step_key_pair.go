@@ -19,7 +19,8 @@ type StepKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 
-	keyName string
+	keyName   string
+	doCleanup bool
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
@@ -69,6 +70,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Set the keyname so we know to delete it later
 	s.keyName = s.TemporaryKeyPairName
+	s.doCleanup = true
 
 	// Set some state data for use in future steps
 	state.Put("keyPair", s.keyName)
@@ -104,10 +106,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
-	// If no key name is set, then we never created it, so just return
-	// If we used an SSH private key file, do not go about deleting
-	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
+	if !s.doCleanup {
 		return
 	}
 
