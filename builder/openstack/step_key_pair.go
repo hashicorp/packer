@@ -22,7 +22,7 @@ type StepKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 
-	keyName string
+	doCleanup bool
 }
 
 func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
@@ -113,11 +113,11 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	// Set the keyname so we know to delete it later
-	s.keyName = s.TemporaryKeyPairName
+	// we created a temporary key, so remember to clean it up
+	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.keyName)
+	state.Put("keyPair", s.TemporaryKeyPairName)
 	state.Put("privateKey", keypair.PrivateKey)
 
 	return multistep.ActionContinue
@@ -167,13 +167,7 @@ func berToDer(ber string, ui packer.Ui) string {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
-	// If we used an SSH private key file, do not go about deleting
-	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
-		return
-	}
-	// If no key name is set, then we never created it, so just return
-	if s.TemporaryKeyPairName == "" {
+	if !s.doCleanup {
 		return
 	}
 
@@ -189,7 +183,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
-	err = keypairs.Delete(computeClient, s.keyName).ExtractErr()
+	err = keypairs.Delete(computeClient, s.TemporaryKeyPairName).ExtractErr()
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
