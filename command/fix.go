@@ -86,7 +86,7 @@ func (c *FixCommand) Run(args []string) int {
 
 	if flagValidate {
 		// Attemot to parse and validate the template
-		tpl, err := template.Parse(strings.NewReader(result))
+		tpl, err := template.Parse(strings.NewReader(result), "")
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
 				"Error! Fixed template fails to parse: %s\n\n"+
