@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/mitchellh/multistep"
 )
@@ -46,7 +47,7 @@ func AMIStateRefreshFunc(conn *ec2.EC2, imageId string) StateRefreshFunc {
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidAMIID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
-			} else if isTransientNetworkError(err) {
+			} else if isTransientError(err) {
 				// Transient network error, treat it as if we didn't find anything
 				resp = nil
 			} else {
@@ -77,7 +78,7 @@ func InstanceStateRefreshFunc(conn *ec2.EC2, instanceId string) StateRefreshFunc
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidInstanceID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
-			} else if isTransientNetworkError(err) {
+			} else if isTransientError(err) {
 				// Transient network error, treat it as if we didn't find anything
 				resp = nil
 			} else {
@@ -109,7 +110,7 @@ func SpotRequestStateRefreshFunc(conn *ec2.EC2, spotRequestId string) StateRefre
 			if ec2err, ok := err.(awserr.Error); ok && ec2err.Code() == "InvalidSpotInstanceRequestID.NotFound" {
 				// Set this to nil as if we didn't find anything.
 				resp = nil
-			} else if isTransientNetworkError(err) {
+			} else if isTransientError(err) {
 				// Transient network error, treat it as if we didn't find anything
 				resp = nil
 			} else {
@@ -140,7 +141,7 @@ func ImportImageRefreshFunc(conn *ec2.EC2, importTaskId string) StateRefreshFunc
 		if err != nil {
 			if ec2err, ok := err.(awserr.Error); ok && strings.HasPrefix(ec2err.Code(), "InvalidConversionTaskId") {
 				resp = nil
-			} else if isTransientNetworkError(err) {
+			} else if isTransientError(err) {
 				resp = nil
 			} else {
 				log.Printf("Error on ImportImageRefresh: %s", err)
@@ -212,9 +213,16 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	}
 }
 
-func isTransientNetworkError(err error) bool {
+func isTransientError(err error) bool {
 	if nerr, ok := err.(net.Error); ok && nerr.Temporary() {
 		return true
+	}
+
+	if ec2err, ok := err.(awserr.Error); ok {
+		req := request.Request{}
+		req.Error = ec2err
+
+		return req.IsErrorExpired() || req.IsErrorRetryable() || req.IsErrorThrottle()
 	}
 
 	return false
