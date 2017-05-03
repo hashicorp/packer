@@ -82,6 +82,7 @@ file as `quick-start.json`. Export your AWS credentials as the
     "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
+    "security_group_id" : "OPTIONAL SECURITY GROUP ID"
   }]
 }
 ```
