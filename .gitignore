@@ -11,6 +11,9 @@ test/.env
 *~
 *.received.*
 
+.idea/
+*.iml
+
 website/.bundle
 website/vendor
 
