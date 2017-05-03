@@ -15,6 +15,94 @@ func TestParse(t *testing.T) {
 		Err    bool
 	}{
 		/*
+		 * Include
+		 */
+		{
+			"parse-include-basic.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"something": &Builder{
+						Name: "something",
+						Type: "something",
+					},
+				},
+			},
+			false,			
+		},
+		{
+			"parse-include-all.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"something": &Builder{
+						Name: "something",
+						Type: "something",
+					},
+				},
+			},
+			false,
+		},
+		{
+			"parse-include-provisioner-basic.json",
+			&Template{
+				Provisioners: []*Provisioner{
+					&Provisioner{
+						Type: "something",
+					},
+				},
+			},
+			false,		
+		},
+		{
+			"parse-include-variable-default.json",
+			&Template{
+				Variables: map[string]*Variable{
+					"foo": &Variable{
+						Default: "foo",
+					},
+				},
+			},
+			false,
+		},
+		{
+			"parse-include-variable-two.json",
+			&Template{
+				Variables: map[string]*Variable{
+					"foo": &Variable{
+						Default: "foo",
+					},
+					"bar": &Variable{
+						Default: "bar",
+					},
+				},
+			},
+			false,
+		},
+		{
+			"parse-include-pp-basic.json",
+			&Template{
+				PostProcessors: [][]*PostProcessor{
+					[]*PostProcessor{
+						&PostProcessor{
+							Type: "foo",
+							Config: map[string]interface{}{
+								"foo": "bar",
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
+			"parse-include-push.json",
+			&Template{
+				Push: Push{
+					Name: "foo",
+				},
+			},
+			false,
+		},
+		/*
 		 * Builders
 		 */
 		{

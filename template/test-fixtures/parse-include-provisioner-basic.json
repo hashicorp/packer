@@ -1,0 +1,7 @@
+{
+	"include": {
+		"parse-provisioner-basic.json": [
+			"provisioners[0]"
+		]
+	}
+}

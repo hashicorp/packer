@@ -1,0 +1,7 @@
+{
+	"include": {
+		"parse-variable-default.json": [
+			"variables['foo']"
+		]
+	}
+}
