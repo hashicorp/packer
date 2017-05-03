@@ -38,6 +38,10 @@ func (s *StepGetCertificate) getCertificateUrl(keyVaultName string, secretName s
 		return "", err
 	}
 
+	if secret == nil || secret.ID == nil {
+		return "", fmt.Errorf("certificate is nil")
+	}
+
 	return *secret.ID, err
 }
 
