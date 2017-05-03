@@ -18,7 +18,7 @@ func logOutput() (logOutput io.Writer, err error) {
 
 		if logPath := os.Getenv(EnvLogFile); logPath != "" {
 			var err error
-			logOutput, err = os.Create(logPath)
+			logOutput, err = os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 			if err != nil {
 				return nil, err
 			}

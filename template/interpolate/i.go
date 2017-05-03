@@ -2,8 +2,11 @@ package interpolate
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 )
+
+const maxInterpolationRounds = 5
 
 // Context is the context that an interpolation is done in. This defines
 // things such as available variables.
@@ -34,8 +37,24 @@ type Context struct {
 }
 
 // Render is shorthand for constructing an I and calling Render.
-func Render(v string, ctx *Context) (string, error) {
-	return (&I{Value: v}).Render(ctx)
+// Variable interpolation is done through several rounds in order to cover
+// nested variables definitions (e.g. variables whose content is referencing
+// another variable). Termination of substitution rounds is either max const or
+// no delta between rounds.
+func Render(v string, ctx *Context) (result string, err error) {
+	for count := 0; count < maxInterpolationRounds; count++ {
+		i, err := (&I{Value: v}).Render(ctx)
+		if err != nil {
+			return i, err
+		}
+		if strings.EqualFold(i, v) {
+			result = i
+			break
+		} else {
+			v = i
+		}
+	}
+	return result, err
 }
 
 // Validate is shorthand for constructing an I and calling Validate.
