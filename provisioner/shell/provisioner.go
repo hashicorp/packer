@@ -30,7 +30,7 @@ type Config struct {
 
 	// An inline script to execute. Multiple strings are all executed
 	// in the context of a single shell.
-	Inline []string
+	Inline []string `mapstructure:"inline"`
 
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
@@ -93,6 +93,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"inline",
 			},
 		},
 	}, raws...)
