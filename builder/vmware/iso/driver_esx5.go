@@ -83,6 +83,10 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 	return d.sh("vim-cmd", "vmsvc/power.off", d.vmId)
 }
 
+func (d *ESX5Driver) Delete(vmxPathLocal string) error {
+	return d.sh("vim-cmd", "vmsvc/destroy", d.vmId)
+}
+
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {

@@ -43,6 +43,10 @@ type DriverMock struct {
 	StopPath   string
 	StopErr    error
 
+	DeleteCalled bool
+	DeletePath   string
+	DeleteErr    error
+
 	SuppressMessagesCalled bool
 	SuppressMessagesPath   string
 	SuppressMessagesErr    error
@@ -109,6 +113,12 @@ func (d *DriverMock) Stop(path string) error {
 	d.StopCalled = true
 	d.StopPath = path
 	return d.StopErr
+}
+
+func (d *DriverMock) Delete(path string) error {
+	d.DeleteCalled = true
+	d.DeletePath = path
+	return d.DeleteErr
 }
 
 func (d *DriverMock) SuppressMessages(path string) error {

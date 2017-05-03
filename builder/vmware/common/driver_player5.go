@@ -124,6 +124,15 @@ func (d *Player5Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Player5Driver) Delete(vmxPath string) error {
+	cmd := exec.Command(d.VmrunPath, "-T", "ws", "deleteVM", vmxPath)
+	if _, _, err := runAndLog(cmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Player5Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }
