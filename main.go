@@ -73,6 +73,14 @@ func realMain() int {
 		outR, outW := io.Pipe()
 		go copyOutput(outR, doneCh)
 
+		// Enable checkpoint for panic reporting
+		config, err := loadConfig()
+		if err == nil {
+			if !config.DisableCheckpoint {
+				packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
+			}
+		}
+
 		// Create the configuration for panicwrap and wrap our executable
 		wrapConfig.Handler = panicHandler(logTempFile)
 		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
@@ -117,9 +125,11 @@ func wrappedMain() int {
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
 	log.Printf("Built with Go Version: %s", runtime.Version())
 
+	inPlugin := os.Getenv(plugin.MagicCookieKey) == plugin.MagicCookieValue
+
 	// Prepare stdin for plugin usage by switching it to a pipe
 	// But do not switch to pipe in plugin
-	if os.Getenv(plugin.MagicCookieKey) != plugin.MagicCookieValue {
+	if !inPlugin {
 		setupStdin()
 	}
 
@@ -132,6 +142,9 @@ func wrappedMain() int {
 
 	// Fire off the checkpoint.
 	go runCheckpoint(config)
+	if !config.DisableCheckpoint {
+		packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
+	}
 
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")
 	if cacheDir == "" {
@@ -196,6 +209,12 @@ func wrappedMain() int {
 	}
 
 	exitCode, err := cli.Run()
+	if !inPlugin {
+		if err := packer.CheckpointReporter.Finalize(cli.Subcommand(), exitCode, err); err != nil {
+			log.Printf("Error finalizing telemetry report. This is safe to ignore. %s", err.Error())
+		}
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err)
 		return 1
