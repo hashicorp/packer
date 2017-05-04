@@ -101,8 +101,11 @@ builder.
     Default `false`.
 
 - `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+  networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
+  `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
+  sure enhanced networking is enabled on your instance. See [Amazon's
+  documentation on enabling enhanced networking](
+  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
 
 - `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
