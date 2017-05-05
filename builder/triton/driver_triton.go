@@ -1,6 +1,7 @@
 package triton
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -26,7 +27,7 @@ func NewDriverTriton(ui packer.Ui, config Config) (Driver, error) {
 }
 
 func (d *driverTriton) CreateImageFromMachine(machineId string, config Config) (string, error) {
-	image, err := d.client.Images().CreateImageFromMachine(&triton.CreateImageFromMachineInput{
+	image, err := d.client.Images().CreateImageFromMachine(context.Background(), &triton.CreateImageFromMachineInput{
 		MachineID:   machineId,
 		Name:        config.ImageName,
 		Version:     config.ImageVersion,
@@ -64,7 +65,7 @@ func (d *driverTriton) CreateMachine(config Config) (string, error) {
 		input.Networks = config.MachineNetworks
 	}
 
-	machine, err := d.client.Machines().CreateMachine(input)
+	machine, err := d.client.Machines().CreateMachine(context.Background(), input)
 	if err != nil {
 		return "", err
 	}
@@ -73,19 +74,19 @@ func (d *driverTriton) CreateMachine(config Config) (string, error) {
 }
 
 func (d *driverTriton) DeleteImage(imageId string) error {
-	return d.client.Images().DeleteImage(&triton.DeleteImageInput{
+	return d.client.Images().DeleteImage(context.Background(), &triton.DeleteImageInput{
 		ImageID: imageId,
 	})
 }
 
 func (d *driverTriton) DeleteMachine(machineId string) error {
-	return d.client.Machines().DeleteMachine(&triton.DeleteMachineInput{
+	return d.client.Machines().DeleteMachine(context.Background(), &triton.DeleteMachineInput{
 		ID: machineId,
 	})
 }
 
 func (d *driverTriton) GetMachineIP(machineId string) (string, error) {
-	machine, err := d.client.Machines().GetMachine(&triton.GetMachineInput{
+	machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
 		ID: machineId,
 	})
 	if err != nil {
@@ -96,7 +97,7 @@ func (d *driverTriton) GetMachineIP(machineId string) (string, error) {
 }
 
 func (d *driverTriton) StopMachine(machineId string) error {
-	return d.client.Machines().StopMachine(&triton.StopMachineInput{
+	return d.client.Machines().StopMachine(context.Background(), &triton.StopMachineInput{
 		MachineID: machineId,
 	})
 }
@@ -109,7 +110,7 @@ func (d *driverTriton) StopMachine(machineId string) error {
 func (d *driverTriton) WaitForMachineState(machineId string, state string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.Machines().GetMachine(&triton.GetMachineInput{
+			machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
 				ID: machineId,
 			})
 			if machine == nil {
@@ -128,7 +129,7 @@ func (d *driverTriton) WaitForMachineState(machineId string, state string, timeo
 func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.Machines().GetMachine(&triton.GetMachineInput{
+			machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
 				ID: machineId,
 			})
 			if err != nil && triton.IsResourceNotFound(err) {
@@ -149,7 +150,7 @@ func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Dur
 func (d *driverTriton) WaitForImageCreation(imageId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			image, err := d.client.Images().GetImage(&triton.GetImageInput{
+			image, err := d.client.Images().GetImage(context.Background(), &triton.GetImageInput{
 				ImageID: imageId,
 			})
 			if image == nil {
