@@ -5,6 +5,16 @@ GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
+GOOS=$(shell go env GOOS)
+GOARCH=$(shell go env GOARCH)
+
+# Get the git commit
+GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+GIT_COMMIT=$(shell git rev-parse --short HEAD)
+GIT_IMPORT=github.com/hashicorp/packer/version
+GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)
+
+export GOLDFLAGS
 
 default: deps generate test dev
 
@@ -13,32 +23,36 @@ ci: deps test
 release: deps test releasebin package ## Build a release build
 
 bin: deps ## Build debug/test build
+	@go get github.com/mitchellh/gox
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
-	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@sh -c "$(CURDIR)/scripts/build.sh"
 
 releasebin: deps
+	@go get github.com/mitchellh/gox
 	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
 	fi
-	@GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@sh -c "$(CURDIR)/scripts/build.sh"
 
 package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
-	go get github.com/mitchellh/gox
-	go get golang.org/x/tools/cmd/stringer
-	go get github.com/kardianos/govendor
-	govendor sync
+	@go get golang.org/x/tools/cmd/stringer
+	@go get github.com/kardianos/govendor
+	@govendor sync
 
 dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must add prerelease tags to version/version.go prior to making a dev build."; \
 		exit 1; \
 	fi
-	@PACKER_DEV=1 GO15VENDOREXPERIMENT=1 sh -c "$(CURDIR)/scripts/build.sh"
+	@mkdir -p pkg/$(GOOS)_$(GOARCH)
+	go install -ldflags '$(GOLDFLAGS)'
+	@cp $(GOPATH)/bin/packer bin
+	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
 	@gofmt -w -s $(GOFMT_FILES)
@@ -72,8 +86,6 @@ testrace: deps ## Test for race conditions
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
-	go get -u github.com/mitchellh/gox
-	go get -u golang.org/x/tools/cmd/stringer
 	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
 
 help:
