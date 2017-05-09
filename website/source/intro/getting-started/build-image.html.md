@@ -175,7 +175,7 @@ you will also need to set `associate_public_ip_address` to `true`, or set up a
 
 Packer only builds images. It does not attempt to manage them in any way. After
 they're built, it is up to you to launch or destroy them as you see fit. If you
-want to store and namespace images for easy reference, you can use [Atlas by
+want to store and namespace images for quick reference, you can use [Atlas by
 HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
 storing images at the end of this getting started guide.
 

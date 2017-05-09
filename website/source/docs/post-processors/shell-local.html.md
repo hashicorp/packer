@@ -11,8 +11,9 @@ description: |-
 
 Type: `shell-local`
 
-The local shell post processor executes scripts locally during the post processing stage. Shell local provides an easy
-way to automate executing some task with the packer outputs.
+The local shell post processor executes scripts locally during the post
+processing stage. Shell local provides a convenient way to automate executing
+some task with the packer outputs.
 
 ## Basic example
 

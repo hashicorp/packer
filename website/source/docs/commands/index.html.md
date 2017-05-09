@@ -35,8 +35,9 @@ However, Packer was built with automation in mind. To that end, Packer supports
 a fully machine-readable output setting, allowing you to use Packer in automated
 environments.
 
-The machine-readable output format is easy to use and read and was made with
-Unix tools in mind, so it is awk/sed/grep/etc. friendly.
+Because the machine-readable output format was made with Unix tools in mind, it
+is `awk`/`sed`/`grep`/etc. friendly and provides a familiar interface without
+requiring you to learn a new format.
 
 ### Enabling Machine-Readable Output
 
@@ -64,8 +65,8 @@ environments.
 ### Format for Machine-Readable Output
 
 The machine readable format is a line-oriented, comma-delimited text format.
-This makes it extremely easy to parse using standard Unix tools such as awk or
-grep in addition to full programming languages like Ruby or Python.
+This makes it more convenient to parse using standard Unix tools such as `awk` or
+`grep` in addition to full programming languages like Ruby or Python.
 
 The format is:
 
@@ -92,7 +93,7 @@ Each component is explained below:
 
 Within the format, if data contains a comma, it is replaced with
 `%!(PACKER_COMMA)`. This was preferred over an escape character such as `\'`
-because it is more friendly to tools like awk.
+because it is more friendly to tools like `awk`.
 
 Newlines within the format are replaced with their respective standard escape
 sequence. Newlines become a literal `\n` within the output. Carriage returns

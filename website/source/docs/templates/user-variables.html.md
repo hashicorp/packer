@@ -26,12 +26,11 @@ how configuration templates work yet, please read that page first.
 
 User variables must first be defined in a `variables` section within your
 template. Even if you want a variable to default to an empty string, it must be
-defined. This explicitness makes it easy for newcomers to your template to
-understand what can be modified using variables in your template.
+defined. This explicitness helps reduce the onboarding time for newcomers to your
+template to understand what can be modified using variables in your template.
 
-The `variables` section is a simple key/value mapping of the variable name to a
-default value. A default value can be the empty string. An example is shown
-below:
+The `variables` section is a key/value mapping of the variable name to a default
+value. A default value can be the empty string. An example is shown below:
 
 ```json
 {
@@ -58,11 +57,10 @@ If the default value is `null`, then the user variable will be *required*. This
 means that the user must specify a value for this variable or template
 validation will fail.
 
-Using the variables is extremely easy. Variables are used by calling the user
-function in the form of <code>{{user \`variable\`}}</code>. This function can be
-used in *any value* within the template; in builders, provisioners, *anywhere
-outside the `variables` section*.   The user variable is available globally
-within the rest of the template.
+Variables are used by calling the user function in the form of
+<code>{{user \`variable\`}}</code>. This function can be used in *any value*
+within the template; in builders, provisioners, *anywhere outside the `variables`
+section*. The user variable is available globally within the rest of the template.
 
 ## Environment Variables
 
@@ -121,8 +119,8 @@ earlier set variables if it has already been set.
 ### From a File
 
 Variables can also be set from an external JSON file. The `-var-file` flag reads
-a file containing a basic key/value mapping of variables to values and sets
-those variables. The JSON file is simple:
+a file containing a key/value mapping of variables to values and sets
+those variables. An example JSON file may look like this:
 
 ```json
 {

@@ -78,7 +78,7 @@ standpoint.
 Packer plugins must be written in [Go](https://golang.org/), so it is also
 assumed that you're familiar with the language. This page will not be a Go
 language tutorial. Thankfully, if you are familiar with Go, the Go toolchain
-makes it extremely easy to develop Packer plugins.
+provides many conveniences to help to develop Packer plugins.
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
@@ -104,9 +104,10 @@ process. Pretty cool.
 
 ### Plugin Development Basics
 
-Developing a plugin is quite simple. All the various kinds of plugins have a
-corresponding interface. The plugin simply needs to implement this interface and
-expose it using the Packer plugin package (covered here shortly), and that's it!
+Developing a plugin allows you to create additional functionality for Packer.
+All the various kinds of plugins have a corresponding interface. The plugin needs
+to implement this interface and expose it using the Packer plugin package
+(covered here shortly), and that's it!
 
 There are two packages that really matter that every plugin must use. Other than
 the following two packages, you're encouraged to use whatever packages you want.
