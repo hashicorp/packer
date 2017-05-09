@@ -24,7 +24,7 @@ familiar with this and vice versa.
 
 ## Configuration
 
-The configuration for this post-processor is extremely simple.
+The configuration for this post-processor only requires one option.
 
 - `path` (string) - The path to save the image.
 

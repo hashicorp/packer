@@ -29,7 +29,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 ## The Interface
 
 The interface that must be implemented for a provisioner is the
-`packer.Provisioner` interface. It is reproduced below for easy reference. The
+`packer.Provisioner` interface. It is reproduced below for reference. The
 actual interface in the source code contains some basic documentation as well
 explaining what each method should do.
 
