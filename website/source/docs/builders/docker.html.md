@@ -75,6 +75,7 @@ Example uses of all of the options, assuming one is building an NGINX image from
     "VOLUME /test1 /test2",
     "EXPOSE 80 443",
     "LABEL version=1.0",
+    "ONBUILD RUN date",
     "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
     "MAINTAINER Captain Kirk",
     "ENTRYPOINT /var/www/start.sh"
@@ -100,6 +101,9 @@ Allowed metadata fields that can be changed are:
 - LABEL
 	- String, space separated key=value pairs
 	- EX: `"LABEL version=1.0"`
+- ONBUILD
+	- String
+	- EX: `"ONBUILD RUN date"`
 - MAINTAINER
 	- String, deprecated in Docker version 1.13.0
 	- EX: `"MAINTAINER NAME"`
