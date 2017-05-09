@@ -44,9 +44,8 @@ apply to, if you wish.
 
 Within the `post-processors` array in a template, there are three ways to define
 a post-processor. There are *simple* definitions, *detailed* definitions, and
-*sequence* definitions. Don't worry, they're all very easy to understand, and
-the "simple" and "detailed" definitions are simply shortcuts for the "sequence"
-definition.
+*sequence* definitions. Another way to think about this is that the "simple" and
+"detailed" definitions are shortcuts for the "sequence" definition.
 
 A **simple definition** is just a string; the name of the post-processor. An
 example is shown below. Simple definitions are used when no additional

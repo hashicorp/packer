@@ -25,8 +25,8 @@ that this works with committed resources, rather than exported.
 
 ## Configuration
 
-The configuration for this post-processor is extremely simple. At least a
-repository is required.
+The configuration for this post-processor requires `repository`, all other settings
+are optional.
 
 - `repository` (string) - The repository of the image.
 

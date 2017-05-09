@@ -4,7 +4,7 @@ sidebar_current: intro-getting-started-install
 page_title: Install Packer - Getting Started
 description: |-
   Packer must first be installed on the machine you want to run it on. To make
-  installation easy, Packer is distributed as a binary package for all supported
+  installation easier, Packer is distributed as a binary package for all supported
   platforms and architectures. This page will not cover how to compile Packer
   from source, as that is covered in the README and is only recommended for
   advanced users.
@@ -13,7 +13,7 @@ description: |-
 # Install Packer
 
 Packer must first be installed on the machine you want to run it on. To make
-installation easy, Packer is distributed as a [binary package](/downloads.html)
+installation easier, Packer is distributed as a [binary package](/downloads.html)
 for all supported platforms and architectures. This page will not cover how to
 compile Packer from source, as that is covered in the
 [README](https://github.com/hashicorp/packer/blob/master/README.md) and is only
