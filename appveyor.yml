@@ -22,6 +22,7 @@ install:
   - go env
   - go get github.com/mitchellh/gox
   - go get golang.org/x/tools/cmd/stringer
+  - choco install putty
 
 build_script:
   - git rev-parse HEAD
