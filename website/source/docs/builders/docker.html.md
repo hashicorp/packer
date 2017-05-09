@@ -74,6 +74,7 @@ Example uses of all of the options, assuming one is building an NGINX image from
     "ENV HOSTNAME www.example.com",
     "VOLUME /test1 /test2",
     "EXPOSE 80 443",
+    "LABEL version=1.0",
     "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
     "MAINTAINER Captain Kirk",
     "ENTRYPOINT /var/www/start.sh"
@@ -96,6 +97,9 @@ Allowed metadata fields that can be changed are:
 - EXPOSE
 	- String, space separated ports
 	- EX: `"EXPOSE 80 443"`
+- LABEL
+	- String, space separated key=value pairs
+	- EX: `"LABEL version=1.0"`
 - MAINTAINER
 	- String, deprecated in Docker version 1.13.0
 	- EX: `"MAINTAINER NAME"`
