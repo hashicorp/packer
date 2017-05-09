@@ -97,7 +97,7 @@ Allowed metadata fields that can be changed are:
 	- String, space separated ports
 	- EX: `"EXPOSE 80 443"`
 - MAINTAINER
-	- String
+	- String, deprecated in Docker version 1.13.0
 	- EX: `"MAINTAINER NAME"`
 - USER
 	- String
