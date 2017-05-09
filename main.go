@@ -7,6 +7,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	server.RegisterPostProcessor(new(PostProcessor))
+	server.RegisterBuilder(new(Builder))
 	server.Serve()
 }
