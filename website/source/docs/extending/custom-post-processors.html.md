@@ -30,7 +30,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 ## The Interface
 
 The interface that must be implemented for a post-processor is the
-`packer.PostProcessor` interface. It is reproduced below for easy reference. The
+`packer.PostProcessor` interface. It is reproduced below for reference. The
 actual interface in the source code contains some basic documentation as well
 explaining what each method should do.
 

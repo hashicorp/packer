@@ -86,7 +86,7 @@ when you click on the active build, you can view the logs in real-time.
 Now we have Atlas building an AMI with Redis pre-configured. This is great, but
 it's even better to store and version the AMI output so it can be easily
 deployed by a tool like [Terraform](https://www.terraform.io). The `atlas`
-[post-processor](/docs/post-processors/atlas.html) makes this process simple:
+[post-processor](/docs/post-processors/atlas.html) makes this process easier:
 
 ```json
 {

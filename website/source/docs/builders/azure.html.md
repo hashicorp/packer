@@ -217,7 +217,7 @@ builder.
 
 The Azure builder uses ARM
 [templates](https://azure.microsoft.com/en-us/documentation/articles/resource-group-authoring-templates/) to deploy
-resources.  ARM templates make it easy to express the what without having to express the how.
+resources.  ARM templates allow you to express the what without having to express the how.
 
 The Azure builder works under the assumption that it creates everything it needs to execute a build.  When the build has
 completed it simply deletes the resource group to cleanup any runtime resources.  Resource groups are named using the
