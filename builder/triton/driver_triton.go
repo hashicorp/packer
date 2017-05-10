@@ -3,6 +3,7 @@ package triton
 import (
 	"context"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/packer/packer"
@@ -129,15 +130,16 @@ func (d *driverTriton) WaitForMachineState(machineId string, state string, timeo
 func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
+			_, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
 				ID: machineId,
 			})
-			if err != nil && triton.IsResourceNotFound(err) {
-				return true, nil
-			}
-
-			if machine != nil {
-				return machine.State == "deleted", nil
+			if err != nil {
+				// Return true only when we receive a 410 (Gone) response.  A 404
+				// indicates that the machine is being deleted whereas a 410 indicates
+				// that this process has completed.
+				if triErr, ok := err.(*triton.TritonError); ok && triErr.StatusCode == http.StatusGone {
+					return true, nil
+				}
 			}
 
 			return false, err
