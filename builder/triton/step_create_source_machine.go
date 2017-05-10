@@ -64,5 +64,12 @@ func (s *StepCreateSourceMachine) Cleanup(state multistep.StateBag) {
 			state.Put("error", fmt.Errorf("Problem deleting source machine: %s", err))
 			return
 		}
+
+		ui.Say(fmt.Sprintf("Waiting for source machine to be destroyed (%s)...", machineId))
+		err = driver.WaitForMachineDeletion(machineId, 10*time.Minute)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Problem waiting for source machine to be deleted: %s", err))
+			return
+		}
 	}
 }
