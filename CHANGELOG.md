@@ -15,6 +15,7 @@
     `packer_builder_type`. [GH-4821]
 * provisioner/ansible-local: Add extra-vars `packer_build_name`, 
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
+* website/docs: Update docker metadata fields that can be changed. [GH-4867]
 
 ### BUG FIXES:
 
