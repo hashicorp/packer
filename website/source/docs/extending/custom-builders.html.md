@@ -25,8 +25,8 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 ## The Interface
 
 The interface that must be implemented for a builder is the `packer.Builder`
-interface. It is reproduced below for easy reference. The actual interface in
-the source code contains some basic documentation as well explaining what each
+interface. It is reproduced below for reference. The actual interface in the
+source code contains some basic documentation as well explaining what each
 method should do.
 
 ```go
@@ -109,8 +109,7 @@ respond to these cancellations and clean up after itself.
 
 The `Run` method is expected to return an implementation of the
 `packer.Artifact` interface. Each builder must create their own implementation.
-The interface is very simple and the documentation on the interface is quite
-clear.
+The interface has ample documentation to help you get started.
 
 The only part of an artifact that may be confusing is the `BuilderId` method.
 This method must return an absolutely unique ID for the builder. In general, I

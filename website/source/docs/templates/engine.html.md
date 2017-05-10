@@ -31,10 +31,11 @@ globally available functions.
 
 ## Syntax
 
-The syntax of templates is extremely simple. Anything template related happens
-within double-braces: `{{ }}`. Variables are prefixed with a period and
-capitalized, such as `{{.Variable}}` and functions are just directly within the
-braces, such as `{{timestamp}}`.
+The syntax of templates uses the following conventions:
+
+* Anything template related happens within double-braces: `{{ }}`
+* Variables are prefixed with a period and capitalized, such as `{{.Variable}}`
+* Functions are directly within the braces, such as `{{timestamp}}`
 
 Here is an example from the VMware VMX template that shows configuration
 templates in action:

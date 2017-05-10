@@ -6,7 +6,7 @@ description: |-
   the meaning may not be immediately obvious if you haven't used Packer before.
   Luckily, there are relatively few. This page documents all the terminology
   required to understand and use Packer. The terminology is in alphabetical
-  order for easy referencing.
+  order for quick referencing.
 ---
 
 # Packer Terminology
@@ -15,7 +15,7 @@ There are a handful of terms used throughout the Packer documentation where the
 meaning may not be immediately obvious if you haven't used Packer before.
 Luckily, there are relatively few. This page documents all the terminology
 required to understand and use Packer. The terminology is in alphabetical order
-for easy referencing.
+for quick referencing.
 
 - `Artifacts` are the results of a single build, and are usually a set of IDs or
   files to represent a machine image. Every builder produces a single artifact.
