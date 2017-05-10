@@ -26,8 +26,8 @@ how configuration templates work yet, please read that page first.
 
 User variables must first be defined in a `variables` section within your
 template. Even if you want a variable to default to an empty string, it must be
-defined. This explicitness helps reduce the onboarding time for newcomers to your
-template to understand what can be modified using variables in your template.
+defined. This explicitness helps reduce the time it takes for newcomers to 
+understand what can be modified using variables in your template.
 
 The `variables` section is a key/value mapping of the variable name to a default
 value. A default value can be the empty string. An example is shown below:
