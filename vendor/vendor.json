@@ -520,10 +520,10 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "3yw6Wr66v4WrQyY2hYveEmiFadM=",
+			"checksumSHA1": "cdoXZmgAhucjxu9V0xuAwwOoN0U=",
 			"path": "github.com/joyent/triton-go",
-			"revision": "16cef4c2d78ba1d3bf89af75e93ae2dec6e56634",
-			"revisionTime": "2017-05-04T20:45:05Z"
+			"revision": "97ccd9f6c0c0652cf87997bcb01955e0329cd37e",
+			"revisionTime": "2017-05-09T20:29:43Z"
 		},
 		{
 			"checksumSHA1": "QzUqkCSn/ZHyIK346xb9V6EBw9U=",
