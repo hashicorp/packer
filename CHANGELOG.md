@@ -2,6 +2,7 @@
 
 ### IMPROVEMENTS:
 
+* website/docs: Clarify language, improve formatting. [GH-4866]
 * builder/amazon: validate ami name. [GH-4762]
 * builder/digitalocean: Added support for monitoring. [GH-4782]
 * builder/openstack: Add ssh agent support. [GH-4655]
@@ -16,6 +17,7 @@
 * provisioner/ansible-local: Add extra-vars `packer_build_name`, 
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
+* builder/amazon: use retry logic when creating instance tags. [GH-4876]
 
 ### BUG FIXES:
 
