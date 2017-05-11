@@ -80,7 +80,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	// group isn't available immediately because AWS resources are eventually
 	// consistent.
 	ui.Say(fmt.Sprintf(
-		"Authorizing access to port %d the temporary security group...",
+		"Authorizing access to port %d on the temporary security group...",
 		port))
 	for i := 0; i < 5; i++ {
 		_, err = ec2conn.AuthorizeSecurityGroupIngress(req)
