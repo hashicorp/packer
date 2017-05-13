@@ -54,8 +54,8 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Username = os.Getenv("SDK_USERNAME")
 	}
 
-	// Get as much as possible from the end
-	ao, _ := openstack.AuthOptionsFromEnv()
+	// Get as much as possible from the env
+	ao, authErr := openstack.AuthOptionsFromEnv()
 
 	// Make sure we reauth as needed
 	ao.AllowReauth = true
@@ -78,6 +78,10 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 			*s.To = *s.From
 		}
 	}
+
+    if ao.IdentityEndpoint == "" || ao.Username == "" || ao.Password == "" {
+        return []error{authErr}
+    }
 
 	// Build the client itself
 	client, err := openstack.NewClient(ao.IdentityEndpoint)
