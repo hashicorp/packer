@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,

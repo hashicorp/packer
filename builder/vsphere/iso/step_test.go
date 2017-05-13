@@ -2,10 +2,11 @@ package iso
 
 import (
 	"bytes"
+	"testing"
+
 	vspcommon "github.com/hashicorp/packer/builder/vsphere/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"testing"
 )
 
 func testState(t *testing.T) multistep.StateBag {

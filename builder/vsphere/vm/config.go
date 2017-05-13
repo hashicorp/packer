@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-//TODO: WIP to be implemented
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
