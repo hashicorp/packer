@@ -520,7 +520,13 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "cdoXZmgAhucjxu9V0xuAwwOoN0U=",
+			"checksumSHA1": "GnYsUxBxUHGDBIaCeQbMdYUCzkA=",
+			"path": "github.com/jmoiron/jsonq",
+			"revision": "e874b168d07ecc7808bc950a17998a8aa3141d82",
+			"revisionTime": "2015-05-11T02:39:44Z"
+		},
+		{
+			"checksumSHA1": "o8jaSD36Zq42PMnmUaiB+vq+QNA=",
 			"path": "github.com/joyent/triton-go",
 			"revision": "97ccd9f6c0c0652cf87997bcb01955e0329cd37e",
 			"revisionTime": "2017-05-09T20:29:43Z"
@@ -968,5 +974,5 @@
 			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
-	"rootPath": "github.com/hashicorp/packer"
+	"rootPath": "github.com/mitchellh/packer"
 }
