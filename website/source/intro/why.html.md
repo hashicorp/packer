@@ -1,17 +1,15 @@
 ---
-description: |
-    Pre-baked machine images have a lot of advantages, but most have been unable to
-    benefit from them because images have been too tedious to create and manage.
-    There were either no existing tools to automate the creation of machine images
-    or they had too high of a learning curve. The result is that, prior to Packer,
-    creating machine images threatened the agility of operations teams, and
-    therefore aren't used, despite the massive benefits.
 layout: intro
-next_title: Packer Use Cases
-next_url: '/intro/use-cases.html'
-page_title: 'Why Use Packer?'
-prev_url: '/intro/index.html'
-...
+sidebar_current: intro-why
+page_title: Why Packer - Introduction
+description: |-
+  Pre-baked machine images have a lot of advantages, but most have been unable
+  to benefit from them because images have been too tedious to create and
+  manage. There were either no existing tools to automate the creation of
+  machine images or they had too high of a learning curve. The result is that,
+  prior to Packer, creating machine images threatened the agility of operations
+  teams, and therefore aren't used, despite the massive benefits.
+---
 
 # Why Use Packer?
 

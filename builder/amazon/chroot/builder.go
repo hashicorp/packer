@@ -11,12 +11,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // The unique ID for this builder
@@ -87,10 +87,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.ChrootMounts = make([][]string, 0)
 	}
 
-	if b.config.CopyFiles == nil {
-		b.config.CopyFiles = make([]string, 0)
-	}
-
 	if len(b.config.ChrootMounts) == 0 {
 		b.config.ChrootMounts = [][]string{
 			{"proc", "proc", "/proc"},
@@ -101,8 +97,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if len(b.config.CopyFiles) == 0 && !b.config.FromScratch {
-		b.config.CopyFiles = []string{"/etc/resolv.conf"}
+	// set default copy file if we're not giving our own
+	if b.config.CopyFiles == nil {
+		b.config.CopyFiles = make([]string, 0)
+		if !b.config.FromScratch {
+			b.config.CopyFiles = []string{"/etc/resolv.conf"}
+		}
 	}
 
 	if b.config.CommandWrapper == "" {

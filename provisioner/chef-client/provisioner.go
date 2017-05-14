@@ -12,12 +12,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/provisioner"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type guestOSTypeConfig struct {
@@ -317,20 +317,6 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
-}
-
-func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
-	if err := p.createDir(ui, comm, dst); err != nil {
-		return err
-	}
-
-	// Make sure there is a trailing "/" so that the directory isn't
-	// created on the other side.
-	if src[len(src)-1] != '/' {
-		src = src + "/"
-	}
-
-	return comm.UploadDir(dst, src, nil)
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {

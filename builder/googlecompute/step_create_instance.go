@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepCreateInstance represents a Packer build step that creates GCE instances.
@@ -99,25 +99,24 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	var metadata map[string]string
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
 	errCh, err = d.RunInstance(&InstanceConfig{
-		Address:             c.Address,
-		Description:         "New instance created by Packer",
-		DiskSizeGb:          c.DiskSizeGb,
-		DiskType:            c.DiskType,
-		Image:               sourceImage,
-		MachineType:         c.MachineType,
-		Metadata:            metadata,
-		Name:                name,
-		Network:             c.Network,
-		NetworkProjectId:    c.NetworkProjectId,
-		OmitExternalIP:      c.OmitExternalIP,
-		OnHostMaintenance:   c.OnHostMaintenance,
-		Preemptible:         c.Preemptible,
-		Region:              c.Region,
-		ServiceAccountEmail: c.Account.ClientEmail,
-		Scopes:              c.Scopes,
-		Subnetwork:          c.Subnetwork,
-		Tags:                c.Tags,
-		Zone:                c.Zone,
+		Address:           c.Address,
+		Description:       "New instance created by Packer",
+		DiskSizeGb:        c.DiskSizeGb,
+		DiskType:          c.DiskType,
+		Image:             sourceImage,
+		MachineType:       c.MachineType,
+		Metadata:          metadata,
+		Name:              name,
+		Network:           c.Network,
+		NetworkProjectId:  c.NetworkProjectId,
+		OmitExternalIP:    c.OmitExternalIP,
+		OnHostMaintenance: c.OnHostMaintenance,
+		Preemptible:       c.Preemptible,
+		Region:            c.Region,
+		Scopes:            c.Scopes,
+		Subnetwork:        c.Subnetwork,
+		Tags:              c.Tags,
+		Zone:              c.Zone,
 	})
 
 	if err == nil {

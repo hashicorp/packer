@@ -7,18 +7,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepGetCertificate struct {
-	client   *AzureClient
-	template string
-	get      func(keyVaultName string, secretName string) (string, error)
-	say      func(message string)
-	error    func(e error)
-	pause    func()
+	client *AzureClient
+	get    func(keyVaultName string, secretName string) (string, error)
+	say    func(message string)
+	error  func(e error)
+	pause  func()
 }
 
 func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificate {
