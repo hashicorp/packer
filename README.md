@@ -40,6 +40,12 @@ $ sudo docker-compose up
             "cpus": "2",
             "shutdown_command": "echo '{{user `ssh_password`}}' | sudo -S shutdown -P now"
         } 
+    ],
+    "provisioners": [
+        {
+              "type": "shell",
+              "inline": ["echo foo"]
+        }
     ]
 }
 ```
