@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
-	"github.com/mitchellh/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell/hyperv"
 )
 
 type HypervPS4Driver struct {
@@ -258,7 +258,7 @@ func (d *HypervPS4Driver) verifyPSVersion() error {
 		return err
 	}
 
-	versionOutput := strings.TrimSpace(string(cmdOut))
+	versionOutput := strings.TrimSpace(cmdOut)
 	log.Printf("%s output: %s", versionCmd, versionOutput)
 
 	ver, err := strconv.ParseInt(versionOutput, 10, 32)
@@ -287,7 +287,7 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 		return err
 	}
 
-	res := strings.TrimSpace(string(cmdOut))
+	res := strings.TrimSpace(cmdOut)
 
 	if res == "False" {
 		err := fmt.Errorf("%s", "PS Hyper-V module is not loaded. Make sure Hyper-V feature is on.")
@@ -309,7 +309,7 @@ func (d *HypervPS4Driver) verifyHypervPermissions() error {
 		return err
 	}
 
-	res := strings.TrimSpace(string(cmdOut))
+	res := strings.TrimSpace(cmdOut)
 
 	if res == "False" {
 		isAdmin, _ := powershell.IsCurrentUserAnAdministrator()

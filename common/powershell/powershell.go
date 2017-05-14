@@ -219,7 +219,7 @@ param([string]$moduleName)
 		return false, err
 	}
 
-	res := strings.TrimSpace(string(cmdOut))
+	res := strings.TrimSpace(cmdOut)
 
 	if res == powerShellFalse {
 		err := fmt.Errorf("PowerShell %s module is not loaded. Make sure %s feature is on.", moduleName, moduleName)

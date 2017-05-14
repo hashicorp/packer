@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell"
 )
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
@@ -587,7 +587,7 @@ func GetExternalOnlineVirtualSwitch() (string, error) {
 
 	var script = `
 $adapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | Sort-Object -Descending -Property Speed
-foreach ($adapter in $adapters) { 
+foreach ($adapter in $adapters) {
   $switch = Get-VMSwitch -SwitchType External | Where-Object { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
   if ($switch -ne $null) {
@@ -617,10 +617,10 @@ $adapters = foreach ($name in $names) {
   Get-NetAdapter -Physical -Name $name -ErrorAction SilentlyContinue | where status -eq 'up'
 }
 
-foreach ($adapter in $adapters) { 
+foreach ($adapter in $adapters) {
   $switch = Get-VMSwitch -SwitchType External | where { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
-  if ($switch -eq $null) { 
+  if ($switch -eq $null) {
     $switch = New-VMSwitch -Name $switchName -NetAdapterName $adapter.Name -AllowManagementOS $true -Notes 'Parent OS, VMs, WiFi'
   }
 
@@ -629,9 +629,9 @@ foreach ($adapter in $adapters) {
   }
 }
 
-if($switch -ne $null) { 
-  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch 
-} else { 
+if($switch -ne $null) {
+  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch
+} else {
   Write-Error 'No internet adapters found'
 }
 `
@@ -733,7 +733,7 @@ $vm.Uptime.TotalSeconds
 		return 0, err
 	}
 
-	uptime, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 64)
+	uptime, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
 
 	return uptime, err
 }
@@ -764,7 +764,7 @@ func IpAddress(mac string) (string, error) {
 param([string]$mac, [int]$addressIndex)
 try {
   $ip = Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
-	
+
   if($ip -eq $null) {
     return ""
   }
@@ -819,7 +819,7 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
 	#Requires -RunAsAdministrator
-	
+
 	function Get-VMConsole
 	{
 	    [CmdletBinding()]
@@ -827,16 +827,16 @@ param([string]$vmName, [string]$scanCodes)
 	        [Parameter(Mandatory)]
 	        [string] $VMName
 	    )
-	
+
 	    $ErrorActionPreference = "Stop"
-	    
+
 	    $vm = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_ComputerSystem -ErrorAction Ignore -Verbose:$false | where ElementName -eq $VMName | select -first 1
 	    if ($vm -eq $null){
 	        Write-Error ("VirtualMachine({0}) is not found!" -f $VMName)
 	    }
-		
+
 	    $vmKeyboard = $vm | Get-CimAssociatedInstance -ResultClassName "Msvm_Keyboard" -ErrorAction Ignore -Verbose:$false
-		
+
 		if ($vmKeyboard -eq $null) {
 			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
 		}
@@ -844,22 +844,22 @@ param([string]$vmName, [string]$scanCodes)
 		if ($vmKeyboard -eq $null) {
 			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
 		}
-		
+
 	    if ($vmKeyboard -eq $null){
 	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
 	    }
-	
+
 	    #TODO: It may be better using New-Module -AsCustomObject to return console object?
-	
+
 	    #Console object to return
 	    $console = [pscustomobject] @{
 	        Msvm_ComputerSystem = $vm
 	        Msvm_Keyboard = $vmKeyboard
 	    }
-	
+
 	    #Need to import assembly to use System.Windows.Input.Key
 	    Add-Type -AssemblyName WindowsBase
-	
+
 	    #region Add Console Members
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeText -Value {
 	        [OutputType([bool])]
@@ -871,13 +871,13 @@ param([string]$vmName, [string]$scanCodes)
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeText" -Arguments @{ asciiText = $AsciiText }
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:TypeCtrlAltDel
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeCtrlAltDel -Value {
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeCtrlAltDel"
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:TypeKey
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeKey -Value {
 	        [OutputType([bool])]
@@ -886,9 +886,9 @@ param([string]$vmName, [string]$scanCodes)
 	            [Windows.Input.Key] $Key,
 	            [Windows.Input.ModifierKeys] $ModifierKey = [Windows.Input.ModifierKeys]::None
 	        )
-	
+
 	        $keyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey($Key)
-	        
+
 	        switch ($ModifierKey)
 	        {
 	            ([Windows.Input.ModifierKeys]::Control){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftCtrl)}
@@ -896,7 +896,7 @@ param([string]$vmName, [string]$scanCodes)
 	            ([Windows.Input.ModifierKeys]::Shift){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftShift)}
 	            ([Windows.Input.ModifierKeys]::Windows){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LWin)}
 	        }
-	
+
 	        if ($ModifierKey -eq [Windows.Input.ModifierKeys]::None)
 	        {
 	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
@@ -909,7 +909,7 @@ param([string]$vmName, [string]$scanCodes)
 	        }
 	        $result = return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:Scancodes
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeScancodes -Value {
 	        [OutputType([bool])]
@@ -920,7 +920,7 @@ param([string]$vmName, [string]$scanCodes)
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $ScanCodes }
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:ExecCommand
 	    $console | Add-Member -MemberType ScriptMethod -Name ExecCommand -Value {
 	        param (
@@ -930,46 +930,46 @@ param([string]$vmName, [string]$scanCodes)
 	        if ([String]::IsNullOrEmpty($Command)){
 	            return
 	        }
-	
+
 	        $console.TypeText($Command) > $null
 	        $console.TypeKey([Windows.Input.Key]::Enter) > $null
 	        #sleep -Milliseconds 100
 	    }
-	
+
 	    #Define method:Dispose
 	    $console | Add-Member -MemberType ScriptMethod -Name Dispose -Value {
 	        $this.Msvm_ComputerSystem.Dispose()
 	        $this.Msvm_Keyboard.Dispose()
 	    }
-	    
-	
+
+
 	    #endregion
-	
+
 	    return $console
 	}
-	
+
 	$vmConsole = Get-VMConsole -VMName $vmName
 	$scanCodesToSend = ''
 	$scanCodes.Split(' ') | %{
 		$scanCode = $_
-			
+
 		if ($scanCode.StartsWith('wait')){
 			$timeToWait = $scanCode.Substring(4)
 			if (!$timeToWait){
 				$timeToWait = "1"
 			}
-						
+
 			if ($scanCodesToSend){
 				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
-				
+
                 $scanCodesToSendByteArray | %{
 				    $vmConsole.TypeScancodes($_)
                 }
 			}
-			
+
 			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
 			Start-Sleep -s $timeToWait
-			
+
 			$scanCodesToSend = ''
 		} else {
 			if ($scanCodesToSend){
@@ -983,7 +983,7 @@ param([string]$vmName, [string]$scanCodes)
 	}
 	if ($scanCodesToSend){
 		$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
-		
+
         $scanCodesToSendByteArray | %{
 			$vmConsole.TypeScancodes($_)
         }

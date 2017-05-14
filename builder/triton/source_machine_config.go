@@ -3,7 +3,7 @@ package triton
 import (
 	"fmt"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // SourceMachineConfig represents the configuration to run a machine using

@@ -313,10 +313,11 @@
 			"revision": "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
 		},
 		{
-			"checksumSHA1": "tPavbOLszj9IKgu9ba2TIuRlWLc=",
+			"checksumSHA1": "W1LGm0UNirwMDVCMFv5vZrOpUJI=",
 			"comment": "v0.9.0-24-g6ca5b77",
 			"path": "github.com/digitalocean/godo",
-			"revision": "6ca5b770f203b82a0fca68d0941736458efa8a4f"
+			"revision": "4c04abe183f449bd9ede285f0e5c7ee575d0dbe4",
+			"revisionTime": "2017-04-07T15:15:42Z"
 		},
 		{
 			"checksumSHA1": "GCskdwYAPW2S34918Z5CgNMJ2Wc=",
@@ -487,6 +488,12 @@
 			"revision": "d30f09973e19c1dfcd120b2d9c4f168e68d6b5d5"
 		},
 		{
+			"checksumSHA1": "ErJHGU6AVPZM9yoY/xV11TwSjQs=",
+			"path": "github.com/hashicorp/go-retryablehttp",
+			"revision": "2d5f5dbd904dbad432492c3ca2c12c72c9e3045a",
+			"revisionTime": "2017-04-21T23:29:22Z"
+		},
+		{
 			"checksumSHA1": "A1PcINvF3UiwHRKn8UcgARgvGRs=",
 			"path": "github.com/hashicorp/go-rootcerts",
 			"revision": "6bb64b370b90e7ef1fa532be9e591a81c3493e00"
@@ -513,19 +520,16 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "NOwNdnb70M6s9LvhaPFabBVwlBs=",
-			"path": "github.com/joyent/gocommon",
-			"revision": "b78708995d1c2ebdb64a3061b0bca5d8ccdf0fc2"
+			"checksumSHA1": "cdoXZmgAhucjxu9V0xuAwwOoN0U=",
+			"path": "github.com/joyent/triton-go",
+			"revision": "97ccd9f6c0c0652cf87997bcb01955e0329cd37e",
+			"revisionTime": "2017-05-09T20:29:43Z"
 		},
 		{
-			"checksumSHA1": "zg/V3yqR59RlBEhTqjW7AhEp16o=",
-			"path": "github.com/joyent/gosdc",
-			"revision": "ec8b3503a75edca0df26581b83807677b0240716"
-		},
-		{
-			"checksumSHA1": "xVAU7r1t8lxJ1AHvgNNXxwU+jIo=",
-			"path": "github.com/joyent/gosign",
-			"revision": "9abcee278795b82b36858cdfc857c8a0e7de797c"
+			"checksumSHA1": "QzUqkCSn/ZHyIK346xb9V6EBw9U=",
+			"path": "github.com/joyent/triton-go/authentication",
+			"revision": "16cef4c2d78ba1d3bf89af75e93ae2dec6e56634",
+			"revisionTime": "2017-05-04T20:45:05Z"
 		},
 		{
 			"checksumSHA1": "6nmAJBw2phU9MUmkUnqFvbO5urg=",
@@ -596,9 +600,10 @@
 			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639"
 		},
 		{
-			"checksumSHA1": "WbXdGQiD4hQNID4Xo/RJumaimk0=",
+			"checksumSHA1": "UP+pXl+ic9y6qrpZA5MqDIAuGfw=",
 			"path": "github.com/mitchellh/cli",
-			"revision": "5c87c51cedf76a1737bf5ca3979e8644871598a6"
+			"revision": "ee8578a9c12a5bb9d55303b9665cc448772c81b8",
+			"revisionTime": "2017-03-28T05:23:52Z"
 		},
 		{
 			"checksumSHA1": "mVqDwKcibat0IKAdzAhfGIHPwI8=",
@@ -633,9 +638,10 @@
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
-			"checksumSHA1": "9Vh2o3Vs6HzI8P04ks4kvIpegco=",
+			"checksumSHA1": "5x1RX5m8SCkCRLyLL8wBc0qJpV8=",
 			"path": "github.com/mitchellh/multistep",
-			"revision": "162146fc57112954184d90266f4733e900ed05a5"
+			"revision": "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d",
+			"revisionTime": "2017-03-16T18:53:39Z"
 		},
 		{
 			"checksumSHA1": "VBo7ciCNRr7wNVFmBTW8sm4PQ14=",
@@ -962,5 +968,5 @@
 			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
-	"rootPath": "github.com/mitchellh/packer"
+	"rootPath": "github.com/hashicorp/packer"
 }

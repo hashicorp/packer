@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type StepRunSourceInstance struct {
@@ -289,10 +291,25 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
-		Tags:      ec2Tags,
-		Resources: []*string{instance.InstanceId},
+	ReportTags(ui, ec2Tags)
+
+	// Retry creating tags for about 2.5 minutes
+	err = retry.Retry(0.2, 30, 11, func() (bool, error) {
+		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+			Tags:      ec2Tags,
+			Resources: []*string{instance.InstanceId},
+		})
+		if err == nil {
+			return true, nil
+		}
+		if awsErr, ok := err.(awserr.Error); ok {
+			if awsErr.Code() == "InvalidInstanceID.NotFound" {
+				return false, nil
+			}
+		}
+		return true, err
 	})
+
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
@@ -340,7 +357,10 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "cancelled",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 
 	}
 
@@ -357,6 +377,9 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "terminated",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 	}
 }

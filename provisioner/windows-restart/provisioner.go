@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
@@ -116,7 +116,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 		cmd = &packer.RemoteCmd{Command: trycommand}
 		err = cmd.StartWithUi(comm, ui)
 		if err != nil {
-			// Couldnt execute, we asume machine is rebooting already
+			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
@@ -175,8 +175,8 @@ var waitForCommunicator = func(p *Provisioner) error {
 	for {
 		select {
 		case <-p.cancel:
-			log.Println("Communicator wait cancelled, exiting loop")
-			return fmt.Errorf("Communicator wait cancelled")
+			log.Println("Communicator wait canceled, exiting loop")
+			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
 
@@ -217,7 +217,7 @@ func (p *Provisioner) retryable(f func() error) error {
 
 		// Create an error and log it
 		err = fmt.Errorf("Retryable error: %s", err)
-		log.Printf(err.Error())
+		log.Print(err.Error())
 
 		// Check if we timed out, otherwise we retry. It is safe to
 		// retry since the only error case above is if the command

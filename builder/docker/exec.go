@@ -2,8 +2,8 @@ package docker
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/iochan"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"log"
 	"os/exec"
