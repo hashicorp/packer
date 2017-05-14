@@ -1,0 +1,6 @@
+build:
+    build: docker/
+    volumes:
+        - .:/go/src/github.com/LizaTretyakova/packer-builder-vsphere
+    working_dir: /go/src/github.com/LizaTretyakova/packer-builder-vsphere
+    command: ./build.sh
