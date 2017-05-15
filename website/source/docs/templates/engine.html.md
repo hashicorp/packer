@@ -16,9 +16,10 @@ parameter at runtime.
 
 For example, the `{{timestamp}}` function can be used in any string to generate
 the current timestamp. This is useful for configurations that require unique
-keys, such as AMI names. By setting the AMI name to something like
-`My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second.
-If you need greater than one second granularity, you should use `{{uuid}}`, for example when you have multiple builders in the same template.
+keys, such as AMI names. By setting the AMI name to something like `My Packer
+AMI {{timestamp}}`, the AMI name will be unique down to the second.  If you
+need greater than one second granularity, you should use `{{uuid}}`, for
+example when you have multiple builders in the same template.
 
 In addition to globally available functions like `{{timestamp}}`, some
 configurations have special local variables that are available only for
