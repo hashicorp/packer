@@ -8,12 +8,17 @@
 
 2. `cd` to `$GOPATH/go/src/github.com/LizaTretyakova/packer-builder-vsphere` (or wherever it was downloaded)
 
-3. Build the binaries
+3. Get the dependencies
+```
+$ glide install
+```
+
+4. Build the binaries
 ```
 $ sudo docker-compose up
 ```
 
-4. The template for this builder is like following:
+5. The template for this builder is like following:
 ```json
 {
     "variables": {
@@ -55,7 +60,7 @@ on which you are creating the new one (note, that VMWare Tools should be already
 `url`, `username` and `password` are your vSphere parameters.
 You need to set the appropriate values in the `variables` section before proceeding.
 
-5. Now you can go to the `bin/` directory
+6. Now you can go to the `bin/` directory
 ```
 $ cd ./bin
 ```
