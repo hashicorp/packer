@@ -22,9 +22,11 @@ need greater than one second granularity, you should use `{{uuid}}`, for
 example when you have multiple builders in the same template.
 
 In addition to globally available functions like `{{timestamp}}`, some
-configurations have special local variables that are available only for
-that configuration. These are recognizable because they're prefixed by a
-period, such as `{{.Name}}`.
+configurations have special template variables that are available only
+for that configuration. Template variables are recognizable because
+they're prefixed by a period, such as `{{.Name}}`.
+
+-> **Note:** In addition to template variables, you can specify your own user variables. See the [user variable](/docs/templates/user-variables.html) documentation for more information on user variables.
 
 The complete syntax is covered in the next section, followed by a reference of
 globally available functions.
@@ -34,11 +36,12 @@ globally available functions.
 The syntax of templates uses the following conventions:
 
 * Anything template related happens within double-braces: `{{ }}`.
-* Variables are prefixed with a period and capitalized, such as `{{.Variable}}`.
+* Template variables are prefixed with a period and capitalized, such as
+  `{{.Variable}}`.
 * Functions are directly within the braces, such as `{{timestamp}}`.
 
-Here is an example from the VMware VMX template that shows configuration
-templates in action:
+Here is an example from the VMware VMX template that shows template
+variables in action:
 
 ```liquid
 .encoding = "UTF-8"
@@ -46,8 +49,8 @@ displayName = "{{ .Name }}"
 guestOS = "{{ .GuestOS }}"
 ```
 
-In this case, the "Name" and "GuestOS" variables will be replaced, potentially
-resulting in a VMX that looks like this:
+In this case, the "Name" and "GuestOS" template variables will be
+replaced, potentially resulting in a VMX template that looks like this:
 
 ```liquid
 .encoding = "UTF-8"
@@ -57,7 +60,7 @@ guestOS = "otherlinux"
 
 ## Global Functions
 
-While some configuration settings have local variables specific to only that
+While some configuration settings have template variables specific to only that
 configuration, a set of functions are available globally for use in *any string*
 in Packer templates. These are listed below for reference.
 
