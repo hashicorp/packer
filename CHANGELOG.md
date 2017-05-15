@@ -18,6 +18,7 @@
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
 * builder/amazon: use retry logic when creating instance tags. [GH-4876]
+* builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
 
 ### BUG FIXES:
 
