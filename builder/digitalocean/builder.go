@@ -4,6 +4,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
@@ -44,6 +45,26 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			return nil, fmt.Errorf("DigitalOcean: Invalid API URL, %s.", err)
 		}
 		client.BaseURL = u
+	}
+
+	if len(b.config.SnapshotRegions) > 0 {
+		opt := &godo.ListOptions{
+			Page:    1,
+			PerPage: 200,
+		}
+		regions, _, err := client.Regions.List(context.TODO(), opt)
+		if err != nil {
+			return nil, fmt.Errorf("DigitalOcean: Unable to get regions, %s.", err)
+		}
+		for _, snapShotRegion := range b.config.SnapshotRegions {
+			for _, region := range regions {
+				if snapShotRegion == region.Slug {
+					continue
+				} else {
+					return nil, fmt.Errorf("DigitalOcean: Invalid region, %s.", snapShotRegion)
+				}
+			}
+		}
 	}
 
 	// Set up the state
