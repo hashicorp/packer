@@ -90,6 +90,14 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 			ui.Say(fmt.Sprintf("Transfering Snapshot ID: %d", imageTransfer.ID))
+			if err := waitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
+				client, 20*time.Minute); err != nil {
+				// If we get an error the first time, actually report it
+				err := fmt.Errorf("Error waiting for snapshot transfer: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 
@@ -106,7 +114,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Snapshot image ID: %d", imageId)
 	state.Put("snapshot_image_id", imageId)
 	state.Put("snapshot_name", c.SnapshotName)
-	state.Put("region", c.Region)
+	state.Put("regions", c.SnapshotRegions)
 
 	return multistep.ActionContinue
 }
