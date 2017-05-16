@@ -19,6 +19,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	dropletId := state.Get("droplet_id").(int)
+	var snapshotRegions []string
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
 	action, _, err := client.DropletActions.Snapshot(context.TODO(), dropletId, c.SnapshotName)
@@ -75,12 +76,12 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 			regions = append(regions, region)
 		}
-		c.SnapshotRegions = regions
+		snapshotRegions = regions
 
-		for transfer := range c.SnapshotRegions {
+		for transfer := range snapshotRegions {
 			transferRequest := &godo.ActionRequest{
 				"type":   "transfer",
-				"region": c.SnapshotRegions[transfer],
+				"region": snapshotRegions[transfer],
 			}
 			imageTransfer, _, err := client.ImageActions.Transfer(context.TODO(), images[0].ID, transferRequest)
 			if err != nil {
@@ -114,7 +115,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Snapshot image ID: %d", imageId)
 	state.Put("snapshot_image_id", imageId)
 	state.Put("snapshot_name", c.SnapshotName)
-	state.Put("regions", c.SnapshotRegions)
+	state.Put("regions", snapshotRegions)
 
 	return multistep.ActionContinue
 }
