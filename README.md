@@ -15,7 +15,7 @@ $ glide install
 
 4. Build the binaries
 ```
-$ sudo docker-compose up
+$ docker-compose run build
 ```
 
 5. The template for this builder is like following:
