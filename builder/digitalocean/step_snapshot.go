@@ -63,7 +63,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	if len(c.SnapshotRegions) > 0 {
 		regionSet := make(map[string]struct{})
 		regions := make([]string, 0, len(c.SnapshotRegions))
-
+		regionSet[c.Region] = struct{}{}
 		for _, region := range c.SnapshotRegions {
 			// If we already saw the region, then don't look again
 			if _, ok := regionSet[region]; ok {
@@ -76,6 +76,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 			regions = append(regions, region)
 		}
 		c.SnapshotRegions = regions
+
 		for transfer := range c.SnapshotRegions {
 			transferRequest := &godo.ActionRequest{
 				"type":   "transfer",
@@ -89,13 +90,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 			ui.Say(fmt.Sprintf("Transfering Snapshot ID: %d", imageTransfer.ID))
-
 		}
-
-		ui.Say(fmt.Sprintf("Snapshot region: %d", len(regions)))
-		// ui.Say(fmt.Sprintf("Snapshot regions: %s", strings.Join(c.SnapshotRegions[:], ",")))
-
-		//client.ImageActions.Transfer(context.TODO(), )
 	}
 
 	var imageId int
