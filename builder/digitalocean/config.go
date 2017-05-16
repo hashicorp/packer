@@ -29,6 +29,7 @@ type Config struct {
 	PrivateNetworking bool          `mapstructure:"private_networking"`
 	Monitoring        bool          `mapstructure:"monitoring"`
 	SnapshotName      string        `mapstructure:"snapshot_name"`
+	SnapshotRegions   []string      `mapstructure:"snapshot_regions"`
 	StateTimeout      time.Duration `mapstructure:"state_timeout"`
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
