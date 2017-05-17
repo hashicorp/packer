@@ -226,6 +226,11 @@ builder.
 - `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
+- `custom_endpoint_ec2` (string) - this option is useful if you use 
+    another cloud provider that provide a compatible API with aws EC2,
+    specify another endpoint like this "https://ec2.another.endpoint..com"
+
+
 ## Basic Example
 
 ```json
