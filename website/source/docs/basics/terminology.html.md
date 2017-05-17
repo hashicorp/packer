@@ -50,6 +50,6 @@ for quick referencing.
   image. They perform the major work of making the image contain useful
   software. Example provisioners include shell scripts, Chef, Puppet, etc.
 
-- `Templates` are JSON files which define one or more builds by configuring the
+- `Templates` are [JSON5](http://json5.org) files which define one or more builds by configuring the
   various components of Packer. Packer is able to read a template and use that
   information to create multiple machine images in parallel.

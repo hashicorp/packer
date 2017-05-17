@@ -2,10 +2,11 @@ package template
 
 import (
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kylelemons/godebug/pretty"
 )
 
 func TestParse(t *testing.T) {
@@ -24,6 +25,27 @@ func TestParse(t *testing.T) {
 					"something": {
 						Name: "something",
 						Type: "something",
+					},
+				},
+			},
+			false,
+		},
+		{
+			"parse-modern.json",
+			&Template{
+				Builders: map[string]*Builder{
+					"vmware-iso": {
+						Name: "vmware-iso",
+						Type: "vmware-iso",
+						Config: map[string]interface{}{
+							"boot_commands": []interface{}{
+								"step1",
+								"step2",
+								42,
+								66,
+								"noice",
+							},
+						},
 					},
 				},
 			},
@@ -332,8 +354,8 @@ func TestParse(t *testing.T) {
 		if tpl != nil {
 			tpl.RawContents = nil
 		}
-		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
+		if diff := pretty.Compare(tpl, tc.Result); diff != "" {
+			t.Fatalf("bad: %s: (-got +want)\n%s", tc.File, diff)
 		}
 	}
 }
@@ -357,7 +379,7 @@ func TestParse_bad(t *testing.T) {
 		Expected string
 	}{
 		{"error-beginning.json", "line 1, column 1 (offset 1)"},
-		{"error-middle.json", "line 5, column 6 (offset 50)"},
+		{"error-middle.json", "line 4, column 23 (offset 46)"},
 		{"error-end.json", "line 1, column 30 (offset 30)"},
 	}
 	for _, tc := range cases {

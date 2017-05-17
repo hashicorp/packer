@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/flynn/json5"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
@@ -35,7 +35,7 @@ type config struct {
 // Decodes configuration in JSON format from the given io.Reader into
 // the config object pointed to.
 func decodeConfig(r io.Reader, c *config) error {
-	decoder := json.NewDecoder(r)
+	decoder := json5.NewDecoder(r)
 	return decoder.Decode(c)
 }
 
