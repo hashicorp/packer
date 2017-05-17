@@ -19,6 +19,8 @@
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
 * builder/amazon: use retry logic when creating instance tags. [GH-4876]
 * builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
+* builder/digitalocean: Support for copying snapshot to other regions.
+    [GH-4893]
 
 ### BUG FIXES:
 
