@@ -54,7 +54,7 @@ builder.
   engine](/docs/templates/engine.html) for more info)
 
 - `instance_type` (string) - The EC2 instance type to use while building the
-  AMI, such as `m1.small`.
+  AMI, such as `t2.small`.
 
 - `region` (string) - The name of the region, such as `us-east-1`, in which to
   launch the EC2 instance to create the AMI.
