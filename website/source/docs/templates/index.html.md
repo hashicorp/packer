@@ -3,7 +3,7 @@ layout: docs
 page_title: Templates
 sidebar_current: docs-templates
 description: |-
-  Templates are JSON files that configure the various components of Packer in
+  Templates are [JSON5](http://json5.org) files that configure the various components of Packer in
   order to create one or more machine images. Templates are portable, static,
   and readable and writable by both humans and computers. This has the added
   benefit of being able to not only create and modify templates by hand, but
@@ -12,7 +12,7 @@ description: |-
 
 # Templates
 
-Templates are JSON files that configure the various components of Packer in
+Templates are [JSON5](http://json5.org) files that configure the various components of Packer in
 order to create one or more machine images. Templates are portable, static, and
 readable and writable by both humans and computers. This has the added benefit
 of being able to not only create and modify templates by hand, but also write
@@ -24,7 +24,7 @@ images.
 
 ## Template Structure
 
-A template is a JSON object that has a set of keys configuring various
+A template is a [JSON5](http://json5.org) object that has a set of keys configuring various
 components of Packer. The available keys within a template are listed below.
 Along with each key, it is noted whether it is required or not.
 
@@ -66,21 +66,7 @@ Along with each key, it is noted whether it is required or not.
 
 ## Comments
 
-JSON doesn't support comments and Packer reports unknown keys as validation
-errors. If you'd like to comment your template, you can prefix a *root level*
-key with an underscore. Example:
-
-```json
-{
-  "_comment": "This is a comment",
-  "builders": [
-    {}
-  ]
-}
-```
-
-**Important:** Only *root level* keys can be underscore prefixed. Keys within
-builders, provisioners, etc. will still result in validation errors.
+[JSON5](http://json5.org/) supports both single-line and multi-line comments.
 
 ## Example Template
 
@@ -98,15 +84,17 @@ Below is an example of a basic template that could be invoked with `packer build
       "region": "us-east-1",
       "source_ami": "ami-fce3c696",
       "instance_type": "t2.micro",
+
+      // ubuntu is the default username for this AMI
       "ssh_username": "ubuntu",
-      "ami_name": "packer {{timestamp}}"
+      "ami_name": "packer {{timestamp}}",
     }
   ],
 
   "provisioners": [
     {
-      "type": "shell",
-      "script": "setup_things.sh"
+      type: "shell",
+      script: "setup_things.sh",
     }
   ]
 }

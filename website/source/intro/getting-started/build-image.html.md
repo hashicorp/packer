@@ -37,7 +37,7 @@ apply to the other platforms as well.
 
 The configuration file used to define what image we want built and how is called
 a *template* in Packer terminology. The format of a template is simple
-[JSON](http://www.json.org/). JSON struck the best balance between
+[JSON5](http://json5.org/). JSON5 struck the best balance between
 human-editable and machine-editable, allowing both hand-made templates as well
 as machine generated templates to easily be made.
 
