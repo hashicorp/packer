@@ -278,6 +278,9 @@ each category, the available configuration keys are alphabetized.
     `BuildRegion` variable is replaced with name of the region where this
     is built.
 
+- `custom_endpoint_ec2` (string) - this option is useful if you use 
+    another cloud provider that provide a compatible API with aws EC2,
+    specify another endpoint like this "https://ec2.another.endpoint..com"
 
 ## Basic Example
 

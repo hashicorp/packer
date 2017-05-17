@@ -17,12 +17,13 @@ import (
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey      string `mapstructure:"access_key"`
-	SecretKey      string `mapstructure:"secret_key"`
-	RawRegion      string `mapstructure:"region"`
-	SkipValidation bool   `mapstructure:"skip_region_validation"`
-	Token          string `mapstructure:"token"`
-	ProfileName    string `mapstructure:"profile"`
+	AccessKey         string `mapstructure:"access_key"`
+	SecretKey         string `mapstructure:"secret_key"`
+	RawRegion         string `mapstructure:"region"`
+	SkipValidation    bool   `mapstructure:"skip_region_validation"`
+	Token             string `mapstructure:"token"`
+	ProfileName       string `mapstructure:"profile"`
+	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -35,6 +36,11 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		return nil, err
 	}
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
+
+	if c.CustomEndpointEc2 != "" {
+		config.Endpoint = &c.CustomEndpointEc2
+	}
+
 	if c.ProfileName != "" {
 		profile, err := NewFromProfile(c.ProfileName)
 		if err != nil {
