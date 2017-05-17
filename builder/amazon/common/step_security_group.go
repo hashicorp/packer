@@ -55,8 +55,12 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	group := &ec2.CreateSecurityGroupInput{
 		GroupName:   &groupName,
 		Description: aws.String("Temporary group for Packer"),
-		VpcId:       &s.VpcId,
 	}
+
+	if s.VpcId != "" {
+		group.VpcId = &s.VpcId
+	}
+
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {
 		ui.Error(err.Error())
