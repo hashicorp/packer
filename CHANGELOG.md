@@ -21,6 +21,8 @@
 * builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
 * builder/digitalocean: Support for copying snapshot to other regions.
     [GH-4893]
+* builder/amazon: Allow configuration of api endpoint to support api-compatible
+    cloud providers. [GH-4896]
 
 ### BUG FIXES:
 
