@@ -132,6 +132,7 @@ func TestNew_Invalid(t *testing.T) {
 		Auth: []ssh.AuthMethod{
 			ssh.Password("i-am-invalid"),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	address := newMockLineServer(t)
@@ -160,6 +161,7 @@ func TestStart(t *testing.T) {
 		Auth: []ssh.AuthMethod{
 			ssh.Password("pass"),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	address := newMockLineServer(t)
@@ -195,6 +197,7 @@ func TestHandshakeTimeout(t *testing.T) {
 		Auth: []ssh.AuthMethod{
 			ssh.Password("pass"),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	address := newMockBrokenServer(t)
