@@ -36,6 +36,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 			ssh.KeyboardInteractive(
 				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	if config.Comm.SSHPrivateKey != "" {

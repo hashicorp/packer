@@ -5,6 +5,7 @@ package lin
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
@@ -32,6 +33,7 @@ func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, err
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}, nil
 	}
 }

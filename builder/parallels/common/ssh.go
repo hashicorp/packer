@@ -44,8 +44,9 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*ssh.ClientConfig
 		}
 
 		return &ssh.ClientConfig{
-			User: config.Comm.SSHUsername,
-			Auth: auth,
+			User:            config.Comm.SSHUsername,
+			Auth:            auth,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}, nil
 	}
 }

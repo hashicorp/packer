@@ -88,6 +88,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 
@@ -103,11 +104,13 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeys(signer),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 
 		} else {
 			return &ssh.ClientConfig{
-				User: username,
+				User:            username,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth: []ssh.AuthMethod{
 					ssh.Password(password),
 					ssh.KeyboardInteractive(
