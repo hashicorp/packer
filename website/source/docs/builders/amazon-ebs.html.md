@@ -54,7 +54,7 @@ builder.
   engine](/docs/templates/engine.html) for more info)
 
 - `instance_type` (string) - The EC2 instance type to use while building the
-  AMI, such as `m1.small`.
+  AMI, such as `t2.small`.
 
 - `region` (string) - The name of the region, such as `us-east-1`, in which to
   launch the EC2 instance to create the AMI.
@@ -142,6 +142,10 @@ builder.
 
 - `availability_zone` (string) - Destination availability zone to launch
   instance in. Leave this empty to allow Amazon to auto-assign.
+
+- `custom_endpoint_ec2` (string) - this option is useful if you use
+    another cloud provider that provide a compatible API with aws EC2,
+    specify another endpoint like this "https://ec2.another.endpoint..com"
 
 - `disable_stop_instance` (boolean) - Packer normally stops the build instance
   after all provisioners have run. For Windows instances, it is sometimes
@@ -328,7 +332,8 @@ builder.
 
 - `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
   in order to create a temporary security group within the VPC. Requires `subnet_id`
-  to be set.
+  to be set. If this field is left blank, Packer will try to get the VPC ID from the
+  `subnet_id`.
 
 - `windows_password_timeout` (string) - The timeout for waiting for a Windows
   password for Windows instances. Defaults to 20 minutes. Example value: `10m`

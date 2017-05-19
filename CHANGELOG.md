@@ -18,6 +18,11 @@
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
 * builder/amazon: use retry logic when creating instance tags. [GH-4876]
+* builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
+* builder/digitalocean: Support for copying snapshot to other regions.
+    [GH-4893]
+* builder/amazon: Allow configuration of api endpoint to support api-compatible
+    cloud providers. [GH-4896]
 
 ### BUG FIXES:
 
@@ -25,6 +30,7 @@
     Windows. [GH-4792]
 * builder/azure: Replace calls to panic with error returns. [GH-4846]
 * builder/amazon: Only delete temporary key if we created one. [GH-4850]
+* post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
 
 
 ## 1.0.0 (April 4, 2017)

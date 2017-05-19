@@ -75,6 +75,9 @@ builder.
     function like `timestamp` (see [configuration
     templates](/docs/templates/engine.html) for more info)
 
+- `snapshot_regions` (array of strings) - The regions of the resulting snapshot that will
+    appear in your account.
+
 - `state_timeout` (string) - The time to wait, as a duration string, for a
     droplet to enter a desired state (such as "active") before timing out. The
     default state timeout is "6m".

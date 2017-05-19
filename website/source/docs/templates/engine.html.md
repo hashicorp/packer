@@ -16,15 +16,15 @@ parameter at runtime.
 
 For example, the `{{timestamp}}` function can be used in any string to generate
 the current timestamp. This is useful for configurations that require unique
-keys, such as AMI names. By setting the AMI name to something like
-`My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second.
-If you need greater than one second granularity, you should use `{{uuid}}`, as
-when you have multiple builders in the same template.
+keys, such as AMI names. By setting the AMI name to something like `My Packer
+AMI {{timestamp}}`, the AMI name will be unique down to the second.  If you
+need greater than one second granularity, you should use `{{uuid}}`, for
+example when you have multiple builders in the same template.
 
-In addition to globally available functions like timestamp shown before, some
-configurations have special local variables that are available only for that
-configuration. These are recognizable because they're prefixed by a period, such
-as `{{.Name}}`.
+In addition to globally available functions like `{{timestamp}}`, some
+configurations have special local variables that are available only for
+that configuration. These are recognizable because they're prefixed by a
+period, such as `{{.Name}}`.
 
 The complete syntax is covered in the next section, followed by a reference of
 globally available functions.
@@ -33,9 +33,9 @@ globally available functions.
 
 The syntax of templates uses the following conventions:
 
-* Anything template related happens within double-braces: `{{ }}`
-* Variables are prefixed with a period and capitalized, such as `{{.Variable}}`
-* Functions are directly within the braces, such as `{{timestamp}}`
+* Anything template related happens within double-braces: `{{ }}`.
+* Variables are prefixed with a period and capitalized, such as `{{.Variable}}`.
+* Functions are directly within the braces, such as `{{timestamp}}`.
 
 Here is an example from the VMware VMX template that shows configuration
 templates in action:
@@ -72,6 +72,7 @@ in Packer templates. These are listed below for reference.
 - `timestamp` - The current Unix timestamp in UTC.
 - `uuid` - Returns a random UUID.
 - `upper` - Uppercases the string.
+- `user` - Specify a user variable.
 
 ### isotime Format
 
