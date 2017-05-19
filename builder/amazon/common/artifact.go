@@ -28,9 +28,15 @@ func (a *Artifact) BuilderId() string {
 	return a.BuilderIdValue
 }
 
-func (*Artifact) Files() []string {
-	// We have no files
-	return nil
+func (a *Artifact) Files() []string {
+	filePaths := make([]string, 0, len(a.Amis))
+	for region, id := range a.Amis {
+		single := fmt.Sprintf("%s/%s", region, id)
+		filePaths = append(filePaths, single)
+	}
+
+	sort.Strings(filePaths)
+	return filePaths
 }
 
 func (a *Artifact) Id() string {
