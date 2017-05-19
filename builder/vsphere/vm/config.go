@@ -23,15 +23,15 @@ type Config struct {
 	vspcommon.VMXConfig      `mapstructure:",squash"`
 	vspcommon.ExportConfig   `mapstructure:",squash"`
 
-	//TODO: Review this options to provide all needed information for vm.clone
-	BootCommand    []string `mapstructure:"boot_command"`
-	Cpu            uint     `mapstructure:"cpu"`
-	DiskSize       uint     `mapstructure:"disk_size"`
-	DiskThick      bool     `mapstructure:"disk_thick"`
-	MemSize        uint     `mapstructure:"mem_size"`
-	NetworkAdapter string   `mapstructure:"network_adapter"`
-	NetworkName    string   `mapstructure:"network_name"`
-	SourceVMName   string   `mapstructure:"source_vm"`
+	BootCommand            []string `mapstructure:"boot_command"`
+	Cpu                    uint     `mapstructure:"cpu"`
+	MemSize                uint     `mapstructure:"mem_size"`
+	NetworkAdapter         string   `mapstructure:"network_adapter"`
+	NetworkName            string   `mapstructure:"network_name"`
+	SourceVMName           string   `mapstructure:"source_vm"`
+	RemoteSourceFolder     string   `mapstructure:"source_folder"`
+	RemoteSourceDatacenter string   `mapstructure:"source_datacenter"`
+	DiskThick              bool     `mapstructure:"disk_thick"`
 
 	CommConfig communicator.Config `mapstructure:",squash"`
 
@@ -67,12 +67,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 
-	//TODO: Review this part with options for vm.clone
 	if c.SourceVMName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_vm is blank, but is required"))
 	}
 
-	//For cloning DiskSize,Cpu and Memsize == 0 reuse the same value than for the source VM
+	if c.RemoteSourceDatacenter == "" {
+		c.RemoteSourceDatacenter = "ha-datacenter"
+	}
+
+	//For cloning Cpu and Memsize == 0 reuse the same value than for the source VM
 	// NetworkName and NetworkAdapter can be empty to reuse configuration from the source VM
 
 	// Check for any errors.

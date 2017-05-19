@@ -11,7 +11,7 @@ import (
 // A driver is able to talk to VMware, control virtual machines, etc.
 type Driver interface {
 	// Clones the VM to another VM
-	CloneVirtualMachine(string, string, string, string, uint, uint, uint, bool, string, string, string) error
+	CloneVirtualMachine(string, string, string, string, string, string, uint, uint, string, string, string) error
 
 	// Create a new VM
 	CreateVirtualMachine(string, string, string, uint, uint, uint, bool, string, string, string, string) error

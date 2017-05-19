@@ -8,8 +8,19 @@ import (
 type DriverMock struct {
 	sync.Mutex
 
-	CloneVirtualMachineCalled bool
-	CloneVirtualMachineErr    error
+	CloneVirtualMachineCalled         bool
+	CloneVirtualMachineSrcVmName      string
+	CloneVirtualMachineDstVmName      string
+	CloneVirtualMachineSrcFolder      string
+	CloneVirtualMachineDstFolder      string
+	CloneVirtualMachineSrcDatacenter  string
+	CloneVirtualMachineDstDatastore   string
+	CloneVirtualMachineCpu            uint
+	CloneVirtualMachineRam            uint
+	CloneVirtualMachineNetworkName    string
+	CloneVirtualMachineNetworkAdapter string
+	CloneVirtualMachineAnnotation     string
+	CloneVirtualMachineErr            error
 
 	CreateVirtualMachineCalled         bool
 	CreateVirtualMachineVmName         string
@@ -109,11 +120,19 @@ type DriverMock struct {
 	VerifyErr    error
 }
 
-//TODO: Implement this function
-func (d *DriverMock) CloneVirtualMachine(srcVmName string, dstVmName string, folder string, datastore string, cpu uint, ram uint, diskSize uint, diskThick bool, networkName string, networkAdapter string, annotation string) error {
+func (d *DriverMock) CloneVirtualMachine(srcVmName string, dstVmName string, srcFolder string, dstFolder string, srcDatacenter string, dstDatastore string, cpu uint, ram uint, networkName string, networkAdapter string, annotation string) error {
 	d.CloneVirtualMachineCalled = true
-	//	d.CloneVirtualMachineDst = dst
-	//	d.CloneVirtualMachineSrc = src
+	d.CloneVirtualMachineSrcVmName = srcVmName
+	d.CloneVirtualMachineDstVmName = dstVmName
+	d.CloneVirtualMachineSrcFolder = srcFolder
+	d.CloneVirtualMachineDstFolder = dstFolder
+	d.CloneVirtualMachineSrcDatacenter = srcDatacenter
+	d.CloneVirtualMachineDstDatastore = dstDatastore
+	d.CloneVirtualMachineCpu = cpu
+	d.CloneVirtualMachineRam = ram
+	d.CloneVirtualMachineNetworkName = networkName
+	d.CloneVirtualMachineNetworkAdapter = networkAdapter
+	d.CloneVirtualMachineAnnotation = annotation
 	return d.CloneVirtualMachineErr
 }
 

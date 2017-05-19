@@ -125,19 +125,70 @@ func (d *GOVCDriver) folderDatastoreNetworkExists(folder string, datastore strin
 	return folderpath, nil
 }
 
-//TODO: Implement this function
-func (d *GOVCDriver) CloneVirtualMachine(srcVmName string, dstVmName string, folder string, datastore string, cpu uint, ram uint, diskSize uint, diskThick bool, networkName string, networkAdapter string, annotation string) error {
-	//govc vm.clone -vm SrcVmName -c=nbcpu (0=idem) -datastore-cluster=[GOVC_DATASTORE_CLUSTER] -ds=[GOVC_DATASTORE] -folder=[GOVC_FOLDER] -force=false -host=[GOVC_HOST] -m=Ramsize (0=idem) -net=[GOVC_NETWORK] -net.adapter=e1000 -net.address=IP -on=false -pool=[GOVC_RESOURCE_POOL] -annotation="description"
+//TODO: Test this function
+func (d *GOVCDriver) CloneVirtualMachine(srcVmName string, dstVmName string, srcFolder string, dstFolder string, srcDatacenter string, dstDatastore string, cpu uint, ram uint, networkName string, networkAdapter string, annotation string) error {
 
-	//srcfolderpath, err := d.folderDatastoreNetworkExists(srcfolder, srcdatastore, srcnetworkName)
-	//if err != nil {
-	//		return err
+	srcfolderpath := fmt.Sprintf("/%s/vm/%s", srcDatacenter, srcFolder)
+	if srcFolder == "" {
+		srcfolderpath = fmt.Sprintf("/%s/vm", srcDatacenter)
+	}
+	srcvmpath := fmt.Sprintf("%s/%s", srcfolderpath, srcVmName)
+	exists, err := d.vapiPathExists(srcvmpath)
+	if err != nil || !exists {
+		err = fmt.Errorf("The VM %s does not exists", srcvmpath)
+		return err
+	}
+
+	dstfolderpath, err := d.folderDatastoreNetworkExists(dstFolder, dstDatastore, networkName)
+	if err != nil {
+		return err
+	}
+
+	gocmd := []string{
+		"vm.clone", "-force=false", "-on=false",
+		fmt.Sprintf("-vm=%s", srcvmpath),         // /ha-datacenter/vm/MyGroup/MyVm
+		fmt.Sprintf("-c=%d", cpu),                // default 0=idem
+		fmt.Sprintf("-m=%d", ram),                // in MB, default 0=idem
+		fmt.Sprintf("-ds=%s", dstDatastore),      // datastore1. In clone case, this is the datastore of clone not of origin VM
+		fmt.Sprintf("-folder=%s", dstfolderpath), // /ha-datacenter/vm/MyGroup
+		fmt.Sprintf("-host=%s", d.hostPath),      // /ha-datacenter/host/MyCluster/MyHost  or /ha-datacenter/host/MyHost (if cluster empty). In clone case, this is the host of the clone not of the origin VM
+		fmt.Sprintf("-net=%s", networkName),      // MyNetwork
+		//TODO: add validation on the value of networkAdapter
+		fmt.Sprintf("-net.adapter=%s", networkAdapter), // e1000, vmxnet3, ...
+	}
+
+	if d.ResourcePool != "" {
+		gocmd = append(gocmd, fmt.Sprintf("-pool=%s", d.ResourcePool))
+	}
+
+	//TODO: Impletement resource pool (if needed)
+	//	if resourcePool != "" {
+	//		gocmd = append(gocmd, fmt.Sprintf("-pool=%s", resourcePool))
 	//	}
-	//dstfolderpath, err := d.folderDatastoreNetworkExists(dstfolder, dstdatastore, dstnetworkName)
-	//if err != nil {
-	//		return err
+
+	//TODO: Implement for datastore cluster (if needed)
+	//	if datastoreCluster != "" {
+	//		gocmd = append(gocmd, fmt.Sprintf("-datastore-cluster=%s", datastoreCluster))
 	//	}
-	return errors.New("Cloning is not implemented yet.")
+
+	//TODO: Implement for network IP (if needed)
+	//	if dstIP != "" {
+	//		gocmd = append(gocmd, fmt.Sprintf("-net.address=%s", dstIP))
+	//	}
+
+	if annotation != "" {
+		gocmd = append(gocmd, fmt.Sprintf("-annotation=%s", annotation))
+	}
+
+	gocmd = append(gocmd, dstVmName)
+
+	if _, err := d.govc(gocmd); err != nil {
+		err = fmt.Errorf("Could not clone VM: %v", err)
+		return err
+	}
+	d.vmName = dstVmName
+	d.vmPath = fmt.Sprintf("%s/%s", dstfolderpath, dstVmName)
+	return nil
 }
 
 func (d *GOVCDriver) CreateVirtualMachine(vmName string, folder string, datastore string, cpu uint, ram uint, diskSize uint, diskThick bool, guestType string, networkName string, networkAdapter string, annotation string) error {

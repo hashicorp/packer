@@ -128,8 +128,7 @@ builder.
     VM will be stored when it is built on the remote machine. By default this
     is "datastore1".
 
--   `remote_folder` (string) - The logical path of the
-    VM on the remote machine.
+-   `remote_folder` (string) - The logical path of the VM on the remote machine.
 
 -   `remote_host` (string) - The host of the remote machine used for access.
 
@@ -154,6 +153,10 @@ builder.
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
+
+-   `source_datacenter` (string) - The name of datacenter in which the source VM is. On ESXi not managed by Vcenter the default value of `ha-datacenter` is sufficient.
+
+-   `source_folder` (string) - The logical path of the source VM on the remote machine.
 
 -   `vcenter` (string) - Name of vcenter managing the host used to generate the VM. If not provided, it will default to host name.
 

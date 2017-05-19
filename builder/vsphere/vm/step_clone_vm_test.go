@@ -29,11 +29,11 @@ func TestStepCloneVM(t *testing.T) {
 	step.VMName = "foo"
 	step.SrcVMName = "src-foo"
 	step.Folder = "fold-foo"
+	step.SrcFolder = "srcfold-foo"
 	step.Datastore = "fold-data"
+	step.SrcDatacenter = "datacenter"
 	step.Cpu = 3
 	step.MemSize = 256
-	step.DiskSize = 50000
-	step.DiskThick = true
 	step.NetworkName = "net-foo"
 	step.NetworkAdapter = "vmxnet3"
 	step.Annotation = "foobar"
@@ -71,11 +71,11 @@ func TestStepCloneVM_AdditionnalDisk(t *testing.T) {
 	step.VMName = "foo"
 	step.SrcVMName = "src-foo"
 	step.Folder = "fold-foo"
+	step.SrcFolder = "srcfold-foo"
 	step.Datastore = "fold-data"
+	step.SrcDatacenter = "datacenter"
 	step.Cpu = 3
 	step.MemSize = 256
-	step.DiskSize = 50000
-	step.DiskThick = true
 	step.NetworkName = "net-foo"
 	step.NetworkAdapter = "vmxnet3"
 	step.Annotation = "foobar"

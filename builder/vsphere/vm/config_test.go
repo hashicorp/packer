@@ -91,46 +91,6 @@ func TestNewConfig_MemSize(t *testing.T) {
 	}
 }
 
-func TestNewConfig_DiskThick(t *testing.T) {
-	c := testConfig(t)
-
-	delete(c, "disk_thick")
-	config, warns, errs := NewConfig(c)
-	testConfigOk(t, warns, errs)
-
-	if config.DiskThick != false {
-		t.Fatalf("bad disk_thick: %t", config.DiskThick)
-	}
-
-	c["disk_thick"] = true
-	config, warns, errs = NewConfig(c)
-	testConfigOk(t, warns, errs)
-
-	if config.DiskThick != true {
-		t.Fatalf("bad disk_thick: %t", config.DiskThick)
-	}
-}
-
-func TestNewConfig_DiskSize(t *testing.T) {
-	c := testConfig(t)
-
-	delete(c, "disk_size")
-	config, warns, errs := NewConfig(c)
-	testConfigOk(t, warns, errs)
-
-	if config.DiskSize != 0 {
-		t.Fatalf("bad size: %d", config.DiskSize)
-	}
-
-	c["disk_size"] = 60000
-	config, warns, errs = NewConfig(c)
-	testConfigOk(t, warns, errs)
-
-	if config.DiskSize != 60000 {
-		t.Fatalf("bad size: %d", config.DiskSize)
-	}
-}
-
 func TestNewConfig_NetworkAdapter(t *testing.T) {
 	c := testConfig(t)
 
@@ -160,6 +120,77 @@ func TestNewConfig_NetworkName(t *testing.T) {
 
 	if config.NetworkName != "Test Network" {
 		t.Fatalf("bad network name: %s", config.NetworkName)
+	}
+}
+
+func TestNewConfig_DiskThick(t *testing.T) {
+	c := testConfig(t)
+
+	delete(c, "disk_thick")
+	config, warns, errs := NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	if config.DiskThick != false {
+		t.Fatalf("bad disk_thick: %t", config.DiskThick)
+	}
+
+	c["disk_thick"] = true
+	config, warns, errs = NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	if config.DiskThick != true {
+		t.Fatalf("bad disk_thick: %t", config.DiskThick)
+	}
+}
+
+func TestNewConfig_SourceVMName(t *testing.T) {
+	c := testConfig(t)
+
+	delete(c, "source_vm")
+	config, warns, errs := NewConfig(c)
+	testConfigErr(t, warns, errs)
+
+	c["source_vm"] = "my-vm"
+	config, warns, errs = NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	if config.SourceVMName != "my-vm" {
+		t.Fatalf("bad source VM name: %s", config.SourceVMName)
+	}
+}
+
+func TestNewConfig_RemoteSourceFolder(t *testing.T) {
+	c := testConfig(t)
+
+	delete(c, "source_folder")
+	config, warns, errs := NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	c["source_folder"] = "my-fold"
+	config, warns, errs = NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	if config.RemoteSourceFolder != "my-fold" {
+		t.Fatalf("bad source folder: %s", config.RemoteSourceFolder)
+	}
+}
+
+func TestNewConfig_RemoteSourceDatacenter(t *testing.T) {
+	c := testConfig(t)
+
+	delete(c, "source_datacenter")
+	config, warns, errs := NewConfig(c)
+	testConfigOk(t, warns, errs)
+	if config.RemoteSourceDatacenter != "ha-datacenter" {
+		t.Fatalf("bad default source datacenter: %s", config.RemoteSourceDatacenter)
+	}
+
+	c["source_datacenter"] = "my-data"
+	config, warns, errs = NewConfig(c)
+	testConfigOk(t, warns, errs)
+
+	if config.RemoteSourceDatacenter != "my-data" {
+		t.Fatalf("bad source datacenter: %s", config.RemoteSourceDatacenter)
 	}
 }
 

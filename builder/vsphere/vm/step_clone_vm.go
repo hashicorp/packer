@@ -12,11 +12,12 @@ import (
 type stepCloneVM struct {
 	SrcVMName      string
 	VMName         string
+	SrcFolder      string
 	Folder         string
+	SrcDatacenter  string
 	Datastore      string
 	Cpu            uint
 	MemSize        uint
-	DiskSize       uint
 	DiskThick      bool
 	NetworkName    string
 	NetworkAdapter string
@@ -34,12 +35,12 @@ func (s *stepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	if err := driver.CloneVirtualMachine(
 		s.SrcVMName,
 		s.VMName,
+		s.SrcFolder, //TO BE ADDED
 		s.Folder,
+		s.SrcDatacenter, //TO BE ADDED
 		s.Datastore,
 		s.Cpu,
 		s.MemSize,
-		s.DiskSize,
-		s.DiskThick,
 		s.NetworkName,
 		s.NetworkAdapter,
 		s.Annotation); err != nil {

@@ -56,16 +56,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vspcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 		},
-		//TODO: Add to stepCloneVM structure the necessary b.config entry (for the source vm (provide the full govc path or each component (datacenter,folder,cluster,resourcepool?)))
 		&stepCloneVM{
 			VMName:         b.config.VMName,
 			SrcVMName:      b.config.SourceVMName,
+			SrcFolder:      b.config.RemoteSourceFolder,
 			Folder:         b.config.RemoteFolder,
 			Datastore:      b.config.RemoteDatastore,
+			SrcDatacenter:  b.config.RemoteSourceDatacenter,
 			Cpu:            b.config.Cpu,
 			MemSize:        b.config.MemSize,
-			DiskSize:       b.config.DiskSize,
-			DiskThick:      b.config.DiskThick,
 			NetworkName:    b.config.NetworkName,
 			NetworkAdapter: b.config.NetworkAdapter,
 			Annotation:     b.config.Annotation,
