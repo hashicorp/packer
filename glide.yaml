@@ -11,7 +11,6 @@ import:
   - template/interpolate
 - package: github.com/mitchellh/multistep
 - package: github.com/vmware/govmomi
-  version: v0.14.0
   subpackages:
   - find
   - object
