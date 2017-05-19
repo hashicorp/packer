@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -73,12 +72,12 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("AMIName must be between 3 and 128 characters long"))
 	}
 
-	amiNameRe := regexp.MustCompile(`^[0-9a-zA-Z().\-/_]+$`)
-	if !amiNameRe.MatchString(c.AMIName) {
-		errs = append(errs, fmt.Errorf("AMIName should only contain letters,"+
-			" numbers, '(', ')', '.', '-', '/' and '_'. You can use the "+
-			"`clean_ami_name` template filter to automatically clean your ami "+
-			"name."))
+	if c.AMIName != templateCleanAMIName(c.AMIName) {
+		errs = append(errs, fmt.Errorf("AMIName should only contain "+
+			"alphanumeric characters, parentheses (()), square brackets ([]), spaces "+
+			"( ), periods (.), slashes (/), dashes (-), single quotes ('), at-signs "+
+			"(@), or underscores(_). You can use the `clean_ami_name` template "+
+			"filter to automatically clean your ami name."))
 	}
 
 	if len(errs) > 0 {
