@@ -18,7 +18,6 @@ type CloneParameters struct {
 	vmSrc    *object.VirtualMachine
 	ctx      context.Context
 	vmName   string
-	confSpec *types.VirtualMachineConfigSpec
 }
 
 type StepCloneVM struct{
@@ -29,8 +28,6 @@ type StepCloneVM struct{
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("start cloning...")
-
-	confSpec := state.Get("confSpec").(types.VirtualMachineConfigSpec)
 
 	// Prepare entities: client (authentification), finder, folder, virtual machine
 	client, ctx, err := createClient(s.config.Url, s.config.Username, s.config.Password)
@@ -60,7 +57,6 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 		vmSrc:    vmSrc,
 		ctx:      ctx,
 		vmName: s.config.VMName,
-		confSpec: &confSpec,
 	}
 
 	vm, err := cloneVM(&cloneParameters)
@@ -111,7 +107,6 @@ func cloneVM(params *CloneParameters) (vm *object.VirtualMachine, err error) {
 	var relocateSpec types.VirtualMachineRelocateSpec
 	cloneSpec := types.VirtualMachineCloneSpec{
 		Location: relocateSpec,
-		Config:   params.confSpec,
 		PowerOn:  false,
 	}
 
