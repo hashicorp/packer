@@ -97,9 +97,9 @@ func TestAMINameValidation(t *testing.T) {
 		t.Fatal("shouldn't be able to have an ami name with invalid characters")
 	}
 
-	c.AMIName = "foo().-/_bar"
+	c.AMIName = "fooBAR1()[] ./-'@_"
 	if err := c.Prepare(nil); err != nil {
-		t.Fatal("expected 'foobar' to be a valid ami name")
+		t.Fatal("should be able to use all of the allowed AMI characters")
 	}
 
 	c.AMIName = `xyz-base-2017-04-05-1934`
