@@ -61,8 +61,9 @@ variable or template validation will fail.
 
 User variables are used by calling the `{{user}}` function in the form of
 <code>{{user \`variable\`}}</code>. This function can be used in *any value*
-within the template; in builders, provisioners, *anywhere outside the `variables`
-section*. User variables are available globally within the rest of the template.
+but `type` within the template: in builders, provisioners, *anywhere outside
+the `variables` section*. User variables are available globally within the rest
+of the template.
 
 ## Environment Variables
 
