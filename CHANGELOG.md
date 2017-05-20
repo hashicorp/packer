@@ -31,6 +31,8 @@
 * builder/azure: Replace calls to panic with error returns. [GH-4846]
 * builder/amazon: Only delete temporary key if we created one. [GH-4850]
 * post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
+* core: Correctly reject config files which have junk after valid json.
+    [GH-4906]
 
 
 ## 1.0.0 (April 4, 2017)
