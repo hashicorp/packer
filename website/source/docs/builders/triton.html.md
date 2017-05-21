@@ -30,6 +30,13 @@ This reusable image can then be used to launch new machines.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
+~> **Private installations of Triton must have custom images enabled!** To use
+the Triton builder with a private/on-prem installation of Joyent's Triton
+software, you'll need an operator to manually
+[enable custom images](https://docs.joyent.com/private-cloud/install/image-management)
+after installing Triton. This is not a requirement for Joyent's public cloud
+offering of Triton.
+
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
@@ -110,7 +117,7 @@ builder.
     added to the source machine used for creating the image. For example if any
     of the provisioners which are run need Internet access you will need to add
     the UUID's of the appropriate networks here. If this is not specified,
-    instances will be placed into the default Triton public and internal 
+    instances will be placed into the default Triton public and internal
     networks.
 - `source_machine_tags` (object of key/value strings) - Tags applied to the VM
     used to create the image.
