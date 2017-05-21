@@ -26,8 +26,12 @@ import (
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
+<<<<<<< HEAD
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
+=======
+	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
+>>>>>>> Can specify an iso, vhd or vhdx for download. If it is a vhd or vhdx it is used as the hard drive for spinning up a new machine, importing an exported virtual machine or cloning a virtual machine.
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"

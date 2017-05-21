@@ -170,12 +170,12 @@ func (d *HypervPS4Driver) CreateVirtualSwitch(switchName string, switchType stri
 	return hyperv.CreateVirtualSwitch(switchName, switchType)
 }
 
-func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint) error {
-	return hyperv.CreateVirtualMachine(vmName, path, vhdPath, ram, diskSize, switchName, generation)
+func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint) error {
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, vhdPath, ram, diskSize, switchName, generation)
 }
 
-func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, ram int64, switchName string) error {
-	return hyperv.CloneVirtualMachine(cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots, vmName, path, ram, switchName)
+func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+	return hyperv.CloneVirtualMachine(cloneFromVmxcPath, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
 }
 
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {

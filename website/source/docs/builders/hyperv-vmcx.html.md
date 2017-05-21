@@ -9,12 +9,14 @@ page_title: "Hyper-V Builder (from an vmcx)"
 
 Type: `hyperv-vmcx`
 
-The Hyper-V Packer builder is able to clone [Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
-virtual machines and export them.
+The Hyper-V Packer builder is able to use exported virtual machines or clone existing 
+[Hyper-V](https://www.microsoft.com/en-us/server-cloud/solutions/virtualization.aspx)
+virtual machines.
 
-The builder clones an existing virtual machine boots it, and provisioning software within
-the OS, then shutting it down. The result of the Hyper-V builder is a directory
-containing all the files necessary to run the virtual machine portably.
+The builder imports a virtual machine or clones an existing virtual machine boots it, 
+and provisioning software within the OS, then shutting it down. The result of the 
+Hyper-V builder is a directory containing all the files necessary to run the virtual 
+machine portably.
 
 ## Basic Example
 
@@ -22,6 +24,18 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
+Import from folder:
+```javascript
+{
+  "type": "hyperv-vmcx",
+  "clone_from_vmxc_path": "c:\virtual machines\ubuntu-12.04.5-server-amd64",
+  "ssh_username": "packer",
+  "ssh_password": "packer",
+  "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
+}
+```
+
+Clone from existing virtual machine:
 ```javascript
 {
   "type": "hyperv-vmcx",
@@ -46,7 +60,11 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html)
 can be configured for this builder.
 
-### Required:
+### Required for virtual machine import:
+-   `clone_from_vmxc_path` (string) - The path to the exported
+    virtual machine folder.
+
+### Required for virtual machine clone:
 -   `clone_from_vm_name` (string) - The name of the vm to clone from.
     Ideally the machine to clone from should be shutdown.
 

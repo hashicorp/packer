@@ -2,9 +2,12 @@ package common
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"path/filepath"
 
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step clones an existing virtual machine.
@@ -12,6 +15,7 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepCloneVM struct {
+	CloneFromVMXCPath              string
 	CloneFromVMName                string
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
@@ -31,11 +35,24 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Cloning virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
+	
+	// Determine if we even have an existing virtual harddrive to attach
+	harddrivePath := ""
+	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
+		extension := strings.ToLower(filepath.Ext(harddrivePathRaw.(string)))
+		if extension == "vhd" || extension == "vhdx" {
+			harddrivePath = harddrivePathRaw.(string)
+		} else {
+			log.Println("No existing virtual harddrive, not attaching.")
+		}
+	} else {
+		log.Println("No existing virtual harddrive, not attaching.")
+	}
 
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 
-	err := driver.CloneVirtualMachine(s.CloneFromVMName, s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path, ramSize, s.SwitchName)
+	err := driver.CloneVirtualMachine(s.CloneFromVMXCPath, s.CloneFromVMName, s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path, harddrivePath, ramSize, s.SwitchName)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)

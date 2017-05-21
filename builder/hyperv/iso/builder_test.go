@@ -235,7 +235,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	delete(config, "iso_url")
 	delete(config, "iso_urls")
 
-	// Test both epty
+	// Test both empty
 	config["iso_url"] = ""
 	b = Builder{}
 	warns, err := b.Prepare(config)
