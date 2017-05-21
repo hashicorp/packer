@@ -187,27 +187,37 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64, switchName string, generation uint) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, switchName string, generation uint) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
-New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
+if ($harddrivePath){
+	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
+} else {
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
+}
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
+		err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
 		return err
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
-New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+if ($harddrivePath){
+	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
+} else {
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+}
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
+		err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
 
 		if err != nil {
 			return err
@@ -217,47 +227,111 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 	}
 }
 
-func CloneVirtualMachine(cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, ram int64, switchName string) error {
-
+func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
 	var script = `
-param([string]$CloneFromVMName, [string]$CloneFromSnapshotName, [string]$CloneAllSnapshotsString, [string]$vmName, [string]$path, [long]$memoryStartupBytes, [string]$switchName)
+param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
-$CloneAllSnapshots = [System.Boolean]::Parse($CloneAllSnapshotsString)
+$WorkingPath = Join-Path $exportPath $vmName 
 
-$ExportPath = Join-Path $path $VMName
+if (Test-Path $WorkingPath) {
+	throw "Export path working directory: $WorkingPath already exists!"
+}
 
-if ($CloneFromSnapshotName) {
-    $snapshot = Get-VMSnapshot -VMName $CloneFromVMName -Name $CloneFromSnapshotName
-    Export-VMSnapshot -VMSnapshot $snapshot -Path $ExportPath -ErrorAction Stop
+$allSnapshots = [System.Boolean]::Parse($allSnapshotsString)
+
+if ($snapshotName) {
+    $snapshot = Get-VMSnapshot -VMName $vmName -Name $snapshotName
+    Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
 } else {
-    if (!$CloneAllSnapshots) {
+    if (!$allSnapshots) {
         #Use last snapshot if one was not specified
-        $snapshot = Get-VMSnapshot -VMName $CloneFromVMName | Select -Last 1
+        $snapshot = Get-VMSnapshot -VMName $vmName | Select -Last 1
     } else {
         $snapshot = $null
     }
     
     if (!$snapshot) {
         #No snapshot clone
-        Export-VM -Name $CloneFromVMName -Path $ExportPath -ErrorAction Stop
+        Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
     } else {
         #Snapshot clone
-        Export-VMSnapshot -VMSnapshot $snapshot -Path $ExportPath -ErrorAction Stop
+        Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
     }
 }
 
-$result = Get-ChildItem -Path (Join-Path $ExportPath $CloneFromVMName) | Move-Item -Destination $ExportPath -Force
-$result = Remove-Item -Path (Join-Path $ExportPath $CloneFromVMName)
+$result = Get-ChildItem -Path $WorkingPath | Move-Item -Destination $exportPath -Force
+$result = Remove-Item -Path $WorkingPath
+	`
 
-$VirtualMachinePath = Get-ChildItem -Path (Join-Path $ExportPath 'Virtual Machines') -Filter *.vmcx -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+	allSnapshotsString := "False"
+	if allSnapshots {
+		allSnapshotsString = "True"
+	}
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, exportPath, vmName, snapshotName, allSnapshotsString)
+
+	return err
+}
+
+func CopyVmxcVirtualMachine(exportPath string, cloneFromVmxcPath string) error {
+	var script = `
+param([string]$exportPath, [string]$cloneFromVmxcPath)
+if (!(Test-Path $cloneFromVmxcPath)){
+	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
+}
+	
+if (!(Test-Path $exportPath)){
+	New-Item -ItemType Directory -Force -Path $exportPath
+}
+$cloneFromVmxcPath = Join-Path $cloneFromVmxcPath '\*'
+Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
+	`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, exportPath, cloneFromVmxcPath)
+
+	return err
+}
+
+func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string, ram int64, switchName string) error {
+	var script = `
+param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)
+
+$VirtualHarddisksPath = Join-Path -Path $importPath -ChildPath 'Virtual Hard Disks'
+if (!(Test-Path $VirtualHarddisksPath)) {
+	New-Item -ItemType Directory -Force -Path $VirtualHarddisksPath
+}
+
+$vhdPath = ""
+if ($harddrivePath){
+	$vhdx = $vmName + '.vhdx'
+	$vhdPath = Join-Path -Path $VirtualHarddisksPath -ChildPath $vhdx
+}
+
+$VirtualMachinesPath = Join-Path $importPath 'Virtual Machines'
+if (!(Test-Path $VirtualMachinesPath)) {
+	New-Item -ItemType Directory -Force -Path $VirtualMachinesPath
+}
+
+$VirtualMachinePath = Get-ChildItem -Path $VirtualMachinesPath -Filter *.vmcx -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 if (!$VirtualMachinePath){
-    $VirtualMachinePath = Get-ChildItem -Path (Join-Path $ExportPath 'Virtual Machines') -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+    $VirtualMachinePath = Get-ChildItem -Path $VirtualMachinesPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 }
 if (!$VirtualMachinePath){
-    $VirtualMachinePath = Get-ChildItem -Path $ExportPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+    $VirtualMachinePath = Get-ChildItem -Path $importPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 }
 
-$compatibilityReport = Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $ExportPath -SmartPagingFilePath $ExportPath -SnapshotFilePath $ExportPath -VhdDestinationPath (Join-Path -Path $ExportPath -ChildPath 'Virtual Hard Disks') -GenerateNewId -Copy:$false
+$compatibilityReport = Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy:$false
+if ($vhdPath){
+	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	$existingFirstHarddrive = $compatibilityReport.VM.HardDrives | Select -First 1
+	if ($existingFirstHarddrive) {
+		$existingFirstHarddrive | Set-VMHardDiskDrive -Path $vhdPath
+	} else {
+		Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
+	}	
+}
 Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
@@ -267,22 +341,35 @@ $vm = Import-VM -CompatibilityReport $compatibilityReport
 if ($vm) {
     $result = Rename-VM -VM $vm -NewName $VMName
 }
-`
-
-	CloneAllSnapshotsString := "False"
-	if cloneAllSnapshots {
-		CloneAllSnapshotsString = "True"
-	}
+	`
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, cloneFromVmName, cloneFromSnapshotName, CloneAllSnapshotsString, vmName, path, strconv.FormatInt(ram, 10), switchName)
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName)
 
+	return err
+}
+
+func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+	if cloneFromVmName != "" {
+		err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots)
+		if err != nil {
+			return err
+		}
+	}
+
+	if cloneFromVmxcPath != "" {
+		err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName)
 	if err != nil {
 		return err
 	}
 
 	return DeleteAllDvdDrives(vmName)
-
 }
 
 func GetVirtualMachineGeneration(vmName string) (uint, error) {
