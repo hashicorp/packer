@@ -41,7 +41,8 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 		auth = append(auth, gossh.PublicKeys(signer))
 	}
 	return &gossh.ClientConfig{
-		User: config.Comm.SSHUsername,
-		Auth: auth,
+		User:            config.Comm.SSHUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }

@@ -50,6 +50,7 @@ func SSHConfig(username string, password string, privateKeyFile string) func(mul
 					gossh.KeyboardInteractive(
 						ssh.PasswordKeyboardInteractive(password)),
 				},
+				HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 	}
