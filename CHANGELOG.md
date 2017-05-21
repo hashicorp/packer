@@ -23,6 +23,8 @@
     [GH-4893]
 * builder/amazon: Allow configuration of api endpoint to support api-compatible
     cloud providers. [GH-4896]
+* provisioner/shell: Use `env` to set environment variables to support freebsd
+    out of the box. [GH-4909]
 
 ### BUG FIXES:
 
