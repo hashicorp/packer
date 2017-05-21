@@ -2,7 +2,10 @@ package common
 
 import (
 	"fmt"
-
+	"log"
+	"strings"
+	"path/filepath"
+	
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -14,6 +17,7 @@ import (
 type StepCreateVM struct {
 	VMName                         string
 	SwitchName                     string
+	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint
 	Generation                     uint
@@ -30,13 +34,26 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
-	vhdPath := state.Get("packerVhdTempDir").(string)
-
+	
+	// Determine if we even have an existing virtual harddrive to attach
+	harddrivePath := ""
+	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
+		extension := strings.ToLower(filepath.Ext(harddrivePathRaw.(string)))
+		if extension == "vhd" || extension == "vhdx" {
+			harddrivePath = harddrivePathRaw.(string)
+		} else {
+			log.Println("No existing virtual harddrive, not attaching.")
+		}
+	} else {
+		log.Println("No existing virtual harddrive, not attaching.")
+	}
+    
+    vhdPath := state.Get("packerVhdTempDir").(string)
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)

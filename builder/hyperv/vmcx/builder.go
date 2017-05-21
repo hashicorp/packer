@@ -7,15 +7,16 @@ import (
 	"os"
 	"strings"
 
+	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	"github.com/hashicorp/packer/common"
+	powershell "github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
-	"github.com/mitchellh/packer/common"
-	powershell "github.com/mitchellh/packer/common/powershell"
-	"github.com/mitchellh/packer/common/powershell/hyperv"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"path/filepath"
 )
 
 const (
@@ -69,6 +70,9 @@ type Config struct {
 	// The path to the integration services iso
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
+	// This is the path to a directory containing an exported virtual machine.
+	CloneFromVMXCPath string `mapstructure:"clone_from_vmxc_path"`
+	
 	// This is the name of the virtual machine to clone from.
 	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
 
@@ -122,6 +126,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 		warnings = append(warnings, isoWarnings...)
 		errs = packer.MultiErrorAppend(errs, isoErrs...)
+		
+		extension := strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0]))
+		if extension == "vhd" || extension == "vhdx" {
+			b.config.ISOConfig.TargetExtension = extension
+		}
 	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
@@ -153,7 +162,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.Generation = 1
 
 	if b.config.CloneFromVMName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified."))
+		if b.config.CloneFromVMXCPath == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if clone_from_vmxc_path is not specified."))
+		}
 	} else {
 		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
 		if err != nil {
@@ -190,8 +201,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			}
 		}
 	}
+	
+	if b.config.CloneFromVMXCPath == "" {
+		if b.config.CloneFromVMName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmxc_path be specified if clone_from_vm_name must is not specified."))
+		}
+	} else {
+		if _, err := os.Stat(b.config.CloneFromVMXCPath); os.IsNotExist(err) {
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("CloneFromVMXCPath does not exist: %s", err))
+			}
+		}
+	}
 
-	if b.config.Generation != 2 {
+	if b.config.Generation != 1 || b.config.Generation != 2 {
 		b.config.Generation = 1
 	}
 
@@ -377,6 +401,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCloneVM{
+			CloneFromVMXCPath:				b.config.CloneFromVMXCPath,
 			CloneFromVMName:                b.config.CloneFromVMName,
 			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
