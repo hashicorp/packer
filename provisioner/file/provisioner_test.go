@@ -2,6 +2,8 @@ package file
 
 import (
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,12 +40,32 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 
 func TestProvisionerPrepare_InvalidSource(t *testing.T) {
 	var p Provisioner
+
 	config := testConfig()
 	config["source"] = "/this/should/not/exist"
+	errs := p.Prepare(config)
+	if errs == nil {
+		t.Fatalf("should require existing file or directory")
+	}
+}
 
-	err := p.Prepare(config)
-	if err == nil {
-		t.Fatalf("should require existing file")
+func TestProvisionerPrepare_ValidURL(t *testing.T) {
+	var p Provisioner
+
+	// Set up caching directory
+	packerCache := "packer_cache"
+	os.Mkdir(packerCache, 0760)
+	defer os.RemoveAll(packerCache)
+
+	// Set up test server
+	ts := httptest.NewServer(http.FileServer(http.Dir("./../../common/test-fixtures/root")))
+	defer ts.Close()
+
+	config := testConfig()
+	config["sources"] = []string{ts.URL + "/basic.txt"}
+	errs := p.Prepare(config)
+	if errs != nil {
+		t.Fatalf("file should have been downloaded and exist locally: %s", errs)
 	}
 }
 
