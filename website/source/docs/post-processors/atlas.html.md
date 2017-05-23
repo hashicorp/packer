@@ -22,6 +22,8 @@ You can also use the push command to [run packer builds in
 Atlas](/docs/commands/push.html). The push command and Atlas post-processor
 can be used together or independently.
 
+~> If you'd like to publish a Vagrant box to [Vagrant Cloud](https://vagrantcloud.com), you must use the [`vagrant-cloud`](/docs/post-processors/vagrant-cloud.html) post-processor.
+
 ## Workflow
 
 To take full advantage of Packer and Atlas, it's important to understand the
