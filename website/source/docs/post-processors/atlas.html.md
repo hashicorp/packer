@@ -14,7 +14,7 @@ Type: `atlas`
 
 The Atlas post-processor uploads artifacts from your packer builds to Atlas for
 hosting. Artifacts hosted in Atlas are automatically made available for use
-with Vagrant and Terraform, and Atlas provides additional features for managing
+with Terraform, and Atlas provides additional features for managing
 versions and releases. [Learn more about packer in
 Atlas.](https://atlas.hashicorp.com/help/packer/features)
 
@@ -58,8 +58,7 @@ The configuration allows you to specify and access the artifact in Atlas.
     `cloudstack.image`, `digitalocean.image`, `docker.image`,
     `googlecompute.image`, `hyperv.image`, `oneandone.image`,
     `openstack.image`, `parallels.image`, `profitbricks.image`, `qemu.image`,
-    `triton.image`, `virtualbox.image`, `vmware.image`, `custom.image`, and
-    `vagrant.box`.
+    `triton.image`, `virtualbox.image`, `vmware.image`, and `custom.image`.
 
 ### Optional:
 
@@ -74,9 +73,7 @@ you can also use `token` configuration option.
     you're using Atlas Enterprise in your own network. Defaults to
     `https://atlas.hashicorp.com/api/v1`.
 
-- `metadata` (map) - Send metadata about the artifact. If the artifact type
-    is `vagrant.box`, you must specify a `provider` metadata about what
-    provider to use.
+- `metadata` (map) - Send metadata about the artifact.
 
     - `description` (string) - Inside the metadata blob you can add a information
         about the uploaded artifact to Atlas. This will be reflected in the box
