@@ -477,6 +477,21 @@ modify as well:
     format of the exported virtual machine. This defaults to "ovf".
     Before using this option, you need to install `ovftool`.
 
+
+### VNC port discovery
+
+Packer needs to decide on a port to use for VNC when building remotely. To find
+an open port, we try to connect to ports in the range of `vnc_port_min` to
+`vnc_port_max`. If we notice something is listening on a port in the range, we
+try to connect to the next one, and so on until we find a port that has nothing
+listening on it. If you have many clients building on the ESXi host, there
+might be competition for the VNC ports. You can adjust how long packer waits
+for a connection timeout by setting `PACKER_ESXI_VNC_PROBE_TIMEOUT`. This
+defaults to 15 seconds. Set this shorter if vnc connections are refused, and
+set it longer if Packer can't find an open port. This is intended as an
+advanced configuration option. Please make sure your firewall settings are
+correct before adjusting.
+
 ### Using a Floppy for Linux kickstart file or preseed
 
 Depending on your network configuration, it may be difficult to use packer's

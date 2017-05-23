@@ -198,6 +198,16 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 		}
 	}
 
+	vncTimeout := time.Duration(15)
+	envTimeout := os.Getenv("PACKER_ESXI_VNC_PROBE_TIMEOUT")
+	if envTimeout != "" {
+		if parsedTimeout, err := time.ParseDuration(envTimeout); err != nil {
+			log.Printf("Error parsing PACKER_ESXI_VNC_PROBE_TIMEOUT. Falling back to default (15s). %s", err)
+		} else {
+			vncTimeout = parsedTimeout
+		}
+	}
+
 	for port := portMin; port <= portMax; port++ {
 		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
 			log.Printf("Port %d in use", port)
@@ -205,7 +215,7 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 		}
 		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
-		l, err := net.DialTimeout("tcp", address, 30*time.Second)
+		l, err := net.DialTimeout("tcp", address, vncTimeout)
 
 		if err != nil {
 			if e, ok := err.(*net.OpError); ok {
