@@ -231,6 +231,12 @@ builder.
 - `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option.  Defaults to `false`.
 
+- `skip_register_ami` (boolean) - Set to `true` if you want to skip creation of
+  an AMI. This skips volume bundling and AMI creation and jumps directly to
+  instance termination after provisioning. This may be useful if the instance
+  provisioning is producing an artifact other than an AMI. The `ami_name` option
+  can be omitted if this is set.  Default `false`.
+
 - `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
     volumes form the snapshot(s). `all` will make the snapshot publicly accessible.

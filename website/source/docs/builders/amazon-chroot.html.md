@@ -231,6 +231,12 @@ each category, the available configuration keys are alphabetized.
 - `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
+- `skip_register_ami` (boolean) - Set to `true` if you want to skip creation of
+  an AMI. This skips snapshot and AMI creation and jumps directly to deleting
+  the volume after provisioning. This may be useful if the chroot provisioning
+  is producing an artifact other than an AMI. The `ami_name` setting can be
+  omitted if this is set. Default `false`.
+
 - `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
     [template engine](/docs/templates/engine.html)
