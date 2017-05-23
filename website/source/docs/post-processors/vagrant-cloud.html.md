@@ -11,10 +11,6 @@ description: |-
 
 # Vagrant Cloud Post-Processor
 
-~> Vagrant Cloud has been superseded by Atlas. Please use the [Atlas
-post-processor](/docs/post-processors/atlas.html) instead. Learn more about
-[Atlas](https://atlas.hashicorp.com/).
-
 Type: `vagrant-cloud`
 
 The Packer Vagrant Cloud post-processor receives a Vagrant box from the
