@@ -9,6 +9,8 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/hashicorp/packer/template/interpolate"
+	"io/ioutil"
+	"crypto/x509"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -24,6 +26,7 @@ type AccessConfig struct {
 	Insecure         bool   `mapstructure:"insecure"`
 	Region           string `mapstructure:"region"`
 	EndpointType     string `mapstructure:"endpoint_type"`
+	CACertFile       string `mapstructure:"cacert"`
 	ClientCertFile   string `mapstructure:"cert"`
 	ClientKeyFile    string `mapstructure:"key"`
 
@@ -54,6 +57,9 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 	if c.Username == "" {
 		c.Username = os.Getenv("SDK_USERNAME")
+	}
+	if c.CACertFile == "" {
+		c.CACertFile = os.Getenv("OS_CACERT")
 	}
 	if c.ClientCertFile == "" {
 		c.ClientCertFile = os.Getenv("OS_CERT")
@@ -94,6 +100,16 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	tls_config := &tls.Config{}
+
+	if c.CACertFile != "" {
+		caCert, err := ioutil.ReadFile(c.CACertFile)
+		if err != nil {
+			return []error{err}
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		tls_config.RootCAs = caCertPool
+	}
 
 	// If we have insecure set, then create a custom HTTP client that
 	// ignores SSL errors.

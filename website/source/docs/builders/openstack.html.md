@@ -76,6 +76,9 @@ builder.
     server in. If this isn't specified, the default enforced by your OpenStack
     cluster will be used. This may be required for some OpenStack clusters.
 
+- `cacert` (string) - Custom CA certificate file path.
+     If ommited the OS_CACERT environment variable can be used.
+
 - `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
      cloud-init metadata.
 
