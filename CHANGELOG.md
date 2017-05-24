@@ -26,6 +26,7 @@
 * provisioner/shell: Use `env` to set environment variables to support freebsd
     out of the box. [GH-4909]
 * communicator/winrm: Add support for file downloads. [GH-4748]
+* builder/openstack: Support client x509 certificates. [GH-4921]
 
 ### BUG FIXES:
 
