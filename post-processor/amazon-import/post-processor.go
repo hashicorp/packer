@@ -64,10 +64,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.S3Key = "packer-import-{{timestamp}}.ova"
 	}
 
-	if p.config.LicenseType == "" {
-		p.config.LicenseType = "BYOL"
-	}
-
 	errs := new(packer.MultiError)
 
 	// Check and render s3_key_name
@@ -166,7 +162,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Calling EC2 to import from s3://%s/%s with license type '%s'", p.config.S3Bucket, p.config.S3Key, p.config.LicenseType)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -175,8 +171,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-		LicenseType: &p.config.LicenseType,
-	})
+	}
+
+	if p.config.LicenseType == "" {
+		p.config.LicenseType = "BYOL"
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
