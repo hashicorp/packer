@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 
+	"crypto/x509"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/hashicorp/packer/template/interpolate"
 	"io/ioutil"
-	"crypto/x509"
 )
 
 // AccessConfig is for common configuration related to openstack access
