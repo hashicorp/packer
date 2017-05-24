@@ -173,8 +173,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		},
 	}
 
-	if p.config.LicenseType == "" {
-		p.config.LicenseType = "BYOL"
+	if p.config.LicenseType != "" {
+		params.LicenseType = &p.config.LicenseType
 	}
 
 	import_start, err := ec2conn.ImportImage(params)
