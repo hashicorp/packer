@@ -125,8 +125,10 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 		tls_config.Certificates = []tls.Certificate{cert}
 	}
-	transport := &http.Transport{TLSClientConfig: tls_config}
-	client.HTTPClient.Transport = transport
+
+	var transport http.Transport = *http.DefaultTransport.(*http.Transport)
+	transport.TLSClientConfig = tls_config
+	client.HTTPClient.Transport = &transport
 
 	// Auth
 	err = openstack.Authenticate(client, ao)
