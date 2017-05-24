@@ -24,6 +24,8 @@ type AccessConfig struct {
 	Insecure         bool   `mapstructure:"insecure"`
 	Region           string `mapstructure:"region"`
 	EndpointType     string `mapstructure:"endpoint_type"`
+	ClientCertFile   string `mapstructure:"cert"`
+	ClientKeyFile    string `mapstructure:"key"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -52,6 +54,12 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 	if c.Username == "" {
 		c.Username = os.Getenv("SDK_USERNAME")
+	}
+	if c.ClientCertFile == "" {
+		c.ClientCertFile = os.Getenv("OS_CERT")
+	}
+	if c.ClientKeyFile == "" {
+		c.ClientKeyFile = os.Getenv("OS_KEY")
 	}
 
 	// Get as much as possible from the end
@@ -85,13 +93,24 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		return []error{err}
 	}
 
+	tls_config := &tls.Config{}
+
 	// If we have insecure set, then create a custom HTTP client that
 	// ignores SSL errors.
 	if c.Insecure {
-		config := &tls.Config{InsecureSkipVerify: true}
-		transport := &http.Transport{TLSClientConfig: config}
-		client.HTTPClient.Transport = transport
+		tls_config.InsecureSkipVerify = true
 	}
+
+	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(c.ClientCertFile, c.ClientKeyFile)
+		if err != nil {
+			return []error{err}
+		}
+
+		tls_config.Certificates = []tls.Certificate{cert}
+	}
+	transport := &http.Transport{TLSClientConfig: tls_config}
+	client.HTTPClient.Transport = transport
 
 	// Auth
 	err = openstack.Authenticate(client, ao)
