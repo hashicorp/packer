@@ -3,14 +3,15 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
-	"net/http"
 	"os"
 
 	"crypto/x509"
+	"io/ioutil"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
-	"io/ioutil"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -126,7 +127,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		tls_config.Certificates = []tls.Certificate{cert}
 	}
 
-	transport := http.DefaultTransport.(*http.Transport)
+	transport := cleanhttp.DefaultTransport()
 	transport.TLSClientConfig = tls_config
 	client.HTTPClient.Transport = transport
 
