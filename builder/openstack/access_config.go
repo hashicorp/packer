@@ -3,6 +3,7 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -24,6 +25,7 @@ type AccessConfig struct {
 	Insecure         bool   `mapstructure:"insecure"`
 	Region           string `mapstructure:"region"`
 	EndpointType     string `mapstructure:"endpoint_type"`
+	TokenID          string `mapstructure:"token"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -55,7 +57,10 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Get as much as possible from the end
-	ao, _ := openstack.AuthOptionsFromEnv()
+	ao, err := openstack.AuthOptionsFromEnv()
+	if err != nil {
+		log.Printf("[WARN] Error getting openstack auth from environment: %s", err)
+	}
 
 	// Make sure we reauth as needed
 	ao.AllowReauth = true
@@ -72,6 +77,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.TenantName, &ao.TenantName},
 		{&c.DomainID, &ao.DomainID},
 		{&c.DomainName, &ao.DomainName},
+		{&c.TokenID, &ao.TokenID},
 	}
 	for _, s := range overrides {
 		if *s.From != "" {
