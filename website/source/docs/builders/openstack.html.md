@@ -79,6 +79,9 @@ builder.
 - `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
      cloud-init metadata.
 
+- `cert` (string) - Client certificate file path for SSL client authentication.
+    If omitted the OS_CERT environment variable is used.
+
 - `domain_name` or `domain_id` (string) - The Domain name or ID you are
     authenticating with. OpenStack installations require this if identity v3 is used.
     Packer will use the environment variable `OS_DOMAIN_NAME` or `OS_DOMAIN_ID`, if set.
@@ -101,6 +104,9 @@ builder.
 
 - `insecure` (boolean) - Whether or not the connection to OpenStack can be
     done over an insecure connection. By default this is false.
+
+- `key` (string) - Cleint private key file path for SSL client authentication.
+    If ommited the OS_KEY environment variable is used.
 
 - `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
