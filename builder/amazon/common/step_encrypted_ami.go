@@ -25,7 +25,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Encrypt boot not set, so skip step
 	if !s.EncryptBootVolume {
 		if kmsKeyId != "" {
-			log.Printf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId)
+			log.Printf("Ignoring KMS Key ID: %s, encrypted_boot=false", kmsKeyId)
 		}
 		return multistep.ActionContinue
 	}
@@ -43,7 +43,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	ui.Say(fmt.Sprintf("Copying AMI: %s(%s)", region, id))
 
 	if kmsKeyId != "" {
-		ui.Say(fmt.Sprintf("Encypting with KMS Key ID: %s", kmsKeyId))
+		ui.Say(fmt.Sprintf("Encrypting with KMS Key ID: %s", kmsKeyId))
 	}
 
 	copyOpts := &ec2.CopyImageInput{
