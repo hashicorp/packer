@@ -19,7 +19,9 @@ import (
 //
 // Produces:
 //   <nothing>
-type StepCleanVMX struct{}
+type StepCleanVMX struct {
+	RemoveEthernetInterfaces bool
+}
 
 func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
@@ -59,6 +61,16 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Message("Disabling VNC server...")
 	vmxData["remotedisplay.vnc.enabled"] = "FALSE"
+
+	if s.RemoveEthernetInterfaces {
+		ui.Message("Removing Ethernet Interfaces...")
+		for k := range vmxData {
+			if strings.HasPrefix(k, "ethernet") {
+				log.Printf("Deleting key: %s", k)
+				delete(vmxData, k)
+			}
+		}
+	}
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {
