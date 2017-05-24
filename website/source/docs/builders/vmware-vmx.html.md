@@ -163,6 +163,11 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
+- `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces from
+    the VMX file after building. This is for advanced users who understand the
+    ramifications, but is useful for building Vagrant boxes since Vagrant will
+    create ethernet interfaces when provisioning a box.
+
 - `vnc_bind_address` (string / IP address) - The IP address that should be binded
      to for VNC. By default packer will use 127.0.0.1 for this.
 
