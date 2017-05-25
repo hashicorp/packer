@@ -8,26 +8,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"io/ioutil"
 	"log"
-	"strings"
-)
-
-const (
-	shebang      = "#!/bin/sh\n"
-	key_function = `
-export ssh_directory="/root/.ssh"
-export authorized_keys=${ssh_directory}/authorized_keys
-if [ -f "${authorized_keys}" ] ; then
-	isKeyExist=$(egrep -v "${user_public_key}" "${authorized_keys}")
-	if [ ! "${isKeyExist}" ] ; then
-		echo ${user_public_key} >> ${ssh_directory}/authorized_keys
-	fi
-else
-	if [ ! -d "${ssh_directory}" ] ; then
-		mkdir -p ${ssh_directory}
-	fi
-	echo ${user_public_key} >> ${ssh_directory}/authorized_keys
-fi
-`
 )
 
 type stepCreateAlicloudInstance struct {
@@ -152,12 +132,6 @@ func (s *stepCreateAlicloudInstance) Cleanup(state multistep.StateBag) {
 }
 
 func (s *stepCreateAlicloudInstance) getUserData(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(Config)
-	publicKey := ""
-	if publickey_temp, ok := state.GetOk("publickKey"); ok {
-		publicKey = publickey_temp.(string)
-		publicKey = strings.TrimRight(publicKey, "\n")
-	}
 	userData := s.UserData
 	if s.UserDataFile != "" {
 		data, err := ioutil.ReadFile(s.UserDataFile)
@@ -165,16 +139,6 @@ func (s *stepCreateAlicloudInstance) getUserData(state multistep.StateBag) (stri
 			return "", err
 		}
 		userData = string(data)
-	}
-
-	if config.Comm.SSHPrivateKey != "" || config.TemporaryKeyPairName != "" {
-		if userData == "" {
-			userData = shebang
-		} else {
-			userData = userData + "\n\n"
-		}
-		userData = userData + "export user_public_key=\"" + publicKey + "\""
-		userData = userData + key_function
 	}
 	log.Printf(userData)
 	return userData, nil

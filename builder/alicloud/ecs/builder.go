@@ -95,8 +95,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:                b.config.PackerDebug,
 			KeyPairName:          b.config.SSHKeyPairName,
 			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-			PublicKeyFile:        b.config.PublicKey,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			//DebugKeyPath:          b.config.Com
+			RegionId: b.config.AlicloudRegion,
 		},
 	}
 	if b.chooseNetworkType() == VpcNet {
@@ -134,6 +136,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		steps = append(steps, &setpConfigAlicloudEIP{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
+			InternetChargeType:       b.config.InternetChargeType,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
@@ -143,6 +146,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		&stepRunAlicloudInstance{},
 		&stepMountAlicloudDisk{},
+		&stepAttachKeyPar{},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: SSHHost(

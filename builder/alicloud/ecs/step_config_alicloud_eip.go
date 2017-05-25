@@ -11,6 +11,7 @@ import (
 type setpConfigAlicloudEIP struct {
 	AssociatePublicIpAddress bool
 	RegionId                 string
+	InternetChargeType       string
 	allocatedId              string
 }
 
@@ -20,7 +21,7 @@ func (s *setpConfigAlicloudEIP) Run(state multistep.StateBag) multistep.StepActi
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	ui.Say("Start allocated alicloud eip")
 	ipaddress, allocateId, err := client.AllocateEipAddress(&ecs.AllocateEipAddressArgs{
-		RegionId: common.Region(s.RegionId),
+		RegionId: common.Region(s.RegionId), InternetChargeType: common.InternetChargeType(s.InternetChargeType),
 	})
 	if err != nil {
 		state.Put("error", err)

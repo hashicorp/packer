@@ -21,15 +21,15 @@ func TestBuilderAcc_basic(t *testing.T) {
 	})
 }
 
-func TestBuilderAcc_windows(t *testing.T) {
-	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Builder:  &Builder{},
-		Template: testBuilderAccWindows,
-	})
-}
+//func TestBuilderAcc_windows(t *testing.T) {
+//	builderT.Test(t, builderT.TestCase{
+//		PreCheck: func() {
+//			testAccPreCheck(t)
+//		},
+//		Builder:  &Builder{},
+//		Template: testBuilderAccWindows,
+//	})
+//}
 
 func TestBuilderAcc_regionCopy(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
