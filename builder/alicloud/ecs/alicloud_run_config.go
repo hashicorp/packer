@@ -35,7 +35,6 @@ type RunConfig struct {
 	Comm           communicator.Config `mapstructure:",squash"`
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
 	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
-	PublicKey      string              `mapstructure:"ssh_private_key_file"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
