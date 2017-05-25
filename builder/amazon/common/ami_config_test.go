@@ -57,6 +57,46 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 	c.AMISkipRegionValidation = false
 
+	c.AMIRegions = []string{"us-east-1", "us-east-2", "us-west-1"}
+	c.AMIRegionKmsKeyIds = map[string]string{
+		"us-east-1": "123-456-7890",
+		"us-west-1": "789-012-3456",
+		"us-east-2": "456-789-0123",
+	}
+	if err := c.Prepare(nil); err != nil {
+		t.Fatal("shouldn't have error")
+	}
+
+	c.AMIRegions = []string{"us-east-1", "us-west-1"}
+	c.AMIRegionKmsKeyIds = map[string]string{
+		"us-east-1": "123-456-7890",
+		"us-west-1": "789-012-3456",
+		"us-east-2": "456-789-0123",
+	}
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have error b/c theres a region in the key map that isn't in ami_regions")
+	}
+
+	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-2"}
+	c.AMIRegionKmsKeyIds = map[string]string{
+		"us-east-1": "123-456-7890",
+		"us-west-1": "789-012-3456",
+	}
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have error b/c theres a region in in ami_regions that isn't in the key map")
+	}
+
+	c.SnapshotUsers = []string{"foo", "bar"}
+	c.AMIKmsKeyId = "123-abc-456"
+	c.AMIEncryptBootVolume = true
+	c.AMIRegions = []string{"us-east-1", "us-west-1"}
+	c.AMIRegionKmsKeyIds = map[string]string{
+		"us-east-1": "123-456-7890",
+		"us-west-1": "",
+	}
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have error b/c theres a region in in ami_regions that isn't in the key map")
+	}
 }
 
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
