@@ -8,6 +8,12 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 	"net"
 	"os"
+	"time"
+)
+
+var (
+	// modified in tests
+	sshHostSleepDuration = time.Second
 )
 
 type alicloudSSHHelper interface {
@@ -21,6 +27,9 @@ func SSHHost(e alicloudSSHHelper, private bool) func(multistep.StateBag) (string
 	}
 }
 
+// SSHConfig returns a function that can be used for the SSH communicator
+// config for connecting to the instance created over SSH using the private key
+// or password.
 func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		if useAgent {
@@ -41,6 +50,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				},
 			}, nil
 		}
+
 		privateKey, hasKey := state.GetOk("privateKey")
 		if hasKey {
 
