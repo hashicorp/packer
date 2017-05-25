@@ -278,6 +278,11 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
+- `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces from
+    the VMX file after building. This is for advanced users who understand the
+    ramifications, but is useful for building Vagrant boxes since Vagrant will
+    create ethernet interfaces when provisioning a box.
+
 - `vmx_template_path` (string) - Path to a [configuration
     template](/docs/templates/engine.html) that defines the
     contents of the virtual machine VMX file for VMware. This is for **advanced
