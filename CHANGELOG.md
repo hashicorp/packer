@@ -38,6 +38,8 @@
 * post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
 * core: Correctly reject config files which have junk after valid json.
     [GH-4906]
+* builder/amazon: fix `force_delete_snapshot` when the launch instance has
+    extra volumes. [GH-4931]
 
 
 ## 1.0.0 (April 4, 2017)
