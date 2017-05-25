@@ -69,7 +69,7 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if len(c.AMIName) < 3 || len(c.AMIName) > 128 {
-		errs = append(errs, fmt.Errorf("AMIName must be between 3 and 128 characters long"))
+		errs = append(errs, fmt.Errorf("ami_name must be between 3 and 128 characters long"))
 	}
 
 	if c.AMIName != templateCleanAMIName(c.AMIName) {
