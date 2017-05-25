@@ -51,7 +51,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			// Delete snapshot(s) by image
 			if s.ForceDeleteSnapshot {
 				for _, b := range i.BlockDeviceMappings {
-					if b.Ebs != nil {
+					if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
 						_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
 							SnapshotId: b.Ebs.SnapshotId,
 						})
