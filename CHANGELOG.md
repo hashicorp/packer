@@ -27,6 +27,7 @@
     out of the box. [GH-4909]
 * communicator/winrm: Add support for file downloads. [GH-4748]
 * builder/openstack: Support client x509 certificates. [GH-4921]
+* builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
 
 ### BUG FIXES:
 
