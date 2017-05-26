@@ -205,7 +205,7 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	if config.SSHBastionPrivateKey != "" {
-		signer, err := commonssh.FileSigner(config.SSHBastionPrivateKey)
+		signer, err := commonssh.PassphraseFileSigner(config.SSHBastionPrivateKey, config.SSHBastionPrivateKeyPassphrase)
 		if err != nil {
 			return nil, err
 		}
