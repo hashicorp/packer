@@ -22,15 +22,18 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	retry_times := 3
 	for {
-		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion), KeyPairName: keyPairName,
-			InstanceIds: "[\"" + instance.InstanceId + "\"]"})
+		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
+			KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})
 		if err != nil {
 			e, _ := err.(*common.Error)
-			if (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" || e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound")) && retry_times > 0 {
+			if (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" ||
+				e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound")) &&
+				retry_times > 0 {
 				retry_times = retry_times - 1
 				continue
 			}
-			err := fmt.Errorf("Error attaching keypair %s to instance %s : %s", keyPairName, instance.InstanceId, err)
+			err := fmt.Errorf("Error attaching keypair %s to instance %s : %s",
+				keyPairName, instance.InstanceId, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -53,10 +56,11 @@ func (s *stepAttachKeyPar) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 
-	err := client.DetachKeyPair(&ecs.DetachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion), KeyPairName: keyPairName,
-		InstanceIds: "[\"" + instance.InstanceId + "\"]"})
+	err := client.DetachKeyPair(&ecs.DetachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
+		KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})
 	if err != nil {
-		err := fmt.Errorf("Error Detaching keypair %s to instance %s : %s", keyPairName, instance.InstanceId, err)
+		err := fmt.Errorf("Error Detaching keypair %s to instance %s : %s", keyPairName,
+			instance.InstanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return

@@ -123,7 +123,8 @@ func checkSnapshotsDeleted(snapshotIds []string) builderT.TestCheckFunc {
 			return fmt.Errorf("Query snapshot failed %v", err)
 		}
 		if len(snapshotResp) > 0 {
-			return fmt.Errorf("Snapshots weren't successfully deleted by `ecs_image_force_delete_snapshots`")
+			return fmt.Errorf("Snapshots weren't successfully deleted by " +
+				"`ecs_image_force_delete_snapshots`")
 		}
 		return nil
 	}
@@ -144,17 +145,21 @@ func checkECSImageSharing(uid string) builderT.TestCheckFunc {
 
 		// describe the image, get block devices with a snapshot
 		client, _ := testAliyunClient()
-		imageSharePermissionResponse, err := client.DescribeImageSharePermission(&ecs.ModifyImageSharePermissionArgs{
-			RegionId: "cn-beijing",
-			ImageId:  artifact.AlicloudImages["cn-beijing"],
-		})
+		imageSharePermissionResponse, err := client.DescribeImageSharePermission(
+			&ecs.ModifyImageSharePermissionArgs{
+				RegionId: "cn-beijing",
+				ImageId:  artifact.AlicloudImages["cn-beijing"],
+			})
 
 		if err != nil {
-			return fmt.Errorf("Error retrieving Image Attributes for ECS Image Artifact (%#v) in ECS Image Sharing Test: %s", artifact, err)
+			return fmt.Errorf("Error retrieving Image Attributes for ECS Image Artifact (%#v) "+
+				"in ECS Image Sharing Test: %s", artifact, err)
 		}
 
-		if len(imageSharePermissionResponse.Accounts.Account) != 1 && imageSharePermissionResponse.Accounts.Account[0].AliyunId != uid {
-			return fmt.Errorf("share account is incorrect %d", len(imageSharePermissionResponse.Accounts.Account))
+		if len(imageSharePermissionResponse.Accounts.Account) != 1 &&
+			imageSharePermissionResponse.Accounts.Account[0].AliyunId != uid {
+			return fmt.Errorf("share account is incorrect %d",
+				len(imageSharePermissionResponse.Accounts.Account))
 		}
 
 		return nil

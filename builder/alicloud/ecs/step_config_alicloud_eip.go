@@ -29,7 +29,8 @@ func (s *setpConfigAlicloudEIP) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 	s.allocatedId = allocateId
-	if err = client.WaitForEip(common.Region(s.RegionId), allocateId, ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
+	if err = client.WaitForEip(common.Region(s.RegionId), allocateId,
+		ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
 		state.Put("error", err)
 		ui.Say(fmt.Sprintf("Error allocate alicloud eip: %s", err))
 		return multistep.ActionHalt
@@ -41,7 +42,8 @@ func (s *setpConfigAlicloudEIP) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 	}
 
-	if err = client.WaitForEip(common.Region(s.RegionId), allocateId, ecs.EipStatusInUse, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
+	if err = client.WaitForEip(common.Region(s.RegionId), allocateId,
+		ecs.EipStatusInUse, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
 		state.Put("error", err)
 		ui.Say(fmt.Sprintf("Error associating alicloud eip: %s", err))
 		return multistep.ActionHalt
@@ -66,7 +68,8 @@ func (s *setpConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
 		ui.Say(fmt.Sprintf("Unassociate alicloud eip failed "))
 	}
 
-	if err := client.WaitForEip(common.Region(s.RegionId), s.allocatedId, ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
+	if err := client.WaitForEip(common.Region(s.RegionId), s.allocatedId,
+		ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
 		ui.Say(fmt.Sprintf("Unassociate alicloud eip timeout "))
 	}
 	if err := client.ReleaseEipAddress(s.allocatedId); err != nil {
