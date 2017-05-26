@@ -67,6 +67,17 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatal("shouldn't have error")
 	}
 
+	c.SnapshotUsers = []string{"user-foo", "user-bar"}
+	c.AMIRegions = []string{"us-east-1", "us-east-2", "us-west-1"}
+	c.AMIRegionKmsKeyIds = map[string]string{
+		"us-east-1": "123-456-7890",
+		"us-west-1": "789-012-3456",
+		"us-east-2": "",
+	}
+	if err := c.Prepare(nil); err == nil {
+		t.Fatal("should have an error b/c can't use default KMS key if sharing")
+	}
+
 	c.AMIRegions = []string{"us-east-1", "us-west-1"}
 	c.AMIRegionKmsKeyIds = map[string]string{
 		"us-east-1": "123-456-7890",

@@ -13,9 +13,11 @@ import (
 )
 
 type StepAMIRegionCopy struct {
-	AccessConfig *AccessConfig
-	Regions      []string
-	Name         string
+	AccessConfig      *AccessConfig
+	Regions           []string
+	RegionKeyIds      map[string]string
+	EncryptBootVolume bool
+	Name              string
 }
 
 func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
@@ -33,6 +35,7 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 
 	var lock sync.Mutex
 	var wg sync.WaitGroup
+	var reg_key_id string
 	errs := new(packer.MultiError)
 	for _, region := range s.Regions {
 		if region == *ec2conn.Config.Region {
@@ -44,10 +47,14 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 		wg.Add(1)
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
+		reg_key_id = s.RegionKeyIds[region]
+		if !s.EncryptBootVolume {
+			reg_key_id = ""
+		}
+
 		go func(region string) {
 			defer wg.Done()
-			id, snapshotIds, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region)
-
+			id, snapshotIds, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region, reg_key_id)
 			lock.Lock()
 			defer lock.Unlock()
 			amis[region] = id
@@ -80,8 +87,9 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID and snapshot IDs, or error.
 func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, imageId string,
-	target string, source string) (string, []string, error) {
+	target string, source string, key_id string) (string, []string, error) {
 	snapshotIds := []string{}
+	is_encrypted := false
 
 	// Connect to the region where the AMI will be copied to
 	awsConfig, err := config.Config()
@@ -95,11 +103,16 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 		return "", snapshotIds, err
 	}
 	regionconn := ec2.New(session)
-
+	// if we've provided a map of key ids to regions, use those keys.
+	if len(key_id) > 0 {
+		is_encrypted = true
+	}
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,
 		SourceImageId: &imageId,
 		Name:          &name,
+		Encrypted:     aws.Bool(is_encrypted),
+		KmsKeyId:      aws.String(key_id),
 	})
 
 	if err != nil {
