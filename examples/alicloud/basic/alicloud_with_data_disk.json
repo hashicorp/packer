@@ -9,7 +9,7 @@
     "secret_key":"{{user `secret_key`}}",
     "region":"cn-beijing",
     "image_name":"packer_with_data_disk",
-    "source_image":"centos_7_2_64_40G_base_20170222.vhd",
+    "source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
     "ssh_username":"root",
     "instance_type":"ecs.n1.tiny",
     "io_optimized":"true",
@@ -19,7 +19,7 @@
     "type": "shell",
     "inline": [
       "sleep 30",
-      "yum install redis.x86_64 -y"
+      "apt-get update -yy"
     ]
   }]
 }
