@@ -21,13 +21,13 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	retry_times := 3
-	for{
+	for {
 		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion), KeyPairName: keyPairName,
 			InstanceIds: "[\"" + instance.InstanceId + "\"]"})
 		if err != nil {
 			e, _ := err.(*common.Error)
-			if( (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" || e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound"))&& retry_times>0){
-				retry_times=retry_times-1
+			if (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" || e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound")) && retry_times > 0 {
+				retry_times = retry_times - 1
 				continue
 			}
 			err := fmt.Errorf("Error attaching keypair %s to instance %s : %s", keyPairName, instance.InstanceId, err)
