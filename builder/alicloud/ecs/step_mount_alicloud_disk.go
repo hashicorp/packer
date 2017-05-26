@@ -20,7 +20,8 @@ func (s *stepMountAlicloudDisk) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionContinue
 	}
 	ui.Say("Start mounting Disks")
-	disks, _, err := client.DescribeDisks(&ecs.DescribeDisksArgs{InstanceId: instance.InstanceId, RegionId: instance.RegionId})
+	disks, _, err := client.DescribeDisks(&ecs.DescribeDisksArgs{InstanceId: instance.InstanceId,
+		RegionId: instance.RegionId})
 	if err != nil {
 		err := fmt.Errorf("Error query alicloud disks failed: %s", err)
 		state.Put("error", err)

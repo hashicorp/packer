@@ -155,16 +155,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ImageName: p.config.AlicloudImageName,
 	})
 	if err != nil {
-		return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+		return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+			getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 	}
 
 	if len(images) > 0 && !p.config.AlicloudImageForceDetele {
-		return nil, false, fmt.Errorf("Duplicated image exists, please delete the existing images or set the 'image_force_delete' value as true")
+		return nil, false, fmt.Errorf("Duplicated image exists, please delete the existing images " +
+			"or set the 'image_force_delete' value as true")
 	}
 
 	// Set up the OSS client
 	log.Println("Creating OSS Client")
-	client, err := oss.New(getEndPonit(p.config.AlicloudRegion), p.config.AlicloudAccessKey, p.config.AlicloudSecretKey)
+	client, err := oss.New(getEndPonit(p.config.AlicloudRegion), p.config.AlicloudAccessKey,
+		p.config.AlicloudSecretKey)
 	if err != nil {
 		return nil, false, fmt.Errorf("Creating oss connection failed: %s", err)
 	}
@@ -182,7 +185,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed to upload image %s: %s", source, err)
 	}
 	if len(images) > 0 && p.config.AlicloudImageForceDetele {
-		if err = ecsClient.DeleteImage(packercommon.Region(p.config.AlicloudRegion), images[0].ImageId); err != nil {
+		if err = ecsClient.DeleteImage(packercommon.Region(p.config.AlicloudRegion),
+			images[0].ImageId); err != nil {
 			return nil, false, fmt.Errorf("Delete duplicated image %s failed", images[0].ImageName)
 		}
 	}
@@ -215,14 +219,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				RoleName: "AliyunECSImageImportDefaultRole",
 			})
 			if err != nil {
-				return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+				return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+					getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 			}
 			if roleResponse.Role.RoleId == "" {
 				if _, err = ramClient.CreateRole(ram.RoleRequest{
 					RoleName:                 "AliyunECSImageImportDefaultRole",
 					AssumeRolePolicyDocument: AliyunECSImageImportDefaultRolePolicy,
 				}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				if _, err := ramClient.AttachPolicyToRole(ram.AttachPolicyToRoleRequest{
 					ram.PolicyRequest{
@@ -230,18 +236,21 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 						PolicyType: "System",
 					}, "AliyunECSImageImportDefaultRole",
 				}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 			} else {
 				policyListResponse, err := ramClient.ListPoliciesForRole(ram.RoleQueryRequest{
 					"AliyunECSImageImportDefaultRole",
 				})
 				if err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				isAliyunECSImageImportRolePolicyNotExit := true
 				for _, policy := range policyListResponse.Policies.Policy {
-					if policy.PolicyName == "AliyunECSImageImportRolePolicy" && policy.PolicyType == "System" {
+					if policy.PolicyName == "AliyunECSImageImportRolePolicy" &&
+						policy.PolicyType == "System" {
 						isAliyunECSImageImportRolePolicyNotExit = false
 						break
 					}
@@ -253,7 +262,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 							PolicyType: "System",
 						}, "AliyunECSImageImportDefaultRole",
 					}); err != nil {
-						return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+						return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+							getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 					}
 				}
 				if _, err = ramClient.UpdateRole(
@@ -261,7 +271,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 						RoleName:                    "AliyunECSImageImportDefaultRole",
 						NewAssumeRolePolicyDocument: AliyunECSImageImportDefaultRolePolicy,
 					}); err != nil {
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 			}
 			for i := 10; i > 0; i = i - 1 {
@@ -271,17 +282,20 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 					if e.Code == "NoSetRoletoECSServiceAcount" {
 						time.Sleep(5 * time.Second)
 						continue
-					} else if e.Code == "ImageIsImporting" || e.Code == "InvalidImageName.Duplicated" {
+					} else if e.Code == "ImageIsImporting" ||
+						e.Code == "InvalidImageName.Duplicated" {
 						break
 					}
-					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				break
 			}
 
 		} else {
 
-			return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s", getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
+			return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
+				getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 		}
 	}
 
@@ -298,9 +312,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	if !p.config.SkipClean {
-		ui.Message(fmt.Sprintf("Deleting import source %s/%s/%s", getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey))
+		ui.Message(fmt.Sprintf("Deleting import source %s/%s/%s",
+			getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey))
 		if err = bucket.DeleteObject(p.config.OSSKey); err != nil {
-			return nil, false, fmt.Errorf("Failed to delete %s/%s/%s: %s", getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey, err)
+			return nil, false, fmt.Errorf("Failed to delete %s/%s/%s: %s",
+				getEndPonit(p.config.AlicloudRegion), p.config.OSSBucket, p.config.OSSKey, err)
 		}
 	}
 

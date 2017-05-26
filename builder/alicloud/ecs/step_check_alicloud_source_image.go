@@ -16,7 +16,8 @@ func (s *stepCheckAlicloudSourceImage) Run(state multistep.StateBag) multistep.S
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
-	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{RegionId: common.Region(config.AlicloudRegion), ImageId: config.AlicloudSourceImage})
+	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{RegionId: common.Region(config.AlicloudRegion),
+		ImageId: config.AlicloudSourceImage})
 	if err != nil {
 		err := fmt.Errorf("Error querying alicloud image: %s", err)
 		state.Put("error", err)

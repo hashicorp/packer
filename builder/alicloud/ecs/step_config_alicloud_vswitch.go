@@ -133,7 +133,9 @@ func (s *stepConfigAlicloudVSwitch) Cleanup(state multistep.StateBag) {
 	for {
 		if err := client.DeleteVSwitch(s.VSwitchId); err != nil {
 			e, _ := err.(*common.Error)
-			if (e.Code == "IncorrectVSwitchStatus" || e.Code == "DependencyViolation" || e.Code == "DependencyViolation.HaVip" || e.Code == "IncorretRouteEntryStatus") && time.Now().Before(start) {
+			if (e.Code == "IncorrectVSwitchStatus" || e.Code == "DependencyViolation" ||
+				e.Code == "DependencyViolation.HaVip" ||
+				e.Code == "IncorretRouteEntryStatus") && time.Now().Before(start) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
