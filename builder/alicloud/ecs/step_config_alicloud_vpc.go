@@ -81,7 +81,9 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 	for {
 		if err := client.DeleteVpc(s.VpcId); err != nil {
 			e, _ := err.(*common.Error)
-			if (e.Code == "DependencyViolation.Instance" || e.Code == "DependencyViolation.RouteEntry" || e.Code == "DependencyViolation.VSwitch" || e.Code == "DependencyViolation.SecurityGroup") && time.Now().Before(start) {
+			if (e.Code == "DependencyViolation.Instance" || e.Code == "DependencyViolation.RouteEntry" ||
+				e.Code == "DependencyViolation.VSwitch" ||
+				e.Code == "DependencyViolation.SecurityGroup") && time.Now().Before(start) {
 				time.Sleep(1 * time.Second)
 				continue
 			}

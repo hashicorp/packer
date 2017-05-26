@@ -56,7 +56,8 @@ func (c *AlicloudAccessConfig) Config() error {
 		c.AlicloudSecretKey = os.Getenv("ALICLOUD_SECRET_KEY")
 	}
 	if c.AlicloudAccessKey == "" || c.AlicloudSecretKey == "" {
-		return fmt.Errorf("ALICLOUD_ACCESS_KEY and ALICLOUD_SECRET_KEY must set in template file or environment variables")
+		return fmt.Errorf("ALICLOUD_ACCESS_KEY and ALICLOUD_SECRET_KEY must set in template file " +
+			"or environment variables")
 	}
 	return nil
 
