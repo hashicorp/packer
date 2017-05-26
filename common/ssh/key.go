@@ -38,8 +38,9 @@ func PassphraseFileSigner(path, passphrase string) (ssh.Signer, error) {
 	if block.Headers["Proc-Type"] == "4,ENCRYPTED" {
 		if passphrase == "" {
 			return nil, fmt.Errorf(
-				"Failed to read key '%s': password protected keys require\n"+
-					"ssh_private_key_passphrase to be set.", path)
+				"Failed to read key '%s': password protected keys for bastion\n"+
+					"hosts require ssh_bastion_private_key_passphrase to\n"+
+					"be set.", path)
 		}
 		return parseEncryptedKey(block, path, passphrase)
 	}
