@@ -16,22 +16,23 @@ type Config struct {
 	Type string `mapstructure:"communicator"`
 
 	// SSH
-	SSHHost               string        `mapstructure:"ssh_host"`
-	SSHPort               int           `mapstructure:"ssh_port"`
-	SSHUsername           string        `mapstructure:"ssh_username"`
-	SSHPassword           string        `mapstructure:"ssh_password"`
-	SSHPrivateKey         string        `mapstructure:"ssh_private_key_file"`
-	SSHPty                bool          `mapstructure:"ssh_pty"`
-	SSHTimeout            time.Duration `mapstructure:"ssh_timeout"`
-	SSHAgentAuth          bool          `mapstructure:"ssh_agent_auth"`
-	SSHDisableAgent       bool          `mapstructure:"ssh_disable_agent"`
-	SSHHandshakeAttempts  int           `mapstructure:"ssh_handshake_attempts"`
-	SSHBastionHost        string        `mapstructure:"ssh_bastion_host"`
-	SSHBastionPort        int           `mapstructure:"ssh_bastion_port"`
-	SSHBastionUsername    string        `mapstructure:"ssh_bastion_username"`
-	SSHBastionPassword    string        `mapstructure:"ssh_bastion_password"`
-	SSHBastionPrivateKey  string        `mapstructure:"ssh_bastion_private_key_file"`
-	SSHFileTransferMethod string        `mapstructure:"ssh_file_transfer_method"`
+	SSHHost                 string        `mapstructure:"ssh_host"`
+	SSHPort                 int           `mapstructure:"ssh_port"`
+	SSHUsername             string        `mapstructure:"ssh_username"`
+	SSHPassword             string        `mapstructure:"ssh_password"`
+	SSHPrivateKey           string        `mapstructure:"ssh_private_key_file"`
+	SSHPrivateKeyPassphrase string        `mapstructure:"ssh_private_key_passphrase"`
+	SSHPty                  bool          `mapstructure:"ssh_pty"`
+	SSHTimeout              time.Duration `mapstructure:"ssh_timeout"`
+	SSHAgentAuth            bool          `mapstructure:"ssh_agent_auth"`
+	SSHDisableAgent         bool          `mapstructure:"ssh_disable_agent"`
+	SSHHandshakeAttempts    int           `mapstructure:"ssh_handshake_attempts"`
+	SSHBastionHost          string        `mapstructure:"ssh_bastion_host"`
+	SSHBastionPort          int           `mapstructure:"ssh_bastion_port"`
+	SSHBastionUsername      string        `mapstructure:"ssh_bastion_username"`
+	SSHBastionPassword      string        `mapstructure:"ssh_bastion_password"`
+	SSHBastionPrivateKey    string        `mapstructure:"ssh_bastion_private_key_file"`
+	SSHFileTransferMethod   string        `mapstructure:"ssh_file_transfer_method"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -153,7 +154,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if _, err := os.Stat(c.SSHPrivateKey); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := SSHFileSigner(c.SSHPrivateKey); err != nil {
+		} else if _, err := SSHFileSigner(c.SSHPrivateKey, c.SSHPrivateKeyPassphrase); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}
