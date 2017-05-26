@@ -44,7 +44,7 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 
 	}
-	ui.Say("Start create alicloud vpc")
+	ui.Say("Start creating alicloud vpc")
 	vpc, err := client.CreateVpc(&ecs.CreateVpcArgs{
 		RegionId:  common.Region(config.AlicloudRegion),
 		CidrBlock: s.CidrBlock,

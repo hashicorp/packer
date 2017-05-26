@@ -31,16 +31,16 @@ func TestBuilderAcc_basic(t *testing.T) {
 //	})
 //}
 
-func TestBuilderAcc_regionCopy(t *testing.T) {
-	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Builder:  &Builder{},
-		Template: testBuilderAccRegionCopy,
-		Check:    checkRegionCopy([]string{"cn-hangzhou", "cn-shenzhen"}),
-	})
-}
+//func TestBuilderAcc_regionCopy(t *testing.T) {
+//	builderT.Test(t, builderT.TestCase{
+//		PreCheck: func() {
+//			testAccPreCheck(t)
+//		},
+//		Builder:  &Builder{},
+//		Template: testBuilderAccRegionCopy,
+//		Check:    checkRegionCopy([]string{"cn-hangzhou", "cn-shenzhen"}),
+//	})
+//}
 
 func TestBuilderAcc_forceDelete(t *testing.T) {
 	// Build the same alicloud image twice, with ecs_image_force_delete on the second run
@@ -230,7 +230,7 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"centos_7_2_64_40G_base_20170222.vhd",
+		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
 		"ssh_username": "ubuntu",
 		"io_optimized":"true",
 		"ssh_username":"root",
@@ -244,7 +244,7 @@ const testBuilderAccRegionCopy = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"centos_7_2_64_40G_base_20170222.vhd",
+		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test_{{timestamp}}",
@@ -259,7 +259,7 @@ const testBuilderAccForceDelete = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"centos_7_2_64_40G_base_20170222.vhd",
+		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_force_delete": "%s",
@@ -274,7 +274,7 @@ const testBuilderAccForceDeleteSnapshot = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"centos_7_2_64_40G_base_20170222.vhd",
+		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_force_delete_snapshots": "%s",
@@ -291,7 +291,7 @@ const testBuilderAccSharing = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"centos_7_2_64_40G_base_20170222.vhd",
+		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test_{{timestamp}}",
