@@ -13,7 +13,7 @@ func message(state multistep.StateBag, module string) {
 	ui := state.Get("ui").(packer.Ui)
 
 	if cancelled || halted {
-		ui.Say(fmt.Sprintf("Delete the %s because cancelation or error...", module))
+		ui.Say(fmt.Sprintf("Delete the %s because cancellation or error...", module))
 	} else {
 		ui.Say(fmt.Sprintf("Clean the created %s", module))
 	}

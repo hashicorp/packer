@@ -3,11 +3,12 @@ package ecs
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 type stepConfigAlicloudVPC struct {
@@ -28,7 +29,7 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 			RegionId: common.Region(config.AlicloudRegion),
 		})
 		if err != nil {
-			ui.Say(fmt.Sprintf("Query vpcs failed: %s", err))
+			ui.Say(fmt.Sprintf("Failed querying vpcs: %s", err))
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
@@ -38,13 +39,13 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 			s.isCreate = false
 			return multistep.ActionContinue
 		}
-		message := fmt.Sprintf("The specific vpc {%s} isn't exist.", s.VpcId)
+		message := fmt.Sprintf("The specified vpc {%s} doesn't exist.", s.VpcId)
 		state.Put("error", errors.New(message))
 		ui.Say(message)
 		return multistep.ActionHalt
 
 	}
-	ui.Say("Start creating alicloud vpc")
+	ui.Say("Start create vpc")
 	vpc, err := client.CreateVpc(&ecs.CreateVpcArgs{
 		RegionId:  common.Region(config.AlicloudRegion),
 		CidrBlock: s.CidrBlock,
@@ -52,13 +53,13 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 	})
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Create vps failed %v", err))
+		ui.Say(fmt.Sprintf("Create vpc failed %s", err))
 		return multistep.ActionHalt
 	}
 	err = client.WaitForVpcAvailable(common.Region(config.AlicloudRegion), vpc.VpcId, ALICLOUD_DEFAULT_SHORT_TIMEOUT)
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Waiting vps avabalibe failed %v", err))
+		ui.Say(fmt.Sprintf("Failed waiting for vpc to become available %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -87,7 +88,7 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
-			ui.Error(fmt.Sprintf("Error delete vpc, may still be around: %s", err))
+			ui.Error(fmt.Sprintf("Error deleting vpc, it may still be around: %s", err))
 			return
 		}
 		break

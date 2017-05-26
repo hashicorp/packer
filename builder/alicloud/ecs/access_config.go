@@ -2,10 +2,11 @@ package ecs
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/template/interpolate"
-	"os"
 )
 
 // Config of alicloud
@@ -56,8 +57,7 @@ func (c *AlicloudAccessConfig) Config() error {
 		c.AlicloudSecretKey = os.Getenv("ALICLOUD_SECRET_KEY")
 	}
 	if c.AlicloudAccessKey == "" || c.AlicloudSecretKey == "" {
-		return fmt.Errorf("ALICLOUD_ACCESS_KEY and ALICLOUD_SECRET_KEY must set in template file " +
-			"or environment variables")
+		return fmt.Errorf("ALICLOUD_ACCESS_KEY and ALICLOUD_SECRET_KEY must be set in template file or environment variables.")
 	}
 	return nil
 

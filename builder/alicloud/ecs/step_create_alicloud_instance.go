@@ -2,12 +2,13 @@ package ecs
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"io/ioutil"
-	"log"
 )
 
 type stepCreateAlicloudInstance struct {
@@ -67,7 +68,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
 		})
 		if err != nil {
-			err := fmt.Errorf("Error create alicloud instance: %s", err)
+			err := fmt.Errorf("Error creating instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -93,7 +94,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
 		})
 		if err != nil {
-			err := fmt.Errorf("Error create instance: %s", err)
+			err := fmt.Errorf("Error creating instance: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -108,7 +109,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 	}
 	instance, err := client.DescribeInstanceAttribute(instanceId)
 	if err != nil {
-		ui.Say(fmt.Sprint(err))
+		ui.Say(err.Error())
 		return multistep.ActionHalt
 	}
 	s.instance = instance
@@ -126,7 +127,7 @@ func (s *stepCreateAlicloudInstance) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	err := client.DeleteInstance(s.instance.InstanceId)
 	if err != nil {
-		ui.Say(fmt.Sprintf("Cleaning instance: %s failed ", s.instance.InstanceId))
+		ui.Say(fmt.Sprintf("Cleaning instance %s failed ", s.instance.InstanceId))
 	}
 
 }
