@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
@@ -28,7 +29,7 @@ func (s *setpShareAlicloudImage) Run(state multistep.StateBag) multistep.StepAct
 			})
 		if err != nil {
 			state.Put("error", err)
-			ui.Say(fmt.Sprintf("Modify alicloud image share permission failed: %s", err))
+			ui.Say(fmt.Sprintf("Failed modifying image share permissions: %s", err))
 			return multistep.ActionHalt
 		}
 	}
@@ -42,7 +43,7 @@ func (s *setpShareAlicloudImage) Cleanup(state multistep.StateBag) {
 		ui := state.Get("ui").(packer.Ui)
 		client := state.Get("client").(*ecs.Client)
 		alicloudImages := state.Get("alicloudimages").(map[string]string)
-		ui.Say("Restore alicloud image share permission because cancelations or error...")
+		ui.Say("Restoring image share permission because cancellations or error...")
 		for copyedRegion, copyedImageId := range alicloudImages {
 			err := client.ModifyImageSharePermission(
 				&ecs.ModifyImageSharePermissionArgs{
@@ -52,7 +53,7 @@ func (s *setpShareAlicloudImage) Cleanup(state multistep.StateBag) {
 					RemoveAccount: s.AlicloudImageShareAccounts,
 				})
 			if err != nil {
-				ui.Say(fmt.Sprintf("Restore alicloud image share permission failed: %s", err))
+				ui.Say(fmt.Sprintf("Restoring image share permission failed: %s", err))
 			}
 		}
 	}

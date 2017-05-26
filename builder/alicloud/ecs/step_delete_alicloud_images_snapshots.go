@@ -2,11 +2,12 @@ package ecs
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 type stepDeleteAlicloudImageSnapshots struct {
@@ -36,7 +37,7 @@ func (s *stepDeleteAlicloudImageSnapshots) Run(state multistep.StateBag) multist
 			}
 			err = client.DeleteImage(common.Region(config.AlicloudRegion), image.ImageId)
 			if err != nil {
-				err := fmt.Errorf("Delete alicloud image failed: %s", err)
+				err := fmt.Errorf("Failed to delete image: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt

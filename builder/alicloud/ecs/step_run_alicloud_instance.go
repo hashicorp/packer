@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
@@ -17,7 +18,7 @@ func (s *stepRunAlicloudInstance) Run(state multistep.StateBag) multistep.StepAc
 
 	err := client.StartInstance(instance.InstanceId)
 	if err != nil {
-		err := fmt.Errorf("Error start alicloud instance: %s", err)
+		err := fmt.Errorf("Error starting instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -25,7 +26,7 @@ func (s *stepRunAlicloudInstance) Run(state multistep.StateBag) multistep.StepAc
 	ui.Say("Alcoud instance starting")
 	err = client.WaitForInstance(instance.InstanceId, ecs.Running, ALICLOUD_DEFAULT_TIMEOUT)
 	if err != nil {
-		err := fmt.Errorf("Starting alicloud instance timeout: %s", err)
+		err := fmt.Errorf("Timeout waiting for instance to start: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -44,11 +45,11 @@ func (s *stepRunAlicloudInstance) Cleanup(state multistep.StateBag) {
 		instanceAttrubite, _ := client.DescribeInstanceAttribute(instance.InstanceId)
 		if instanceAttrubite.Status == ecs.Starting || instanceAttrubite.Status == ecs.Running {
 			if err := client.StopInstance(instance.InstanceId, true); err != nil {
-				ui.Say(fmt.Sprintf("Stop alicloud instance %s failed %v", instance.InstanceId, err))
+				ui.Say(fmt.Sprintf("Error stopping instance %s, it may still be around %s", instance.InstanceId, err))
 				return
 			}
 			err := client.WaitForInstance(instance.InstanceId, ecs.Stopped, ALICLOUD_DEFAULT_TIMEOUT)
-			ui.Say(fmt.Sprintf("Stop alicloud instance %s failed %v", instance.InstanceId, err))
+			ui.Say(fmt.Sprintf("Error stopping instance %s, it may still be around %s", instance.InstanceId, err))
 		}
 	}
 }

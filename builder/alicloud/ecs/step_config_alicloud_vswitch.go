@@ -3,11 +3,12 @@ package ecs
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 type stepConfigAlicloudVSwitch struct {
@@ -31,7 +32,7 @@ func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.Step
 			ZoneId:    s.ZoneId,
 		})
 		if err != nil {
-			ui.Say(fmt.Sprintf("Query vswitch failed: %s", err))
+			ui.Say(fmt.Sprintf("Failed querying vswitch: %s", err))
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
@@ -42,7 +43,7 @@ func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.Step
 			return multistep.ActionContinue
 		}
 		s.isCreate = false
-		message := fmt.Sprintf("The specific vswitch {%s} doesn't exist.", s.VSwitchId)
+		message := fmt.Sprintf("The specified vswitch {%s} doesn't exist.", s.VSwitchId)
 		state.Put("error", errors.New(message))
 		ui.Say(message)
 		return multistep.ActionHalt
@@ -139,7 +140,7 @@ func (s *stepConfigAlicloudVSwitch) Cleanup(state multistep.StateBag) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
-			ui.Error(fmt.Sprintf("Error delete vswitch, may still be around: %s", err))
+			ui.Error(fmt.Sprintf("Error deleting vswitch, it may still be around: %s", err))
 			return
 		}
 		break
