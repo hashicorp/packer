@@ -3,11 +3,12 @@ package ecs
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 type stepConfigAlicloudSecurityGroup struct {
@@ -40,7 +41,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 		}
 
 		if err != nil {
-			ui.Say(fmt.Sprintf("Query alicloud security grouip failed: %s", err))
+			ui.Say(fmt.Sprintf("Failed querying security group: %s", err))
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
@@ -52,7 +53,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 			}
 		}
 		s.isCreate = false
-		message := fmt.Sprintf("The specific security group {%s} isn't exist.", s.SecurityGroupId)
+		message := fmt.Sprintf("The specified security group {%s} doesn't exist.", s.SecurityGroupId)
 		state.Put("error", errors.New(message))
 		ui.Say(message)
 		return multistep.ActionHalt
@@ -75,7 +76,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 	}
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Create security group failed %v", err))
+		ui.Say(fmt.Sprintf("Create security group failed %s", err))
 		return multistep.ActionHalt
 	}
 	state.Put("securitygroupid", securityGroupId)
@@ -91,7 +92,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 	})
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("authorzie security group failed %v", err))
+		ui.Say(fmt.Sprintf("Failed authorizing security group: %s", err))
 		return multistep.ActionHalt
 	}
 	err = client.AuthorizeSecurityGroup(&ecs.AuthorizeSecurityGroupArgs{
@@ -104,7 +105,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 	})
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("authorzie security group failed %v", err))
+		ui.Say(fmt.Sprintf("Failed authorizing security group: %s", err))
 		return multistep.ActionHalt
 	}
 
@@ -128,7 +129,7 @@ func (s *stepConfigAlicloudSecurityGroup) Cleanup(state multistep.StateBag) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
-			ui.Error(fmt.Sprintf("Error delete security group failed, may still be around: %s", err))
+			ui.Error(fmt.Sprintf("Failed to delete security group, it may still be around: %s", err))
 			return
 		}
 		break

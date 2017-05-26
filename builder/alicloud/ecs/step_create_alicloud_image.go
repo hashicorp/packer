@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
@@ -18,7 +19,7 @@ func (s *stepCreateAlicloudImage) Run(state multistep.StateBag) multistep.StepAc
 	ui := state.Get("ui").(packer.Ui)
 
 	// Create the alicloud image
-	ui.Say(fmt.Sprintf("Creating alicloud images: %s", config.AlicloudImageName))
+	ui.Say(fmt.Sprintf("Creating image: %s", config.AlicloudImageName))
 	var imageId string
 	var err error
 
@@ -31,7 +32,7 @@ func (s *stepCreateAlicloudImage) Run(state multistep.StateBag) multistep.StepAc
 		Description:  config.AlicloudImageDescription})
 
 	if err != nil {
-		err := fmt.Errorf("Error creating alicloud images: %s", err)
+		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -39,7 +40,7 @@ func (s *stepCreateAlicloudImage) Run(state multistep.StateBag) multistep.StepAc
 	err = client.WaitForImageReady(common.Region(config.AlicloudRegion),
 		imageId, ALICLOUD_DEFAULT_LONG_TIMEOUT)
 	if err != nil {
-		err := fmt.Errorf("Waiting alicloud image creating timeout: %s", err)
+		err := fmt.Errorf("Timeout waiting for image to be created: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -49,14 +50,14 @@ func (s *stepCreateAlicloudImage) Run(state multistep.StateBag) multistep.StepAc
 		RegionId: common.Region(config.AlicloudRegion),
 		ImageId:  imageId})
 	if err != nil {
-		err := fmt.Errorf("Query created alicloud image failed: %s", err)
+		err := fmt.Errorf("Error querying created image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	if len(images) == 0 {
-		err := fmt.Errorf("Query created alicloud image failed: %s", err)
+		err := fmt.Errorf("Unable to find created image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -85,9 +86,9 @@ func (s *stepCreateAlicloudImage) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 
-	ui.Say("Delete the alicloud image because cancelation or error...")
+	ui.Say("Deleting the image because of cancellation or error...")
 	if err := client.DeleteImage(common.Region(config.AlicloudRegion), s.image.ImageId); err != nil {
-		ui.Error(fmt.Sprintf("Error delete alicloud image, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error deleting image, it may still be around: %s", err))
 		return
 	}
 }
