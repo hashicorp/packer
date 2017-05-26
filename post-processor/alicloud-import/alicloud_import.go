@@ -2,6 +2,11 @@ package alicloudimport
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	packercommon "github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
@@ -11,10 +16,6 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"log"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
@@ -69,7 +70,7 @@ type PostProcessor struct {
 	DiskDeviceMapping []ecs.DiskDeviceMapping
 }
 
-// Entry point for configuration parisng when we've defined
+// Entry point for configuration parsing when we've defined
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -95,7 +96,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check we have alicloud access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AlicloudAccessConfig.Prepare(&p.config.ctx)...)
 
-	// define all our required paramaters
+	// define all our required parameters
 	templates := map[string]*string{
 		"oss_bucket_name": &p.config.OSSBucket,
 	}
@@ -125,7 +126,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Error rendering oss_key_name template: %s", err)
 	}
 	if p.config.OSSKey == "" {
-		p.config.OSSKey = "Pakcer_" + strconv.Itoa(time.Now().Nanosecond())
+		p.config.OSSKey = "Packer_" + strconv.Itoa(time.Now().Nanosecond())
 	}
 	log.Printf("Rendered oss_key_name as %s", p.config.OSSKey)
 
