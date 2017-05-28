@@ -169,7 +169,7 @@ func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtual
 			strings.Contains(s, "Microsoft.Network/publicIPAddresses")
 	})
 
-	(*resource.Properties.IPConfigurations)[0].Properties.PublicIPAddress = nil
+	(*resource.Properties.IPConfigurations)[0].PublicIPAddress = nil
 
 	return nil
 }

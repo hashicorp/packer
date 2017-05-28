@@ -53,8 +53,8 @@ func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.say(fmt.Sprintf(" -> OS Disk           : '%s'", *vm.Properties.StorageProfile.OsDisk.Vhd.URI))
-	state.Put(constants.ArmOSDiskVhd, *vm.Properties.StorageProfile.OsDisk.Vhd.URI)
+	s.say(fmt.Sprintf(" -> OS Disk           : '%s'", *vm.StorageProfile.OsDisk.Vhd.URI))
+	state.Put(constants.ArmOSDiskVhd, *vm.StorageProfile.OsDisk.Vhd.URI)
 
 	return multistep.ActionContinue
 }

@@ -40,7 +40,9 @@ func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deployment
 		return err
 	}
 
-	_, err = s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
+	_, errChan := s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
+
+	err = <-errChan
 	return err
 }
 

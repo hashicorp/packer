@@ -31,8 +31,9 @@ func NewStepDeleteResourceGroup(client *AzureClient, ui packer.Ui) *StepDeleteRe
 }
 
 func (s *StepDeleteResourceGroup) deleteResourceGroup(resourceGroupName string, cancelCh <-chan struct{}) error {
-	_, err := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
+	_, errChan := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
 
+	err := <-errChan
 	return err
 }
 
