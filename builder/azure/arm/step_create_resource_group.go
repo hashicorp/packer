@@ -31,7 +31,7 @@ func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateRe
 }
 
 func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, location string, tags *map[string]*string) error {
-	_, err := s.client.GroupsClient.CreateOrUpdate(resourceGroupName, resources.ResourceGroup{
+	_, err := s.client.GroupsClient.CreateOrUpdate(resourceGroupName, resources.Group{
 		Location: &location,
 		Tags:     tags,
 	})

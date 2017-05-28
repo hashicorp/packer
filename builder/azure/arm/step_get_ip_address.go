@@ -57,7 +57,7 @@ func (s *StepGetIPAddress) getPrivateIP(resourceGroupName string, ipAddressName 
 		return "", err
 	}
 
-	return *(*resp.Properties.IPConfigurations)[0].Properties.PrivateIPAddress, nil
+	return *(*resp.IPConfigurations)[0].PrivateIPAddress, nil
 }
 
 func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
@@ -66,7 +66,7 @@ func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName s
 		return "", err
 	}
 
-	return *resp.Properties.IPAddress, nil
+	return *resp.IPAddress, nil
 }
 
 func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {

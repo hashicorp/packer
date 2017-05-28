@@ -12,8 +12,6 @@ import (
 
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 
-	"github.com/Azure/go-autorest/autorest/azure"
-
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 
@@ -21,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
+	"github.com/Azure/go-autorest/autorest/adal"
 )
 
 type Builder struct {
@@ -179,7 +178,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			template.(*CaptureTemplate),
 			func(name string) string {
 				month := time.Now().AddDate(0, 1, 0).UTC()
-				sasUrl, _ := azureClient.BlobStorageClient.GetBlobSASURI(DefaultSasBlobContainer, name, month, DefaultSasBlobPermission)
+				blob := azureClient.BlobStorageClient.GetContainerReference(DefaultSasBlobContainer).GetBlobReference(name)
+				sasUrl, _ := blob.GetSASURI(month, DefaultSasBlobPermission)
 				return sasUrl
 			})
 	}
@@ -204,7 +204,7 @@ func (b *Builder) getBlobEndpoint(client *AzureClient, resourceGroupName string,
 		return "", err
 	}
 
-	return *account.Properties.PrimaryEndpoints.Blob, nil
+	return *account.AccountProperties.PrimaryEndpoints.Blob, nil
 }
 
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
@@ -226,9 +226,9 @@ func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, b.config.toVirtualMachineCaptureParameters())
 }
 
-func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePrincipalToken, *azure.ServicePrincipalToken, error) {
-	var servicePrincipalToken *azure.ServicePrincipalToken
-	var servicePrincipalTokenVault *azure.ServicePrincipalToken
+func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrincipalToken, *adal.ServicePrincipalToken, error) {
+	var servicePrincipalToken *adal.ServicePrincipalToken
+	var servicePrincipalTokenVault *adal.ServicePrincipalToken
 
 	var err error
 

@@ -21,6 +21,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/version"
+	"github.com/Azure/go-autorest/autorest/adal"
 )
 
 const (
@@ -107,56 +108,56 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
 	cloud *azure.Environment,
-	servicePrincipalToken, servicePrincipalTokenVault *azure.ServicePrincipalToken) (*AzureClient, error) {
+	servicePrincipalToken, servicePrincipalTokenVault *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
 
 	maxlen := getInspectorMaxLength()
 
 	azureClient.DeploymentsClient = resources.NewDeploymentsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.DeploymentsClient.Authorizer = servicePrincipalToken
+	azureClient.DeploymentsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DeploymentsClient.RequestInspector = withInspection(maxlen)
 	azureClient.DeploymentsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.DeploymentsClient.UserAgent += packerUserAgent
 
 	azureClient.GroupsClient = resources.NewGroupsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.GroupsClient.Authorizer = servicePrincipalToken
+	azureClient.GroupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GroupsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.GroupsClient.UserAgent += packerUserAgent
 
 	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.InterfacesClient.Authorizer = servicePrincipalToken
+	azureClient.InterfacesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.InterfacesClient.RequestInspector = withInspection(maxlen)
 	azureClient.InterfacesClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.InterfacesClient.UserAgent += packerUserAgent
 
 	azureClient.SubnetsClient = network.NewSubnetsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.SubnetsClient.Authorizer = servicePrincipalToken
+	azureClient.SubnetsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.SubnetsClient.RequestInspector = withInspection(maxlen)
 	azureClient.SubnetsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.SubnetsClient.UserAgent += packerUserAgent
 
 	azureClient.VirtualNetworksClient = network.NewVirtualNetworksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.VirtualNetworksClient.Authorizer = servicePrincipalToken
+	azureClient.VirtualNetworksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualNetworksClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualNetworksClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.VirtualNetworksClient.UserAgent += packerUserAgent
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.PublicIPAddressesClient.Authorizer = servicePrincipalToken
+	azureClient.PublicIPAddressesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.PublicIPAddressesClient.RequestInspector = withInspection(maxlen)
 	azureClient.PublicIPAddressesClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.PublicIPAddressesClient.UserAgent += packerUserAgent
 
 	azureClient.VirtualMachinesClient = compute.NewVirtualMachinesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.VirtualMachinesClient.Authorizer = servicePrincipalToken
+	azureClient.VirtualMachinesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualMachinesClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient))
 	azureClient.VirtualMachinesClient.UserAgent += packerUserAgent
 
 	azureClient.AccountsClient = armStorage.NewAccountsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.AccountsClient.Authorizer = servicePrincipalToken
+	azureClient.AccountsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.AccountsClient.UserAgent += packerUserAgent
@@ -167,7 +168,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	}
 
 	azureClient.VaultClient = common.NewVaultClient(*keyVaultURL)
-	azureClient.VaultClient.Authorizer = servicePrincipalTokenVault
+	azureClient.VaultClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalTokenVault)
 	azureClient.VaultClient.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.VaultClient.UserAgent += packerUserAgent

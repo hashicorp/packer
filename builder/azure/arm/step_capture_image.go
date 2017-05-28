@@ -39,7 +39,9 @@ func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName st
 		return err
 	}
 
-	_, err = s.client.Capture(resourceGroupName, computeName, *parameters, cancelCh)
+	_, errChan := s.client.Capture(resourceGroupName, computeName, *parameters, cancelCh)
+
+	err = <-errChan
 	if err != nil {
 		return err
 	}
