@@ -230,7 +230,8 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	return &gossh.ClientConfig{
-		User: config.SSHBastionUsername,
-		Auth: auth,
+		User:            config.SSHBastionUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }
