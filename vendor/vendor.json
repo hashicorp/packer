@@ -63,34 +63,56 @@
 			"versionExact": "v10.0.3-beta"
 		},
 		{
-			"checksumSHA1": "pi00alAztMy9MGxJmvg9qC+tsGk=",
+			"checksumSHA1": "NwbvjCz9Xo4spo0C96Tq6WCLX7U=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest",
-			"revision": "6f40a8acfe03270d792cb8155e2942c09d7cff95"
+			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
 		},
 		{
-			"checksumSHA1": "z8FwqeLK0Pluo7FYC5k2MVBoils=",
+			"checksumSHA1": "KOETWLsF6QW+lrPVPsMNHDZP+xA=",
+			"path": "github.com/Azure/go-autorest/autorest/adal",
+			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
+		},
+		{
+			"checksumSHA1": "2KdBFgT4qY+fMOkBTa5vA9V0AiM=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/azure",
-			"revision": "6f40a8acfe03270d792cb8155e2942c09d7cff95"
+			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
 		},
 		{
-			"checksumSHA1": "q4bSpJ5t571H3ny1PwIgTn6g75E=",
+			"checksumSHA1": "LSF/pNrjhIxl6jiS6bKooBFCOxI=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/date",
-			"revision": "6f40a8acfe03270d792cb8155e2942c09d7cff95"
+			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
 		},
 		{
 			"checksumSHA1": "Ev8qCsbFjDlMlX0N2tYAhYQFpUc=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/to",
-			"revision": "6f40a8acfe03270d792cb8155e2942c09d7cff95"
+			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
 		},
 		{
 			"checksumSHA1": "oBixceM+55gdk47iff8DSEIh3po=",
 			"path": "github.com/Azure/go-autorest/autorest/validation",
 			"revision": "58f6f26e200fa5dfb40c9cd1c83f3e2c860d779d",
-			"revisionTime": "2017-04-28T17:52:31Z"
+			"revisionTime": "2017-04-28T17:52:31Z",
+			"version": "=v8.0.0",
+			"versionExact": "v8.0.0"
 		},
 		{
 			"checksumSHA1": "TgrN0l/E16deTlLYNt8wf66urSU=",
