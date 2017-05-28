@@ -31,7 +31,9 @@ func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui) *StepPowerOffComp
 }
 
 func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
-	_, err := s.client.PowerOff(resourceGroupName, computeName, cancelCh)
+	_, errChan := s.client.PowerOff(resourceGroupName, computeName, cancelCh)
+
+	err := <-errChan
 	if err != nil {
 		return err
 	}
