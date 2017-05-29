@@ -41,6 +41,13 @@ func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary OS disk ...")
 
 	var osDisk = state.Get(constants.ArmOSDiskVhd).(string)
+	var isManagedDisk = state.Get(constants.ArmIsManagedImage).(bool)
+
+	if isManagedDisk {
+		s.say(fmt.Sprintf(" -> OS Disk : skipping, managed disk was used..."))
+		return multistep.ActionContinue
+	}
+
 	s.say(fmt.Sprintf(" -> OS Disk : '%s'", osDisk))
 
 	u, err := url.Parse(osDisk)

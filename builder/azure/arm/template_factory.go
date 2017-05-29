@@ -51,6 +51,10 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	if config.ImageUrl != "" {
 		builder.SetImageUrl(config.ImageUrl, osType)
+	} else if config.ManagedImageName != "" {
+		builder.SetManagedDiskUrl(config.ManagedImageName, config.managedImageLocation, config.managedImageBlobUri, config.managedImageOSState)
+	} else if config.TargetManagedImageName != "" && config.ImagePublisher != "" {
+		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	} else {
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}

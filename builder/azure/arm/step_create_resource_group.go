@@ -71,7 +71,9 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 	ui.Say("\nCleanup requested, deleting resource group ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	_, err := s.client.GroupsClient.Delete(resourceGroupName, nil)
+	_, errChan := s.client.GroupsClient.Delete(resourceGroupName, nil)
+	err := <-errChan
+
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
 			"Name: %s\n"+

@@ -400,19 +400,19 @@ type APIErrorBase struct {
 // AvailabilitySet is create or update availability set parameters.
 type AvailabilitySet struct {
 	autorest.Response          `json:"-"`
-	ID                         *string             `json:"id,omitempty"`
-	Name                       *string             `json:"name,omitempty"`
-	Type                       *string             `json:"type,omitempty"`
-	Location                   *string             `json:"location,omitempty"`
-	Tags                       *map[string]*string `json:"tags,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Type     *string             `json:"type,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
 	*AvailabilitySetProperties `json:"properties,omitempty"`
-	Sku                        *Sku `json:"sku,omitempty"`
+	Sku      *Sku `json:"sku,omitempty"`
 }
 
 // AvailabilitySetListResult is the List Availability Set operation response.
 type AvailabilitySetListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]AvailabilitySet `json:"value,omitempty"`
+	Value *[]AvailabilitySet `json:"value,omitempty"`
 }
 
 // AvailabilitySetProperties is the instance view of a resource.
@@ -480,11 +480,11 @@ type HardwareProfile struct {
 // Image is describes an Image.
 type Image struct {
 	autorest.Response `json:"-"`
-	ID                *string             `json:"id,omitempty"`
-	Name              *string             `json:"name,omitempty"`
-	Type              *string             `json:"type,omitempty"`
-	Location          *string             `json:"location,omitempty"`
-	Tags              *map[string]*string `json:"tags,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Type     *string             `json:"type,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
 	*ImageProperties  `json:"properties,omitempty"`
 }
 
@@ -501,8 +501,8 @@ type ImageDataDisk struct {
 // ImageListResult is the List Image operation response.
 type ImageListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]Image `json:"value,omitempty"`
-	NextLink          *string  `json:"nextLink,omitempty"`
+	Value    *[]Image `json:"value,omitempty"`
+	NextLink *string  `json:"nextLink,omitempty"`
 }
 
 // ImageListResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -586,8 +586,8 @@ type LinuxConfiguration struct {
 // ListUsagesResult is the List Usages operation response.
 type ListUsagesResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]Usage `json:"value,omitempty"`
-	NextLink          *string  `json:"nextLink,omitempty"`
+	Value    *[]Usage `json:"value,omitempty"`
+	NextLink *string  `json:"nextLink,omitempty"`
 }
 
 // ListUsagesResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -605,13 +605,13 @@ func (client ListUsagesResult) ListUsagesResultPreparer() (*http.Request, error)
 // ListVirtualMachineExtensionImage is
 type ListVirtualMachineExtensionImage struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineExtensionImage `json:"value,omitempty"`
+	Value *[]VirtualMachineExtensionImage `json:"value,omitempty"`
 }
 
 // ListVirtualMachineImageResource is
 type ListVirtualMachineImageResource struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineImageResource `json:"value,omitempty"`
+	Value *[]VirtualMachineImageResource `json:"value,omitempty"`
 }
 
 // LongRunningOperationProperties is compute-specific operation properties,
@@ -628,7 +628,7 @@ type ManagedDiskParameters struct {
 
 // NetworkInterfaceReference is describes a network interface reference.
 type NetworkInterfaceReference struct {
-	ID                                   *string `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 	*NetworkInterfaceReferenceProperties `json:"properties,omitempty"`
 }
 
@@ -646,16 +646,19 @@ type NetworkProfile struct {
 // OperationStatusResponse is operation status response
 type OperationStatusResponse struct {
 	autorest.Response `json:"-"`
-	Name              *string    `json:"name,omitempty"`
-	Status            *string    `json:"status,omitempty"`
-	StartTime         *date.Time `json:"startTime,omitempty"`
-	EndTime           *date.Time `json:"endTime,omitempty"`
-	Error             *APIError  `json:"error,omitempty"`
+	Name      *string    `json:"name,omitempty"`
+	Status    *string    `json:"status,omitempty"`
+	StartTime *date.Time `json:"startTime,omitempty"`
+	EndTime   *date.Time `json:"endTime,omitempty"`
+	Error     *APIError  `json:"error,omitempty"`
 }
 
 // OSDisk is describes an Operating System disk.
 type OSDisk struct {
 	OsType             OperatingSystemTypes    `json:"osType,omitempty"`
+	OsState            *string                 `json:"osState,omitempty"`
+	StorageAccountType *string                 `json:"storageAccountType,omitempty"`
+	BlobUri            *string                 `json:"blobUri,omitempty"`
 	EncryptionSettings *DiskEncryptionSettings `json:"encryptionSettings,omitempty"`
 	Name               *string                 `json:"name,omitempty"`
 	Vhd                *VirtualHardDisk        `json:"vhd,omitempty"`
@@ -784,15 +787,15 @@ type VirtualHardDisk struct {
 // VirtualMachine is describes a Virtual Machine.
 type VirtualMachine struct {
 	autorest.Response         `json:"-"`
-	ID                        *string             `json:"id,omitempty"`
-	Name                      *string             `json:"name,omitempty"`
-	Type                      *string             `json:"type,omitempty"`
-	Location                  *string             `json:"location,omitempty"`
-	Tags                      *map[string]*string `json:"tags,omitempty"`
-	Plan                      *Plan               `json:"plan,omitempty"`
+	ID        *string             `json:"id,omitempty"`
+	Name      *string             `json:"name,omitempty"`
+	Type      *string             `json:"type,omitempty"`
+	Location  *string             `json:"location,omitempty"`
+	Tags      *map[string]*string `json:"tags,omitempty"`
+	Plan      *Plan               `json:"plan,omitempty"`
 	*VirtualMachineProperties `json:"properties,omitempty"`
-	Resources                 *[]VirtualMachineExtension `json:"resources,omitempty"`
-	Identity                  *VirtualMachineIdentity    `json:"identity,omitempty"`
+	Resources *[]VirtualMachineExtension `json:"resources,omitempty"`
+	Identity  *VirtualMachineIdentity    `json:"identity,omitempty"`
 }
 
 // VirtualMachineAgentInstanceView is the instance view of the VM Agent running
@@ -813,7 +816,7 @@ type VirtualMachineCaptureParameters struct {
 // VirtualMachineCaptureResult is resource Id.
 type VirtualMachineCaptureResult struct {
 	autorest.Response                      `json:"-"`
-	ID                                     *string `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 	*VirtualMachineCaptureResultProperties `json:"properties,omitempty"`
 }
 
@@ -826,11 +829,11 @@ type VirtualMachineCaptureResultProperties struct {
 // VirtualMachineExtension is describes a Virtual Machine Extension.
 type VirtualMachineExtension struct {
 	autorest.Response                  `json:"-"`
-	ID                                 *string             `json:"id,omitempty"`
-	Name                               *string             `json:"name,omitempty"`
-	Type                               *string             `json:"type,omitempty"`
-	Location                           *string             `json:"location,omitempty"`
-	Tags                               *map[string]*string `json:"tags,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Type     *string             `json:"type,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
 	*VirtualMachineExtensionProperties `json:"properties,omitempty"`
 }
 
@@ -845,11 +848,11 @@ type VirtualMachineExtensionHandlerInstanceView struct {
 // VirtualMachineExtensionImage is describes a Virtual Machine Extension Image.
 type VirtualMachineExtensionImage struct {
 	autorest.Response                       `json:"-"`
-	ID                                      *string             `json:"id,omitempty"`
-	Name                                    *string             `json:"name,omitempty"`
-	Type                                    *string             `json:"type,omitempty"`
-	Location                                *string             `json:"location,omitempty"`
-	Tags                                    *map[string]*string `json:"tags,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Type     *string             `json:"type,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
 	*VirtualMachineExtensionImageProperties `json:"properties,omitempty"`
 }
 
@@ -897,10 +900,10 @@ type VirtualMachineIdentity struct {
 // VirtualMachineImage is describes a Virtual Machine Image.
 type VirtualMachineImage struct {
 	autorest.Response              `json:"-"`
-	ID                             *string             `json:"id,omitempty"`
-	Name                           *string             `json:"name,omitempty"`
-	Location                       *string             `json:"location,omitempty"`
-	Tags                           *map[string]*string `json:"tags,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
 	*VirtualMachineImageProperties `json:"properties,omitempty"`
 }
 
@@ -935,8 +938,8 @@ type VirtualMachineInstanceView struct {
 // VirtualMachineListResult is the List Virtual Machine operation response.
 type VirtualMachineListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachine `json:"value,omitempty"`
-	NextLink          *string           `json:"nextLink,omitempty"`
+	Value    *[]VirtualMachine `json:"value,omitempty"`
+	NextLink *string           `json:"nextLink,omitempty"`
 }
 
 // VirtualMachineListResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -968,15 +971,15 @@ type VirtualMachineProperties struct {
 // VirtualMachineScaleSet is describes a Virtual Machine Scale Set.
 type VirtualMachineScaleSet struct {
 	autorest.Response                 `json:"-"`
-	ID                                *string             `json:"id,omitempty"`
-	Name                              *string             `json:"name,omitempty"`
-	Type                              *string             `json:"type,omitempty"`
-	Location                          *string             `json:"location,omitempty"`
-	Tags                              *map[string]*string `json:"tags,omitempty"`
-	Sku                               *Sku                `json:"sku,omitempty"`
-	Plan                              *Plan               `json:"plan,omitempty"`
+	ID       *string             `json:"id,omitempty"`
+	Name     *string             `json:"name,omitempty"`
+	Type     *string             `json:"type,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Tags     *map[string]*string `json:"tags,omitempty"`
+	Sku      *Sku                `json:"sku,omitempty"`
+	Plan     *Plan               `json:"plan,omitempty"`
 	*VirtualMachineScaleSetProperties `json:"properties,omitempty"`
-	Identity                          *VirtualMachineScaleSetIdentity `json:"identity,omitempty"`
+	Identity *VirtualMachineScaleSetIdentity `json:"identity,omitempty"`
 }
 
 // VirtualMachineScaleSetDataDisk is describes a virtual machine scale set data
@@ -993,8 +996,8 @@ type VirtualMachineScaleSetDataDisk struct {
 // VirtualMachineScaleSetExtension is describes a Virtual Machine Scale Set
 // Extension.
 type VirtualMachineScaleSetExtension struct {
-	ID                                         *string `json:"id,omitempty"`
-	Name                                       *string `json:"name,omitempty"`
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 	*VirtualMachineScaleSetExtensionProperties `json:"properties,omitempty"`
 }
 
@@ -1028,9 +1031,9 @@ type VirtualMachineScaleSetIdentity struct {
 // scale set.
 type VirtualMachineScaleSetInstanceView struct {
 	autorest.Response `json:"-"`
-	VirtualMachine    *VirtualMachineScaleSetInstanceViewStatusesSummary `json:"virtualMachine,omitempty"`
-	Extensions        *[]VirtualMachineScaleSetVMExtensionsSummary       `json:"extensions,omitempty"`
-	Statuses          *[]InstanceViewStatus                              `json:"statuses,omitempty"`
+	VirtualMachine *VirtualMachineScaleSetInstanceViewStatusesSummary `json:"virtualMachine,omitempty"`
+	Extensions     *[]VirtualMachineScaleSetVMExtensionsSummary       `json:"extensions,omitempty"`
+	Statuses       *[]InstanceViewStatus                              `json:"statuses,omitempty"`
 }
 
 // VirtualMachineScaleSetInstanceViewStatusesSummary is instance view statuses
@@ -1042,8 +1045,8 @@ type VirtualMachineScaleSetInstanceViewStatusesSummary struct {
 // VirtualMachineScaleSetIPConfiguration is describes a virtual machine scale
 // set network profile's IP configuration.
 type VirtualMachineScaleSetIPConfiguration struct {
-	ID                                               *string `json:"id,omitempty"`
-	Name                                             *string `json:"name,omitempty"`
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 	*VirtualMachineScaleSetIPConfigurationProperties `json:"properties,omitempty"`
 }
 
@@ -1060,8 +1063,8 @@ type VirtualMachineScaleSetIPConfigurationProperties struct {
 // response.
 type VirtualMachineScaleSetListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineScaleSet `json:"value,omitempty"`
-	NextLink          *string                   `json:"nextLink,omitempty"`
+	Value    *[]VirtualMachineScaleSet `json:"value,omitempty"`
+	NextLink *string                   `json:"nextLink,omitempty"`
 }
 
 // VirtualMachineScaleSetListResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -1080,8 +1083,8 @@ func (client VirtualMachineScaleSetListResult) VirtualMachineScaleSetListResultP
 // Skus operation response.
 type VirtualMachineScaleSetListSkusResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineScaleSetSku `json:"value,omitempty"`
-	NextLink          *string                      `json:"nextLink,omitempty"`
+	Value    *[]VirtualMachineScaleSetSku `json:"value,omitempty"`
+	NextLink *string                      `json:"nextLink,omitempty"`
 }
 
 // VirtualMachineScaleSetListSkusResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -1100,8 +1103,8 @@ func (client VirtualMachineScaleSetListSkusResult) VirtualMachineScaleSetListSku
 // operation response.
 type VirtualMachineScaleSetListWithLinkResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineScaleSet `json:"value,omitempty"`
-	NextLink          *string                   `json:"nextLink,omitempty"`
+	Value    *[]VirtualMachineScaleSet `json:"value,omitempty"`
+	NextLink *string                   `json:"nextLink,omitempty"`
 }
 
 // VirtualMachineScaleSetListWithLinkResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -1125,8 +1128,8 @@ type VirtualMachineScaleSetManagedDiskParameters struct {
 // VirtualMachineScaleSetNetworkConfiguration is describes a virtual machine
 // scale set network profile's network configurations.
 type VirtualMachineScaleSetNetworkConfiguration struct {
-	ID                                                    *string `json:"id,omitempty"`
-	Name                                                  *string `json:"name,omitempty"`
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 	*VirtualMachineScaleSetNetworkConfigurationProperties `json:"properties,omitempty"`
 }
 
@@ -1205,16 +1208,16 @@ type VirtualMachineScaleSetStorageProfile struct {
 // machine.
 type VirtualMachineScaleSetVM struct {
 	autorest.Response                   `json:"-"`
-	ID                                  *string             `json:"id,omitempty"`
-	Name                                *string             `json:"name,omitempty"`
-	Type                                *string             `json:"type,omitempty"`
-	Location                            *string             `json:"location,omitempty"`
-	Tags                                *map[string]*string `json:"tags,omitempty"`
-	InstanceID                          *string             `json:"instanceId,omitempty"`
-	Sku                                 *Sku                `json:"sku,omitempty"`
+	ID         *string             `json:"id,omitempty"`
+	Name       *string             `json:"name,omitempty"`
+	Type       *string             `json:"type,omitempty"`
+	Location   *string             `json:"location,omitempty"`
+	Tags       *map[string]*string `json:"tags,omitempty"`
+	InstanceID *string             `json:"instanceId,omitempty"`
+	Sku        *Sku                `json:"sku,omitempty"`
 	*VirtualMachineScaleSetVMProperties `json:"properties,omitempty"`
-	Plan                                *Plan                      `json:"plan,omitempty"`
-	Resources                           *[]VirtualMachineExtension `json:"resources,omitempty"`
+	Plan       *Plan                      `json:"plan,omitempty"`
+	Resources  *[]VirtualMachineExtension `json:"resources,omitempty"`
 }
 
 // VirtualMachineScaleSetVMExtensionsSummary is extensions summary for virtual
@@ -1255,8 +1258,8 @@ type VirtualMachineScaleSetVMInstanceView struct {
 // operation response.
 type VirtualMachineScaleSetVMListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineScaleSetVM `json:"value,omitempty"`
-	NextLink          *string                     `json:"nextLink,omitempty"`
+	Value    *[]VirtualMachineScaleSetVM `json:"value,omitempty"`
+	NextLink *string                     `json:"nextLink,omitempty"`
 }
 
 // VirtualMachineScaleSetVMListResultPreparer prepares a request to retrieve the next set of results. It returns
@@ -1309,7 +1312,7 @@ type VirtualMachineSize struct {
 // VirtualMachineSizeListResult is the List Virtual Machine operation response.
 type VirtualMachineSizeListResult struct {
 	autorest.Response `json:"-"`
-	Value             *[]VirtualMachineSize `json:"value,omitempty"`
+	Value *[]VirtualMachineSize `json:"value,omitempty"`
 }
 
 // VirtualMachineStatusCodeCount is the status code and count of the virtual

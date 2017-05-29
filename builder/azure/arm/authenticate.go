@@ -4,8 +4,8 @@
 package arm
 
 import (
-	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/Azure/go-autorest/autorest/azure"
 )
 
 type Authenticate struct {

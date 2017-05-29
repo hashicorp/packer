@@ -14,6 +14,7 @@ const (
 	jsonIndent = "  "
 
 	resourceKeyVaults         = "Microsoft.KeyVault/vaults"
+	resourceManagedDisk       = "Microsoft.Compute/images"
 	resourceNetworkInterfaces = "Microsoft.Network/networkInterfaces"
 	resourcePublicIPAddresses = "Microsoft.Network/publicIPAddresses"
 	resourceVirtualMachine    = "Microsoft.Compute/virtualMachines"
@@ -24,6 +25,7 @@ const (
 
 type TemplateBuilder struct {
 	template *Template
+	osType   compute.OperatingSystemTypes
 }
 
 func NewTemplateBuilder(template string) (*TemplateBuilder, error) {
@@ -57,6 +59,7 @@ func (s *TemplateBuilder) BuildLinux(sshAuthorizedKey string) error {
 		},
 	}
 
+	s.osType = compute.Linux
 	return nil
 }
 
@@ -93,6 +96,80 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 			},
 		},
 	}
+
+	s.osType = compute.Windows
+	return nil
+}
+
+func (s *TemplateBuilder) SetManagedDiskUrl(managedDiskImageName, location, blobUri string, osState compute.OperatingSystemStateTypes) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	resourceId := s.toResourceID(resourceManagedDisk, managedDiskImageName)
+	profile := resource.Properties.StorageProfile
+	profile.ImageReference = &compute.ImageReference{
+		ID: to.StringPtr(resourceId),
+	}
+	profile.OsDisk.Vhd = nil
+
+	*resource.DependsOn = append(*resource.DependsOn, fmt.Sprintf("[concat('%s/', '%s')]", resourceManagedDisk, managedDiskImageName))
+
+	managedDiskResource := &Resource{
+		Type:       to.StringPtr(resourceManagedDisk),
+		ApiVersion: to.StringPtr(s.toVariable("managedDiskApiVersion")),
+		Name:       to.StringPtr(managedDiskImageName),
+		Location:   to.StringPtr(location),
+		Properties: &Properties{
+			StorageProfile: &compute.StorageProfile{
+				OsDisk: &compute.OSDisk{
+					OsType:  s.osType,
+					OsState: to.StringPtr(fmt.Sprintf("%s", osState)),
+					BlobUri: to.StringPtr(blobUri),
+				},
+			},
+		},
+	}
+
+	*s.template.Resources = append(*s.template.Resources, *managedDiskResource)
+	return nil
+}
+
+func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	managedDiskImageName := "packerManagedDisk"
+
+	resourceId := s.toResourceID(resourceManagedDisk, managedDiskImageName)
+	profile := resource.Properties.StorageProfile
+	profile.ImageReference = &compute.ImageReference{
+		ID: to.StringPtr(resourceId),
+	}
+	profile.OsDisk.Vhd = nil
+	*resource.DependsOn = append(*resource.DependsOn, fmt.Sprintf("[concat('%s/', '%s')]", resourceManagedDisk, managedDiskImageName))
+
+	managedDiskResource := &Resource{
+		Type:       to.StringPtr(resourceManagedDisk),
+		Name:       &managedDiskImageName,
+		ApiVersion: to.StringPtr(s.toVariable("managedDiskApiVersion")),
+		Location:   to.StringPtr(location),
+		Properties: &Properties{
+			StorageProfile: &compute.StorageProfile{
+				ImageReference: &compute.ImageReference{
+					Publisher: &publisher,
+					Offer:     &offer,
+					Sku:       &sku,
+					Version:   &version,
+				},
+			},
+		},
+	}
+
+	*s.template.Resources = append(*s.template.Resources, *managedDiskResource)
 	return nil
 }
 
@@ -347,7 +424,11 @@ const BasicTemplate = `{
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "2017-03-30",
+    "managedDiskApiVersion": "2017-03-30",
+    "networkInterfacesApiVersion": "2017-04-01",
+    "publicIPAddressApiVersion": "2017-04-01",
+    "virtualNetworksApiVersion": "2017-04-01",
     "location": "[resourceGroup().location]",
     "nicName": "packerNic",
     "publicIPAddressName": "packerPublicIP",
@@ -363,7 +444,7 @@ const BasicTemplate = `{
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('publicIPAddressApiVersion')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
       "location": "[variables('location')]",
@@ -375,7 +456,7 @@ const BasicTemplate = `{
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('virtualNetworksApiVersion')]",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
       "location": "[variables('location')]",
@@ -396,7 +477,7 @@ const BasicTemplate = `{
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('networkInterfacesApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
       "location": "[variables('location')]",

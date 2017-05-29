@@ -87,7 +87,8 @@
     {
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+        "[concat('Microsoft.Compute/images/', 'ManagedImageName')]"
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
@@ -123,21 +124,32 @@
           }
         },
         "storageProfile": {
+          "imageReference": {
+            "id": "[resourceId(resourceGroup().name, 'Microsoft.Compute/images', 'ManagedImageName')]"
+          },
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
-            "image": {
-              "uri": "https://localhost/custom.vhd"
-            },
-            "name": "osdisk",
-            "osType": "Linux",
-            "vhd": {
-              "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
-            }
+            "name": "osdisk"
           }
         }
       },
       "type": "Microsoft.Compute/virtualMachines"
+    },
+    {
+      "apiVersion": "[variables('managedDiskApiVersion')]",
+      "location": "",
+      "name": "ManagedImageName",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "blobUri": "",
+            "osState": "",
+            "osType": "Linux"
+          }
+        }
+      },
+      "type": "Microsoft.Compute/images"
     }
   ],
   "variables": {

@@ -14,39 +14,49 @@ import (
 )
 
 type StepCaptureImage struct {
-	client  *AzureClient
-	capture func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error
-	get     func(client *AzureClient) *CaptureTemplate
-	say     func(message string)
-	error   func(e error)
+	client              *AzureClient
+	generalizeVM        func(resourceGroupName, computeName string) error
+	captureVhd          func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error
+	captureManagedImage func(resourceGroupName string, computeName string, parameters *compute.Image, cancelCh <-chan struct{}) error
+	get                 func(client *AzureClient) *CaptureTemplate
+	say                 func(message string)
+	error               func(e error)
 }
 
 func NewStepCaptureImage(client *AzureClient, ui packer.Ui) *StepCaptureImage {
 	var step = &StepCaptureImage{
 		client: client,
-		get:    func(client *AzureClient) *CaptureTemplate { return client.Template },
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		get: func(client *AzureClient) *CaptureTemplate {
+			return client.Template
+		},
+		say: func(message string) {
+			ui.Say(message)
+		},
+		error: func(e error) {
+			ui.Error(e.Error())
+		},
 	}
 
-	step.capture = step.captureImage
+	step.generalizeVM = step.generalize
+	step.captureVhd = step.captureImage
+	step.captureManagedImage = step.captureImageFromVM
+
 	return step
 }
 
-func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
+func (s *StepCaptureImage) generalize(resourceGroupName string, computeName string) error {
 	_, err := s.client.Generalize(resourceGroupName, computeName)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
+func (s *StepCaptureImage) captureImageFromVM(resourceGroupName string, imageName string, image *compute.Image, cancelCh <-chan struct{}) error {
+	_, errChan := s.client.ImagesClient.CreateOrUpdate(resourceGroupName, imageName, *image, cancelCh)
+	return <-errChan
+}
+
+func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
 	_, errChan := s.client.Capture(resourceGroupName, computeName, *parameters, cancelCh)
-
-	err = <-errChan
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return <-errChan
 }
 
 func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
@@ -54,15 +64,35 @@ func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	var computeName = state.Get(constants.ArmComputeName).(string)
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	var parameters = state.Get(constants.ArmVirtualMachineCaptureParameters).(*compute.VirtualMachineCaptureParameters)
+	var vmCaptureParameters = state.Get(constants.ArmVirtualMachineCaptureParameters).(*compute.VirtualMachineCaptureParameters)
+	var imageParameters = state.Get(constants.ArmImageParameters).(*compute.Image)
 
-	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
-	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
+	var isManagedImage = state.Get(constants.ArmIsManagedImage).(bool)
+	var targetManagedImageResourceGroupName = state.Get(constants.ArmTargetManagedImageResourceGroupName).(string)
+	var targetManagedImageName = state.Get(constants.ArmTargetManagedImageName).(string)
+	var targetManagedImageLocation = state.Get(constants.ArmTargetManagedImageLocation).(string)
+
+	s.say(fmt.Sprintf(" -> ResourceGroupName      : '%s'", resourceGroupName))
+	s.say(fmt.Sprintf(" -> ComputeName            : '%s'", computeName))
 
 	result := common.StartInterruptibleTask(
-		func() bool { return common.IsStateCancelled(state) },
+		func() bool {
+			return common.IsStateCancelled(state)
+		},
 		func(cancelCh <-chan struct{}) error {
-			return s.capture(resourceGroupName, computeName, parameters, cancelCh)
+			err := s.generalizeVM(resourceGroupName, computeName)
+			if err != nil {
+				return err
+			}
+
+			if isManagedImage {
+				s.say(fmt.Sprintf(" -> ImageResourceGroupName : '%s'", targetManagedImageResourceGroupName))
+				s.say(fmt.Sprintf(" -> ImageName              : '%s'", targetManagedImageName))
+				s.say(fmt.Sprintf(" -> Image Location         : '%s'", targetManagedImageLocation))
+				return s.captureManagedImage(targetManagedImageResourceGroupName, targetManagedImageName, imageParameters, cancelCh)
+			} else {
+				return s.captureVhd(resourceGroupName, computeName, vmCaptureParameters, cancelCh)
+			}
 		})
 
 	// HACK(chrboum): I do not like this.  The capture method should be returning this value

@@ -258,6 +258,74 @@ growpart:
 	}
 }
 
+// Ensure the VM template is correct when building from a custom managed image.
+func TestVirtualMachineDeployment08(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":                      "ignore",
+		"capture_container_name":                   "ignore",
+		"location":                                 "ignore",
+		"resource_group_name":                      "ignore",
+		"storage_account":                          "ignore",
+		"subscription_id":                          "ignore",
+		"os_type":                                  constants.Target_Linux,
+		"communicator":                             "none",
+		"managed_image_name":                       "ManagedImageName",
+		"managed_image_resource_group_name":        "ManagedImageResourceGroupName",
+		"target_managed_image_name":                "TargetManagedImageName",
+		"target_managed_image_resource_group_name": "TargetManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building from a platform managed image.
+func TestVirtualMachineDeployment09(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":                      "ignore",
+		"capture_container_name":                   "ignore",
+		"location":                                 "ignore",
+		"resource_group_name":                      "ignore",
+		"storage_account":                          "ignore",
+		"subscription_id":                          "ignore",
+		"os_type":                                  constants.Target_Linux,
+		"communicator":                             "none",
+		"image_publisher":                          "Canonical",
+		"image_offer":                              "UbuntuServer",
+		"image_sku":                                "16.04-LTS",
+		"image_version":                            "--version--",
+		"target_managed_image_name":                "TargetManagedImageName",
+		"target_managed_image_resource_group_name": "TargetManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
