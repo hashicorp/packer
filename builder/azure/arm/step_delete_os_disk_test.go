@@ -108,6 +108,7 @@ func TestStepDeleteOSDiskShouldHandleComplexStorageContainerNames(t *testing.T) 
 func DeleteTestStateBagStepDeleteOSDisk(osDiskVhd string) multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 	stateBag.Put(constants.ArmOSDiskVhd, osDiskVhd)
+	stateBag.Put(constants.ArmIsManagedImage, false)
 
 	return stateBag
 }

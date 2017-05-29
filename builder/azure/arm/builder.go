@@ -15,11 +15,12 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 
+	"github.com/Azure/azure-sdk-for-go/arm/storage"
+	"github.com/Azure/go-autorest/autorest/adal"
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/Azure/go-autorest/autorest/adal"
 )
 
 type Builder struct {
@@ -47,6 +48,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.stateBag = new(multistep.BasicStateBag)
 	b.configureStateBag(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
+	b.setImageParameters(b.stateBag)
 
 	return warnings, errs
 }
@@ -87,9 +89,29 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	b.config.storageAccountBlobEndpoint, err = b.getBlobEndpoint(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
+	if b.config.isManagedImage() {
+		group, err := azureClient.GroupsClient.Get(b.config.TargetManagedImageResourceGroupName)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.TargetManagedImageResourceGroupName)
+		}
+
+		b.config.targetManageImageLocation = *group.Location
+
+		// If a managed image already exists it cannot be overwritten.
+		_, err = azureClient.ImagesClient.Get(b.config.TargetManagedImageResourceGroupName, b.config.TargetManagedImageName, "")
+		if err == nil {
+			return nil, fmt.Errorf("A managed image named %s already exists in the resource group %s.", b.config.TargetManagedImageName, b.config.TargetManagedImageResourceGroupName)
+		}
+	}
+
+	account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
 	if err != nil {
 		return nil, err
+	}
+	b.config.storageAccountBlobEndpoint = *account.AccountProperties.PrimaryEndpoints.Blob
+
+	if !b.config.isManagedImage() && equalLocation(*account.Location, b.config.Location) == false {
+		return nil, fmt.Errorf("The storage account is located in %s, but the build will take place in %s.  The locations must be identical", *account.Location, b.config.Location)
 	}
 
 	endpointConnectType := PublicEndpoint
@@ -97,7 +119,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		endpointConnectType = PrivateEndpoint
 	}
 
+	b.setRuntimeParameters(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
+	b.setImageParameters(b.stateBag)
 	var steps []multistep.Step
 
 	if b.config.OSType == constants.Target_Linux {
@@ -198,13 +222,21 @@ func (b *Builder) Cancel() {
 	}
 }
 
-func (b *Builder) getBlobEndpoint(client *AzureClient, resourceGroupName string, storageAccountName string) (string, error) {
+func equalLocation(location1, location2 string) bool {
+	return strings.EqualFold(canonicalizeLocation(location1), canonicalizeLocation(location2))
+}
+
+func canonicalizeLocation(location string) string {
+	return strings.Replace(location, " ", "", -1)
+}
+
+func (b *Builder) getBlobAccount(client *AzureClient, resourceGroupName string, storageAccountName string) (*storage.Account, error) {
 	account, err := client.AccountsClient.GetProperties(resourceGroupName, storageAccountName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return *account.AccountProperties.PrimaryEndpoints.Blob, nil
+	return &account, err
 }
 
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
@@ -220,10 +252,23 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
+
+	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
+	stateBag.Put(constants.ArmTargetManagedImageResourceGroupName, b.config.TargetManagedImageResourceGroupName)
+	stateBag.Put(constants.ArmTargetManagedImageName, b.config.TargetManagedImageName)
+}
+
+// Parameters that are only known at runtime after querying Azure.
+func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
+	stateBag.Put(constants.ArmTargetManagedImageLocation, b.config.targetManageImageLocation)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, b.config.toVirtualMachineCaptureParameters())
+}
+
+func (b *Builder) setImageParameters(stateBag multistep.StateBag) {
+	stateBag.Put(constants.ArmImageParameters, b.config.toImageParameters())
 }
 
 func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrincipalToken, *adal.ServicePrincipalToken, error) {
