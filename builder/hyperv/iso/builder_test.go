@@ -300,6 +300,98 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_SizeNotRequiredWhenUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected := []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+
+	// Test just iso_urls set but with vhd
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_SizeIsRequiredWhenNotUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	expected := []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
 func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()

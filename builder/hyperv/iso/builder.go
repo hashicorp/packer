@@ -112,22 +112,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
-
-	if len(b.config.ISOConfig.ISOUrls) > 0 {
-		extension := strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0]))
-		if extension == "vhd" || extension == "vhdx" {
-			b.config.ISOConfig.TargetExtension = extension
-		}
-	}
 	
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)	
+	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	if b.config.ISOConfig.TargetExtension != "vhd" && b.config.ISOConfig.TargetExtension != "vhdx" {
+	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx")  {
 		//We only create a new hard drive if an existing one to copy from does not exist
 		err = b.checkDiskSize()
 		if err != nil {

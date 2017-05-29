@@ -40,7 +40,7 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	harddrivePath := ""
 	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
 		extension := strings.ToLower(filepath.Ext(harddrivePathRaw.(string)))
-		if extension == "vhd" || extension == "vhdx" {
+		if extension == ".vhd" || extension == ".vhdx" {
 			harddrivePath = harddrivePathRaw.(string)
 		} else {
 			log.Println("No existing virtual harddrive, not attaching.")
