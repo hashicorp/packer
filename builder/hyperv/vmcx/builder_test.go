@@ -80,6 +80,90 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_CloneFromExistingMachineOrImportFromExportedMachineSettingsRequired(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "clone_from_vmxc_path")
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	//Create vmxc folder
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	//Delete the folder immediately
+	os.RemoveAll(td)
+
+	config["clone_from_vmxc_path"] = td
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	//Create vmxc folder
+	td, err := ioutil.TempDir("", "packer")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	//Only delete afterwards
+	defer os.RemoveAll(td)
+
+	config["clone_from_vmxc_path"] = td
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmxcPathRequired(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "clone_from_vmxc_path")
+
+	config["clone_from_vm_name"] = "test_machine_name_that_does_not_exist"
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+
+	if err == nil {
+		t.Fatal("should have error")
+	} else {
+		errorMessage := err.Error()
+		if errorMessage != "1 error(s) occurred:\n\n* Virtual machine 'test_machine_name_that_does_not_exist' to clone from does not exist." {
+			t.Fatalf("should not have error: %s", err)
+		}
+	}
+}
+
 func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	var b Builder
 	config := testConfig()
