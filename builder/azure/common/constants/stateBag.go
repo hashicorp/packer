@@ -16,6 +16,7 @@ const (
 const (
 	ArmCaptureTemplate                 string = "arm.CaptureTemplate"
 	ArmComputeName                     string = "arm.ComputeName"
+	ArmImageParameters                 string = "arm.ImageParameters"
 	ArmCertificateUrl                  string = "arm.CertificateUrl"
 	ArmDeploymentName                  string = "arm.DeploymentName"
 	ArmNicName                         string = "arm.NicName"
@@ -28,4 +29,9 @@ const (
 	ArmStorageAccountName              string = "arm.StorageAccountName"
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
+
+	ArmIsManagedImage                      string = "arm.IsManagedImage"
+	ArmTargetManagedImageResourceGroupName string = "arm.TargetManagedImageResourceGroupName"
+	ArmTargetManagedImageLocation          string = "arm.TargetManagedImageLocation"
+	ArmTargetManagedImageName              string = "arm.TargetManagedImageName"
 )

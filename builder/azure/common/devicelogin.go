@@ -9,11 +9,11 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/subscriptions"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/go-homedir"
-	"github.com/Azure/go-autorest/autorest/adal"
 )
 
 var (

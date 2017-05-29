@@ -18,10 +18,10 @@ import (
 	armStorage "github.com/Azure/azure-sdk-for-go/arm/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/version"
-	"github.com/Azure/go-autorest/autorest/adal"
 )
 
 const (
@@ -40,6 +40,7 @@ type AzureClient struct {
 	network.InterfacesClient
 	network.SubnetsClient
 	network.VirtualNetworksClient
+	compute.ImagesClient
 	compute.VirtualMachinesClient
 	common.VaultClient
 	armStorage.AccountsClient
@@ -125,6 +126,12 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
 	azureClient.GroupsClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.GroupsClient.UserAgent += packerUserAgent
+
+	azureClient.ImagesClient = compute.NewImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.ImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.ImagesClient.RequestInspector = withInspection(maxlen)
+	azureClient.ImagesClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.ImagesClient.UserAgent += packerUserAgent
 
 	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.InterfacesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)

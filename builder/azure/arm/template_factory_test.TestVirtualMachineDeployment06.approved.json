@@ -26,7 +26,7 @@
   },
   "resources": [
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('publicIPAddressApiVersion')]",
       "location": "[variables('location')]",
       "name": "[variables('publicIPAddressName')]",
       "properties": {
@@ -43,7 +43,7 @@
       "type": "Microsoft.Network/publicIPAddresses"
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('virtualNetworksApiVersion')]",
       "location": "[variables('location')]",
       "name": "[variables('virtualNetworkName')]",
       "properties": {
@@ -69,7 +69,7 @@
       "type": "Microsoft.Network/virtualNetworks"
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "[variables('networkInterfacesApiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
@@ -162,9 +162,12 @@
   ],
   "variables": {
     "addressPrefix": "10.0.0.0/16",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "2017-03-30",
     "location": "[resourceGroup().location]",
+    "managedDiskApiVersion": "2017-03-30",
+    "networkInterfacesApiVersion": "2017-04-01",
     "nicName": "packerNic",
+    "publicIPAddressApiVersion": "2017-04-01",
     "publicIPAddressName": "packerPublicIP",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
@@ -173,6 +176,7 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "virtualNetworkName": "packerNetwork",
     "virtualNetworkResourceGroup": "[resourceGroup().name]",
+    "virtualNetworksApiVersion": "2017-04-01",
     "vmStorageAccountContainerName": "images",
     "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
   }

@@ -65,8 +65,19 @@ type Config struct {
 	ImageSku       string `mapstructure:"image_sku"`
 	ImageVersion   string `mapstructure:"image_version"`
 	ImageUrl       string `mapstructure:"image_url"`
-	Location       string `mapstructure:"location"`
-	VMSize         string `mapstructure:"vm_size"`
+
+	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName              string `mapstructure:"managed_image_name"`
+	managedImageLocation          string
+	managedImageBlobUri           string
+	managedImageOSState           compute.OperatingSystemStateTypes
+
+	Location string `mapstructure:"location"`
+	VMSize   string `mapstructure:"vm_size"`
+
+	TargetManagedImageResourceGroupName string `mapstructure:"target_managed_image_resource_group_name"`
+	TargetManagedImageName              string `mapstructure:"target_managed_image_name"`
+	targetManageImageLocation           string
 
 	// Deployment
 	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
@@ -118,11 +129,31 @@ type keyVaultCertificate struct {
 	Password string `json:"password,omitempty"`
 }
 
+func (c *Config) toVMID() string {
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, c.tmpResourceGroupName, c.tmpComputeName)
+}
+
+func (c *Config) isManagedImage() bool {
+	return c.TargetManagedImageName != ""
+}
+
 func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCaptureParameters {
 	return &compute.VirtualMachineCaptureParameters{
 		DestinationContainerName: &c.CaptureContainerName,
 		VhdPrefix:                &c.CaptureNamePrefix,
 		OverwriteVhds:            to.BoolPtr(false),
+	}
+}
+
+func (c *Config) toImageParameters() *compute.Image {
+	return &compute.Image{
+		ImageProperties: &compute.ImageProperties{
+			SourceVirtualMachine: &compute.SubResource{
+				ID: to.StringPtr(c.toVMID()),
+			},
+		},
+		Location: to.StringPtr(c.Location),
+		Tags:     &c.AzureTags,
 	}
 }
 
@@ -277,7 +308,9 @@ func setSshValues(c *Config) error {
 
 func setWinRMCertificate(c *Config) error {
 	c.Comm.WinRMTransportDecorator =
-		func() winrm.Transporter { return &winrm.ClientNTLM{} }
+		func() winrm.Transporter {
+			return &winrm.ClientNTLM{}
+		}
 
 	cert, err := c.createCertificate()
 	c.winrmCertificate = cert
@@ -372,7 +405,7 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
-	if c.ImageUrl == "" && c.ImageVersion == "" {
+	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
 
@@ -467,7 +500,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Compute
-	if c.ImageUrl == "" {
+	if c.ImageUrl != "" &&
+		(c.ManagedImageName != "" || c.ManagedImageResourceGroupName != "") &&
+		(c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (managed_disk_image_name, managed_disk_resource_group_name"))
+	}
+
+	if c.ImageUrl == "" && c.ManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
@@ -478,6 +517,19 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 		if c.ImageSku == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
+		}
+	} else if c.ImageUrl == "" && c.ImagePublisher == "" {
+		if c.ManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed_image_name must be specified"))
+		}
+		if c.ManagedImageResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
+		}
+		if c.TargetManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An target_managed_image_name must be specified"))
+		}
+		if c.TargetManagedImageResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An target_managed_image_resource_group_name must be specified"))
 		}
 	} else {
 		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
