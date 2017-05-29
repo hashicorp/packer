@@ -42,7 +42,7 @@ type Config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	common.HTTPConfig           `mapstructure:",squash"`
 	common.ISOConfig            `mapstructure:",squash"`
-	hypervcommon.FloppyConfig   `mapstructure:",squash"`
+	common.FloppyConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
 	hypervcommon.RunConfig      `mapstructure:",squash"`
