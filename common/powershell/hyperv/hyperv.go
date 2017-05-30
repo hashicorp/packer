@@ -806,7 +806,6 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 	var script = `
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
-	#Requires -RunAsAdministrator
 
 	function Get-VMConsole
 	{
