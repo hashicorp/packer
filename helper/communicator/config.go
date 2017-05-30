@@ -28,6 +28,7 @@ type Config struct {
 	SSHHandshakeAttempts  int           `mapstructure:"ssh_handshake_attempts"`
 	SSHBastionHost        string        `mapstructure:"ssh_bastion_host"`
 	SSHBastionPort        int           `mapstructure:"ssh_bastion_port"`
+	SSHBastionAgentAuth   bool          `mapstructure:"ssh_bastion_agent_auth"`
 	SSHBastionUsername    string        `mapstructure:"ssh_bastion_username"`
 	SSHBastionPassword    string        `mapstructure:"ssh_bastion_password"`
 	SSHBastionPrivateKey  string        `mapstructure:"ssh_bastion_private_key_file"`
@@ -159,7 +160,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SSHBastionHost != "" {
+	if c.SSHBastionHost != "" && !c.SSHBastionAgentAuth {
 		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
