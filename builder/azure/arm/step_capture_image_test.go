@@ -125,6 +125,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 func createTestStateBagStepCaptureImage() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
+	stateBag.Put(constants.ArmLocation, "localhost")
 	stateBag.Put(constants.ArmComputeName, "Unit Test: ComputeName")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, &compute.VirtualMachineCaptureParameters{})

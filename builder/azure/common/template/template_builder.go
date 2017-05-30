@@ -136,40 +136,25 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedDiskImageName, location, blob
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version string) error {
+func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version, imageID string) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
 	}
 
-	managedDiskImageName := "packerManagedDisk"
-
-	resourceId := s.toResourceID(resourceManagedDisk, managedDiskImageName)
 	profile := resource.Properties.StorageProfile
 	profile.ImageReference = &compute.ImageReference{
-		ID: to.StringPtr(resourceId),
+		Publisher: &publisher,
+		Offer:     &offer,
+		Sku:       &sku,
+		Version:   &version,
+		//ID:        &imageID,
 	}
+	profile.OsDisk.Name = to.StringPtr("osdisk")
+	profile.OsDisk.OsType = s.osType
+	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
-	*resource.DependsOn = append(*resource.DependsOn, fmt.Sprintf("[concat('%s/', '%s')]", resourceManagedDisk, managedDiskImageName))
 
-	managedDiskResource := &Resource{
-		Type:       to.StringPtr(resourceManagedDisk),
-		Name:       &managedDiskImageName,
-		ApiVersion: to.StringPtr(s.toVariable("managedDiskApiVersion")),
-		Location:   to.StringPtr(location),
-		Properties: &Properties{
-			StorageProfile: &compute.StorageProfile{
-				ImageReference: &compute.ImageReference{
-					Publisher: &publisher,
-					Offer:     &offer,
-					Sku:       &sku,
-					Version:   &version,
-				},
-			},
-		},
-	}
-
-	*s.template.Resources = append(*s.template.Resources, *managedDiskResource)
 	return nil
 }
 
