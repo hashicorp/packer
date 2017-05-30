@@ -58,6 +58,9 @@ the SSH agent to the remote host.
 
 The SSH communicator has the following options:
 
+- `ssh_bastion_agent_auth` (boolean) - If true, the local SSH agent will
+    be used to authenticate with the bastion host. Defaults to false.
+
 - `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
 
