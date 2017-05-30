@@ -71,7 +71,7 @@ type Config struct {
 
 	// This is the path to a directory containing an exported virtual machine.
 	CloneFromVMXCPath string `mapstructure:"clone_from_vmxc_path"`
-	
+
 	// This is the name of the virtual machine to clone from.
 	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
 
@@ -195,7 +195,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			}
 		}
 	}
-	
+
 	if b.config.CloneFromVMXCPath == "" {
 		if b.config.CloneFromVMName == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmxc_path be specified if clone_from_vm_name must is not specified."))
@@ -209,7 +209,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.Generation != 1 || b.config.Generation != 2 {
+	if b.config.Generation < 1 || b.config.Generation > 2 {
 		b.config.Generation = 1
 	}
 
@@ -395,7 +395,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCloneVM{
-			CloneFromVMXCPath:				b.config.CloneFromVMXCPath,
+			CloneFromVMXCPath:              b.config.CloneFromVMXCPath,
 			CloneFromVMName:                b.config.CloneFromVMName,
 			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
