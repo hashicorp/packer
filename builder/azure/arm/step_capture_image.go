@@ -63,6 +63,7 @@ func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
 	s.say("Capturing image ...")
 
 	var computeName = state.Get(constants.ArmComputeName).(string)
+	var location = state.Get(constants.ArmLocation).(string)
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var vmCaptureParameters = state.Get(constants.ArmVirtualMachineCaptureParameters).(*compute.VirtualMachineCaptureParameters)
 	var imageParameters = state.Get(constants.ArmImageParameters).(*compute.Image)
@@ -72,8 +73,9 @@ func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
 	var targetManagedImageName = state.Get(constants.ArmTargetManagedImageName).(string)
 	var targetManagedImageLocation = state.Get(constants.ArmTargetManagedImageLocation).(string)
 
-	s.say(fmt.Sprintf(" -> ResourceGroupName      : '%s'", resourceGroupName))
-	s.say(fmt.Sprintf(" -> ComputeName            : '%s'", computeName))
+	s.say(fmt.Sprintf(" -> Compute ResourceGroupName : '%s'", resourceGroupName))
+	s.say(fmt.Sprintf(" -> Compute Name              : '%s'", computeName))
+	s.say(fmt.Sprintf(" -> Compute Location          : '%s'", location))
 
 	result := common.StartInterruptibleTask(
 		func() bool {
@@ -86,9 +88,9 @@ func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
 			}
 
 			if isManagedImage {
-				s.say(fmt.Sprintf(" -> ImageResourceGroupName : '%s'", targetManagedImageResourceGroupName))
-				s.say(fmt.Sprintf(" -> ImageName              : '%s'", targetManagedImageName))
-				s.say(fmt.Sprintf(" -> Image Location         : '%s'", targetManagedImageLocation))
+				s.say(fmt.Sprintf(" -> Image ResourceGroupName   : '%s'", targetManagedImageResourceGroupName))
+				s.say(fmt.Sprintf(" -> Image Name                : '%s'", targetManagedImageName))
+				s.say(fmt.Sprintf(" -> Image Location            : '%s'", targetManagedImageLocation))
 				return s.captureManagedImage(targetManagedImageResourceGroupName, targetManagedImageName, imageParameters, cancelCh)
 			} else {
 				return s.captureVhd(resourceGroupName, computeName, vmCaptureParameters, cancelCh)

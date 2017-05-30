@@ -87,8 +87,7 @@
     {
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
-        "[concat('Microsoft.Compute/images/', 'packerManagedDisk')]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
@@ -125,32 +124,20 @@
         },
         "storageProfile": {
           "imageReference": {
-            "id": "[resourceId(resourceGroup().name, 'Microsoft.Compute/images', 'packerManagedDisk')]"
-          },
-          "osDisk": {
-            "caching": "ReadWrite",
-            "createOption": "FromImage",
-            "name": "osdisk"
-          }
-        }
-      },
-      "type": "Microsoft.Compute/virtualMachines"
-    },
-    {
-      "apiVersion": "[variables('managedDiskApiVersion')]",
-      "location": "ignore",
-      "name": "packerManagedDisk",
-      "properties": {
-        "storageProfile": {
-          "imageReference": {
             "offer": "UbuntuServer",
             "publisher": "Canonical",
             "sku": "16.04-LTS",
             "version": "--version--"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "fromImage",
+            "name": "osdisk",
+            "osType": "Linux"
           }
         }
       },
-      "type": "Microsoft.Compute/images"
+      "type": "Microsoft.Compute/virtualMachines"
     }
   ],
   "variables": {
