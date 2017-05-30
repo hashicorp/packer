@@ -2,9 +2,11 @@ package common
 
 import (
 	"fmt"
-	"log"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
+	"log"
+	"path/filepath"
+	"strings"
 )
 
 type StepMountDvdDrive struct {
@@ -24,6 +26,12 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 		isoPath = isoPathRaw.(string)
 	} else {
 		log.Println("No dvd disk, not attaching.")
+		return multistep.ActionContinue
+	}
+
+	// Determine if its a virtual hdd to mount
+	if strings.ToLower(filepath.Ext(isoPath)) == ".vhd" || strings.ToLower(filepath.Ext(isoPath)) == ".vhdx" {
+		log.Println("Its a hard disk, not attaching.")
 		return multistep.ActionContinue
 	}
 

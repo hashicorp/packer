@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 	"log"
-	"strings"
 	"path/filepath"
-	
+	"strings"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -34,7 +34,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
-	
+
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
 	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
