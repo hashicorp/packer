@@ -28,6 +28,7 @@
 * communicator/winrm: Add support for file downloads. [GH-4748]
 * builder/openstack: Support client x509 certificates. [GH-4921]
 * builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
+* communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
 
 ### BUG FIXES:
 
