@@ -3,11 +3,11 @@ package common
 import (
 	"fmt"
 	"log"
-	"strings"
 	"path/filepath"
+	"strings"
 
-	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // This step clones an existing virtual machine.
@@ -35,7 +35,7 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Cloning virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
-	
+
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
 	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {

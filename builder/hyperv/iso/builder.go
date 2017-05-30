@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
@@ -112,7 +112,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
-	
+
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
@@ -120,7 +120,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx")  {
+	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
 		//We only create a new hard drive if an existing one to copy from does not exist
 		err = b.checkDiskSize()
 		if err != nil {
@@ -147,7 +147,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Cpu = 1
 	}
 
-	if b.config.Generation != 2 {
+	if b.config.Generation < 1 || b.config.Generation > 2 {
 		b.config.Generation = 1
 	}
 
