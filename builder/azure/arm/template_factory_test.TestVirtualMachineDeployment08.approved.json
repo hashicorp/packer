@@ -88,7 +88,7 @@
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
-        "[concat('Microsoft.Compute/images/', 'ManagedImageName')]"
+        "[concat('Microsoft.Compute/images/', 'CustomManagedImageName')]"
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
@@ -125,7 +125,7 @@
         },
         "storageProfile": {
           "imageReference": {
-            "id": "[resourceId(resourceGroup().name, 'Microsoft.Compute/images', 'ManagedImageName')]"
+            "id": "[resourceId(resourceGroup().name, 'Microsoft.Compute/images', 'CustomManagedImageName')]"
           },
           "osDisk": {
             "caching": "ReadWrite",
@@ -139,7 +139,7 @@
     {
       "apiVersion": "[variables('managedDiskApiVersion')]",
       "location": "",
-      "name": "ManagedImageName",
+      "name": "CustomManagedImageName",
       "properties": {
         "storageProfile": {
           "osDisk": {

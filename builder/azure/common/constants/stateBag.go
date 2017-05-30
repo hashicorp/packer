@@ -30,8 +30,8 @@ const (
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
 
-	ArmIsManagedImage                      string = "arm.IsManagedImage"
-	ArmTargetManagedImageResourceGroupName string = "arm.TargetManagedImageResourceGroupName"
-	ArmTargetManagedImageLocation          string = "arm.TargetManagedImageLocation"
-	ArmTargetManagedImageName              string = "arm.TargetManagedImageName"
+	ArmIsManagedImage                string = "arm.IsManagedImage"
+	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
+	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
+	ArmManagedImageName              string = "arm.ManagedImageName"
 )

@@ -269,10 +269,10 @@ func TestVirtualMachineDeployment08(t *testing.T) {
 		"subscription_id":                          "ignore",
 		"os_type":                                  constants.Target_Linux,
 		"communicator":                             "none",
+		"custom_managed_image_resource_group_name": "CustomManagedImageResourceGroupName",
+		"custom_managed_image_name":                "CustomManagedImageName",
 		"managed_image_name":                       "ManagedImageName",
 		"managed_image_resource_group_name":        "ManagedImageResourceGroupName",
-		"target_managed_image_name":                "TargetManagedImageName",
-		"target_managed_image_resource_group_name": "TargetManagedImageResourceGroupName",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -294,20 +294,20 @@ func TestVirtualMachineDeployment08(t *testing.T) {
 // Ensure the VM template is correct when building from a platform managed image.
 func TestVirtualMachineDeployment09(t *testing.T) {
 	config := map[string]interface{}{
-		"capture_name_prefix":                      "ignore",
-		"capture_container_name":                   "ignore",
-		"location":                                 "ignore",
-		"resource_group_name":                      "ignore",
-		"storage_account":                          "ignore",
-		"subscription_id":                          "ignore",
-		"os_type":                                  constants.Target_Linux,
-		"communicator":                             "none",
-		"image_publisher":                          "Canonical",
-		"image_offer":                              "UbuntuServer",
-		"image_sku":                                "16.04-LTS",
-		"image_version":                            "--version--",
-		"target_managed_image_name":                "TargetManagedImageName",
-		"target_managed_image_resource_group_name": "TargetManagedImageResourceGroupName",
+		"capture_name_prefix":               "ignore",
+		"capture_container_name":            "ignore",
+		"location":                          "ignore",
+		"resource_group_name":               "ignore",
+		"storage_account":                   "ignore",
+		"subscription_id":                   "ignore",
+		"os_type":                           constants.Target_Linux,
+		"communicator":                      "none",
+		"image_publisher":                   "--image-publisher--",
+		"image_offer":                       "--image-offer--",
+		"image_sku":                         "--image-sku--",
+		"image_version":                     "--version--",
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())

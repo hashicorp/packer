@@ -66,18 +66,18 @@ type Config struct {
 	ImageVersion   string `mapstructure:"image_version"`
 	ImageUrl       string `mapstructure:"image_url"`
 
-	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName              string `mapstructure:"managed_image_name"`
-	managedImageLocation          string
-	managedImageBlobUri           string
-	managedImageOSState           compute.OperatingSystemStateTypes
+	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name"`
+	CustomManagedImageName              string `mapstructure:"custom_managed_image_name"`
+	customManagedImageLocation          string
+	customManagedImageBlobUri           string
+	customManagedImageOSState           compute.OperatingSystemStateTypes
 
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
 
-	TargetManagedImageResourceGroupName string `mapstructure:"target_managed_image_resource_group_name"`
-	TargetManagedImageName              string `mapstructure:"target_managed_image_name"`
-	targetManageImageLocation           string
+	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName              string `mapstructure:"managed_image_name"`
+	manageImageLocation           string
 
 	// Deployment
 	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
@@ -134,7 +134,7 @@ func (c *Config) toVMID() string {
 }
 
 func (c *Config) isManagedImage() bool {
-	return c.TargetManagedImageName != ""
+	return c.ManagedImageName != ""
 }
 
 func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCaptureParameters {
@@ -501,35 +501,33 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	/////////////////////////////////////////////
 	// Compute
 	if c.ImageUrl != "" &&
-		(c.ManagedImageName != "" || c.ManagedImageResourceGroupName != "") &&
+		(c.CustomManagedImageName != "" || c.CustomManagedImageResourceGroupName != "") &&
 		(c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (managed_disk_image_name, managed_disk_resource_group_name"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name"))
 	}
 
-	if c.ImageUrl == "" && c.ManagedImageName == "" {
+	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
-
 		if c.ImageOffer == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified"))
 		}
-
 		if c.ImageSku == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
 		}
 	} else if c.ImageUrl == "" && c.ImagePublisher == "" {
-		if c.ManagedImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed_image_name must be specified"))
+		if c.CustomManagedImageResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An custom_managed_image_resource_group_name must be specified"))
+		}
+		if c.CustomManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_name must be specified"))
 		}
 		if c.ManagedImageResourceGroupName == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
 		}
-		if c.TargetManagedImageName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An target_managed_image_name must be specified"))
-		}
-		if c.TargetManagedImageResourceGroupName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An target_managed_image_resource_group_name must be specified"))
+		if c.ManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_name must be specified"))
 		}
 	} else {
 		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
