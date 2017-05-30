@@ -29,6 +29,7 @@
 * builder/openstack: Support client x509 certificates. [GH-4921]
 * builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
 * communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
+* builder/vmware: make vnc probe timeout configurable. [GH-4919]
 
 ### BUG FIXES:
 
