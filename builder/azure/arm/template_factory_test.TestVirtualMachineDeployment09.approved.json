@@ -124,9 +124,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "offer": "UbuntuServer",
-            "publisher": "Canonical",
-            "sku": "16.04-LTS",
+            "offer": "--image-offer--",
+            "publisher": "--image-publisher--",
+            "sku": "--image-sku--",
             "version": "--version--"
           },
           "osDisk": {

@@ -90,17 +90,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if b.config.isManagedImage() {
-		group, err := azureClient.GroupsClient.Get(b.config.TargetManagedImageResourceGroupName)
+		group, err := azureClient.GroupsClient.Get(b.config.ManagedImageResourceGroupName)
 		if err != nil {
-			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.TargetManagedImageResourceGroupName)
+			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.ManagedImageResourceGroupName)
 		}
 
-		b.config.targetManageImageLocation = *group.Location
+		b.config.manageImageLocation = *group.Location
 
 		// If a managed image already exists it cannot be overwritten.
-		_, err = azureClient.ImagesClient.Get(b.config.TargetManagedImageResourceGroupName, b.config.TargetManagedImageName, "")
+		_, err = azureClient.ImagesClient.Get(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
 		if err == nil {
-			return nil, fmt.Errorf("A managed image named %s already exists in the resource group %s.", b.config.TargetManagedImageName, b.config.TargetManagedImageResourceGroupName)
+			return nil, fmt.Errorf("A managed image named %s already exists in the resource group %s.", b.config.ManagedImageName, b.config.ManagedImageResourceGroupName)
 		}
 	}
 
@@ -254,13 +254,13 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
-	stateBag.Put(constants.ArmTargetManagedImageResourceGroupName, b.config.TargetManagedImageResourceGroupName)
-	stateBag.Put(constants.ArmTargetManagedImageName, b.config.TargetManagedImageName)
+	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
+	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
 }
 
 // Parameters that are only known at runtime after querying Azure.
 func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
-	stateBag.Put(constants.ArmTargetManagedImageLocation, b.config.targetManageImageLocation)
+	stateBag.Put(constants.ArmManagedImageLocation, b.config.manageImageLocation)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {

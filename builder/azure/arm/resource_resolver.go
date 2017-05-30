@@ -45,14 +45,14 @@ func (s *resourceResolver) Resolve(c *Config) error {
 	}
 
 	if s.shouldResolveManagedImageName(c) {
-		image, err := findManagedImageByName(s.client, c.ManagedImageName, c.ManagedImageResourceGroupName)
+		image, err := findManagedImageByName(s.client, c.CustomManagedImageName, c.CustomManagedImageResourceGroupName)
 		if err != nil {
 			return err
 		}
 
-		c.managedImageBlobUri = *image.ImageProperties.StorageProfile.OsDisk.BlobURI
-		c.managedImageLocation = *image.Location
-		c.managedImageOSState = image.ImageProperties.StorageProfile.OsDisk.OsState
+		c.customManagedImageBlobUri = *image.ImageProperties.StorageProfile.OsDisk.BlobURI
+		c.customManagedImageLocation = *image.Location
+		c.customManagedImageOSState = image.ImageProperties.StorageProfile.OsDisk.OsState
 	}
 
 	return nil
@@ -63,7 +63,7 @@ func (s *resourceResolver) shouldResolveResourceGroup(c *Config) bool {
 }
 
 func (s *resourceResolver) shouldResolveManagedImageName(c *Config) bool {
-	return c.ManagedImageName != ""
+	return c.CustomManagedImageName != ""
 }
 
 func getResourceGroupNameFromId(id string) string {
