@@ -64,6 +64,21 @@ builder.
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
+    
+-   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
+     of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
+     cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
+     to learn more about custom data, and how it can be used to influence the provisioning process.
+
+-   `custom_managed_image_name` (string) Specify the source managed image's name to use.  If this value is set, do not set
+     image_publisher, image_offer, image_sku, or image_version. If this value is set, the value
+     `custom_managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+     to learn more about managed images.
+
+-   `custom_managed_image_resource_group_name` (string)  Specify the source managed image's resource group used to use.  If this
+      value is set, do not set image_publisher, image_offer, image_sku, or image_version. If this value is set, the
+      value `custom_managed_image_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+      to learn more about managed images.
 
 -   `image_version` (string) Specify a specific version of an OS to boot from. Defaults to `latest`. There may be a
     difference in versions available across regions due to image synchronization latency. To ensure a consistent
@@ -73,26 +88,39 @@ builder.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
-
--   `temp_compute_name` (string) temporary name assigned to the VM. If this value is not set, a random value will be assigned. Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer build, e.g. attach a resource disk to the VM.
-
--   `temp_resource_group_name` (string) temporary name assigned to the resource group. If this value is not set, a random value will be assigned.
-
--   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
-    specified, `tenant_id` will be looked up using `subscription_id`.
-
+     
+-   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
+     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
+     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
+     to learn more about managed images.
+     
+-   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
+     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
+     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
+     learn more about managed images.
+      
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
     behavior for `os_type`, below.
+
+-   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
+    ignored.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
--   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes). Values of zero or less than zero are
-    ignored.
+-   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be 
+    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer 
+    build, e.g. attach a resource disk to the VM.
+
+-   `temp_resource_group_name` (string) temporary name assigned to the resource group.  If this value is not set, a random
+    value will be assigned.
+
+-   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
+    specified, `tenant_id` will be looked up using `subscription_id`.
 
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM. This option enables private
     communication with the VM, no public IP address is **used** or **provisioned**. This value should only be set if
