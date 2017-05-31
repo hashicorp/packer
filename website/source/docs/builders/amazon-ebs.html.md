@@ -128,6 +128,10 @@ builder.
   Tags and attributes are copied along with the AMI. AMI copying takes time
   depending on the size of the AMI, but will generally take many minutes.
 
+- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to, 
+  along with the custom kms key id to use for encryption for that region. 
+  Keys must match the regions provided in `ami_regions`
+
 - `ami_users` (array of strings) - A list of account IDs that have access to
   launch the resulting AMI(s). By default no additional users other than the
   user creating the AMI has permissions to launch it.
