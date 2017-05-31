@@ -66,11 +66,11 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 			// Make sure that if we have region_kms_key_ids defined the regions in ami_regions are also in region_kms_key_ids
 			if len(c.AMIRegionKmsKeyIds) > 0 {
-				regions_in_key_map := make([]string, 0, len(c.AMIRegionKmsKeyIds))
+				regionsInKeyMap := make([]string, 0, len(c.AMIRegionKmsKeyIds))
 				for reg := range c.AMIRegionKmsKeyIds {
-					regions_in_key_map = append(regions_in_key_map, reg)
+					regionsInKeyMap = append(regionsInKeyMap, reg)
 				}
-				if regions_match := stringInSlice(region, regions_in_key_map); !regions_match {
+				if regionsMatch := stringInSlice(region, regionsInKeyMap); !regionsMatch {
 					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
 				}
 			}
@@ -82,9 +82,9 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 	// Make sure that if we have region_kms_key_ids defined the regions in region_kms_key_ids are also in ami_regions
 	if len(c.AMIRegionKmsKeyIds) > 0 {
-		for KMS_key_region := range c.AMIRegionKmsKeyIds {
-			if regions_match := stringInSlice(KMS_key_region, c.AMIRegions); !regions_match {
-				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", KMS_key_region))
+		for kmsKeyRegion := range c.AMIRegionKmsKeyIds {
+			if regionsMatch := stringInSlice(kmsKeyRegion, c.AMIRegions); !regionsMatch {
+				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
 			}
 		}
 	}
@@ -98,8 +98,8 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKmsKeyIds) > 0 {
-			for _, KMS_key_region := range c.AMIRegionKmsKeyIds {
-				if len(KMS_key_region) == 0 {
+			for _, kmsKeyRegion := range c.AMIRegionKmsKeyIds {
+				if len(kmsKeyRegion) == 0 {
 					errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 				}
 			}
