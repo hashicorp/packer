@@ -1,5 +1,43 @@
 # packer-builder-vsphere
 
+
+## Builder parameters
+### Required parameters:
+* `username`
+* `password`
+* `template`
+* `vm_name`
+* `host`
+### Optional parameters:
+* Destination parameters:
+    * `resource_pool`
+    * `datastore` (but is required if you move between hosts)
+* Hardware configuration:
+    * `cpus`
+    * `ram`
+    * `shutdown_command`
+* `ssh_username`
+* `ssh_password`
+* `dc_name` (source datacenter)
+
+You will find an example in **Installation instructions** section.
+
+## Progress bar
+You can find it [here](https://github.com/LizaTretyakova/packer-builder-vsphere/projects/1) as well.
+
+- [x] hardware customization of the new VM (cpu, ram)
+- [x] clone from template (not only from VM)
+- [x] clone to alternate host, resource pool and datastore
+- [ ] enable linked clones
+- [ ] support Windows guest systems
+- [ ] enable VM-to-template conversion
+- [ ] tests
+- [ ] add a shutdown timeout
+- [ ] further hardware customization:
+    * resize disks
+    * ram reservation
+    * cpu reservation
+
 ## Installation instructions
 
 1. It is supposed that you already have Go(and [Packer](https://github.com/hashicorp/packer)), [Docker-compose](https://docs.docker.com/compose/install/) and [Glide](https://github.com/Masterminds/glide) set.
@@ -73,39 +111,3 @@ and try the builder
 ```
 $ packer build template.json
 ```
-
-## Builder parameters
-I will repeat myself here a bit just to make the things clearer.
-### Required parameters:
-* `username`
-* `password`
-* `template`
-* `vm_name`
-* `host`
-### Optional parameters:
-* Destination parameters:
-    * `resource_pool`
-    * `datastore` (but is required if you move between hosts)
-* Hardware configuration:
-    * `cpus`
-    * `ram`
-    * `shutdown_command`
-* `ssh_username`
-* `ssh_password`
-* `dc_name` (source datacenter)
-
-## Progress bar
-You can find it [here](https://github.com/LizaTretyakova/packer-builder-vsphere/projects/1) as well.
-
-- [x] hardware customization of the new VM (cpu, ram)
-- [x] clone from template (not only from VM)
-- [x] clone to alternate host, resource pool and datastore
-- [ ] enable linked clones
-- [ ] support Windows guest systems
-- [ ] enable VM-to-template conversion
-- [ ] tests
-- [ ] add a shutdown timeout
-- [ ] further hardware customization:
-    * resize disks
-    * ram reservation
-    * cpu reservation
