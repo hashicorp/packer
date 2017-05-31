@@ -58,7 +58,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	c.AMISkipRegionValidation = false
 
 	c.AMIRegions = []string{"us-east-1", "us-east-2", "us-west-1"}
-	c.AMIRegionKmsKeyIds = map[string]string{
+	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
 		"us-west-1": "789-012-3456",
 		"us-east-2": "456-789-0123",
@@ -69,7 +69,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 	c.SnapshotUsers = []string{"user-foo", "user-bar"}
 	c.AMIRegions = []string{"us-east-1", "us-east-2", "us-west-1"}
-	c.AMIRegionKmsKeyIds = map[string]string{
+	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
 		"us-west-1": "789-012-3456",
 		"us-east-2": "",
@@ -79,7 +79,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 
 	c.AMIRegions = []string{"us-east-1", "us-west-1"}
-	c.AMIRegionKmsKeyIds = map[string]string{
+	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
 		"us-west-1": "789-012-3456",
 		"us-east-2": "456-789-0123",
@@ -89,7 +89,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 
 	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-2"}
-	c.AMIRegionKmsKeyIds = map[string]string{
+	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
 		"us-west-1": "789-012-3456",
 	}
@@ -101,7 +101,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	c.AMIKmsKeyId = "123-abc-456"
 	c.AMIEncryptBootVolume = true
 	c.AMIRegions = []string{"us-east-1", "us-west-1"}
-	c.AMIRegionKmsKeyIds = map[string]string{
+	c.AMIRegionKMSKeyIDs = map[string]string{
 		"us-east-1": "123-456-7890",
 		"us-west-1": "",
 	}
