@@ -46,6 +46,23 @@ func TestBuilderAcc_forceDeregister(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_forceDeregisterOwners(t *testing.T) {
+	// Build the same AMI name twice, with force_deregister on the second run
+	builderT.Test(t, builderT.TestCase{
+		PreCheck:             func() { testAccPreCheck(t) },
+		Builder:              &Builder{},
+		Template:             buildForceDeregisterOwnersConfig("[]", "dereg"),
+		SkipArtifactTeardown: true,
+	})
+
+	owner := fmt.Sprintf("[%s]", os.Getenv("AWS_ACCOUNT_ID"))
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: buildForceDeregisterOwnersConfig(owner, "dereg"),
+	})
+}
+
 func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
 	amiName := "packer-test-dereg"
 
@@ -251,6 +268,10 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("AWS_SECRET_ACCESS_KEY"); v == "" {
 		t.Fatal("AWS_SECRET_ACCESS_KEY must be set for acceptance tests")
 	}
+
+	if v := os.Getenv("AWS_ACCOUNT_ID"); v == "" {
+		t.Fatal("AWS_ACCOUNT_ID must be set for acceptance tests. Must be aws account ID or alias.")
+	}
 }
 
 func testEC2Conn() (*ec2.EC2, error) {
@@ -308,6 +329,20 @@ const testBuilderAccForceDeregister = `
 }
 `
 
+const testBuilderAccForceDeregisterOwners = `
+{
+	"builders": [{
+		"type": "test",
+		"region": "us-east-1",
+		"instance_type": "m3.medium",
+		"source_ami": "ami-76b2a71e",
+		"ssh_username": "ubuntu",
+		"force_deregister_owners": "%s",
+		"ami_name": "packer-test-%s"
+	}]
+}
+`
+
 const testBuilderAccForceDeleteSnapshot = `
 {
 	"builders": [{
@@ -355,6 +390,10 @@ const testBuilderAccEncrypted = `
 
 func buildForceDeregisterConfig(val, name string) string {
 	return fmt.Sprintf(testBuilderAccForceDeregister, val, name)
+}
+
+func buildForceDeregisterOwnersConfig(val, name string) string {
+	return fmt.Sprintf(testBuilderAccForceDeregisterOwners, val, name)
 }
 
 func buildForceDeleteSnapshotConfig(val, name string) string {
