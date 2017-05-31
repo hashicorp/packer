@@ -75,7 +75,7 @@ $ packer build template.json
 ```
 
 ## Builder parameters
-I will repeat myself here a bit just to make the things clearer a bit.
+I will repeat myself here a bit just to make the things clearer.
 ### Required parameters:
 * `username`
 * `password`
