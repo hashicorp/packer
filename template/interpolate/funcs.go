@@ -26,13 +26,14 @@ func init() {
 var FuncGens = map[string]FuncGenerator{
 	"build_name":   funcGenBuildName,
 	"build_type":   funcGenBuildType,
+	"default":      funcGenDefault,
 	"env":          funcGenEnv,
 	"isotime":      funcGenIsotime,
 	"pwd":          funcGenPwd,
 	"template_dir": funcGenTemplateDir,
 	"timestamp":    funcGenTimestamp,
-	"uuid":         funcGenUuid,
 	"user":         funcGenUser,
+	"uuid":         funcGenUuid,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -134,6 +135,20 @@ func funcGenTemplateDir(ctx *Context) interface{} {
 func funcGenTimestamp(ctx *Context) interface{} {
 	return func() string {
 		return strconv.FormatInt(InitTime.Unix(), 10)
+	}
+}
+
+func funcGenDefault(ctx *Context) interface{} {
+	return func(def, input string) (string, error) {
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("env vars are not allowed here")
+		}
+		if input == "" {
+			return def, nil
+		}
+		return input, nil
 	}
 }
 

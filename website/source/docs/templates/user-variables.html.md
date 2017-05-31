@@ -95,6 +95,28 @@ single source of input to a template that a user can easily discover using
 that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
+
+## Default function
+
+The default function allows you to specify a default value for a given
+environment variable. As with the `env` function, the `default` function is
+available *only* within the `variables` section. Here's how the above example
+would look with a default:
+
+``` {.javascript}
+{
+  "variables": {
+    "my_foo": "{{env `MY_FOO` | default `bar`}}",
+  },
+
+  // ...
+}
+```
+
+If `MY_FOO` is available in the environment, this would act as usual. If it
+were not set, the value of `my_foo` would become `bar`.
+
+
 ## Setting Variables
 
 Now that we covered how to define and use user variables within a
