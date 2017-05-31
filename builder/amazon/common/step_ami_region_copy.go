@@ -47,9 +47,8 @@ func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
 		wg.Add(1)
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
-		regKeyID = s.RegionKeyIds[region]
-		if !s.EncryptBootVolume {
-			regKeyID = ""
+		if s.EncryptBootVolume {
+			regKeyID = s.RegionKeyIds[region]
 		}
 
 		go func(region string) {
