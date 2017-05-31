@@ -22,14 +22,14 @@ type AMIConfig struct {
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
-	AMIRegionKmsKeyIds      map[string]string `mapstructure:"region_kms_key_ids"`
+	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 }
 
-func stringInSlice(searchstr string, searchslice []string) bool {
-	for _, item := range searchslice {
+func stringInSlice(s []string, searchstr string) bool {
+	for _, item := range s {
 		if item == searchstr {
 			return true
 		}
@@ -64,13 +64,10 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 				}
 			}
 
-			// Make sure that if we have region_kms_key_ids defined the regions in ami_regions are also in region_kms_key_ids
-			if len(c.AMIRegionKmsKeyIds) > 0 {
-				regionsInKeyMap := make([]string, 0, len(c.AMIRegionKmsKeyIds))
-				for reg := range c.AMIRegionKmsKeyIds {
-					regionsInKeyMap = append(regionsInKeyMap, reg)
-				}
-				if regionsMatch := stringInSlice(region, regionsInKeyMap); !regionsMatch {
+			// Make sure that if we have region_kms_key_ids defined,
+			// the regions in ami_regions are also in region_kms_key_ids
+			if len(c.AMIRegionKMSKeyIDs) > 0 {
+				if _, ok := c.AMIRegionKMSKeyIDs[region]; !ok {
 					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
 				}
 			}
@@ -80,10 +77,11 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 
 		c.AMIRegions = regions
 	}
-	// Make sure that if we have region_kms_key_ids defined the regions in region_kms_key_ids are also in ami_regions
-	if len(c.AMIRegionKmsKeyIds) > 0 {
-		for kmsKeyRegion := range c.AMIRegionKmsKeyIds {
-			if regionsMatch := stringInSlice(kmsKeyRegion, c.AMIRegions); !regionsMatch {
+	// Make sure that if we have region_kms_key_ids defined,
+	//  the regions in region_kms_key_ids are also in ami_regions
+	if len(c.AMIRegionKMSKeyIDs) > 0 {
+		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
+			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
 				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
 			}
 		}
@@ -97,9 +95,9 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 		}
-		if len(c.AMIRegionKmsKeyIds) > 0 {
-			for _, kmsKeyRegion := range c.AMIRegionKmsKeyIds {
-				if len(kmsKeyRegion) == 0 {
+		if len(c.AMIRegionKMSKeyIDs) > 0 {
+			for _, kmsKey := range c.AMIRegionKMSKeyIDs {
+				if len(kmsKey) == 0 {
 					errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
 				}
 			}
