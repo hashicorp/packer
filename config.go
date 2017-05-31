@@ -19,15 +19,19 @@ type Config struct {
 	Username         string `mapstructure:"username"`
 	Password         string `mapstructure:"password"`
 
-	Template   string `mapstructure:"template"`
-	VMName     string `mapstructure:"vm_name"`
-	FolderName string `mapstructure:"folder_name"`
-	DCName     string `mapstructure:"dc_name"`
+	// Location
+	Template     string `mapstructure:"template"`
+	VMName       string `mapstructure:"vm_name"`
+	FolderName   string `mapstructure:"folder_name"`
+	DCName       string `mapstructure:"dc_name"`
+	Host         string `mapstructure:"host"`
+	ResourcePool string `mapstructure:"resource_pool"`
+	Datastore    string `mapstructure:"datastore"`
 
+	// Hardware
 	Cpus            string `mapstructure:"cpus"`
 	ShutdownCommand string `mapstructure:"shutdown_command"`
 	Ram             string `mapstructure:"RAM"`
-	//TODO: add more options
 
 	ctx      interpolate.Context
 }
@@ -64,6 +68,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.VMName == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target VM name required"))
 	}
+	if c.Host == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target host required"))
+	}
 
 	// Verify numeric parameters if present
 	if c.Cpus != "" {
@@ -79,6 +86,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Warnings
 	var warnings []string
+	if c.Datastore == "" {
+		warnings = append(warnings, "Datastore is not specified, will try to find a default one")
+	}
 
 	if len(errs.Errors) > 0 {
 		return nil, warnings, errs
