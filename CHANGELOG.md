@@ -44,6 +44,8 @@
     [GH-4906]
 * builder/amazon: fix `force_delete_snapshot` when the launch instance has
     extra volumes. [GH-4931]
+* communicator/winrm: Use KeepAlive to keep long-running connections open.
+    [GH-4952]
 
 
 ## 1.0.0 (April 4, 2017)
