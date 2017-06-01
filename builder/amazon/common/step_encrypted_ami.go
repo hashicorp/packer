@@ -36,7 +36,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	var region, id string
 	if amis != nil {
 		for region, id = range amis {
-			break // Only get the first
+			break // There is only ever one region:ami pair in this map
 		}
 	}
 

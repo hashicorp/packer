@@ -270,9 +270,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepRegisterAMI{},
 		&awscommon.StepAMIRegionCopy{
-			AccessConfig: &b.config.AccessConfig,
-			Regions:      b.config.AMIRegions,
-			Name:         b.config.AMIName,
+			AccessConfig:      &b.config.AccessConfig,
+			Regions:           b.config.AMIRegions,
+			RegionKeyIds:      b.config.AMIRegionKMSKeyIDs,
+			EncryptBootVolume: b.config.AMIEncryptBootVolume,
+			Name:              b.config.AMIName,
 		},
 		&awscommon.StepModifyAMIAttributes{
 			Description:    b.config.AMIDescription,

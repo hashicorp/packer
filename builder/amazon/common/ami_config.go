@@ -22,9 +22,19 @@ type AMIConfig struct {
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
+	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
+}
+
+func stringInSlice(s []string, searchstr string) bool {
+	for _, item := range s {
+		if item == searchstr {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
@@ -54,18 +64,44 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 				}
 			}
 
+			// Make sure that if we have region_kms_key_ids defined,
+			// the regions in ami_regions are also in region_kms_key_ids
+			if len(c.AMIRegionKMSKeyIDs) > 0 {
+				if _, ok := c.AMIRegionKMSKeyIDs[region]; !ok {
+					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
+				}
+			}
+
 			regions = append(regions, region)
 		}
 
 		c.AMIRegions = regions
+	}
+	// Make sure that if we have region_kms_key_ids defined,
+	//  the regions in region_kms_key_ids are also in ami_regions
+	if len(c.AMIRegionKMSKeyIDs) > 0 {
+		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
+			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
+				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
+			}
+		}
 	}
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
 	}
 
-	if len(c.SnapshotUsers) > 0 && len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
-		errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+	if len(c.SnapshotUsers) > 0 {
+		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
+			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+		}
+		if len(c.AMIRegionKMSKeyIDs) > 0 {
+			for _, kmsKey := range c.AMIRegionKMSKeyIDs {
+				if len(kmsKey) == 0 {
+					errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
+				}
+			}
+		}
 	}
 
 	if len(c.AMIName) < 3 || len(c.AMIName) > 128 {
