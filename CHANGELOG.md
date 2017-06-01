@@ -30,6 +30,8 @@
 * builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
 * communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
 * builder/vmware: make vnc probe timeout configurable. [GH-4919]
+* builder/amazon: Allow amis to be copied to other regions, encrypted with
+    custom KMS keys. [GH-4948]
 
 ### BUG FIXES:
 
