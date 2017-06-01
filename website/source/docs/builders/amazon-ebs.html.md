@@ -195,6 +195,15 @@ builder.
   preserved when booting from the AMI built with Packer. See
   `ami_block_device_mappings`, above, for details.
 
+- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to, 
+  along with the custom kms key id to use for encryption for that region. 
+  Keys must match the regions provided in `ami_regions`. If you just want to 
+  encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
+  If you want a region to be encrypted with that region's default key ID, you can 
+  use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
+  However, you cannot use default key IDs if you are using this in conjunction with 
+  `snapshot_users` -- in that situation you must use custom keys.
+
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
   that is *launched* to create the AMI. These tags are *not* applied to the
   resulting AMI unless they're duplicated in `tags`. This is a
