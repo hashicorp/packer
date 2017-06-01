@@ -90,8 +90,13 @@ func (*Artifact) Id() string {
 	return ""
 }
 
-func (*Artifact) State(name string) interface{} {
-	return nil
+func (a *Artifact) State(name string) interface{} {
+	switch name {
+	case "atlas.artifact.metadata":
+		return a.stateAtlasMetadata()
+	default:
+		return nil
+	}
 }
 
 func (a *Artifact) String() string {
@@ -109,4 +114,15 @@ func (a *Artifact) String() string {
 
 func (*Artifact) Destroy() error {
 	return nil
+}
+
+func (a *Artifact) stateAtlasMetadata() interface{} {
+	metadata := make(map[string]string)
+	metadata["StorageAccountLocation"] = a.StorageAccountLocation
+	metadata["OSDiskUri"] = a.OSDiskUri
+	metadata["OSDiskUriReadOnlySas"] = a.OSDiskUriReadOnlySas
+	metadata["TemplateUri"] = a.TemplateUri
+	metadata["TemplateUriReadOnlySas"] = a.TemplateUriReadOnlySas
+
+	return metadata
 }
