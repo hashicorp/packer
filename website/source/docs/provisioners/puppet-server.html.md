@@ -22,8 +22,8 @@ this.
 
 ## Basic Example
 
-The example below is fully functional and expects a Puppet server to be
-accessible from your network.
+The example below is fully functional on Unix like systems and expects a Puppet
+server to be accessible from your network.
 
 ```json
 {
@@ -32,6 +32,20 @@ accessible from your network.
    "facter": {
      "server_role": "webserver"
    }
+}
+```
+
+The example below is fully functional on Windows systems and expects a Puppet
+server to be accessible from your network.
+
+``` {.javascript}
+{
+   "type": "puppet-server",
+   "options": "--test --pluginsync",
+   "facter": {
+     "server_role": "webserver"
+   },
+   "execute_command": "{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent --onetime --no-daemonize {{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}{{if ne .Options \"\"}}{{.Options}} {{end}}{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}--detailed-exitcodes"
 }
 ```
 
