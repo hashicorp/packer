@@ -579,15 +579,16 @@
 			"revision": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"checksumSHA1": "kWWDtHJJp7Hiq0zj0xecRGqMoeU=",
+			"checksumSHA1": "LY1os7cX/gWXWTWYCHCtEaf5jSw=",
 			"path": "github.com/masterzen/winrm",
-			"revision": "acf371f6aff113fc0104a61cd72db45a7c27d310",
-			"revisionTime": "2017-03-29T23:04:57Z"
+			"revision": "1ca0ba637a877ee12b69abc73c6161fccb77b70a",
+			"revisionTime": "2017-06-01T21:16:37Z"
 		},
 		{
 			"checksumSHA1": "KTsgWipT3ennAAtaKxEZairxero=",
 			"path": "github.com/masterzen/winrm/soap",
-			"revision": "ef3efbb97f99fc204bd9c7edf778a0dbd9781baf"
+			"revision": "1ca0ba637a877ee12b69abc73c6161fccb77b70a",
+			"revisionTime": "2017-06-01T21:16:37Z"
 		},
 		{
 			"checksumSHA1": "bx+egnFe0OB0BZBcgZcaqsvcmS4=",
