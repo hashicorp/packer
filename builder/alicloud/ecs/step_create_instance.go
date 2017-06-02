@@ -43,7 +43,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 	if password == "" && config.Comm.WinRMPassword != "" {
 		password = config.Comm.WinRMPassword
 	}
-	ui.Say("Start creating alicloud instance")
+	ui.Say("Creating instance.")
 	if network_type == VpcNet {
 		userData, err := s.getUserData(state)
 		if err != nil {
@@ -127,7 +127,7 @@ func (s *stepCreateAlicloudInstance) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	err := client.DeleteInstance(s.instance.InstanceId)
 	if err != nil {
-		ui.Say(fmt.Sprintf("Cleaning instance %s failed ", s.instance.InstanceId))
+		ui.Say(fmt.Sprintf("Failed to clean up instance %s: ", s.instance.InstanceId, err.Error()))
 	}
 
 }
