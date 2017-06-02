@@ -45,7 +45,7 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 		return multistep.ActionHalt
 
 	}
-	ui.Say("Start create vpc")
+	ui.Say("Creating vpc")
 	vpc, err := client.CreateVpc(&ecs.CreateVpcArgs{
 		RegionId:  common.Region(config.AlicloudRegion),
 		CidrBlock: s.CidrBlock,
@@ -53,13 +53,13 @@ func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepActi
 	})
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Create vpc failed %s", err))
+		ui.Say(fmt.Sprintf("Failed creating vpc: %s", err))
 		return multistep.ActionHalt
 	}
 	err = client.WaitForVpcAvailable(common.Region(config.AlicloudRegion), vpc.VpcId, ALICLOUD_DEFAULT_SHORT_TIMEOUT)
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Failed waiting for vpc to become available %s", err))
+		ui.Say(fmt.Sprintf("Failed waiting for vpc to become available: %s", err))
 		return multistep.ActionHalt
 	}
 
