@@ -49,6 +49,7 @@
     extra volumes. [GH-4931]
 * communicator/winrm: Use KeepAlive to keep long-running connections open.
     [GH-4952]
+* builder/amazon: don't try to delete extra volumes during clean up. [GH-4930]
 
 ### FEATURES:
 
