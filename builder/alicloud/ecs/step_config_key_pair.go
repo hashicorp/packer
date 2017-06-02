@@ -43,7 +43,7 @@ func (s *StepConfigAlicloudKeyPair) Run(state multistep.StateBag) multistep.Step
 	}
 
 	if s.SSHAgentAuth && s.KeyPairName == "" {
-		ui.Say("Using SSH Agent with key pair in Source AlicloudImage")
+		ui.Say("Using SSH Agent with key pair in source image")
 		return multistep.ActionContinue
 	}
 
@@ -61,7 +61,7 @@ func (s *StepConfigAlicloudKeyPair) Run(state multistep.StateBag) multistep.Step
 
 	client := state.Get("client").(*ecs.Client)
 
-	ui.Say(fmt.Sprintf("Start creating temporary keypair: %s", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
 	keyResp, err := client.CreateKeyPair(&ecs.CreateKeyPairArgs{
 		KeyPairName: s.TemporaryKeyPairName,
 		RegionId:    common.Region(s.RegionId),
