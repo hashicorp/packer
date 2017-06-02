@@ -3,10 +3,11 @@ package ecs
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
-	"os"
 )
 
 type RunConfig struct {

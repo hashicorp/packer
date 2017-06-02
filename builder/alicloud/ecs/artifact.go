@@ -2,12 +2,13 @@ package ecs
 
 import (
 	"fmt"
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/ecs"
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/denverdino/aliyungo/common"
+	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/packer"
 )
 
 type Artifact struct {
