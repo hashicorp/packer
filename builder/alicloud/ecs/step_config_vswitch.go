@@ -80,18 +80,18 @@ func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.Step
 			if len(instanceTypes) > 0 {
 				ui.Say(fmt.Sprintf("The instance type %s isn't available in this region."+
 					"\n You can either change the instance to one of following: %v \n"+
-					"or choose another region", config.InstanceType, instanceTypes))
+					"or choose another region.", config.InstanceType, instanceTypes))
 
 				state.Put("error", fmt.Errorf("The instance type %s isn't available in this region."+
 					"\n You can either change the instance to one of following: %v \n"+
-					"or choose another region", config.InstanceType, instanceTypes))
+					"or choose another region.", config.InstanceType, instanceTypes))
 				return multistep.ActionHalt
 			} else {
 				ui.Say(fmt.Sprintf("The instance type %s isn't available in this region."+
-					"\n You can change to other regions \n", config.InstanceType))
+					"\n You can change to other regions.", config.InstanceType))
 
 				state.Put("error", fmt.Errorf("The instance type %s isn't available in this region."+
-					"\n You can change to other regions \n", config.InstanceType))
+					"\n You can change to other regions.", config.InstanceType))
 				return multistep.ActionHalt
 			}
 		}
@@ -99,7 +99,7 @@ func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.Step
 	if config.CidrBlock == "" {
 		s.CidrBlock = "172.16.0.0/24" //use the default CirdBlock
 	}
-	ui.Say("Start creating vswitch...")
+	ui.Say("Creating vswitch...")
 	vswitchId, err := client.CreateVSwitch(&ecs.CreateVSwitchArgs{
 		CidrBlock:   s.CidrBlock,
 		ZoneId:      s.ZoneId,

@@ -60,7 +60,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 
 	}
 	var securityGroupId string
-	ui.Say("Start creating security groups...")
+	ui.Say("Creating security groups...")
 	if networkType == VpcNet {
 		vpcId := state.Get("vpcid").(string)
 		securityGroupId, err = client.CreateSecurityGroup(&ecs.CreateSecurityGroupArgs{
@@ -76,7 +76,7 @@ func (s *stepConfigAlicloudSecurityGroup) Run(state multistep.StateBag) multiste
 	}
 	if err != nil {
 		state.Put("error", err)
-		ui.Say(fmt.Sprintf("Create security group failed %s", err))
+		ui.Say(fmt.Sprintf("Failed creating security group %s.", err))
 		return multistep.ActionHalt
 	}
 	state.Put("securitygroupid", securityGroupId)

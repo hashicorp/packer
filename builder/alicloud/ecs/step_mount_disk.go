@@ -20,7 +20,7 @@ func (s *stepMountAlicloudDisk) Run(state multistep.StateBag) multistep.StepActi
 	if len(config.ECSImagesDiskMappings) == 0 {
 		return multistep.ActionContinue
 	}
-	ui.Say("Start mounting Disks")
+	ui.Say("Mounting disks.")
 	disks, _, err := client.DescribeDisks(&ecs.DescribeDisksArgs{InstanceId: instance.InstanceId,
 		RegionId: instance.RegionId})
 	if err != nil {
@@ -50,7 +50,7 @@ func (s *stepMountAlicloudDisk) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 	}
-	ui.Say("Finished mounting disks")
+	ui.Say("Finished mounting disks.")
 	return multistep.ActionContinue
 }
 
