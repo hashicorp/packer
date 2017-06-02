@@ -127,7 +127,7 @@ func (s *stepCreateAlicloudInstance) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	err := client.DeleteInstance(s.instance.InstanceId)
 	if err != nil {
-		ui.Say(fmt.Sprintf("Failed to clean up instance %s: ", s.instance.InstanceId, err.Error()))
+		ui.Say(fmt.Sprintf("Failed to clean up instance %s: %v", s.instance.InstanceId, err.Error()))
 	}
 
 }
