@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
