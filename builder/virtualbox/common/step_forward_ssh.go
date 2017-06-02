@@ -32,6 +32,12 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	if s.CommConfig.Type == "none" {
+		log.Printf("Not using a communicator, skipping setting up port forwarding...")
+		state.Put("sshHostPort", 0)
+		return multistep.ActionContinue
+	}
+
 	guestPort := s.CommConfig.Port()
 	sshHostPort := guestPort
 	if !s.SkipNatMapping {
