@@ -32,6 +32,7 @@
 * builder/vmware: make vnc probe timeout configurable. [GH-4919]
 * builder/amazon: Allow amis to be copied to other regions, encrypted with
     custom KMS keys. [GH-4948]
+* builder/null: Support SSH agent auth [GH-4956]
 
 ### BUG FIXES:
 
