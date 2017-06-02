@@ -32,6 +32,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.CommConfig,
 			Host:   CommHost(b.config.CommConfig.Host()),
 			SSHConfig: SSHConfig(
+				b.config.CommConfig.SSHAgentAuth,
 				b.config.CommConfig.SSHUsername,
 				b.config.CommConfig.SSHPassword,
 				b.config.CommConfig.SSHPrivateKey),
