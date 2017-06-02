@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
+	"strings"
 )
 
 type RunConfig struct {
@@ -49,6 +50,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := c.Comm.Prepare(ctx)
 	if c.AlicloudSourceImage == "" {
 		errs = append(errs, errors.New("A source_image must be specified"))
+	}
+
+	if strings.TrimSpace(c.AlicloudSourceImage) != c.AlicloudSourceImage {
+		errs = append(errs, errors.New("The source_image can't include spaces"))
 	}
 
 	if c.InstanceType == "" {
