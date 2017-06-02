@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/plugin"
 
+	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
 	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"
 	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
 	amazonebssurrogatebuilder "github.com/hashicorp/packer/builder/amazon/ebssurrogate"
@@ -37,6 +38,7 @@ import (
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
+	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	atlaspostprocessor "github.com/hashicorp/packer/post-processor/atlas"
@@ -73,6 +75,7 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
+	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
@@ -117,6 +120,7 @@ var Provisioners = map[string]packer.Provisioner{
 }
 
 var PostProcessors = map[string]packer.PostProcessor{
+	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"atlas":                new(atlaspostprocessor.PostProcessor),
