@@ -25,7 +25,7 @@ func (s *stepConfigAlicloudPublicIP) Run(state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 	s.publicIPAdress = ipaddress
-	ui.Say(fmt.Sprintf("allocated public ip address %s", ipaddress))
+	ui.Say(fmt.Sprintf("Allocated public ip address %s.", ipaddress))
 	state.Put("ipaddress", ipaddress)
 	return multistep.ActionContinue
 }

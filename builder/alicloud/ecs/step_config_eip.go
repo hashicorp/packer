@@ -66,14 +66,14 @@ func (s *setpConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
 	message(state, "EIP")
 
 	if err := client.UnassociateEipAddress(s.allocatedId, instance.InstanceId); err != nil {
-		ui.Say(fmt.Sprintf("Unassociating eip failed."))
+		ui.Say(fmt.Sprintf("Failed to unassociate eip."))
 	}
 
 	if err := client.WaitForEip(common.Region(s.RegionId), s.allocatedId, ecs.EipStatusAvailable, ALICLOUD_DEFAULT_SHORT_TIMEOUT); err != nil {
 		ui.Say(fmt.Sprintf("Timeout while unassociating eip."))
 	}
 	if err := client.ReleaseEipAddress(s.allocatedId); err != nil {
-		ui.Say(fmt.Sprintf("Releasing eip failed."))
+		ui.Say(fmt.Sprintf("Failed to release eip."))
 	}
 
 }
