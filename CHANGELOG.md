@@ -50,6 +50,10 @@
 * communicator/winrm: Use KeepAlive to keep long-running connections open.
     [GH-4952]
 
+### FEATURES:
+
+* **New builder:** `alicloud-ecs` for building Alicloud ECS images. [GH-4619]
+
 
 ## 1.0.0 (April 4, 2017)
 
