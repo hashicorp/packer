@@ -36,6 +36,8 @@
     out of the box. [GH-4909]
 * website/docs: Clarify language, improve formatting. [GH-4866]
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
+* builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
+
 
 ### BUG FIXES:
 
