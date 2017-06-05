@@ -35,6 +35,7 @@
 * builder/null: Support SSH agent auth [GH-4956]
 * builder/virtualbox: Don't add port forwarding when using "none" communicator.
     [GH-4960]
+* builder/azure: Add build output to artifact. [GH-4953]
 
 ### BUG FIXES:
 
