@@ -38,6 +38,7 @@
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
 * builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
 * builder/virtualbox: Add sata port count configuration option. [GH-4699]
+* post-processor/amazon-import: Add support for `license_type`. [GH-4634]
 
 
 ### BUG FIXES:
