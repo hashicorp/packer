@@ -13,7 +13,7 @@ os: Windows Server 2012 R2
 environment:
   GOPATH: c:\gopath
 
-clone_folder: c:\gopath\src\github.com\mitchellh\packer
+clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
   - set GO15VENDOREXPERIMENT=1
