@@ -2,9 +2,11 @@ package iso
 
 import (
 	"fmt"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
+
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -55,7 +57,7 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	// the IDE controller above because some other things (disks) require
 	// that.
 	if config.HardDriveInterface == "sata" || config.ISOInterface == "sata" {
-		if err := driver.CreateSATAController(vmName, "SATA Controller"); err != nil {
+		if err := driver.CreateSATAController(vmName, "SATA Controller", config.SATAPortCount); err != nil {
 			err := fmt.Errorf("Error creating disk controller: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
