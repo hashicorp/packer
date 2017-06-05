@@ -34,6 +34,7 @@ type Config struct {
 	Description string            `mapstructure:"ami_description"`
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
+	LicenseType string            `mapstructure:"license_type"`
 
 	ctx interpolate.Context
 }
@@ -158,10 +159,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message(fmt.Sprintf("Completed upload of %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
 	// Call EC2 image import process
-	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
+	log.Printf("Calling EC2 to import from s3://%s/%s with license type '%s'", p.config.S3Bucket, p.config.S3Key, p.config.LicenseType)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -170,13 +171,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-	})
+	}
+
+	if p.config.LicenseType != "" {
+		params.LicenseType = &p.config.LicenseType
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
 	}
 
-	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
+	ui.Message(fmt.Sprintf("Started import of s3://%s/%s with license type %s, task id %s", p.config.S3Bucket, p.config.S3Key, p.config.LicenseType, *import_start.ImportTaskId))
 
 	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
