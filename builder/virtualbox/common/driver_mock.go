@@ -47,7 +47,7 @@ type DriverMock struct {
 	VersionErr    error
 }
 
-func (d *DriverMock) CreateSATAController(vm string, controller string) error {
+func (d *DriverMock) CreateSATAController(vm string, controller string, portcount int) error {
 	d.CreateSATAControllerVM = vm
 	d.CreateSATAControllerController = vm
 	return d.CreateSATAControllerErr
