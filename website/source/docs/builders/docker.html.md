@@ -57,9 +57,14 @@ more easily tagged, pushed, etc.
 
 ## Basic Example: Changes to Metadata
 
-Below is an example using the changes argument of the builder. This feature allows the source images metadata to be changed when committed back into the Docker environment. It is derived from the `docker commit --change` command line [option to Docker](https://docs.docker.com/engine/reference/commandline/commit/).
+Below is an example using the changes argument of the builder. This feature
+allows the source images metadata to be changed when committed back into the
+Docker environment. It is derived from the `docker commit --change` command
+line [option to
+Docker](https://docs.docker.com/engine/reference/commandline/commit/).
 
-Example uses of all of the options, assuming one is building an NGINX image from ubuntu as an simple example:
+Example uses of all of the options, assuming one is building an NGINX image
+from ubuntu as an simple example:
 
 ```json
 {
