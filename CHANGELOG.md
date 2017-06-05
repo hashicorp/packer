@@ -39,6 +39,7 @@
 * builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
 * builder/virtualbox: Add sata port count configuration option. [GH-4699]
 * post-processor/amazon-import: Add support for `license_type`. [GH-4634]
+* provisioner/chef-solo: Add option to select Chef version. [GH-4791]
 
 
 ### BUG FIXES:
