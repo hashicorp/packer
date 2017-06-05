@@ -461,11 +461,11 @@
 			"revisionTime": "2016-11-07T20:49:10Z"
 		},
 		{
-			"checksumSHA1": "lrfddRS4/LDKnF0sAbyZ59eUSjo=",
+			"checksumSHA1": "IR7S+SOsSUnPnLxgRrfemXfCqNM=",
 			"comment": "20141209094003-92-g95fa852",
 			"path": "github.com/hashicorp/atlas-go/v1",
-			"revision": "1792bd8de119ba49b17fd8d3c3c1f488ec613e62",
-			"revisionTime": "2016-11-07T20:49:10Z"
+			"revision": "047827faf4f20cc74f1a420fdf679d59162a09c7",
+			"revisionTime": "2017-06-05T23:14:32Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
@@ -473,9 +473,10 @@
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 		},
 		{
-			"checksumSHA1": "nd3S1qkFv7zZxA9be0bw4nT0pe0=",
+			"checksumSHA1": "SF8aIBEMV6/MXLFTgErdONaX8f0=",
 			"path": "github.com/hashicorp/go-checkpoint",
-			"revision": "e4b2dc34c0f698ee04750bf2035d8b9384233e1b"
+			"revision": "f8cfd20c53506d1eb3a55c2c43b84d009fab39bd",
+			"revisionTime": "2016-08-16T19:50:56Z"
 		},
 		{
 			"checksumSHA1": "fSe5y1UgTDeYlnFfUcDA1zzcw+U=",

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
 	"github.com/hashicorp/packer/helper/flag-kv"
+	"github.com/hashicorp/packer/helper/flag-slice"
 	"github.com/hashicorp/packer/template"
 )
 
@@ -190,6 +191,12 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
+	if privs := flags.Lookup("private"); privs != nil {
+		pvf := privs.Value.(*sliceflag.StringFlag)
+		pvars := []string(*pvf)
+		uploadOpts.PrivVars = pvars
+	}
+
 	uploadOpts.Vars = make(map[string]string)
 	if vs := flags.Lookup("var"); vs != nil {
 		f := vs.Value.(*kvflag.Flag)
@@ -334,12 +341,19 @@ func (c *PushCommand) upload(
 	}
 
 	// Build the BuildVars struct
-
 	buildVars := atlas.BuildVars{}
 	for k, v := range opts.Vars {
+		isSensitive := false
+		for _, sensitiveVar := range opts.PrivVars {
+			if string(sensitiveVar) == string(k) {
+				isSensitive = true
+				break
+			}
+		}
 		buildVars = append(buildVars, atlas.BuildVar{
-			Key:   k,
-			Value: v,
+			Key:       k,
+			Value:     v,
+			Sensitive: isSensitive,
 		})
 	}
 
@@ -372,6 +386,7 @@ type uploadOpts struct {
 	Builds   map[string]*uploadBuildInfo
 	Metadata map[string]interface{}
 	Vars     map[string]string
+	PrivVars []string
 }
 
 type uploadBuildInfo struct {
