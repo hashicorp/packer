@@ -1,7 +1,41 @@
 #!/usr/bin/env python
-import textwrap
-import sys
+"""
+sort-md-list.py sorts markdown lists
+
+Use this script to prepare sections of the changelog.
+
+this script expects a bulleted markdown list in stdout
+
+for example
+
+./sort-md-list.py - <<EOF
+* builder/amazon: Only delete temporary key if we created one. [GH-4850]
+* core: Correctly reject config files which have junk after valid json.
+        [GH-4906]
+    * builder/azure: Replace calls to panic with error returns. [GH-4846]
+* communicator/winrm: Use KeepAlive to keep long-running connections open.  [GH-4952]
+EOF
+
+output:
+
+* builder/amazon: Only delete temporary key if we created one. [GH-4850]
+* builder/azure: Replace calls to panic with error returns. [GH-4846]
+* communicator/winrm: Use KeepAlive to keep long-running connections open.
+    [GH-4952]
+* core: Correctly reject config files which have junk after valid json.
+    [GH-4906]
+
+As you can see, the output is sorted and spaced appropriately.
+
+Limitations:
+    * nested lists are not supported
+    * must be passed a list to stdin, it does not process the changelog
+    * whitespace within the list is elided
+"""
+
 import fileinput
+import sys
+import textwrap
 
 
 if __name__ == '__main__':
@@ -37,13 +71,3 @@ if __name__ == '__main__':
     sys.stdin.seek(0)
     if sys.stdin.readlines()[-1].strip() == "":
         print ""
-
-"""
-    for line in lines:
-        do_indent = False
-        for wline in textwrap.wrap(line, 79):
-            if do_indent:
-                print "    ",
-            print wline
-            do_indent = True
-"""
