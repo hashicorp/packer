@@ -53,7 +53,8 @@ Here is a basic example:
       "disk_size":"50",
       "image_name":"test5",
       "source_image_name":"ubuntu1604-64min",
-      "ssh_username" :"root"
+      "ssh_username" :"root",
+      "ssh_private_key_file" : "/path/to/private/ssh/key"
     }
   ]
 }
