@@ -130,6 +130,7 @@
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
 * post-processor/docker-import: print stderr on docker import failure.
     [GH-4529]
+* provisioner/salt: add support for grains. [GH-4961]
 
 ### BUG FIXES:
 
