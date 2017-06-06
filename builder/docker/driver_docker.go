@@ -227,7 +227,7 @@ func (d *DockerDriver) StartContainer(config *ContainerConfig) (string, error) {
 		args = append(args, "--privileged")
 	}
 	for host, guest := range config.Volumes {
-		args = append(args, "-v", fmt.Sprintf("%s:%s", host, guest))
+		args = append(args, "-v", fmt.Sprintf("%s:%s:Z", host, guest))
 	}
 	for _, v := range config.RunCommand {
 		v, err := interpolate.Render(v, &ctx)
