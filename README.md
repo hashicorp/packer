@@ -7,7 +7,7 @@
 
 [travis-badge]: https://travis-ci.org/hashicorp/packer.svg?branch=master
 [travis]: https://travis-ci.org/hashicorp/packer
-[appveyor-badge]: https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/hashicorp/packer
 [godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
 [godoc]: https://godoc.org/github.com/mitchellh/packer
