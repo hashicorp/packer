@@ -27,15 +27,14 @@ type StepGetPassword struct {
 func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	// Skip if we're not using winrm
-	if s.Comm.Type != "winrm" {
-		log.Printf("[INFO] Not using winrm communicator, skipping get password...")
+	// Skip if already have a password
+	if s.Comm.Type == "winrm" && s.Comm.WinRMPassword != "" {
+		log.Printf("[INFO] WinRM password is set, skipping get password...")
 		return multistep.ActionContinue
 	}
 
-	// If we already have a password, skip it
-	if s.Comm.WinRMPassword != "" {
-		ui.Say("Skipping waiting for password since WinRM password set...")
+	// Skip if we are not waiting for SSH password
+	if s.Comm.Type == "ssh" && !s.Comm.SSHWaitForPassword {
 		return multistep.ActionContinue
 	}
 
@@ -67,7 +66,14 @@ WaitLoop:
 			}
 
 			ui.Message(fmt.Sprintf(" \nPassword retrieved!"))
-			s.Comm.WinRMPassword = password
+			if s.Comm.Type == "winrm" {
+				s.Comm.WinRMPassword = password
+			}
+
+			if s.Comm.Type == "ssh" {
+				s.Comm.SSHPassword = password
+			}
+
 			break WaitLoop
 		case <-timeout:
 			err := fmt.Errorf("Timeout waiting for password.")

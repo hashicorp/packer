@@ -75,11 +75,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-	if c.SSHKeyPairName != "" {
-		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
+	if c.SSHKeyPairName != "" && c.Comm.SSHPrivateKey == "" {
+		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" {
 			errs = append(errs, errors.New("A private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
-		} else if c.Comm.SSHPrivateKey == "" && !c.Comm.SSHAgentAuth {
+		} else if !c.Comm.SSHAgentAuth {
 			errs = append(errs, errors.New("A private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
+		} else if c.Comm.Type == "ssh" && c.Comm.SSHWaitForPassword {
+			errs = append(errs, errors.New("A private_key_file must be provided to retrieve the ssh password when ssh_wait_for_password is enabled and ssh_keypair_name is specified."))
 		}
 	}
 

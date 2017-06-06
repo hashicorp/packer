@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -70,9 +71,10 @@ func SSHHost(e ec2Describer, private bool) func(multistep.StateBag) (string, err
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the private key
 // or password.
-func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+func SSHConfig(config *communicator.Config) func(multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		if useAgent {
+
+		if config.SSHAgentAuth {
 			authSock := os.Getenv("SSH_AUTH_SOCK")
 			if authSock == "" {
 				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
@@ -84,12 +86,23 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 			}
 
 			return &ssh.ClientConfig{
-				User: username,
+				User: config.SSHUsername,
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
+		}
+
+		if config.SSHWaitForPassword {
+			return &ssh.ClientConfig{
+				User:            config.SSHUsername,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+				Auth: []ssh.AuthMethod{
+					ssh.Password(config.SSHPassword),
+					ssh.KeyboardInteractive(
+						packerssh.PasswordKeyboardInteractive(config.SSHPassword)),
+				}}, nil
 		}
 
 		privateKey, hasKey := state.GetOk("privateKey")
@@ -100,7 +113,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 			}
 			return &ssh.ClientConfig{
-				User: username,
+				User: config.SSHUsername,
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeys(signer),
 				},
@@ -109,12 +122,12 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 
 		} else {
 			return &ssh.ClientConfig{
-				User:            username,
+				User:            config.SSHUsername,
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth: []ssh.AuthMethod{
-					ssh.Password(password),
+					ssh.Password(config.SSHPassword),
 					ssh.KeyboardInteractive(
-						packerssh.PasswordKeyboardInteractive(password)),
+						packerssh.PasswordKeyboardInteractive(config.SSHPassword)),
 				}}, nil
 		}
 	}
