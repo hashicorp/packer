@@ -144,6 +144,8 @@
 * core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 * provisioner/chef-client: only upload knife config if we're cleaning.
     [GH-4534]
+* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
+    [GH-4972]
 
 ## 0.12.2 (January 20, 2017)
 
