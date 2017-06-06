@@ -66,8 +66,8 @@ Optional:
     uploaded to the `/etc/salt` on the remote. This option overrides the
     `remote_state_tree` or `remote_pillar_roots` options.
 
-- `grains_file` (string) - The path to your local [grains file]
-    (https://docs.saltstack.com/en/latest/topics/grains). This will be
+- `grains_file` (string) - The path to your local [grains file](
+    https://docs.saltstack.com/en/latest/topics/grains). This will be
     uploaded to `/etc/salt/grains` on the remote.
 
 - `skip_bootstrap` (boolean) - By default the salt provisioner runs [salt
