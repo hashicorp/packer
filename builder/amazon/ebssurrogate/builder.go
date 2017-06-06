@@ -209,7 +209,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepRegisterAMI{
 			RootDevice:   b.config.RootDevice,
-			BlockDevices: b.config.BlockDevices.BuildLaunchDevices(),
+			BlockDevices: b.config.BlockDevices.BuildAMIDevices(),
 		},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
