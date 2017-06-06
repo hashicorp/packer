@@ -34,6 +34,9 @@ type Config struct {
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
 
+	// Local path to the minion grains
+	GrainsFile string `mapstructure:"grains_file"`
+
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
 
@@ -105,6 +108,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.MinionConfig != "" && (p.config.RemoteStateTree != "" || p.config.RemotePillarRoots != "") {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("remote_state_tree and remote_pillar_roots only apply when minion_config is not used"))
+	}
+
+	err = validateFileConfig(p.config.GrainsFile, "grains_file", false)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	// build the command line args to pass onto salt
@@ -205,6 +213,26 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		dst = "/etc/salt/minion"
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %s", p.config.TempConfigDir, err)
+		}
+	}
+
+	if p.config.GrainsFile != "" {
+		ui.Message(fmt.Sprintf("Uploading grains file: %s", p.config.GrainsFile))
+		src = p.config.GrainsFile
+		dst = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "grains"))
+		if err = p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading local grains file to remote: %s", err)
+		}
+
+		// move grains file into /etc/salt
+		ui.Message(fmt.Sprintf("Make sure directory %s exists", "/etc/salt"))
+		if err := p.createDir(ui, comm, "/etc/salt"); err != nil {
+			return fmt.Errorf("Error creating remote salt configuration directory: %s", err)
+		}
+		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "grains"))
+		dst = "/etc/salt/grains"
+		if err = p.moveFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Unable to move %s/grains to /etc/salt/grains: %s", p.config.TempConfigDir, err)
 		}
 	}
 
