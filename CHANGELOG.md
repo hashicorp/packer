@@ -131,6 +131,8 @@
 * post-processor/docker-import: print stderr on docker import failure.
     [GH-4529]
 * provisioner/salt: add support for grains. [GH-4961]
+* provisioner/ansible: add `inventory_directory` option to control where to
+    place the generated inventory file. [GH-4760]
 
 ### BUG FIXES:
 
