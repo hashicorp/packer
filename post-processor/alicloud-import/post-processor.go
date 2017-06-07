@@ -232,17 +232,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 				if _, err := ramClient.AttachPolicyToRole(ram.AttachPolicyToRoleRequest{
-					ram.PolicyRequest{
+					PolicyRequest: ram.PolicyRequest{
 						PolicyName: "AliyunECSImageImportRolePolicy",
 						PolicyType: "System",
-					}, "AliyunECSImageImportDefaultRole",
+					},
+					RoleName: "AliyunECSImageImportDefaultRole",
 				}); err != nil {
 					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 						getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
 				}
 			} else {
 				policyListResponse, err := ramClient.ListPoliciesForRole(ram.RoleQueryRequest{
-					"AliyunECSImageImportDefaultRole",
+					RoleName: "AliyunECSImageImportDefaultRole",
 				})
 				if err != nil {
 					return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
@@ -258,10 +259,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				}
 				if isAliyunECSImageImportRolePolicyNotExit {
 					if _, err := ramClient.AttachPolicyToRole(ram.AttachPolicyToRoleRequest{
-						ram.PolicyRequest{
+						PolicyRequest: ram.PolicyRequest{
 							PolicyName: "AliyunECSImageImportRolePolicy",
 							PolicyType: "System",
-						}, "AliyunECSImageImportDefaultRole",
+						},
+						RoleName: "AliyunECSImageImportDefaultRole",
 					}); err != nil {
 						return nil, false, fmt.Errorf("Failed to start import from %s/%s: %s",
 							getEndPonit(p.config.OSSBucket), p.config.OSSKey, err)
