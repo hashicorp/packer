@@ -29,15 +29,8 @@ builder.
 
 -   `client_secret` (string) The password or secret for your service principal.
 
--   `resource_group_name` (string) Resource group under which the final artifact will be stored.
-
--   `storage_account` (string) Storage account under which the final artifact will be stored.
-
 -   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
-
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure. The captured VHD's URL will be <https://><storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
-
--   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and `PREFIX-vmTemplate.UUID`.
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -54,6 +47,32 @@ builder.
 -   `location` (string) Azure datacenter in which your VM will build.
 
     CLI example `azure location list`
+    
+#### VHD or Managed Image
+
+The Azure builder can create either a VHD, or a managed image. When creating a VHD the following two options are required.
+
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
+    organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+    
+-   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
+    `PREFIX-vmTemplate.UUID`.
+
+-   `resource_group_name` (string) Resource group under which the final artifact will be stored.
+
+-   `storage_account` (string) Storage account under which the final artifact will be stored.
+
+When creating a managed image the following two options are required.
+
+-   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
+     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
+     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
+     to learn more about managed images.
+     
+-   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
+     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
+     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
+     learn more about managed images.
 
 ### Optional:
 
@@ -89,16 +108,7 @@ builder.
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
      
--   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
-     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
-     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
-     to learn more about managed images.
-     
--   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
-     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
-     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
-     learn more about managed images.
-      
+           
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
