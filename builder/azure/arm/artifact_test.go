@@ -13,6 +13,37 @@ func getFakeSasUrl(name string) string {
 	return fmt.Sprintf("SAS-%s", name)
 }
 
+func TestArtifactId(t *testing.T) {
+	template := CaptureTemplate{
+		Resources: []CaptureResources{
+			{
+				Properties: CaptureProperties{
+					StorageProfile: CaptureStorageProfile{
+						OSDisk: CaptureDisk{
+							Image: CaptureUri{
+								Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
+							},
+						},
+					},
+				},
+				Location: "southcentralus",
+			},
+		},
+	}
+
+	artifact, err := NewArtifact(&template, getFakeSasUrl)
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd"
+
+	result := artifact.Id()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
 func TestArtifactString(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
