@@ -88,5 +88,20 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
+	sliceTemplates := map[string][]string{
+		"networks": c.Networks,
+	}
+
+	for n, slice := range sliceTemplates {
+		for i, elem := range slice {
+			var err error
+			slice[i], err = t.Process(elem, nil)
+			if err != nil {
+				errs = append(
+					errs, fmt.Errorf("Error processing %s[%d]: %s", n, i, err))
+			}
+		}
+	}
+
 	return errs
 }

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"github.com/mitchellh/packer/packer"
 	"os"
 	"testing"
 
@@ -68,5 +69,26 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 
 	if c.Comm.SSHPort != 44 {
 		t.Fatalf("invalid value: %d", c.Comm.SSHPort)
+	}
+}
+
+func TestRunConfigPrepare_Networks(t *testing.T) {
+	c := testRunConfig()
+	network_uuid_var := "7d83eb1e-76ed-4a35-9247-54380a5419ea"
+
+	tpl, err := packer.NewConfigTemplate()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tpl.UserVars["network_uuid"] = network_uuid_var
+
+	c.Networks = []string{`{{user "network_uuid"}}`}
+
+	if err := c.Prepare(tpl); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	expected := network_uuid_var
+	if c.Networks[0] != expected {
+		t.Fatalf("Networks was not templated. Value is: %s", c.Networks)
 	}
 }
