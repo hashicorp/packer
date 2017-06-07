@@ -133,6 +133,7 @@
 * provisioner/salt: add support for grains. [GH-4961]
 * provisioner/ansible: add `inventory_directory` option to control where to
     place the generated inventory file. [GH-4760]
+* communicator/winrm: Add NTLM authentication support. [GH-4979]
 
 ### BUG FIXES:
 
