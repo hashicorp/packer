@@ -52,6 +52,7 @@ type Config struct {
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
+	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	inventoryFile        string
@@ -132,9 +133,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	err = p.getVersion()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+	if !p.config.SkipVersionCheck {
+		err = p.getVersion()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	if p.config.User == "" {
