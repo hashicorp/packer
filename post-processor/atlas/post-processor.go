@@ -149,6 +149,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			"its own product, Vagrant Cloud. This migration is currently planned for June 27th, \n" +
 			"2017 at 6PM EDT/3PM PDT/10PM UTC. For more information see \n" +
 			"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
+			"In the meantime, you should activate your vagrant cloud account and start replacing your \n" +
+			"Atlas post-processor with the vagrant cloud post-processor. See\n" +
+			"https://www.packer.io/docs/post-processors/vagrant-cloud.html for more details." +
 			"-----------------------------------------------------------------------------------\n")
 	}
 	if _, err := p.client.Artifact(p.config.user, p.config.name); err != nil {
