@@ -53,6 +53,7 @@ type Config struct {
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
+	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	inventoryFile        string
 }
 
@@ -121,6 +122,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	} else {
 		p.config.LocalPort = "0"
+	}
+
+	if len(p.config.InventoryDirectory) > 0 {
+		err = validateInventoryDirectoryConfig(p.config.InventoryDirectory)
+		if err != nil {
+			log.Println(p.config.InventoryDirectory, "does not exist")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	err = p.getVersion()
@@ -249,7 +258,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	go p.adapter.Serve()
 
 	if len(p.config.inventoryFile) == 0 {
-		tf, err := ioutil.TempFile("", "packer-provisioner-ansible")
+		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
@@ -380,6 +389,16 @@ func validateFileConfig(name string, config string, req bool) error {
 		return fmt.Errorf("%s: %s is invalid: %s", config, name, err)
 	} else if info.IsDir() {
 		return fmt.Errorf("%s: %s must point to a file", config, name)
+	}
+	return nil
+}
+
+func validateInventoryDirectoryConfig(name string) error {
+	info, err := os.Stat(name)
+	if err != nil {
+		return fmt.Errorf("inventory_directory: %s is invalid: %s", name, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("inventory_directory: %s must point to a directory", name)
 	}
 	return nil
 }
