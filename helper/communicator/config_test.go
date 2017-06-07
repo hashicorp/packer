@@ -1,9 +1,11 @@
 package communicator
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/masterzen/winrm"
 )
 
 func testConfig() *Config {
@@ -97,6 +99,29 @@ func TestConfig_winrm_port_ssl(t *testing.T) {
 
 	if c.WinRMPort != 5510 {
 		t.Fatalf("WinRMPort doesn't match custom port 5510 when SSL is enabled.")
+	}
+
+}
+
+func TestConfig_winrm_use_ntlm(t *testing.T) {
+	c := &Config{
+		Type:         "winrm",
+		WinRMUser:    "admin",
+		WinRMUseNTLM: true,
+	}
+	if err := c.Prepare(testContext(t)); len(err) > 0 {
+		t.Fatalf("bad: %#v", err)
+	}
+
+	if c.WinRMTransportDecorator == nil {
+		t.Fatalf("WinRMTransportDecorator not set.")
+	}
+
+	expected := &winrm.ClientNTLM{}
+	actual := c.WinRMTransportDecorator()
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("WinRMTransportDecorator isn't ClientNTLM.")
 	}
 
 }

@@ -42,6 +42,7 @@ type Config struct {
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
+	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
 }
 
@@ -185,6 +186,10 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 
 	if c.WinRMTimeout == 0 {
 		c.WinRMTimeout = 30 * time.Minute
+	}
+
+	if c.WinRMUseNTLM == true {
+		c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
 	}
 
 	var errs []error
