@@ -177,6 +177,18 @@ func (c *PushCommand) Run(args []string) int {
 	uploadOpts.Builds = make(map[string]*uploadBuildInfo)
 	for _, b := range tpl.Builders {
 		info := &uploadBuildInfo{Type: b.Type}
+		// todo: remove post-migration
+		if b.Type == "vagrant" {
+			c.Ui.Message("\n-----------------------------------------------------------------------------------\n" +
+				"Warning: Vagrant-related functionality will be moved from Terraform Enterprise into \n" +
+				"its own product, Vagrant Cloud. This migration is currently planned for June 27th, \n" +
+				"2017 at 6PM EDT/3PM PDT/10PM UTC. For more information see \n" +
+				"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
+				"In the meantime, you should activate your Vagrant Cloud account and replace your \n" +
+				"Atlas post-processor with the Vagrant Cloud post-processor. See\n" +
+				"https://www.packer.io/docs/post-processors/vagrant-cloud.html for more details." +
+				"-----------------------------------------------------------------------------------\n")
+		}
 
 		// Determine if we're artifacting this build
 		for _, pp := range atlasPPs {

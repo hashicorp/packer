@@ -138,11 +138,22 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			return errs
 		}
 	}
-
 	return nil
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+	// todo: remove/reword after the migration
+	if p.config.Type == "vagrant.box" {
+		ui.Message("\n-----------------------------------------------------------------------------------\n" +
+			"Warning: Vagrant-related functionality will be moved from Terraform Enterprise into \n" +
+			"its own product, Vagrant Cloud. This migration is currently planned for June 27th, \n" +
+			"2017 at 6PM EDT/3PM PDT/10PM UTC. For more information see \n" +
+			"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
+			"In the meantime, you should activate your Vagrant Cloud account and replace your \n" +
+			"Atlas post-processor with the Vagrant Cloud post-processor. See\n" +
+			"https://www.packer.io/docs/post-processors/vagrant-cloud.html for more details." +
+			"-----------------------------------------------------------------------------------\n")
+	}
 	if _, err := p.client.Artifact(p.config.user, p.config.name); err != nil {
 		if err != atlas.ErrNotFound {
 			return nil, false, fmt.Errorf(
