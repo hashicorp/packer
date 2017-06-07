@@ -114,6 +114,13 @@ Optional Parameters:
 - `user` (string) - The `ansible_user` to use. Defaults to the user running
   packer.
 
+- `inventory_directory` (string) - The directory in which to place the
+  temporary generated Ansible inventory file. By default, this is the
+  system-specific temporary file location.  The fully-qualified name of this
+  temporary file will be passed to the `-i` argument of the `ansible` command
+  when this provisioner runs ansible.  Specify this if you have an existing
+  inventory directory with `host_vars` `group_vars` that you would like to use
+  in the playbook that this provisioner will run.
 
 ## Default Extra Variables
 
@@ -128,7 +135,6 @@ commonly useful Ansible variables:
 - `packer_builder_type` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the playbook on systems built with certain builders.
-
 
 ## Limitations
 
