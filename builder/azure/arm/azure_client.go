@@ -180,23 +180,27 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VaultClient.ResponseInspector = byInspecting(maxlen)
 	azureClient.VaultClient.UserAgent += packerUserAgent
 
-	accountKeys, err := azureClient.AccountsClient.ListKeys(resourceGroupName, storageAccountName)
-	if err != nil {
-		return nil, err
+	// If this is a managed disk build, this should be ignored.
+	if resourceGroupName != "" && storageAccountName != "" {
+		accountKeys, err := azureClient.AccountsClient.ListKeys(resourceGroupName, storageAccountName)
+		if err != nil {
+			return nil, err
+		}
+
+		storageClient, err := storage.NewClient(
+			storageAccountName,
+			*(*accountKeys.Keys)[0].Value,
+			cloud.StorageEndpointSuffix,
+			storage.DefaultAPIVersion,
+			true /*useHttps*/)
+
+		if err != nil {
+			return nil, err
+		}
+
+		azureClient.BlobStorageClient = storageClient.GetBlobService()
 	}
 
-	storageClient, err := storage.NewClient(
-		storageAccountName,
-		*(*accountKeys.Keys)[0].Value,
-		cloud.StorageEndpointSuffix,
-		storage.DefaultAPIVersion,
-		true /*useHttps*/)
-
-	if err != nil {
-		return nil, err
-	}
-
-	azureClient.BlobStorageClient = storageClient.GetBlobService()
 	return azureClient, nil
 }
 
