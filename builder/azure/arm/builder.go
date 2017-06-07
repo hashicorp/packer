@@ -104,14 +104,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		}
 	}
 
-	account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
-	if err != nil {
-		return nil, err
-	}
-	b.config.storageAccountBlobEndpoint = *account.AccountProperties.PrimaryEndpoints.Blob
+	if b.config.StorageAccount != "" {
+		account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
+		if err != nil {
+			return nil, err
+		}
+		b.config.storageAccountBlobEndpoint = *account.AccountProperties.PrimaryEndpoints.Blob
 
-	if !b.config.isManagedImage() && equalLocation(*account.Location, b.config.Location) == false {
-		return nil, fmt.Errorf("The storage account is located in %s, but the build will take place in %s.  The locations must be identical", *account.Location, b.config.Location)
+		if !equalLocation(*account.Location, b.config.Location) {
+			return nil, fmt.Errorf("The storage account is located in %s, but the build will take place in %s. The locations must be identical", *account.Location, b.config.Location)
+		}
 	}
 
 	endpointConnectType := PublicEndpoint
@@ -197,7 +199,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
+	if b.config.isManagedImage() {
+		return NewManagedImageArtifact(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation)
+	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
 			func(name string) string {

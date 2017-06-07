@@ -261,11 +261,7 @@ growpart:
 // Ensure the VM template is correct when building from a custom managed image.
 func TestVirtualMachineDeployment08(t *testing.T) {
 	config := map[string]interface{}{
-		"capture_name_prefix":                      "ignore",
-		"capture_container_name":                   "ignore",
 		"location":                                 "ignore",
-		"resource_group_name":                      "ignore",
-		"storage_account":                          "ignore",
 		"subscription_id":                          "ignore",
 		"os_type":                                  constants.Target_Linux,
 		"communicator":                             "none",
@@ -294,11 +290,7 @@ func TestVirtualMachineDeployment08(t *testing.T) {
 // Ensure the VM template is correct when building from a platform managed image.
 func TestVirtualMachineDeployment09(t *testing.T) {
 	config := map[string]interface{}{
-		"capture_name_prefix":               "ignore",
-		"capture_container_name":            "ignore",
 		"location":                          "ignore",
-		"resource_group_name":               "ignore",
-		"storage_account":                   "ignore",
 		"subscription_id":                   "ignore",
 		"os_type":                           constants.Target_Linux,
 		"communicator":                      "none",
