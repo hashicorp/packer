@@ -136,6 +136,8 @@
 * communicator/winrm: Add NTLM authentication support. [GH-4979]
 * provisioner/ansible: add `skip_version_check` flag for when ansible will be
     installed from a prior provisioner. [GH-4983]
+* command/push: Vagrant support in Terraform Enterprise is deprecated.
+    [GH-4950]
 
 ### BUG FIXES:
 
