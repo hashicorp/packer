@@ -134,6 +134,8 @@
 * provisioner/ansible: add `inventory_directory` option to control where to
     place the generated inventory file. [GH-4760]
 * communicator/winrm: Add NTLM authentication support. [GH-4979]
+* provisioner/ansible: add `skip_version_check` flag for when ansible will be
+    installed from a prior provisioner. [GH-4983]
 
 ### BUG FIXES:
 
