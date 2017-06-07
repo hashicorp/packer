@@ -86,8 +86,8 @@ func (*Artifact) Files() []string {
 	return []string{}
 }
 
-func (*Artifact) Id() string {
-	return ""
+func (a *Artifact) Id() string {
+	return a.OSDiskUri
 }
 
 func (a *Artifact) State(name string) interface{} {
