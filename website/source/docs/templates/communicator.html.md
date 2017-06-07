@@ -127,3 +127,5 @@ The WinRM communicator has the following options.
 
 - `winrm_insecure` (boolean) - If true, do not check server certificate
     chain and host name
+
+- `winrm_use_ntlm` (boolean) - If true, use NTLM authentication for WinRM
