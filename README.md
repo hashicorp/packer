@@ -108,3 +108,7 @@ http://www.packer.io/docs
 ## Developing Packer
 
 See [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.
+test
+test
+test
+test
