@@ -166,6 +166,9 @@ Results in the following variables:
 | aws_access_key | foo |
 | aws_secret_key | baz |
 
+The `-private` flag will mark as sensitive any variable, regardless of whether
+the variable has been specified via `-var` or via `-var-file`
+
 # Recipes
 
 ## Making a provisioner step conditional on the value of a variable
