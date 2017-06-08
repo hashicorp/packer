@@ -1,0 +1,8 @@
+{
+    "variables": {
+        "_include": [
+            "parse-hook-include-vars-one.json",
+            "parse-hook-include-vars-two.json"
+        ]
+    }
+}
