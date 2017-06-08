@@ -310,7 +310,7 @@ Options:
 
   -token=<token>           The access token to use to when uploading
 
-  -sensitive='var1,var2'     List of variables to mark as sensitive in Atlas UI.
+  -sensitive='var1,var2'   List of variables to mark as sensitive in Atlas UI.
 
   -var 'key=value'         Variable for templates, can be used multiple times.
 
