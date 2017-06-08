@@ -43,7 +43,7 @@ func (c *PushCommand) Run(args []string) int {
 	var message string
 	var name string
 	var create bool
-	var privVars []string
+	var sensitiveVars []string
 
 	flags := c.Meta.FlagSet("push", FlagSetVars)
 	flags.Usage = func() { c.Ui.Error(c.Help()) }
@@ -52,7 +52,7 @@ func (c *PushCommand) Run(args []string) int {
 	flags.StringVar(&message, "message", "", "message")
 	flags.StringVar(&name, "name", "", "name")
 	flags.BoolVar(&create, "create", false, "create (deprecated)")
-	flags.Var((*sliceflag.StringFlag)(&privVars), "sensitive", "")
+	flags.Var((*sliceflag.StringFlag)(&sensitiveVars), "sensitive", "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -205,10 +205,10 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
-	if privs := flags.Lookup("sensitive"); privs != nil {
-		pvf := privs.Value.(*sliceflag.StringFlag)
-		pvars := []string(*pvf)
-		uploadOpts.PrivVars = pvars
+	if sf := flags.Lookup("sensitive"); sf != nil {
+		sfv := sf.Value.(*sliceflag.StringFlag)
+		svars := []string(*sfv)
+		uploadOpts.SensitiveVars = svars
 	}
 
 	uploadOpts.Vars = make(map[string]string)
@@ -360,7 +360,7 @@ func (c *PushCommand) upload(
 	buildVars := atlas.BuildVars{}
 	for k, v := range opts.Vars {
 		isSensitive := false
-		for _, sensitiveVar := range opts.PrivVars {
+		for _, sensitiveVar := range opts.SensitiveVars {
 			if sensitiveVar == k {
 				isSensitive = true
 				break
@@ -397,12 +397,12 @@ func (c *PushCommand) upload(
 }
 
 type uploadOpts struct {
-	URL      string
-	Slug     string
-	Builds   map[string]*uploadBuildInfo
-	Metadata map[string]interface{}
-	Vars     map[string]string
-	PrivVars []string
+	URL           string
+	Slug          string
+	Builds        map[string]*uploadBuildInfo
+	Metadata      map[string]interface{}
+	Vars          map[string]string
+	SensitiveVars []string
 }
 
 type uploadBuildInfo struct {
