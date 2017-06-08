@@ -44,10 +44,10 @@ configuration using the options below.
   `hashicorp/precise64`, which follows the form `<username>/<buildname>`. This
   must be specified here or in your template.
 
-- `-private` - A comma-separated list of variables that should be marked as
+- `-sensitive` - A comma-separated list of variables that should be marked as
   sensitive in the Terraform Enterprise ui. These variables' keys will be 
   visible, but their values will be redacted. example usage:
-  `-var 'supersecretpassword=mypassword' -private=supersecretpassword1`
+  `-var 'supersecretpassword=mypassword' -sensitive=supersecretpassword1`
 
 - `-var` - Set a variable in your packer template. This option can be used
   multiple times. This is useful for setting version numbers for your build.
