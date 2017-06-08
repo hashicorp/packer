@@ -47,7 +47,7 @@ configuration using the options below.
 - `-private` - A comma-separated list of variables that should be marked as
   sensitive in the Terraform Enterprise ui. These variables' keys will be 
   visible, but their values will be redacted. example usage:
-  `-private=supersecretpassword1,anothersecretysecret`
+  `-var 'supersecretpassword=mypassword' -private=supersecretpassword1`
 
 - `-var` - Set a variable in your packer template. This option can be used
   multiple times. This is useful for setting version numbers for your build.
