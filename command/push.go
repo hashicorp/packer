@@ -361,7 +361,7 @@ func (c *PushCommand) upload(
 	for k, v := range opts.Vars {
 		isSensitive := false
 		for _, sensitiveVar := range opts.PrivVars {
-			if string(sensitiveVar) == string(k) {
+			if sensitiveVar == k {
 				isSensitive = true
 				break
 			}
