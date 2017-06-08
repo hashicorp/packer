@@ -170,6 +170,10 @@ func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, ram i
 	return hyperv.CreateVirtualMachine(vmName, path, ram, diskSize, switchName, generation)
 }
 
+func (d *HypervPS4Driver) ImportVirtualMachine(vmName string, sourcePath string, path string) error {
+	return hyperv.ImportVirtualMachine(vmName, sourcePath, path)
+}
+
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
 	return hyperv.DeleteVirtualMachine(vmName)
 }

@@ -66,6 +66,8 @@ type Driver interface {
 
 	CreateVirtualMachine(string, string, int64, int64, string, uint) error
 
+	ImportVirtualMachine(string, string, string) error
+
 	DeleteVirtualMachine(string) error
 
 	SetVirtualMachineCpuCount(string, uint) error
