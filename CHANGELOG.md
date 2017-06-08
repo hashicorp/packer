@@ -138,6 +138,8 @@
     installed from a prior provisioner. [GH-4983]
 * command/push: Vagrant support in Terraform Enterprise is deprecated.
     [GH-4950]
+* post-processor/vagrant-cloud: get vagrant cloud token from environment.
+    [GH-4982]
 
 ### BUG FIXES:
 
