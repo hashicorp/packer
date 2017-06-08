@@ -29,7 +29,7 @@ sudo chown -R vagrant:vagrant ${GOROOT}
 sudo chown -R vagrant:vagrant ${GOPATH}
 
 # Install some other stuff we need
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get install -y curl make git mercurial bzr zip
 SCRIPT
 
