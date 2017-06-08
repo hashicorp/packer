@@ -43,6 +43,7 @@ func (c *PushCommand) Run(args []string) int {
 	var message string
 	var name string
 	var create bool
+	var privVars []string
 
 	flags := c.Meta.FlagSet("push", FlagSetVars)
 	flags.Usage = func() { c.Ui.Error(c.Help()) }
@@ -51,6 +52,7 @@ func (c *PushCommand) Run(args []string) int {
 	flags.StringVar(&message, "message", "", "message")
 	flags.StringVar(&name, "name", "", "name")
 	flags.BoolVar(&create, "create", false, "create (deprecated)")
+	flags.Var((*sliceflag.StringFlag)(&privVars), "private", "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
