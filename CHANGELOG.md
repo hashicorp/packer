@@ -40,6 +40,8 @@
 * builder/virtualbox: Add sata port count configuration option. [GH-4699]
 * post-processor/amazon-import: Add support for `license_type`. [GH-4634]
 * provisioner/chef-solo: Add option to select Chef version. [GH-4791]
+* command/push: add `-sensitive` flag to mark pushed vars are sensitive.
+    [GH-4970]
 
 
 ### BUG FIXES:
