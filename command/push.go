@@ -296,6 +296,8 @@ Options:
 
   -token=<token>           The access token to use to when uploading
 
+  -private='var1,var2'     List of variables to mark as sensitive in Atlas UI.
+
   -var 'key=value'         Variable for templates, can be used multiple times.
 
   -var-file=path           JSON file containing user variables.
