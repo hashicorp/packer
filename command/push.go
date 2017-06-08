@@ -52,7 +52,7 @@ func (c *PushCommand) Run(args []string) int {
 	flags.StringVar(&message, "message", "", "message")
 	flags.StringVar(&name, "name", "", "name")
 	flags.BoolVar(&create, "create", false, "create (deprecated)")
-	flags.Var((*sliceflag.StringFlag)(&privVars), "private", "")
+	flags.Var((*sliceflag.StringFlag)(&privVars), "sensitive", "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -205,7 +205,7 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
-	if privs := flags.Lookup("private"); privs != nil {
+	if privs := flags.Lookup("sensitive"); privs != nil {
 		pvf := privs.Value.(*sliceflag.StringFlag)
 		pvars := []string(*pvf)
 		uploadOpts.PrivVars = pvars
@@ -310,7 +310,7 @@ Options:
 
   -token=<token>           The access token to use to when uploading
 
-  -private='var1,var2'     List of variables to mark as sensitive in Atlas UI.
+  -sensitive='var1,var2'     List of variables to mark as sensitive in Atlas UI.
 
   -var 'key=value'         Variable for templates, can be used multiple times.
 
