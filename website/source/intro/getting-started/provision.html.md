@@ -46,7 +46,7 @@ the various parts of the new configuration following the code block below.
     "type": "shell",
     "inline": [
       "sleep 30",
-      "sudo apt-get update",
+      "sudo apt-get update -y",
       "sudo apt-get install -y redis-server"
     ]
   }]
