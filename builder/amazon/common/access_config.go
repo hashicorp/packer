@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -33,6 +35,12 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
+	}
+
+	if c.ProfileName != "" {
+		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
+			log.Printf("Set env error: %s", err)
+		}
 	}
 
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
