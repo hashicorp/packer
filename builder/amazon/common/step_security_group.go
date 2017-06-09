@@ -51,7 +51,6 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	// Create the group
 	groupName := fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	ui.Say(fmt.Sprintf("Creating temporary security group for this instance: %s", groupName))
-	log.Printf("Temporary group name: %s", groupName)
 	group := &ec2.CreateSecurityGroupInput{
 		GroupName:   &groupName,
 		Description: aws.String("Temporary group for Packer"),
