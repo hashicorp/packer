@@ -19,28 +19,13 @@ type AccessConfig struct {
 	AssumeRoleArn     string `mapstructure:"assume_role_arn"`
 	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
 	ExternalID        string `mapstructure:"external_id"`
-	ExternalID        string `mapstructure:"external_id"`
-	MFACode           string `mapstructure:"mfa_code"`
 	MFACode           string `mapstructure:"mfa_code"`
 	MFASerial         string `mapstructure:"mfa_serial"`
-	MFASerial         string `mapstructure:"mfa_serial"`
-	ProfileName       string `mapstructure:"profile"`
 	ProfileName       string `mapstructure:"profile"`
 	RawRegion         string `mapstructure:"region"`
-	RawRegion         string `mapstructure:"region"`
-	SecretKey         string `mapstructure:"secret_key"`
 	SecretKey         string `mapstructure:"secret_key"`
 	SkipValidation    bool   `mapstructure:"skip_region_validation"`
-	SkipValidation    bool   `mapstructure:"skip_region_validation"`
 	Token             string `mapstructure:"token"`
-	Token             string `mapstructure:"token"`
-	session           *session.Session
-	AccessKey         string `mapstructure:"access_key"`
-	SecretKey         string `mapstructure:"secret_key"`
-	RawRegion         string `mapstructure:"region"`
-	SkipValidation    bool   `mapstructure:"skip_region_validation"`
-	Token             string `mapstructure:"token"`
-	MFACode           string `mapstructure:"mfa_code"`
 	session           *session.Session
 }
 
