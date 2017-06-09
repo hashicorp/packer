@@ -36,6 +36,9 @@ func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, 
 		Tags:     tags,
 	})
 
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 

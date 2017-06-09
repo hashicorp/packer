@@ -35,10 +35,9 @@ func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeN
 
 	err := <-errChan
 	if err != nil {
-		return err
+		s.say(s.client.LastError.Error())
 	}
-
-	return nil
+	return err
 }
 
 func (s *StepPowerOffCompute) Run(state multistep.StateBag) multistep.StepAction {

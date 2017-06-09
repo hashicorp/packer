@@ -34,7 +34,12 @@ func NewStepDeleteOSDisk(client *AzureClient, ui packer.Ui) *StepDeleteOSDisk {
 
 func (s *StepDeleteOSDisk) deleteBlob(storageContainerName string, blobName string) error {
 	blob := s.client.BlobStorageClient.GetContainerReference(storageContainerName).GetBlobReference(blobName)
-	return blob.Delete(nil)
+	err := blob.Delete(nil)
+
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+	return err
 }
 
 func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {

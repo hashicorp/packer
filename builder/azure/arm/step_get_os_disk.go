@@ -33,7 +33,11 @@ func NewStepGetOSDisk(client *AzureClient, ui packer.Ui) *StepGetOSDisk {
 }
 
 func (s *StepGetOSDisk) queryCompute(resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
-	return s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+	vm, err := s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+	return vm, err
 }
 
 func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
