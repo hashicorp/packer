@@ -1,5 +1,27 @@
 # packer-builder-vsphere
 
+## The minimal working builder
+``` json
+{
+   "builders": [
+      {
+         "type": "vsphere",
+         
+         "url":          "https://your.lab.addr/",
+         "username":     "username",
+         "password":     "secret",
+         
+         "ssh_username": "ssh_username",
+         "ssh_password": "ssh_secret",
+         
+         "template": "source_vm_name",
+         "vm_name":  "clone_name",
+         "host":     "172.16.0.1"
+      }
+   ]
+}
+```
+(`host` is for target host)
 
 ## Builder parameters
 ### Required parameters:
@@ -11,7 +33,7 @@
 ### Optional parameters:
 * Destination parameters:
     * `resource_pool`
-    * `datastore` (but is required if you move between hosts)
+    * `datastore`
 * Hardware configuration:
     * `cpus`
     * `ram`
@@ -59,33 +81,23 @@ $ docker-compose run build
 6. The template for this builder is like following:
 ```json
 {
-    "variables": {
-            "url": "{{env `YOUR_VSPHERE_URL`}}",
-            "username": "{{env `YOUR_VSPHERE_USERNAME`}}",
-            "password": "{{env `YOUR_VSPHERE_PASSWORD`}}",
-            "ssh_username": "{{env `TEMPLATE_VM_SSH_USERNAME`}}",
-            "ssh_password": "{{env `TEMPLATE_VM_SSH_PASSWORD`}}",
-            "dc_name": "{{env `TEMPLATE_VM_DATACENTER`}}",
-            "template": "{{env `TEMPLATE_VM_NAME`}}",
-            "host": "{{env `TARGET_HOST`}}"
-    },
     "builders": [
         {
             "type": "vsphere",
-            "url": "{{user `url`}}",
-            "username": "{{user `username`}}",
-            "password": "{{user `password`}}",
-            "ssh_username": "{{user `ssh_username`}}",
-            "ssh_password": "{{user `ssh_password`}}",
-            "dc_name": "{{user `dc_name`}}",
-            "template": "{{user `template`}}",
+            "url": "https://your.url/",
+            "username": "username",
+            "password": "secret",
+            "ssh_username": "ssh_username",
+            "ssh_password": "ssh_secret",
+            "dc_name": "datacenter1",
+            "template": "template_vm_name",
             "vm_name": "new_vm_name",
-            "host": "{{user `host`}}",
-            "resource_pool": "your_target_resource_pool",
-            "datastore": "your_target_datastore",
+            "host": "172.16.0.1",
+            "resource_pool": "target_rpool",
+            "datastore": "target_datastore",
             "RAM": "1024",
             "cpus": "2",
-            "shutdown_command": "echo '{{user `ssh_password`}}' | sudo -S shutdown -P now"
+            "shutdown_command": "echo 'ssh_secret' | sudo -S shutdown -P now"
         } 
     ],
     "provisioners": [
