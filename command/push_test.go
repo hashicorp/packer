@@ -232,9 +232,9 @@ func TestPush_vars(t *testing.T) {
 		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.Vars, expected)
 	}
 
-	expected_priv := []string{"super", "secret"}
-	if !reflect.DeepEqual(actualOpts.PrivVars, expected_priv) {
-		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.PrivVars, expected_priv)
+	expected_sensitive := []string{"super", "secret"}
+	if !reflect.DeepEqual(actualOpts.SensitiveVars, expected_sensitive) {
+		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.SensitiveVars, expected_sensitive)
 	}
 }
 
