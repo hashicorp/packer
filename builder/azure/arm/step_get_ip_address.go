@@ -54,6 +54,7 @@ func NewStepGetIPAddress(client *AzureClient, ui packer.Ui, endpoint EndpointTyp
 func (s *StepGetIPAddress) getPrivateIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
 	resp, err := s.client.InterfacesClient.Get(resourceGroupName, interfaceName, "")
 	if err != nil {
+		s.say(s.client.LastError.Error())
 		return "", err
 	}
 

@@ -46,16 +46,27 @@ func NewStepCaptureImage(client *AzureClient, ui packer.Ui) *StepCaptureImage {
 
 func (s *StepCaptureImage) generalize(resourceGroupName string, computeName string) error {
 	_, err := s.client.Generalize(resourceGroupName, computeName)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 
 func (s *StepCaptureImage) captureImageFromVM(resourceGroupName string, imageName string, image *compute.Image, cancelCh <-chan struct{}) error {
 	_, errChan := s.client.ImagesClient.CreateOrUpdate(resourceGroupName, imageName, *image, cancelCh)
+	err := <-errChan
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return <-errChan
 }
 
 func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
 	_, errChan := s.client.Capture(resourceGroupName, computeName, *parameters, cancelCh)
+	err := <-errChan
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return <-errChan
 }
 
