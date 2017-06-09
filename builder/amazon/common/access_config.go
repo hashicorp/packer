@@ -2,12 +2,9 @@ package common
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -16,11 +13,8 @@ import (
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
 	AccessKey         string `mapstructure:"access_key"`
-	AssumeRoleArn     string `mapstructure:"assume_role_arn"`
 	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
-	ExternalID        string `mapstructure:"external_id"`
 	MFACode           string `mapstructure:"mfa_code"`
-	MFASerial         string `mapstructure:"mfa_serial"`
 	ProfileName       string `mapstructure:"profile"`
 	RawRegion         string `mapstructure:"region"`
 	SecretKey         string `mapstructure:"secret_key"`
@@ -39,25 +33,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	region, err := c.Region()
 	if err != nil {
 		return nil, err
-	}
-
-	if c.AssumeRoleArn != "" {
-		var options []func(*stscreds.AssumeRoleProvider)
-		if c.MFACode != "" {
-			options = append(options, func(p *stscreds.AssumeRoleProvider) {
-				p.SerialNumber = aws.String(c.MFASerial)
-				p.TokenProvider = func() (string, error) {
-					return c.MFACode, nil
-				}
-			})
-		}
-	}
-
-	if c.ProfileName != "" {
-		err := os.Setenv("AWS_PROFILE", c.ProfileName)
-		if err != nil {
-			log.Printf("Set env error: %s", err)
-		}
 	}
 
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
