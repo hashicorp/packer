@@ -1,10 +1,11 @@
 ---
-description: |
-    Packer is able to create Amazon AMIs. To achieve this, Packer comes with
-    multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
-page_title: Amazon AMI Builder
-...
+sidebar_current: docs-builders-amazon
+page_title: Amazon AMI - Builders
+description: |-
+  Packer is able to create Amazon AMIs. To achieve this, Packer comes with
+  multiple builders depending on the strategy you want to use to build the AMI.
+---
 
 # Amazon AMI Builder
 
@@ -28,7 +29,12 @@ Packer supports the following builders at the moment:
     newcomers**. However, it is also the fastest way to build an EBS-backed AMI
     since no new EC2 instance needs to be launched.
 
--&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
+-   [amazon-ebssurrogate](/docs/builders/amazon-ebssurrogate.html) - Create EBS
+    -backed AMIs from scratch. Works similarly to the `chroot` builder but does
+    not require running in AWS. This is an **advanced builder and should not be
+    used by newcomers**.
+
+-> **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
@@ -73,12 +79,15 @@ following steps:
 
 2.  Look for [local AWS configuration
     files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    -   First `~/.aws/credentials`
-    -   Next based on `AWS_PROFILE`
+    - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
+      environment variable, and if that's empty, use the default credentials
+      file (`.aws/credentials`) in the user's home directory.
+    - Uses the profile name set in the `AWS_PROFILE` environment variable. If
+      the environment variable is not set, uses "default" as the profile name.
 
 3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
 
-\~&gt; **Subtle details of automatic lookup may change over time.** The most
+~> **Subtle details of automatic lookup may change over time.** The most
 reliable way to specify your configuration is by setting them in template
 variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY` environment variables.
@@ -96,7 +105,7 @@ the instance's IAM profile, if it has one.
 The following policy document provides the minimal set permissions necessary for
 Packer to work:
 
-``` {.javascript}
+```json
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -144,7 +153,7 @@ Packer to work:
 
 ### Attaching IAM Policies to Roles
 
-IAM policies can be associated with user or roles. If you use packer with IAM
+IAM policies can be associated with users or roles. If you use packer with IAM
 roles, you may encounter an error like this one:
 
     ==> amazon-ebs: Error launching source instance: You are not authorized to perform this operation.
@@ -155,7 +164,7 @@ The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.
 
-``` {.json}
+```json
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",

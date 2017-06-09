@@ -1,8 +1,10 @@
 ---
-layout: "docs"
-page_title: "Ansible Provisioner"
+layout: docs
+sidebar_current: docs-provisioners-ansible-remote
+page_title: Ansible - Provisioners
 description: |-
-  The `ansible` Packer provisioner allows Ansible playbooks to be run to provision the machine.
+  The ansible Packer provisioner allows Ansible playbooks to be run to
+  provision the machine.
 ---
 
 # Ansible Provisioner
@@ -49,18 +51,61 @@ Required Parameters:
 
 Optional Parameters:
 
+- `ansible_env_vars` (array of strings) - Environment variables to set before
+  running Ansible.
+  Usage example:
+
+    ```json
+    {
+      "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
+    }
+    ```
+
 - `command` (string) - The command to invoke ansible.
    Defaults to `ansible-playbook`.
+
+- `empty_groups` (array of strings) - The groups which should be present in
+  inventory file but remain empty.
+
+- `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
+  These arguments _will not_ be passed through a shell and arguments should
+  not be quoted. Usage example:
+
+    ```json
+    {
+      "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
+    }
+    ```
 
 - `groups` (array of strings) - The groups into which the Ansible host
   should be placed. When unspecified, the host is not associated with any
   groups.
 
-- `empty_groups` (array of strings) - The groups which should be present in
-  inventory file but remain empty.
-
 - `host_alias` (string) - The alias by which the Ansible host should be known.
   Defaults to `default`.
+
+- `inventory_directory` (string) - The directory in which to place the
+  temporary generated Ansible inventory file. By default, this is the
+  system-specific temporary file location.  The fully-qualified name of this
+  temporary file will be passed to the `-i` argument of the `ansible` command
+  when this provisioner runs ansible.  Specify this if you have an existing
+  inventory directory with `host_vars` `group_vars` that you would like to use
+  in the playbook that this provisioner will run.
+
+- `local_port` (string) - The port on which to attempt to listen for SSH
+  connections. This value is a starting point.  The provisioner will attempt
+  listen for SSH connections on the first available of ten ports, starting at
+  `local_port`. A system-chosen port is used when `local_port` is missing or
+  empty.
+
+- `sftp_command` (string) - The command to run on the machine being provisioned
+  by Packer to handle the SFTP protocol that Ansible will use to transfer
+  files. The command should read and write on stdin and stdout, respectively.
+  Defaults to `/usr/lib/sftp-server -e`.
+
+- `skip_version_check` (bool) - Check if ansible is installed prior to running.
+  Set this to `true`, for example, if you're going to install ansible during
+  the packer run.
 
 - `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
   server on the host machine to forward commands to the target machine. Ansible
@@ -74,38 +119,22 @@ Optional Parameters:
   this key is generated, the corresponding private key is passed to
   `ansible-playbook` with the `--private-key` option.
 
-- `local_port` (string) - The port on which to attempt to listen for SSH
-  connections. This value is a starting point.  The provisioner will attempt
-  listen for SSH connections on the first available of ten ports, starting at
-  `local_port`. A system-chosen port is used when `local_port` is missing or
-  empty.
-
-- `sftp_command` (string) - The command to run on the machine being provisioned
-  by Packer to handle the SFTP protocol that Ansible will use to transfer
-  files. The command should read and write on stdin and stdout, respectively.
-  Defaults to `/usr/lib/sftp-server -e`.
-
-- `use_sftp` (boolean) - Whether to use SFTP. When false,
-  `ANSIBLE_SCP_IF_SSH=True` will be automatically added to `ansible_env_vars`.
-  Defaults to false.
-
-- `extra_arguments` (array of strings) - Extra arguments to pass to Ansible.
-  Usage example:
-
-```
-"extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
-```
-
-- `ansible_env_vars` (array of strings) - Environment variables to set before
-  running Ansible.
-  Usage example:
-
-```
-"ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
-```
-
 - `user` (string) - The `ansible_user` to use. Defaults to the user running
   packer.
+
+## Default Extra Variables
+
+In addition to being able to specify extra arguments using the
+`extra_arguments` configuration, the provisioner automatically defines certain
+commonly useful Ansible variables:
+
+- `packer_build_name` is set to the name of the build that Packer is running.
+    This is most useful when Packer is making multiple builds and you want to
+    distinguish them slightly when using a common playbook.
+
+- `packer_builder_type` is the type of the builder that was used to create the
+    machine that the script is running on. This is useful if you want to run
+    only certain parts of the playbook on systems built with certain builders.
 
 ## Limitations
 
@@ -113,7 +142,7 @@ Optional Parameters:
 
 Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
 
-```
+```text
 ==> virtualbox-ovf: starting sftp subsystem
     virtualbox-ovf: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "SSH Error: data could not be sent to the remote host. Make sure this host can be reached over ssh", "unreachable": true}
 ```
@@ -122,26 +151,26 @@ Redhat / CentOS builds have been known to fail with the following error due to `
 
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
 
-```
+```json
 {
-    "builders": [
-        {
-            "type": "amazon-chroot",
-            "mount_path": "/mnt/packer-amazon-chroot",
-            "region": "us-east-1",
-            "source_ami": "ami-123456"
-        }
-    ],
-    "provisioners": [
-        {
-            "type": "ansible",
-            "extra_arguments": [
-                "--connection=chroot",
-                "--inventory-file=/mnt/packer-amazon-chroot,"
-            ],
-            "playbook_file": "main.yml"
-        }
-    ]
+  "builders": [
+    {
+      "type": "amazon-chroot",
+      "mount_path": "/mnt/packer-amazon-chroot",
+      "region": "us-east-1",
+      "source_ami": "ami-123456"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "extra_arguments": [
+        "--connection=chroot",
+        "--inventory-file=/mnt/packer-amazon-chroot,"
+      ],
+      "playbook_file": "main.yml"
+    }
+  ]
 }
 ```
 
@@ -149,7 +178,7 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
 
-```
+```python
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
@@ -170,34 +199,34 @@ class Connection(SSHConnection):
 
 This template should build a Windows Server 2012 image on Google Cloud Platform:
 
-```
+```json
 {
-    "variables": {},
-    "provisioners": [
-      {
-        "type":  "ansible",
-        "playbook_file": "./win-playbook.yml",
-        "extra_arguments": [
-          "--connection", "packer",
-          "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
-        ]
+  "variables": {},
+  "provisioners": [
+    {
+      "type":  "ansible",
+      "playbook_file": "./win-playbook.yml",
+      "extra_arguments": [
+        "--connection", "packer",
+        "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+      ]
+    }
+  ],
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "{{user `account_file`}}",
+      "project_id": "{{user `project_id`}}",
+      "source_image": "windows-server-2012-r2-dc-v20160916",
+      "communicator": "winrm",
+      "zone": "us-central1-a",
+      "disk_size": 50,
+      "winrm_username": "packer",
+      "winrm_use_ssl": true,
+      "winrm_insecure": true,
+      "metadata": {
+        "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
       }
-    ],
-    "builders": [
-      {
-        "type": "googlecompute",
-        "account_file": "{{user `account_file`}}",
-        "project_id": "{{user `project_id`}}",
-        "source_image": "windows-server-2012-r2-dc-v20160916",
-        "communicator": "winrm",
-        "zone": "us-central1-a",
-        "disk_size": 50,
-        "winrm_username": "packer",
-        "winrm_use_ssl": true,
-        "winrm_insecure": true,
-        "metadata": {
-                  "sysprep-specialize-script-cmd": "winrm set winrm/config/service/auth @{Basic=\"true\"}"
-        }
-      }
-    ]
+    }
+  ]
 }

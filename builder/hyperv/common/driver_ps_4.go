@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
-	"github.com/mitchellh/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell/hyperv"
 )
 
 type HypervPS4Driver struct {
@@ -64,7 +64,7 @@ func (d *HypervPS4Driver) Verify() error {
 		return err
 	}
 
-	if err := d.verifyElevatedMode(); err != nil {
+	if err := d.verifyHypervPermissions(); err != nil {
 		return err
 	}
 
@@ -254,7 +254,7 @@ func (d *HypervPS4Driver) verifyPSVersion() error {
 		return err
 	}
 
-	versionOutput := strings.TrimSpace(string(cmdOut))
+	versionOutput := strings.TrimSpace(cmdOut)
 	log.Printf("%s output: %s", versionCmd, versionOutput)
 
 	ver, err := strconv.ParseInt(versionOutput, 10, 32)
@@ -283,7 +283,7 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 		return err
 	}
 
-	res := strings.TrimSpace(string(cmdOut))
+	res := strings.TrimSpace(cmdOut)
 
 	if res == "False" {
 		err := fmt.Errorf("%s", "PS Hyper-V module is not loaded. Make sure Hyper-V feature is on.")
@@ -293,15 +293,27 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 	return nil
 }
 
-func (d *HypervPS4Driver) verifyElevatedMode() error {
+func (d *HypervPS4Driver) verifyHypervPermissions() error {
 
-	log.Printf("Enter method: %s", "verifyElevatedMode")
+	log.Printf("Enter method: %s", "verifyHypervPermissions")
 
-	isAdmin, _ := powershell.IsCurrentUserAnAdministrator()
+	hypervAdminCmd := "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Hyper-V Administrators')"
 
-	if !isAdmin {
-		err := fmt.Errorf("%s", "Please restart your shell in elevated mode")
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(hypervAdminCmd)
+	if err != nil {
 		return err
+	}
+
+	res := strings.TrimSpace(cmdOut)
+
+	if res == "False" {
+		isAdmin, _ := powershell.IsCurrentUserAnAdministrator()
+
+		if !isAdmin {
+			err := fmt.Errorf("%s", "Current user is not a member of 'Hyper-V Administrators' or 'Administrators' group")
+			return err
+		}
 	}
 
 	return nil

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/provisioner/file"
-	"github.com/mitchellh/packer/provisioner/shell"
-	"github.com/mitchellh/packer/template"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner/file"
+	"github.com/hashicorp/packer/provisioner/shell"
+	"github.com/hashicorp/packer/template"
 )
 
 func TestCommunicator_impl(t *testing.T) {
@@ -99,7 +99,7 @@ func TestUploadDownload(t *testing.T) {
 	}
 }
 
-// TestLargeDownload verifies that files are the apporpriate size after being
+// TestLargeDownload verifies that files are the appropriate size after being
 // downloaded. This is to identify and fix the race condition in #2793. You may
 // need to use github.com/cbednarski/rerun to verify since this problem occurs
 // only intermittently.

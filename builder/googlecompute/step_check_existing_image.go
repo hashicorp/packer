@@ -3,8 +3,8 @@ package googlecompute
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepCheckExistingImage represents a Packer build step that checks if the

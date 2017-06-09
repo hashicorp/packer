@@ -12,17 +12,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey      string `mapstructure:"access_key"`
-	SecretKey      string `mapstructure:"secret_key"`
-	RawRegion      string `mapstructure:"region"`
-	SkipValidation bool   `mapstructure:"skip_region_validation"`
-	Token          string `mapstructure:"token"`
-	ProfileName    string `mapstructure:"profile"`
+	AccessKey         string `mapstructure:"access_key"`
+	SecretKey         string `mapstructure:"secret_key"`
+	RawRegion         string `mapstructure:"region"`
+	SkipValidation    bool   `mapstructure:"skip_region_validation"`
+	Token             string `mapstructure:"token"`
+	ProfileName       string `mapstructure:"profile"`
+	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -35,6 +36,11 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 		return nil, err
 	}
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
+
+	if c.CustomEndpointEc2 != "" {
+		config.Endpoint = &c.CustomEndpointEc2
+	}
+
 	if c.ProfileName != "" {
 		profile, err := NewFromProfile(c.ProfileName)
 		if err != nil {
@@ -66,7 +72,7 @@ func (c *AccessConfig) Config() (*aws.Config, error) {
 func (c *AccessConfig) Region() (string, error) {
 	if c.RawRegion != "" {
 		if !c.SkipValidation {
-			if valid := ValidateRegion(c.RawRegion); valid == false {
+			if valid := ValidateRegion(c.RawRegion); !valid {
 				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
 			}
 		}
@@ -85,7 +91,7 @@ func (c *AccessConfig) Region() (string, error) {
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if c.RawRegion != "" && !c.SkipValidation {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
+		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
@@ -115,5 +121,5 @@ func GetInstanceMetaData(path string) (contents []byte, err error) {
 	if err != nil {
 		return
 	}
-	return []byte(body), err
+	return body, err
 }

@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
+	commonssh "github.com/hashicorp/packer/common/ssh"
+	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	commonssh "github.com/mitchellh/packer/common/ssh"
-	"github.com/mitchellh/packer/communicator/ssh"
-	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 // StepConnectSSH is a step that only connects to SSH.
@@ -213,8 +215,23 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 		auth = append(auth, gossh.PublicKeys(signer))
 	}
 
+	if config.SSHBastionAgentAuth {
+		authSock := os.Getenv("SSH_AUTH_SOCK")
+		if authSock == "" {
+			return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+		}
+
+		sshAgent, err := net.Dial("unix", authSock)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+		}
+
+		auth = append(auth, gossh.PublicKeysCallback(agent.NewClient(sshAgent).Signers))
+	}
+
 	return &gossh.ClientConfig{
-		User: config.SSHBastionUsername,
-		Auth: auth,
+		User:            config.SSHBastionUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }

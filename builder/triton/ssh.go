@@ -3,21 +3,22 @@ package triton
 import (
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/agent"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
+
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 func commHost(state multistep.StateBag) (string, error) {
 	driver := state.Get("driver").(Driver)
 	machineID := state.Get("machine").(string)
 
-	machine, err := driver.GetMachine(machineID)
+	machine, err := driver.GetMachineIP(machineID)
 	if err != nil {
 		return "", err
 	}
@@ -49,6 +50,7 @@ func sshConfig(useAgent bool, username, privateKeyPath, password string) func(mu
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 
@@ -72,12 +74,14 @@ func sshConfig(useAgent bool, username, privateKeyPath, password string) func(mu
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeys(signer),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 		} else {
 			log.Println("Configuring SSH keyboard interactive.")
 
 			return &ssh.ClientConfig{
-				User: username,
+				User:            username,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth: []ssh.AuthMethod{
 					ssh.Password(password),
 					ssh.KeyboardInteractive(

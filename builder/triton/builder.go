@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
 )
 
 const (
@@ -35,6 +35,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = multierror.Append(errs, b.config.SourceMachineConfig.Prepare(&b.config.ctx)...)
 	errs = multierror.Append(errs, b.config.Comm.Prepare(&b.config.ctx)...)
 	errs = multierror.Append(errs, b.config.TargetImageConfig.Prepare(&b.config.ctx)...)
+
+	// If we are using an SSH agent to sign requests, and no private key has been
+	// specified for SSH, use the agent for connecting for provisioning.
+	if b.config.AccessConfig.KeyMaterial == "" && b.config.Comm.SSHPrivateKey == "" {
+		b.config.Comm.SSHAgentAuth = true
+	}
 
 	return nil, errs.ErrorOrNil()
 }

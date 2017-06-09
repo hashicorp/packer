@@ -1,10 +1,11 @@
 ---
-description: |
-    The Packer Amazon Import post-processor takes an OVA artifact from various builders and
-    imports it to an AMI available to Amazon Web Services EC2.
 layout: docs
-page_title: 'Amazon Import Post-Processor'
-...
+sidebar_current: docs-post-processors-amazon-import
+page_title: Amazon Import - Post-Processors
+description: |-
+  The Packer Amazon Import post-processor takes an OVA artifact from various
+  builders and imports it to an AMI available to Amazon Web Services EC2.
+---
 
 # Amazon Import Post-Processor
 
@@ -12,7 +13,7 @@ Type: `amazon-import`
 
 The Packer Amazon Import post-processor takes an OVA artifact from various builders and imports it to an AMI available to Amazon Web Services EC2.
 
-\~&gt; This post-processor is for advanced users. It depends on specific IAM roles inside AWS and is best used with images that operate with the EC2 configuration model (eg, cloud-init for Linux systems). Please ensure you read the [prerequisites for import](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html) before using this post-processor.
+~> This post-processor is for advanced users. It depends on specific IAM roles inside AWS and is best used with images that operate with the EC2 configuration model (eg, cloud-init for Linux systems). Please ensure you read the [prerequisites for import](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html) before using this post-processor.
 
 ## How Does it Work?
 
@@ -30,51 +31,54 @@ Within each category, the available configuration keys are alphabetized.
 
 Required:
 
--   `access_key` (string) - The access key used to communicate with AWS. [Learn
+- `access_key` (string) - The access key used to communicate with AWS. [Learn
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `region` (string) - The name of the region, such as `us-east-1` in which to upload the OVA file to S3 and create the AMI. A list of valid regions can be obtained with AWS CLI tools or by consulting the AWS website.
+- `region` (string) - The name of the region, such as `us-east-1` in which to upload the OVA file to S3 and create the AMI. A list of valid regions can be obtained with AWS CLI tools or by consulting the AWS website.
 
--   `s3_bucket_name` (string) - The name of the S3 bucket where the OVA file will be copied to for import. This bucket must exist when the post-processor is run.
+- `s3_bucket_name` (string) - The name of the S3 bucket where the OVA file will be copied to for import. This bucket must exist when the post-processor is run.
 
--   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
+- `secret_key` (string) - The secret key used to communicate with AWS. [Learn
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 Optional:
 
--   `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the OVA file will be copied to for import. If not specified, this will default to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will be removed after import, unless `skip_clean` is `true`.
+- `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the OVA file will be copied to for import. If not specified, this will default to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will be removed after import, unless `skip_clean` is `true`.
 
--   `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the import process has completed. "true" means that we should leave it in the S3 bucket, "false" means to clean it out. Defaults to `false`.
+- `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the import process has completed. "true" means that we should leave it in the S3 bucket, "false" means to clean it out. Defaults to `false`.
 
--   `ami_name` (string) - The name of the ami within the console. If not specified, this will default to something like `ami-import-sfwerwf`. Please note, specifying this option will result in a slightly longer execution time.
+- `ami_name` (string) - The name of the ami within the console. If not specified, this will default to something like `ami-import-sfwerwf`. Please note, specifying this option will result in a slightly longer execution time.
 
--   `tags` (object of key/value strings) - Tags applied to the created AMI and
+- `tags` (object of key/value strings) - Tags applied to the created AMI and
     relevant snapshots.
 
--   `ami_users` (array of strings) - A list of account IDs that have access to launch the imported AMI. By default no additional users other than the user importing the AMI has permission to launch it.
+- `ami_users` (array of strings) - A list of account IDs that have access to launch the imported AMI. By default no additional users other than the user importing the AMI has permission to launch it.
 
--   `ami_groups` (array of strings) - A list of groups that have access to launch the imported AMI. By default no groups have permission to launch the AMI. `all` will make the AMI publically accessible. AWS currently doesn't accept any value other than "all".
+- `ami_groups` (array of strings) - A list of groups that have access to launch the imported AMI. By default no groups have permission to launch the AMI. `all` will make the AMI publically accessible. AWS currently doesn't accept any value other than "all".
 
--   `ami_description` (string) - The description to set for the resulting imported AMI. By default this description is generated by the AMI import process.
+- `ami_description` (string) - The description to set for the resulting imported AMI. By default this description is generated by the AMI import process.
+
+- `license_type` (string) - The license type to be used for the Amazon Machine Image (AMI) after importing. Valid values: `AWS` or `BYOL` (default). For more details regarding licensing, see [Prerequisites](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/VMImportPrerequisites.html) in the VM Import/Export User Guide.
 
 ## Basic Example
 
 Here is a basic example. This assumes that the builder has produced an OVA artifact for us to work with, and IAM roles for import exist in the AWS account being imported into.
 
-``` {.javascript}
+```json
 {
   "type": "amazon-import",
   "access_key": "YOUR KEY HERE",
   "secret_key": "YOUR SECRET KEY HERE",
   "region": "us-east-1",
   "s3_bucket_name": "importbucket",
+  "license_type": "BYOL",
   "tags": {
     "Description": "packer amazon-import {{timestamp}}"
   }
 }
 ```
 
--&gt; **Note:** Packer can also read the access key and secret access key from
+-> **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
 

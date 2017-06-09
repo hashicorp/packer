@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -90,7 +90,7 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	b = Builder{}
 	_, errs := b.Prepare(config)
 	if errs == nil {
-		t.Fatalf("Non existant floppies should trigger multierror")
+		t.Fatalf("Nonexistent floppies should trigger multierror")
 	}
 
 	if len(errs.(*packer.MultiError).Errors) != 2 {
@@ -128,6 +128,61 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 	if b.config.DiskSize != 60000 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
+}
+
+func TestBuilderPrepare_DiskType(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test a default disk_type
+	delete(config, "disk_type")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if b.config.DiskType != "expand" {
+		t.Fatalf("bad: %s", b.config.DiskType)
+	}
+
+	// Test with a bad
+	config["disk_type"] = "fake"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Test with plain disk with wrong setting for compaction
+	config["disk_type"] = "plain"
+	config["skip_compaction"] = false
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) == 0 {
+		t.Fatalf("should have warning")
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test with plain disk with correct setting for compaction
+	config["disk_type"] = "plain"
+	config["skip_compaction"] = true
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
 }
 
 func TestBuilderPrepare_HardDriveInterface(t *testing.T) {

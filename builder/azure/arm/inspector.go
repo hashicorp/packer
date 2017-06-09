@@ -8,7 +8,7 @@ import (
 
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/mitchellh/packer/builder/azure/common/logutil"
+	"github.com/hashicorp/packer/builder/azure/common/logutil"
 	"io"
 )
 

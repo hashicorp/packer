@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepSourceAMIInfo extracts critical information from the source AMI
@@ -85,7 +85,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if len(imageResp.Images) > 1 && s.AmiFilters.MostRecent == false {
+	if len(imageResp.Images) > 1 && !s.AmiFilters.MostRecent {
 		err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set most_recent to true.")
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -101,7 +101,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", *image.ImageId))
 
-	// Enhanced Networking (SriovNetSupport) can only be enabled on HVM AMIs.
+	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
 	if s.EnhancedNetworking && *image.VirtualizationType != "hvm" {
 		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)

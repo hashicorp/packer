@@ -10,9 +10,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mitchellh/packer/helper/enumflag"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template"
+	"github.com/hashicorp/packer/helper/enumflag"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template"
 )
 
 type BuildCommand struct {
@@ -92,14 +92,17 @@ func (c BuildCommand) Run(args []string) int {
 				Color: colors[i%len(colors)],
 				Ui:    ui,
 			}
+			if _, ok := c.Ui.(*packer.MachineReadableUi); !ok {
+				ui.Say(fmt.Sprintf("%s output will be in this color.", b))
+				if i+1 == len(buildNames) {
+					// Add a newline between the color output and the actual output
+					c.Ui.Say("")
+				}
+			}
 		}
 
 		buildUis[b] = ui
-		ui.Say(fmt.Sprintf("%s output will be in this color.", b))
 	}
-
-	// Add a newline between the color output and the actual output
-	c.Ui.Say("")
 
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
@@ -208,8 +211,8 @@ func (c BuildCommand) Run(args []string) int {
 
 		c.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
 		for name, err := range errors {
-			// Create a UI for the machine readable stuff to be targetted
-			ui := &packer.TargettedUi{
+			// Create a UI for the machine readable stuff to be targeted
+			ui := &packer.TargetedUI{
 				Target: name,
 				Ui:     c.Ui,
 			}
@@ -223,8 +226,8 @@ func (c BuildCommand) Run(args []string) int {
 	if len(artifacts.m) > 0 {
 		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts.m {
-			// Create a UI for the machine readable stuff to be targetted
-			ui := &packer.TargettedUi{
+			// Create a UI for the machine readable stuff to be targeted
+			ui := &packer.TargetedUI{
 				Target: name,
 				Ui:     c.Ui,
 			}

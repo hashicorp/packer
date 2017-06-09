@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/packer/builder/amazon/common"
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/builder/amazon/common"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 type TFBuilder struct {
@@ -84,11 +84,11 @@ func checkTags() builderT.TestCheckFunc {
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error retreiving Snapshots for AMI Artifcat (%#v) in Tags Test: %s", artifact, err)
+			return fmt.Errorf("Error retrieving Snapshots for AMI Artifact (%#v) in Tags Test: %s", artifact, err)
 		}
 
 		if len(resp.Snapshots) == 0 {
-			return fmt.Errorf("No Snapshots found for AMI Artifcat (%#v) in Tags Test", artifact)
+			return fmt.Errorf("No Snapshots found for AMI Artifact (%#v) in Tags Test", artifact)
 		}
 
 		// Grab the snapshots, check the tags

@@ -1,13 +1,11 @@
 ---
-description: |
-    Packer also has the ability to take the results of a builder (such as an AMI or
-    plain VMware image) and turn it into a Vagrant box.
 layout: intro
-next_title: Remote Builds and Storage
-next_url: '/intro/getting-started/remote-builds.html'
-page_title: Vagrant Boxes
-prev_url: '/intro/getting-started/parallel-builds.html'
-...
+sidebar_current: intro-getting-started-vagrant
+page_title: Vagrant Boxes - Getting Started
+description: |-
+  Packer also has the ability to take the results of a builder (such as an AMI
+  or plain VMware image) and turn it into a Vagrant box.
+---
 
 # Vagrant Boxes
 
@@ -36,7 +34,7 @@ Post-processors are added in the `post-processors` section of a template, which
 we haven't created yet. Modify your `example.json` template and add the section.
 Your template should look like the following:
 
-``` {.javascript}
+```json
 {
   "builders": ["..."],
   "provisioners": ["..."],
@@ -46,7 +44,7 @@ Your template should look like the following:
 
 In this case, we're enabling a single post-processor named "vagrant". This
 post-processor is built-in to Packer and will create Vagrant boxes. You can
-always create [new post-processors](/docs/extend/post-processor.html), however.
+always create [new post-processors](/docs/extending/custom-post-processors.html), however.
 The details on configuring post-processors is covered in the
 [post-processors](/docs/templates/post-processors.html) documentation.
 
@@ -59,7 +57,7 @@ Packer can't currently make a Vagrant box for DigitalOcean anyway, I recommend
 passing the `-only=amazon-ebs` flag to `packer build` so it only builds the AMI.
 The command should look like the following:
 
-``` {.text}
+```text
 $ packer build -only=amazon-ebs example.json
 ```
 
@@ -67,10 +65,11 @@ As you watch the output, you'll notice at the end in the artifact listing that a
 Vagrant box was made (by default at `packer_aws.box` in the current directory).
 Success!
 
-But where did the AMI go? When using post-processors, Vagrant removes
-intermediary artifacts since they're usually not wanted. Only the final artifact
-is preserved. This behavior can be changed, of course. Changing this behavior is
-covered [in the documentation](/docs/templates/post-processors.html).
+But where did the Amazon EBS builder artifact go? When using post-processors,
+Vagrant removes intermediary artifacts since they're usually not wanted. Only
+the final artifact is preserved. This behavior can be changed, of course.
+Changing this behavior is covered [in the
+documentation](/docs/templates/post-processors.html).
 
 Typically when removing intermediary artifacts, the actual underlying files or
 resources of the artifact are also removed. For example, when building a VMware

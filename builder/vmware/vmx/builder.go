@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 )
 
 // Builder implements packer.Builder and builds the actual VMware
@@ -119,7 +119,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+		},
 	}
 
 	// Run the steps.

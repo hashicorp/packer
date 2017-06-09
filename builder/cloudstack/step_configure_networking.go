@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -73,6 +73,8 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		} else {
 			p.SetNetworkid(network.Id)
 		}
+
+		p.SetZoneid(config.Zone)
 
 		// Associate a new public IP address.
 		ipAddr, err := client.Address.AssociateIpAddress(p)

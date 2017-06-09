@@ -24,10 +24,10 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
@@ -52,7 +52,9 @@ type Config struct {
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
 	SFTPCmd              string   `mapstructure:"sftp_command"`
+	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
+	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	inventoryFile        string
 }
 
@@ -123,9 +125,19 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.LocalPort = "0"
 	}
 
-	err = p.getVersion()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+	if len(p.config.InventoryDirectory) > 0 {
+		err = validateInventoryDirectoryConfig(p.config.InventoryDirectory)
+		if err != nil {
+			log.Println(p.config.InventoryDirectory, "does not exist")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if !p.config.SkipVersionCheck {
+		err = p.getVersion()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	if p.config.User == "" {
@@ -144,7 +156,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 func (p *Provisioner) getVersion() error {
 	out, err := exec.Command(p.config.Command, "--version").Output()
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"Error running \"%s --version\": %s", p.config.Command, err.Error())
 	}
 
 	versionRe := regexp.MustCompile(`\w (\d+\.\d+[.\d+]*)`)
@@ -248,7 +261,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	go p.adapter.Serve()
 
 	if len(p.config.inventoryFile) == 0 {
-		tf, err := ioutil.TempFile("", "packer-provisioner-ansible")
+		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
@@ -304,7 +317,9 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	inventory := p.config.inventoryFile
 	var envvars []string
 
-	args := []string{playbook, "-i", inventory}
+	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
+		p.config.PackerBuildName, p.config.PackerBuilderType),
+		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
 		args = append(args, "--private-key", privKeyFile)
 	}
@@ -353,8 +368,10 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	log.Printf("Executing Ansible: %s", strings.Join(cmd.Args, " "))
-	cmd.Start()
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
+	if err := cmd.Start(); err != nil {
+		return err
+	}
 	wg.Wait()
 	err = cmd.Wait()
 	if err != nil {
@@ -375,6 +392,16 @@ func validateFileConfig(name string, config string, req bool) error {
 		return fmt.Errorf("%s: %s is invalid: %s", config, name, err)
 	} else if info.IsDir() {
 		return fmt.Errorf("%s: %s must point to a file", config, name)
+	}
+	return nil
+}
+
+func validateInventoryDirectoryConfig(name string) error {
+	info, err := os.Stat(name)
+	if err != nil {
+		return fmt.Errorf("inventory_directory: %s is invalid: %s", name, err)
+	} else if !info.IsDir() {
+		return fmt.Errorf("inventory_directory: %s must point to a directory", name)
 	}
 	return nil
 }

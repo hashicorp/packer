@@ -1,52 +1,37 @@
-@mixin button {
-  font-family: $mono;
-  height: $button-height;
-  line-height: $button-height;
-  background-color: transparent;
-  border-width: 2px;
-  border-style: solid;
-  display: block;
-  padding: 0 30px;
+.button {
+  background: $button-background;
+  border: 1px solid $button-font-color;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+  color: $button-font-color;
+  display: inline-block;
+  font-family: $button-font-family;
+  font-size: $button-font-size;
+  font-weight: $button-font-weight;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  padding: 12px 30px 10px 30px;
   text-transform: uppercase;
-  letter-spacing: 3px;
-  @include rounded(5px);
+  text-decoration: none;
 
-  &.spaced {
-    margin-right: 20px;
+  &:hover,
+  &:active,
+  &:focus {
+    text-decoration: none;
+  }
+
+  &:hover {
+    background: $button-font-color;
+    border: 1px solid $button-font-color;
+    color: $button-background;
   }
 
   &.primary {
-    color: $green;
-    border-color: $green;
+    background: $button-primary-background;
+    border: 1px solid darken($button-primary-background, 5%);
+    color: $button-primary-font-color;
 
     &:hover {
-      background-color: transparentize($green, .7);
-    }
-
-    &:active {
-      background-color: transparentize($green, .5);
-    }
-  }
-
-  &.secondary {
-    color: $black;
-    border-color: $black;
-
-    &:hover {
-      background-color: transparentize($black, .9);
-    }
-
-    &:active {
-      background-color: transparentize($black, .7);
-    }
-  }
-
-  &.inline {
-    margin: auto $baseline;
-    @include respond-to(mobile) {
-      display: block;
-      width: 100%;
-      margin: $baseline 0;
+      background: lighten($button-primary-background, 5%);
     }
   }
 }

@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderIdESX = "mitchellh.vmware-esx"
@@ -38,19 +38,20 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
+	BootCommand         []string `mapstructure:"boot_command"`
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
 	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
-	Version             string   `mapstructure:"version"`
-	VMName              string   `mapstructure:"vm_name"`
-	BootCommand         []string `mapstructure:"boot_command"`
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
+	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	SkipExport          bool     `mapstructure:"skip_export"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	Version             string   `mapstructure:"version"`
 
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`
@@ -297,7 +298,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},

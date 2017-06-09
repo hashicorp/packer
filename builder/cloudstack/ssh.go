@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 	"golang.org/x/crypto/ssh"
 )
@@ -36,6 +36,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 			ssh.KeyboardInteractive(
 				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
 		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	if config.Comm.SSHPrivateKey != "" {
@@ -44,7 +45,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
 		}
 
-		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+		signer, err := ssh.ParsePrivateKey(privateKey)
 		if err != nil {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}

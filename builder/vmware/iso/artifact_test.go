@@ -1,7 +1,7 @@
 package iso
 
 import (
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 	"testing"
 )
 
