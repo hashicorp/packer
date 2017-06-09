@@ -42,6 +42,7 @@
 * provisioner/chef-solo: Add option to select Chef version. [GH-4791]
 * command/push: add `-sensitive` flag to mark pushed vars are sensitive.
     [GH-4970]
+* builder/amazon: Print temporary security group name to the UI. [GH-4997]
 
 
 ### BUG FIXES:
