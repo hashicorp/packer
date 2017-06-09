@@ -40,6 +40,9 @@ func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploy
 	}
 
 	_, err = s.client.Validate(resourceGroupName, deploymentName, *deployment)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 

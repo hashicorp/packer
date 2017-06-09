@@ -34,6 +34,9 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(resourceGroupName string, 
 	_, errChan := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
 
 	err := <-errChan
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 
