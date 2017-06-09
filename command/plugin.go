@@ -61,7 +61,7 @@ import (
 	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	posixrestartprovisioner "github.com/hashicorp/packer/provisioner/posix-restart"
-  powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
+  	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
 	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
