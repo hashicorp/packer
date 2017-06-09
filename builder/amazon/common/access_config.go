@@ -63,8 +63,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
 
 	if c.CustomEndpointEc2 != "" {
-		config.Endpoint = &c.CustomEndpointEc2
+		config = config.WithEndpoint(aws.String(c.CustomEndpointEc2))
 	}
+
 	if c.AccessKey != "" {
 		creds := credentials.NewChainCredentials(
 			[]credentials.Provider{
