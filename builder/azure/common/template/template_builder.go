@@ -122,11 +122,11 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedDiskImageName, location, blob
 		Name:       to.StringPtr(managedDiskImageName),
 		Location:   to.StringPtr(location),
 		Properties: &Properties{
-			StorageProfile: &compute.StorageProfile{
-				OsDisk: &compute.OSDisk{
+			StorageProfile: &StorageProfileUnion{
+				OsDisk: &OSDiskUnion{
 					OsType:  s.osType,
-					OsState: to.StringPtr(fmt.Sprintf("%s", osState)),
-					BlobUri: to.StringPtr(blobUri),
+					OsState: osState,
+					BlobURI: to.StringPtr(blobUri),
 				},
 			},
 		},

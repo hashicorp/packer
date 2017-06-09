@@ -144,7 +144,6 @@
         "storageProfile": {
           "osDisk": {
             "blobUri": "",
-            "osState": "",
             "osType": "Linux"
           }
         }
