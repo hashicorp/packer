@@ -27,7 +27,7 @@ Here is an example. This example is fully functional as long as the source vmnam
 ``` {.javascript}
 {
   "type": "vsphere-vmx",
-  "source_vmname": "basevm",
+  "source_vm": "basevm",
   "ssh_username": "root",
   "ssh_password": "root",
   "shutdown_command": "shutdown -P now"
@@ -46,7 +46,7 @@ builder.
 
 ### Required:
 
--   `source_vmname` (string) - Path to the source VM file to clone.
+-   `source_vm` (string) - Path to the source VM file to clone.
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
     the VM is cloned.
