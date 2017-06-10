@@ -66,7 +66,7 @@ Optional parameters:
     as well, which are covered in the section below.
 
 - `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
+    default this is `chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}`. The value
     of this is treated as [configuration
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
@@ -126,17 +126,14 @@ is being piped in with the value of `packer`.
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.
 
-### FreeBSD Example
+### `execute_command` Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
-for packer to pass environment variables you will need to change the
-`execute_command` to:
+The following contrived example shows how to pass environment variables and
+change the permissions of the script to be executed:
 
 ```text
-chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+chmod +x {{ .Path }}; chmod 0700 {{ .Path}}; env {{ .Vars }} {{ .Path }}
 ```
-
-Note the addition of `env` before `{{ .Vars }}`.
 
 ## Default Environmental Variables
 

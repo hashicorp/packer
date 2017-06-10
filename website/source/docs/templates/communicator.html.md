@@ -58,6 +58,9 @@ the SSH agent to the remote host.
 
 The SSH communicator has the following options:
 
+- `ssh_bastion_agent_auth` (boolean) - If true, the local SSH agent will
+    be used to authenticate with the bastion host. Defaults to false.
+
 - `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
 
@@ -124,3 +127,8 @@ The WinRM communicator has the following options.
 
 - `winrm_insecure` (boolean) - If true, do not check server certificate
     chain and host name
+
+- `winrm_use_ntlm` (boolean) - If true, NTLM authentication will be used for WinRM, 
+    rather than default (basic authentication), removing the requirement for basic 
+    authentication to be enabled within the target guest. Further reading for remote 
+    connection authentication can be found [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).

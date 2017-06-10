@@ -34,6 +34,7 @@ type Config struct {
 	Description string            `mapstructure:"ami_description"`
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
+	LicenseType string            `mapstructure:"license_type"`
 
 	ctx interpolate.Context
 }
@@ -161,7 +162,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -170,7 +171,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-	})
+	}
+
+	if p.config.LicenseType != "" {
+		ui.Message(fmt.Sprintf("Setting license type to '%s'", p.config.LicenseType))
+		params.LicenseType = &p.config.LicenseType
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)

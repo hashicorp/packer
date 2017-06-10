@@ -16,21 +16,23 @@ User variables allow your templates to be further configured with variables from
 the command-line, environment variables, or files. This lets you parameterize
 your templates so that you can keep secret tokens, environment-specific data,
 and other types of information out of your templates. This maximizes the
-portability and shareability of the template.
+portability of the template.
 
-Using user variables expects you know how [configuration
+Using user variables expects you to know how [configuration
 templates](/docs/templates/engine.html) work. If you don't know
 how configuration templates work yet, please read that page first.
 
 ## Usage
 
-User variables must first be defined in a `variables` section within your
-template. Even if you want a variable to default to an empty string, it must be
-defined. This explicitness helps reduce the time it takes for newcomers to 
-understand what can be modified using variables in your template.
+User variables must first be defined in a `variables` section within
+your template. Even if you want a user variable to default to an empty
+string, it must be defined. This explicitness helps reduce the time it
+takes for newcomers to understand what can be modified using variables
+in your template.
 
-The `variables` section is a key/value mapping of the variable name to a default
-value. A default value can be the empty string. An example is shown below:
+The `variables` section is a key/value mapping of the user variable name
+to a default value. A default value can be the empty string. An example
+is shown below:
 
 ```json
 {
@@ -48,19 +50,20 @@ value. A default value can be the empty string. An example is shown below:
 }
 ```
 
-In the above example, the template defines two variables: `aws_access_key` and
-`aws_secret_key`. They default to empty values. Later, the variables are used
-within the builder we defined in order to configure the actual keys for the
-Amazon builder.
+In the above example, the template defines two user variables:
+`aws_access_key` and `aws_secret_key`. They default to empty values.
+Later, the variables are used within the builder we defined in order to
+configure the actual keys for the Amazon builder.
 
-If the default value is `null`, then the user variable will be *required*. This
-means that the user must specify a value for this variable or template
-validation will fail.
+If the default value is `null`, then the user variable will be
+*required*. This means that the user must specify a value for this
+variable or template validation will fail.
 
-Variables are used by calling the user function in the form of
+User variables are used by calling the `{{user}}` function in the form of
 <code>{{user \`variable\`}}</code>. This function can be used in *any value*
-within the template; in builders, provisioners, *anywhere outside the `variables`
-section*. The user variable is available globally within the rest of the template.
+but `type` within the template: in builders, provisioners, *anywhere outside
+the `variables` section*. User variables are available globally within the rest
+of the template.
 
 ## Environment Variables
 
@@ -78,7 +81,7 @@ An example is shown below:
 ```
 
 This will default "my\_secret" to be the value of the "MY\_SECRET" environment
-variable (or the empty string if it does not exist).
+variable (or an empty string if it does not exist).
 
 -> **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
@@ -89,21 +92,23 @@ single source of input to a template that a user can easily discover using
 `packer inspect`.
 
 -> **Why can't I use `~` for home variable?** `~` is an special variable
-that is evaluated by shell during a variable expansion. As packer doesn't run
+that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
 ## Setting Variables
 
-Now that we covered how to define and use variables within a template, the next
-important point is how to actually set these variables. Packer exposes two
-methods for setting variables: from the command line or from a file.
+Now that we covered how to define and use user variables within a
+template, the next important point is how to actually set these
+variables. Packer exposes two methods for setting user variables: from
+the command line or from a file.
 
 ### From the Command Line
 
-To set variables from the command line, the `-var` flag is used as a parameter
-to `packer build` (and some other commands). Continuing our example above, we
-could build our template using the command below. The command is split across
-multiple lines for readability, but can of course be a single line.
+To set user variables from the command line, the `-var` flag is used as
+a parameter to `packer build` (and some other commands). Continuing our
+example above, we could build our template using the command below. The
+command is split across multiple lines for readability, but can of
+course be a single line.
 
 ```text
 $ packer build \
@@ -114,7 +119,7 @@ $ packer build \
 
 As you can see, the `-var` flag can be specified multiple times in order to set
 multiple variables. Also, variables set later on the command-line override
-earlier set variables if it has already been set.
+any earlier set variable of the same name.
 
 ### From a File
 
@@ -139,11 +144,12 @@ $ packer build -var-file=variables.json template.json
 
 The `-var-file` flag can be specified multiple times and variables from multiple
 files will be read and applied. As you'd expect, variables read from files
-specified later override a variable set earlier if it has already been set.
+specified later override a variable set earlier.
 
-Combining the -var and -var-file flags together also works how you'd
-expect. Flags set later in the command override flags set earlier. So, for
-example, in the following command with the above variables.json file:
+Combining the `-var` and `-var-file` flags together also works how you'd
+expect. Variables set later in the command override variables set
+earlier. So, for example, in the following command with the above
+`variables.json` file:
 
 ```text
 $ packer build \
@@ -153,7 +159,7 @@ $ packer build \
     template.json
 ```
 
-results in the following variables:
+Results in the following variables:
 
 | Variable | Value     |
 | -------- | --------- |
@@ -179,7 +185,7 @@ provisioner only run if the `do_nexpose_scan` variable is non-empty.
 
 ## Using HOME Variable
 
-In order to use `$HOME` variable, you can create a `home` variable in packer:
+In order to use `$HOME` variable, you can create a `home` variable in Packer:
 
 ```json
 {
@@ -189,7 +195,7 @@ In order to use `$HOME` variable, you can create a `home` variable in packer:
 }
 ```
 
-And this will be available to be used in the rest of the template, ie:
+And this will be available to be used in the rest of the template, i.e.:
 
 ```json
 {

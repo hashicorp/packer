@@ -74,6 +74,12 @@
 			"revision": "e0b63eb299a769ea4b04dadfe530f6074b277afb"
 		},
 		{
+			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
+			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
+			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
+			"revisionTime": "2017-01-13T02:27:42Z"
+		},
+		{
 			"checksumSHA1": "gc98KRYAAiw4g1FrSTsuggSNv8k=",
 			"path": "github.com/approvals/go-approval-tests",
 			"revision": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
@@ -307,6 +313,36 @@
 			"revision": "6d212800a42e8ab5c146b8ace3490ee17e5225f9"
 		},
 		{
+			"checksumSHA1": "4YIveqfMA1MH8oX8YMG7rDSl+ms=",
+			"path": "github.com/denverdino/aliyungo/common",
+			"revision": "920561accef9a3e387f10bf8f93be73d6bb55054",
+			"revisionTime": "2017-05-25T09:08:54Z"
+		},
+		{
+			"checksumSHA1": "x4l/zVF/J4ibAH39pNrSvTnFsPI=",
+			"path": "github.com/denverdino/aliyungo/ecs",
+			"revision": "920561accef9a3e387f10bf8f93be73d6bb55054",
+			"revisionTime": "2017-05-25T09:08:54Z"
+		},
+		{
+			"checksumSHA1": "40PbgN4Emct6AIiJbhPoEdd+vIA=",
+			"path": "github.com/denverdino/aliyungo/ram",
+			"revision": "920561accef9a3e387f10bf8f93be73d6bb55054",
+			"revisionTime": "2017-05-25T09:08:54Z"
+		},
+		{
+			"checksumSHA1": "iZftKqx5jdcEaMJNJhrb5QwmMuc=",
+			"path": "github.com/denverdino/aliyungo/slb",
+			"revision": "920561accef9a3e387f10bf8f93be73d6bb55054",
+			"revisionTime": "2017-05-25T09:08:54Z"
+		},
+		{
+			"checksumSHA1": "piZlmhWPLGxYkXLysTrjcXllO4c=",
+			"path": "github.com/denverdino/aliyungo/util",
+			"revision": "920561accef9a3e387f10bf8f93be73d6bb55054",
+			"revisionTime": "2017-05-25T09:08:54Z"
+		},
+		{
 			"checksumSHA1": "D37uI+U+FYvTJIdG2TTozXe7i7U=",
 			"comment": "v3.0.0",
 			"path": "github.com/dgrijalva/jwt-go",
@@ -461,11 +497,11 @@
 			"revisionTime": "2016-11-07T20:49:10Z"
 		},
 		{
-			"checksumSHA1": "lrfddRS4/LDKnF0sAbyZ59eUSjo=",
+			"checksumSHA1": "IR7S+SOsSUnPnLxgRrfemXfCqNM=",
 			"comment": "20141209094003-92-g95fa852",
 			"path": "github.com/hashicorp/atlas-go/v1",
-			"revision": "1792bd8de119ba49b17fd8d3c3c1f488ec613e62",
-			"revisionTime": "2016-11-07T20:49:10Z"
+			"revision": "0885342d5643b7a412026596f2f3ebb3c9b4c190",
+			"revisionTime": "2017-06-08T19:44:05Z"
 		},
 		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
@@ -585,15 +621,16 @@
 			"revision": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"checksumSHA1": "6uNzRk3ScsTC+olpCXkW4M/L3fg=",
+			"checksumSHA1": "LY1os7cX/gWXWTWYCHCtEaf5jSw=",
 			"path": "github.com/masterzen/winrm",
-			"revision": "b7e3d2de4979ce5eae5c1c1ef450040c5d675a89",
-			"revisionTime": "2017-01-26T07:02:57Z"
+			"revision": "1ca0ba637a877ee12b69abc73c6161fccb77b70a",
+			"revisionTime": "2017-06-01T21:16:37Z"
 		},
 		{
 			"checksumSHA1": "KTsgWipT3ennAAtaKxEZairxero=",
 			"path": "github.com/masterzen/winrm/soap",
-			"revision": "ef3efbb97f99fc204bd9c7edf778a0dbd9781baf"
+			"revision": "1ca0ba637a877ee12b69abc73c6161fccb77b70a",
+			"revisionTime": "2017-06-01T21:16:37Z"
 		},
 		{
 			"checksumSHA1": "bx+egnFe0OB0BZBcgZcaqsvcmS4=",

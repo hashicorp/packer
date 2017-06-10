@@ -36,8 +36,9 @@ func SSHConfigFunc(config SSHConfig) func(multistep.StateBag) (*gossh.ClientConf
 		}
 
 		return &gossh.ClientConfig{
-			User: config.Comm.SSHUsername,
-			Auth: auth,
+			User:            config.Comm.SSHUsername,
+			Auth:            auth,
+			HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 		}, nil
 	}
 }

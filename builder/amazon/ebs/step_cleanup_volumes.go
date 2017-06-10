@@ -37,22 +37,8 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Cleaning up any extra volumes...")
 
-	// We don't actually care about the value here, but we need Set behavior
-	save := make(map[string]struct{})
-	for _, b := range s.BlockDevices.AMIMappings {
-		if !b.DeleteOnTermination {
-			save[b.DeviceName] = struct{}{}
-		}
-	}
-
-	for _, b := range s.BlockDevices.LaunchMappings {
-		if !b.DeleteOnTermination {
-			save[b.DeviceName] = struct{}{}
-		}
-	}
-
 	// Collect Volume information from the cached Instance as a map of volume-id
-	// to device name, to compare with save list above
+	// to device name, to compare with save list below
 	var vl []*string
 	volList := make(map[string]string)
 	for _, bdm := range instance.BlockDeviceMappings {
@@ -91,10 +77,11 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	// Filter out any devices marked for saving
-	for saveName := range save {
+	// Filter out any devices created as part of the launch mappings, since
+	// we'll let amazon follow the `delete_on_termination` setting.
+	for _, b := range s.BlockDevices.LaunchMappings {
 		for volKey, volName := range volList {
-			if volName == saveName {
+			if volName == b.DeviceName {
 				delete(volList, volKey)
 			}
 		}

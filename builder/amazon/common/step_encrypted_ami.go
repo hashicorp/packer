@@ -36,14 +36,14 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	var region, id string
 	if amis != nil {
 		for region, id = range amis {
-			break // Only get the first
+			break // There is only ever one region:ami pair in this map
 		}
 	}
 
 	ui.Say(fmt.Sprintf("Copying AMI: %s(%s)", region, id))
 
 	if kmsKeyId != "" {
-		ui.Say(fmt.Sprintf("Encypting with KMS Key ID: %s", kmsKeyId))
+		ui.Say(fmt.Sprintf("Encrypting with KMS Key ID: %s", kmsKeyId))
 	}
 
 	copyOpts := &ec2.CopyImageInput{
@@ -161,7 +161,7 @@ func (s *StepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancelation or error...")
+	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))

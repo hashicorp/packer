@@ -199,6 +199,11 @@ builder.
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
 
+- `sata_port_count` (integer) - The number of ports available on any SATA
+    controller created, defaults to 1. VirtualBox supports up to 30 ports on a
+    maxiumum of 1 SATA controller. Increasing this value can be useful if you
+    want to attach additional drives.
+
 - `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
     Also set `hard_drive_Discard` to `true` to enable TRIM support.

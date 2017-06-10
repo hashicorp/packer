@@ -11,10 +11,6 @@ description: |-
 
 # Vagrant Cloud Post-Processor
 
-~> Vagrant Cloud has been superseded by Atlas. Please use the [Atlas
-post-processor](/docs/post-processors/atlas.html) instead. Learn more about
-[Atlas](https://atlas.hashicorp.com/).
-
 Type: `vagrant-cloud`
 
 The Packer Vagrant Cloud post-processor receives a Vagrant box from the
@@ -57,7 +53,9 @@ on Vagrant Cloud, as well as authentication and version information.
 
 - `access_token` (string) - Your access token for the Vagrant Cloud API. This
     can be generated on your [tokens
-    page](https://vagrantcloud.com/account/tokens).
+    page](https://vagrantcloud.com/account/tokens). If not specified, the
+    environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
+    if nothing is found, finally `ATLAS_TOKEN` will be used.
 
 - `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
     Cloud, i.e `hashicorp/precise64` for `vagrantcloud.com/hashicorp/precise64`
@@ -95,8 +93,7 @@ post-processor.
 ```json
 {
   "variables": {
-    "version": "",
-    "cloud_token": ""
+    "cloud_token": "{{ env `ATLAS_TOKEN` }}"
   },
   "post-processors": [
     [
@@ -110,7 +107,7 @@ post-processor.
         "type": "vagrant-cloud",
         "box_tag": "hashicorp/precise64",
         "access_token": "{{user `cloud_token`}}",
-        "version": "{{user `version`}}"
+        "version": "1.0.{{timestamp}}"
       }
     ]
   ]
