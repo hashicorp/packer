@@ -27,6 +27,7 @@ type Config struct {
 	Host         string `mapstructure:"host"`
 	ResourcePool string `mapstructure:"resource_pool"`
 	Datastore    string `mapstructure:"datastore"`
+	LinkedClone  bool   `mapstructure:"linked_clone"`
 
 	// Hardware
 	Cpus            string `mapstructure:"cpus"`

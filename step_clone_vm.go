@@ -10,6 +10,8 @@ import (
 	"github.com/vmware/govmomi/find"
 	"fmt"
 	"net/url"
+	"github.com/vmware/govmomi/vim25/mo"
+	"errors"
 )
 
 type CloneParameters struct {
@@ -20,6 +22,7 @@ type CloneParameters struct {
 	vmSrc        *object.VirtualMachine
 	ctx          context.Context
 	vmName       string
+	linkedClone  bool
 }
 
 type StepCloneVM struct{
@@ -86,6 +89,7 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 		vmSrc:        vmSrc,
 		ctx:          ctx,
 		vmName:       s.config.VMName,
+		linkedClone:  s.config.LinkedClone,
 	})
 	if err != nil {
 		state.Put("error", err)
@@ -139,10 +143,26 @@ func cloneVM(params *CloneParameters) (vm *object.VirtualMachine, err error) {
 		datastoreRef := params.datastore.Reference()
 		relocateSpec.Datastore = &datastoreRef
 	}
+	if params.linkedClone == true {
+		relocateSpec.DiskMoveType = "createNewChildDiskBacking"
+	}
 
 	cloneSpec := types.VirtualMachineCloneSpec{
 		Location: relocateSpec,
 		PowerOn:  false,
+	}
+	if params.linkedClone == true {
+		var vmImage mo.VirtualMachine
+		err = params.vmSrc.Properties(params.ctx, params.vmSrc.Reference(), []string{"snapshot"}, &vmImage)
+		if err != nil {
+			err = fmt.Errorf("Error reading base VM properties: %s", err)
+			return
+		}
+		if vmImage.Snapshot == nil {
+			err = errors.New("`linked_clone=true`, but image VM has no snapshots")
+			return
+		}
+		cloneSpec.Snapshot = vmImage.Snapshot.CurrentSnapshot
 	}
 
 	// Cloning itself
