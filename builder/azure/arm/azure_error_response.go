@@ -7,7 +7,7 @@ import (
 )
 
 type azureErrorDetails struct {
-	Code    string              `json:"code""`
+	Code    string              `json:"code"`
 	Message string              `json:"message"`
 	Details []azureErrorDetails `json:"details"`
 }
