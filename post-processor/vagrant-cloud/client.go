@@ -110,15 +110,7 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 
 	defer file.Close()
 
-	body := &bytes.Buffer{}
-
-	_, err = io.Copy(body, file)
-
-	if err != nil {
-		return nil, fmt.Errorf("Error uploading file: %s", err)
-	}
-
-	request, err := http.NewRequest("PUT", url, body)
+	request, err := http.NewRequest("PUT", url, file)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error preparing upload request: %s", err)
