@@ -211,13 +211,31 @@ func (b *Builder) Cancel() {
 }
 
 func (b *Builder) chooseNetworkType() InstanceNetWork {
-	//Alicloud userdata require vpc network and public key require userdata, so besides user specific vpc network,
-	//choose vpc networks in those cases
-	if b.config.RunConfig.Comm.SSHPrivateKey != "" || b.config.UserData != "" || b.config.UserDataFile != "" ||
-		b.config.VpcId != "" || b.config.VSwitchId != "" || b.config.TemporaryKeyPairName != "" {
+	if b.isVpcNetRequired() {
 		return VpcNet
 	} else {
 		return ClassicNet
 	}
+}
 
+func (b *Builder) isVpcNetRequired() bool {
+	// UserData and KeyPair only works in VPC
+	return b.isVpcSpecified() || b.isUserDataNeeded() || b.isKeyPairNeeded()
+}
+
+func (b *Builder) isVpcSpecified() bool {
+	return b.config.VpcId != "" || b.config.VSwitchId != ""
+}
+
+func (b *Builder) isUserDataNeeded() bool {
+	// Public key setup requires userdata
+	if b.config.RunConfig.Comm.SSHPrivateKey != "" {
+		return true
+	}
+
+	return b.config.UserData != "" || b.config.UserDataFile != ""
+}
+
+func (b *Builder) isKeyPairNeeded() bool {
+	return b.config.SSHKeyPairName != "" || b.config.TemporaryKeyPairName != ""
 }
