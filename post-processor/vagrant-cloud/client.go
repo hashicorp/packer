@@ -108,6 +108,12 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 		return nil, fmt.Errorf("Error opening file for upload: %s", err)
 	}
 
+	fi, err := file.Stat()
+
+	if err != nil {
+		return nil, fmt.Errorf("Error stating file for upload: %s", err)
+	}
+
 	defer file.Close()
 
 	request, err := http.NewRequest("PUT", url, file)
@@ -118,6 +124,7 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 
 	log.Printf("Post-Processor Vagrant Cloud API Upload: %s %s", path, url)
 
+	request.ContentLength = fi.Size()
 	resp, err := v.client.Do(request)
 
 	log.Printf("Post-Processor Vagrant Cloud Upload Response: \n\n%+v", resp)
