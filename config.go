@@ -57,6 +57,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Accumulate any errors
 	errs := new(packer.MultiError)
+	var warnings []string
 
 	// Prepare config(s)
 	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
@@ -100,12 +101,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
 	}
 
-
-	// Warnings
-	var warnings []string
-	if c.Datastore == "" {
-		warnings = append(warnings, "Datastore is not specified, will try to find the default one")
-	}
+	//if c.Datastore == "" {
+	//	warnings = append(warnings, "Datastore is not specified, will try to find the default one")
+	//}
 
 	if len(errs.Errors) > 0 {
 		return nil, warnings, errs
