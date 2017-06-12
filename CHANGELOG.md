@@ -43,6 +43,16 @@
 * command/push: add `-sensitive` flag to mark pushed vars are sensitive.
     [GH-4970]
 * builder/amazon: Print temporary security group name to the UI. [GH-4997]
+* provisioner/salt: add support for grains. [GH-4961]
+* provisioner/ansible: add `inventory_directory` option to control where to
+    place the generated inventory file. [GH-4760]
+* communicator/winrm: Add NTLM authentication support. [GH-4979]
+* provisioner/ansible: add `skip_version_check` flag for when ansible will be
+    installed from a prior provisioner. [GH-4983]
+* command/push: Vagrant support in Terraform Enterprise is deprecated.
+    [GH-4950]
+* post-processor/vagrant-cloud: get vagrant cloud token from environment.
+    [GH-4982]
 
 
 ### BUG FIXES:
@@ -59,6 +69,8 @@
 * post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
 * provisioner/ansible-local: Correctly set the default staging directory under
     Windows. [GH-4792]
+* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
+    [GH-4972]
 
 ### FEATURES:
 
@@ -133,16 +145,6 @@
 * post-processor/amazon-import: support AMI attributes on import [GH-4216]
 * post-processor/docker-import: print stderr on docker import failure.
     [GH-4529]
-* provisioner/salt: add support for grains. [GH-4961]
-* provisioner/ansible: add `inventory_directory` option to control where to
-    place the generated inventory file. [GH-4760]
-* communicator/winrm: Add NTLM authentication support. [GH-4979]
-* provisioner/ansible: add `skip_version_check` flag for when ansible will be
-    installed from a prior provisioner. [GH-4983]
-* command/push: Vagrant support in Terraform Enterprise is deprecated.
-    [GH-4950]
-* post-processor/vagrant-cloud: get vagrant cloud token from environment.
-    [GH-4982]
 
 ### BUG FIXES:
 
@@ -157,8 +159,6 @@
 * core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 * provisioner/chef-client: only upload knife config if we're cleaning.
     [GH-4534]
-* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
-    [GH-4972]
 
 ## 0.12.2 (January 20, 2017)
 
