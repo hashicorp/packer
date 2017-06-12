@@ -173,7 +173,7 @@ builder.
     If this parameter is not specified, the default value is `PayByBandwidth`.
 
 
-- `internet_max_bandwith_out` (string) - Maximum outgoing bandwidth to the public
+- `internet_max_bandwidth_out` (string) - Maximum outgoing bandwidth to the public
   network, measured in Mbps (Mega bit per second).
 
     Value range:
