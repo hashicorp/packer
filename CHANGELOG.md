@@ -74,6 +74,7 @@
     [GH-4972]
 * post-processor/vagrant-cloud: don't read files to upload in to memory first.
     [GH-5005]
+* post-processor/vagrant-cloud: only upload once under normal conditions. [GH-5008]
 
 ### FEATURES:
 
