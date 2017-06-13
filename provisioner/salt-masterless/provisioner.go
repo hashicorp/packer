@@ -61,6 +61,9 @@ type Config struct {
 	// Arguments to pass to salt-call
 	SaltCallArgs string `mapstructure:"salt_call_args"`
 
+	// Directory containing salt-call
+	SaltBinDir string `mapstructure:"salt_bin_dir"`
+
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
@@ -281,7 +284,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local %s", p.config.CmdArgs))}
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
