@@ -93,7 +93,8 @@ post-processor.
 ```json
 {
   "variables": {
-    "cloud_token": "{{ env `ATLAS_TOKEN` }}"
+    "cloud_token": "{{ env `ATLAS_TOKEN` }}",
+    "version": "1.0.{{timestamp}}"
   },
   "post-processors": [
     [
@@ -107,7 +108,7 @@ post-processor.
         "type": "vagrant-cloud",
         "box_tag": "hashicorp/precise64",
         "access_token": "{{user `cloud_token`}}",
-        "version": "1.0.{{timestamp}}"
+        "version": "{{user `version`}}"
       }
     ]
   ]
