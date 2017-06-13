@@ -152,7 +152,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			new(stepCreateProvider),
 			new(stepPrepareUpload),
 			new(stepUpload),
-			new(stepVerifyUpload),
 			new(stepReleaseVersion),
 		}
 	} else {

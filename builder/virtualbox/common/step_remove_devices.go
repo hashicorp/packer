@@ -45,7 +45,7 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 		var vboxErr error
 		// Retry for 10 minutes to remove the floppy controller.
 		log.Printf("Trying for 10 minutes to remove floppy controller.")
-		err := common.Retry(15, 15, 40, func() (bool, error) {
+		err := common.Retry(15, 15, 40, func(_ uint) (bool, error) {
 			// Don't forget to remove the floppy controller as well
 			command = []string{
 				"storagectl", vmName,
