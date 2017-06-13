@@ -195,6 +195,9 @@ builder.
   preserved when booting from the AMI built with Packer. See
   `ami_block_device_mappings`, above, for details.
 
+- `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+  code. This should probably be a user variable since it changes all the time.
+
 - `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to, 
   along with the custom kms key id to use for encryption for that region. 
   Keys must match the regions provided in `ami_regions`. If you just want to 
