@@ -105,7 +105,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		ReportTags(ui, snapshotTags)
 
 		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func() (bool, error) {
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
 			// Tag images and snapshots
 			_, err := regionconn.CreateTags(&ec2.CreateTagsInput{
 				Resources: resourceIds,

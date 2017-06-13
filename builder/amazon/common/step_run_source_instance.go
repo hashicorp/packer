@@ -294,7 +294,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	ReportTags(ui, ec2Tags)
 
 	// Retry creating tags for about 2.5 minutes
-	err = retry.Retry(0.2, 30, 11, func() (bool, error) {
+	err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
 		_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Tags:      ec2Tags,
 			Resources: []*string{instance.InstanceId},

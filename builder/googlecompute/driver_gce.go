@@ -582,7 +582,7 @@ type stateRefreshFunc func() (string, error)
 // waitForState will spin in a loop forever waiting for state to
 // reach a certain target.
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
-	err := common.Retry(2, 2, 0, func() (bool, error) {
+	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
 		if err != nil {
 			return false, err
