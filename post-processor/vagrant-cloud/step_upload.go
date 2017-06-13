@@ -2,8 +2,9 @@ package vagrantcloud
 
 import (
 	"fmt"
-	"time"
+	"log"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -23,34 +24,27 @@ func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
 		"Depending on your internet connection and the size of the box,\n" +
 			"this may take some time")
 
-	var finalErr error
-	for i := 0; i < 3; i++ {
-		if i > 0 {
-			ui.Message(fmt.Sprintf("Uploading box, attempt %d", i+1))
-		}
+	err := common.Retry(10, 10, 3, func(i uint) (bool, error) {
+		ui.Message(fmt.Sprintf("Uploading box, attempt %d", i+1))
 
 		resp, err := client.Upload(artifactFilePath, url)
 		if err != nil {
-			finalErr = err
 			ui.Message(fmt.Sprintf(
 				"Error uploading box! Will retry in 10 seconds. Error: %s", err))
-			time.Sleep(10 * time.Second)
-			continue
+			return false, nil
 		}
 		if resp.StatusCode != 200 {
-			finalErr = fmt.Errorf("bad HTTP status: %d", resp.StatusCode)
+			log.Printf("bad HTTP status: %d", resp.StatusCode)
 			ui.Message(fmt.Sprintf(
 				"Error uploading box! Will retry in 10 seconds. Status: %d",
 				resp.StatusCode))
-			time.Sleep(10 * time.Second)
-			continue
+			return false, nil
 		}
+		return true, nil
+	})
 
-		finalErr = nil
-	}
-
-	if finalErr != nil {
-		state.Put("error", finalErr)
+	if err != nil {
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 

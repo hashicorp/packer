@@ -8,7 +8,11 @@ import (
 
 var RetryExhaustedError error = fmt.Errorf("Function never succeeded in Retry")
 
-type RetryableFunc func() (bool, error)
+// RetryableFunc performs an action and returns a bool indicating whether the
+// function is done, or if it should keep retrying, and an erorr which will
+// abort the retry and be returned by the Retry function. The 0-indexed attempt
+// is passed with each call.
+type RetryableFunc func(uint) (bool, error)
 
 // Retry retries a function up to numTries times with exponential backoff.
 // If numTries == 0, retry indefinitely. If interval == 0, Retry will not delay retrying and there will be
@@ -27,7 +31,7 @@ func Retry(initialInterval float64, maxInterval float64, numTries uint, function
 	done := false
 	interval := initialInterval
 	for i := uint(0); !done && (numTries == 0 || i < numTries); i++ {
-		done, err = function()
+		done, err = function(i)
 		if err != nil {
 			return err
 		}
