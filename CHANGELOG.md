@@ -71,6 +71,8 @@
     Windows. [GH-4792]
 * builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
     [GH-4972]
+* post-processor/vagrant-cloud: don't read files to upload in to memory first.
+    [GH-5005]
 
 ### FEATURES:
 
