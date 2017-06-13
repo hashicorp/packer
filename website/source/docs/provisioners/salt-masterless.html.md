@@ -86,3 +86,6 @@ Optional:
     [salt-call](https://docs.saltstack.com/ref/cli/salt-call.html) documentation for more
     information. By default no additional arguments (besides the ones Packer generates)
     are passed to `salt-call`.
+
+- `salt_bin_dir` (string) - Path to the `salt-call` executable. Useful if it is not
+    on the PATH.
