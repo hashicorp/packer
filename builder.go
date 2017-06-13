@@ -62,7 +62,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&StepShutdown{
-			Command: b.config.ShutdownCommand,
+			Command:    b.config.ShutdownCommand,
+			ShutdownTimeout: b.config.ShutdownTimeout,
+		},
+		&StepPostProcess{
+			ToTemplate: b.config.ToTemplate,
 		},
 	}
 

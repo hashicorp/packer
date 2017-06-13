@@ -49,6 +49,7 @@ func (s *StepConfigureHW) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if parametersFlag != (ConfigParametersFlag{}) {
 		ui.Say("configuring virtual hardware...")
+		// Reconfigure hardware
 		task, err := vm.Reconfigure(ctx, confSpec)
 		if err != nil {
 			state.Put("error", err)

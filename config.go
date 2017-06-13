@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -27,7 +28,12 @@ type Config struct {
 	Host         string `mapstructure:"host"`
 	ResourcePool string `mapstructure:"resource_pool"`
 	Datastore    string `mapstructure:"datastore"`
+
+	// Settings
 	LinkedClone  bool   `mapstructure:"linked_clone"`
+	ToTemplate   bool   `mapstructure:"to_template"`
+	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	ShutdownTimeout time.Duration ``
 
 	// Hardware
 	Cpus            string `mapstructure:"cpus"`
@@ -84,11 +90,19 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number for Ram"))
 		}
 	}
+	if c.RawShutdownTimeout == "" {
+		c.RawShutdownTimeout = "5m"
+	}
+	c.ShutdownTimeout, err = time.ParseDuration(c.RawShutdownTimeout)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
+	}
+
 
 	// Warnings
 	var warnings []string
 	if c.Datastore == "" {
-		warnings = append(warnings, "Datastore is not specified, will try to find a default one")
+		warnings = append(warnings, "Datastore is not specified, will try to find the default one")
 	}
 
 	if len(errs.Errors) > 0 {
