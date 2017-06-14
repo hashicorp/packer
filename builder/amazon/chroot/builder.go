@@ -206,19 +206,22 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&awscommon.StepPreValidate{
 			DestAmiName:     b.config.AMIName,
 			ForceDeregister: b.config.AMIForceDeregister,
+			SkipRegister:    b.config.AMISkipRegister,
 		},
 		&StepInstanceInfo{},
 	}
 
+	sourceInfoSteps := []multistep.Step{
+		&awscommon.StepSourceAMIInfo{
+			SourceAmi:          b.config.SourceAmi,
+			EnhancedNetworking: b.config.AMIEnhancedNetworking,
+			AmiFilters:         b.config.SourceAmiFilter,
+		},
+		&StepCheckRootDevice{},
+	}
+
 	if !b.config.FromScratch {
-		steps = append(steps,
-			&awscommon.StepSourceAMIInfo{
-				SourceAmi:          b.config.SourceAmi,
-				EnhancedNetworking: b.config.AMIEnhancedNetworking,
-				AmiFilters:         b.config.SourceAmiFilter,
-			},
-			&StepCheckRootDevice{},
-		)
+		steps = append(steps, sourceInfoSteps...)
 	}
 
 	steps = append(steps,
@@ -243,6 +246,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCopyFiles{},
 		&StepChrootProvision{},
 		&StepEarlyCleanup{},
+	)
+
+	amiCreationSteps := []multistep.Step{
 		&StepSnapshot{},
 		&awscommon.StepDeregisterAMI{
 			ForceDeregister:     b.config.AMIForceDeregister,
@@ -278,7 +284,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SnapshotTags: b.config.SnapshotTags,
 			Ctx:          b.config.ctx,
 		},
-	)
+	}
+
+	if !b.config.AMISkipRegister {
+		steps = append(steps, amiCreationSteps...)
+	}
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)

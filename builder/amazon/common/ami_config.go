@@ -21,6 +21,7 @@ type AMIConfig struct {
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
+	AMISkipRegister         bool              `mapstructure:"skip_register_ami"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
 	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
@@ -39,7 +40,7 @@ func stringInSlice(s []string, searchstr string) bool {
 
 func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
-	if c.AMIName == "" {
+	if c.AMIName == "" && !c.AMISkipRegister {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
 	}
 
