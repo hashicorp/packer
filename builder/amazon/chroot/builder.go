@@ -9,7 +9,6 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
@@ -182,12 +181,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("The amazon-chroot builder only works on Linux environments.")
 	}
 
-	config, err := b.config.Config()
-	if err != nil {
-		return nil, err
-	}
-
-	session, err := session.NewSession(config)
+	session, err := b.config.Session()
 	if err != nil {
 		return nil, err
 	}

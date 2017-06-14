@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	"github.com/hashicorp/packer/packer"
@@ -91,21 +90,18 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	isEncrypted := false
 
 	// Connect to the region where the AMI will be copied to
-	awsConfig, err := config.Config()
+	session, err := config.Session()
 	if err != nil {
 		return "", snapshotIds, err
 	}
-	awsConfig.Region = aws.String(target)
-
-	session, err := session.NewSession(awsConfig)
-	if err != nil {
-		return "", snapshotIds, err
-	}
-	regionconn := ec2.New(session)
 	// if we've provided a map of key ids to regions, use those keys.
 	if len(keyID) > 0 {
 		isEncrypted = true
 	}
+	regionconn := ec2.New(session.Copy(&aws.Config{
+		Region: aws.String(target)},
+	))
+
 	resp, err := regionconn.CopyImage(&ec2.CopyImageInput{
 		SourceRegion:  &source,
 		SourceImageId: &imageId,
