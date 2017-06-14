@@ -205,6 +205,9 @@ each category, the available configuration keys are alphabetized.
 
 - `root_device_name` (string) - The root device name. For example, `xvda`.
 
+- `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+   code. This should probably be a user variable since it changes all the time.
+
 - `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
     `/mnt/packer-amazon-chroot-volumes/{{.Device}}`. This is a configuration template
