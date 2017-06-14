@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -91,7 +92,15 @@ func (c *AccessConfig) Region() (string, error) {
 		return c.RawRegion, nil
 	}
 
-	return "", nil
+	sess := session.New()
+	ec2meta := ec2metadata.New(sess)
+	identity, err := ec2meta.GetInstanceIdentityDocument()
+	if err != nil {
+		log.Println("Error getting region from metadata service, "+
+			"probably because we're not running on AWS.", err)
+		return "", nil
+	}
+	return identity.Region, nil
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
