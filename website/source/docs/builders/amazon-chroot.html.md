@@ -194,13 +194,13 @@ each category, the available configuration keys are alphabetized.
         volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
         volumes
 
-- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to, 
-   along with the custom kms key id to use for encryption for that region. 
-   Keys must match the regions provided in `ami_regions`. If you just want to 
+- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
+   along with the custom kms key id to use for encryption for that region.
+   Keys must match the regions provided in `ami_regions`. If you just want to
    encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
-   If you want a region to be encrypted with that region's default key ID, you can 
+   If you want a region to be encrypted with that region's default key ID, you can
    use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
-   However, you cannot use default key IDs if you are using this in conjunction with 
+   However, you cannot use default key IDs if you are using this in conjunction with
    `snapshot_users` -- in that situation you must use custom keys.
 
 - `root_device_name` (string) - The root device name. For example, `xvda`.
@@ -229,6 +229,11 @@ each category, the available configuration keys are alphabetized.
     required unless using `from_scratch`. If so, this should include any
     partitioning and filesystem creation commands. The path to the device is
     provided by `{{.Device}}`.
+
+- `profile` (string) - The profile to use in the shared credentials file for
+    AWS. See Amazon's documentation on [specifying
+    profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+    for more details.
 
 - `post_mount_commands` (array of strings) - As `pre_mount_commands`, but the
     commands are executed after mounting the root device and before the extra
