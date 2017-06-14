@@ -191,14 +191,19 @@ builder.
 - `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
    code. This should probably be a user variable since it changes all the time.
 
-- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to, 
-   along with the custom kms key id to use for encryption for that region. 
-   Keys must match the regions provided in `ami_regions`. If you just want to 
-   encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
-   If you want a region to be encrypted with that region's default key ID, you can 
-   use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
-   However, you cannot use default key IDs if you are using this in conjunction with 
-   `snapshot_users` -- in that situation you must use custom keys.
+- `profile` (string) - The profile to use in the shared credentials file for
+    AWS. See Amazon's documentation on [specifying
+    profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+    for more details.
+
+- `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
+    along with the custom kms key id to use for encryption for that region.
+    Keys must match the regions provided in `ami_regions`. If you just want to
+    encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
+    If you want a region to be encrypted with that region's default key ID, you can
+    use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
+    However, you cannot use default key IDs if you are using this in conjunction with
+    `snapshot_users` -- in that situation you must use custom keys.
 
 - `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the

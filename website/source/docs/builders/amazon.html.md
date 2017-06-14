@@ -80,7 +80,8 @@ the following order:
 3. If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
 
 Please refer to the SDK's documentation on [specifying
-credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#id2) for more information.
+credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)
+for more information.
 
 ## Using an IAM Task or Instance Role
 
