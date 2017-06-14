@@ -70,37 +70,24 @@ Credentials are resolved in the following order:
 
 ### Automatic Lookup
 
-If no AWS credentials are found in a packer template, we proceed on to the
-following steps:
+Packer depends on the [AWS
+SDK](https://aws.amazon.com/documentation/sdk-for-go/) to perform automatic
+lookup using _credential chains_. In short, the SDK looks for credentials in
+the following order:
 
-1.  Lookup via environment variables.
-    -   First `AWS_ACCESS_KEY_ID`, then `AWS_ACCESS_KEY`
-    -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
+1. Environment variables.
+2. Shared credentials file.
+3. If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
 
-2.  Look for [local AWS configuration
-    files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
-      environment variable, and if that's empty, use the default credentials
-      file (`.aws/credentials`) in the user's home directory.
-    - Uses the profile name set in the `AWS_PROFILE` environment variable. If
-      the environment variable is not set, uses "default" as the profile name.
+Please refer to the SDK's documentation on [specifying
+credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#id2) for more information.
 
-3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
-
-~> **Subtle details of automatic lookup may change over time.** The most
-reliable way to specify your configuration is by setting them in template
-variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and
-`AWS_SECRET_ACCESS_KEY` environment variables.
-
-Environment variables provide the best portability, allowing you to run your
-packer build on your workstation, in Atlas, or on another build server.
-
-## Using an IAM Instance Profile
+## Using an IAM Task or Instance Role
 
 If AWS keys are not specified in the template, a
-[credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-file or through environment variables Packer will use credentials provided by
-the instance's IAM profile, if it has one.
+[shared credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
+or through environment variables Packer will use credentials provided by
+the task's or instance's IAM role, if it has one.
 
 The following policy document provides the minimal set permissions necessary for
 Packer to work:

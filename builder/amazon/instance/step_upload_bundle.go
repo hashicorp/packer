@@ -38,7 +38,8 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 
 	accessKey := config.AccessKey
 	secretKey := config.SecretKey
-	accessConfig, err := config.AccessConfig.Config()
+	session, err := config.AccessConfig.Session()
+	accessConfig := session.Config
 	if err == nil && accessKey == "" && secretKey == "" {
 		credentials, err := accessConfig.Credentials.Get()
 		if err == nil {
