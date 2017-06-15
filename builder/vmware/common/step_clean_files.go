@@ -2,10 +2,15 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+
+	"github.com/mitchellh/multistep"
+	"github.com/mitchellh/packer/packer"
 )
 
 // These are the extensions of files that are important for the function
@@ -21,11 +26,18 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //
 // Produces:
 //   <nothing>
-type StepCleanFiles struct{}
+type StepCleanFiles struct {
+	Skip bool
+}
 
-func (StepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.Skip {
+		log.Println("Skipping clean files step...")
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Deleting unnecessary VMware files...")
 	files, err := dir.ListFiles()

@@ -111,7 +111,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
-		&vmwcommon.StepCleanFiles{},
+		&vmwcommon.StepCleanFiles{
+			Skip: b.config.SkipCleanFiles,
+		},
 		&vmwcommon.StepCompactDisk{
 			Skip: b.config.SkipCompaction,
 		},

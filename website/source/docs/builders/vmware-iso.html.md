@@ -3,11 +3,11 @@ layout: docs
 sidebar_current: docs-builders-vmware-iso
 page_title: VMware ISO - Builders
 description: |-
-  This VMware Packer builder is able to create VMware virtual machines from an
-  ISO file as a source. It currently supports building virtual machines on hosts
-  running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and
-  VMware Player on Linux. It can also build machines directly on VMware vSphere
-  Hypervisor using SSH as opposed to the vSphere API.
+This VMware Packer builder is able to create VMware virtual machines from an
+ISO file as a source. It currently supports building virtual machines on hosts
+running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and
+VMware Player on Linux. It can also build machines directly on VMware vSphere
+Hypervisor using SSH as opposed to the vSphere API.
 ---
 
 # VMware Builder (from ISO)
@@ -37,12 +37,12 @@ self-install. Still, the example serves to show the basic configuration:
 
 ```json
 {
-  "type": "vmware-iso",
-  "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
-  "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
-  "iso_checksum_type": "md5",
-  "ssh_username": "packer",
-  "shutdown_command": "shutdown -P now"
+"type": "vmware-iso",
+"iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
+"iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
+"iso_checksum_type": "md5",
+"ssh_username": "packer",
+"shutdown_command": "shutdown -P now"
 }
 ```
 
@@ -59,171 +59,176 @@ builder.
 ### Required:
 
 - `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to
-    booting a virtual machine with the ISO attached. The type of the checksum is
-    specified with `iso_checksum_type`, documented below. At least one of
-    `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
-    over `iso_checksum_url` type.
+  files are so large, this is required and Packer will verify it prior to
+  booting a virtual machine with the ISO attached. The type of the checksum is
+  specified with `iso_checksum_type`, documented below. At least one of
+  `iso_checksum` and `iso_checksum_url` must be defined. This has precedence
+  over `iso_checksum_url` type.
 
 - `iso_checksum_type` (string) - The type of the checksum specified in
-    `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
-    "sha512" currently. While "none" will skip checksumming, this is not
-    recommended since ISO files are generally large and corruption does happen
-    from time to time.
+  `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
+  "sha512" currently. While "none" will skip checksumming, this is not
+  recommended since ISO files are generally large and corruption does happen
+  from time to time.
 
 - `iso_checksum_url` (string) - A URL to a GNU or BSD style checksum file
-    containing a checksum for the OS ISO file. At least one of `iso_checksum`
-    and `iso_checksum_url` must be defined. This will be ignored if
-    `iso_checksum` is non empty.
+  containing a checksum for the OS ISO file. At least one of `iso_checksum`
+  and `iso_checksum_url` must be defined. This will be ignored if
+  `iso_checksum` is non empty.
 
 - `iso_url` (string) - A URL to the ISO containing the installation image.
-    This URL can be either an HTTP URL or a file URL (or path to a file). If
-    this is an HTTP URL, Packer will download it and cache it between runs.
+  This URL can be either an HTTP URL or a file URL (or path to a file). If
+  this is an HTTP URL, Packer will download it and cache it between runs.
 
 - `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
+  the OS is installed.
 
 ### Optional:
 
 - `boot_command` (array of strings) - This is an array of commands to type
-    when the virtual machine is first booted. The goal of these commands should
-    be to type just enough to initialize the operating system installer. Special
-    keys can be typed as well, and are covered in the section below on the
-    boot command. If this is not specified, it is assumed the installer will
-    start itself.
+  when the virtual machine is first booted. The goal of these commands should
+  be to type just enough to initialize the operating system installer. Special
+  keys can be typed as well, and are covered in the section below on the
+  boot command. If this is not specified, it is assumed the installer will
+  start itself.
 
 - `boot_wait` (string) - The time to wait after booting the initial virtual
-    machine before typing the `boot_command`. The value of this should be
-    a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
-    five seconds and one minute 30 seconds, respectively. If this isn't
-    specified, the default is 10 seconds.
+  machine before typing the `boot_command`. The value of this should be
+  a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+  five seconds and one minute 30 seconds, respectively. If this isn't
+  specified, the default is 10 seconds.
 
 - `disk_additional_size` (array of integers) - The size(s) of any additional
-    hard disks for the VM in megabytes. If this is not specified then the VM
-    will only contain a primary hard disk. The builder uses expandable, not
-    fixed-size virtual hard disks, so the actual file representing the disk will
-    not use the full size unless it is full.
+  hard disks for the VM in megabytes. If this is not specified then the VM
+  will only contain a primary hard disk. The builder uses expandable, not
+  fixed-size virtual hard disks, so the actual file representing the disk will
+  not use the full size unless it is full.
 
 - `disk_size` (integer) - The size of the hard disk for the VM in megabytes.
-    The builder uses expandable, not fixed-size virtual hard disks, so the
-    actual file representing the disk will not use the full size unless it
-    is full. By default this is set to 40,000 (about 40 GB).
+  The builder uses expandable, not fixed-size virtual hard disks, so the
+  actual file representing the disk will not use the full size unless it
+  is full. By default this is set to 40,000 (about 40 GB).
 
 - `disk_type_id` (string) - The type of VMware virtual disk to create. The
-    default is "1", which corresponds to a growable virtual disk split in
-    2GB files. This option is for advanced usage, modify only if you know what
-    you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
-    VMware clients. For ESXi, refer to the proper ESXi documentation.
+  default is "1", which corresponds to a growable virtual disk split in
+  2GB files. This option is for advanced usage, modify only if you know what
+  you're doing. For more information, please consult the [Virtual Disk Manager
+  User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
+  VMware clients. For ESXi, refer to the proper ESXi documentation.
 
 - `floppy_files` (array of strings) - A list of files to place onto a floppy
-    disk that is attached when the VM is booted. This is most useful for
-    unattended Windows installs, which look for an `Autounattend.xml` file on
-    removable media. By default, no floppy will be attached. All files listed in
-    this setting get placed into the root directory of the floppy and the floppy
-    is attached as the first floppy device. Currently, no support exists for
-    creating sub-directories on the floppy. Wildcard characters (\*, ?,
-    and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
+  disk that is attached when the VM is booted. This is most useful for
+  unattended Windows installs, which look for an `Autounattend.xml` file on
+  removable media. By default, no floppy will be attached. All files listed in
+  this setting get placed into the root directory of the floppy and the floppy
+  is attached as the first floppy device. Currently, no support exists for
+  creating sub-directories on the floppy. Wildcard characters (\*, ?,
+  and \[\]) are allowed. Directory names are also allowed, which will add all
+  the files found in the directory to the floppy.
 
 - `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+  the floppy disk recursively. This is similar to the `floppy_files` option
+  except that the directory structure is preserved. This is useful for when
+  your floppy disk includes drivers or if you just want to organize it's
+  contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 - `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
-    "/Applications/VMware Fusion.app" but this setting allows you to
-    customize this.
+  "/Applications/VMware Fusion.app" but this setting allows you to
+  customize this.
 
 - `guest_os_type` (string) - The guest OS type being installed. This will be
-    set in the VMware VMX. By default this is "other". By specifying a more
-    specific OS type, VMware may perform some optimizations or virtual hardware
-    changes to better support the operating system running in the
-    virtual machine.
+  set in the VMware VMX. By default this is "other". By specifying a more
+  specific OS type, VMware may perform some optimizations or virtual hardware
+  changes to better support the operating system running in the
+  virtual machine.
 
 - `headless` (boolean) - Packer defaults to building VMware virtual machines
-    by launching a GUI that shows the console of the machine being built. When
-    this value is set to true, the machine will start without a console. For
-    VMware machines, Packer will output VNC connection information in case you
-    need to connect to the console to debug the build process.
+  by launching a GUI that shows the console of the machine being built. When
+  this value is set to true, the machine will start without a console. For
+  VMware machines, Packer will output VNC connection information in case you
+  need to connect to the console to debug the build process.
 
 - `http_directory` (string) - Path to a directory to serve using an
-    HTTP server. The files in this directory will be available over HTTP that
-    will be requestable from the virtual machine. This is useful for hosting
-    kickstart files and so on. By default this is "", which means no HTTP server
-    will be started. The address and port of the HTTP server will be available
-    as variables in `boot_command`. This is covered in more detail below.
+  HTTP server. The files in this directory will be available over HTTP that
+  will be requestable from the virtual machine. This is useful for hosting
+  kickstart files and so on. By default this is "", which means no HTTP server
+  will be started. The address and port of the HTTP server will be available
+  as variables in `boot_command`. This is covered in more detail below.
 
 - `http_port_min` and `http_port_max` (integer) - These are the minimum and
-    maximum port to use for the HTTP server started to serve the
-    `http_directory`. Because Packer often runs in parallel, Packer will choose
-    a randomly available port in this range to run the HTTP server. If you want
-    to force the HTTP server to be on one port, make this minimum and maximum
-    port the same. By default the values are 8000 and 9000, respectively.
+  maximum port to use for the HTTP server started to serve the
+  `http_directory`. Because Packer often runs in parallel, Packer will choose
+  a randomly available port in this range to run the HTTP server. If you want
+  to force the HTTP server to be on one port, make this minimum and maximum
+  port the same. By default the values are 8000 and 9000, respectively.
 
 - `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to "iso".
+  download. This defaults to "iso".
 
 - `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
-    original filename as its name.
+  download. By default will go in the packer cache, with a hash of the
+  original filename as its name.
 
 - `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
-    Packer will try these in order. If anything goes wrong attempting to
-    download or while downloading a single URL, it will move on to the next. All
-    URLs must point to the same file (same checksum). By default this is empty
-    and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
+  Packer will try these in order. If anything goes wrong attempting to
+  download or while downloading a single URL, it will move on to the next. All
+  URLs must point to the same file (same checksum). By default this is empty
+  and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
 - `output_directory` (string) - This is the path to the directory where the
-    resulting virtual machine will be created. This may be relative or absolute.
-    If relative, the path is relative to the working directory when `packer`
-    is executed. This directory must not exist or be empty prior to running
-    the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
-    name of the build.
+  resulting virtual machine will be created. This may be relative or absolute.
+  If relative, the path is relative to the working directory when `packer`
+  is executed. This directory must not exist or be empty prior to running
+  the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
+  name of the build.
 
 - `remote_cache_datastore` (string) - The path to the datastore where
-    supporting files will be stored during the build on the remote machine. By
-    default this is the same as the `remote_datastore` option. This only has an
-    effect if `remote_type` is enabled.
+  supporting files will be stored during the build on the remote machine. By
+  default this is the same as the `remote_datastore` option. This only has an
+  effect if `remote_type` is enabled.
 
 - `remote_cache_directory` (string) - The path where the ISO and/or floppy
-    files will be stored during the build on the remote machine. The path is
-    relative to the `remote_cache_datastore` on the remote machine. By default
-    this is "packer\_cache". This only has an effect if `remote_type`
-    is enabled.
+  files will be stored during the build on the remote machine. The path is
+  relative to the `remote_cache_datastore` on the remote machine. By default
+  this is "packer\_cache". This only has an effect if `remote_type`
+  is enabled.
 
 - `remote_datastore` (string) - The path to the datastore where the resulting
-    VM will be stored when it is built on the remote machine. By default this
-    is "datastore1". This only has an effect if `remote_type` is enabled.
+  VM will be stored when it is built on the remote machine. By default this
+  is "datastore1". This only has an effect if `remote_type` is enabled.
 
 - `remote_host` (string) - The host of the remote machine used for access.
-    This is only required if `remote_type` is enabled.
+  This is only required if `remote_type` is enabled.
 
 - `remote_password` (string) - The SSH password for the user used to access
-    the remote machine. By default this is empty. This only has an effect if
-    `remote_type` is enabled.
+  the remote machine. By default this is empty. This only has an effect if
+  `remote_type` is enabled.
 
 - `remote_private_key_file` (string) - The path to the PEM encoded private key
-    file for the user used to access the remote machine. By default this is empty.
-    This only has an effect if `remote_type` is enabled.
+  file for the user used to access the remote machine. By default this is empty.
+  This only has an effect if `remote_type` is enabled.
 
 - `remote_type` (string) - The type of remote machine that will be used to
-    build this VM rather than a local desktop product. The only value accepted
-    for this currently is "esx5". If this is not set, a desktop product will
-    be used. By default, this is not set.
+  build this VM rather than a local desktop product. The only value accepted
+  for this currently is "esx5". If this is not set, a desktop product will
+  be used. By default, this is not set.
 
 - `remote_username` (string) - The username for the SSH user that will access
-    the remote machine. This is required if `remote_type` is enabled.
+  the remote machine. This is required if `remote_type` is enabled.
 
 - `shutdown_command` (string) - The command to use to gracefully shut down the
-    machine once all the provisioning is done. By default this is an empty
-    string, which tells Packer to just forcefully shut down the machine.
+  machine once all the provisioning is done. By default this is an empty
+  string, which tells Packer to just forcefully shut down the machine.
 
 - `shutdown_timeout` (string) - The amount of time to wait after executing the
-    `shutdown_command` for the virtual machine to actually shut down. If it
-    doesn't shut down in this time, it is an error. By default, the timeout is
-    "5m", or five minutes.
+  `shutdown_command` for the virtual machine to actually shut down. If it
+  doesn't shut down in this time, it is an error. By default, the timeout is
+  "5m", or five minutes.
+
+- `skip_clean_files` (boolean) - Files that are not important for the function
+  of a VMware virtual machine are discarded as part of the
+  build. Set this to `true` if you would like to keep such files.
+  Defaults to `false`.
 
 - `skip_compaction` (boolean) - VMware-created disks are defragmented and
     compacted at the end of the build process using `vmware-vdiskmanager`. In
