@@ -1,11 +1,11 @@
 ---
+description: |
+    Packer strives to be stable and bug-free, but issues inevitably arise where
+    certain things may not work entirely correctly, or may not appear to work
+    correctly.
 layout: docs
-sidebar_current: docs-other-debugging
-page_title: Debugging - Other
-description: |-
-  Packer strives to be stable and bug-free, but issues inevitably arise where
-  certain things may not work entirely correctly, or may not appear to work
-  correctly.
+page_title: 'Debugging - Other'
+sidebar_current: 'docs-other-debugging'
 ---
 
 # Debugging Packer Builds
@@ -66,7 +66,7 @@ In Windows you can set the detailed logs environmental variable `PACKER_LOG` or
 the log variable `PACKER_LOG_PATH` using powershell environment variables. For
 example:
 
-```powershell
+``` powershell
 $env:PACKER_LOG=1
 $env:PACKER_LOG_PATH="packerlog.txt"
 ```
@@ -80,10 +80,8 @@ Issues may arise using and building Ubuntu AMIs where common packages that
 *should* be installed from Ubuntu's Main repository are not found during a
 provisioner step:
 
-```
-amazon-ebs: No candidate version found for build-essential
-amazon-ebs: No candidate version found for build-essential
-```
+    amazon-ebs: No candidate version found for build-essential
+    amazon-ebs: No candidate version found for build-essential
 
 This, obviously can cause problems where a build is unable to finish
 successfully as the proper packages cannot be provisioned correctly. The problem
@@ -94,7 +92,7 @@ Adding the following provisioner to the packer template, allows for the
 cloud-init process to fully finish before packer starts provisioning the source
 AMI.
 
-```json
+``` json
 {
   "type": "shell",
   "inline": [
@@ -103,7 +101,6 @@ AMI.
 }
 ```
 
-
 ## Issues when using numerous Builders/Provisioners/Post-Processors
 
 Packer uses a separate process for each builder, provisioner, post-processor,
@@ -111,13 +108,12 @@ and plugin. In certain cases, if you have too many of these, you can run out of
 [file descriptors](https://en.wikipedia.org/wiki/File_descriptor). This results
 in an error that might look like
 
-```text
+``` text
 error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:
 too many open files
 ```
 
-On Unix systems, you can check what your file descriptor limit is with `ulimit
--Sn`. You should check with your OS vendor on how to raise this limit.
+On Unix systems, you can check what your file descriptor limit is with `ulimit -Sn`. You should check with your OS vendor on how to raise this limit.
 
 ## Issues when using long temp directory
 
@@ -126,7 +122,7 @@ directory for temporary files. Some operating systems place a limit on the
 length of the socket name, usually between 80 and 110 characters. If you get an
 error like this (for any builder, not just docker):
 
-```text
+``` text
 Failed to initialize build 'docker': error initializing builder 'docker': plugin exited before we could connect
 ```
 
