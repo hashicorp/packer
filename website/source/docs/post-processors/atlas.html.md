@@ -1,11 +1,11 @@
 ---
+description: |
+    The Atlas post-processor for Packer receives an artifact from a Packer build
+    and uploads it to Atlas. Atlas hosts and serves artifacts, allowing you to
+    version and distribute them in a simple way.
 layout: docs
-sidebar_current: docs-post-processors-atlas
-page_title: Atlas - Post-Processor
-description: |-
-  The Atlas post-processor for Packer receives an artifact from a Packer build
-  and uploads it to Atlas. Atlas hosts and serves artifacts, allowing you to
-  version and distribute them in a simple way.
+page_title: 'Atlas - Post-Processor'
+sidebar_current: 'docs-post-processors-atlas'
 ---
 
 # Atlas Post-Processor
@@ -22,7 +22,7 @@ You can also use the push command to [run packer builds in
 Atlas](/docs/commands/push.html). The push command and Atlas post-processor
 can be used together or independently.
 
-~> If you'd like to publish a Vagrant box to [Vagrant Cloud](https://vagrantcloud.com), you must use the [`vagrant-cloud`](/docs/post-processors/vagrant-cloud.html) post-processor.
+~&gt; If you'd like to publish a Vagrant box to [Vagrant Cloud](https://vagrantcloud.com), you must use the [`vagrant-cloud`](/docs/post-processors/vagrant-cloud.html) post-processor.
 
 ## Workflow
 
@@ -34,13 +34,13 @@ location in Atlas.
 
 Here is an example workflow:
 
-1. Packer builds an AMI with the [Amazon AMI
+1.  Packer builds an AMI with the [Amazon AMI
     builder](/docs/builders/amazon.html)
-1. The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
+2.  The `atlas` post-processor takes the resulting AMI and uploads it to Atlas.
     The `atlas` post-processor is configured with the name of the AMI, for
     example `hashicorp/foobar`, to create the artifact in Atlas or update the
     version if the artifact already exists
-1. The new version is ready and available to be used in deployments with a
+3.  The new version is ready and available to be used in deployments with a
     tool like [Terraform](https://www.terraform.io)
 
 ## Configuration
@@ -49,12 +49,12 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 ### Required:
 
-- `artifact` (string) - The shorthand tag for your artifact that maps to
+-   `artifact` (string) - The shorthand tag for your artifact that maps to
     Atlas, i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`.
     You must have access to the organization—hashicorp in this example—in order
     to add an artifact to the organization in Atlas.
 
-- `artifact_type` (string) - For uploading artifacts to Atlas.
+-   `artifact_type` (string) - For uploading artifacts to Atlas.
     `artifact_type` can be set to any unique identifier, however, the following
     are recommended for consistency - `amazon.image`, `azure.image`,
     `cloudstack.image`, `digitalocean.image`, `docker.image`,
@@ -64,38 +64,38 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 ### Optional:
 
-- `token` (string) - Your access token for the Atlas API.
+-   `token` (string) - Your access token for the Atlas API.
 
--> Login to Atlas to [generate an Atlas
+-&gt; Login to Atlas to [generate an Atlas
 Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
 configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
 you can also use `token` configuration option.
 
-- `atlas_url` (string) - Override the base URL for Atlas. This is useful if
+-   `atlas_url` (string) - Override the base URL for Atlas. This is useful if
     you're using Atlas Enterprise in your own network. Defaults to
     `https://atlas.hashicorp.com/api/v1`.
 
-- `metadata` (map) - Send metadata about the artifact.
+-   `metadata` (map) - Send metadata about the artifact.
 
-    - `description` (string) - Inside the metadata blob you can add a information
+    -   `description` (string) - Inside the metadata blob you can add a information
         about the uploaded artifact to Atlas. This will be reflected in the box
         description on Atlas.
 
-    - `provider` (string) - Used by Atlas to help determine, what should be used
+    -   `provider` (string) - Used by Atlas to help determine, what should be used
         to run the artifact.
 
-    - `version` (string) - Used by Atlas to give a semantic version to the
+    -   `version` (string) - Used by Atlas to give a semantic version to the
         uploaded artifact.
 
 ## Environment Variables
 
-- `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public key. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
 
-- `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded public key file. If specified, this will be used to validate the certificate authority that signed certificates used by an Atlas installation.
 
 ### Example Configuration
 
-```json
+``` json
 {
   "variables": {
     "aws_access_key": "ACCESS_KEY_HERE",

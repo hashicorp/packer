@@ -1,12 +1,12 @@
 ---
+description: |
+    The Packer Docker import post-processor takes an artifact from the docker
+    builder and imports it with Docker locally. This allows you to apply a
+    repository and tag to the image and lets you use the other Docker
+    post-processors such as docker-push to push the image to a registry.
 layout: docs
-sidebar_current: docs-post-processors-docker-import
-page_title: Docker Import - Post-Processors
-description: |-
-  The Packer Docker import post-processor takes an artifact from the docker
-  builder and imports it with Docker locally. This allows you to apply a
-  repository and tag to the image and lets you use the other Docker
-  post-processors such as docker-push to push the image to a registry.
+page_title: 'Docker Import - Post-Processors'
+sidebar_current: 'docs-post-processors-docker-import'
 ---
 
 # Docker Import Post-Processor
@@ -25,15 +25,15 @@ registry.
 The configuration for this post-processor only requires a `repository`, a `tag`
 is optional.
 
-- `repository` (string) - The repository of the imported image.
+-   `repository` (string) - The repository of the imported image.
 
-- `tag` (string) - The tag for the imported image. By default this is not set.
+-   `tag` (string) - The tag for the imported image. By default this is not set.
 
 ## Example
 
 An example is shown below, showing only the post-processor configuration:
 
-```json
+``` json
 {
   "type": "docker-import",
   "repository": "mitchellh/packer",

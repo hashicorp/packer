@@ -1,10 +1,10 @@
 ---
+description: |
+    Post-processors run after the image is built by the builder and provisioned by
+    the provisioner(s).
 layout: docs
-page_title: Post-Processors
-sidebar_current: docs-post-processors
-description: |-
-  Post-processors run after the image is built by the builder and provisioned by
-  the provisioner(s).
+page_title: 'Post-Processors'
+sidebar_current: 'docs-post-processors'
 ---
 
 # Post-Processors
