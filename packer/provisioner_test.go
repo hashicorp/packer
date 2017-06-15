@@ -23,7 +23,8 @@ func TestProvisionHook(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners: []Provisioner{pA, pB},
+		Provisioners:     []Provisioner{pA, pB},
+		ProvisionerTypes: []string{"", ""},
 	}
 
 	hook.Run("foo", ui, comm, data)
@@ -46,7 +47,8 @@ func TestProvisionHook_nilComm(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners: []Provisioner{pA, pB},
+		Provisioners:     []Provisioner{pA, pB},
+		ProvisionerTypes: []string{"", ""},
 	}
 
 	err := hook.Run("foo", ui, comm, data)
@@ -72,7 +74,8 @@ func TestProvisionHook_cancel(t *testing.T) {
 	}
 
 	hook := &ProvisionHook{
-		Provisioners: []Provisioner{p},
+		Provisioners:     []Provisioner{p},
+		ProvisionerTypes: []string{""},
 	}
 
 	finished := make(chan struct{})
