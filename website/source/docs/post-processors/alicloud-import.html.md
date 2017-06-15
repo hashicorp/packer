@@ -4,7 +4,7 @@ description: |
     various builders and imports it to an Alicloud customized image list.
 layout: docs
 page_title: 'Alicloud Import Post-Processor'
-...
+---
 
 # Aicloud Import Post-Processor
 
@@ -27,59 +27,59 @@ two categories: required and optional parameters.
 
 ### Required:
 
-- `access_key` (string) - This is the Alicloud access key. It must be provided,
-  but  it can also be sourced from the `ALICLOUD_ACCESS_KEY` environment
-  variable.
+-   `access_key` (string) - This is the Alicloud access key. It must be provided,
+    but it can also be sourced from the `ALICLOUD_ACCESS_KEY` environment
+    variable.
 
-- `secret_key` (string) - This is the Alicloud secret key. It must be provided,
-  but it can also be sourced from the `ALICLOUD_SECRET_KEY` environment
-  variable.
+-   `secret_key` (string) - This is the Alicloud secret key. It must be provided,
+    but it can also be sourced from the `ALICLOUD_SECRET_KEY` environment
+    variable.
 
-- `region` (string) - This is the Alicloud region. It must be provided, but it
-  can also be sourced from the `ALICLOUD_REGION` environment variables.
+-   `region` (string) - This is the Alicloud region. It must be provided, but it
+    can also be sourced from the `ALICLOUD_REGION` environment variables.
 
-- `image_name` (string) - The name of the user-defined image, [2, 128] English
-  or Chinese characters. It must begin with an uppercase/lowercase letter or
-  a Chinese character, and may contain numbers, `_` or `-`. It cannot begin
-  with http:// or https://.
+-   `image_name` (string) - The name of the user-defined image, \[2, 128\] English
+    or Chinese characters. It must begin with an uppercase/lowercase letter or
+    a Chinese character, and may contain numbers, `_` or `-`. It cannot begin
+    with <http://> or <https://>.
 
-- `oss_bucket_name` (string) - The name of the OSS bucket where the RAW or VHD
-  file will be copied to for import. If the Bucket isn't exist, post-process
-  will create it for you.
+-   `oss_bucket_name` (string) - The name of the OSS bucket where the RAW or VHD
+    file will be copied to for import. If the Bucket isn't exist, post-process
+    will create it for you.
 
-- `image_os_type` (string) - Type of the OS linux/windows
+-   `image_os_type` (string) - Type of the OS linux/windows
 
-- `image_platform` (string) - platform such `CentOS`
+-   `image_platform` (string) - platform such `CentOS`
 
-- `image_architecture` (string) - Platform type of the image system:i386
-  | x86_64
+-   `image_architecture` (string) - Platform type of the image system:i386
+    | x86\_64
 
-- `format` (string) - The format of the image for import, now alicloud only
-  support RAW and VHD.
+-   `format` (string) - The format of the image for import, now alicloud only
+    support RAW and VHD.
 
 ### Optional:
 
-- `oss_key_name` (string) - The name of the object key in `oss_bucket_name`
-  where the RAW or VHD file will be copied to for import.
+-   `oss_key_name` (string) - The name of the object key in `oss_bucket_name`
+    where the RAW or VHD file will be copied to for import.
 
-- `skip_clean` (boolean) - Whether we should skip removing the RAW or VHD file
-  uploaded to OSS after the import process has completed. `true` means that we
-  should leave it in the OSS bucket, `false` means to clean it out. Defaults to
-  `false`.
+-   `skip_clean` (boolean) - Whether we should skip removing the RAW or VHD file
+    uploaded to OSS after the import process has completed. `true` means that we
+    should leave it in the OSS bucket, `false` means to clean it out. Defaults to
+    `false`.
 
-- `image_description` (string) - The description of the image, with a length
-  limit of 0 to 256 characters. Leaving it blank means null, which is the
-  default value. It cannot begin with http:// or https://.
+-   `image_description` (string) - The description of the image, with a length
+    limit of 0 to 256 characters. Leaving it blank means null, which is the
+    default value. It cannot begin with <http://> or <https://>.
 
-- `image_force_delete` (bool) - If this value is true, when the target image
-  name is duplicated with an existing image, it will delete the existing image
-  and then create the target image, otherwise, the creation will fail. The
-  default value is false.
+-   `image_force_delete` (bool) - If this value is true, when the target image
+    name is duplicated with an existing image, it will delete the existing image
+    and then create the target image, otherwise, the creation will fail. The
+    default value is false.
 
-- `image_system_size` (int) - Size of the system disk, in GB, values range:
-    - cloud - 5 ~ 2000
-    - cloud_efficiency - 20 ~ 2048
-    - cloud_ssd - 20 ~ 2048
+-   `image_system_size` (int) - Size of the system disk, in GB, values range:
+    -   cloud - 5 ~ 2000
+    -   cloud\_efficiency - 20 ~ 2048
+    -   cloud\_ssd - 20 ~ 2048
 
 ## Basic Example
 
@@ -89,7 +89,7 @@ artifact. The user must have the role `AliyunECSImageImportDefaultRole` with
 role and policy for you if you have the privilege, otherwise, you have to ask
 the administrator configure for you in advance.
 
-```json
+``` json
 "post-processors":[
     {
       "access_key":"{{user `access_key`}}",

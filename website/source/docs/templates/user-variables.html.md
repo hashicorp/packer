@@ -1,13 +1,13 @@
 ---
+description: |
+    User variables allow your templates to be further configured with variables
+    from the command-line, environment variables, or files. This lets you
+    parameterize your templates so that you can keep secret tokens,
+    environment-specific data, and other types of information out of your
+    templates. This maximizes the portability and shareability of the template.
 layout: docs
-sidebar_current: docs-templates-user-variables
-page_title: User Variables - Templates
-description: |-
-  User variables allow your templates to be further configured with variables
-  from the command-line, environment variables, or files. This lets you
-  parameterize your templates so that you can keep secret tokens,
-  environment-specific data, and other types of information out of your
-  templates. This maximizes the portability and shareability of the template.
+page_title: 'User Variables - Templates'
+sidebar_current: 'docs-templates-user-variables'
 ---
 
 # Template User Variables
@@ -34,7 +34,7 @@ The `variables` section is a key/value mapping of the user variable name
 to a default value. A default value can be the empty string. An example
 is shown below:
 
-```json
+``` json
 {
   "variables": {
     "aws_access_key": "",
@@ -72,7 +72,7 @@ The `env` function is available *only* within the default value of a user
 variable, allowing you to default a user variable to an environment variable.
 An example is shown below:
 
-```json
+``` json
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
@@ -83,7 +83,7 @@ An example is shown below:
 This will default "my\_secret" to be the value of the "MY\_SECRET" environment
 variable (or an empty string if it does not exist).
 
--> **Why can't I use environment variables elsewhere?** User variables are
+-&gt; **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
 environment variables used *anywhere* in a template would confuse the user
 about the possible inputs to a template. By allowing environment variables
@@ -91,7 +91,7 @@ only within default values for user variables, user variables remain as the
 single source of input to a template that a user can easily discover using
 `packer inspect`.
 
--> **Why can't I use `~` for home variable?** `~` is an special variable
+-&gt; **Why can't I use `~` for home variable?** `~` is an special variable
 that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
@@ -110,7 +110,7 @@ example above, we could build our template using the command below. The
 command is split across multiple lines for readability, but can of
 course be a single line.
 
-```text
+``` text
 $ packer build \
     -var 'aws_access_key=foo' \
     -var 'aws_secret_key=bar' \
@@ -127,7 +127,7 @@ Variables can also be set from an external JSON file. The `-var-file` flag reads
 a file containing a key/value mapping of variables to values and sets
 those variables. An example JSON file may look like this:
 
-```json
+``` json
 {
   "aws_access_key": "foo",
   "aws_secret_key": "bar"
@@ -138,7 +138,7 @@ It is a single JSON object where the keys are variables and the values are the
 variable values. Assuming this file is in `variables.json`, we can build our
 template using the following command:
 
-```text
+``` text
 $ packer build -var-file=variables.json template.json
 ```
 
@@ -151,7 +151,7 @@ expect. Variables set later in the command override variables set
 earlier. So, for example, in the following command with the above
 `variables.json` file:
 
-```text
+``` text
 $ packer build \
     -var 'aws_access_key=bar' \
     -var-file=variables.json \
@@ -161,10 +161,10 @@ $ packer build \
 
 Results in the following variables:
 
-| Variable | Value     |
-| -------- | --------- |
-| aws_access_key | foo |
-| aws_secret_key | baz |
+| Variable         | Value |
+|------------------|-------|
+| aws\_access\_key | foo   |
+| aws\_secret\_key | baz   |
 
 # Recipes
 
@@ -176,7 +176,7 @@ be able to do this by referencing the variable within a command that
 you execute. For example, here is how to make a `shell-local`
 provisioner only run if the `do_nexpose_scan` variable is non-empty.
 
-```json
+``` json
 {
   "type": "shell-local",
   "command": "if [ ! -z \"{{user `do_nexpose_scan`}}\" ]; then python -u trigger_nexpose_scan.py; fi"
@@ -187,7 +187,7 @@ provisioner only run if the `do_nexpose_scan` variable is non-empty.
 
 In order to use `$HOME` variable, you can create a `home` variable in Packer:
 
-```json
+``` json
 {
   "variables": {
     "home": "{{env `HOME`}}"
@@ -197,7 +197,7 @@ In order to use `$HOME` variable, you can create a `home` variable in Packer:
 
 And this will be available to be used in the rest of the template, i.e.:
 
-```json
+``` json
 {
   "builders": [
     {
