@@ -64,6 +64,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateInstance{
 			Ctx: b.config.ctx,
 		},
+		&stepDetachIso{
+			DetachISO:     b.config.DetachISO,
+			DetachISOWait: b.config.DetachISOWait,
+		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,

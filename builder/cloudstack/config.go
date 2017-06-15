@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -28,22 +29,26 @@ type Config struct {
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
 	CIDRList          []string `mapstructure:"cidr_list"`
-	DiskOffering      string   `mapstructure:"disk_offering"`
-	DiskSize          int64    `mapstructure:"disk_size"`
-	Expunge           bool     `mapstructure:"expunge"`
-	Hypervisor        string   `mapstructure:"hypervisor"`
-	InstanceName      string   `mapstructure:"instance_name"`
-	Keypair           string   `mapstructure:"keypair"`
-	Network           string   `mapstructure:"network"`
-	Project           string   `mapstructure:"project"`
-	PublicIPAddress   string   `mapstructure:"public_ip_address"`
-	ServiceOffering   string   `mapstructure:"service_offering"`
-	SourceTemplate    string   `mapstructure:"source_template"`
-	SourceISO         string   `mapstructure:"source_iso"`
-	UserData          string   `mapstructure:"user_data"`
-	UserDataFile      string   `mapstructure:"user_data_file"`
-	UseLocalIPAddress bool     `mapstructure:"use_local_ip_address"`
-	Zone              string   `mapstructure:"zone"`
+	DetachISO         bool
+	DetachISOWait     time.Duration
+	DiskOffering      string `mapstructure:"disk_offering"`
+	DiskSize          int64  `mapstructure:"disk_size"`
+	Expunge           bool   `mapstructure:"expunge"`
+	Hypervisor        string `mapstructure:"hypervisor"`
+	InstanceName      string `mapstructure:"instance_name"`
+	Keypair           string `mapstructure:"keypair"`
+	Network           string `mapstructure:"network"`
+	Project           string `mapstructure:"project"`
+	PublicIPAddress   string `mapstructure:"public_ip_address"`
+	ServiceOffering   string `mapstructure:"service_offering"`
+	SourceTemplate    string `mapstructure:"source_template"`
+	SourceISO         string `mapstructure:"source_iso"`
+	RawDetachISO      string `mapstructure:"detach_iso"`
+	RawDetachISOWait  string `mapstructure:"detach_iso_wait"`
+	UserData          string `mapstructure:"user_data"`
+	UserDataFile      string `mapstructure:"user_data_file"`
+	UseLocalIPAddress bool   `mapstructure:"use_local_ip_address"`
+	Zone              string `mapstructure:"zone"`
 
 	TemplateName            string `mapstructure:"template_name"`
 	TemplateDisplayText     string `mapstructure:"template_display_text"`
@@ -145,6 +150,28 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("a hypervisor must be specified when using source_iso"))
 	}
+
+	if c.RawDetachISO == "" {
+		c.RawDetachISO = "false"
+	}
+
+	detachIso, err := strconv.ParseBool(c.RawDetachISO)
+	if err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing iso_detach: %s", err))
+	}
+	c.DetachISO = detachIso
+
+	if c.RawDetachISOWait == "" {
+		c.RawDetachISOWait = "10s"
+	}
+
+	detachISOWait, err := time.ParseDuration(c.RawDetachISOWait)
+	if err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Failed parsing iso_detach_wait: %s", err))
+	}
+	c.DetachISOWait = detachISOWait
 
 	if c.TemplateOS == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a template_os must be specified"))
