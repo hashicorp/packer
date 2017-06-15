@@ -4,6 +4,7 @@ package checkpoint
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
@@ -64,7 +65,7 @@ func (i *ReportParams) signature() string {
 	return signature
 }
 
-func Report(r *ReportParams) error {
+func Report(ctx context.Context, r *ReportParams) error {
 	if disabled := os.Getenv("CHECKPOINT_DISABLE"); disabled != "" {
 		return nil
 	}
@@ -117,7 +118,7 @@ func Report(r *ReportParams) error {
 	req.Header.Add("User-Agent", "HashiCorp/go-checkpoint")
 
 	client := cleanhttp.DefaultClient()
-	resp, err := client.Do(req)
+	resp, err := client.Do(req.WithContext(ctx))
 	if err != nil {
 		return err
 	}

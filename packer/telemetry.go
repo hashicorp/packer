@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -79,7 +80,11 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 	panicParams := c.baseParams(TelemetryPanicVersion)
 	panicParams.Payload = m
 	panicParams.EndTime = time.Now().UTC()
-	return checkpoint.Report(panicParams)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 4500*time.Millisecond)
+	defer cancel()
+
+	return checkpoint.Report(ctx, panicParams)
 }
 
 func (c *CheckpointTelemetry) AddSpan(name, pluginType string) *TelemetrySpan {
@@ -112,7 +117,10 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	}
 	params.Payload = extra
 
-	return checkpoint.Report(params)
+	ctx, cancel := context.WithTimeout(context.Background(), 450*time.Millisecond)
+	defer cancel()
+
+	return checkpoint.Report(ctx, params)
 }
 
 type TelemetrySpan struct {

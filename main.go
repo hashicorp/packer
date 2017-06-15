@@ -85,6 +85,7 @@ func realMain() int {
 		wrapConfig.Handler = panicHandler(logTempFile)
 		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
 		wrapConfig.Stdout = outW
+		wrapConfig.DetectDuration = 500 * time.Millisecond
 		exitStatus, err := panicwrap.Wrap(&wrapConfig)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
