@@ -64,13 +64,14 @@ straightforwarded, it is documented here.
 1.  Log into the [Google Developers
     Console](https://console.developers.google.com) and select a project.
 
-2.  Under the "APIs & Auth" section, click "Credentials."
+2.  Under the "API Manager" section, click "Credentials."
 
-3.  Click the "Create new Client ID" button, select "Service account", and click
-    "Create Client ID"
+3.  Click the "Create credentials" button, select "Service account key"
 
-4.  Click "Generate new JSON key" for the Service Account you just created. A
-    JSON file will be downloaded automatically. This is your *account file*.
+4.  Create new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
+
+5.  Chose `JSON` as Key type and click "Create".
+    A JSON file will be downloaded automatically. This is your *account file*.
 
 ### Precedence of Authentication Methods
 
