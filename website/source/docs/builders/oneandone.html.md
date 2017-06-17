@@ -1,9 +1,8 @@
 ---
+description: 'The 1&1 builder is able to create images for 1&1 cloud.'
 layout: docs
-sidebar_current: docs-builders-oneandone
-page_title: 1&1 - Builders
-description: |-
-  The 1&1 builder is able to create images for 1&1 cloud.
+page_title: '1&1 - Builders'
+sidebar_current: 'docs-builders-oneandone'
 ---
 
 # 1&1 Builder
@@ -24,28 +23,27 @@ builder.
 
 ### Required
 
-- `source_image_name` (string) - 1&1 Server Appliance name of type `IMAGE`.
+-   `source_image_name` (string) - 1&1 Server Appliance name of type `IMAGE`.
 
-- `token` (string) - 1&1 REST API Token. This can be specified via environment variable `ONEANDONE_TOKEN`
+-   `token` (string) - 1&1 REST API Token. This can be specified via environment variable `ONEANDONE_TOKEN`
 
 ### Optional
 
-- `data_center_name` - Name of virtual data center. Possible values "ES", "US", "GB", "DE". Default value "US"
+-   `data_center_name` - Name of virtual data center. Possible values "ES", "US", "GB", "DE". Default value "US"
 
-- `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
+-   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
-- `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
+-   `image_name` (string) - Resulting image. If "image\_name" is not provided Packer will generate it
 
-- `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
+-   `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
 
-- `url` (string) - Endpoint for the 1&1 REST API. Default URL "https://cloudpanel-api.1and1.com/v1"
-
+-   `url` (string) - Endpoint for the 1&1 REST API. Default URL "<https://cloudpanel-api.1and1.com/v1>"
 
 ## Example
 
 Here is a basic example:
 
-```json
+``` json
 {
   "builders":[
     {

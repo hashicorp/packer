@@ -1,10 +1,10 @@
 ---
+description: |
+    The `packer push` command uploads a template and other required files to the
+    Atlas build service, which will run your packer build for you.
 layout: docs
-sidebar_current: docs-commands-push
-page_title: packer push - Commands
-description: |-
-  The `packer push` command uploads a template and other required files to the
-  Atlas build service, which will run your packer build for you.
+page_title: 'packer push - Commands'
+sidebar_current: 'docs-commands-push'
 ---
 
 # `push` Command
@@ -23,7 +23,7 @@ artifacts in Atlas. In order to do that you will also need to configure the
 [Atlas post-processor](/docs/post-processors/atlas.html). This is optional, and
 both the post-processor and push commands can be used independently.
 
-!> The push command uploads your template and other files, like provisioning
+!&gt; The push command uploads your template and other files, like provisioning
 scripts, to Atlas. Take care not to upload files that you don't intend to, like
 secrets or large binaries. **If you have secrets in your Packer template, you
 should [move them into environment
@@ -35,46 +35,46 @@ configuration using the options below.
 
 ## Options
 
-- `-token` - Your access token for the Atlas API. Login to Atlas to [generate an
-  Atlas Token](https://atlas.hashicorp.com/settings/tokens). The most convenient
-  way to configure your token is to set it to the `ATLAS_TOKEN` environment
-  variable, but you can also use `-token` on the command line.
+-   `-token` - Your access token for the Atlas API. Login to Atlas to [generate an
+    Atlas Token](https://atlas.hashicorp.com/settings/tokens). The most convenient
+    way to configure your token is to set it to the `ATLAS_TOKEN` environment
+    variable, but you can also use `-token` on the command line.
 
-- `-name` - The name of the build in the service. This typically looks like
-  `hashicorp/precise64`, which follows the form `<username>/<buildname>`. This
-  must be specified here or in your template.
+-   `-name` - The name of the build in the service. This typically looks like
+    `hashicorp/precise64`, which follows the form `<username>/<buildname>`. This
+    must be specified here or in your template.
 
-- `-sensitive` - A comma-separated list of variables that should be marked as
-  sensitive in the Terraform Enterprise ui. These variables' keys will be 
-  visible, but their values will be redacted. example usage:
-  `-var 'supersecretpassword=mypassword' -sensitive=supersecretpassword1`
+-   `-sensitive` - A comma-separated list of variables that should be marked as
+    sensitive in the Terraform Enterprise ui. These variables' keys will be
+    visible, but their values will be redacted. example usage:
+    `-var 'supersecretpassword=mypassword' -sensitive=supersecretpassword1`
 
-- `-var` - Set a variable in your packer template. This option can be used
-  multiple times. This is useful for setting version numbers for your build.
+-   `-var` - Set a variable in your packer template. This option can be used
+    multiple times. This is useful for setting version numbers for your build.
 
-- `-var-file` - Set template variables from a file.
+-   `-var-file` - Set template variables from a file.
 
 ## Environment Variables
 
-- `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public
-  key. If specified, this will be used to validate the certificate authority
-  that signed certificates used by an Atlas installation.
+-   `ATLAS_CAFILE` (path) - This should be a path to an X.509 PEM-encoded public
+    key. If specified, this will be used to validate the certificate authority
+    that signed certificates used by an Atlas installation.
 
-- `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded
-  public key file. If specified, this will be used to validate the certificate
-  authority that signed certificates used by an Atlas installation.
+-   `ATLAS_CAPATH` - This should be a path which contains an X.509 PEM-encoded
+    public key file. If specified, this will be used to validate the certificate
+    authority that signed certificates used by an Atlas installation.
 
 ## Examples
 
 Push a Packer template:
 
-```shell
+``` shell
 $ packer push template.json
 ```
 
 Push a Packer template with a custom token:
 
-```shell
+``` shell
 $ packer push -token ABCD1234 template.json
 ```
 
