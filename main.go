@@ -212,7 +212,7 @@ func wrappedMain() int {
 	exitCode, err := cli.Run()
 	if !inPlugin {
 		if err := packer.CheckpointReporter.Finalize(cli.Subcommand(), exitCode, err); err != nil {
-			log.Printf("Error finalizing telemetry report. This is safe to ignore. %s", err.Error())
+			log.Printf("[WARN] (telemetry) Error finalizing report. This is safe to ignore. %s", err.Error())
 		}
 	}
 
