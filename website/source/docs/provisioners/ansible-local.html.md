@@ -1,11 +1,11 @@
 ---
+description: |
+    The ansible-local Packer provisioner configures Ansible to run on the
+    machine by Packer from local Playbook and Role files. Playbooks and Roles can
+    be uploaded from your local machine to the remote machine.
 layout: docs
-sidebar_current: docs-provisioners-ansible-local
-page_title: Ansible Local - Provisioners
-description: |-
-  The ansible-local Packer provisioner configures Ansible to run on the
-  machine by Packer from local Playbook and Role files. Playbooks and Roles can
-  be uploaded from your local machine to the remote machine.
+page_title: 'Ansible Local - Provisioners'
+sidebar_current: 'docs-provisioners-ansible-local'
 ---
 
 # Ansible Local Provisioner
@@ -18,7 +18,7 @@ uploaded from your local machine to the remote machine. Ansible is run in [local
 mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks) via the
 `ansible-playbook` command.
 
--> **Note:** Ansible will *not* be installed automatically by this
+-&gt; **Note:** Ansible will *not* be installed automatically by this
 provisioner. This provisioner expects that Ansible is already installed on the
 machine. It is common practice to use the [shell
 provisioner](/docs/provisioners/shell.html) before the Ansible provisioner to do
@@ -28,7 +28,7 @@ this.
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "ansible-local",
   "playbook_file": "local.yml"
@@ -41,38 +41,37 @@ The reference of available configuration options is listed below.
 
 Required:
 
-- `playbook_file` (string) - The playbook file to be executed by ansible. This
+-   `playbook_file` (string) - The playbook file to be executed by ansible. This
     file must exist on your local system and will be uploaded to the
     remote machine.
 
 Optional:
 
-- `command` (string) - The command to invoke ansible. Defaults
-    to "ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook".
+-   `command` (string) - The command to invoke ansible. Defaults
+    to "ANSIBLE\_FORCE\_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook".
     Note, This disregards the value of `-color` when passed to `packer build`.
     To disable colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
 
-- `extra_arguments` (array of strings) - An array of extra arguments to pass
-    to the ansible command. By default, this is empty. These arguments _will_
+-   `extra_arguments` (array of strings) - An array of extra arguments to pass
+    to the ansible command. By default, this is empty. These arguments *will*
     be passed through a shell and arguments should be quoted accordingly.
     Usage example:
 
-```
-"extra_arguments": [ "--extra-vars \"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
-```
+<!-- -->
+    "extra_arguments": [ "--extra-vars \"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
 
-- `inventory_groups` (string) - A comma-separated list of groups to which
+-   `inventory_groups` (string) - A comma-separated list of groups to which
     packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
     will generate an Ansible inventory like:
 
-```text
+``` text
 [my_group_1]
 127.0.0.1
 [my_group_2]
 127.0.0.1
 ```
 
-- `inventory_file` (string) - The inventory file to be used by ansible. This
+-   `inventory_file` (string) - The inventory file to be used by ansible. This
     file must exist on your local system and will be uploaded to the
     remote machine.
 
@@ -82,7 +81,7 @@ specified host you're buiding. The `--limit` argument can be provided in the
 
 An example inventory file may look like:
 
-```text
+``` text
 [chi-dbservers]
 db-01 ansible_connection=local
 db-02 ansible_connection=local
@@ -102,32 +101,32 @@ chi-dbservers
 chi-appservers
 ```
 
-- `playbook_dir` (string) - a path to the complete ansible directory structure
+-   `playbook_dir` (string) - a path to the complete ansible directory structure
     on your local system to be copied to the remote machine as the
     `staging_directory` before all other files and directories.
 
-- `playbook_paths` (array of strings) - An array of directories of playbook files on
+-   `playbook_paths` (array of strings) - An array of directories of playbook files on
     your local system. These will be uploaded to the remote machine under
     `staging_directory`/playbooks. By default, this is empty.
 
-- `galaxy_file` (string) - A requirements file which provides a way to install
+-   `galaxy_file` (string) - A requirements file which provides a way to install
     roles with the [ansible-galaxy
     cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
     on the remote machine. By default, this is empty.
 
-- `group_vars` (string) - a path to the directory containing ansible group
+-   `group_vars` (string) - a path to the directory containing ansible group
     variables on your local system to be copied to the remote machine. By
     default, this is empty.
 
-- `host_vars` (string) - a path to the directory containing ansible host
+-   `host_vars` (string) - a path to the directory containing ansible host
     variables on your local system to be copied to the remote machine. By
     default, this is empty.
 
-- `role_paths` (array of strings) - An array of paths to role directories on
+-   `role_paths` (array of strings) - An array of paths to role directories on
     your local system. These will be uploaded to the remote machine under
     `staging_directory`/roles. By default, this is empty.
 
-- `staging_directory` (string) - The directory where all the configuration of
+-   `staging_directory` (string) - The directory where all the configuration of
     Ansible by Packer will be placed. By default this is
     `/tmp/packer-provisioner-ansible-local/<uuid>`, where `<uuid>` is replaced
     with a unique ID so that this provisioner can be run more than once. If
@@ -144,15 +143,15 @@ In addition to being able to specify extra arguments using the
 `extra_arguments` configuration, the provisioner automatically defines certain
 commonly useful Ansible variables:
 
-- `packer_build_name` is set to the name of the build that Packer is running.
+-   `packer_build_name` is set to the name of the build that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly when using a common playbook.
 
-- `packer_builder_type` is the type of the builder that was used to create the
+-   `packer_builder_type` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the playbook on systems built with certain builders.
 
-- `packer_http_addr` If using a builder that provides an http server for file
+-   `packer_http_addr` If using a builder that provides an http server for file
     transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
     will be set to the address. You can use this address in your provisioner to
     download large files over http. This may be useful if you're experiencing
