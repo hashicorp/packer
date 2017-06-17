@@ -75,10 +75,13 @@ func realMain() int {
 
 		// Enable checkpoint for panic reporting
 		config, err := loadConfig()
-		if err == nil {
-			if !config.DisableCheckpoint {
-				packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
-			}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Couldn't load config: %s", err)
+			return 1
+		}
+
+		if !config.DisableCheckpoint {
+			packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
 		}
 
 		// Create the configuration for panicwrap and wrap our executable
