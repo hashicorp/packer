@@ -1,12 +1,12 @@
 ---
+description: |
+    Packer Provisioners are the components of Packer that install and configure
+    software into a running machine prior to turning that machine into an image.
+    An example of a provisioner is the shell provisioner, which runs shell scripts
+    within the machines.
 layout: docs
-sidebar_current: docs-extending-custom-provisioners
-page_title: Custom Provisioners - Extending
-description: |-
-  Packer Provisioners are the components of Packer that install and configure
-  software into a running machine prior to turning that machine into an image.
-  An example of a provisioner is the shell provisioner, which runs shell scripts
-  within the machines.
+page_title: 'Custom Provisioners - Extending'
+sidebar_current: 'docs-extending-custom-provisioners'
 ---
 
 # Custom Provisioners
@@ -23,7 +23,7 @@ development basics](/docs/extending/plugins.html).
 Provisioner plugins implement the `packer.Provisioner` interface and are served
 using the `plugin.ServeProvisioner` function.
 
-~> **Warning!** This is an advanced topic. If you're new to Packer, we
+~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
@@ -33,7 +33,7 @@ The interface that must be implemented for a provisioner is the
 actual interface in the source code contains some basic documentation as well
 explaining what each method should do.
 
-```go
+``` go
 type Provisioner interface {
   Prepare(...interface{}) error
   Provision(Ui, Communicator) error
@@ -90,7 +90,7 @@ itself](https://github.com/hashicorp/packer/blob/master/packer/communicator.go)
 is really great as an overview of how to use the interface. You should begin by
 reading this. Once you have read it, you can see some example usage below:
 
-```go
+``` go
 // Build the remote command.
 var cmd packer.RemoteCmd
 cmd.Command = "echo foo"
