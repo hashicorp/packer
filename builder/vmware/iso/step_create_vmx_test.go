@@ -199,6 +199,10 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 }
 
 func TestStepCreateVmx_SerialFile(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	tmpfile := tmpnam("SerialFileInput.")
 
 	serialConfig := map[string]string{
@@ -223,6 +227,10 @@ func TestStepCreateVmx_SerialFile(t *testing.T) {
 }
 
 func TestStepCreateVmx_SerialPort(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	var defaultSerial string
 	if runtime.GOOS == "windows" {
 		defaultSerial = "COM1"
@@ -268,6 +276,10 @@ func TestStepCreateVmx_SerialPort(t *testing.T) {
 }
 
 func TestStepCreateVmx_ParallelPort(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	var defaultParallel string
 	if runtime.GOOS == "windows" {
 		defaultParallel = "LPT1"
@@ -313,6 +325,10 @@ func TestStepCreateVmx_ParallelPort(t *testing.T) {
 }
 
 func TestStepCreateVmx_Usb(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	config := map[string]string{
 		"usb": `"TRUE"`,
 	}
@@ -351,6 +367,10 @@ func TestStepCreateVmx_Usb(t *testing.T) {
 }
 
 func TestStepCreateVmx_Sound(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	config := map[string]string{
 		"sound": `"TRUE"`,
 	}
