@@ -2,7 +2,6 @@ package packer
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -56,7 +55,7 @@ func (c *CheckpointTelemetry) Enable(disableSignature bool) {
 func (c *CheckpointTelemetry) baseParams(prefix string) *checkpoint.ReportParams {
 	version := packerVersion.Version
 	if packerVersion.VersionPrerelease != "" {
-		version += fmt.Sprintf("-%s", packerVersion.VersionPrerelease)
+		version += "-" + packerVersion.VersionPrerelease
 	}
 
 	return &checkpoint.ReportParams{
@@ -67,9 +66,6 @@ func (c *CheckpointTelemetry) baseParams(prefix string) *checkpoint.ReportParams
 		RunID:         os.Getenv("PACKER_RUN_UUID"),
 		SignatureFile: c.signatureFile,
 	}
-}
-
-func (c *CheckpointTelemetry) log(m string, args ...interface{}) {
 }
 
 func (c *CheckpointTelemetry) ReportPanic(m string) error {
