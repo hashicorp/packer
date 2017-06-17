@@ -27,6 +27,7 @@ import (
 
 var magicBytes [4]byte = [4]byte{0x35, 0x77, 0x69, 0xFB}
 
+// ReportParams are the parameters for configuring a telemetry report.
 type ReportParams struct {
 	// Signature is some random signature that should be stored and used
 	// as a cookie-like value. This ensures that alerts aren't repeated.
@@ -43,14 +44,14 @@ type ReportParams struct {
 
 	StartTime     time.Time   `json:"start_time"`
 	EndTime       time.Time   `json:"end_time"`
-	Version       string      `json:"version"`
-	Product       string      `json:"product"`
-	Payload       interface{} `json:"payload,omitempty"`
-	RunID         string      `json:"run_id"`
-	OS            string      `json:"os"`
 	Arch          string      `json:"arch"`
 	Args          []string    `json:"args"`
+	OS            string      `json:"os"`
+	Payload       interface{} `json:"payload,omitempty"`
+	Product       string      `json:"product"`
+	RunID         string      `json:"run_id"`
 	SchemaVersion string      `json:"schema_version"`
+	Version       string      `json:"version"`
 }
 
 func (i *ReportParams) signature() string {
@@ -65,15 +66,36 @@ func (i *ReportParams) signature() string {
 	return signature
 }
 
+// Report sends telemetry information to checkpoint
 func Report(ctx context.Context, r *ReportParams) error {
 	if disabled := os.Getenv("CHECKPOINT_DISABLE"); disabled != "" {
 		return nil
 	}
 
+	req, err := ReportRequest(r)
+	if err != nil {
+		return err
+	}
+
+	client := cleanhttp.DefaultClient()
+	resp, err := client.Do(req.WithContext(ctx))
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 201 {
+		return fmt.Errorf("Unknown status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// ReportRequest creates a request object for making a report
+func ReportRequest(r *ReportParams) (*http.Request, error) {
+	// Populate some fields automatically if we can
 	if r.RunID == "" {
 		uuid, err := uuid.GenerateUUID()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		r.RunID = uuid
 	}
@@ -92,17 +114,8 @@ func Report(ctx context.Context, r *ReportParams) error {
 
 	b, err := json.Marshal(r)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	// file logging while debugging
-	file, err := os.OpenFile("telemetry.log", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	file.Write(b)
-	file.WriteString("\n")
 
 	u := &url.URL{
 		Scheme: "https",
@@ -112,21 +125,12 @@ func Report(ctx context.Context, r *ReportParams) error {
 
 	req, err := http.NewRequest("POST", u.String(), bytes.NewReader(b))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", "HashiCorp/go-checkpoint")
 
-	client := cleanhttp.DefaultClient()
-	resp, err := client.Do(req.WithContext(ctx))
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 201 {
-		return fmt.Errorf("Unknown status: %d", resp.StatusCode)
-	}
-
-	return nil
+	return req, nil
 }
 
 // CheckParams are the parameters for configuring a check request.
@@ -221,7 +225,6 @@ func Check(p *CheckParams) (*CheckResponse, error) {
 		p.OS = runtime.GOOS
 	}
 
-	// TODO: race here if we try to write this file twice
 	// If we're given a SignatureFile, then attempt to read that.
 	signature := p.Signature
 	if p.Signature == "" && p.SignatureFile != "" {
