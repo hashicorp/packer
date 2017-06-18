@@ -60,6 +60,9 @@ fmt: ## Format Go code
 fmt-check: ## Check go code formatting
 	$(CURDIR)/scripts/gofmtcheck.sh $(GOFMT_FILES)
 
+fmt-docs:
+	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
+
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:
 	find examples -name *.json | xargs js-beautify -r -s 2 -n -eol "\n"
@@ -91,4 +94,4 @@ updatedeps:
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: bin checkversion ci default deps fmt fmt-examples generate releasebin test testacc testrace updatedeps
+.PHONY: bin checkversion ci default deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace updatedeps
