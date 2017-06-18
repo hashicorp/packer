@@ -1,10 +1,10 @@
 ---
+description: |
+    The shell-local Packer post processor enables users to do some post processing
+    after artifacts have been built.
 layout: docs
-sidebar_current: docs-post-processors-shell-local
-page_title: Local Shell - Post-Processors
-description: |-
-  The shell-local Packer post processor enables users to do some post processing
-  after artifacts have been built.
+page_title: 'Local Shell - Post-Processors'
+sidebar_current: 'docs-post-processors-shell-local'
 ---
 
 # Local Shell Post Processor
@@ -19,7 +19,7 @@ some task with the packer outputs.
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "shell-local",
   "inline": ["echo foo"]
@@ -33,36 +33,36 @@ required element is either "inline" or "script". Every other option is optional.
 
 Exactly *one* of the following is required:
 
-- `inline` (array of strings) - This is an array of commands to execute. The
+-   `inline` (array of strings) - This is an array of commands to execute. The
     commands are concatenated by newlines and turned into a single file, so they
     are all executed within the same context. This allows you to change
     directories in one command and use something in the directory in the next
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
 
-- `script` (string) - The path to a script to execute. This path can be
+-   `script` (string) - The path to a script to execute. This path can be
     absolute or relative. If it is relative, it is relative to the working
     directory when Packer is executed.
 
-- `scripts` (array of strings) - An array of scripts to execute. The scripts
+-   `scripts` (array of strings) - An array of scripts to execute. The scripts
     will be executed in the order specified. Each script is executed in
     isolation, so state such as variables from one script won't carry on to the
     next.
 
 Optional parameters:
 
-- `environment_vars` (array of strings) - An array of key/value pairs to
+-   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
-- `execute_command` (string) - The command to use to execute the script. By
+-   `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
     The value of this is treated as [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
     to run, `Vars`, which is the list of `environment_vars`, if configured.
 
-- `inline_shebang` (string) - The
+-   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
     running commands specified by `inline`. By default, this is `/bin/sh -e`. If
     you're not using `inline`, then this configuration has no effect.
@@ -82,11 +82,11 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
-- `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+-   `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 
-- `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
+-   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
 
@@ -99,7 +99,7 @@ you much time in the process.
 
 ### Once Per Builder
 
-The `shell-local` script(s) you pass are run once per builder.  That means that
+The `shell-local` script(s) you pass are run once per builder. That means that
 if you have an `amazon-ebs` builder and a `docker` builder, your script will be
 run twice. If you have 3 builders, it will run 3 times, once for each builder.
 
@@ -112,7 +112,7 @@ of files produced by a `builder` to a json file after each `builder` is run.
 For example, if you wanted to package a file from the file builder into
 a tarball, you might wright this:
 
-```json
+``` json
 {
   "builders": [
     {
