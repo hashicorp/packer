@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/panicwrap"
 )
 
@@ -33,6 +34,10 @@ func panicHandler(logF *os.File) panicwrap.HandlerFunc {
 		// Write away just output this thing on stderr so that it gets
 		// shown in case anything below fails.
 		fmt.Fprintf(os.Stderr, fmt.Sprintf("%s\n", m))
+
+		if err := packer.CheckpointReporter.ReportPanic(m); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to report panic. This is safe to ignore: %s", err)
+		}
 
 		// Create the crash log file where we'll write the logs
 		f, err := os.Create("crash.log")

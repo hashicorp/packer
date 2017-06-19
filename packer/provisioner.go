@@ -30,7 +30,8 @@ type Provisioner interface {
 type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
-	Provisioners []Provisioner
+	Provisioners     []Provisioner
+	ProvisionerTypes []string
 
 	lock               sync.Mutex
 	runningProvisioner Provisioner
@@ -57,12 +58,15 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 		h.runningProvisioner = nil
 	}()
 
-	for _, p := range h.Provisioners {
+	for i, p := range h.Provisioners {
 		h.lock.Lock()
 		h.runningProvisioner = p
 		h.lock.Unlock()
 
-		if err := p.Provision(ui, comm); err != nil {
+		ts := CheckpointReporter.AddSpan(h.ProvisionerTypes[i], "provisioner")
+		err := p.Provision(ui, comm)
+		ts.End(err)
+		if err != nil {
 			return err
 		}
 	}
