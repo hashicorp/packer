@@ -115,6 +115,7 @@ type coreBuildPostProcessor struct {
 // Keeps track of the provisioner and the configuration of the provisioner
 // within the build.
 type coreBuildProvisioner struct {
+	pType       string
 	provisioner Provisioner
 	config      []interface{}
 }
@@ -194,8 +195,10 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	// Add a hook for the provisioners if we have provisioners
 	if len(b.provisioners) > 0 {
 		provisioners := make([]Provisioner, len(b.provisioners))
+		provisionerTypes := make([]string, len(b.provisioners))
 		for i, p := range b.provisioners {
 			provisioners[i] = p.provisioner
+			provisionerTypes[i] = p.pType
 		}
 
 		if _, ok := hooks[HookProvision]; !ok {
@@ -203,7 +206,8 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 		}
 
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
-			Provisioners: provisioners,
+			Provisioners:     provisioners,
+			ProvisionerTypes: provisionerTypes,
 		})
 	}
 
@@ -217,7 +221,9 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	}
 
 	log.Printf("Running builder: %s", b.builderType)
+	ts := CheckpointReporter.AddSpan(b.builderType, "builder")
 	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
+	ts.End(err)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +248,9 @@ PostProcessorRunSeqLoop:
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
+			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor")
 			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop
