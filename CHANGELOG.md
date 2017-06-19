@@ -1,4 +1,4 @@
-## (Unreleased)
+## 1.0.1 (June 19, 2017)
 
 ### IMPROVEMENTS:
 
@@ -9,8 +9,9 @@
 * builder/amazon: Allow configuration of api endpoint to support api-compatible
     cloud providers. [GH-4896]
 * builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
-* builder/amazon: use retry logic when creating instance tags. [GH-4876]
-* builder/amazon: validate ami name. [GH-4762]
+* builder/amazon: Use retry logic when creating instance tags. [GH-4876]
+* builder/amazon: Validate ami name. [GH-4762]
+* builder/amazon: Fix regex used for ami name validation [GH-4902]
 * builder/azure: Add build output to artifact. [GH-4953]
 * builder/digitalocean: Added support for monitoring. [GH-4782]
 * builder/digitalocean: Support for copying snapshot to other regions.
@@ -25,7 +26,7 @@
 * builder/virtualbox: Don't add port forwarding when using "none" communicator.
     [GH-4960]
 * builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
-* builder/vmware: make vnc probe timeout configurable. [GH-4919]
+* builder/vmware: VNC probe timeout is configurable. [GH-4919]
 * communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
 * communicator/winrm: Add support for file downloads. [GH-4748]
 * provisioner/ansible-local: Add extra-vars `packer_build_name`,
@@ -43,18 +44,24 @@
 * command/push: add `-sensitive` flag to mark pushed vars are sensitive.
     [GH-4970]
 * builder/amazon: Print temporary security group name to the UI. [GH-4997]
-* provisioner/salt: add support for grains. [GH-4961]
-* provisioner/ansible: add `inventory_directory` option to control where to
+* provisioner/salt: Add support for grains. [GH-4961]
+* provisioner/ansible: Add `inventory_directory` option to control where to
     place the generated inventory file. [GH-4760]
 * communicator/winrm: Add NTLM authentication support. [GH-4979]
-* provisioner/ansible: add `skip_version_check` flag for when ansible will be
+* provisioner/ansible: Add `skip_version_check` flag for when ansible will be
     installed from a prior provisioner. [GH-4983]
 * command/push: Vagrant support in Terraform Enterprise is deprecated.
     [GH-4950]
-* post-processor/vagrant-cloud: get vagrant cloud token from environment.
+* post-processor/vagrant-cloud: Get vagrant cloud token from environment.
     [GH-4982]
 * provisioner/salt: Add salt bin directory configuration. [GH-5009]
 * core: add telemetry for better product support. [GH-5015]
+* builder/amazon: Support Assume Role with MFA and ECS Task Roles. Also updates
+    to a newer version of aws-sdk-go. [GH-4996]
+* builder/azure: Use disk URI as artifact ID. [GH-4981]
+* builder/hyper-v: Remove the check for administrator rights when sending key strokes to Hyper-V. [GH-4687]
+# builder/openstack: Fix private key error message to match documentation [GH-4898]
+* core: Build binaries for arm64 [GH-4892]
 
 
 ### BUG FIXES:
@@ -101,6 +108,7 @@
 * core: Invoking packer `--help` or `--version` now exits with status 0.
     [GH-4723]
 * core: show correct step name when debugging. [GH-4672]
+* communicator/winrm: Directory uploads behave more like scp. [GH-4438]
 
 ### IMPROVEMENTS:
 
