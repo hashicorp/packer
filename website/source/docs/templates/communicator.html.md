@@ -76,8 +76,8 @@ The SSH communicator has the following options:
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
 
--   `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
-    disabled. Defaults to false.
+-   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
+    will be disabled. Defaults to false.
 
 -   `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
     copy (default) or SSH File Transfer Protocol.
