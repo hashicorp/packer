@@ -546,9 +546,10 @@
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 		},
 		{
-			"checksumSHA1": "nd3S1qkFv7zZxA9be0bw4nT0pe0=",
+			"checksumSHA1": "EPwsEGG/9t4sCexmFYnlZpE548A=",
 			"path": "github.com/hashicorp/go-checkpoint",
-			"revision": "e4b2dc34c0f698ee04750bf2035d8b9384233e1b"
+			"revision": "04fd58160a0619a814172a795aa173fa64be731c",
+			"revisionTime": "2017-06-17T00:44:57Z"
 		},
 		{
 			"checksumSHA1": "fSe5y1UgTDeYlnFfUcDA1zzcw+U=",
@@ -718,9 +719,10 @@
 			"revisionTime": "2017-03-16T18:53:39Z"
 		},
 		{
-			"checksumSHA1": "VBo7ciCNRr7wNVFmBTW8sm4PQ14=",
+			"checksumSHA1": "m2L8ohfZiFRsMW3iynaH/TWgnSY=",
 			"path": "github.com/mitchellh/panicwrap",
-			"revision": "a1e50bc201f387747a45ffff020f1af2d8759e88"
+			"revision": "fce601fe55579125e1b3cb0b992287e7290f7b83",
+			"revisionTime": "2017-01-06T18:23:40Z"
 		},
 		{
 			"checksumSHA1": "h+ODp7a8Vj8XMUsORLbhtQMWOO4=",

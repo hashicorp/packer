@@ -154,6 +154,7 @@ func (c *Core) Build(n string) (Build, error) {
 		}
 
 		provisioners = append(provisioners, coreBuildProvisioner{
+			pType:       rawP.Type,
 			provisioner: provisioner,
 			config:      config,
 		})

@@ -15,7 +15,7 @@ func testBuild() *coreBuild {
 			"foo": {&MockHook{}},
 		},
 		provisioners: []coreBuildProvisioner{
-			{&MockProvisioner{}, []interface{}{42}},
+			{"mock-provisioner", &MockProvisioner{}, []interface{}{42}},
 		},
 		postProcessors: [][]coreBuildPostProcessor{
 			{
