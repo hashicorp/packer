@@ -72,7 +72,6 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 	if !c.enabled {
 		return nil
 	}
-	log.Printf("[TELEMETRY] Add panic: %s", m)
 	panicParams := c.baseParams(TelemetryPanicVersion)
 	panicParams.Payload = m
 	panicParams.EndTime = time.Now().UTC()
@@ -99,7 +98,6 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 		return nil
 	}
 
-	log.Printf("[TELEMETRY] finalize: %#v", c)
 	params := c.baseParams(TelemetryVersion)
 	params.EndTime = time.Now().UTC()
 
