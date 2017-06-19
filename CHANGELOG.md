@@ -2,70 +2,73 @@
 
 ### IMPROVEMENTS:
 
-* builder.triton: An SSH agent can be used to authenticate requests, making
-    `triton_key_material` optional. [GH-4838]
 * builder/amazon: Allow amis to be copied to other regions, encrypted with
     custom KMS keys. [GH-4948]
 * builder/amazon: Allow configuration of api endpoint to support api-compatible
     cloud providers. [GH-4896]
+* builder/amazon: Fix regex used for ami name validation [GH-4902]
 * builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
+* builder/amazon: Print temporary security group name to the UI. [GH-4997]
+* builder/amazon: Support Assume Role with MFA and ECS Task Roles. Also updates
+    to a newer version of aws-sdk-go. [GH-4996]
 * builder/amazon: Use retry logic when creating instance tags. [GH-4876]
 * builder/amazon: Validate ami name. [GH-4762]
-* builder/amazon: Fix regex used for ami name validation [GH-4902]
 * builder/azure: Add build output to artifact. [GH-4953]
+* builder/azure: Use disk URI as artifact ID. [GH-4981]
 * builder/digitalocean: Added support for monitoring. [GH-4782]
 * builder/digitalocean: Support for copying snapshot to other regions.
     [GH-4893]
+* builder/hyper-v: Remove the check for administrator rights when sending key
+    strokes to Hyper-V. [GH-4687] # builder/openstack: Fix private key error
+    message to match documentation [GH-4898]
 * builder/null: Support SSH agent auth [GH-4956]
 * builder/openstack: Add ssh agent support. [GH-4655]
 * builder/openstack: Support client x509 certificates. [GH-4921]
 * builder/parallels-iso: Configuration of disk type, plain or expanding.
     [GH-4621]
+* builder/triton: An SSH agent can be used to authenticate requests, making
+    `triton_key_material` optional. [GH-4838]
 * builder/triton: If no source machine networks are specified, instances are
     started on the default public and internal networks. [GH-4838]
+* builder/virtualbox: Add sata port count configuration option. [GH-4699]
 * builder/virtualbox: Don't add port forwarding when using "none" communicator.
     [GH-4960]
 * builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
+* builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
 * builder/vmware: VNC probe timeout is configurable. [GH-4919]
+* command/push: add `-sensitive` flag to mark pushed vars are sensitive.
+    [GH-4970]
+* command/push: Vagrant support in Terraform Enterprise is deprecated.
+    [GH-4950]
 * communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
+* communicator/winrm: Add NTLM authentication support. [GH-4979]
 * communicator/winrm: Add support for file downloads. [GH-4748]
+* core: add telemetry for better product support. [GH-5015]
+* core: Build binaries for arm64 [GH-4892]
+* post-processor/amazon-import: Add support for `license_type`. [GH-4634]
+* post-processor/vagrant-cloud: Get vagrant cloud token from environment.
+    [GH-4982]
 * provisioner/ansible-local: Add extra-vars `packer_build_name`,
     `packer_builder_type`, and `packer_http_addr`. [GH-4821]
+* provisioner/ansible: Add `inventory_directory` option to control where to
+    place the generated inventory file. [GH-4760]
+* provisioner/ansible: Add `skip_version_check` flag for when ansible will be
+    installed from a prior provisioner. [GH-4983]
 * provisioner/ansible: Add extra-vars `packer_build_name` and
     `packer_builder_type`. [GH-4821]
+* provisioner/chef-solo: Add option to select Chef version. [GH-4791]
+* provisioner/salt: Add salt bin directory configuration. [GH-5009]
+* provisioner/salt: Add support for grains. [GH-4961]
 * provisioner/shell: Use `env` to set environment variables to support freebsd
     out of the box. [GH-4909]
 * website/docs: Clarify language, improve formatting. [GH-4866]
 * website/docs: Update docker metadata fields that can be changed. [GH-4867]
-* builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
-* builder/virtualbox: Add sata port count configuration option. [GH-4699]
-* post-processor/amazon-import: Add support for `license_type`. [GH-4634]
-* provisioner/chef-solo: Add option to select Chef version. [GH-4791]
-* command/push: add `-sensitive` flag to mark pushed vars are sensitive.
-    [GH-4970]
-* builder/amazon: Print temporary security group name to the UI. [GH-4997]
-* provisioner/salt: Add support for grains. [GH-4961]
-* provisioner/ansible: Add `inventory_directory` option to control where to
-    place the generated inventory file. [GH-4760]
-* communicator/winrm: Add NTLM authentication support. [GH-4979]
-* provisioner/ansible: Add `skip_version_check` flag for when ansible will be
-    installed from a prior provisioner. [GH-4983]
-* command/push: Vagrant support in Terraform Enterprise is deprecated.
-    [GH-4950]
-* post-processor/vagrant-cloud: Get vagrant cloud token from environment.
-    [GH-4982]
-* provisioner/salt: Add salt bin directory configuration. [GH-5009]
-* core: add telemetry for better product support. [GH-5015]
-* builder/amazon: Support Assume Role with MFA and ECS Task Roles. Also updates
-    to a newer version of aws-sdk-go. [GH-4996]
-* builder/azure: Use disk URI as artifact ID. [GH-4981]
-* builder/hyper-v: Remove the check for administrator rights when sending key strokes to Hyper-V. [GH-4687]
-# builder/openstack: Fix private key error message to match documentation [GH-4898]
-* core: Build binaries for arm64 [GH-4892]
 
 
 ### BUG FIXES:
 
+* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
+    [GH-4972]
 * builder/amazon: don't try to delete extra volumes during clean up. [GH-4930]
 * builder/amazon: fix `force_delete_snapshot` when the launch instance has
     extra volumes. [GH-4931]
@@ -76,13 +79,12 @@
 * core: Correctly reject config files which have junk after valid json.
     [GH-4906]
 * post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
-* provisioner/ansible-local: Correctly set the default staging directory under
-    Windows. [GH-4792]
-* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
-    [GH-4972]
 * post-processor/vagrant-cloud: don't read files to upload in to memory first.
     [GH-5005]
-* post-processor/vagrant-cloud: only upload once under normal conditions. [GH-5008]
+* post-processor/vagrant-cloud: only upload once under normal conditions.
+    [GH-5008]
+* provisioner/ansible-local: Correctly set the default staging directory under
+    Windows. [GH-4792]
 
 ### FEATURES:
 
