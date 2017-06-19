@@ -63,7 +63,7 @@ can be configured for this builder.
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
     recommended since ISO files and virtual harddrive files are	generally large 
-	and corruption does happen from time to time.
+    and corruption does happen from time to time.
 
 -   `iso_url` (string) - A URL to the ISO containing the installation image or
     virtual harddrive vhd or vhdx file to clone. This URL can be either an HTTP
@@ -114,7 +114,7 @@ can be configured for this builder.
     characters (`*`, `?`, and `[]`) are allowed. Directory names are also allowed,
     which will add all the files found in the directory to the floppy.
 
-- `floppy_dirs` (array of strings) - A list of directories to place onto
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
     except that the directory structure is preserved. This is useful for when
     your floppy disk includes drivers or if you just want to organize it's
