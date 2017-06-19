@@ -54,6 +54,7 @@
 * post-processor/vagrant-cloud: get vagrant cloud token from environment.
     [GH-4982]
 * provisioner/salt: Add salt bin directory configuration. [GH-5009]
+* core: add telemetry for better product support. [GH-5015]
 
 
 ### BUG FIXES:
