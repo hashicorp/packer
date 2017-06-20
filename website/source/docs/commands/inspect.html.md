@@ -1,13 +1,13 @@
 ---
+description: |
+    The `packer inspect` command takes a template and outputs the various
+    components a template defines. This can help you quickly learn about a
+    template without having to dive into the JSON itself. The command will tell
+    you things like what variables a template accepts, the builders it defines,
+    the provisioners it defines and the order they'll run, and more.
 layout: docs
-sidebar_current: docs-commands-inspect
-page_title: packer inspect - Commands
-description: |-
-  The `packer inspect` command takes a template and outputs the various
-  components a template defines. This can help you quickly learn about a
-  template without having to dive into the JSON itself. The command will tell
-  you things like what variables a template accepts, the builders it defines,
-  the provisioners it defines and the order they'll run, and more.
+page_title: 'packer inspect - Commands'
+sidebar_current: 'docs-commands-inspect'
 ---
 
 # `inspect` Command
@@ -30,7 +30,7 @@ your template by necessity.
 
 Given a basic template, here is an example of what the output might look like:
 
-```text
+``` text
 $ packer inspect template.json
 Variables and their defaults:
 
