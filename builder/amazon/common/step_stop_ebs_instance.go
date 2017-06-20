@@ -78,7 +78,7 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 	// Wait for the instance to actual stop
 	ui.Say("Waiting for the instance to stop...")
 	stateChange := StateChangeConf{
-		Pending:   []string{"running", "stopping"},
+		Pending:   []string{"running", "pending", "stopping"},
 		Target:    "stopped",
 		Refresh:   InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
 		StepState: state,
