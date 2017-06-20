@@ -1,10 +1,10 @@
 ---
+description: |
+    Within the template, the builders section contains an array of all the
+    builders that Packer should use to generate machine images for the template.
 layout: docs
-sidebar_current: docs-templates-builders
-page_title: Builders - Templates
-description: |-
-  Within the template, the builders section contains an array of all the
-  builders that Packer should use to generate machine images for the template.
+page_title: 'Builders - Templates'
+sidebar_current: 'docs-templates-builders'
 ---
 
 # Template Builders
@@ -23,7 +23,7 @@ referenced from the documentation for that specific builder.
 
 Within a template, a section of builder definitions looks like this:
 
-```json
+``` json
 {
   "builders": [
     // ... one or more builder definitions here
@@ -45,7 +45,7 @@ These are placed directly within the builder definition.
 An example builder definition is shown below, in this case configuring the AWS
 builder:
 
-```json
+``` json
 {
   "type": "amazon-ebs",
   "access_key": "...",

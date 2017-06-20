@@ -1,10 +1,10 @@
 ---
+description: |
+    It is possible to write custom builders using the Packer plugin interface, and
+    this page documents how to do that.
 layout: docs
-sidebar_current: docs-extending-custom-builders
-page_title: Custom Builders - Extending
-description: |-
-  It is possible to write custom builders using the Packer plugin interface, and
-  this page documents how to do that.
+page_title: 'Custom Builders - Extending'
+sidebar_current: 'docs-extending-custom-builders'
 ---
 
 # Custom Builders
@@ -19,7 +19,7 @@ plugin interface, and this page documents how to do that.
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins.html).
 
-~> **Warning!** This is an advanced topic. If you're new to Packer, we
+~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
@@ -29,7 +29,7 @@ interface. It is reproduced below for reference. The actual interface in the
 source code contains some basic documentation as well explaining what each
 method should do.
 
-```go
+``` go
 type Builder interface {
   Prepare(...interface{}) error
   Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
@@ -134,14 +134,14 @@ When the machine is ready to be provisioned, run the `packer.HookProvision`
 hook, making sure the communicator is not nil, since this is required for
 provisioners. An example of calling the hook is shown below:
 
-```go
+``` go
 hook.Run(packer.HookProvision, ui, comm, nil)
 ```
 
 At this point, Packer will run the provisioners and no additional work is
 necessary.
 
--> **Note:** Hooks are still undergoing thought around their general design
+-&gt; **Note:** Hooks are still undergoing thought around their general design
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 

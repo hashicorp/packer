@@ -1,10 +1,10 @@
 ---
+description: |
+    Packer is able to create Amazon AMIs. To achieve this, Packer comes with
+    multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
-sidebar_current: docs-builders-amazon
-page_title: Amazon AMI - Builders
-description: |-
-  Packer is able to create Amazon AMIs. To achieve this, Packer comes with
-  multiple builders depending on the strategy you want to use to build the AMI.
+page_title: 'Amazon AMI - Builders'
+sidebar_current: 'docs-builders-amazon'
 ---
 
 # Amazon AMI Builder
@@ -34,7 +34,7 @@ Packer supports the following builders at the moment:
     not require running in AWS. This is an **advanced builder and should not be
     used by newcomers**.
 
--> **Don't know which builder to use?** If in doubt, use the [amazon-ebs
+-&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
@@ -72,12 +72,12 @@ Credentials are resolved in the following order:
 
 Packer depends on the [AWS
 SDK](https://aws.amazon.com/documentation/sdk-for-go/) to perform automatic
-lookup using _credential chains_. In short, the SDK looks for credentials in
+lookup using *credential chains*. In short, the SDK looks for credentials in
 the following order:
 
-1. Environment variables.
-2. Shared credentials file.
-3. If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
+1.  Environment variables.
+2.  Shared credentials file.
+3.  If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
 
 Please refer to the SDK's documentation on [specifying
 credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)
@@ -93,7 +93,7 @@ the task's or instance's IAM role, if it has one.
 The following policy document provides the minimal set permissions necessary for
 Packer to work:
 
-```json
+``` json
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -152,7 +152,7 @@ The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.
 
-```json
+``` json
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
@@ -173,6 +173,6 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-http://www.time.gov/. On Linux/OS X, you can run the `date` command to get the
+<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
 current time. If you're on Linux, you can try setting the time with ntp by
 running `sudo ntpd -q`.
