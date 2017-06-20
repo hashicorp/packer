@@ -1,3 +1,6 @@
+## (UNRELEASED)
+* builder/amazon: Fixed bugs related to stop instance command. [GH-5007]
+
 ## 1.0.1 (June 19, 2017)
 
 ### IMPROVEMENTS:
