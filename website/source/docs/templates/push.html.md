@@ -1,10 +1,10 @@
 ---
+description: |
+    Within the template, the push section configures how a template can be pushed
+    to a remote build service.
 layout: docs
-sidebar_current: docs-templates-push
-page_title: Push - Templates
-description: |-
-  Within the template, the push section configures how a template can be pushed
-  to a remote build service.
+page_title: 'Push - Templates'
+sidebar_current: 'docs-templates-push'
 ---
 
 # Template Push
@@ -22,7 +22,7 @@ services will come in the form of plugins in the future.
 
 Within a template, a push configuration section looks like this:
 
-```json
+``` json
 {
   "push": {
     // ... push configuration here
@@ -38,30 +38,30 @@ each category, the available configuration keys are alphabetized.
 
 ### Required
 
-- `name` (string) - Name of the build configuration in the build service. If
+-   `name` (string) - Name of the build configuration in the build service. If
     this doesn't exist, it will be created (by default). Note that the name
     cannot contain dots. `[a-zA-Z0-9-_/]+` are safe.
 
 ### Optional
 
-- `address` (string) - The address of the build service to use. By default
+-   `address` (string) - The address of the build service to use. By default
     this is `https://atlas.hashicorp.com`.
 
-- `base_dir` (string) - The base directory of the files to upload. This will
+-   `base_dir` (string) - The base directory of the files to upload. This will
     be the current working directory when the build service executes
     your template. This path is relative to the template.
 
-- `include` (array of strings) - Glob patterns to include relative to the
+-   `include` (array of strings) - Glob patterns to include relative to the
     `base_dir`. If this is specified, only files that match the include pattern
     are included.
 
-- `exclude` (array of strings) - Glob patterns to exclude relative to the
+-   `exclude` (array of strings) - Glob patterns to exclude relative to the
     `base_dir`.
 
-- `token` (string) - An access token to use to authenticate to the
+-   `token` (string) - An access token to use to authenticate to the
     build service.
 
-- `vcs` (boolean) - If true, Packer will detect your VCS (if there is one) and
+-   `vcs` (boolean) - If true, Packer will detect your VCS (if there is one) and
     only upload the files that are tracked by the VCS. This is useful for
     automatically excluding ignored files. This defaults to false.
 
@@ -69,7 +69,7 @@ each category, the available configuration keys are alphabetized.
 
 A push configuration section with minimal options:
 
-```json
+``` json
 {
   "push": {
     "name": "hashicorp/precise64"
@@ -80,7 +80,7 @@ A push configuration section with minimal options:
 A push configuration specifying Packer to inspect the VCS and list individual
 files to include:
 
-```json
+``` json
 {
   "push": {
     "name": "hashicorp/precise64",
