@@ -1,5 +1,18 @@
 ## (UNRELEASED)
-* builder/amazon: Fixed bugs related to stop instance command. [GH-5007]
+
+## 1.0.2 (June 21, 2017)
+
+### BUG FIXES:
+
+* builder/amazon: Fix bugs related to stop instance command. [GH-5029]
+* communicator/ssh: Fix ssh connection errors. [GH-5038]
+* core: Remove logging that shouldn't be there when running commands. [GH-5042]
+* provisioner/shell: Fix bug where scripts were being run under `sh`. [GH-5043]
+
+### IMRPOVEMENTS:
+
+* provisioner/windows-restart: make it clear that timeouts come from the
+    provisioner, not winrm. [GH-5040]
 
 ## 1.0.1 (June 19, 2017)
 
