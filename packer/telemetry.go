@@ -76,7 +76,9 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 	panicParams.Payload = m
 	panicParams.EndTime = time.Now().UTC()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 4500*time.Millisecond)
+	// This timeout can be longer because it runs in the real main.
+	// We're also okay waiting a bit longer to collect panic information
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	return checkpoint.Report(ctx, panicParams)
