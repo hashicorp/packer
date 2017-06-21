@@ -395,8 +395,9 @@ func (d *ESX5Driver) connect() error {
 	sshConfig := &ssh.Config{
 		Connection: ssh.ConnectFunc("tcp", address),
 		SSHConfig: &gossh.ClientConfig{
-			User: d.Username,
-			Auth: auth,
+			User:            d.Username,
+			Auth:            auth,
+			HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 		},
 	}
 
