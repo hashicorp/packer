@@ -36,6 +36,7 @@ func sshConfig(comm *communicator.Config) func(state multistep.StateBag) (*gossh
 				Auth: []gossh.AuthMethod{
 					gossh.PublicKeys(signer),
 				},
+				HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 			}, nil
 		} else {
 			// password based auth
@@ -46,6 +47,7 @@ func sshConfig(comm *communicator.Config) func(state multistep.StateBag) (*gossh
 					gossh.KeyboardInteractive(
 						ssh.PasswordKeyboardInteractive(comm.SSHPassword)),
 				},
+				HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 	}

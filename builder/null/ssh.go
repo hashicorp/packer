@@ -39,6 +39,7 @@ func SSHConfig(useAgent bool, username string, password string, privateKeyFile s
 				Auth: []gossh.AuthMethod{
 					gossh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
+				HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 
@@ -61,6 +62,7 @@ func SSHConfig(useAgent bool, username string, password string, privateKeyFile s
 				Auth: []gossh.AuthMethod{
 					gossh.PublicKeys(signer),
 				},
+				HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 			}, nil
 		} else {
 			// password based auth
