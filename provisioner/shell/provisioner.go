@@ -101,7 +101,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = "chmod +x {{.Path}}; env {{.Vars}} {{.Path}}"
+		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
 	}
 
 	if p.config.ExpectDisconnect == nil {
