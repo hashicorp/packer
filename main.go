@@ -53,6 +53,9 @@ func realMain() int {
 			logWriter = ioutil.Discard
 		}
 
+		// Disable logging here
+		log.SetOutput(ioutil.Discard)
+
 		// We always send logs to a temporary file that we use in case
 		// there is a panic. Otherwise, we delete it.
 		logTempFile, err := ioutil.TempFile("", "packer-log")
@@ -74,13 +77,7 @@ func realMain() int {
 		go copyOutput(outR, doneCh)
 
 		// Enable checkpoint for panic reporting
-		config, err := loadConfig()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Couldn't load config: %s", err)
-			return 1
-		}
-
-		if !config.DisableCheckpoint {
+		if config, _ := loadConfig(); config != nil && !config.DisableCheckpoint {
 			packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
 		}
 
