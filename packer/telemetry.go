@@ -37,13 +37,13 @@ type CheckpointTelemetry struct {
 func (c *CheckpointTelemetry) Enable(disableSignature bool) {
 	configDir, err := ConfigDir()
 	if err != nil {
-		log.Printf("[ERR] Checkpoint telemetry setup error: %s", err)
+		log.Printf("[WARN] (telemetry) setup error: %s", err)
 		return
 	}
 
 	signatureFile := ""
 	if disableSignature {
-		log.Printf("[INFO] Checkpoint telemetry signature disabled")
+		log.Printf("[INFO] (telemetry) Checkpoint signature disabled")
 	} else {
 		signatureFile = filepath.Join(configDir, "checkpoint_signature")
 	}
@@ -83,7 +83,7 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 }
 
 func (c *CheckpointTelemetry) AddSpan(name, pluginType string) *TelemetrySpan {
-	log.Printf("[TELEMETRY] Starting %s %s", pluginType, name)
+	log.Printf("[INFO] (telemetry) Starting %s %s", pluginType, name)
 	ts := &TelemetrySpan{
 		Name:      name,
 		Type:      pluginType,
@@ -127,9 +127,9 @@ type TelemetrySpan struct {
 
 func (s *TelemetrySpan) End(err error) {
 	s.EndTime = time.Now().UTC()
-	log.Printf("[TELEMETRY] ending %s", s.Name)
+	log.Printf("[INFO] (telemetry) ending %s", s.Name)
 	if err != nil {
 		s.Error = err.Error()
-		log.Printf("[TELEMETRY] ERROR: %s", err.Error())
+		log.Printf("[INFO] (telemetry) found error: %s", err.Error())
 	}
 }
