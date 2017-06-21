@@ -147,7 +147,7 @@ WaitLoop:
 		select {
 		case <-waitDone:
 			if err != nil {
-				ui.Error(fmt.Sprintf("Error waiting for WinRM: %s", err))
+				ui.Error(fmt.Sprintf("Error waiting for machine to restart: %s", err))
 				return err
 			}
 
@@ -155,7 +155,7 @@ WaitLoop:
 			close(p.cancel)
 			break WaitLoop
 		case <-timeout:
-			err := fmt.Errorf("Timeout waiting for WinRM.")
+			err := fmt.Errorf("Timeout waiting for machine to restart.")
 			ui.Error(err.Error())
 			close(p.cancel)
 			return err
