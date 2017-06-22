@@ -50,9 +50,7 @@ func (s *resourceResolver) Resolve(c *Config) error {
 			return err
 		}
 
-		c.customManagedImageBlobUri = *image.ImageProperties.StorageProfile.OsDisk.BlobURI
-		c.customManagedImageLocation = *image.Location
-		c.customManagedImageOSState = image.ImageProperties.StorageProfile.OsDisk.OsState
+		c.customManagedImageID = *image.ID
 	}
 
 	return nil
