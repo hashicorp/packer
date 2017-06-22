@@ -53,7 +53,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	if config.ImageUrl != "" {
 		builder.SetImageUrl(config.ImageUrl, osType)
 	} else if config.CustomManagedImageName != "" {
-		builder.SetManagedDiskUrl(config.CustomManagedImageName, config.customManagedImageLocation, config.customManagedImageBlobUri, config.customManagedImageOSState)
+		builder.SetManagedDiskUrl(config.customManagedImageID)
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
 			config.SubscriptionID,

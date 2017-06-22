@@ -68,9 +68,7 @@ type Config struct {
 
 	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name"`
 	CustomManagedImageName              string `mapstructure:"custom_managed_image_name"`
-	customManagedImageLocation          string
-	customManagedImageBlobUri           string
-	customManagedImageOSState           compute.OperatingSystemStateTypes
+	customManagedImageID                string
 
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
