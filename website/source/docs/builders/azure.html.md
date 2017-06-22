@@ -85,19 +85,19 @@ When creating a managed image the following two options are required.
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
     
 -   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
-     of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
-     cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
-     to learn more about custom data, and how it can be used to influence the provisioning process.
+    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
+    cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
+    to learn more about custom data, and how it can be used to influence the provisioning process.
 
 -   `custom_managed_image_name` (string) Specify the source managed image's name to use.  If this value is set, do not set
-     image_publisher, image_offer, image_sku, or image_version. If this value is set, the value
-     `custom_managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-     to learn more about managed images.
+    image_publisher, image_offer, image_sku, or image_version. If this value is set, the value
+    `custom_managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
 
--   `custom_managed_image_resource_group_name` (string)  Specify the source managed image's resource group used to use.  If this
-      value is set, do not set image_publisher, image_offer, image_sku, or image_version. If this value is set, the
-      value `custom_managed_image_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
-      to learn more about managed images.
+-   `custom_managed_image_resource_group_name` (string) Specify the source managed image's resource group used to use.  If this
+    value is set, do not set image_publisher, image_offer, image_sku, or image_version. If this value is set, the
+    value `custom_managed_image_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
 
 -   `image_version` (string) Specify a specific version of an OS to boot from. Defaults to `latest`. There may be a
     difference in versions available across regions due to image synchronization latency. To ensure a consistent
@@ -107,8 +107,7 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
-     
-           
+                
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
