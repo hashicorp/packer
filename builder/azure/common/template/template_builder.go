@@ -101,38 +101,21 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedDiskUrl(managedDiskImageName, location, blobUri string, osState compute.OperatingSystemStateTypes) error {
+func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
 	}
 
-	resourceId := s.toResourceID(resourceManagedDisk, managedDiskImageName)
 	profile := resource.Properties.StorageProfile
 	profile.ImageReference = &compute.ImageReference{
-		ID: to.StringPtr(resourceId),
+		ID: &managedImageId,
 	}
+	profile.OsDisk.Name = to.StringPtr("osdisk")
+	profile.OsDisk.OsType = s.osType
+	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
 
-	*resource.DependsOn = append(*resource.DependsOn, fmt.Sprintf("[concat('%s/', '%s')]", resourceManagedDisk, managedDiskImageName))
-
-	managedDiskResource := &Resource{
-		Type:       to.StringPtr(resourceManagedDisk),
-		ApiVersion: to.StringPtr(s.toVariable("managedDiskApiVersion")),
-		Name:       to.StringPtr(managedDiskImageName),
-		Location:   to.StringPtr(location),
-		Properties: &Properties{
-			StorageProfile: &StorageProfileUnion{
-				OsDisk: &OSDiskUnion{
-					OsType:  s.osType,
-					OsState: osState,
-					BlobURI: to.StringPtr(blobUri),
-				},
-			},
-		},
-	}
-
-	*s.template.Resources = append(*s.template.Resources, *managedDiskResource)
 	return nil
 }
 
