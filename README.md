@@ -16,7 +16,7 @@
 
 * Website: https://www.packer.io
 * IRC: `#packer-tool` on Freenode
-* Mailing list: [Google Groups](http://groups.google.com/group/packer-tool)
+* Mailing list: [Google Groups](https://groups.google.com/forum/#!forum/packer-tool)
 
 Packer is a tool for building identical machine images for multiple platforms
 from a single source configuration.
@@ -53,12 +53,12 @@ go get github.com/hashicorp/packer
 ```
 
 **Note:** There is a great
-[introduction and getting started guide](http://www.packer.io/intro)
+[introduction and getting started guide](https://www.packer.io/intro)
 for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
-First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
+First, [download a pre-built Packer binary](https://www.packer.io/downloads.html)
 for your operating system or [compile Packer yourself](CONTRIBUTING.md#setting-up-go-to-work-on-packer).
 
 After Packer is installed, create your first template, which tells Packer
@@ -103,7 +103,7 @@ they're run, etc. is up to you.
 
 Comprehensive documentation is viewable on the Packer website:
 
-http://www.packer.io/docs
+https://www.packer.io/docs
 
 ## Developing Packer
 
