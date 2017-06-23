@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -328,6 +329,16 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 		if instance.PrivateIpAddress != nil && *instance.PrivateIpAddress != "" {
 			ui.Message(fmt.Sprintf("Private IP: %s", *instance.PrivateIpAddress))
+		}
+	}
+	if instance.PrivateIpAddress != nil && *instance.PrivateIpAddress != "" {
+		if err := os.Setenv("PACKER_AWS_PRIVATE_IP", *instance.PrivateIpAddress); err != nil {
+			log.Printf("Set env error: %s", err)
+		}
+	}
+	if instance.PublicIpAddress != nil && *instance.PublicIpAddress != "" {
+		if err := os.Setenv("PACKER_AWS_PUBLIC_IP", *instance.PublicIpAddress); err != nil {
+			log.Printf("Set env error: %s", err)
 		}
 	}
 
