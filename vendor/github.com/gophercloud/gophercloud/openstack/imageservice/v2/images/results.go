@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/internal"
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
@@ -63,13 +64,13 @@ type Image struct {
 	Metadata map[string]string `json:"metadata"`
 
 	// Properties is a set of key-value pairs, if any, that are associated with the image.
-	Properties map[string]string `json:"properties"`
+	Properties map[string]interface{} `json:"-"`
 
 	// CreatedAt is the date when the image has been created.
-	CreatedAt time.Time `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// UpdatedAt is the date when the last change has been made to the image or it's properties.
-	UpdatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// File is the trailing path after the glance endpoint that represent the location
 	// of the image or the path to retrieve it.
@@ -77,38 +78,45 @@ type Image struct {
 
 	// Schema is the path to the JSON-schema that represent the image or image entity.
 	Schema string `json:"schema"`
+
+	// VirtualSize is the virtual size of the image
+	VirtualSize int64 `json:"virtual_size"`
 }
 
-func (s *Image) UnmarshalJSON(b []byte) error {
+func (r *Image) UnmarshalJSON(b []byte) error {
 	type tmp Image
-	var p *struct {
+	var s struct {
 		tmp
 		SizeBytes interface{} `json:"size"`
-		CreatedAt string      `json:"created_at"`
-		UpdatedAt string      `json:"updated_at"`
 	}
-	err := json.Unmarshal(b, &p)
+	err := json.Unmarshal(b, &s)
 	if err != nil {
 		return err
 	}
-	*s = Image(p.tmp)
+	*r = Image(s.tmp)
 
-	switch t := p.SizeBytes.(type) {
+	switch t := s.SizeBytes.(type) {
 	case nil:
 		return nil
 	case float32:
-		s.SizeBytes = int64(t)
+		r.SizeBytes = int64(t)
 	case float64:
-		s.SizeBytes = int64(t)
+		r.SizeBytes = int64(t)
 	default:
 		return fmt.Errorf("Unknown type for SizeBytes: %v (value: %v)", reflect.TypeOf(t), t)
 	}
 
-	s.CreatedAt, err = time.Parse(time.RFC3339, p.CreatedAt)
+	// Bundle all other fields into Properties
+	var result interface{}
+	err = json.Unmarshal(b, &result)
 	if err != nil {
 		return err
 	}
-	s.UpdatedAt, err = time.Parse(time.RFC3339, p.UpdatedAt)
+	if resultMap, ok := result.(map[string]interface{}); ok {
+		delete(resultMap, "self")
+		r.Properties = internal.RemainingKeys(Image{}, resultMap)
+	}
+
 	return err
 }
 
@@ -163,7 +171,12 @@ func (r ImagePage) NextPageURL() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return nextPageURL(r.URL.String(), s.Next), nil
+
+	if s.Next == "" {
+		return "", nil
+	}
+
+	return nextPageURL(r.URL.String(), s.Next)
 }
 
 // ExtractImages interprets the results of a single page from a List() call, producing a slice of Image entities.
