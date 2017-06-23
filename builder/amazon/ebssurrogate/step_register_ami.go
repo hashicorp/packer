@@ -25,7 +25,8 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Registering the AMI...")
 
-	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(s.BlockDevices)-1)
+	// Defensive coding to make sure we only add the root volume once
+	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(s.BlockDevices))
 	for _, blockDevice := range s.BlockDevices {
 		if *blockDevice.DeviceName == s.RootDevice.SourceDeviceName {
 			continue
