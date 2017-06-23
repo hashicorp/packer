@@ -1,5 +1,9 @@
 ## (UNRELEASED)
 
+### BUG FIXES:
+
+* builder/vmware-esxi: Fix VNC port discovery default timeout. [GH-5051]
+
 ## 1.0.2 (June 21, 2017)
 
 ### BUG FIXES:
