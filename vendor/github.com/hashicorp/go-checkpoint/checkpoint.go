@@ -45,7 +45,6 @@ type ReportParams struct {
 	StartTime     time.Time   `json:"start_time"`
 	EndTime       time.Time   `json:"end_time"`
 	Arch          string      `json:"arch"`
-	Args          []string    `json:"args"`
 	OS            string      `json:"os"`
 	Payload       interface{} `json:"payload,omitempty"`
 	Product       string      `json:"product"`
@@ -104,9 +103,6 @@ func ReportRequest(r *ReportParams) (*http.Request, error) {
 	}
 	if r.OS == "" {
 		r.OS = runtime.GOOS
-	}
-	if len(r.Args) == 0 {
-		r.Args = os.Args
 	}
 	if r.Signature == "" {
 		r.Signature = r.signature()
