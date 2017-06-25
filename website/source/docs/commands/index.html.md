@@ -48,10 +48,10 @@ appear on stderr. An example of the output is shown below:
 
 ``` text
 $ packer -machine-readable version
-1376289459,,version,0.2.4
-1376289459,,version-prerelease,
-1376289459,,version-commit,eed6ece
-1376289459,,ui,say,Packer v0.2.4.dev (eed6ece+CHANGES)
+1498365963,,version,1.0.2
+1498365963,,version-prelease,
+1498365963,,version-commit,3ead2750b+CHANGES
+1498365963,,ui,say,Packer v1.0.2
 ```
 
 The format will be covered in more detail later. But as you can see, the output
