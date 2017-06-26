@@ -41,8 +41,8 @@ as a copy of [`git`](https://www.git-scm.com/) in your `PATH`.
 1.  Clone the Packer repository from GitHub into your `GOPATH`:
 
     ``` shell
-    $ mkdir -p $GOPATH/src/github.com/mitchellh && cd $!
-    $ git clone https://github.com/mitchellh/packer.git
+    $ mkdir -p $GOPATH/src/github.com/hashicorp && cd $!
+    $ git clone https://github.com/hashicorp/packer.git
     $ cd packer
     ```
 

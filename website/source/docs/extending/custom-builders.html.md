@@ -115,7 +115,7 @@ The only part of an artifact that may be confusing is the `BuilderId` method.
 This method must return an absolutely unique ID for the builder. In general, I
 follow the practice of making the ID contain my GitHub username and then the
 platform it is building for. For example, the builder ID of the VMware builder
-is "mitchellh.vmware" or something similar.
+is "hashicorp.vmware" or something similar.
 
 Post-processors use the builder ID value in order to make some assumptions about
 the artifact results, so it is important it never changes.
