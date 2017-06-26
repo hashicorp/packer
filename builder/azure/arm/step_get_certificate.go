@@ -35,6 +35,7 @@ func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificat
 func (s *StepGetCertificate) getCertificateUrl(keyVaultName string, secretName string) (string, error) {
 	secret, err := s.client.GetSecret(keyVaultName, secretName)
 	if err != nil {
+		s.say(s.client.LastError.Error())
 		return "", err
 	}
 

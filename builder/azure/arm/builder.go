@@ -12,11 +12,11 @@ import (
 
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 
-	"github.com/Azure/go-autorest/autorest/azure"
-
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 
+	"github.com/Azure/azure-sdk-for-go/arm/storage"
+	"github.com/Azure/go-autorest/autorest/adal"
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
@@ -48,6 +48,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.stateBag = new(multistep.BasicStateBag)
 	b.configureStateBag(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
+	b.setImageParameters(b.stateBag)
 
 	return warnings, errs
 }
@@ -88,9 +89,31 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	b.config.storageAccountBlobEndpoint, err = b.getBlobEndpoint(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
-	if err != nil {
-		return nil, err
+	if b.config.isManagedImage() {
+		group, err := azureClient.GroupsClient.Get(b.config.ManagedImageResourceGroupName)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.ManagedImageResourceGroupName)
+		}
+
+		b.config.manageImageLocation = *group.Location
+
+		// If a managed image already exists it cannot be overwritten.
+		_, err = azureClient.ImagesClient.Get(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
+		if err == nil {
+			return nil, fmt.Errorf("A managed image named %s already exists in the resource group %s.", b.config.ManagedImageName, b.config.ManagedImageResourceGroupName)
+		}
+	}
+
+	if b.config.StorageAccount != "" {
+		account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
+		if err != nil {
+			return nil, err
+		}
+		b.config.storageAccountBlobEndpoint = *account.AccountProperties.PrimaryEndpoints.Blob
+
+		if !equalLocation(*account.Location, b.config.Location) {
+			return nil, fmt.Errorf("The storage account is located in %s, but the build will take place in %s. The locations must be identical", *account.Location, b.config.Location)
+		}
 	}
 
 	endpointConnectType := PublicEndpoint
@@ -98,7 +121,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		endpointConnectType = PrivateEndpoint
 	}
 
+	b.setRuntimeParameters(b.stateBag)
 	b.setTemplateParameters(b.stateBag)
+	b.setImageParameters(b.stateBag)
 	var steps []multistep.Step
 
 	if b.config.OSType == constants.Target_Linux {
@@ -174,12 +199,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
+	if b.config.isManagedImage() {
+		return NewManagedImageArtifact(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation)
+	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
 			func(name string) string {
 				month := time.Now().AddDate(0, 1, 0).UTC()
-				sasUrl, _ := azureClient.BlobStorageClient.GetBlobSASURI(DefaultSasBlobContainer, name, month, DefaultSasBlobPermission)
+				blob := azureClient.BlobStorageClient.GetContainerReference(DefaultSasBlobContainer).GetBlobReference(name)
+				sasUrl, _ := blob.GetSASURI(month, DefaultSasBlobPermission)
 				return sasUrl
 			})
 	}
@@ -198,13 +226,21 @@ func (b *Builder) Cancel() {
 	}
 }
 
-func (b *Builder) getBlobEndpoint(client *AzureClient, resourceGroupName string, storageAccountName string) (string, error) {
+func equalLocation(location1, location2 string) bool {
+	return strings.EqualFold(canonicalizeLocation(location1), canonicalizeLocation(location2))
+}
+
+func canonicalizeLocation(location string) string {
+	return strings.Replace(location, " ", "", -1)
+}
+
+func (b *Builder) getBlobAccount(client *AzureClient, resourceGroupName string, storageAccountName string) (*storage.Account, error) {
 	account, err := client.AccountsClient.GetProperties(resourceGroupName, storageAccountName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return *account.Properties.PrimaryEndpoints.Blob, nil
+	return &account, err
 }
 
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
@@ -220,15 +256,28 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
 	stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
+
+	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
+	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
+	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
+}
+
+// Parameters that are only known at runtime after querying Azure.
+func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
+	stateBag.Put(constants.ArmManagedImageLocation, b.config.manageImageLocation)
 }
 
 func (b *Builder) setTemplateParameters(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, b.config.toVirtualMachineCaptureParameters())
 }
 
-func (b *Builder) getServicePrincipalTokens(say func(string)) (*azure.ServicePrincipalToken, *azure.ServicePrincipalToken, error) {
-	var servicePrincipalToken *azure.ServicePrincipalToken
-	var servicePrincipalTokenVault *azure.ServicePrincipalToken
+func (b *Builder) setImageParameters(stateBag multistep.StateBag) {
+	stateBag.Put(constants.ArmImageParameters, b.config.toImageParameters())
+}
+
+func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrincipalToken, *adal.ServicePrincipalToken, error) {
+	var servicePrincipalToken *adal.ServicePrincipalToken
+	var servicePrincipalTokenVault *adal.ServicePrincipalToken
 
 	var err error
 

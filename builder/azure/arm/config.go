@@ -65,8 +65,17 @@ type Config struct {
 	ImageSku       string `mapstructure:"image_sku"`
 	ImageVersion   string `mapstructure:"image_version"`
 	ImageUrl       string `mapstructure:"image_url"`
-	Location       string `mapstructure:"location"`
-	VMSize         string `mapstructure:"vm_size"`
+
+	CustomManagedImageResourceGroupName string `mapstructure:"custom_managed_image_resource_group_name"`
+	CustomManagedImageName              string `mapstructure:"custom_managed_image_name"`
+	customManagedImageID                string
+
+	Location string `mapstructure:"location"`
+	VMSize   string `mapstructure:"vm_size"`
+
+	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName              string `mapstructure:"managed_image_name"`
+	manageImageLocation           string
 
 	// Deployment
 	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
@@ -118,11 +127,31 @@ type keyVaultCertificate struct {
 	Password string `json:"password,omitempty"`
 }
 
+func (c *Config) toVMID() string {
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, c.tmpResourceGroupName, c.tmpComputeName)
+}
+
+func (c *Config) isManagedImage() bool {
+	return c.ManagedImageName != ""
+}
+
 func (c *Config) toVirtualMachineCaptureParameters() *compute.VirtualMachineCaptureParameters {
 	return &compute.VirtualMachineCaptureParameters{
 		DestinationContainerName: &c.CaptureContainerName,
 		VhdPrefix:                &c.CaptureNamePrefix,
 		OverwriteVhds:            to.BoolPtr(false),
+	}
+}
+
+func (c *Config) toImageParameters() *compute.Image {
+	return &compute.Image{
+		ImageProperties: &compute.ImageProperties{
+			SourceVirtualMachine: &compute.SubResource{
+				ID: to.StringPtr(c.toVMID()),
+			},
+		},
+		Location: to.StringPtr(c.Location),
+		Tags:     &c.AzureTags,
 	}
 }
 
@@ -277,7 +306,9 @@ func setSshValues(c *Config) error {
 
 func setWinRMCertificate(c *Config) error {
 	c.Comm.WinRMTransportDecorator =
-		func() winrm.Transporter { return &winrm.ClientNTLM{} }
+		func() winrm.Transporter {
+			return &winrm.ClientNTLM{}
+		}
 
 	cert, err := c.createCertificate()
 	c.winrmCertificate = cert
@@ -372,7 +403,7 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
-	if c.ImageUrl == "" && c.ImageVersion == "" {
+	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
 
@@ -437,47 +468,86 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Capture
-	if c.CaptureContainerName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must be specified"))
+	if c.CaptureContainerName == "" && c.ManagedImageName == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name or managed_image_name must be specified"))
 	}
 
-	if !reCaptureContainerName.MatchString(c.CaptureContainerName) {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must satisfy the regular expression %q.", reCaptureContainerName.String()))
+	if c.CaptureNamePrefix == "" && c.ManagedImageResourceGroupName == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix or managed_image_resource_group_name must be specified"))
 	}
 
-	if strings.HasSuffix(c.CaptureContainerName, "-") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not end with a hyphen, e.g. '-'."))
+	if (c.CaptureNamePrefix != "" || c.CaptureContainerName != "") && (c.ManagedImageResourceGroupName != "" || c.ManagedImageName != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either a VHD or a managed image can be built, but not both. Please specify either capture_container_name and capture_name_prefix or managed_image_resource_group_name and managed_image_name."))
 	}
 
-	if strings.Contains(c.CaptureContainerName, "--") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not contain consecutive hyphens, e.g. '--'."))
-	}
+	if c.CaptureContainerName != "" {
+		if !reCaptureContainerName.MatchString(c.CaptureContainerName) {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must satisfy the regular expression %q.", reCaptureContainerName.String()))
+		}
 
-	if c.CaptureNamePrefix == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must be specified"))
-	}
+		if strings.HasSuffix(c.CaptureContainerName, "-") {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not end with a hyphen, e.g. '-'."))
+		}
 
-	if !reCaptureNamePrefix.MatchString(c.CaptureNamePrefix) {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must satisfy the regular expression %q.", reCaptureNamePrefix.String()))
-	}
+		if strings.Contains(c.CaptureContainerName, "--") {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_container_name must not contain consecutive hyphens, e.g. '--'."))
+		}
 
-	if strings.HasSuffix(c.CaptureNamePrefix, "-") || strings.HasSuffix(c.CaptureNamePrefix, ".") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must not end with a hyphen or period."))
+		if c.CaptureNamePrefix == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must be specified"))
+		}
+
+		if !reCaptureNamePrefix.MatchString(c.CaptureNamePrefix) {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must satisfy the regular expression %q.", reCaptureNamePrefix.String()))
+		}
+
+		if strings.HasSuffix(c.CaptureNamePrefix, "-") || strings.HasSuffix(c.CaptureNamePrefix, ".") {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A capture_name_prefix must not end with a hyphen or period."))
+		}
 	}
 
 	/////////////////////////////////////////////
 	// Compute
-	if c.ImageUrl == "" {
+	toInt := func(b bool) int {
+		if b {
+			return 1
+		} else {
+			return 0
+		}
+	}
+
+	isImageUrl := c.ImageUrl != ""
+	isCustomManagedImage := c.CustomManagedImageName != "" || c.CustomManagedImageResourceGroupName != ""
+	isPlatformImage := c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != ""
+
+	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage)
+
+	if countSourceInputs > 1 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name"))
+	}
+
+	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
-
 		if c.ImageOffer == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_offer must be specified"))
 		}
-
 		if c.ImageSku == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_sku must be specified"))
+		}
+	} else if c.ImageUrl == "" && c.ImagePublisher == "" {
+		if c.CustomManagedImageResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An custom_managed_image_resource_group_name must be specified"))
+		}
+		if c.CustomManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A custom_managed_image_name must be specified"))
+		}
+		if c.ManagedImageResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_resource_group_name must be specified"))
+		}
+		if c.ManagedImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An managed_image_name must be specified"))
 		}
 	} else {
 		if c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != "" || c.ImageVersion != "" {
@@ -491,12 +561,23 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Deployment
-	if c.StorageAccount == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A storage_account must be specified"))
+	xor := func(a, b bool) bool {
+		return (a || b) && !(a && b)
 	}
-	if c.ResourceGroupName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+
+	if !xor((c.StorageAccount != "" || c.ResourceGroupName != ""), (c.ManagedImageName != "" || c.ManagedImageResourceGroupName != "")) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (storage_account and resource_group_name) or Managed Image (managed_image_resource_group_name and managed_image_name) output"))
 	}
+
+	if c.ManagedImageName == "" && c.ManagedImageResourceGroupName == "" {
+		if c.StorageAccount == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A storage_account must be specified"))
+		}
+		if c.ResourceGroupName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}

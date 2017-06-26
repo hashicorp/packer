@@ -6,6 +6,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 
+	"fmt"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/template"
 )
@@ -51,6 +52,18 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 
 	if config.ImageUrl != "" {
 		builder.SetImageUrl(config.ImageUrl, osType)
+	} else if config.CustomManagedImageName != "" {
+		builder.SetManagedDiskUrl(config.customManagedImageID)
+	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
+		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
+			config.SubscriptionID,
+			config.Location,
+			config.ImagePublisher,
+			config.ImageOffer,
+			config.ImageSku,
+			config.ImageVersion)
+
+		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID)
 	} else {
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}
