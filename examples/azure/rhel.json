@@ -5,7 +5,8 @@
     "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
     "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
-    "ssh_user": "packer",
+    "tenant_id": "{{env `ARM_TENANT_ID`}}",
+    "ssh_user": "centos",
     "ssh_pass": null
   },
   "builders": [{
@@ -16,6 +17,7 @@
     "resource_group_name": "{{user `resource_group`}}",
     "storage_account": "{{user `storage_account`}}",
     "subscription_id": "{{user `subscription_id`}}",
+    "tenant_id": "{{user `tenant_id`}}",
 
     "capture_container_name": "images",
     "capture_name_prefix": "packer",
@@ -24,22 +26,23 @@
     "ssh_password": "{{user `ssh_pass`}}",
 
     "os_type": "Linux",
-    "image_publisher": "SUSE",
-    "image_offer": "openSUSE",
-    "image_sku": "13.2",
+    "image_publisher": "RedHat",
+    "image_offer": "RHEL",
+    "image_sku": "7.3",
+    "image_version": "latest",
     "ssh_pty": "true",
 
     "location": "South Central US",
-    "vm_size": "Standard_A2"
+    "vm_size": "Standard_DS2_v2"
   }],
   "provisioners": [{
     "execute_command": "echo '{{user `ssh_pass`}}' | {{ .Vars }} sudo -S -E sh '{{ .Path }}'",
     "inline": [
-      "zypper update -y",
-
+      "yum update -y",
       "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
     ],
     "inline_shebang": "/bin/sh -x",
-    "type": "shell"
+    "type": "shell",
+    "skip_clean": true
   }]
 }
