@@ -29,15 +29,8 @@ builder.
 
 -   `client_secret` (string) The password or secret for your service principal.
 
--   `resource_group_name` (string) Resource group under which the final artifact will be stored.
-
--   `storage_account` (string) Storage account under which the final artifact will be stored.
-
 -   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
-
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure. The captured VHD's URL will be <https://><storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
-
--   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and `PREFIX-vmTemplate.UUID`.
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -54,6 +47,32 @@ builder.
 -   `location` (string) Azure datacenter in which your VM will build.
 
     CLI example `azure location list`
+    
+#### VHD or Managed Image
+
+The Azure builder can create either a VHD, or a managed image. When creating a VHD the following two options are required.
+
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
+    organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+    
+-   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
+    `PREFIX-vmTemplate.UUID`.
+
+-   `resource_group_name` (string) Resource group under which the final artifact will be stored.
+
+-   `storage_account` (string) Storage account under which the final artifact will be stored.
+
+When creating a managed image the following two options are required.
+
+-   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
+     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
+     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
+     to learn more about managed images.
+     
+-   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
+     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
+     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
+     learn more about managed images.
 
 ### Optional:
 
@@ -64,6 +83,21 @@ builder.
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
+    
+-   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
+    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
+    cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
+    to learn more about custom data, and how it can be used to influence the provisioning process.
+
+-   `custom_managed_image_name` (string) Specify the source managed image's name to use.  If this value is set, do not set
+    image_publisher, image_offer, image_sku, or image_version. If this value is set, the value
+    `custom_managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
+
+-   `custom_managed_image_resource_group_name` (string) Specify the source managed image's resource group used to use.  If this
+    value is set, do not set image_publisher, image_offer, image_sku, or image_version. If this value is set, the
+    value `custom_managed_image_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+    to learn more about managed images.
 
 -   `image_version` (string) Specify a specific version of an OS to boot from. Defaults to `latest`. There may be a
     difference in versions available across regions due to image synchronization latency. To ensure a consistent
@@ -73,26 +107,29 @@ builder.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
-
--   `temp_compute_name` (string) temporary name assigned to the VM. If this value is not set, a random value will be assigned. Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer build, e.g. attach a resource disk to the VM.
-
--   `temp_resource_group_name` (string) temporary name assigned to the resource group. If this value is not set, a random value will be assigned.
-
--   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
-    specified, `tenant_id` will be looked up using `subscription_id`.
-
+                
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
     behavior for `os_type`, below.
+
+-   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
+    ignored.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
--   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes). Values of zero or less than zero are
-    ignored.
+-   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be 
+    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer 
+    build, e.g. attach a resource disk to the VM.
+
+-   `temp_resource_group_name` (string) temporary name assigned to the resource group.  If this value is not set, a random
+    value will be assigned.
+
+-   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
+    specified, `tenant_id` will be looked up using `subscription_id`.
 
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM. This option enables private
     communication with the VM, no public IP address is **used** or **provisioned**. This value should only be set if

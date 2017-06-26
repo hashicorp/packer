@@ -737,6 +737,95 @@ func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 	}
 }
 
+func TestConfigShouldAcceptPlatformManagedImageBuild(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal("expected config to accept platform managed image build")
+	}
+}
+
+// If the user specified a build for a VHD and a Managed Image it should be rejected.
+func TestConfigShouldRejectVhdAndManagedImageOutput(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"capture_container_name":            "ignore",
+		"capture_name_prefix":               "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject VHD and Managed Image build")
+	}
+}
+
+func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"image_offer":                              "ignore",
+		"image_publisher":                          "ignore",
+		"image_sku":                                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
+func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
+	config := map[string]interface{}{
+		"image_url":                                "ignore",
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {

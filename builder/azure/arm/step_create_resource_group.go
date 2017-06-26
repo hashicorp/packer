@@ -31,11 +31,14 @@ func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateRe
 }
 
 func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, location string, tags *map[string]*string) error {
-	_, err := s.client.GroupsClient.CreateOrUpdate(resourceGroupName, resources.ResourceGroup{
+	_, err := s.client.GroupsClient.CreateOrUpdate(resourceGroupName, resources.Group{
 		Location: &location,
 		Tags:     tags,
 	})
 
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 
@@ -71,7 +74,9 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 	ui.Say("\nCleanup requested, deleting resource group ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	_, err := s.client.GroupsClient.Delete(resourceGroupName, nil)
+	_, errChan := s.client.GroupsClient.Delete(resourceGroupName, nil)
+	err := <-errChan
+
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
 			"Name: %s\n"+
