@@ -180,6 +180,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.PackerDebug {
 		ui.Message(fmt.Sprintf("temp admin user: '%s'", b.config.UserName))
 		ui.Message(fmt.Sprintf("temp admin password: '%s'", b.config.Password))
+
+		if b.config.sshPrivateKey != "" {
+			ui.Message(fmt.Sprintf("temp private ssh key: '%s'", b.config.sshPrivateKey))
+		}
 	}
 
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
