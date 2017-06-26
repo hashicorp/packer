@@ -180,7 +180,7 @@ var waitForCommunicator = func(p *Provisioner) error {
 		case <-time.After(retryableSleep):
 		}
 
-		log.Printf("Attempting to communicator to machine with: '%s'", cmd.Command)
+		log.Printf("Checking that communicator is connected with: '%s'", cmd.Command)
 
 		err := cmd.StartWithUi(p.comm, p.ui)
 		if err != nil {
