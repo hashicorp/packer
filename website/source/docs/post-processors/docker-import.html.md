@@ -36,13 +36,13 @@ An example is shown below, showing only the post-processor configuration:
 ``` json
 {
   "type": "docker-import",
-  "repository": "mitchellh/packer",
+  "repository": "hashicorp/packer",
   "tag": "0.7"
 }
 ```
 
 This example would take the image created by the Docker builder and import it
-into the local Docker process with a name of `mitchellh/packer:0.7`.
+into the local Docker process with a name of `hashicorp/packer:0.7`.
 
 Following this, you can use the
 [docker-push](/docs/post-processors/docker-push.html) post-processor to push it
