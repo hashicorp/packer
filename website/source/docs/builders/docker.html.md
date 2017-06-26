@@ -1,4 +1,4 @@
-hashicorp---
+---
 description: |
     The docker Packer builder builds Docker images using Docker. The builder
     starts a Docker container, runs provisioners within this container, then
