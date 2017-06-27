@@ -1,5 +1,9 @@
 ## (UNRELEASED)
 
+### IMRPOVEMENTS:
+
+* builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
+
 ### BUG FIXES:
 
 * builder/parallels: Skip missing paths when looking for unnecessary files. [GH-5058]
