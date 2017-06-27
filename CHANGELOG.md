@@ -2,6 +2,7 @@
 
 ### BUG FIXES:
 
+* builder/parallels: Skip missing paths when looking for unnecessary files. [GH-5058]
 * builder/vmware-esxi: Fix VNC port discovery default timeout. [GH-5051]
 
 ## 1.0.2 (June 21, 2017)
