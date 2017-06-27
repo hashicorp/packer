@@ -51,7 +51,8 @@ $ packer build template.json
 * `dc_name` (source datacenter)
 * Post-processing:
     * `linked_clone`
-    * `to_template`
+    * `create_snapshot`
+    * `convert_to_template`
 
 See an example below:
 ```json
@@ -71,7 +72,8 @@ See an example below:
             "vm_name": "clone_name",
             "host": "172.16.0.1",
             "linked_clone": true,
-            "to_template": true,
+            "create_snapshot": true,
+            "convert_to_template": true,
 
             "RAM": "1024",
             "cpus": "2",

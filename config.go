@@ -30,15 +30,17 @@ type Config struct {
 	Datastore    string `mapstructure:"datastore"`
 
 	// Settings
-	LinkedClone  bool   `mapstructure:"linked_clone"`
-	ToTemplate   bool   `mapstructure:"to_template"`
+	LinkedClone        bool   `mapstructure:"linked_clone"`
+	ConvertToTemplate  bool   `mapstructure:"convert_to_template"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	ShutdownTimeout time.Duration ``
+	ShutdownTimeout    time.Duration ``
 
-	// Hardware
+	// Customization
 	Cpus            string `mapstructure:"cpus"`
 	ShutdownCommand string `mapstructure:"shutdown_command"`
 	Ram             string `mapstructure:"RAM"`
+	CreateSnapshot  bool   `mapstructure:"create_snapshot"`
+
 
 	ctx      interpolate.Context
 }

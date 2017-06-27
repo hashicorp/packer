@@ -35,6 +35,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps.
 	steps := []multistep.Step{
+		&StepSetup{
+			config: b.config,
+		},
 		&StepCloneVM{
 			config: b.config,
 		},
@@ -65,8 +68,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command:    b.config.ShutdownCommand,
 			ShutdownTimeout: b.config.ShutdownTimeout,
 		},
-		&StepPostProcess{
-			ToTemplate: b.config.ToTemplate,
+		&StepCreateSnapshot{
+			createSnapshot: b.config.CreateSnapshot,
+		},
+		&StepConvertToTemplate{
+			ConvertToTemplate: b.config.ConvertToTemplate,
 		},
 	}
 
