@@ -1,20 +1,8 @@
-package: github.com/LizaTretyakova/packer-builder-vsphere
+package: github.com/jetbrains-infra/packer-builder-vsphere
 import:
 - package: github.com/hashicorp/packer
-  subpackages:
-  - common
-  - communicator/ssh
-  - helper/communicator
-  - helper/config
-  - packer
-  - packer/plugin
-  - template/interpolate
+  version: v1.0.2
 - package: github.com/mitchellh/multistep
 - package: github.com/vmware/govmomi
-  subpackages:
-  - find
-  - object
-  - vim25/types
+  version: v0.15.0
 - package: golang.org/x/crypto
-  subpackages:
-  - ssh
