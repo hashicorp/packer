@@ -203,7 +203,7 @@ builder.
 -   `metadata` (object of key/value strings) - Metadata applied to the launched
     instance.
 
--   `network` (string) - The Google Compute network to use for the
+-   `network` (string) - The Google Compute network id or URL to use for the
     launched instance. Defaults to `"default"`.
 
 -   `network_project_id` (string) - The project ID for the network and subnetwork
@@ -244,11 +244,10 @@ builder.
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
 
--   `subnetwork` (string) - The Google Compute subnetwork to use for the launched
-    instance. Only required if the `network` has been created with custom
-    subnetting.
-    Note, the region of the subnetwork must match the `region` or `zone` in
-    which the VM is launched.
+-   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
+    the launched instance. Only required if the `network` has been created with
+    custom subnetting. Note, the region of the subnetwork must match the `region`
+    or `zone` in which the VM is launched.
 
 -   `tags` (array of strings)
 
