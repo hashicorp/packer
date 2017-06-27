@@ -1,9 +1,9 @@
 package main
 
-const BuilderId = "LizaTretyakova.vsphere"
+const BuilderId = "jetbrains.vsphere"
 
 type Artifact struct {
-	VMName        string         `json:"vm_name"`
+	VMName string         `json:"vm_name"`
 }
 
 func (a *Artifact) BuilderId() string {
