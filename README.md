@@ -1,60 +1,72 @@
-# packer-builder-vsphere
+# Packer Builder for VMware vSphere
+
+This builder uses native vSphere API, and creates virtual machines remotely.
+
+- VMware Player is not required
+- Builds are incremental, VMs are not created from scratch but cloned from base templates - similar to [amazon-ebs](https://www.packer.io/docs/builders/amazon-ebs.html) builder
+- Official vCenter API is used, no ESXi host [modification](https://www.packer.io/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor) is required 
 
 ## Usage
-* Download the plugin from the [Releases](https://github.com/jetbrains-infra/packer-builder-vsphere/releases) page
-* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugin, or simply save it into the working directory together with a configuration file; you may create your own configuration file or take the one given below (remember to put your real values for names, passwords, `url` and `host`)
-``` json
-template.json
+* Download the plugin from [Releases](https://github.com/jetbrains-infra/packer-builder-vsphere/releases) page
+* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugin, or simply put it into the same directory with configuration files
 
+## Minimal Example
+
+```json
 {
-   "builders": [
-      {
-         "type": "vsphere",
-         
-         "url":          "https://your.lab.addr/",
-         "username":     "username",
-         "password":     "secret",
-         
-         "ssh_username": "ssh_username",
-         "ssh_password": "ssh_secret",
-         
-         "template": "source_vm_name",
-         "vm_name":  "clone_name",
-         "host":     "172.16.0.1"
-      }
-   ]
+  "builders": [
+    {
+      "type": "vsphere",
+
+      "url":      "https://vcenter.domain.com/sdk",
+      "username": "root",
+      "password": "secret",
+
+      "template": "ubuntu",
+      "vm_name":  "vm-1",
+      "host":     "esxi-1.domain.com",
+
+      "ssh_username": "root",
+      "ssh_password": "secret"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [ "echo hello" ]
+    }
+  ]
 }
 ```
-(`host` is for target host)
-* Run:
-```
-$ packer build template.json
-```
 
-## Builder parameters
-### Required parameters:
+## Parameters
+### Required
+* `url`
 * `username`
 * `password`
 * `template`
 * `vm_name`
 * `host`
-### Optional parameters:
-* Destination parameters:
-    * `resource_pool`
-    * `datastore`
-* Hardware configuration:
-    * `cpus`
-    * `ram`
-    * `shutdown_command`
 * `ssh_username`
 * `ssh_password`
-* `dc_name` (source datacenter)
-* Post-processing:
-    * `linked_clone`
-    * `create_snapshot`
-    * `convert_to_template`
 
-See an example below:
+### Optional
+Destination:
+* `dc_name` (source datacenter)
+* `resource_pool`
+* `datastore`
+* `linked_clone`
+
+Hardware customization:
+* `cpus`
+* `ram`
+* `shutdown_command`
+
+Post-processing:
+* `create_snapshot`
+* `convert_to_template`
+
+## Complete Example
 ```json
 {
     "builders": [
@@ -93,20 +105,3 @@ Parameters `ssh_*`, `dc_name` (datacenter name) and `template` (the name of the 
 on which you are creating the new one (note that VMWare Tools should be already installed on this template machine).
 `vm_name` and `host` (describe the name of the new VM and the name of the host where we want to create it) are required parameters; you can also specify `resource_pool` (if you don't, the builder will try to detect the default one) and `datastore`.
 `url`, `username` and `password` are your vSphere parameters.
-
-
-## Progress bar
-You can find it [here](https://github.com/LizaTretyakova/packer-builder-vsphere/projects/1) as well.
-
-- [x] hardware customization of the new VM (cpu, ram)
-- [x] clone from template (not only from VM)
-- [x] clone to alternate host, resource pool and datastore
-- [x] enable linked clones
-- [ ] support Windows guest systems
-- [x] enable VM-to-template conversion
-- [ ] tests
-- [x] add a shutdown timeout
-- [ ] further hardware customization:
-    * resize disks
-    * ram reservation
-    * cpu reservation
