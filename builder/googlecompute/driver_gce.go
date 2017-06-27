@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"runtime"
 	"strings"
 	"time"
@@ -297,33 +298,56 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 	// TODO(mitchellh): deprecation warnings
 
-	// Get the network
-	if c.NetworkProjectId == "" {
-		c.NetworkProjectId = d.projectId
-	}
-	d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-	network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
-	if err != nil {
-		return nil, err
-	}
+	networkSelfLink := ""
+	subnetworkSelfLink := ""
 
-	// Subnetwork
-	// Validate Subnetwork config now that we have some info about the network
-	if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
-		// Network appears to be in "custom" mode, so a subnetwork is required
-		if c.Subnetwork == "" {
-			return nil, fmt.Errorf("a subnetwork must be specified")
+	if u, err := url.Parse(c.Network); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
+		// Network is a full server URL
+		// Parse out Network and NetworkProjectId from URL
+		// https://www.googleapis.com/compute/v1/projects/<ProjectId>/global/networks/<Network>
+		networkSelfLink = c.Network
+		parts := strings.Split(u.String(), "/")
+		if len(parts) >= 10 {
+			c.NetworkProjectId = parts[6]
+			c.Network = parts[9]
 		}
 	}
-	// Get the subnetwork
-	subnetworkSelfLink := ""
-	if c.Subnetwork != "" {
-		d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-		subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
+	if u, err := url.Parse(c.Subnetwork); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
+		// Subnetwork is a full server URL
+		subnetworkSelfLink = c.Subnetwork
+	}
+
+	// If subnetwork is ID's and not full service URL's look them up.
+	if subnetworkSelfLink == "" {
+
+		// Get the network
+		if c.NetworkProjectId == "" {
+			c.NetworkProjectId = d.projectId
+		}
+		d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
+		network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
 		if err != nil {
 			return nil, err
 		}
-		subnetworkSelfLink = subnetwork.SelfLink
+		networkSelfLink = network.SelfLink
+
+		// Subnetwork
+		// Validate Subnetwork config now that we have some info about the network
+		if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
+			// Network appears to be in "custom" mode, so a subnetwork is required
+			if c.Subnetwork == "" {
+				return nil, fmt.Errorf("a subnetwork must be specified")
+			}
+		}
+		// Get the subnetwork
+		if c.Subnetwork != "" {
+			d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
+			subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
+			if err != nil {
+				return nil, err
+			}
+			subnetworkSelfLink = subnetwork.SelfLink
+		}
 	}
 
 	var accessconfig *compute.AccessConfig
@@ -381,7 +405,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
-				Network:       network.SelfLink,
+				Network:       networkSelfLink,
 				Subnetwork:    subnetworkSelfLink,
 			},
 		},
