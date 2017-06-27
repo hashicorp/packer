@@ -18,7 +18,7 @@ import (
 func Create(client *gophercloud.ServiceClient, id string, member string) (r CreateResult) {
 	b := map[string]interface{}{"member": member}
 	_, r.Err = client.Post(createMemberURL(client, id), b, &r.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200, 409, 403},
+		OkCodes: []int{200},
 	})
 	return
 }
@@ -42,7 +42,7 @@ func Get(client *gophercloud.ServiceClient, imageID string, memberID string) (r 
 // Callee should be image owner
 // More details: http://developer.openstack.org/api-ref-image-v2.html#deleteImageMember-v2
 func Delete(client *gophercloud.ServiceClient, imageID string, memberID string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteMemberURL(client, imageID, memberID), &gophercloud.RequestOpts{OkCodes: []int{204, 403}})
+	_, r.Err = client.Delete(deleteMemberURL(client, imageID, memberID), &gophercloud.RequestOpts{OkCodes: []int{204}})
 	return
 }
 
