@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -182,7 +184,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ui.Message(fmt.Sprintf("temp admin password: '%s'", b.config.Password))
 
 		if b.config.sshPrivateKey != "" {
-			ui.Message(fmt.Sprintf("temp private ssh key: '%s'", b.config.sshPrivateKey))
+			debugKeyPath := fmt.Sprintf("%s-%s.pem", b.config.PackerBuildName, b.config.tmpComputeName)
+			ui.Message(fmt.Sprintf("temp ssh key: %s", debugKeyPath))
+
+			b.writeSSHPrivateKey(ui, debugKeyPath)
 		}
 	}
 
@@ -217,6 +222,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return &Artifact{}, nil
+}
+
+func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
+	f, err := os.Create(debugKeyPath)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Error saving debug key: %s", err))
+	}
+	defer f.Close()
+
+	// Write the key out
+	if _, err := f.Write([]byte(b.config.sshPrivateKey)); err != nil {
+		ui.Say(fmt.Sprintf("Error saving debug key: %s", err))
+		return
+	}
+
+	// Chmod it so that it is SSH ready
+	if runtime.GOOS != "windows" {
+		if err := f.Chmod(0600); err != nil {
+			ui.Say(fmt.Sprintf("Error setting permissions of debug key: %s", err))
+		}
+	}
 }
 
 func (b *Builder) isPrivateNetworkCommunication() bool {
