@@ -41,67 +41,80 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 
 ## Parameters
 ### Required
-* `url`
-* `username`
-* `password`
-* `template`
-* `vm_name`
-* `host`
-* `ssh_username`
-* `ssh_password`
+* `url` - URL of vCenter API enpoint.
+* `username` - vSphere username.
+* `password` - vSphere password.
+* `template` - name of source VM.
+* `vm_name` - name of target VM.
+* `host` - vSphere host where target VM is created.
+* `ssh_username` - username in guest OS.
+* `ssh_password` - password in guest OS.
 
 ### Optional
 Destination:
-* `dc_name` (source datacenter)
-* `resource_pool`
-* `datastore`
-* `linked_clone`
+* `dc_name` - required if there are several datacenters.
+* `folder_name` - VM folder where target VM is created.
+* `resource_pool` - by default a root of vSphere host.
+* `datastore` - required if vSphere host has multiple datastores attached.
+* `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
 
 Hardware customization:
-* `cpus`
-* `ram`
-* `shutdown_command`
+* `cpus` - number of CPU sockets. Inherited from source VM by default.
+* `ram` - Amount of RAM in megabytes. Inherited from source VM by default.
 
 Post-processing:
-* `create_snapshot`
-* `convert_to_template`
+* `shutdown_command` - VMware guest tools are used by default.
+* `create_snapshot` - add a snapshot, so VM can be used as a base for linked clones. `false` by default.
+* `convert_to_template` - convert VM to a template. `false` by default.
 
 ## Complete Example
 ```json
 {
-    "builders": [
-        {
-            "type": "vsphere",
+  "variables": {
+    "vsphere_password": "secret",
+    "guest_password": "secret"
+  },
 
-            "url": "https://your.lab.addr/",
-            "username": "username",
-            "password": "secret",
+  "builders": [
+    {
+      "type": "vsphere",
 
-            "ssh_username": "ssh_username",
-            "ssh_password": "ssh_secret",
+      "url": "https://vcenter.domain.com/sdk",
+      "dc_name": "dc1",
+      "username": "root",
+      "password": "{{user `vsphere_password`}}",
 
-            "template": "template_name",
-            "vm_name": "clone_name",
-            "host": "172.16.0.1",
-            "linked_clone": true,
-            "create_snapshot": true,
-            "convert_to_template": true,
+      "template": "ubuntu",
+      "folder_name": "folder",
+      "vm_name": "vm-1",
+      "host": "esxi-1.domain.com",
+      "resource_pool": "pool1/pool2",
+      "datastore": "datastore1",
+      "linked_clone": true,
 
-            "RAM": "1024",
-            "cpus": "2",
-            "shutdown_command": "echo 'ssh_secret' | sudo -S shutdown -P now"
-        } 
-    ],
-    "provisioners": [
-        {
-              "type": "shell",
-              "inline": ["echo foo"]
-        }
-    ]
+      "cpus": 2,
+      "ram": 8192,
+
+      "ssh_username": "root",
+      "ssh_password": "{{user `guest_password`}}",
+
+      "shutdown_command": "echo '{{user `guest_password`}}' | sudo -S shutdown -P now",
+      "create_snapshot": true,
+      "convert_to_template": true
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+        "DEBIAN_FRONTEND=noninteractive"
+      ],
+      "execute_command": "echo '{{user `guest_password`}}' | {{.Vars}} sudo -ES bash -eux '{{.Path}}'",
+      "inline": [
+        "apt-get install -y zip"
+      ]
+    }
+  ]
 }
 ```
-where `vm_name`, `RAM`, `cpus` and `shutdown_command` are parameters of the new VM. 
-Parameters `ssh_*`, `dc_name` (datacenter name) and `template` (the name of the base VM) are for the base VM, 
-on which you are creating the new one (note that VMWare Tools should be already installed on this template machine).
-`vm_name` and `host` (describe the name of the new VM and the name of the host where we want to create it) are required parameters; you can also specify `resource_pool` (if you don't, the builder will try to detect the default one) and `datastore`.
-`url`, `username` and `password` are your vSphere parameters.
