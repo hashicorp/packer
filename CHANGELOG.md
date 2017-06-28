@@ -6,6 +6,7 @@
 
 ### BUG FIXES:
 
+* builder/azure: Write private SSH to file in debug mode. [GH-5070] [GH-5074]
 * builder/parallels: Skip missing paths when looking for unnecessary files. [GH-5058]
 * builder/vmware-esxi: Fix VNC port discovery default timeout. [GH-5051]
 
