@@ -1,12 +1,11 @@
-_Read these instructions before submitting_
+_Please read these instructions before submitting_
 
 **DELETE THIS TEMPLATE BEFORE SUBMITTING**
 
 _Only use Github issues to report bugs or feature requests, see
 https://www.packer.io/community.html_
 
-Specifically we _don't accept_ issues for:
-- _Timeout waiting for SSH/WinRM_ - Unless there is evidence pointing towards a bug in packer. e.g it works with a previous version, or you can manually connect with the same credentials, etc. Ask on the mailing list if you are unsure.
+For example, _Timeouts waiting for SSH/WinRM_ are generally not bugs within packer and are better addressed by the mailing list. Ask on the mailing list if you are unsure.
 
 If you are planning to open a pull-request just open the pull-request instead of making an issue first.
 
@@ -24,3 +23,4 @@ Describe the problem and include the following information:
   Please paste this in a gist https://gist.github.com
 - The _simplest example template and scripts_ needed to reproduce the bug.
   Include these in your gist https://gist.github.com
+  
