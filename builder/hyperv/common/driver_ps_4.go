@@ -297,7 +297,9 @@ func (d *HypervPS4Driver) verifyHypervPermissions() error {
 
 	log.Printf("Enter method: %s", "verifyHypervPermissions")
 
-	hypervAdminCmd := "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Hyper-V Administrators')"
+	//SID:S-1-5-32-578 = 'BUILTIN\Hyper-V Administrators'
+	//https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
+	hypervAdminCmd := "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('S-1-5-32-578')"
 
 	var ps powershell.PowerShellCmd
 	cmdOut, err := ps.Output(hypervAdminCmd)
