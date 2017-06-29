@@ -14,6 +14,7 @@ import (
 	"context"
 	"net/url"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 )
 
 type Builder struct {
@@ -121,9 +122,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	// No errors, must've worked
 	artifact := &Artifact{
 		VMName: b.config.VMName,
+		Conn: state.Get("vm").(*object.VirtualMachine),
 	}
 	return artifact, nil
 }
