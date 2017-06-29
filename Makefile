@@ -50,8 +50,9 @@ dev: deps ## Build and install a development build
 		exit 1; \
 	fi
 	@mkdir -p pkg/$(GOOS)_$(GOARCH)
+	@mkdir -p bin
 	@go install -ldflags '$(GOLDFLAGS)'
-	@cp $(GOPATH)/bin/packer bin
+	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
