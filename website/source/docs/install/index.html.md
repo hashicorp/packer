@@ -41,19 +41,12 @@ as a copy of [`git`](https://www.git-scm.com/) in your `PATH`.
 1.  Clone the Packer repository from GitHub into your `GOPATH`:
 
     ``` shell
-    $ mkdir -p $GOPATH/src/github.com/hashicorp && cd $!
+    $ mkdir -p $GOPATH/src/github.com/hashicorp && cd $_
     $ git clone https://github.com/hashicorp/packer.git
     $ cd packer
     ```
 
-2.  Bootstrap the project. This will download and compile libraries and tools
-    needed to compile Packer:
-
-    ``` shell
-    $ make bootstrap
-    ```
-
-3.  Build Packer for your current system and put the
+2.  Build Packer for your current system and put the
     binary in `./bin/` (relative to the git checkout). The `make dev` target is
     just a shortcut that builds `packer` for only your local build environment (no
     cross-compiled targets).
