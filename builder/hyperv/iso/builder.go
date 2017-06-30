@@ -90,6 +90,7 @@ type Config struct {
 	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
 	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
 	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
+	TempPath                       string   `mapstructure:"temp_path"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -303,7 +304,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{},
+		&hypervcommon.StepCreateTempDir{
+			TempPath: b.config.TempPath,
+		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
