@@ -197,6 +197,9 @@ can be configured for this builder.
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
+-   `temp_path` (string) - This is the temporary path in which Packer will create the virtual
+    machine
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys
