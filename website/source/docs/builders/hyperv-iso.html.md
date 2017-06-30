@@ -198,7 +198,7 @@ can be configured for this builder.
     where "BUILDNAME" is the name of the build.
 
 -   `temp_path` (string) - This is the temporary path in which Packer will create the virtual
-    machine
+    machine. Default value is system `%temp%`
 
 ## Boot Command
 
