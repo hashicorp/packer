@@ -35,8 +35,8 @@ func (s *StepConfigureHW) Run(state multistep.StateBag) multistep.StepAction {
 		confSpec.NumCPUs = int32(CPUs)
 		parametersFlag.NumCPUsPtr = &(confSpec.NumCPUs)
 	}
-	if s.config.Ram != "" {
-		ram, err := strconv.Atoi(s.config.Ram)
+	if s.config.RAM != "" {
+		ram, err := strconv.Atoi(s.config.RAM)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

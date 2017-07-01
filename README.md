@@ -60,10 +60,11 @@ Destination:
 
 Hardware customization:
 * `CPUs` - number of CPU sockets. Inherited from source VM by default.
-* `ram` - Amount of RAM in megabytes. Inherited from source VM by default.
+* `RAM` - Amount of RAM in megabytes. Inherited from source VM by default.
 
 Post-processing:
 * `shutdown_command` - VMware guest tools are used by default.
+* `shutdown_timeout` - [Duration](https://golang.org/pkg/time/#ParseDuration) how long to wait for a graceful shutdown. 5 minutes by default.
 * `create_snapshot` - add a snapshot, so VM can be used as a base for linked clones. `false` by default.
 * `convert_to_template` - convert VM to a template. `false` by default.
 
@@ -93,12 +94,13 @@ Post-processing:
       "linked_clone": true,
 
       "CPUs": 2,
-      "ram": 8192,
+      "RAM": 8192,
 
       "ssh_username": "root",
       "ssh_password": "{{user `guest_password`}}",
 
       "shutdown_command": "echo '{{user `guest_password`}}' | sudo -S shutdown -P now",
+      "shutdown_timeout": "5m",
       "create_snapshot": true,
       "convert_to_template": true
     }

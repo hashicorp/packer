@@ -14,45 +14,49 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	communicator.Config `mapstructure:",squash"`
 
+	// Connection
 	VCenterHost string `mapstructure:"vcenter_host"`
+	Datacenter  string `mapstructure:"datacenter"`
 	Username    string `mapstructure:"username"`
 	Password    string `mapstructure:"password"`
 
 	// Location
 	Template     string `mapstructure:"template"`
-	VMName       string `mapstructure:"vm_name"`
 	FolderName   string `mapstructure:"folder"`
-	Datacenter   string `mapstructure:"datacenter"`
+	VMName       string `mapstructure:"vm_name"`
 	Host         string `mapstructure:"host"`
 	ResourcePool string `mapstructure:"resource_pool"`
 	Datastore    string `mapstructure:"datastore"`
-
-	// Settings
-	LinkedClone        bool   `mapstructure:"linked_clone"`
-	ConvertToTemplate  bool   `mapstructure:"convert_to_template"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	ShutdownTimeout    time.Duration
+	LinkedClone  bool   `mapstructure:"linked_clone"`
 
 	// Customization
-	CPUs            string `mapstructure:"CPUs"`
-	ShutdownCommand string `mapstructure:"shutdown_command"`
-	Ram             string `mapstructure:"RAM"`
-	CreateSnapshot  bool   `mapstructure:"create_snapshot"`
+	CPUs string `mapstructure:"CPUs"`
+	RAM  string `mapstructure:"RAM"`
 
+	// Provisioning
+	communicator.Config `mapstructure:",squash"`
 
-	ctx      interpolate.Context
+	// Post-processing
+	ShutdownCommand    string `mapstructure:"shutdown_command"`
+	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
+	ShutdownTimeout    time.Duration
+	CreateSnapshot     bool   `mapstructure:"create_snapshot"`
+	ConvertToTemplate  bool   `mapstructure:"convert_to_template"`
+
+	ctx interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
-	err := config.Decode(c, &config.DecodeOpts{
-		Interpolate:        true,
-		InterpolateContext: &c.ctx,
-	}, raws...)
-	if err != nil {
-		return nil, nil, err
+	{
+		err := config.Decode(c, &config.DecodeOpts{
+			Interpolate:        true,
+			InterpolateContext: &c.ctx,
+		}, raws...)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	// Accumulate any errors
@@ -84,26 +88,24 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Verify numeric parameters if present
 	if c.CPUs != "" {
-		if _, err = strconv.Atoi(c.CPUs); err != nil {
+		if _, err := strconv.Atoi(c.CPUs); err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number of CPU sockets"))
 		}
 	}
-	if c.Ram != "" {
-		if _, err = strconv.Atoi(c.Ram); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number for Ram"))
+	if c.RAM != "" {
+		if _, err := strconv.Atoi(c.RAM); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number for RAM"))
 		}
 	}
-	if c.RawShutdownTimeout == "" {
-		c.RawShutdownTimeout = "5m"
+	if c.RawShutdownTimeout != "" {
+		timeout, err := time.ParseDuration(c.RawShutdownTimeout)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
+		}
+		c.ShutdownTimeout = timeout
+	} else {
+		c.ShutdownTimeout = 5 * time.Minute
 	}
-	c.ShutdownTimeout, err = time.ParseDuration(c.RawShutdownTimeout)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-	}
-
-	//if c.Datastore == "" {
-	//	warnings = append(warnings, "Datastore is not specified, will try to find the default one")
-	//}
 
 	if len(errs.Errors) > 0 {
 		return nil, warnings, errs
