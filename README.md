@@ -40,23 +40,19 @@ This a plugin for [HashiCorp Packer](https://www.packer.io/). It uses native vSp
 ```
 
 ## Parameters
-### Required
-* `vcenter_server` - vCenter server hostname.
-* `username` - vSphere username.
-* `password` - vSphere password.
+
+Connection:
+* `vcenter_server` - [**mandatory**] vCenter server hostname.
+* `username` - [**mandatory**] vSphere username.
+* `password` - [**mandatory**] vSphere password.
 * `insecure_connection` - do not validate server's TLS certificate. `false` by default.
-
-* `template` - name of source VM.
-* `vm_name` - name of target VM.
-
-* `host` - vSphere host where target VM is created.
-* `ssh_username` - username in guest OS.
-* `ssh_password` - password in guest OS.
-
-### Optional
-Destination:
 * `datacenter` - required if there are several datacenters.
+
+Destination:
+* `template` - [**mandatory**] name of source VM.
+* `vm_name` - [**mandatory**] name of target VM.
 * `folder` - VM folder where target VM is created.
+* `host` - [**mandatory**] vSphere host where target VM is created.
 * `resource_pool` - by default a root of vSphere host.
 * `datastore` - required if vSphere host has multiple datastores attached.
 * `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
@@ -64,6 +60,10 @@ Destination:
 Hardware customization:
 * `CPUs` - number of CPU sockets. Inherited from source VM by default.
 * `RAM` - Amount of RAM in megabytes. Inherited from source VM by default.
+
+Provisioning:
+* `ssh_username` - [**mandatory**] username in guest OS.
+* `ssh_password` - [**mandatory**] password in guest OS.
 
 Post-processing:
 * `shutdown_command` - VMware guest tools are used by default.
