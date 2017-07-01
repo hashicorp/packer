@@ -20,6 +20,7 @@ const testBuilderAccBasic = `
 		"vcenter_server": "vcenter.vsphere5.test",
 		"username": "root",
 		"password": "jetbrains",
+		"insecure_connection": true,
 
 		"template": "basic",
 		"vm_name": "test1",

@@ -49,6 +49,7 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 * `host` - vSphere host where target VM is created.
 * `ssh_username` - username in guest OS.
 * `ssh_password` - password in guest OS.
+* `insecure_connection` - do not validate server's TLS certificate. `false` by default.
 
 ### Optional
 Destination:

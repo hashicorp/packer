@@ -45,7 +45,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	vcenter_url.User = url.UserPassword(b.config.Username, b.config.Password)
-	client, err := govmomi.NewClient(ctx, vcenter_url,true)
+	client, err := govmomi.NewClient(ctx, vcenter_url, b.config.InsecureConnection)
 	if err != nil {
 		return nil, err
 	}

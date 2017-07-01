@@ -16,10 +16,11 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Connection
-	VCenterServer string `mapstructure:"vcenter_server"`
-	Datacenter    string `mapstructure:"datacenter"`
-	Username      string `mapstructure:"username"`
-	Password      string `mapstructure:"password"`
+	VCenterServer      string `mapstructure:"vcenter_server"`
+	Datacenter         string `mapstructure:"datacenter"`
+	Username           string `mapstructure:"username"`
+	Password           string `mapstructure:"password"`
+	InsecureConnection bool   `mapstructure:"insecure_connection"`
 
 	// Location
 	Template     string `mapstructure:"template"`
