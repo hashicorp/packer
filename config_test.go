@@ -31,13 +31,13 @@ func TestTimeout(t *testing.T) {
 	conf, warns, err := NewConfig(raw)
 	testConfigOk(t, warns, err)
 	if conf.ShutdownTimeout != 3 * time.Minute {
-		t.Fatalf("shutdown_timeout sourld equal 3 minutes")
+		t.Fatalf("shutdown_timeout sould be equal 3 minutes")
 	}
 }
 
 func minimalConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"url":          "https://vcenter.domain.local/sdk",
+		"vcenter_host": "vcenter.domain.local",
 		"username":     "root",
 		"password":     "vmware",
 		"template":     "ubuntu",

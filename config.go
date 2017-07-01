@@ -16,9 +16,9 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	communicator.Config `mapstructure:",squash"`
 
-	Url              string `mapstructure:"url"`
-	Username         string `mapstructure:"username"`
-	Password         string `mapstructure:"password"`
+	VCenterHost string `mapstructure:"vcenter_host"`
+	Username    string `mapstructure:"username"`
+	Password    string `mapstructure:"password"`
 
 	// Location
 	Template     string `mapstructure:"template"`
@@ -33,7 +33,7 @@ type Config struct {
 	LinkedClone        bool   `mapstructure:"linked_clone"`
 	ConvertToTemplate  bool   `mapstructure:"convert_to_template"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	ShutdownTimeout    time.Duration ``
+	ShutdownTimeout    time.Duration
 
 	// Customization
 	Cpus            string `mapstructure:"cpus"`
@@ -63,8 +63,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
 
 	// Check the required params
-	if c.Url == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("URL required"))
+	if c.VCenterHost == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vCenter host required"))
 	}
 	if c.Username == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Username required"))

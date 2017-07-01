@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"fmt"
 )
 
 type Builder struct {
@@ -39,7 +40,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ctx := context.TODO()
 	state.Put("ctx", ctx)
 
-	vcenter_url, err := url.Parse(b.config.Url)
+	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", b.config.VCenterHost))
 	if err != nil {
 		return nil, err
 	}

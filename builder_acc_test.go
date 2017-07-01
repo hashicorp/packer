@@ -17,7 +17,7 @@ const testBuilderAccBasic = `
 	"builders": [{
 		"type": "test",
 
-		"url": "https://vcenter.vsphere5.test/sdk",
+		"vcenter_host": "vcenter.vsphere5.test",
 		"username": "root",
 		"password": "jetbrains",
 
