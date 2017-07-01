@@ -45,7 +45,7 @@ type Config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	common.HTTPConfig           `mapstructure:",squash"`
 	common.ISOConfig            `mapstructure:",squash"`
-	hypervcommon.FloppyConfig   `mapstructure:",squash"`
+	common.FloppyConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
 	hypervcommon.RunConfig      `mapstructure:",squash"`
@@ -57,16 +57,6 @@ type Config struct {
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
 	RamSize uint `mapstructure:"ram_size"`
-	// A list of files to place onto a floppy disk that is attached when the
-	// VM is booted. This is most useful for unattended Windows installs,
-	// which look for an Autounattend.xml file on removable media. By default,
-	// no floppy will be attached. All files listed in this setting get
-	// placed into the root directory of the floppy and the floppy is attached
-	// as the first floppy device. Currently, no support exists for creating
-	// sub-directories on the floppy. Wildcard characters (*, ?, and [])
-	// are allowed. Directory names are also allowed, which will add all
-	// the files found in the directory to the floppy.
-	FloppyFiles []string `mapstructure:"floppy_files"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -156,7 +146,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if b.config.Generation == 2 {
-		if len(b.config.FloppyFiles) > 0 {
+		if len(b.config.FloppyFiles) > 0 || len(b.config.FloppyDirectories) > 0 {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
@@ -318,7 +308,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			TargetPath:   b.config.TargetPath,
 		},
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
