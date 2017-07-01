@@ -59,7 +59,11 @@ Destination:
 
 Hardware customization:
 * `CPUs` - number of CPU sockets. Inherited from source VM by default.
+* `CPU_reservation` - Amount of reserved CPU resources in MHz. Inherited from source VM by default.
+* `CPU_limit` - Upper limit of available CPU resources in MHz. Inherited from source VM by default, set to `-1` for reset.
 * `RAM` - Amount of RAM in megabytes. Inherited from source VM by default.
+* `RAM_reservation` - Amount of reserved RAM in MB. Inherited from source VM by default.
+* `RAM_reserve_all` - Reserve all available RAM (bool). `false` by default. Cannot be used together with `RAM_reservation`.
 
 Provisioning:
 * `ssh_username` - [**mandatory**] username in guest OS.
@@ -98,7 +102,10 @@ Post-processing:
       "linked_clone": true,
 
       "CPUs": 2,
+      "CPU_reservation": 1000,
+      "CPU_limit": 2000,
       "RAM": 8192,
+      "RAM_reservation": 2048,
 
       "ssh_username": "root",
       "ssh_password": "{{user `guest_password`}}",

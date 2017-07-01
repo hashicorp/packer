@@ -11,20 +11,6 @@ func TestMinimalConfig(t *testing.T) {
 	testConfigOk(t, warns, errs)
 }
 
-func TestInvalidCpu(t *testing.T) {
-	raw := minimalConfig()
-	raw["CPUs"] = "string"
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-}
-
-func TestInvalidRam(t *testing.T) {
-	raw := minimalConfig()
-	raw["RAM"] = "string"
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-}
-
 func TestTimeout(t *testing.T) {
 	raw := minimalConfig()
 	raw["shutdown_timeout"] = "3m"
@@ -33,6 +19,14 @@ func TestTimeout(t *testing.T) {
 	if conf.ShutdownTimeout != 3 * time.Minute {
 		t.Fatalf("shutdown_timeout sould be equal 3 minutes")
 	}
+}
+
+func TestRAMReservation(t *testing.T) {
+	raw := minimalConfig()
+	raw["RAM_reservation"] = 1000
+	raw["RAM_reserve_all"] = true
+	_, warns, err := NewConfig(raw)
+	testConfigErr(t, warns, err)
 }
 
 func minimalConfig() map[string]interface{} {
@@ -50,18 +44,18 @@ func minimalConfig() map[string]interface{} {
 
 func testConfigOk(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+		t.Fatalf("Should be no warnings: %#v", warns)
 	}
 	if err != nil {
-		t.Fatalf("bad: %s", err)
+		t.Fatalf("Unexpected error: %s", err)
 	}
 }
 
 func testConfigErr(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+		t.Fatalf("Should be no warnings: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("should error")
+		t.Fatal("An error is not raised")
 	}
 }
