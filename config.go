@@ -81,6 +81,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vSphere host is required"))
 	}
 
+	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
+
 	if c.RawShutdownTimeout != "" {
 		timeout, err := time.ParseDuration(c.RawShutdownTimeout)
 		if err != nil {

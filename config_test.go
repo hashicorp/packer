@@ -21,6 +21,14 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
+func TestRAMReservation(t *testing.T) {
+	raw := minimalConfig()
+	raw["RAM_reservation"] = 1000
+	raw["RAM_reserve_all"] = true
+	_, warns, err := NewConfig(raw)
+	testConfigErr(t, warns, err)
+}
+
 func minimalConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"vcenter_server": "vcenter.domain.local",
@@ -36,18 +44,18 @@ func minimalConfig() map[string]interface{} {
 
 func testConfigOk(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+		t.Fatalf("Should be no warnings: %#v", warns)
 	}
 	if err != nil {
-		t.Fatalf("bad: %s", err)
+		t.Fatalf("Unexpected error: %s", err)
 	}
 }
 
 func testConfigErr(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
+		t.Fatalf("Should be no warnings: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("should error")
+		t.Fatal("An error is not raised")
 	}
 }

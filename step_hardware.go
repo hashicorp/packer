@@ -6,6 +6,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 	"context"
 	"github.com/vmware/govmomi/object"
+	"fmt"
 )
 
 type HardwareConfig struct {
@@ -14,6 +15,17 @@ type HardwareConfig struct {
 	CPULimit       int64 `mapstructure:"CPU_limit"`
 	RAM            int64 `mapstructure:"RAM"`
 	RAMReservation int64 `mapstructure:"RAM_reservation"`
+	RAMReserveAll  bool  `mapstructure:"RAM_reserve_all"`
+}
+
+func (c *HardwareConfig) Prepare() []error {
+	var errs []error
+
+	if c.RAMReservation > 0 && c.RAMReserveAll != false {
+		errs = append(errs, fmt.Errorf("'RAM_reservation' and 'RAM_reserve_all' cannot be used together"))
+	}
+
+	return errs
 }
 
 type StepConfigureHardware struct {
@@ -40,6 +52,8 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 		var ramSpec types.ResourceAllocationInfo
 		ramSpec.Reservation = s.config.RAMReservation
 		confSpec.MemoryAllocation = &ramSpec
+
+		confSpec.MemoryReservationLockedToMax = &s.config.RAMReserveAll
 
 		task, err := vm.Reconfigure(ctx, confSpec)
 		if err != nil {
