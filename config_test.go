@@ -13,7 +13,7 @@ func TestMinimalConfig(t *testing.T) {
 
 func TestInvalidCpu(t *testing.T) {
 	raw := minimalConfig()
-	raw["cpus"] = "string"
+	raw["CPUs"] = "string"
 	_, warns, errs := NewConfig(raw)
 	testConfigErr(t, warns, errs)
 }

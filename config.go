@@ -36,7 +36,7 @@ type Config struct {
 	ShutdownTimeout    time.Duration
 
 	// Customization
-	Cpus            string `mapstructure:"cpus"`
+	CPUs            string `mapstructure:"CPUs"`
 	ShutdownCommand string `mapstructure:"shutdown_command"`
 	Ram             string `mapstructure:"RAM"`
 	CreateSnapshot  bool   `mapstructure:"create_snapshot"`
@@ -83,9 +83,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	// Verify numeric parameters if present
-	if c.Cpus != "" {
-		if _, err = strconv.Atoi(c.Cpus); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number of cpu sockets"))
+	if c.CPUs != "" {
+		if _, err = strconv.Atoi(c.CPUs); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number of CPU sockets"))
 		}
 	}
 	if c.Ram != "" {

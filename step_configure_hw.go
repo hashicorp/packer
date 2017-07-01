@@ -25,14 +25,14 @@ func (s *StepConfigureHW) Run(state multistep.StateBag) multistep.StepAction {
 	var confSpec types.VirtualMachineConfigSpec
 	parametersFlag := ConfigParametersFlag{}
 	// configure HW
-	if s.config.Cpus != "" {
-		cpus, err := strconv.Atoi(s.config.Cpus)
+	if s.config.CPUs != "" {
+		CPUs, err := strconv.Atoi(s.config.CPUs)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
-		confSpec.NumCPUs = int32(cpus)
+		confSpec.NumCPUs = int32(CPUs)
 		parametersFlag.NumCPUsPtr = &(confSpec.NumCPUs)
 	}
 	if s.config.Ram != "" {

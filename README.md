@@ -59,7 +59,7 @@ Destination:
 * `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
 
 Hardware customization:
-* `cpus` - number of CPU sockets. Inherited from source VM by default.
+* `CPUs` - number of CPU sockets. Inherited from source VM by default.
 * `ram` - Amount of RAM in megabytes. Inherited from source VM by default.
 
 Post-processing:
@@ -92,7 +92,7 @@ Post-processing:
       "datastore": "datastore1",
       "linked_clone": true,
 
-      "cpus": 2,
+      "CPUs": 2,
       "ram": 8192,
 
       "ssh_username": "root",
