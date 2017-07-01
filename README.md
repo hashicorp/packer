@@ -1,6 +1,6 @@
 # Packer Builder for VMware vSphere
 
-This builder uses native vSphere API, and creates virtual machines remotely.
+This a plugin for [HashiCorp Packer](https://www.packer.io/). It uses native vSphere API, and creates virtual machines remotely.
 
 - VMware Player is not required
 - Builds are incremental, VMs are not created from scratch but cloned from base templates - similar to [amazon-ebs](https://www.packer.io/docs/builders/amazon-ebs.html) builder
@@ -44,12 +44,14 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 * `vcenter_server` - vCenter server hostname.
 * `username` - vSphere username.
 * `password` - vSphere password.
+* `insecure_connection` - do not validate server's TLS certificate. `false` by default.
+
 * `template` - name of source VM.
 * `vm_name` - name of target VM.
+
 * `host` - vSphere host where target VM is created.
 * `ssh_username` - username in guest OS.
 * `ssh_password` - password in guest OS.
-* `insecure_connection` - do not validate server's TLS certificate. `false` by default.
 
 ### Optional
 Destination:
@@ -82,9 +84,10 @@ Post-processing:
       "type": "vsphere",
 
       "vcenter_server": "vcenter.domain.com",
-      "datacenter": "dc1",
       "username": "root",
       "password": "{{user `vsphere_password`}}",
+      "insecure_connection": true,
+      "datacenter": "dc1",
 
       "template": "ubuntu",
       "folder": "folder1/folder2",
