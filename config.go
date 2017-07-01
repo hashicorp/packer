@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"strconv"
 	"time"
 )
 
@@ -32,8 +31,7 @@ type Config struct {
 	LinkedClone  bool   `mapstructure:"linked_clone"`
 
 	// Customization
-	CPUs string `mapstructure:"CPUs"`
-	RAM  string `mapstructure:"RAM"`
+	HardwareConfig `mapstructure:",squash"`
 
 	// Provisioning
 	communicator.Config `mapstructure:",squash"`
@@ -83,16 +81,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vSphere host is required"))
 	}
 
-	if c.CPUs != "" {
-		if _, err := strconv.Atoi(c.CPUs); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number of CPU sockets"))
-		}
-	}
-	if c.RAM != "" {
-		if _, err := strconv.Atoi(c.RAM); err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number for RAM"))
-		}
-	}
 	if c.RawShutdownTimeout != "" {
 		timeout, err := time.ParseDuration(c.RawShutdownTimeout)
 		if err != nil {

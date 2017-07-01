@@ -70,8 +70,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCloneVM{
 			config: b.config,
 		},
-		&StepConfigureHW{
-			config: b.config,
+		&StepConfigureHardware{
+			config: &b.config.HardwareConfig,
 		},
 		&StepRun{},
 		&communicator.StepConnect{

@@ -11,20 +11,6 @@ func TestMinimalConfig(t *testing.T) {
 	testConfigOk(t, warns, errs)
 }
 
-func TestInvalidCpu(t *testing.T) {
-	raw := minimalConfig()
-	raw["CPUs"] = "string"
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-}
-
-func TestInvalidRam(t *testing.T) {
-	raw := minimalConfig()
-	raw["RAM"] = "string"
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-}
-
 func TestTimeout(t *testing.T) {
 	raw := minimalConfig()
 	raw["shutdown_timeout"] = "3m"
