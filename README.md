@@ -85,7 +85,7 @@ Post-processing:
       "password": "{{user `vsphere_password`}}",
 
       "template": "ubuntu",
-      "folder_name": "folder",
+      "folder_name": "folder1/folder2",
       "vm_name": "vm-1",
       "host": "esxi-1.domain.com",
       "resource_pool": "pool1/pool2",

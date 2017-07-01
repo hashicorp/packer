@@ -36,7 +36,7 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("start cloning...")
 
 	// Get folder
-	folder, err := finder.FolderOrDefault(ctx, s.config.FolderName)
+	folder, err := finder.FolderOrDefault(ctx, fmt.Sprintf("/%v/vm/%v", dc.Name(), s.config.FolderName))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

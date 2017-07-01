@@ -2,4 +2,6 @@
 .glide/
 vendor/
 packer-builder-vsphere
+packer-builder-vsphere.exe
 bin/
+test*.json
