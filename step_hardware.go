@@ -9,8 +9,9 @@ import (
 )
 
 type HardwareConfig struct {
-	CPUs int32 `mapstructure:"CPUs"`
-	RAM  int64 `mapstructure:"RAM"`
+	CPUs           int32 `mapstructure:"CPUs"`
+	CPUReservation int64 `mapstructure:"CPU_reservation"`
+	RAM            int64 `mapstructure:"RAM"`
 }
 
 type StepConfigureHardware struct {
@@ -28,6 +29,10 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 		var confSpec types.VirtualMachineConfigSpec
 		confSpec.NumCPUs = s.config.CPUs
 		confSpec.MemoryMB = s.config.RAM
+
+		var cpuSpec types.ResourceAllocationInfo
+		cpuSpec.Reservation = s.config.CPUReservation
+		confSpec.CpuAllocation = &cpuSpec
 
 		task, err := vm.Reconfigure(ctx, confSpec)
 		if err != nil {
