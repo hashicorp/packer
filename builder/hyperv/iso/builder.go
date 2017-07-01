@@ -80,6 +80,7 @@ type Config struct {
 	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
 	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
 	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
+	UseLegacyNetworkAdapter        bool     `mapstructure:"use_legacy_network_adapter"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -148,6 +149,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.Generation == 2 {
 		if len(b.config.FloppyFiles) > 0 || len(b.config.FloppyDirectories) > 0 {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+		if b.config.UseLegacyNetworkAdapter {
+			err = errors.New("Generation 2 vms don't support legacy network adapters.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
@@ -330,6 +335,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			UseLegacyNetworkAdapter:        b.config.UseLegacyNetworkAdapter,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 

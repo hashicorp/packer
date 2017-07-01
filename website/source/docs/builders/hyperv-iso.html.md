@@ -205,6 +205,9 @@ can be configured for this builder.
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
 
+-   `use_legacy_network_adapter` (bool) - If true use a legacy network adapter as the NIC.
+    This defaults to false.
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys

@@ -571,6 +571,24 @@ Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 	return err
 }
 
+func ReplaceVirtualMachineNetworkAdapter(vmName string, legacy bool) error {
+
+	var script = `
+param([string]$vmName,[string]$legacyString)
+$legacy = [System.Boolean]::Parse($legacyString)
+$switch = (Get-VMNetworkAdapter -VMName $vmName).SwitchName
+Remove-VMNetworkAdapter -VMName $vmName
+Add-VMNetworkAdapter -VMName $vmName -SwitchName $switch -Name $vmName -IsLegacy $legacy
+`
+	legacyString := "False"
+	if legacy {
+		legacyString = "True"
+	}
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, legacyString)
+	return err
+}
+
 func GetExternalOnlineVirtualSwitch() (string, error) {
 
 	var script = `
