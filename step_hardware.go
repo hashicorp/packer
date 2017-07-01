@@ -11,6 +11,7 @@ import (
 type HardwareConfig struct {
 	CPUs           int32 `mapstructure:"CPUs"`
 	CPUReservation int64 `mapstructure:"CPU_reservation"`
+	CPULimit       int64 `mapstructure:"CPU_limit"`
 	RAM            int64 `mapstructure:"RAM"`
 }
 
@@ -32,6 +33,7 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 
 		var cpuSpec types.ResourceAllocationInfo
 		cpuSpec.Reservation = s.config.CPUReservation
+		cpuSpec.Limit = s.config.CPULimit
 		confSpec.CpuAllocation = &cpuSpec
 
 		task, err := vm.Reconfigure(ctx, confSpec)

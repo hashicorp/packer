@@ -60,6 +60,7 @@ Destination:
 Hardware customization:
 * `CPUs` - number of CPU sockets. Inherited from source VM by default.
 * `CPU_reservation` - Amount of reserved CPU resources in MHz. Inherited from source VM by default.
+* `CPU_limit` - Upper limit of available CPU resources in MHz. Inherited from source VM by default, set to `-1` for reset.
 * `RAM` - Amount of RAM in megabytes. Inherited from source VM by default.
 
 Provisioning:
@@ -100,6 +101,7 @@ Post-processing:
 
       "CPUs": 2,
       "CPU_reservation": 1000,
+      "CPU_limit": 2000,
       "RAM": 8192,
 
       "ssh_username": "root",
