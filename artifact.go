@@ -1,9 +1,15 @@
 package main
 
+import (
+	"github.com/vmware/govmomi/object"
+	"context"
+)
+
 const BuilderId = "jetbrains.vsphere"
 
 type Artifact struct {
-	VMName string         `json:"vm_name"`
+	VMName string
+	Conn *object.VirtualMachine
 }
 
 func (a *Artifact) BuilderId() string {
@@ -27,5 +33,15 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
+	ctx := context.TODO()
+	task, err := a.Conn.Destroy(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = task.WaitForResult(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

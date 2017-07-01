@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/vmware/govmomi"
 	"context"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi/vim25/types"
@@ -14,28 +13,25 @@ import (
 )
 
 type CloneParameters struct {
-	client          *govmomi.Client
-	folder          *object.Folder
+	ctx          context.Context
+	vmSrc        *object.VirtualMachine
+	vmName       string
+	folder       *object.Folder
 	resourcePool *object.ResourcePool
 	datastore    *object.Datastore
-	vmSrc        *object.VirtualMachine
-	ctx          context.Context
-	vmName       string
 	linkedClone  bool
 }
 
-type StepCloneVM struct{
-	config *Config
+type StepCloneVM struct {
+	config  *Config
 	success bool
 }
 
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*govmomi.Client)
 	ctx := state.Get("ctx").(context.Context)
 	finder := state.Get("finder").(*find.Finder)
 	dc := state.Get("dc").(*object.Datacenter)
 	vmSrc := state.Get("vmSrc").(*object.VirtualMachine)
-
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("start cloning...")
 
@@ -64,13 +60,12 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vm, err := cloneVM(&CloneParameters{
-		client:          client,
-		folder:          folder,
+		ctx:          ctx,
+		vmSrc:        vmSrc,
+		vmName:       s.config.VMName,
+		folder:       folder,
 		resourcePool: pool,
 		datastore:    datastore,
-		vmSrc:        vmSrc,
-		ctx:          ctx,
-		vmName:       s.config.VMName,
 		linkedClone:  s.config.LinkedClone,
 	})
 	if err != nil {
@@ -79,7 +74,6 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	state.Put("vm", vm)
-	state.Put("ctx", ctx)
 	s.success = true
 	return multistep.ActionContinue
 }
@@ -158,6 +152,6 @@ func cloneVM(params *CloneParameters) (vm *object.VirtualMachine, err error) {
 		return
 	}
 
-	vm = object.NewVirtualMachine(params.client.Client, info.Result.(types.ManagedObjectReference))
+	vm = object.NewVirtualMachine(params.vmSrc.Client(), info.Result.(types.ManagedObjectReference))
 	return vm, nil
 }
