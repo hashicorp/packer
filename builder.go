@@ -52,13 +52,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("client", client)
 
 	finder := find.NewFinder(client.Client, false)
-	dc, err := finder.DatacenterOrDefault(ctx, b.config.DCName)
+	datacenter, err := finder.DatacenterOrDefault(ctx, b.config.Datacenter)
 	if err != nil {
 		return nil, err
 	}
-	finder.SetDatacenter(dc)
+	finder.SetDatacenter(datacenter)
 	state.Put("finder", finder)
-	state.Put("dc", dc)
+	state.Put("datacenter", datacenter)
 
 	vmSrc, err := finder.VirtualMachine(ctx, b.config.Template)
 	if err != nil {

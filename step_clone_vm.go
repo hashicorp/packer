@@ -30,20 +30,20 @@ type StepCloneVM struct {
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ctx := state.Get("ctx").(context.Context)
 	finder := state.Get("finder").(*find.Finder)
-	dc := state.Get("dc").(*object.Datacenter)
+	datacenter := state.Get("datacenter").(*object.Datacenter)
 	vmSrc := state.Get("vmSrc").(*object.VirtualMachine)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("start cloning...")
 
 	// Get folder
-	folder, err := finder.FolderOrDefault(ctx, fmt.Sprintf("/%v/vm/%v", dc.Name(), s.config.FolderName))
+	folder, err := finder.FolderOrDefault(ctx, fmt.Sprintf("/%v/vm/%v", datacenter.Name(), s.config.FolderName))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	// Get resource pool
-	pool, err := finder.ResourcePoolOrDefault(ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", dc.Name(), s.config.Host, s.config.ResourcePool))
+	pool, err := finder.ResourcePoolOrDefault(ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", datacenter.Name(), s.config.Host, s.config.ResourcePool))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

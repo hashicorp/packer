@@ -52,7 +52,7 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 
 ### Optional
 Destination:
-* `dc_name` - required if there are several datacenters.
+* `datacenter` - required if there are several datacenters.
 * `folder` - VM folder where target VM is created.
 * `resource_pool` - by default a root of vSphere host.
 * `datastore` - required if vSphere host has multiple datastores attached.
@@ -80,7 +80,7 @@ Post-processing:
       "type": "vsphere",
 
       "vcenter_host": "vcenter.domain.com",
-      "dc_name": "dc1",
+      "datacenter": "dc1",
       "username": "root",
       "password": "{{user `vsphere_password`}}",
 
