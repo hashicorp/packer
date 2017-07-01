@@ -16,10 +16,10 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Connection
-	VCenterHost string `mapstructure:"vcenter_host"`
-	Datacenter  string `mapstructure:"datacenter"`
-	Username    string `mapstructure:"username"`
-	Password    string `mapstructure:"password"`
+	VCenterServer string `mapstructure:"vcenter_server"`
+	Datacenter    string `mapstructure:"datacenter"`
+	Username      string `mapstructure:"username"`
+	Password      string `mapstructure:"password"`
 
 	// Location
 	Template     string `mapstructure:"template"`
@@ -59,34 +59,29 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	// Accumulate any errors
 	errs := new(packer.MultiError)
 	var warnings []string
-
-	// Prepare config(s)
 	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
 
-	// Check the required params
-	if c.VCenterHost == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vCenter host required"))
+	if c.VCenterServer == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vCenter hostname is required"))
 	}
 	if c.Username == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Username required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Username is required"))
 	}
 	if c.Password == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Password required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Password is required"))
 	}
 	if c.Template == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Template VM name required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Template name is required"))
 	}
 	if c.VMName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target VM name required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target VM name is required"))
 	}
 	if c.Host == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target host required"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vSphere host is required"))
 	}
 
-	// Verify numeric parameters if present
 	if c.CPUs != "" {
 		if _, err := strconv.Atoi(c.CPUs); err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Invalid number of CPU sockets"))

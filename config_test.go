@@ -37,7 +37,7 @@ func TestTimeout(t *testing.T) {
 
 func minimalConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"vcenter_host": "vcenter.domain.local",
+		"vcenter_server": "vcenter.domain.local",
 		"username":     "root",
 		"password":     "vmware",
 		"template":     "ubuntu",

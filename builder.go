@@ -40,7 +40,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	ctx := context.TODO()
 	state.Put("ctx", ctx)
 
-	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", b.config.VCenterHost))
+	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", b.config.VCenterServer))
 	if err != nil {
 		return nil, err
 	}

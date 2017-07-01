@@ -18,7 +18,7 @@ This builder uses native vSphere API, and creates virtual machines remotely.
     {
       "type": "vsphere",
 
-      "vcenter_host": "vcenter.domain.com",
+      "vcenter_server": "vcenter.domain.com",
       "username": "root",
       "password": "secret",
 
@@ -41,7 +41,7 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 
 ## Parameters
 ### Required
-* `vcenter_host` - vCenter hostname.
+* `vcenter_server` - vCenter server hostname.
 * `username` - vSphere username.
 * `password` - vSphere password.
 * `template` - name of source VM.
@@ -80,7 +80,7 @@ Post-processing:
     {
       "type": "vsphere",
 
-      "vcenter_host": "vcenter.domain.com",
+      "vcenter_server": "vcenter.domain.com",
       "datacenter": "dc1",
       "username": "root",
       "password": "{{user `vsphere_password`}}",
