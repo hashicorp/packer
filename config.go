@@ -23,7 +23,7 @@ type Config struct {
 	// Location
 	Template     string `mapstructure:"template"`
 	VMName       string `mapstructure:"vm_name"`
-	FolderName   string `mapstructure:"folder_name"`
+	FolderName   string `mapstructure:"folder"`
 	DCName       string `mapstructure:"dc_name"`
 	Host         string `mapstructure:"host"`
 	ResourcePool string `mapstructure:"resource_pool"`

@@ -53,7 +53,7 @@ This builder uses native vSphere API, and creates virtual machines remotely.
 ### Optional
 Destination:
 * `dc_name` - required if there are several datacenters.
-* `folder_name` - VM folder where target VM is created.
+* `folder` - VM folder where target VM is created.
 * `resource_pool` - by default a root of vSphere host.
 * `datastore` - required if vSphere host has multiple datastores attached.
 * `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
@@ -85,7 +85,7 @@ Post-processing:
       "password": "{{user `vsphere_password`}}",
 
       "template": "ubuntu",
-      "folder_name": "folder1/folder2",
+      "folder": "folder1/folder2",
       "vm_name": "vm-1",
       "host": "esxi-1.domain.com",
       "resource_pool": "pool1/pool2",
