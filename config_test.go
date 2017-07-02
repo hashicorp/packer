@@ -11,6 +11,17 @@ func TestMinimalConfig(t *testing.T) {
 	testConfigOk(t, warns, errs)
 }
 
+func TestMandatoryParameters(t *testing.T) {
+
+	params := []string{"vcenter_server", "username", "password", "template", "vm_name", "host"}
+	for _, param := range params {
+		raw := minimalConfig()
+		raw[param] = ""
+		_, warns, err := NewConfig(raw)
+		testConfigErr(t, param, warns, err)
+	}
+}
+
 func TestTimeout(t *testing.T) {
 	raw := minimalConfig()
 	raw["shutdown_timeout"] = "3m"
@@ -26,7 +37,7 @@ func TestRAMReservation(t *testing.T) {
 	raw["RAM_reservation"] = 1000
 	raw["RAM_reserve_all"] = true
 	_, warns, err := NewConfig(raw)
-	testConfigErr(t, warns, err)
+	testConfigErr(t, "RAM_reservation", warns, err)
 }
 
 func minimalConfig() map[string]interface{} {
@@ -44,18 +55,18 @@ func minimalConfig() map[string]interface{} {
 
 func testConfigOk(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("Should be no warnings: %#v", warns)
+		t.Error("Should be no warnings: %#v", warns)
 	}
 	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
+		t.Error("Unexpected error: %s", err)
 	}
 }
 
-func testConfigErr(t *testing.T, warns []string, err error) {
+func testConfigErr(t *testing.T, context string, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Fatalf("Should be no warnings: %#v", warns)
+		t.Error("Should be no warnings: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("An error is not raised")
+		t.Error("An error is not raised for", context)
 	}
 }
