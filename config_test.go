@@ -16,8 +16,8 @@ func TestTimeout(t *testing.T) {
 	raw["shutdown_timeout"] = "3m"
 	conf, warns, err := NewConfig(raw)
 	testConfigOk(t, warns, err)
-	if conf.ShutdownTimeout != 3 * time.Minute {
-		t.Fatalf("shutdown_timeout sould be equal 3 minutes")
+	if conf.ShutdownConfig.Timeout != 3 * time.Minute {
+		t.Fatalf("shutdown_timeout sould be equal 3 minutes, got %v", conf.ShutdownConfig.Timeout)
 	}
 }
 

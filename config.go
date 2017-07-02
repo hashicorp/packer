@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"time"
 )
 
 type Config struct {
@@ -37,11 +36,9 @@ type Config struct {
 	communicator.Config `mapstructure:",squash"`
 
 	// Post-processing
-	ShutdownCommand    string `mapstructure:"shutdown_command"`
-	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
-	ShutdownTimeout    time.Duration
-	CreateSnapshot     bool   `mapstructure:"create_snapshot"`
-	ConvertToTemplate  bool   `mapstructure:"convert_to_template"`
+	ShutdownConfig         `mapstructure:",squash"`
+	CreateSnapshot    bool `mapstructure:"create_snapshot"`
+	ConvertToTemplate bool `mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context
 }
@@ -82,16 +79,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
-
-	if c.RawShutdownTimeout != "" {
-		timeout, err := time.ParseDuration(c.RawShutdownTimeout)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed parsing shutdown_timeout: %s", err))
-		}
-		c.ShutdownTimeout = timeout
-	} else {
-		c.ShutdownTimeout = 5 * time.Minute
-	}
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
 
 	if len(errs.Errors) > 0 {
 		return nil, warnings, errs
