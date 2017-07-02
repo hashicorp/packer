@@ -4,7 +4,6 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/vim25/types"
-	"context"
 	"github.com/vmware/govmomi/object"
 	"fmt"
 )
@@ -33,8 +32,8 @@ type StepConfigureHardware struct {
 }
 
 func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepAction {
+	d := state.Get("driver").(Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
-	ctx := state.Get("ctx").(context.Context)
 	ui := state.Get("ui").(packer.Ui)
 
 	if *s.config != (HardwareConfig{}) {
@@ -55,12 +54,12 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 
 		confSpec.MemoryReservationLockedToMax = &s.config.RAMReserveAll
 
-		task, err := vm.Reconfigure(ctx, confSpec)
+		task, err := vm.Reconfigure(d.ctx, confSpec)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
-		_, err = task.WaitForResult(ctx, nil)
+		_, err = task.WaitForResult(d.ctx, nil)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

@@ -6,7 +6,6 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/object"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/find"
 	"fmt"
 	"github.com/vmware/govmomi/vim25/mo"
 	"errors"
@@ -49,39 +48,37 @@ type CloneParameters struct {
 }
 
 type StepCloneVM struct {
-	config  *CloneConfig
+	config *CloneConfig
 }
 
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
-	ctx := state.Get("ctx").(context.Context)
-	finder := state.Get("finder").(*find.Finder)
-	datacenter := state.Get("datacenter").(*object.Datacenter)
+	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	vmSrc, err := finder.VirtualMachine(ctx, s.config.Template)
+	vmSrc, err := d.finder.VirtualMachine(d.ctx, s.config.Template)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 	state.Put("vmSrc", vmSrc)
 
-	ui.Say("start cloning...")
+	ui.Say("Cloning VM...")
 
-	folder, err := finder.FolderOrDefault(ctx, fmt.Sprintf("/%v/vm/%v", datacenter.Name(), s.config.FolderName))
+	folder, err := d.finder.FolderOrDefault(d.ctx, fmt.Sprintf("/%v/vm/%v", d.datacenter.Name(), s.config.FolderName))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	pool, err := finder.ResourcePoolOrDefault(ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", datacenter.Name(), s.config.Host, s.config.ResourcePool))
+	pool, err := d.finder.ResourcePoolOrDefault(d.ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", d.datacenter.Name(), s.config.Host, s.config.ResourcePool))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	var datastore *object.Datastore = nil
+	var datastore *object.Datastore
 	if s.config.Datastore != "" {
-		datastore, err = finder.Datastore(ctx, s.config.Datastore)
+		datastore, err = d.finder.Datastore(d.ctx, s.config.Datastore)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -89,7 +86,7 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vm, err := cloneVM(&CloneParameters{
-		ctx:          ctx,
+		ctx:          d.ctx,
 		vmSrc:        vmSrc,
 		vmName:       s.config.VMName,
 		folder:       folder,
@@ -114,17 +111,17 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	}
 
 	if vm, ok := state.GetOk("vm"); ok {
-		ctx := state.Get("ctx").(context.Context)
+		d := state.Get("driver").(Driver)
 		ui := state.Get("ui").(packer.Ui)
 
 		ui.Say("Destroying VM...")
 
-		task, err := vm.(*object.VirtualMachine).Destroy(ctx)
+		task, err := vm.(*object.VirtualMachine).Destroy(d.ctx)
 		if err != nil {
 			ui.Error(err.Error())
 			return
 		}
-		_, err = task.WaitForResult(ctx, nil)
+		_, err = task.WaitForResult(d.ctx, nil)
 		if err != nil {
 			ui.Error(err.Error())
 			return

@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	gossh "golang.org/x/crypto/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
-	"context"
 	"github.com/vmware/govmomi/object"
 )
 
@@ -33,7 +32,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	state.Put("ctx", context.TODO())
 
 	steps := []multistep.Step{
 		&StepConnect{
