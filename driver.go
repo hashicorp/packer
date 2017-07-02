@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/mo"
 	"errors"
+	"time"
 )
 
 type Driver struct {
@@ -184,14 +185,40 @@ func (d *Driver) powerOff(vm *object.VirtualMachine) error {
 		return err
 	}
 
-	if state != types.VirtualMachinePowerStatePoweredOff {
-		task, err := vm.PowerOff(d.ctx)
+	if state == types.VirtualMachinePowerStatePoweredOff {
+		return nil
+	}
+
+	task, err := vm.PowerOff(d.ctx)
+	if err != nil {
+		return err
+	}
+	_, err = task.WaitForResult(d.ctx, nil)
+	return err
+}
+
+func (d *Driver) StartShutdown(vm *object.VirtualMachine) error {
+	err := vm.ShutdownGuest(d.ctx)
+	return err
+}
+
+func (d *Driver) WaitForShutdown(vm *object.VirtualMachine, timeout time.Duration) error {
+	shutdownTimer := time.After(timeout)
+	for {
+		powerState, err := vm.PowerState(d.ctx)
 		if err != nil {
 			return err
 		}
-		_, err = task.WaitForResult(d.ctx, nil)
-		if err != nil {
+		if powerState == "poweredOff" {
+			break
+		}
+
+		select {
+		case <-shutdownTimer:
+			err := errors.New("Timeout while waiting for machine to shut down.")
 			return err
+		default:
+			time.Sleep(1 * time.Second)
 		}
 	}
 	return nil
