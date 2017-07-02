@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/object"
 	"fmt"
 )
@@ -39,27 +38,7 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 	if *s.config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware parameters...")
 
-		var confSpec types.VirtualMachineConfigSpec
-		confSpec.NumCPUs = s.config.CPUs
-		confSpec.MemoryMB = s.config.RAM
-
-		var cpuSpec types.ResourceAllocationInfo
-		cpuSpec.Reservation = s.config.CPUReservation
-		cpuSpec.Limit = s.config.CPULimit
-		confSpec.CpuAllocation = &cpuSpec
-
-		var ramSpec types.ResourceAllocationInfo
-		ramSpec.Reservation = s.config.RAMReservation
-		confSpec.MemoryAllocation = &ramSpec
-
-		confSpec.MemoryReservationLockedToMax = &s.config.RAMReserveAll
-
-		task, err := vm.Reconfigure(d.ctx, confSpec)
-		if err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		_, err = task.WaitForResult(d.ctx, nil)
+		err := d.configureVM(vm, s.config)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

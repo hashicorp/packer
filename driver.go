@@ -129,3 +129,31 @@ func (d *Driver) destroyVM(vm *object.VirtualMachine) error {
 	}
 	return nil
 }
+
+func (d *Driver) configureVM(vm *object.VirtualMachine, config *HardwareConfig) error {
+	var confSpec types.VirtualMachineConfigSpec
+	confSpec.NumCPUs = config.CPUs
+	confSpec.MemoryMB = config.RAM
+
+	var cpuSpec types.ResourceAllocationInfo
+	cpuSpec.Reservation = config.CPUReservation
+	cpuSpec.Limit = config.CPULimit
+	confSpec.CpuAllocation = &cpuSpec
+
+	var ramSpec types.ResourceAllocationInfo
+	ramSpec.Reservation = config.RAMReservation
+	confSpec.MemoryAllocation = &ramSpec
+
+	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
+
+	task, err := vm.Reconfigure(d.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+	_, err = task.WaitForResult(d.ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
