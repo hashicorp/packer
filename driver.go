@@ -225,10 +225,15 @@ func (d *Driver) WaitForShutdown(vm *object.VirtualMachine, timeout time.Duratio
 }
 
 func (d *Driver) CreateSnapshot(vm *object.VirtualMachine) error {
-	task, err := vm.CreateSnapshot(d.ctx, "Created by Packer", "", false,false)
+	task, err := vm.CreateSnapshot(d.ctx, "Created by Packer", "", false, false)
 	if err != nil {
 		return err
 	}
 	_, err = task.WaitForResult(d.ctx, nil)
+	return err
+}
+
+func (d *Driver) ConvertToTemplate(vm *object.VirtualMachine) error {
+	err := vm.MarkAsTemplate(d.ctx)
 	return err
 }
