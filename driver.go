@@ -157,3 +157,42 @@ func (d *Driver) configureVM(vm *object.VirtualMachine, config *HardwareConfig) 
 
 	return nil
 }
+
+func (d *Driver) powerOn(vm *object.VirtualMachine) error {
+	task, err := vm.PowerOn(d.ctx)
+	if err != nil {
+		return err
+	}
+	_, err = task.WaitForResult(d.ctx, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Driver) WaitForIP(vm *object.VirtualMachine) (string, error) {
+	ip, err := vm.WaitForIP(d.ctx)
+	if err != nil {
+		return "", err
+	}
+	return ip, nil
+}
+
+func (d *Driver) powerOff(vm *object.VirtualMachine) error {
+	state, err := vm.PowerState(d.ctx)
+	if err != nil {
+		return err
+	}
+
+	if state != types.VirtualMachinePowerStatePoweredOff {
+		task, err := vm.PowerOff(d.ctx)
+		if err != nil {
+			return err
+		}
+		_, err = task.WaitForResult(d.ctx, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
