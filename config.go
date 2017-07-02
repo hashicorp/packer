@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -11,34 +9,14 @@ import (
 )
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// Connection
-	VCenterServer      string `mapstructure:"vcenter_server"`
-	Datacenter         string `mapstructure:"datacenter"`
-	Username           string `mapstructure:"username"`
-	Password           string `mapstructure:"password"`
-	InsecureConnection bool   `mapstructure:"insecure_connection"`
-
-	// Location
-	Template     string `mapstructure:"template"`
-	FolderName   string `mapstructure:"folder"`
-	VMName       string `mapstructure:"vm_name"`
-	Host         string `mapstructure:"host"`
-	ResourcePool string `mapstructure:"resource_pool"`
-	Datastore    string `mapstructure:"datastore"`
-	LinkedClone  bool   `mapstructure:"linked_clone"`
-
-	// Customization
-	HardwareConfig `mapstructure:",squash"`
-
-	// Provisioning
-	communicator.Config `mapstructure:",squash"`
-
-	// Post-processing
-	ShutdownConfig         `mapstructure:",squash"`
-	CreateSnapshot    bool `mapstructure:"create_snapshot"`
-	ConvertToTemplate bool `mapstructure:"convert_to_template"`
+	common.PackerConfig 	`mapstructure:",squash"`
+	ConnectConfig 			`mapstructure:",squash"`
+	CloneConfig 			`mapstructure:",squash"`
+	HardwareConfig 			`mapstructure:",squash"`
+	communicator.Config 	`mapstructure:",squash"`
+	ShutdownConfig         	`mapstructure:",squash"`
+	CreateSnapshot    bool 	`mapstructure:"create_snapshot"`
+	ConvertToTemplate bool 	`mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context
 }
@@ -56,34 +34,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	errs := new(packer.MultiError)
-	var warnings []string
 	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
-
-	if c.VCenterServer == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vCenter hostname is required"))
-	}
-	if c.Username == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Username is required"))
-	}
-	if c.Password == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Password is required"))
-	}
-	if c.Template == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Template name is required"))
-	}
-	if c.VMName == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Target VM name is required"))
-	}
-	if c.Host == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("vSphere host is required"))
-	}
-
+	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, c.CloneConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
 
 	if len(errs.Errors) > 0 {
-		return nil, warnings, errs
+		return nil, nil, errs
 	}
 
-	return c, warnings, nil
+	return c, nil, nil
 }

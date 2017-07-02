@@ -10,12 +10,8 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	gossh "golang.org/x/crypto/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
-	"github.com/vmware/govmomi"
 	"context"
-	"net/url"
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
-	"fmt"
 )
 
 type Builder struct {
@@ -37,38 +33,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
-	ctx := context.TODO()
-	state.Put("ctx", ctx)
-
-	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", b.config.VCenterServer))
-	if err != nil {
-		return nil, err
-	}
-	vcenter_url.User = url.UserPassword(b.config.Username, b.config.Password)
-	client, err := govmomi.NewClient(ctx, vcenter_url, b.config.InsecureConnection)
-	if err != nil {
-		return nil, err
-	}
-	state.Put("client", client)
-
-	finder := find.NewFinder(client.Client, false)
-	datacenter, err := finder.DatacenterOrDefault(ctx, b.config.Datacenter)
-	if err != nil {
-		return nil, err
-	}
-	finder.SetDatacenter(datacenter)
-	state.Put("finder", finder)
-	state.Put("datacenter", datacenter)
-
-	vmSrc, err := finder.VirtualMachine(ctx, b.config.Template)
-	if err != nil {
-		return nil, err
-	}
-	state.Put("vmSrc", vmSrc)
+	state.Put("ctx", context.TODO())
 
 	steps := []multistep.Step{
+		&StepConnect{
+			config: &b.config.ConnectConfig,
+		},
 		&StepCloneVM{
-			config: b.config,
+			config: &b.config.CloneConfig,
 		},
 		&StepConfigureHardware{
 			config: &b.config.HardwareConfig,

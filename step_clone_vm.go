@@ -12,6 +12,32 @@ import (
 	"errors"
 )
 
+type CloneConfig struct {
+	Template     string `mapstructure:"template"`
+	FolderName   string `mapstructure:"folder"`
+	VMName       string `mapstructure:"vm_name"`
+	Host         string `mapstructure:"host"`
+	ResourcePool string `mapstructure:"resource_pool"`
+	Datastore    string `mapstructure:"datastore"`
+	LinkedClone  bool   `mapstructure:"linked_clone"`
+}
+
+func (c *CloneConfig) Prepare() []error {
+	var errs []error
+
+	if c.Template == "" {
+		errs = append(errs, fmt.Errorf("Template name is required"))
+	}
+	if c.VMName == "" {
+		errs = append(errs, fmt.Errorf("Target VM name is required"))
+	}
+	if c.Host == "" {
+		errs = append(errs, fmt.Errorf("vSphere host is required"))
+	}
+
+	return errs
+}
+
 type CloneParameters struct {
 	ctx          context.Context
 	vmSrc        *object.VirtualMachine
@@ -23,33 +49,36 @@ type CloneParameters struct {
 }
 
 type StepCloneVM struct {
-	config  *Config
-	success bool
+	config  *CloneConfig
 }
 
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ctx := state.Get("ctx").(context.Context)
 	finder := state.Get("finder").(*find.Finder)
 	datacenter := state.Get("datacenter").(*object.Datacenter)
-	vmSrc := state.Get("vmSrc").(*object.VirtualMachine)
 	ui := state.Get("ui").(packer.Ui)
+
+	vmSrc, err := finder.VirtualMachine(ctx, s.config.Template)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	state.Put("vmSrc", vmSrc)
+
 	ui.Say("start cloning...")
 
-	// Get folder
 	folder, err := finder.FolderOrDefault(ctx, fmt.Sprintf("/%v/vm/%v", datacenter.Name(), s.config.FolderName))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	// Get resource pool
 	pool, err := finder.ResourcePoolOrDefault(ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", datacenter.Name(), s.config.Host, s.config.ResourcePool))
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	// Get datastore
 	var datastore *object.Datastore = nil
 	if s.config.Datastore != "" {
 		datastore, err = finder.Datastore(ctx, s.config.Datastore)
@@ -74,26 +103,23 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	state.Put("vm", vm)
-	s.success = true
 	return multistep.ActionContinue
 }
 
 func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
-	if !s.success {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
 		return
 	}
 
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-
-	if cancelled || halted {
-		vm := state.Get("vm").(*object.VirtualMachine)
+	if vm, ok := state.GetOk("vm"); ok {
 		ctx := state.Get("ctx").(context.Context)
 		ui := state.Get("ui").(packer.Ui)
 
-		ui.Say("destroying VM...")
+		ui.Say("Destroying VM...")
 
-		task, err := vm.Destroy(ctx)
+		task, err := vm.(*object.VirtualMachine).Destroy(ctx)
 		if err != nil {
 			ui.Error(err.Error())
 			return
