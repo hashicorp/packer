@@ -16,27 +16,27 @@ import (
 type Driver struct {
 	ctx        context.Context
 	client     *govmomi.Client
-	datacenter *object.Datacenter
 	finder     *find.Finder
+	datacenter *object.Datacenter
 }
 
-func NewDriverVSphere(config *ConnectConfig) (Driver, error) {
+func NewDriver(config *ConnectConfig) (*Driver, error) {
 	ctx := context.TODO()
 
 	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {
-		return Driver{}, err
+		return nil, err
 	}
 	vcenter_url.User = url.UserPassword(config.Username, config.Password)
 	client, err := govmomi.NewClient(ctx, vcenter_url, config.InsecureConnection)
 	if err != nil {
-		return Driver{}, err
+		return nil, err
 	}
 
 	finder := find.NewFinder(client.Client, false)
 	datacenter, err := finder.DatacenterOrDefault(ctx, config.Datacenter)
 	if err != nil {
-		return Driver{}, err
+		return nil, err
 	}
 	finder.SetDatacenter(datacenter)
 
@@ -46,66 +46,58 @@ func NewDriverVSphere(config *ConnectConfig) (Driver, error) {
 		datacenter: datacenter,
 		finder:     finder,
 	}
-	return d, nil
+	return &d, nil
 }
 
-func (d *Driver) cloneVM(config *CloneConfig) (*object.VirtualMachine, error) {
-	vmSrc, err := d.finder.VirtualMachine(d.ctx, config.Template)
+func (d *Driver) CloneVM(config *CloneConfig) (*object.VirtualMachine, error) {
+	template, err := d.finder.VirtualMachine(d.ctx, config.Template)
 	if err != nil {
 		return nil, err
 	}
 
-	folder, err := d.finder.FolderOrDefault(d.ctx, fmt.Sprintf("/%v/vm/%v", d.datacenter.Name(), config.FolderName))
+	folder, err := d.finder.FolderOrDefault(d.ctx, fmt.Sprintf("/%v/vm/%v", d.datacenter.Name(), config.Folder))
 	if err != nil {
 		return nil, err
 	}
+
+	var relocateSpec types.VirtualMachineRelocateSpec
 
 	pool, err := d.finder.ResourcePoolOrDefault(d.ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", d.datacenter.Name(), config.Host, config.ResourcePool))
 	if err != nil {
 		return nil, err
 	}
 	poolRef := pool.Reference()
+	relocateSpec.Pool = &poolRef
 
-	var datastore *object.Datastore
 	if config.Datastore != "" {
-		datastore, err = d.finder.Datastore(d.ctx, config.Datastore)
+		datastore, err := d.finder.Datastore(d.ctx, config.Datastore)
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	// Creating specs for cloning
-	relocateSpec := types.VirtualMachineRelocateSpec{
-		Pool: &(poolRef),
-	}
-	if datastore != nil {
 		datastoreRef := datastore.Reference()
 		relocateSpec.Datastore = &datastoreRef
 	}
-	if config.LinkedClone == true {
-		relocateSpec.DiskMoveType = "createNewChildDiskBacking"
-	}
 
-	cloneSpec := types.VirtualMachineCloneSpec{
-		Location: relocateSpec,
-		PowerOn:  false,
-	}
+	var cloneSpec types.VirtualMachineCloneSpec
+	cloneSpec.Location = relocateSpec
+	cloneSpec.PowerOn = false
+
 	if config.LinkedClone == true {
-		var vmImage mo.VirtualMachine
-		err = vmSrc.Properties(d.ctx, vmSrc.Reference(), []string{"snapshot"}, &vmImage)
+		cloneSpec.Location.DiskMoveType = "createNewChildDiskBacking"
+
+		var tpl mo.VirtualMachine
+		err = template.Properties(d.ctx, template.Reference(), []string{"snapshot"}, &tpl)
 		if err != nil {
-			err = fmt.Errorf("Error reading base VM properties: %s", err)
 			return nil, err
 		}
-		if vmImage.Snapshot == nil {
-			err = errors.New("`linked_clone=true`, but image VM has no snapshots")
+		if tpl.Snapshot == nil {
+			err = errors.New("`linked_clone=true`, but template has no snapshots")
 			return nil, err
 		}
-		cloneSpec.Snapshot = vmImage.Snapshot.CurrentSnapshot
+		cloneSpec.Snapshot = tpl.Snapshot.CurrentSnapshot
 	}
 
-	// Cloning itself
-	task, err := vmSrc.Clone(d.ctx, folder, config.VMName, cloneSpec)
+	task, err := template.Clone(d.ctx, folder, config.VMName, cloneSpec)
 	if err != nil {
 		return nil, err
 	}
@@ -115,23 +107,20 @@ func (d *Driver) cloneVM(config *CloneConfig) (*object.VirtualMachine, error) {
 		return nil, err
 	}
 
-	vm := object.NewVirtualMachine(vmSrc.Client(), info.Result.(types.ManagedObjectReference))
+	vm := object.NewVirtualMachine(d.client.Client, info.Result.(types.ManagedObjectReference))
 	return vm, nil
 }
 
-func (d *Driver) destroyVM(vm *object.VirtualMachine) error {
+func (d *Driver) DestroyVM(vm *object.VirtualMachine) error {
 	task, err := vm.Destroy(d.ctx)
 	if err != nil {
 		return err
 	}
 	_, err = task.WaitForResult(d.ctx, nil)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-func (d *Driver) configureVM(vm *object.VirtualMachine, config *HardwareConfig) error {
+func (d *Driver) ConfigureVM(vm *object.VirtualMachine, config *HardwareConfig) error {
 	var confSpec types.VirtualMachineConfigSpec
 	confSpec.NumCPUs = config.CPUs
 	confSpec.MemoryMB = config.RAM
@@ -152,23 +141,16 @@ func (d *Driver) configureVM(vm *object.VirtualMachine, config *HardwareConfig) 
 		return err
 	}
 	_, err = task.WaitForResult(d.ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
-func (d *Driver) powerOn(vm *object.VirtualMachine) error {
+func (d *Driver) PowerOn(vm *object.VirtualMachine) error {
 	task, err := vm.PowerOn(d.ctx)
 	if err != nil {
 		return err
 	}
 	_, err = task.WaitForResult(d.ctx, nil)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (d *Driver) WaitForIP(vm *object.VirtualMachine) (string, error) {
@@ -179,7 +161,7 @@ func (d *Driver) WaitForIP(vm *object.VirtualMachine) (string, error) {
 	return ip, nil
 }
 
-func (d *Driver) powerOff(vm *object.VirtualMachine) error {
+func (d *Driver) PowerOff(vm *object.VirtualMachine) error {
 	state, err := vm.PowerState(d.ctx)
 	if err != nil {
 		return err

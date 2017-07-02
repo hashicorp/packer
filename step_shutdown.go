@@ -40,7 +40,7 @@ type StepShutdown struct {
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
-	d := state.Get("driver").(Driver)
+	d := state.Get("driver").(*Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.config.Command != "" {
@@ -53,7 +53,8 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
-		if err := comm.Start(cmd); err != nil {
+		err := comm.Start(cmd)
+		if err != nil {
 			state.Put("error", fmt.Errorf("Failed to send shutdown command: %s", err))
 			return multistep.ActionHalt
 		}

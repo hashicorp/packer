@@ -31,14 +31,14 @@ type StepConfigureHardware struct {
 }
 
 func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepAction {
-	d := state.Get("driver").(Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
 	ui := state.Get("ui").(packer.Ui)
+	d := state.Get("driver").(*Driver)
+	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if *s.config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware parameters...")
 
-		err := d.configureVM(vm, s.config)
+		err := d.ConfigureVM(vm, s.config)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

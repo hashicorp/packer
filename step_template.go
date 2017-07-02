@@ -12,7 +12,7 @@ type StepConvertToTemplate struct{
 
 func (s *StepConvertToTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(Driver)
+	d := state.Get("driver").(*Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.ConvertToTemplate {

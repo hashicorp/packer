@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
@@ -93,15 +92,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	artifact := &Artifact{
-		VMName: b.config.VMName,
-		Conn: state.Get("vm").(*object.VirtualMachine),
+		Name: b.config.VMName,
+		VM:   state.Get("vm").(*object.VirtualMachine),
 	}
 	return artifact, nil
 }
 
 func (b *Builder) Cancel() {
 	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
 	}
 }

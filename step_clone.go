@@ -9,8 +9,8 @@ import (
 
 type CloneConfig struct {
 	Template     string `mapstructure:"template"`
-	FolderName   string `mapstructure:"folder"`
 	VMName       string `mapstructure:"vm_name"`
+	Folder       string `mapstructure:"folder"`
 	Host         string `mapstructure:"host"`
 	ResourcePool string `mapstructure:"resource_pool"`
 	Datastore    string `mapstructure:"datastore"`
@@ -38,12 +38,12 @@ type StepCloneVM struct {
 }
 
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
-	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+	d := state.Get("driver").(*Driver)
 
 	ui.Say("Cloning VM...")
 
-	vm, err := d.cloneVM(s.config)
+	vm, err := d.CloneVM(s.config)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -61,12 +61,12 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	}
 
 	if vm, ok := state.GetOk("vm"); ok {
-		d := state.Get("driver").(Driver)
 		ui := state.Get("ui").(packer.Ui)
+		d := state.Get("driver").(*Driver)
 
 		ui.Say("Destroying VM...")
 
-		err := d.destroyVM(vm.(*object.VirtualMachine))
+		err := d.DestroyVM(vm.(*object.VirtualMachine))
 		if err != nil {
 			ui.Error(err.Error())
 		}

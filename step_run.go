@@ -8,16 +8,15 @@ import (
 )
 
 type StepRun struct {
-	// TODO: add boot time to provide a proper timeout during cleanup
 }
 
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
-	d := state.Get("driver").(Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
 	ui := state.Get("ui").(packer.Ui)
+	d := state.Get("driver").(*Driver)
+	vm := state.Get("vm").(*object.VirtualMachine)
 
 	ui.Say("Power on VM...")
-	err := d.powerOn(vm)
+	err := d.PowerOn(vm)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -38,17 +37,17 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 func (s *StepRun) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
+		return
+	}
 
-	if cancelled || halted {
-		d := state.Get("driver").(Driver)
-		vm := state.Get("vm").(*object.VirtualMachine)
-		ui := state.Get("ui").(packer.Ui)
+	ui := state.Get("ui").(packer.Ui)
+	d := state.Get("driver").(*Driver)
+	vm := state.Get("vm").(*object.VirtualMachine)
 
-		ui.Say("Power off VM...")
-		err := d.powerOff(vm)
-		if err != nil {
-			ui.Error(err.Error())
-			return
-		}
+	ui.Say("Power off VM...")
+	err := d.PowerOff(vm)
+	if err != nil {
+		ui.Error(err.Error())
 	}
 }

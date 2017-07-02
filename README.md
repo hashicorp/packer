@@ -48,8 +48,8 @@ Connection:
 * `insecure_connection` - do not validate server's TLS certificate. `false` by default.
 * `datacenter` - required if there are several datacenters.
 
-Destination:
-* `template` - [**mandatory**] name of source VM.
+Location:
+* `template` - [**mandatory**] name of source VM. Path is optional.
 * `vm_name` - [**mandatory**] name of target VM.
 * `folder` - VM folder where target VM is created.
 * `host` - [**mandatory**] vSphere host where target VM is created.
@@ -93,7 +93,7 @@ Post-processing:
       "insecure_connection": true,
       "datacenter": "dc1",
 
-      "template": "ubuntu",
+      "template": "folder/ubuntu",
       "folder": "folder1/folder2",
       "vm_name": "vm-1",
       "host": "esxi-1.domain.com",

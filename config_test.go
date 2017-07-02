@@ -7,12 +7,10 @@ import (
 
 func TestMinimalConfig(t *testing.T) {
 	_, warns, errs := NewConfig(minimalConfig())
-
 	testConfigOk(t, warns, errs)
 }
 
 func TestMandatoryParameters(t *testing.T) {
-
 	params := []string{"vcenter_server", "username", "password", "template", "vm_name", "host"}
 	for _, param := range params {
 		raw := minimalConfig()

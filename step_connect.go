@@ -7,10 +7,10 @@ import (
 
 type ConnectConfig struct {
 	VCenterServer      string `mapstructure:"vcenter_server"`
-	Datacenter         string `mapstructure:"datacenter"`
 	Username           string `mapstructure:"username"`
 	Password           string `mapstructure:"password"`
 	InsecureConnection bool   `mapstructure:"insecure_connection"`
+	Datacenter         string `mapstructure:"datacenter"`
 }
 
 func (c *ConnectConfig) Prepare() []error {
@@ -34,7 +34,7 @@ type StepConnect struct {
 }
 
 func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
-	driver, err := NewDriverVSphere(s.config)
+	driver, err := NewDriver(s.config)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
