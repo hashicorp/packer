@@ -64,9 +64,14 @@ if it is still in your template.
 ```
 
 To get an Atlas username, [create an account
-here](https://atlas.hashicorp.com/account/new?utm_source=oss&utm_medium=getting-started&utm_campaign=packer).
-Replace "ATLAS\_USERNAME" with your username, then run
-`packer push -create example.json` to send the configuration to Atlas, which
+here](https://atlas.hashicorp.com/account/new?utm_source=oss&utm_medium=getting-started&utm_campaign=packer). Once you have an account, you will need to contact
+sales@hashicorp.com to start a trial, if you haven't already done so.
+
+Replace "ATLAS\_USERNAME" with your username in the above config. Generate an
+Atlas token by navigating to https://atlas.hashicorp.com/settings/tokens and set
+that token as an environment variable: `ATLAS_TOKEN=YOURTOKENHERE`.
+
+Then run `packer push example.json` to send the configuration to Atlas, which
 automatically starts the build.
 
 This build will fail since neither `aws_access_key` or `aws_secret_key` are set
