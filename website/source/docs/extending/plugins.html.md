@@ -176,7 +176,7 @@ identifiable where the logs come from. Some example logs are shown below:
 2013/06/10 21:44:43 packer-builder-custom: 2013/06/10 21:44:43 Plugin address: :10000
 ```
 
-As you can see, the log messages from the builder custom plugin are prefixed
+As you can see, the log messages from the custom builder plugin are prefixed
 with "packer-builder-custom". Log output is *extremely* helpful in debugging
 issues and you're encouraged to be as verbose as you need to be in order for the
 logs to be helpful.
