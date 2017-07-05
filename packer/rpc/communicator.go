@@ -102,6 +102,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 
 	go func() {
 		conn, err := c.mux.Accept(responseStreamId)
+		wg.Wait()
 		if err != nil {
 			log.Printf("[ERR] Error accepting response stream %d: %s",
 				responseStreamId, err)
@@ -113,7 +114,6 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 		var finished CommandFinished
 		decoder := gob.NewDecoder(conn)
 		err = decoder.Decode(&finished)
-		wg.Wait()
 		if err != nil {
 			log.Printf("[ERR] Error decoding response stream %d: %s",
 				responseStreamId, err)
