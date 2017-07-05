@@ -94,8 +94,8 @@ Post-processing:
       "datacenter": "dc1",
 
       "template": "folder/ubuntu",
-      "folder": "folder1/folder2",
       "vm_name": "vm-1",
+      "folder": "folder1/folder2",
       "host": "esxi-1.domain.com",
       "resource_pool": "pool1/pool2",
       "datastore": "datastore1",
