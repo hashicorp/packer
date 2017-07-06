@@ -133,7 +133,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	// an interface with type *packer.MultiError and value nil which is different then a
 	// nil interface.
 	if errs != nil && len(errs.Errors) > 0 {
-		ui.Error(errs.Error())
+		state.Put("error", errs)
 		return multistep.ActionHalt
 	}
 

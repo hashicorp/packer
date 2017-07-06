@@ -20,7 +20,7 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	// Retrieve the instance ID from the previously saved state.
 	instanceID, ok := state.Get("instance_id").(string)
 	if !ok || instanceID == "" {
-		ui.Error("Could not retrieve instance_id from state!")
+		state.Put("error", fmt.Errorf("Could not retrieve instance_id from state!"))
 		return multistep.ActionHalt
 	}
 
@@ -30,7 +30,7 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	// Shutdown the virtual machine.
 	_, err := client.VirtualMachine.StopVirtualMachine(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error shutting down instance %s: %s", config.InstanceName, err))
+		state.Put("error", fmt.Errorf("Error shutting down instance %s: %s", config.InstanceName, err))
 		return multistep.ActionHalt
 	}
 
