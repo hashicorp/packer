@@ -2,16 +2,27 @@ package cloudstack
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
+// userDataTemplateData represents variables for user_data interpolation
+type userDataTemplateData struct {
+	HTTPIP   string
+	HTTPPort uint
+}
+
 // stepCreateInstance represents a Packer build step that creates CloudStack instances.
-type stepCreateInstance struct{}
+type stepCreateInstance struct {
+	Ctx interpolate.Context
+}
 
 // Run executes the Packer build step that creates a CloudStack instance.
 func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -65,7 +76,26 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	if config.UserData != "" {
-		ud, err := getUserData(config.UserData, config.HTTPGetOnly)
+		httpPort := state.Get("http_port").(uint)
+		hostIp, err := hostIP()
+		if err != nil {
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		s.Ctx.Data = &userDataTemplateData{
+			hostIp,
+			httpPort,
+		}
+
+		renderedUserData, err := interpolate.Render(config.UserData, &s.Ctx)
+		if err != nil {
+			err := fmt.Errorf("Error rendering user_data: %s", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		ud, err := getUserData(renderedUserData, config.HTTPGetOnly)
 		if err != nil {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -158,4 +188,21 @@ func getUserData(userData string, httpGETOnly bool) (string, error) {
 	}
 
 	return ud, nil
+}
+
+func hostIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", errors.New("No host IP found")
 }

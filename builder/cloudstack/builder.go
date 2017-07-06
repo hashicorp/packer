@@ -56,7 +56,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{
 		&stepPrepareConfig{},
-		&stepCreateInstance{},
+		&common.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&stepCreateInstance{
+			Ctx: b.config.ctx,
+		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
