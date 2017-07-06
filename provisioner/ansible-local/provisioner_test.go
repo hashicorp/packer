@@ -152,6 +152,7 @@ func TestProvisionerPrepare_PlaybookFiles(t *testing.T) {
 func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
 	cmdIndex := 0
 	for _, playbook := range playbooks {
+		playbook = filepath.ToSlash(playbook)
 		for ; cmdIndex < len(comm.startCommand); cmdIndex++ {
 			cmd := comm.startCommand[cmdIndex]
 			if strings.Contains(cmd, "ansible-playbook") && strings.Contains(cmd, playbook) {
@@ -167,6 +168,7 @@ func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
 func assertPlaybooksUploaded(comm *communicatorMock, playbooks []string) {
 	uploadIndex := 0
 	for _, playbook := range playbooks {
+		playbook = filepath.ToSlash(playbook)
 		for ; uploadIndex < len(comm.uploadDestination); uploadIndex++ {
 			dest := comm.uploadDestination[uploadIndex]
 			if strings.HasSuffix(dest, playbook) {
