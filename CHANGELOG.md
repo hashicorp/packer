@@ -2,6 +2,7 @@
 
 ### IMRPOVEMENTS:
 
+* builder/cloudstack: Add support for using a HTTP server. [GH-5017]
 * builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
 
 ### BUG FIXES:
