@@ -17,6 +17,7 @@ import (
 // Config holds all the details needed to configure the builder.
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	common.HTTPConfig   `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	APIURL       string        `mapstructure:"api_url"`
@@ -64,6 +65,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"user_data",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, err
