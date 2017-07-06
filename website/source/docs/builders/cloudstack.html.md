@@ -83,9 +83,23 @@ builder.
 -   `disk_size` (int) - The size (in GB) of the root disk of the new instance.
     This option is only available when using `source_template`.
 
+-   `http_directory` (string) - Path to a directory to serve using an
+    HTTP server. The files in this directory will be available over HTTP that
+    will be requestable from the virtual machine. This is useful for hosting
+    kickstart files and so on. By default this is "", which means no HTTP server
+    will be started. The address and port of the HTTP server will be available
+    as variables in `user_data`. This is covered in more detail below.
+
 -   `http_get_only` (boolean) - Some cloud providers only allow HTTP GET calls to
     their CloudStack API. If using such a provider, you need to set this to `true`
     in order for the provider to only make GET calls and no POST calls.
+
+-   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+    maximum port to use for the HTTP server started to serve the
+    `http_directory`. Because Packer often runs in parallel, Packer will choose
+    a randomly available port in this range to run the HTTP server. If you want
+    to force the HTTP server to be on one port, make this minimum and maximum
+    port the same. By default the values are 8000 and 9000, respectively.
 
 -   `hypervisor` (string) - The target hypervisor (e.g. `XenServer`, `KVM`) for
     the new template. This option is required when using `source_iso`.
@@ -122,6 +136,15 @@ builder.
 
 -   `use_local_ip_address` (boolean) - Set to `true` to indicate that the
     provisioners should connect to the local IP address of the instance.
+
+## User Data
+
+The available variables are:
+
+-  `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+    that is started serving the directory specified by the `http_directory`
+    configuration parameter. If `http_directory` isn't specified, these will be
+    blank!
 
 ## Basic Example
 
