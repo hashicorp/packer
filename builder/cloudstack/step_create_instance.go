@@ -90,13 +90,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 			httpPort,
 		}
 
-		renderedUserData, err := interpolate.Render(config.UserData, &s.Ctx)
-		if err != nil {
-			state.Put("error", fmt.Errorf("Error rendering user_data: %s", err))
-			return multistep.ActionHalt
-		}
-
-		ud, err := getUserData(renderedUserData, config.HTTPGetOnly)
+		ud, err := s.generateUserData(config.UserData, config.HTTPGetOnly)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -140,6 +134,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 // Cleanup any resources that may have been created during the Run phase.
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	instanceID, ok := state.Get("instance_id").(string)
@@ -150,9 +145,6 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	// Create a new parameter struct.
 	p := client.VirtualMachine.NewDestroyVirtualMachineParams(instanceID)
 
-	// Set expunge so the instance is completely removed
-	p.SetExpunge(true)
-
 	ui.Say("Deleting instance...")
 	if _, err := client.VirtualMachine.DestroyVirtualMachine(p); err != nil {
 		// This is a very poor way to be told the ID does no longer exist :(
@@ -162,23 +154,53 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		ui.Error(fmt.Sprintf("Error destroying instance: %s", err))
+		ui.Error(fmt.Sprintf("Error destroying instance. Please destroy it manually.\n\n"+
+			"\tName: %s\n"+
+			"\tError: %s", config.InstanceName, err))
+		return
+	}
+
+	// We could expunge the VM while destroying it, but if the user doesn't have
+	// rights that single call could error out leaving the VM running. So but
+	// splitting these calls we make sure the VM is always deleted, even when the
+	// expunge fails.
+	if config.Expunge {
+		// Create a new parameter struct.
+		p := client.VirtualMachine.NewExpungeVirtualMachineParams(instanceID)
+
+		ui.Say("Expunging instance...")
+		if _, err := client.VirtualMachine.ExpungeVirtualMachine(p); err != nil {
+			// This is a very poor way to be told the ID does no longer exist :(
+			if strings.Contains(err.Error(), fmt.Sprintf(
+				"Invalid parameter id value=%s due to incorrect long value format, "+
+					"or entity does not exist", instanceID)) {
+				return
+			}
+
+			ui.Error(fmt.Sprintf("Error expunging instance. Please expunge it manually.\n\n"+
+				"\tName: %s\n"+
+				"\tError: %s", config.InstanceName, err))
+			return
+		}
 	}
 
 	ui.Message("Instance has been deleted!")
-
 	return
 }
 
-// getUserData returns the user data as a base64 encoded string.
-func getUserData(userData string, httpGETOnly bool) (string, error) {
-	ud := base64.StdEncoding.EncodeToString([]byte(userData))
+// generateUserData returns the user data as a base64 encoded string.
+func (s *stepCreateInstance) generateUserData(userData string, httpGETOnly bool) (string, error) {
+	renderedUserData, err := interpolate.Render(userData, &s.Ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error rendering user_data: %s", err)
+	}
 
-	// deployVirtualMachine uses POST by default, so max userdata is 32K
+	ud := base64.StdEncoding.EncodeToString([]byte(renderedUserData))
+
+	// DeployVirtualMachine uses POST by default which allows 32K of
+	// userdata. If using GET instead the userdata is limited to 2K.
 	maxUD := 32768
-
 	if httpGETOnly {
-		// deployVirtualMachine using GET instead, so max userdata is 2K
 		maxUD = 2048
 	}
 
