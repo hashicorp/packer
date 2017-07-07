@@ -58,7 +58,7 @@ type Config struct {
 	GalaxyFile string `mapstructure:"galaxy_file"`
 
 	// The command to run ansible-galaxy
-	GalaxyCommand string
+	GalaxyCommand string `mapstructure:"galaxy_command"`
 }
 
 type Provisioner struct {
