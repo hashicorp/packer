@@ -25,16 +25,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Registering the AMI...")
 
-	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(s.BlockDevices)-1)
-	for _, blockDevice := range s.BlockDevices {
-		if *blockDevice.DeviceName == s.RootDevice.SourceDeviceName {
-			continue
-		}
-
-		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
-	}
-
-	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, s.RootDevice.createBlockDeviceMapping(snapshotId))
+	blockDevicesExcludingRoot := DeduplicateRootVolume(s.BlockDevices, s.RootDevice, snapshotId)
 
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
@@ -124,4 +115,19 @@ func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return
 	}
+}
+
+func DeduplicateRootVolume(BlockDevices []*ec2.BlockDeviceMapping, RootDevice RootBlockDevice, snapshotId string) []*ec2.BlockDeviceMapping {
+	// Defensive coding to make sure we only add the root volume once
+	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(BlockDevices))
+	for _, blockDevice := range BlockDevices {
+		if *blockDevice.DeviceName == RootDevice.SourceDeviceName {
+			continue
+		}
+
+		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
+	}
+
+	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, RootDevice.createBlockDeviceMapping(snapshotId))
+	return blockDevicesExcludingRoot
 }
