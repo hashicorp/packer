@@ -1,13 +1,15 @@
 ## (UNRELEASED)
 
 ### IMRPOVEMENTS:
-
+* postprocessor/atlas: Disallow pushing vagrant.box artifacts now that Vagrant cloud is live. [GH-4780]
 * builder/cloudstack: Add support for using a HTTP server. [GH-5017]
 * builder/cloudstack: Make expunge optional and improve logging output. [GH-5099]
 * builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
 
 ### BUG FIXES:
-
+* builder/hyperv: Verify membership in the group Hyper-V Administrators by SID not name. [GH-5022]
+* builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
+* builder/amazon: Fix panic that happens if ami_block_device_mappings is empty. [GH-5059]
 * builder/azure: Write private SSH to file in debug mode. [GH-5070] [GH-5074]
 * builder/cloudstack: Properly report back errors. [GH-5103]
 * builder/parallels: Skip missing paths when looking for unnecessary files. [GH-5058]
@@ -16,8 +18,8 @@
 ## 1.0.2 (June 21, 2017)
 
 ### BUG FIXES:
-
-* builder/amazon: Fix bugs related to stop instance command. [GH-5029]
+* communicator/ssh: Fix truncated stdout from remote ssh provisioner. [GH-5050]
+* builder/amazon: Fix bugs related to stop instance command. [GH-4719]
 * communicator/ssh: Fix ssh connection errors. [GH-5038]
 * core: Remove logging that shouldn't be there when running commands. [GH-5042]
 * provisioner/shell: Fix bug where scripts were being run under `sh`. [GH-5043]
