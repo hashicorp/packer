@@ -35,7 +35,6 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	}
 
 	ui.Message("Instance has been shutdown!")
-
 	return multistep.ActionContinue
 }
 

@@ -138,7 +138,6 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Message("Config has been prepared!")
-
 	return multistep.ActionContinue
 }
 
