@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
@@ -61,7 +62,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Retrieve the zone object.
 	zone, _, err := client.Zone.GetZoneByID(config.Zone)
 	if err != nil {
-		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
@@ -77,27 +78,27 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	if config.UserData != "" {
 		httpPort := state.Get("http_port").(uint)
-		hostIp, err := hostIP()
+		httpIP, err := hostIP()
 		if err != nil {
-			ui.Error(err.Error())
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
+		common.SetHTTPIP(httpIP)
 
 		s.Ctx.Data = &userDataTemplateData{
-			hostIp,
+			httpIP,
 			httpPort,
 		}
 
 		renderedUserData, err := interpolate.Render(config.UserData, &s.Ctx)
 		if err != nil {
-			err := fmt.Errorf("Error rendering user_data: %s", err)
-			ui.Error(err.Error())
+			state.Put("error", fmt.Errorf("Error rendering user_data: %s", err))
 			return multistep.ActionHalt
 		}
 
 		ud, err := getUserData(renderedUserData, config.HTTPGetOnly)
 		if err != nil {
-			ui.Error(err.Error())
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
@@ -107,7 +108,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Create the new instance.
 	instance, err := client.VirtualMachine.DeployVirtualMachine(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating new instance %s: %s", config.InstanceName, err))
+		state.Put("error", fmt.Errorf("Error creating new instance %s: %s", config.InstanceName, err))
 		return multistep.ActionHalt
 	}
 
