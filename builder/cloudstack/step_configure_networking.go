@@ -163,7 +163,6 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Message("Networking has been setup!")
-
 	return multistep.ActionContinue
 }
 
@@ -235,6 +234,5 @@ func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Message("Networking has been cleaned!")
-
 	return
 }

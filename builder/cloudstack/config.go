@@ -27,9 +27,10 @@ type Config struct {
 	HTTPGetOnly  bool          `mapstructure:"http_get_only"`
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
+	CIDRList          []string `mapstructure:"cidr_list"`
 	DiskOffering      string   `mapstructure:"disk_offering"`
 	DiskSize          int64    `mapstructure:"disk_size"`
-	CIDRList          []string `mapstructure:"cidr_list"`
+	Expunge           bool     `mapstructure:"expunge"`
 	Hypervisor        string   `mapstructure:"hypervisor"`
 	InstanceName      string   `mapstructure:"instance_name"`
 	Keypair           string   `mapstructure:"keypair"`

@@ -83,6 +83,9 @@ builder.
 -   `disk_size` (int) - The size (in GB) of the root disk of the new instance.
     This option is only available when using `source_template`.
 
+-   `expunge` (boolean) - Set to `true` to expunge the instance when it is
+    destroyed. Defaults to `false`.
+
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
     will be requestable from the virtual machine. This is useful for hosting
