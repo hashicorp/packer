@@ -1,6 +1,7 @@
 ## (UNRELEASED)
 
 ### IMRPOVEMENTS:
+* core: Experimental Android ARM support. [GH-5111]
 * postprocessor/atlas: Disallow pushing vagrant.box artifacts now that Vagrant cloud is live. [GH-4780]
 * builder/cloudstack: Add support for using a HTTP server. [GH-5017]
 * builder/cloudstack: Make expunge optional and improve logging output. [GH-5099]
