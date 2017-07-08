@@ -658,9 +658,10 @@
 			"revisionTime": "2017-05-04T20:45:05Z"
 		},
 		{
-			"checksumSHA1": "6nmAJBw2phU9MUmkUnqFvbO5urg=",
+			"checksumSHA1": "gEjGS03N1eysvpQ+FCHTxPcbxXc=",
 			"path": "github.com/kardianos/osext",
-			"revision": "29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc"
+			"revision": "ae77be60afb1dcacde03767a8c37337fad28ac14",
+			"revisionTime": "2017-05-10T13:15:34Z"
 		},
 		{
 			"checksumSHA1": "yIeeBxrnquUChoE+Rpz7qU6WygQ=",
