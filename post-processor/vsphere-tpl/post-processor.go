@@ -1,19 +1,23 @@
 package vsphere_tpl
 
 import (
+	"context"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"time"
+	"github.com/vmware/govmomi"
 )
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Host                string `mapstructure:"host"`
+	Insecure            bool   `mapstructure:"insecure"`
 	Username            string `mapstructure:"username"`
 	Password            string `mapstructure:"password"`
 	Datacenter          string `mapstructure:"datacenter"`
@@ -67,28 +71,35 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	state := new(multistep.BasicStateBag)
-	state.Put("ui", ui)
+	ctx := context.Background()
 
 	//FIXME I've trash environment, so I need to wait :(
 	ui.Message("Waiting 10s for VMWare vSphere to start")
 	time.Sleep(10 * time.Second)
 
+	c, err := govmomi.NewClient(ctx, p.url, p.config.Insecure)
+	if err != nil {
+		return artifact, true, fmt.Errorf("Error trying to connect: %s", err)
+	}
+
+	state := new(multistep.BasicStateBag)
+	state.Put("ui", ui)
+	state.Put("context", ctx)
+	state.Put("client", c)
+
 	steps := []multistep.Step{
-		&StepVSphereClient{
+		&StepPickDatacenter{
 			Datacenter: p.config.Datacenter,
-			VMName:     p.config.VMName,
-			Url:        p.url,
 		},
 		&StepFetchVm{
 			VMName: p.config.VMName,
 		},
 		&StepCreateFolder{
-			Folder: p.config.Folder,
+			Folder:     p.config.Folder,
 		},
 		&StepMarkAsTemplate{},
 		&StepMoveTemplate{
-			Folder: p.config.Folder,
+			Folder:     p.config.Folder,
 		},
 	}
 
@@ -102,7 +113,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 }
 
 func (p *PostProcessor) configureURL() error {
-	sdk, err := url.Parse("https://" + p.config.Host + "/sdk")
+	sdk, err := url.Parse(fmt.Sprintf("https://%v/sdk", p.config.Host))
 
 	if err != nil {
 		return nil
