@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/mitchellh/multistep"
+	"time"
 )
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -53,6 +55,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
+	if err := p.configureURL(); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, err)
+	}
+
 	if len(errs.Errors) > 0 {
 		return errs
 	}
@@ -60,7 +67,48 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+	state := new(multistep.BasicStateBag)
+	state.Put("ui", ui)
 
+	//FIXME I've trash environment, so I need to wait :(
+	ui.Message("Waiting 10s for VMWare vSphere to start")
+	time.Sleep(10 * time.Second)
+
+	steps := []multistep.Step{
+		&StepVSphereClient{
+			Datacenter: p.config.Datacenter,
+			VMName:     p.config.VMName,
+			Url:        p.url,
+		},
+		&StepFetchVm{
+			VMName: p.config.VMName,
+		},
+		&StepCreateFolder{
+			Folder: p.config.Folder,
+		},
+		&StepMarkAsTemplate{},
+		&StepMoveTemplate{
+			Folder: p.config.Folder,
+		},
+	}
+
+	runner := &multistep.BasicRunner{Steps: steps}
+	runner.Run(state)
+
+	if rawErr, ok := state.GetOk("error"); ok {
+		return artifact, true, rawErr.(error)
+	}
 	return artifact, true, nil
 }
 
+func (p *PostProcessor) configureURL() error {
+	sdk, err := url.Parse("https://" + p.config.Host + "/sdk")
+
+	if err != nil {
+		return nil
+	}
+
+	sdk.User = url.UserPassword(p.config.Username, p.config.Password)
+	p.url = sdk
+	return nil
+}
