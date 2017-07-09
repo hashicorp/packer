@@ -8,9 +8,7 @@ import (
 	"github.com/vmware/govmomi/object"
 )
 
-type StepMarkAsTemplate struct {
-	Folder string
-}
+type StepMarkAsTemplate struct{}
 
 func (s *StepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
@@ -28,4 +26,3 @@ func (s *StepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 }
 
 func (s *StepMarkAsTemplate) Cleanup(multistep.StateBag) {}
-
