@@ -9,12 +9,13 @@ type elevatedOptions struct {
 	Password          string
 	TaskName          string
 	TaskDescription   string
+	LogFile           string
 	XMLEscapedCommand string
 }
 
 var elevatedTemplate = template.Must(template.New("ElevatedCommand").Parse(`
 $name = "{{.TaskName}}"
-$log = "$env:SystemRoot\Temp\$name.out"
+$log = [System.Environment]::ExpandEnvironmentVariables("{{.LogFile}}")
 $s = New-Object -ComObject "Schedule.Service"
 $s.Connect()
 $t = $s.NewTask($null)
@@ -53,7 +54,7 @@ $t.XmlText = @'
   <Actions Context="Author">
     <Exec>
       <Command>cmd</Command>
-      <Arguments>/c {{.XMLEscapedCommand}} &gt; %SYSTEMROOT%\Temp\{{.TaskName}}.out 2&gt;&amp;1</Arguments>
+      <Arguments>/c {{.XMLEscapedCommand}}</Arguments>
     </Exec>
   </Actions>
 </Task>

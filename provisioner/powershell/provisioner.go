@@ -435,6 +435,21 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 
 	var buffer bytes.Buffer
 
+	// Output from the elevated command cannot be returned directly to
+	// the Packer console. In order to be able to view output from elevated
+	// commands and scripts an indirect approach is used by which the
+	// commands output is first redirected to file. The output file is then
+	// 'watched' by Packer while the elevated command is running and any
+	// content appearing in the file is written out to the console.
+	// Below the portion of command required to redirect output from the
+	// command to file is built and appended to the existing command string
+	taskName := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	// Only use %ENVVAR% format for environment variables when setting
+	// the log file path; Do NOT use $env:ENVVAR format as it won't be
+	// expanded correctly in the elevatedTemplate
+	logFile := `%SYSTEMROOT%\Temp\` + taskName + ".out"
+	command += fmt.Sprintf(" > %s 2>&1", logFile)
+
 	// elevatedTemplate wraps the command in a single quoted XML text
 	// string so we need to escape characters considered 'special' in XML.
 	err = xml.EscapeText(&buffer, []byte(command))
@@ -450,8 +465,9 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
 		User:              p.config.ElevatedUser,
 		Password:          p.config.ElevatedPassword,
+		TaskName:          taskName,
 		TaskDescription:   "Packer elevated task",
-		TaskName:          fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
+		LogFile:           logFile,
 		XMLEscapedCommand: escapedCommand,
 	})
 
