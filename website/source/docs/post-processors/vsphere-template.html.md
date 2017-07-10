@@ -1,6 +1,6 @@
 ---
 description: |
-    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder
+    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI is chosen**-
     and allows to mark a VM as a template and leaving it in a path of choice. 
 layout: docs
 page_title: 'vSphere Template - Post-Processors'
@@ -20,13 +20,13 @@ An example is shown below, showing only the post-processor configuration:
 
 ``` json
 {  
-   "type":"vsphere-tpl",
-   "host":"vcenter.local",
-   "username":"root",
-   "password":"sssh_is_a_secret",
-   "datacenter":"murlock",
-   "vm_name":"distro-7.3",
-   "folder":"/packer-templates/os/distro-7"
+   "type": "vsphere-tpl",
+   "host": "vcenter.local",
+   "username": "root",
+   "password": "secret",
+   "datacenter": "murlock",
+   "vm_name": "distro-7.3",
+   "folder": "/packer-templates/os/distro-7"
 }
 ```
 
@@ -53,6 +53,6 @@ Required:
 
 Optional:
 
--   `folder` (string) - Target path where the template is created. 
+-   `folder` (string) - Target path where the template will be created. 
     
 -   `datacenter` (string) - If you have more than one, you will need to specified one.
