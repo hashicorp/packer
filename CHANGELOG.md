@@ -8,6 +8,7 @@
 * builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
 
 ### BUG FIXES:
+* post-processor/checksum: Fix interpolation of "output". [GH-5112]
 * builder/hyperv: Verify membership in the group Hyper-V Administrators by SID not name. [GH-5022]
 * builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
 * builder/amazon: Fix panic that happens if ami_block_device_mappings is empty. [GH-5059]
