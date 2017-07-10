@@ -9,11 +9,11 @@ import (
 	"github.com/vmware/govmomi/find"
 )
 
-type StepPickDatacenter struct {
+type StepChooseDatacenter struct {
 	Datacenter string
 }
 
-func (s *StepPickDatacenter) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepChooseDatacenter) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	ctx := state.Get("context").(context.Context)
@@ -33,4 +33,4 @@ func (s *StepPickDatacenter) Run(state multistep.StateBag) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *StepPickDatacenter) Cleanup(multistep.StateBag) {}
+func (s *StepChooseDatacenter) Cleanup(multistep.StateBag) {}
