@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/template"
-	"github.com/moby/moby/pkg/ioutils"
 	"os/exec"
 )
 
@@ -144,7 +143,7 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbook_dir, err := ioutils.TempDir("", "")
+	playbook_dir, err := ioutil.TempDir("", "")
 	if err != nil {
 		t.Fatalf("Failed to create playbook_dir: %s", err)
 	}
