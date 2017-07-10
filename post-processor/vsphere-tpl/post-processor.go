@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"time"
+	"strings"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -13,6 +14,10 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 )
+
+var builtins = map[string]string{
+	"mitchellh.vmware-esx": "vmware",
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -71,12 +76,22 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
-	ctx := context.Background()
+	if _, ok := builtins[artifact.BuilderId()]; !ok {
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	}
 
-	//FIXME I've trash environment, so I need to wait :(
+	source := ""
+	for _, path := range artifact.Files() {
+		if strings.HasSuffix(path, ".vmx") {
+			source = path
+			break
+		}
+	}
+	//We give a vSphere-ESXI 10s to sync
 	ui.Message("Waiting 10s for VMWare vSphere to start")
 	time.Sleep(10 * time.Second)
 
+	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, p.url, p.config.Insecure)
 	if err != nil {
 		return artifact, true, fmt.Errorf("Error trying to connect: %s", err)
@@ -88,18 +103,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	state.Put("client", c)
 
 	steps := []multistep.Step{
-		&StepPickDatacenter{
+		&StepChooseDatacenter{
 			Datacenter: p.config.Datacenter,
 		},
 		&StepFetchVm{
 			VMName: p.config.VMName,
+			Source: source,
 		},
 		&StepCreateFolder{
-			Folder:     p.config.Folder,
+			Folder: p.config.Folder,
 		},
 		&StepMarkAsTemplate{},
 		&StepMoveTemplate{
-			Folder:     p.config.Folder,
+			Folder: p.config.Folder,
 		},
 	}
 
