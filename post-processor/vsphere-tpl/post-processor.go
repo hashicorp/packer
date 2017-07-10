@@ -130,7 +130,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 func (p *PostProcessor) configureURL() error {
 	sdk, err := url.Parse(fmt.Sprintf("https://%v/sdk", p.config.Host))
-
 	if err != nil {
 		return nil
 	}
