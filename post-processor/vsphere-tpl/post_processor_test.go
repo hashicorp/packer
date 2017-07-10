@@ -13,7 +13,7 @@ func TestConfigureURL(t *testing.T) {
 	p.config.VMName = "my vm"
 	p.config.Insecure = true
 
-	if err := p.configureURL(); err == nil {
+	if err := p.configureURL(); err != nil {
 		t.Errorf("Error: %s", err)
 	}
 }
