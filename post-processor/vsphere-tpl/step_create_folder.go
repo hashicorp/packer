@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 )
 
 type StepCreateFolder struct {
@@ -31,13 +32,13 @@ func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 		path := s.Folder
 		base := filepath.Join("/", d, "vm")
 		var folders []string
-		var folder, root string
+		var root *object.Folder
+		var err error
 
 		for {
-			_, err := f.Folder(ctx, filepath.ToSlash(filepath.Join(base, path)))
+			root, err = f.Folder(ctx, filepath.ToSlash(filepath.Join(base, path)))
 			if err != nil {
-
-				root, folder = filepath.Split(path)
+				_, folder := filepath.Split(path)
 				folders = append(folders, folder)
 				if i := strings.LastIndex(path, "/"); i == 0 {
 					break
@@ -50,21 +51,13 @@ func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 		}
 
 		for i := len(folders) - 1; i >= 0; i-- {
-			folder, err := f.Folder(ctx, filepath.ToSlash(filepath.Join(base, "/", root)))
+			ui.Message(fmt.Sprintf("Creating folder: %v", folders[i]))
+			root, err = root.CreateFolder(ctx, folders[i])
 			if err != nil {
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-
-			ui.Message(fmt.Sprintf("Creating folder: %v", folders[i]))
-
-			if _, err = folder.CreateFolder(ctx, folders[i]); err != nil {
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-			root = filepath.Join(root, folders[i], "/")
 		}
 	}
 	return multistep.ActionContinue
