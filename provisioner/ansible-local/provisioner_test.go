@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/template"
+	"github.com/moby/moby/pkg/ioutils"
 	"os/exec"
 )
 
@@ -117,43 +118,11 @@ func TestProvisionerPrepare_PlaybookFiles(t *testing.T) {
 	}
 }
 
-func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
-	cmdIndex := 0
-	for _, playbook := range playbooks {
-		playbook = filepath.ToSlash(playbook)
-		for ; cmdIndex < len(comm.startCommand); cmdIndex++ {
-			cmd := comm.startCommand[cmdIndex]
-			if strings.Contains(cmd, "ansible-playbook") && strings.Contains(cmd, playbook) {
-				break
-			}
-		}
-		if cmdIndex == len(comm.startCommand) {
-			panic(fmt.Sprintf("Playbook %s was not executed", playbook))
-		}
-	}
-}
-
-func assertPlaybooksUploaded(comm *communicatorMock, playbooks []string) {
-	uploadIndex := 0
-	for _, playbook := range playbooks {
-		playbook = filepath.ToSlash(playbook)
-		for ; uploadIndex < len(comm.uploadDestination); uploadIndex++ {
-			dest := comm.uploadDestination[uploadIndex]
-			if strings.HasSuffix(dest, playbook) {
-				break
-			}
-		}
-		if uploadIndex == len(comm.uploadDestination) {
-			panic(fmt.Sprintf("Playbook %s was not uploaded", playbook))
-		}
-	}
-}
-
 func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbooks := createTempFiles(3)
+	playbooks := createTempFiles("", 3)
 	defer removeFiles(playbooks...)
 
 	config["playbook_files"] = playbooks
@@ -169,6 +138,40 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 
 	assertPlaybooksUploaded(comm, playbooks)
 	assertPlaybooksExecuted(comm, playbooks)
+}
+
+func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	playbook_dir, err := ioutils.TempDir("", "")
+	if err != nil {
+		t.Fatalf("Failed to create playbook_dir: %s", err)
+	}
+	defer os.RemoveAll(playbook_dir)
+	playbooks := createTempFiles(playbook_dir, 3)
+
+	playbookNames := make([]string, 0, len(playbooks))
+	playbooksInPlaybookDir := make([]string, 0, len(playbooks))
+	for _, playbook := range playbooks {
+		playbooksInPlaybookDir = append(playbooksInPlaybookDir, strings.TrimPrefix(playbook, playbook_dir))
+		playbookNames = append(playbookNames, filepath.Base(playbook))
+	}
+
+	config["playbook_files"] = playbooks
+	config["playbook_dir"] = playbook_dir
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	comm := &communicatorMock{}
+	if err := p.Provision(&uiStub{}, comm); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	assertPlaybooksNotUploaded(comm, playbookNames)
+	assertPlaybooksExecuted(comm, playbooksInPlaybookDir)
 }
 
 func TestProvisionerPrepare_InventoryFile(t *testing.T) {
@@ -288,6 +291,14 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 }
 
 func TestProvisionerProvisionDocker_PlaybookFiles(t *testing.T) {
+	testProvisionerProvisionDockerWithPlaybookFiles(t, playbookFilesDockerTemplate)
+}
+
+func TestProvisionerProvisionDocker_PlaybookFilesWithPlaybookDir(t *testing.T) {
+	testProvisionerProvisionDockerWithPlaybookFiles(t, playbookFilesWithPlaybookDirDockerTemplate)
+}
+
+func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateString string) {
 	if os.Getenv("PACKER_ACC") == "" {
 		t.Skip("This test is only run with PACKER_ACC=1")
 	}
@@ -295,7 +306,7 @@ func TestProvisionerProvisionDocker_PlaybookFiles(t *testing.T) {
 	ui := packer.TestUi(t)
 	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
-	tpl, err := template.Parse(strings.NewReader(playbookFilesDockerConfig))
+	tpl, err := template.Parse(strings.NewReader(templateString))
 	if err != nil {
 		t.Fatalf("Unable to parse config: %s", err)
 	}
@@ -359,20 +370,64 @@ func TestProvisionerProvisionDocker_PlaybookFiles(t *testing.T) {
 	}
 }
 
+func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
+	cmdIndex := 0
+	for _, playbook := range playbooks {
+		playbook = filepath.ToSlash(playbook)
+		for ; cmdIndex < len(comm.startCommand); cmdIndex++ {
+			cmd := comm.startCommand[cmdIndex]
+			if strings.Contains(cmd, "ansible-playbook") && strings.Contains(cmd, playbook) {
+				break
+			}
+		}
+		if cmdIndex == len(comm.startCommand) {
+			panic(fmt.Sprintf("Playbook %s was not executed", playbook))
+		}
+	}
+}
+
+func assertPlaybooksUploaded(comm *communicatorMock, playbooks []string) {
+	fmt.Println(comm.uploadDestination)
+	uploadIndex := 0
+	for _, playbook := range playbooks {
+		playbook = filepath.ToSlash(playbook)
+		for ; uploadIndex < len(comm.uploadDestination); uploadIndex++ {
+			dest := comm.uploadDestination[uploadIndex]
+			if strings.HasSuffix(dest, playbook) {
+				break
+			}
+		}
+		if uploadIndex == len(comm.uploadDestination) {
+			panic(fmt.Sprintf("Playbook %s was not uploaded", playbook))
+		}
+	}
+}
+
+func assertPlaybooksNotUploaded(comm *communicatorMock, playbooks []string) {
+	for _, playbook := range playbooks {
+		playbook = filepath.ToSlash(playbook)
+		for _, destination := range comm.uploadDestination {
+			if strings.HasSuffix(destination, playbook) {
+				panic(fmt.Sprintf("Playbook %s was uploaded", playbook))
+			}
+		}
+	}
+}
+
 func testConfig() map[string]interface{} {
 	m := make(map[string]interface{})
 	return m
 }
 
-func createTempFile() string {
-	file, err := ioutil.TempFile("", "")
+func createTempFile(dir string) string {
+	file, err := ioutil.TempFile(dir, "")
 	if err != nil {
 		panic(fmt.Sprintf("err: %s", err))
 	}
 	return file.Name()
 }
 
-func createTempFiles(numFiles int) []string {
+func createTempFiles(dir string, numFiles int) []string {
 	files := make([]string, 0, numFiles)
 	defer func() {
 		// Cleanup the files if not all were created.
@@ -384,7 +439,7 @@ func createTempFiles(numFiles int) []string {
 	}()
 
 	for i := 0; i < numFiles; i++ {
-		files = append(files, createTempFile())
+		files = append(files, createTempFile(dir))
 	}
 	return files
 }
@@ -395,7 +450,7 @@ func removeFiles(files ...string) {
 	}
 }
 
-const playbookFilesDockerConfig = `
+const playbookFilesDockerTemplate = `
 {
 	"builders": [
 		{
@@ -411,6 +466,34 @@ const playbookFilesDockerConfig = `
 				"test-fixtures/hello.yml",
 				"test-fixtures/world.yml"
 			]
+		},
+		{
+			"type": "file",
+			"source": "/tmp/hello_world",
+			"destination": "hello_world",
+			"direction": "download"
+		}
+	]
+}
+`
+
+const playbookFilesWithPlaybookDirDockerTemplate = `
+{
+	"builders": [
+		{
+			"type": "docker",
+			"image": "williamyeh/ansible:centos7",
+			"discard": true
+		}
+	],
+	"provisioners": [
+		{
+			"type": "ansible-local",
+			"playbook_files": [
+				"test-fixtures/hello.yml",
+				"test-fixtures/world.yml"
+			],
+			"playbook_dir": "test-fixtures"
 		},
 		{
 			"type": "file",
