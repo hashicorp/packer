@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
