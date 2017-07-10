@@ -8,44 +8,12 @@ import (
 	"testing"
 
 	"fmt"
+	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner/file"
+	"github.com/hashicorp/packer/template"
+	"os/exec"
 )
-
-func testConfig() map[string]interface{} {
-	m := make(map[string]interface{})
-	return m
-}
-
-func createTempFile() string {
-	file, err := ioutil.TempFile("", "")
-	if err != nil {
-		panic(fmt.Sprintf("err: %s", err))
-	}
-	return file.Name()
-}
-
-func createTempFiles(numFiles int) []string {
-	files := make([]string, 0, numFiles)
-	defer func() {
-		// Cleanup the files if not all were created.
-		if len(files) < numFiles {
-			for _, file := range files {
-				os.Remove(file)
-			}
-		}
-	}()
-
-	for i := 0; i < numFiles; i++ {
-		files = append(files, createTempFile())
-	}
-	return files
-}
-
-func removeFiles(files ...string) {
-	for _, file := range files {
-		os.Remove(file)
-	}
-}
 
 func TestProvisioner_Impl(t *testing.T) {
 	var raw interface{}
@@ -318,3 +286,138 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 }
+
+func TestProvisionerProvisionDocker_PlaybookFiles(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1")
+	}
+
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+
+	tpl, err := template.Parse(strings.NewReader(playbookFilesDockerConfig))
+	if err != nil {
+		t.Fatalf("Unable to parse config: %s", err)
+	}
+
+	// Check if docker executable can be found.
+	_, err = exec.LookPath("docker")
+	if err != nil {
+		t.Error("docker command not found; please make sure docker is installed")
+	}
+
+	// Setup the builder
+	builder := &docker.Builder{}
+	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	if err != nil {
+		t.Fatalf("Error preparing configuration %s", err)
+	}
+	if len(warnings) > 0 {
+		t.Fatal("Encountered configuration warnings; aborting")
+	}
+
+	ansible := &Provisioner{}
+	err = ansible.Prepare(tpl.Provisioners[0].Config)
+	if err != nil {
+		t.Fatalf("Error preparing ansible-local provisioner: %s", err)
+	}
+
+	download := &file.Provisioner{}
+	err = download.Prepare(tpl.Provisioners[1].Config)
+	if err != nil {
+		t.Fatalf("Error preparing download: %s", err)
+	}
+	defer os.Remove("hello_world")
+
+	// Add hooks so the provisioners run during the build
+	hooks := map[string][]packer.Hook{}
+	hooks[packer.HookProvision] = []packer.Hook{
+		&packer.ProvisionHook{
+			Provisioners: []packer.Provisioner{
+				ansible,
+				download,
+			},
+			ProvisionerTypes: []string{tpl.Provisioners[0].Type, tpl.Provisioners[1].Type},
+		},
+	}
+	hook := &packer.DispatchHook{Mapping: hooks}
+
+	artifact, err := builder.Run(ui, hook, cache)
+	if err != nil {
+		t.Fatalf("Error running build %s", err)
+	}
+	defer artifact.Destroy()
+
+	actualContent, err := ioutil.ReadFile("hello_world")
+	if err != nil {
+		t.Fatalf("Expected file not found: %s", err)
+	}
+
+	expectedContent := "Hello world!"
+	if string(actualContent) != expectedContent {
+		t.Fatalf(`Unexpected file content: expected="%s", actual="%s"`, expectedContent, actualContent)
+	}
+}
+
+func testConfig() map[string]interface{} {
+	m := make(map[string]interface{})
+	return m
+}
+
+func createTempFile() string {
+	file, err := ioutil.TempFile("", "")
+	if err != nil {
+		panic(fmt.Sprintf("err: %s", err))
+	}
+	return file.Name()
+}
+
+func createTempFiles(numFiles int) []string {
+	files := make([]string, 0, numFiles)
+	defer func() {
+		// Cleanup the files if not all were created.
+		if len(files) < numFiles {
+			for _, file := range files {
+				os.Remove(file)
+			}
+		}
+	}()
+
+	for i := 0; i < numFiles; i++ {
+		files = append(files, createTempFile())
+	}
+	return files
+}
+
+func removeFiles(files ...string) {
+	for _, file := range files {
+		os.Remove(file)
+	}
+}
+
+const playbookFilesDockerConfig = `
+{
+	"builders": [
+		{
+			"type": "docker",
+			"image": "williamyeh/ansible:centos7",
+			"discard": true
+		}
+	],
+	"provisioners": [
+		{
+			"type": "ansible-local",
+			"playbook_files": [
+				"test-fixtures/hello.yml",
+				"test-fixtures/world.yml"
+			]
+		},
+		{
+			"type": "file",
+			"source": "/tmp/hello_world",
+			"destination": "hello_world",
+			"direction": "download"
+		}
+	]
+}
+`
