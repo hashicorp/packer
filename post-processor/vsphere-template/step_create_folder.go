@@ -1,4 +1,4 @@
-package vsphere_tpl
+package vsphere_template
 
 import (
 	"context"
@@ -41,6 +41,12 @@ func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 				_, folder := filepath.Split(path)
 				folders = append(folders, folder)
 				if i := strings.LastIndex(path, "/"); i == 0 {
+					root, err = f.Folder(ctx, filepath.ToSlash(base))
+					if err != nil {
+						state.Put("error", err)
+						ui.Error(err.Error())
+						return multistep.ActionHalt
+					}
 					break
 				} else {
 					path = path[:i]
