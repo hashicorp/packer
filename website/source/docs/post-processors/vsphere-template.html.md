@@ -1,6 +1,6 @@
 ---
 description: |
-    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI is chosen**-
+    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI was chosen**-
     and allows to mark a VM as a template and leaving it in a path of choice. 
 layout: docs
 page_title: 'vSphere Template - Post-Processors'
@@ -9,9 +9,9 @@ sidebar_current: 'docs-post-processors-vSphere-template'
 
 # vSphere Template Post-Processor
 
-Type: `vsphere-tpl`
+Type: `vsphere-template`
 
-The Packer vSphere template post-processor takes an artifact from the VMware-iso builder
+The Packer vSphere template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI was chosen**-
 allows to mark a VM as a template and leaving it in a path of choice.
 
 ## Example
@@ -20,7 +20,7 @@ An example is shown below, showing only the post-processor configuration:
 
 ``` json
 {  
-   "type": "vsphere-tpl",
+   "type": "vsphere-template",
    "host": "vcenter.local",
    "username": "root",
    "password": "secret",
