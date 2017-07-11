@@ -56,17 +56,17 @@ builder.
     be available.
 
 - `commercial_type` (string) - The name of the server commercial type: `C1`, `C2S`, `C2M`,
-    `C2L`, `X64-2GB`, `X64-4GB`, `X64-8GB`, `X64-15GB`, `X64-30GB`, `X64-60GB`, `X64-120GB`
+    `C2L`, `X64-2GB`, `X64-4GB`, `X64-8GB`, `X64-15GB`, `X64-30GB`, `X64-60GB`, `X64-120GB`, `ARM64-2GB`, `ARM64-4GB`, `ARM64-8GB`, `ARM64-16GB`, `ARM64-32GB`, `ARM64-64GB`, `ARM64-128GB`
 
 ### Optional:
 
-- `server_name` (string) - The name assigned to the server.
+- `server_name` (string) - The name assigned to the server. Default `packer-UUID`
 
 - `image_name` (string) - The name of the resulting image that will
-    appear in your account.
+    appear in your account. Default `packer-TIMESTAMP`
 
 - `snapshot_name` (string) - The name of the resulting snapshot that will
-    appear in your account.
+    appear in your account. Default `packer-TIMESTAMP
 
 ## Basic Example
 
@@ -78,13 +78,14 @@ access tokens:
   "type": "scaleway",
   "api_access_key": "YOUR API ACCESS KEY",
   "api_token": "YOUR TOKEN",
-  "image": "f01f8a48-c026-48ac-9771-a70eaac0890e",
+  "image": "UUID OF THE BASE IMAGE",
   "region": "par1",
   "commercial_type": "X64-2GB",
   "ssh_username": "root",
   "ssh_private_key_file": "~/.ssh/id_rsa",
+  Extra,
 }
 ```
 
 When you do not specified the `ssh_private_key_file`, a temporarily SSH keypair is generated to connect the server.
-This key will only allows the `root` user to connect the server.
+This key will only allow the `root` user to connect the server.

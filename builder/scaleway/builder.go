@@ -15,7 +15,7 @@ import (
 )
 
 // The unique id for the builder
-const BuilderId = "pearkes.scaleway"
+const BuilderId = "hashicorp.scaleway"
 
 type Builder struct {
 	config Config
