@@ -34,10 +34,17 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		Tags:           tags,
 	})
 
+	if err != nil {
+		err := fmt.Errorf("Error creating server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	err = client.PostServerAction(server, "poweron")
 
 	if err != nil {
-		err := fmt.Errorf("Error creating server: %s", err)
+		err := fmt.Errorf("Error starting server: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -51,7 +58,7 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
-	if s.serverID != "" {
+	if s.serverID == "" {
 		return
 	}
 
