@@ -48,7 +48,7 @@ builder.
 
 - `image` (string) - The UUID of the base image to use. This is the
     image that will be used to launch a new server and provision it. See
-    [https://api-marketplace.scaleway.com/images](https://api-marketplace.scaleway.com/images) to
+    [https://api-marketplace.scaleway.com/images](https://api-marketplace.scaleway.com/images)
     get the complete list of the accepted image UUID.
 
 - `region` (string) - The name of the region to launch the
@@ -66,7 +66,7 @@ builder.
     appear in your account. Default `packer-TIMESTAMP`
 
 - `snapshot_name` (string) - The name of the resulting snapshot that will
-    appear in your account. Default `packer-TIMESTAMP
+    appear in your account. Default `packer-TIMESTAMP`
 
 ## Basic Example
 
@@ -82,8 +82,7 @@ access tokens:
   "region": "par1",
   "commercial_type": "X64-2GB",
   "ssh_username": "root",
-  "ssh_private_key_file": "~/.ssh/id_rsa",
-  Extra,
+  "ssh_private_key_file": "~/.ssh/id_rsa"
 }
 ```
 
