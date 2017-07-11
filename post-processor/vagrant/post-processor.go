@@ -26,7 +26,7 @@ var builtins = map[string]string{
 	"mitchellh.vmware-esx":      "vmware",
 	"pearkes.digitalocean":      "digitalocean",
 	"packer.googlecompute":      "google",
-	"pearkes.scaleway":          "scaleway",
+	"hashicorp.scaleway":        "scaleway",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
 	"transcend.qemu":            "libvirt",
