@@ -1,4 +1,4 @@
-package vsphere_tpl
+package vsphere_template
 
 import (
 	"context"
