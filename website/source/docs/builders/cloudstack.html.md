@@ -123,6 +123,13 @@ builder.
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
 
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the source instance. No temporary keypair will
+    be created, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. To use this option with a key pair already configured in the source
+    image, leave the `keypair` blank. To associate an existing key pair
+    with the source instance, set the `keypair` field to the name of the key pair.
+
 -   `ssl_no_verify` (boolean) - Set to `true` to skip SSL verification. Defaults
     to `false`.
 
