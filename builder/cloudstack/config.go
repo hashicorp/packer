@@ -79,6 +79,21 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	var errs *packer.MultiError
 
 	// Set some defaults.
+	if c.APIURL == "" {
+		// Default to environment variable for api_url, if it exists
+		c.APIURL = os.Getenv("CLOUDSTACK_API_URL")
+	}
+
+	if c.APIKey == "" {
+		// Default to environment variable for api_key, if it exists
+		c.APIKey = os.Getenv("CLOUDSTACK_API_KEY")
+	}
+
+	if c.SecretKey == "" {
+		// Default to environment variable for secret_key, if it exists
+		c.SecretKey = os.Getenv("CLOUDSTACK_SECRET_KEY")
+	}
+
 	if c.AsyncTimeout == 0 {
 		c.AsyncTimeout = 30 * time.Minute
 	}
