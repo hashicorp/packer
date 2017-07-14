@@ -50,9 +50,9 @@ builder.
 -   `service_offering` (string) - The name or ID of the service offering used
     for the instance.
 
--   `soure_iso` (string) - The name or ID of an ISO that will be mounted before
+-   `source_iso` (string) - The name or ID of an ISO that will be mounted before
     booting the instance. This option is mutual exclusive with `source_template`.
-    When then is used `disk_offering` and `hypervisor` is required.
+    When using `source_iso`, both `disk_offering` and `hypervisor` are required.
 
 -   `source_template` (string) - The name or ID of the template used as base
     template for the instance. This option is mutual explusive with `source_iso`.
