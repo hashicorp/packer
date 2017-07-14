@@ -135,7 +135,14 @@ builder.
 -   `template_scalable` (boolean) - Set to `true` to indicate that the template
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to `false`.
 
--   `user_data` (string) - User data to launch with the instance.
+-   `user_data` (string) - User data to launch with the instance. This is a
+    [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
+    details.
+
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance. This file will be parsed as a
+    [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
+    details.
 
 -   `use_local_ip_address` (boolean) - Set to `true` to indicate that the
     provisioners should connect to the local IP address of the instance.
@@ -147,7 +154,7 @@ The available variables are:
 -  `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
-    blank!
+    blank.
 
 ## Basic Example
 
