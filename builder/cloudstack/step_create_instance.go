@@ -62,7 +62,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Retrieve the zone object.
 	zone, _, err := client.Zone.GetZoneByID(config.Zone)
 	if err != nil {
+		err := fmt.Errorf("Failed to get Zone by ID: %s - %s", config.Zone, err)
 		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -80,7 +82,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		httpPort := state.Get("http_port").(uint)
 		httpIP, err := hostIP()
 		if err != nil {
+			err := fmt.Errorf("Failed to determine host IP: %s", err)
 			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 		common.SetHTTPIP(httpIP)
@@ -92,7 +96,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 		ud, err := s.generateUserData(config.UserData, config.HTTPGetOnly)
 		if err != nil {
+			err := fmt.Errorf("Failed to interpolate user_data: %s", err)
 			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -102,7 +108,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Create the new instance.
 	instance, err := client.VirtualMachine.DeployVirtualMachine(p)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error creating new instance %s: %s", config.InstanceName, err))
+		err := fmt.Errorf("Error creating new instance %s: %s", config.InstanceName, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
