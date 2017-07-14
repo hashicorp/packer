@@ -42,9 +42,6 @@ builder.
     connect to the instance. Usually this will be the NAT address of your
     current location. Only required when `use_local_ip_address` is `false`.
 
--   `instance_name` (string) - The name of the instance. Defaults to
-    "packer-UUID" where UUID is dynamically generated.
-
 -   `network` (string) - The name or ID of the network to connect the instance
     to.
 
@@ -58,12 +55,6 @@ builder.
 
 -   `source_template` (string) - The name or ID of the template used as base
     template for the instance. This option is mutual explusive with `source_iso`.
-
--   `template_name` (string) - The name of the new template. Defaults to
-    "packer-{{timestamp}}" where timestamp will be the current time.
-
--   `template_display_text` (string) - The display text of the new template.
-    Defaults to the `template_name`.
 
 -   `template_os` (string) - The name or ID of the template OS for the new
     template that will be created.
@@ -111,6 +102,9 @@ builder.
     access the instance. The SSH key pair is assumed to be already available
     within CloudStack.
 
+-   `instance_name` (string) - The name of the instance. Defaults to
+    "packer-UUID" where UUID is dynamically generated.
+
 -   `project` (string) - The name or ID of the project to deploy the instance to.
 
 -   `public_ip_address` (string) - The public IP address or it's ID used for
@@ -120,8 +114,14 @@ builder.
 -   `ssl_no_verify` (boolean) - Set to `true` to skip SSL verification. Defaults
     to `false`.
 
+-   `template_display_text` (string) - The display text of the new template.
+    Defaults to the `template_name`.
+
 -   `template_featured` (boolean) - Set to `true` to indicate that the template
     is featured. Defaults to `false`.
+
+-   `template_name` (string) - The name of the new template. Defaults to
+    "packer-{{timestamp}}" where timestamp will be the current time.
 
 -   `template_public` (boolean) - Set to `true` to indicate that the template is
     available for all accounts. Defaults to `false`.
