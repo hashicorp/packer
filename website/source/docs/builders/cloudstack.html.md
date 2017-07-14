@@ -34,8 +34,12 @@ builder.
 ### Required:
 
 -   `api_url` (string) - The CloudStack API endpoint we will connect to.
+    It can also be specified via environment variable `CLOUDSTACK_API_URL`,
+    if set.
 
--   `api_key` (string) - The API key used to sign all API requests.
+-   `api_key` (string) - The API key used to sign all API requests. It
+    can also be specified via environment variable `CLOUDSTACK_API_KEY`,
+    if set.
 
 -   `cidr_list` (array) - List of CIDR's that will have access to the new
     instance. This is needed in order for any provisioners to be able to
@@ -49,6 +53,8 @@ builder.
     to.
 
 -   `secret_key` (string) - The secret key used to sign all API requests.
+    It can also be specified via environment variable `CLOUDSTACK_SECRET_KEY`,
+    if set.
 
 -   `service_offering` (string) - The name or ID of the service offering used
     for the instance.
