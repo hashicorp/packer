@@ -26,6 +26,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if config.Project != "" && !isUUID(config.Project) {
 		config.Project, _, err = client.Project.GetProjectID(config.Project)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"project", config.Project, err})
 		}
 	}
@@ -33,6 +34,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if config.UserDataFile != "" {
 		userdata, err := ioutil.ReadFile(config.UserDataFile)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("problem reading user data file: %s", err))
 		}
 		config.UserData = string(userdata)
@@ -41,6 +43,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if !isUUID(config.Zone) {
 		config.Zone, _, err = client.Zone.GetZoneID(config.Zone)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"zone", config.Zone, err})
 		}
 	}
@@ -49,6 +52,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if config.DiskOffering != "" && !isUUID(config.DiskOffering) {
 		config.DiskOffering, _, err = client.DiskOffering.GetDiskOfferingID(config.DiskOffering)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"disk offering", config.DiskOffering, err})
 		}
 	}
@@ -66,6 +70,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 
 		ipAddrs, err := client.Address.ListPublicIpAddresses(p)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, err})
 		}
 		if err == nil && ipAddrs.Count != 1 {
@@ -79,6 +84,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if !isUUID(config.Network) {
 		config.Network, _, err = client.Network.GetNetworkID(config.Network, cloudstack.WithProject(config.Project))
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"network", config.Network, err})
 		}
 	}
@@ -86,6 +92,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	if !isUUID(config.ServiceOffering) {
 		config.ServiceOffering, _, err = client.ServiceOffering.GetServiceOfferingID(config.ServiceOffering)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"service offering", config.ServiceOffering, err})
 		}
 	}
@@ -96,6 +103,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 		} else {
 			config.instanceSource, _, err = client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
 			if err != nil {
+				ui.Error(err.Error())
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"ISO", config.SourceISO, err})
 			}
 		}
@@ -107,6 +115,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 		} else {
 			config.instanceSource, _, err = client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
 			if err != nil {
+				ui.Error(err.Error())
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"template", config.SourceTemplate, err})
 			}
 		}
@@ -118,6 +127,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 
 		types, err := client.GuestOS.ListOsTypes(p)
 		if err != nil {
+			ui.Error(err.Error())
 			errs = packer.MultiErrorAppend(errs, &retrieveErr{"OS type", config.TemplateOS, err})
 		}
 		if err == nil && types.Count != 1 {
