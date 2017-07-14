@@ -45,7 +45,7 @@ The available configuration options are listed below. All elements are required.
     directories must already exist.
 
 -   `direction` (string) - The direction of the file transfer. This defaults to
-    "upload." If it is set to "download" then the file "source" in the machine
+    "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
 
 ## Directory Uploads
