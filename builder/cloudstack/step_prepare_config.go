@@ -134,6 +134,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	// nil interface.
 	if errs != nil && len(errs.Errors) > 0 {
 		state.Put("error", errs)
+		ui.Error(errs.Error())
 		return multistep.ActionHalt
 	}
 
