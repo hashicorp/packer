@@ -6,6 +6,7 @@
 * builder/cloudstack: Add support for using a HTTP server. [GH-5017]
 * builder/cloudstack: Make expunge optional and improve logging output. [GH-5099]
 * builder/cloudstack: Allow reading api_url, api_key, and secret_key from env vars. [GH-5124]
+* builder/cloudstack: Add default cidr_list [ 0.0.0.0/0 ]. [GH-5125]
 * builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
 
 ### BUG FIXES:
