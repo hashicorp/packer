@@ -83,6 +83,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.AsyncTimeout = 30 * time.Minute
 	}
 
+	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
+		c.CIDRList = []string{"0.0.0.0/0"}
+	}
+
 	if c.InstanceName == "" {
 		c.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
@@ -112,10 +116,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.SecretKey == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a secret_key must be specified"))
-	}
-
-	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
-		errs = packer.MultiErrorAppend(errs, errors.New("a cidr_list must be specified"))
 	}
 
 	if c.Network == "" {

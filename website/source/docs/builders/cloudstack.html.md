@@ -37,11 +37,6 @@ builder.
 
 -   `api_key` (string) - The API key used to sign all API requests.
 
--   `cidr_list` (array) - List of CIDR's that will have access to the new
-    instance. This is needed in order for any provisioners to be able to
-    connect to the instance. Usually this will be the NAT address of your
-    current location. Only required when `use_local_ip_address` is `false`.
-
 -   `instance_name` (string) - The name of the instance. Defaults to
     "packer-UUID" where UUID is dynamically generated.
 
@@ -75,6 +70,11 @@ builder.
 
 -   `async_timeout` (int) - The time duration to wait for async calls to
     finish. Defaults to 30m.
+
+-   `cidr_list` (array) - List of CIDR's that will have access to the new
+    instance. This is needed in order for any provisioners to be able to
+    connect to the instance. Defaults to `[ "0.0.0.0/0" ]`. Only required
+    when `use_local_ip_address` is `false`.
 
 -   `disk_offering` (string) - The name or ID of the disk offering used for the
     instance. This option is only available (and also required) when using
@@ -161,7 +161,6 @@ Here is a basic example.
   "secret_key": "YOUR_SECRET_KEY",
 
   "disk_offering": "Small - 20GB",
-  "cidr_list": ["0.0.0.0/0"],
   "hypervisor": "KVM",
   "network": "management",
   "service_offering": "small",
