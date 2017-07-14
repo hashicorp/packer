@@ -168,6 +168,8 @@ Here is a basic example.
   "source_iso": "CentOS-7.0-1406-x86_64-Minimal",
   "zone": "NL1",
 
+  "ssh_username": "root",
+
   "template_name": "Centos7-x86_64-KVM-Packer",
   "template_display_text": "Centos7-x86_64 KVM Packer",
   "template_featured": true,
