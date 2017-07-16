@@ -149,6 +149,10 @@ builder.
 -   `template_scalable` (boolean) - Set to `true` to indicate that the template
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to `false`.
 
+-   `temporary_keypair_name` (string) - The name of the temporary SSH key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
+
 -   `user_data` (string) - User data to launch with the instance. This is a
     [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
     details.

@@ -1,6 +1,8 @@
 package cloudstack
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
@@ -60,6 +62,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPDir:     b.config.HTTPDir,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&stepKeypair{
+			Debug:            b.config.PackerDebug,
+			DebugKeyPath:     fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
+			SSHAgentAuth:     b.config.Comm.SSHAgentAuth,
+			TemporaryKeyPair: b.config.TemporaryKeypair,
+			KeyPair:          b.config.Keypair,
+			PrivateKeyFile:   b.config.Comm.SSHPrivateKey,
 		},
 		&stepCreateInstance{
 			Ctx: b.config.ctx,
