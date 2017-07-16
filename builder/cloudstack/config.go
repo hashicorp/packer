@@ -34,6 +34,7 @@ type Config struct {
 	Hypervisor        string   `mapstructure:"hypervisor"`
 	InstanceName      string   `mapstructure:"instance_name"`
 	Keypair           string   `mapstructure:"keypair"`
+	TemporaryKeypair  string   `mapstructure:"temporary_keypair"`
 	Network           string   `mapstructure:"network"`
 	Project           string   `mapstructure:"project"`
 	PublicIPAddress   string   `mapstructure:"public_ip_address"`
@@ -118,6 +119,15 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.TemplateDisplayText == "" {
 		c.TemplateDisplayText = c.TemplateName
+	}
+
+	// If we are not given an explicit keypair or ssh_private_key_file, then create
+	// a temporary one, but only if the temporary_keypair has not been provided and
+	// we are not using ssh_password.
+	if c.Keypair == "" && c.TemporaryKeypair == "" &&
+		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+
+		c.TemporaryKeypair = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	// Process required parameters.

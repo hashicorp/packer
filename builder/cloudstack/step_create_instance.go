@@ -44,8 +44,8 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	p.SetName(config.InstanceName)
 	p.SetDisplayname("Created by Packer")
 
-	if config.Keypair != "" {
-		p.SetKeypair(config.Keypair)
+	if keypair, ok := state.GetOk("keypair"); ok {
+		p.SetKeypair(keypair.(string))
 	}
 
 	// If we use an ISO, configure the disk offering.
