@@ -101,23 +101,25 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 
 	if config.SourceISO != "" {
 		if isUUID(config.SourceISO) {
-			config.instanceSource = config.SourceISO
+			state.Put("source", config.SourceISO)
 		} else {
-			config.instanceSource, _, err = client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
+			isoID, _, err := client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"ISO", config.SourceISO, err})
 			}
+			state.Put("source", isoID)
 		}
 	}
 
 	if config.SourceTemplate != "" {
 		if isUUID(config.SourceTemplate) {
-			config.instanceSource = config.SourceTemplate
+			state.Put("source", config.SourceTemplate)
 		} else {
-			config.instanceSource, _, err = client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
+			templateID, _, err := client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"template", config.SourceTemplate, err})
 			}
+			state.Put("source", templateID)
 		}
 	}
 
