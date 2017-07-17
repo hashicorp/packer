@@ -58,6 +58,8 @@ type Driver interface {
 }
 
 type InstanceConfig struct {
+	AcceleratorType   string
+	AcceleratorCount  int64
 	Address           string
 	Description       string
 	DiskSizeGb        int64
