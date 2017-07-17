@@ -204,6 +204,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     mount into this container. The key of the object is the host path, the value
     is the container path.
 
+-   `container_dir` (string) - The directory inside container to mount
+     temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
+     By default this is set to `/packer-files`.
+
 ## Using the Artifact: Export
 
 Once the tar artifact has been generated, you will likely want to import, tag,
