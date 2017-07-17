@@ -80,7 +80,6 @@ from ubuntu as an simple example:
     "LABEL version=1.0",
     "ONBUILD RUN date",
     "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
-    "MAINTAINER Captain Kirk",
     "ENTRYPOINT /var/www/start.sh"
   ]
 }
