@@ -55,4 +55,4 @@ Optional:
 
 -   `folder` (string) - Target path where the template will be created. 
     
--   `datacenter` (string) - If you have more than one, you will need to specified one.
+-   `datacenter` (string) - If you have more than one, you will need to specify which one the ESXI used.
