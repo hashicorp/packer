@@ -23,18 +23,19 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	Commit     bool
-	Discard    bool
-	ExportPath string `mapstructure:"export_path"`
-	Image      string
-	Pty        bool
-	Pull       bool
-	RunCommand []string `mapstructure:"run_command"`
-	Volumes    map[string]string
-	Privileged bool `mapstructure:"privileged"`
-	Author     string
-	Changes    []string
-	Message    string
+	Commit       bool
+	Discard      bool
+	ExportPath   string `mapstructure:"export_path"`
+	Image        string
+	Pty          bool
+	Pull         bool
+	RunCommand   []string `mapstructure:"run_command"`
+	Volumes      map[string]string
+	Privileged   bool `mapstructure:"privileged"`
+	Author       string
+	Changes      []string
+	Message      string
+	ContainerDir string `mapstructure:"container_dir"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
@@ -110,6 +111,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if fi, err := os.Stat(c.ExportPath); err == nil && fi.IsDir() {
 			errs = packer.MultiErrorAppend(errs, errExportPathNotFile)
 		}
+	}
+
+	if c.ContainerDir == "" {
+		c.ContainerDir = "/packer-files"
 	}
 
 	if c.EcrLogin && c.LoginServer == "" {
