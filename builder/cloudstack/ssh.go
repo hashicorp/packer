@@ -2,12 +2,14 @@ package cloudstack
 
 import (
 	"fmt"
-	"io/ioutil"
+	"net"
+	"os"
 
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 func commHost(state multistep.StateBag) (string, error) {
@@ -26,32 +28,54 @@ func commHost(state multistep.StateBag) (string, error) {
 	return config.hostAddress, nil
 }
 
-func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
-	config := state.Get("config").(*Config)
+func SSHConfig(useAgent bool, username, password string) func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		if useAgent {
+			authSock := os.Getenv("SSH_AUTH_SOCK")
+			if authSock == "" {
+				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+			}
 
-	clientConfig := &ssh.ClientConfig{
-		User: config.Comm.SSHUsername,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(config.Comm.SSHPassword),
-			ssh.KeyboardInteractive(
-				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
+			sshAgent, err := net.Dial("unix", authSock)
+			if err != nil {
+				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+			}
 
-	if config.Comm.SSHPrivateKey != "" {
-		privateKey, err := ioutil.ReadFile(config.Comm.SSHPrivateKey)
-		if err != nil {
-			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
+				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			}, nil
 		}
 
-		signer, err := ssh.ParsePrivateKey(privateKey)
-		if err != nil {
-			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+		privateKey, hasKey := state.GetOk("privateKey")
+
+		if hasKey {
+			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+
+			return &ssh.ClientConfig{
+				User: username,
+				Auth: []ssh.AuthMethod{
+					ssh.PublicKeys(signer),
+				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			}, nil
+
+		} else {
+
+			return &ssh.ClientConfig{
+				User:            username,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+				Auth: []ssh.AuthMethod{
+					ssh.Password(password),
+					ssh.KeyboardInteractive(
+						packerssh.PasswordKeyboardInteractive(password)),
+				}}, nil
 		}
-
-		clientConfig.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	}
-
-	return clientConfig, nil
 }
