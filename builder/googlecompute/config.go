@@ -26,6 +26,8 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	AcceleratorType      string            `mapstructure:"accelerator_type"`
+	AcceleratorCount     int64             `mapstructure:"accelerator_count"`
 	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
