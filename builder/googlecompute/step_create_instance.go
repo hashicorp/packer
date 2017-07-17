@@ -99,6 +99,8 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	var metadata map[string]string
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
 	errCh, err = d.RunInstance(&InstanceConfig{
+		AcceleratorType:   c.AcceleratorType,
+		AcceleratorCount:  c.AcceleratorCount,
 		Address:           c.Address,
 		Description:       "New instance created by Packer",
 		DiskSizeGb:        c.DiskSizeGb,
