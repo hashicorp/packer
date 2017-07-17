@@ -68,10 +68,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
 			Host:   commHost,
-			SSHConfig: SSHConfig(
+			SSHConfig: sshConfig(
 				b.config.Comm.SSHAgentAuth,
 				b.config.Comm.SSHUsername,
 				b.config.Comm.SSHPassword),
+			SSHPort:   commPort,
+			WinRMPort: commPort,
 		},
 		&common.StepProvision{},
 		&stepShutdownInstance{},
