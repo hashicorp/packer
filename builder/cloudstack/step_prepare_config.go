@@ -64,7 +64,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 
 	if config.PublicIPAddress != "" && !isUUID(config.PublicIPAddress) {
 		// Save the public IP address before replacing it with it's UUID.
-		config.hostAddress = config.PublicIPAddress
+		state.Put("ipaddress", config.PublicIPAddress)
 
 		p := client.Address.NewListPublicIpAddressesParams()
 		p.SetIpaddress(config.PublicIPAddress)

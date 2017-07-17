@@ -7,28 +7,30 @@ import (
 
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	"github.com/xanzy/go-cloudstack/cloudstack"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
 
 func commHost(state multistep.StateBag) (string, error) {
-	client := state.Get("client").(*cloudstack.CloudStackClient)
-	config := state.Get("config").(*Config)
 
-	if config.hostAddress == "" {
-		ipAddr, _, err := client.Address.GetPublicIpAddressByID(config.PublicIPAddress)
-		if err != nil {
-			return "", fmt.Errorf("Failed to retrieve IP address: %s", err)
-		}
-
-		config.hostAddress = ipAddr.Ipaddress
+	ip, hasIp := state.Get("ipaddress").(string)
+	if !hasIp {
+		return "", fmt.Errorf("Failed to retrieve IP address")
 	}
 
-	return config.hostAddress, nil
+	return ip, nil
 }
 
-func SSHConfig(useAgent bool, username, password string) func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+func commPort(state multistep.StateBag) (int, error) {
+	commPort, hasPort := state.Get("commPort").(int)
+	if !hasPort {
+		return 0, fmt.Errorf("Failed to retrieve communication port")
+	}
+
+	return commPort, nil
+}
+
+func sshConfig(useAgent bool, username, password string) func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		if useAgent {
 			authSock := os.Getenv("SSH_AUTH_SOCK")

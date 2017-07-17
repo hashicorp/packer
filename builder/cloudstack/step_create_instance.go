@@ -130,7 +130,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	// Set the host address when using the local IP address to connect.
 	if config.UseLocalIPAddress {
-		config.hostAddress = instance.Nic[0].Ipaddress
+		state.Put("ipaddress", instance.Nic[0].Ipaddress)
 	}
 
 	// Store the instance ID so we can remove it later.
