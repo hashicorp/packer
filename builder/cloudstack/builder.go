@@ -71,6 +71,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			TemporaryKeyPairName: b.config.TemporaryKeypairName,
 		},
+		&stepCreateSecurityGroup{},
 		&stepCreateInstance{
 			Ctx:   b.config.ctx,
 			Debug: b.config.PackerDebug,
