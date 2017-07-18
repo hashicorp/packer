@@ -28,6 +28,7 @@ type Config struct {
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
 	CIDRList             []string `mapstructure:"cidr_list"`
+	CreateSecurityGroup bool     `mapstructure:"create_security_group"`
 	DiskOffering         string   `mapstructure:"disk_offering"`
 	DiskSize             int64    `mapstructure:"disk_size"`
 	Expunge              bool     `mapstructure:"expunge"`
@@ -99,7 +100,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.AsyncTimeout = 30 * time.Minute
 	}
 
-	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
+	if len(c.CIDRList) == 0 {
 		c.CIDRList = []string{"0.0.0.0/0"}
 	}
 
@@ -144,6 +145,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.Network == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a network must be specified"))
+	}
+
+	if c.CreateSecurityGroup && !c.Expunge {
+		errs = packer.MultiErrorAppend(errs, errors.New("auto creating a temporary security group requires expunge"))
 	}
 
 	if c.ServiceOffering == "" {
