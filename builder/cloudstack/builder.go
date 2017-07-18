@@ -72,7 +72,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile:   b.config.Comm.SSHPrivateKey,
 		},
 		&stepCreateInstance{
-			Ctx: b.config.ctx,
+			Debug: b.config.PackerDebug,
+			Ctx:   b.config.ctx,
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
