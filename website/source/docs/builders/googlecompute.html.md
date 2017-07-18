@@ -176,7 +176,8 @@ builder.
 
 -   `accelerator_count` (int) - Number of guest accelerator cards to add to the launched instance.
 
--   `accelerator_type` (string) - Full or partial URL of the guest accelerator type.
+-   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
+    `"on_host_maintenance": "TERMINATE"` option set.
     Example: `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
 
 -   `address` (string) - The name of a pre-allocated static external IP address.
