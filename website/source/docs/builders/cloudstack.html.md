@@ -74,6 +74,11 @@ builder.
     connect to the instance. Defaults to `[ "0.0.0.0/0" ]`. Only required
     when `use_local_ip_address` is `false`.
 
+-   `create_security_group` (boolean) - If `true` a temporary security group
+    will be created which allows traffic towards the instance from the
+    `cidr_list`. This option will be ignored if `security_groups` is also
+    defined. Requires `expunge` set to `true`. Defaults to `false`.
+
 -   `disk_offering` (string) - The name or ID of the disk offering used for the
     instance. This option is only available (and also required) when using
     `source_iso`.
@@ -117,6 +122,9 @@ builder.
 -   `public_ip_address` (string) - The public IP address or it's ID used for
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
+
+-   `security_groups` (array of strings) - A list of security group IDs or names
+    to associate the instance with.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
     authenticate connections to the source instance. No temporary keypair will

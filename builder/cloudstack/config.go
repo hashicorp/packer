@@ -28,22 +28,24 @@ type Config struct {
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
 	CIDRList             []string `mapstructure:"cidr_list"`
+	CreateSecurityGroup  bool     `mapstructure:"create_security_group"`
 	DiskOffering         string   `mapstructure:"disk_offering"`
 	DiskSize             int64    `mapstructure:"disk_size"`
 	Expunge              bool     `mapstructure:"expunge"`
 	Hypervisor           string   `mapstructure:"hypervisor"`
 	InstanceName         string   `mapstructure:"instance_name"`
 	Keypair              string   `mapstructure:"keypair"`
-	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
 	Network              string   `mapstructure:"network"`
 	Project              string   `mapstructure:"project"`
 	PublicIPAddress      string   `mapstructure:"public_ip_address"`
+	SecurityGroups       []string `mapstructure:"security_groups"`
 	ServiceOffering      string   `mapstructure:"service_offering"`
-	SourceTemplate       string   `mapstructure:"source_template"`
 	SourceISO            string   `mapstructure:"source_iso"`
+	SourceTemplate       string   `mapstructure:"source_template"`
+	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
+	UseLocalIPAddress    bool     `mapstructure:"use_local_ip_address"`
 	UserData             string   `mapstructure:"user_data"`
 	UserDataFile         string   `mapstructure:"user_data_file"`
-	UseLocalIPAddress    bool     `mapstructure:"use_local_ip_address"`
 	Zone                 string   `mapstructure:"zone"`
 
 	TemplateName            string `mapstructure:"template_name"`
@@ -99,7 +101,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.AsyncTimeout = 30 * time.Minute
 	}
 
-	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
+	if len(c.CIDRList) == 0 {
 		c.CIDRList = []string{"0.0.0.0/0"}
 	}
 
@@ -144,6 +146,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.Network == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a network must be specified"))
+	}
+
+	if c.CreateSecurityGroup && !c.Expunge {
+		errs = packer.MultiErrorAppend(errs, errors.New("auto creating a temporary security group requires expunge"))
 	}
 
 	if c.ServiceOffering == "" {
