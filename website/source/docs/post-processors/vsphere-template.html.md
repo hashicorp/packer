@@ -11,7 +11,7 @@ sidebar_current: 'docs-post-processors-vSphere-template'
 
 Type: `vsphere-template`
 
-The Packer vSphere template post-processor takes an artifact from the VMware-iso builder built on ESXi (i.e. remote)
+The Packer vSphere template post-processor takes an artifact from the VMware-iso builder built on ESXi (i.e. remote) and
 allows to mark a VM as a template and leaving it in a path of choice.
 
 ## Example

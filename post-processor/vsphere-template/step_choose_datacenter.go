@@ -18,7 +18,7 @@ func (s *stepChooseDatacenter) Run(state multistep.StateBag) multistep.StepActio
 	cli := state.Get("client").(*govmomi.Client)
 	finder := find.NewFinder(cli.Client, false)
 
-	datacenter, err := finder.DatacenterOrDefault(context.Background(), s.Datacenter)
+	dc, err := finder.DatacenterOrDefault(context.Background(), s.Datacenter)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -26,8 +26,8 @@ func (s *stepChooseDatacenter) Run(state multistep.StateBag) multistep.StepActio
 		return multistep.ActionHalt
 	}
 
-	finder.SetDatacenter(datacenter)
-	state.Put("Datacenter", datacenter.Name())
+	finder.SetDatacenter(dc)
+	state.Put("datacenter", dc.Name())
 	state.Put("finder", finder)
 	return multistep.ActionContinue
 }
