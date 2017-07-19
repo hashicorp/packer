@@ -18,7 +18,7 @@ type stepMoveTemplate struct {
 func (s *stepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	finder := state.Get("finder").(*find.Finder)
-	dc := state.Get("Datacenter").(string)
+	dc := state.Get("datacenter").(string)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.Folder != "" {

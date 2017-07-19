@@ -25,7 +25,7 @@ type Config struct {
 	Insecure            bool   `mapstructure:"insecure"`
 	Username            string `mapstructure:"username"`
 	Password            string `mapstructure:"password"`
-	Datacenter          string `mapstructure:"Datacenter"`
+	Datacenter          string `mapstructure:"datacenter"`
 	VMName              string `mapstructure:"vm_name"`
 	Folder              string `mapstructure:"folder"`
 
@@ -86,7 +86,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build template: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
 	source := ""
