@@ -11,21 +11,20 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type StepMoveTemplate struct {
+type stepMoveTemplate struct {
 	Folder string
 }
 
-func (s *StepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ctx := state.Get("context").(context.Context)
 	finder := state.Get("finder").(*find.Finder)
-	d := state.Get("datacenter").(string)
+	dc := state.Get("Datacenter").(string)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.Folder != "" {
 		ui.Say("Moving template...")
 
-		folder, err := finder.Folder(ctx, filepath.ToSlash(filepath.Join("/", d, "vm", s.Folder)))
+		folder, err := finder.Folder(context.Background(), filepath.ToSlash(filepath.Join("/", dc, "vm", s.Folder)))
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -33,13 +32,13 @@ func (s *StepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		task, err := folder.MoveInto(ctx, []types.ManagedObjectReference{vm.Reference()})
+		task, err := folder.MoveInto(context.Background(), []types.ManagedObjectReference{vm.Reference()})
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		if err = task.Wait(ctx); err != nil {
+		if err = task.Wait(context.Background()); err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -48,4 +47,4 @@ func (s *StepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepMoveTemplate) Cleanup(multistep.StateBag) {}
+func (s *stepMoveTemplate) Cleanup(multistep.StateBag) {}

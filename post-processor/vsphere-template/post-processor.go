@@ -25,7 +25,7 @@ type Config struct {
 	Insecure            bool   `mapstructure:"insecure"`
 	Username            string `mapstructure:"username"`
 	Password            string `mapstructure:"password"`
-	Datacenter          string `mapstructure:"datacenter"`
+	Datacenter          string `mapstructure:"Datacenter"`
 	VMName              string `mapstructure:"vm_name"`
 	Folder              string `mapstructure:"folder"`
 
@@ -64,10 +64,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	if err := p.configureURL(); err != nil {
+	if p.config.Folder != "" && !strings.HasPrefix(p.config.Folder, "/") {
 		errs = packer.MultiErrorAppend(
-			errs, err)
+			errs, fmt.Errorf("Folder must be bound to the root"))
 	}
+
+	sdk, err := url.Parse(fmt.Sprintf("https://%v/sdk", p.config.Host))
+	if err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error invalid vSphere sdk endpoint: %s", err))
+	}
+
+	sdk.User = url.UserPassword(p.config.Username, p.config.Password)
+	p.url = sdk
 
 	if len(errs.Errors) > 0 {
 		return errs
@@ -77,7 +86,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("Unknown artifact type, can't build template: %s", artifact.BuilderId())
 	}
 
 	source := ""
@@ -87,34 +96,33 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			break
 		}
 	}
-	//We give a vSphere-ESXI 10s to sync
+	// In some occasions when the VM is mark as template it loses its configuration if it's done immediately
+	// after the ESXi creates it. If vSphere is given a few seconds this behavior doesn't reappear.
 	ui.Message("Waiting 10s for VMWare vSphere to start")
 	time.Sleep(10 * time.Second)
 
-	ctx := context.Background()
-	c, err := govmomi.NewClient(ctx, p.url, p.config.Insecure)
+	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
-		return artifact, true, fmt.Errorf("Error trying to connect: %s", err)
+		return nil, true, fmt.Errorf("Error connecting to vSphere: %s", err)
 	}
 
 	state := new(multistep.BasicStateBag)
 	state.Put("ui", ui)
-	state.Put("context", ctx)
 	state.Put("client", c)
 
 	steps := []multistep.Step{
-		&StepChooseDatacenter{
+		&stepChooseDatacenter{
 			Datacenter: p.config.Datacenter,
 		},
-		&StepFetchVm{
+		&stepFetchVm{
 			VMName: p.config.VMName,
 			Source: source,
 		},
-		&StepCreateFolder{
+		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		&StepMarkAsTemplate{},
-		&StepMoveTemplate{
+		&stepMarkAsTemplate{},
+		&stepMoveTemplate{
 			Folder: p.config.Folder,
 		},
 	}
@@ -123,18 +131,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	runner.Run(state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
-		return artifact, true, rawErr.(error)
+		return nil, true, rawErr.(error)
 	}
 	return artifact, true, nil
-}
-
-func (p *PostProcessor) configureURL() error {
-	sdk, err := url.Parse(fmt.Sprintf("https://%v/sdk", p.config.Host))
-	if err != nil {
-		return nil
-	}
-
-	sdk.User = url.UserPassword(p.config.Username, p.config.Password)
-	p.url = sdk
-	return nil
 }
