@@ -207,6 +207,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
 	}
 
+	if c.AcceleratorCount > 0 && len(c.AcceleratorType) == 0 {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
+	}
+
+	if c.AcceleratorCount > 0 && c.OnHostMaintenance != "TERMINATE" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
+	}
+
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
