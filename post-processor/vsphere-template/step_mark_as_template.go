@@ -8,16 +8,15 @@ import (
 	"github.com/vmware/govmomi/object"
 )
 
-type StepMarkAsTemplate struct{}
+type stepMarkAsTemplate struct{}
 
-func (s *StepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ctx := state.Get("context").(context.Context)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	ui.Say("Marking as a template...")
 
-	if err := vm.MarkAsTemplate(ctx); err != nil {
+	if err := vm.MarkAsTemplate(context.Background()); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -25,4 +24,4 @@ func (s *StepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func (s *StepMarkAsTemplate) Cleanup(multistep.StateBag) {}
+func (s *stepMarkAsTemplate) Cleanup(multistep.StateBag) {}

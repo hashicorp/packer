@@ -12,36 +12,33 @@ import (
 	"github.com/vmware/govmomi/object"
 )
 
-type StepCreateFolder struct {
+type stepCreateFolder struct {
 	Folder string
 }
 
-func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ctx := state.Get("context").(context.Context)
-	f := state.Get("finder").(*find.Finder)
-	d := state.Get("datacenter").(string)
+	finder := state.Get("finder").(*find.Finder)
+	dc := state.Get("Datacenter").(string)
 
 	if s.Folder != "" {
 		ui.Say("Creating or checking destination folders...")
 
-		if !strings.HasPrefix(s.Folder, "/") {
-			s.Folder = filepath.Join("/", s.Folder)
-		}
-
 		path := s.Folder
-		base := filepath.Join("/", d, "vm")
+		base := filepath.Join("/", dc, "vm")
 		var folders []string
 		var root *object.Folder
 		var err error
-
+		// We iterate over the path starting with full path
+		// If we don't find it, we save the folder name and continue with the previous path
+		// The iteration ends when we find an existing path
 		for {
-			root, err = f.Folder(ctx, filepath.ToSlash(filepath.Join(base, path)))
+			root, err = finder.Folder(context.Background(), filepath.ToSlash(filepath.Join(base, path)))
 			if err != nil {
 				_, folder := filepath.Split(path)
 				folders = append(folders, folder)
 				if i := strings.LastIndex(path, "/"); i == 0 {
-					root, err = f.Folder(ctx, filepath.ToSlash(base))
+					root, err = finder.Folder(context.Background(), filepath.ToSlash(base))
 					if err != nil {
 						state.Put("error", err)
 						ui.Error(err.Error())
@@ -58,7 +55,7 @@ func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 
 		for i := len(folders) - 1; i >= 0; i-- {
 			ui.Message(fmt.Sprintf("Creating folder: %v", folders[i]))
-			root, err = root.CreateFolder(ctx, folders[i])
+			root, err = root.CreateFolder(context.Background(), folders[i])
 			if err != nil {
 				state.Put("error", err)
 				ui.Error(err.Error())
@@ -69,4 +66,4 @@ func (s *StepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateFolder) Cleanup(multistep.StateBag) {}
+func (s *stepCreateFolder) Cleanup(multistep.StateBag) {}
