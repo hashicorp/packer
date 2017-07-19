@@ -9,17 +9,16 @@ import (
 	"github.com/vmware/govmomi/find"
 )
 
-type StepChooseDatacenter struct {
+type stepChooseDatacenter struct {
 	Datacenter string
 }
 
-func (s *StepChooseDatacenter) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepChooseDatacenter) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
-	ctx := state.Get("context").(context.Context)
 	finder := find.NewFinder(cli.Client, false)
 
-	datacenter, err := finder.DatacenterOrDefault(ctx, s.Datacenter)
+	datacenter, err := finder.DatacenterOrDefault(context.Background(), s.Datacenter)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -28,9 +27,9 @@ func (s *StepChooseDatacenter) Run(state multistep.StateBag) multistep.StepActio
 	}
 
 	finder.SetDatacenter(datacenter)
-	state.Put("datacenter", datacenter.Name())
+	state.Put("Datacenter", datacenter.Name())
 	state.Put("finder", finder)
 	return multistep.ActionContinue
 }
 
-func (s *StepChooseDatacenter) Cleanup(multistep.StateBag) {}
+func (s *stepChooseDatacenter) Cleanup(multistep.StateBag) {}

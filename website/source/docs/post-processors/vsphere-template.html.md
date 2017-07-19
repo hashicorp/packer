@@ -1,6 +1,6 @@
 ---
 description: |
-    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI was chosen**-
+    The Packer vSphere Template post-processor takes an artifact from the VMware-iso builder built on ESXi (i.e. remote)
     and allows to mark a VM as a template and leaving it in a path of choice. 
 layout: docs
 page_title: 'vSphere Template - Post-Processors'
@@ -11,7 +11,7 @@ sidebar_current: 'docs-post-processors-vSphere-template'
 
 Type: `vsphere-template`
 
-The Packer vSphere template post-processor takes an artifact from the VMware-iso builder -**only if remote ESXI was chosen**-
+The Packer vSphere template post-processor takes an artifact from the VMware-iso builder built on ESXi (i.e. remote)
 allows to mark a VM as a template and leaving it in a path of choice.
 
 ## Example
@@ -22,11 +22,12 @@ An example is shown below, showing only the post-processor configuration:
 {  
    "type": "vsphere-template",
    "host": "vcenter.local",
+   "insecure": true,
    "username": "root",
-   "password": "secret",
-   "datacenter": "murlock",
+   "password": "secret",      
    "vm_name": "distro-7.3",
-   "folder": "/packer-templates/os/distro-7"
+   "datacenter": "mydatacenter",
+   "folder": "/packer-templates/os/distro-7"   
 }
 ```
 
@@ -53,6 +54,6 @@ Required:
 
 Optional:
 
+-   `datacenter` (string) - If you have more than one, you will need to specify which one the ESXi used.
+
 -   `folder` (string) - Target path where the template will be created. 
-    
--   `datacenter` (string) - If you have more than one, you will need to specify which one the ESXI used.

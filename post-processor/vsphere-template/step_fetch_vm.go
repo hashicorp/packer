@@ -9,19 +9,18 @@ import (
 	"github.com/vmware/govmomi/find"
 )
 
-type StepFetchVm struct {
+type stepFetchVm struct {
 	VMName string
 	Source string
 }
 
-func (s *StepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ctx := state.Get("context").(context.Context)
 	f := state.Get("finder").(*find.Finder)
 
 	ui.Say("Fetching VM...")
 
-	if err := avoidOrphaned(ctx, f, s.VMName); err != nil {
+	if err := avoidOrphaned(f, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -32,41 +31,41 @@ func (s *StepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 	storage := path[:i]
 	vmx := path[i:]
 
-	ds, err := f.DatastoreOrDefault(ctx, storage)
+	ds, err := f.DatastoreOrDefault(context.Background(), storage)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	folder, err := f.DefaultFolder(ctx)
+	folder, err := f.DefaultFolder(context.Background())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	pool, err := f.DefaultResourcePool(ctx)
+	pool, err := f.DefaultResourcePool(context.Background())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	task, err := folder.RegisterVM(ctx, ds.Path(vmx), s.VMName, false, pool, nil)
+	task, err := folder.RegisterVM(context.Background(), ds.Path(vmx), s.VMName, false, pool, nil)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if err = task.Wait(ctx); err != nil {
+	if err = task.Wait(context.Background()); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	vm, err := f.VirtualMachine(ctx, s.VMName)
+	vm, err := f.VirtualMachine(context.Background(), s.VMName)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -77,13 +76,13 @@ func (s *StepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-// When ESXI remove the VM, vSphere keep the VM as orphaned
-func avoidOrphaned(ctx context.Context, f *find.Finder, vm_name string) error {
-	vm, err := f.VirtualMachine(ctx, vm_name)
+// When ESXi remove the VM, vSphere keep the VM as orphaned
+func avoidOrphaned(f *find.Finder, vm_name string) error {
+	vm, err := f.VirtualMachine(context.Background(), vm_name)
 	if err != nil {
 		return err
 	}
-	return vm.Unregister(ctx)
+	return vm.Unregister(context.Background())
 }
 
-func (s *StepFetchVm) Cleanup(multistep.StateBag) {}
+func (s *stepFetchVm) Cleanup(multistep.StateBag) {}
