@@ -71,10 +71,8 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 	var wg sync.WaitGroup
 
 	if cmd.Stdin != nil {
-		wg.Add(1)
 		args.StdinStreamId = c.mux.NextId()
 		go func() {
-			defer wg.Done()
 			serveSingleCopy("stdin", c.mux, args.StdinStreamId, nil, cmd.Stdin)
 		}()
 	}
