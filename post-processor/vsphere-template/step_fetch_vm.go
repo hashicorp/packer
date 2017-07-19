@@ -16,11 +16,11 @@ type stepFetchVm struct {
 
 func (s *stepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	f := state.Get("finder").(*find.Finder)
+	finder := state.Get("finder").(*find.Finder)
 
 	ui.Say("Fetching VM...")
 
-	if err := avoidOrphaned(f, s.VMName); err != nil {
+	if err := avoidOrphaned(finder, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -31,21 +31,21 @@ func (s *stepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 	storage := path[:i]
 	vmx := path[i:]
 
-	ds, err := f.DatastoreOrDefault(context.Background(), storage)
+	ds, err := finder.DatastoreOrDefault(context.Background(), storage)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	folder, err := f.DefaultFolder(context.Background())
+	folder, err := finder.DefaultFolder(context.Background())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	pool, err := f.DefaultResourcePool(context.Background())
+	pool, err := finder.DefaultResourcePool(context.Background())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -65,7 +65,7 @@ func (s *stepFetchVm) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	vm, err := f.VirtualMachine(context.Background(), s.VMName)
+	vm, err := finder.VirtualMachine(context.Background(), s.VMName)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())

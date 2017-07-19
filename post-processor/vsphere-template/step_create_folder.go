@@ -19,7 +19,7 @@ type stepCreateFolder struct {
 func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	finder := state.Get("finder").(*find.Finder)
-	dc := state.Get("Datacenter").(string)
+	dc := state.Get("datacenter").(string)
 
 	if s.Folder != "" {
 		ui.Say("Creating or checking destination folders...")
@@ -31,7 +31,8 @@ func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 		var err error
 		// We iterate over the path starting with full path
 		// If we don't find it, we save the folder name and continue with the previous path
-		// The iteration ends when we find an existing path
+		// The iteration ends when we find an existing path or if we don't find any we'll use
+		// the base path
 		for {
 			root, err = finder.Folder(context.Background(), filepath.ToSlash(filepath.Join(base, path)))
 			if err != nil {
