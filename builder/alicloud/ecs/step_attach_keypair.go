@@ -22,7 +22,7 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
-	start := time.Now().Add(120 * time.Second)
+	timeoutPoint := time.Now().Add(120 * time.Second)
 	for {
 		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
 			KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})
@@ -30,7 +30,7 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 			e, _ := err.(*common.Error)
 			if (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" ||
 				e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound")) &&
-				time.Now().Before(start) {
+				time.Now().Before(timeoutPoint) {
 				time.Sleep(5 * time.Second)
 				continue
 			}
