@@ -121,11 +121,11 @@ func (s *stepConfigAlicloudSecurityGroup) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	message(state, "security group")
-	start := time.Now().Add(120 * time.Second)
+	timeoutPoint := time.Now().Add(120 * time.Second)
 	for {
 		if err := client.DeleteSecurityGroup(common.Region(s.RegionId), s.SecurityGroupId); err != nil {
 			e, _ := err.(*common.Error)
-			if e.Code == "DependencyViolation" && time.Now().Before(start) {
+			if e.Code == "DependencyViolation" && time.Now().Before(timeoutPoint) {
 				time.Sleep(5 * time.Second)
 				continue
 			}
