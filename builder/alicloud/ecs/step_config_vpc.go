@@ -78,7 +78,7 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	message(state, "VPC")
-	start := time.Now().Add(10 * time.Second)
+	start := time.Now().Add(60 * time.Second)
 	for {
 		if err := client.DeleteVpc(s.VpcId); err != nil {
 			e, _ := err.(*common.Error)

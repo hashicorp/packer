@@ -7,6 +7,7 @@ import (
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
+	"time"
 )
 
 type stepAttachKeyPar struct {
@@ -21,7 +22,7 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
-	retry_times := 3
+	start := time.Now().Add(120 * time.Second)
 	for {
 		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
 			KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})
@@ -29,8 +30,8 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 			e, _ := err.(*common.Error)
 			if (!(e.Code == "MissingParameter" || e.Code == "DependencyViolation.WindowsInstance" ||
 				e.Code == "InvalidKeyPairName.NotFound" || e.Code == "InvalidRegionId.NotFound")) &&
-				retry_times > 0 {
-				retry_times = retry_times - 1
+				time.Now().Before(start) {
+				time.Sleep(5 * time.Second)
 				continue
 			}
 			err := fmt.Errorf("Error attaching keypair %s to instance %s : %s",
