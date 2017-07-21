@@ -33,7 +33,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	client, _ := api.NewScalewayAPI(b.config.Organization, b.config.Token, b.config.UserAgent, b.config.Region)
+	client, err := api.NewScalewayAPI(b.config.Organization, b.config.Token, b.config.UserAgent, b.config.Region)
+
+	if err != nil {
+		return nil, err
+	}
 
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
@@ -58,7 +62,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(stepShutdown),
 		new(stepSnapshot),
 		new(stepImage),
-		new(stepTerminate),
 	}
 
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
