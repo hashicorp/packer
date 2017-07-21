@@ -66,9 +66,12 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Destroying server...")
-	err := client.PostServerAction(s.serverID, "terminate")
+
+	err := client.DeleteServerForce(s.serverID)
+
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error destroying server. Please destroy it manually: %s", err))
 	}
+
 }
