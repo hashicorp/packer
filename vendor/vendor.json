@@ -983,15 +983,10 @@
 			"revisionTime": "2016-10-12T14:34:48Z"
 		},
 		{
-			"checksumSHA1": "ITwMGcU7ZNb0nmOHcKXMjK2i69g=",
-			"path": "google.golang.org/api/compute/v0.beta",
-			"revision": "e665075b5ff79143ba49c58fab02df9dc122afd5",
-			"revisionTime": "2017-07-09T10:32:00Z"
-		},
-		{
-			"checksumSHA1": "hrUTmck0J+LE+lBtCvHvemNDY8U=",
+			"checksumSHA1": "NbZXrCwb2NvwV+g6yF0NXSG63A0=",
 			"path": "google.golang.org/api/compute/v1",
-			"revision": "ff0a1ff302946b997eb1832381419d1f95143483"
+			"revision": "e381d638237fe32daa8eaa3321cf8db7b8203965",
+			"revisionTime": "2017-07-07T17:19:04Z"
 		},
 		{
 			"checksumSHA1": "gvrxuXnqGhfzY0O3MFbS8XhMH/k=",
