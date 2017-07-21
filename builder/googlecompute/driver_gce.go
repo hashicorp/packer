@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
