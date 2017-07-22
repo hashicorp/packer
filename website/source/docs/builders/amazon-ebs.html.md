@@ -446,8 +446,8 @@ images exist when this template is run:
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "tags": {
-  "OS_Version": "Ubuntu",
-  "Release": "Latest"
+    "OS_Version": "Ubuntu",
+    "Release": "Latest"
   }
 }
 ```
