@@ -183,18 +183,26 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.plugins.connection.ssh import Connection as SSHConnection
+from ansible import constants as C
 
 class Connection(SSHConnection):
     ''' ssh based connections for powershell via packer'''
 
     transport = 'packer'
-    has_pipelining = True
-    become_methods = []
+    module_implementation_preferences = ('.ps1', '.exe', '')
+    become_methods = ['runas']
     allow_executable = False
-    module_implementation_preferences = ('.ps1', '')
 
     def __init__(self, *args, **kwargs):
+        self._shell_type = 'powershell'
+
         super(Connection, self).__init__(*args, **kwargs)
+
+        self.host = self._play_context.remote_addr
+        self.port = self._play_context.port
+        self.user = self._play_context.remote_user
+        self.control_path = C.ANSIBLE_SSH_CONTROL_PATH
+        self.control_path_dir = C.ANSIBLE_SSH_CONTROL_PATH_DIR
 ```
 
 This template should build a Windows Server 2012 image on Google Cloud Platform:
@@ -208,7 +216,7 @@ This template should build a Windows Server 2012 image on Google Cloud Platform:
       "playbook_file": "./win-playbook.yml",
       "extra_arguments": [
         "--connection", "packer",
-        "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+        "--extra-vars", "ansible_shell_executable=None"
       ]
     }
   ],
