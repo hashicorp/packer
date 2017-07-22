@@ -7,6 +7,7 @@ GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
+GOPATH=$(shell go env GOPATH)
 
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
