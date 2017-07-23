@@ -220,15 +220,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
 		},
-		&common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			Extension:    b.config.TargetExtension,
-			ResultKey:    "iso_path",
-			TargetPath:   b.config.TargetPath,
-			Url:          b.config.ISOUrls,
-		},
+		&stepDownload{
+			step: &common.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				Extension:    b.config.TargetExtension,
+				ResultKey:    "iso_path",
+				TargetPath:   b.config.TargetPath,
+				Url:          b.config.ISOUrls,
+			}},
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 		},

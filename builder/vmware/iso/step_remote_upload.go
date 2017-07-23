@@ -2,10 +2,12 @@ package iso
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
@@ -33,17 +35,21 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 	checksum := config.ISOChecksum
 	checksumType := config.ISOChecksumType
 
-	ui.Say(s.Message)
-	log.Printf("Remote uploading: %s", path)
-	newPath, err := remote.UploadISO(path, checksum, checksumType)
-	if err != nil {
-		err := fmt.Errorf("Error uploading file: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if !strings.HasPrefix(path, "skip_upload:") {
+		log.Printf("Remote uploading: %s", path)
+		newPath, err := remote.UploadISO(path, checksum, checksumType)
+
+		if err != nil {
+			err := fmt.Errorf("Error uploading file: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		state.Put(s.Key, newPath)
+	} else {
+		state.Put(s.Key, strings.Split("skip_upload:", path)[0])
 	}
 
-	state.Put(s.Key, newPath)
 	return multistep.ActionContinue
 }
 
