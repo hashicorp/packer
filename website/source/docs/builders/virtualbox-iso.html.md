@@ -444,12 +444,12 @@ interface to VirtualBox where you can completely control VirtualBox. It can be
 used to do things such as set RAM, CPUs, etc.
 
 Extra VBoxManage commands are defined in the template in the `vboxmanage`
-section. An example is shown below that sets the memory and number of CPUs
+section or `vboxmanage_post`. In the case of a `modifyvm` command, the machine should generally be off . An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
 ``` json
 {
-  "vboxmanage": [
+  "vboxmanage_post": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
     ["modifyvm", "{{.Name}}", "--cpus", "2"]
   ]
@@ -458,7 +458,7 @@ within the virtual machine:
 
 The value of `vboxmanage` is an array of commands to execute. These commands are
 executed in the order defined. So in the above example, the memory will be set
-followed by the CPUs.
+followed by the CPUs. It may be necessary to set `post_shutdown_delay` to give the machine time to shut down before executing commands.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
