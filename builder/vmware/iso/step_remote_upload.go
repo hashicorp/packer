@@ -36,9 +36,9 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 	checksumType := config.ISOChecksumType
 
 	if !strings.HasPrefix(path, "skip_upload:") {
+		ui.Say(s.Message)
 		log.Printf("Remote uploading: %s", path)
 		newPath, err := remote.UploadISO(path, checksum, checksumType)
-
 		if err != nil {
 			err := fmt.Errorf("Error uploading file: %s", err)
 			state.Put("error", err)
@@ -47,7 +47,7 @@ func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		state.Put(s.Key, newPath)
 	} else {
-		state.Put(s.Key, strings.Split("skip_upload:", path)[0])
+		state.Put(s.Key, strings.Split(path, "skip_upload:")[1])
 	}
 
 	return multistep.ActionContinue
