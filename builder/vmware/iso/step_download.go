@@ -29,29 +29,27 @@ func (s *stepDownload) Run(state multistep.StateBag) multistep.StepAction {
 		for _, url := range s.step.Url {
 			targetPath = s.step.TargetPath
 
-			if targetPath == "" {
-				if u, err := neturl.Parse(url); err == nil {
+			if u, err := neturl.Parse(url); err == nil {
 
-					if u.Scheme == "file" {
+				if u.Scheme == "file" {
 
-						if u.Path != "" {
-							targetPath = u.Path
-						} else if u.Opaque != "" {
-							targetPath = u.Opaque
-						}
+					if u.Path != "" {
+						targetPath = u.Path
+					} else if u.Opaque != "" {
+						targetPath = u.Opaque
+					}
 
-						if runtime.GOOS == "windows" && len(targetPath) > 0 && targetPath[0] == '/' {
-							targetPath = targetPath[1:]
-						}
+					if runtime.GOOS == "windows" && len(targetPath) > 0 && targetPath[0] == '/' {
+						targetPath = targetPath[1:]
 					}
 				}
+			}
 
-				if targetPath == "" {
-					hash := sha1.Sum([]byte(url))
-					cacheKey := fmt.Sprintf("%s.%s", hex.EncodeToString(hash[:]), s.step.Extension)
-					targetPath = cache.Lock(cacheKey)
-					cache.Unlock(cacheKey)
-				}
+			if targetPath == "" {
+				hash := sha1.Sum([]byte(url))
+				cacheKey := fmt.Sprintf("%s.%s", hex.EncodeToString(hash[:]), s.step.Extension)
+				targetPath = cache.Lock(cacheKey)
+				cache.Unlock(cacheKey)
 			}
 
 			remotePath := esx5.cachePath(targetPath)
