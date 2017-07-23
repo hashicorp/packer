@@ -25,12 +25,10 @@ func (s *stepDownload) Run(state multistep.StateBag) multistep.StepAction {
 	if esx5, ok := driver.(*ESX5Driver); ok {
 		ui.Say("Verifying remote cache")
 
-		targetPath := ""
 		for _, url := range s.step.Url {
-			targetPath = s.step.TargetPath
+			targetPath := s.step.TargetPath
 
 			if u, err := neturl.Parse(url); err == nil {
-
 				if u.Scheme == "file" {
 
 					if u.Path != "" {
