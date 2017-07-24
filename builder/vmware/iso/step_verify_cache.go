@@ -24,7 +24,7 @@ func (s *stepVerifyCache) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if esx5, ok := driver.(*ESX5Driver); ok {
-		ui.Say("Verifying remoteUpload cache")
+		ui.Say("Verifying remote cache")
 
 		for _, url := range s.download.Url {
 			targetPath := s.download.TargetPath
