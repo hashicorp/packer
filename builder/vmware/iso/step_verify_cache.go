@@ -55,7 +55,7 @@ func (s *stepVerifyCache) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Message(remotePath)
 
 			if esx5.verifyChecksum(s.download.ChecksumType, s.download.Checksum, remotePath) {
-				ui.Message("Remote cache verified, skipping download/upload step")
+				ui.Message("Remote cache verified, skipping download/upload steps")
 
 				s.remoteUpload.Skip = true
 				state.Put(s.download.ResultKey, remotePath)

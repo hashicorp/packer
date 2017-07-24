@@ -227,7 +227,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		remoteUpload: &stepRemoteUpload{
 			Key:     "iso_path",
-			Message: "Uploading ISO to remoteUpload machine...",
+			Message: "Uploading ISO to remote machine...",
 		},
 	}
 
@@ -246,7 +246,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepRemoteUpload{
 			Key:     "floppy_path",
-			Message: "Uploading Floppy to remoteUpload machine...",
+			Message: "Uploading Floppy to remote machine...",
 		},
 		stepVerifyCache.remoteUpload,
 		&stepCreateDisk{},
