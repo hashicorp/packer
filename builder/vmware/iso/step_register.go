@@ -20,7 +20,7 @@ func (s *StepRegister) Run(state multistep.StateBag) multistep.StepAction {
 	vmxPath := state.Get("vmx_path").(string)
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
-		ui.Say("Registering remoteUpload VM...")
+		ui.Say("Registering remote VM...")
 		if err := remoteDriver.Register(vmxPath); err != nil {
 			err := fmt.Errorf("Error registering VM: %s", err)
 			state.Put("error", err)
