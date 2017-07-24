@@ -9,8 +9,8 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// stepRemoteUpload uploads some thing from the state bag to a remoteUpload driver
-// (if it can) and stores that new remoteUpload path into the state bag.
+// stepRemoteUpload uploads some thing from the state bag to a remote driver
+// (if it can) and stores that new remote path into the state bag.
 type stepRemoteUpload struct {
 	Key     string
 	Message string
