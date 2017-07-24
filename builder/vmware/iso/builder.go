@@ -215,21 +215,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	stepVerifyCache := &stepVerifyCache{
+		download: &common.StepDownload{
+			Checksum:     b.config.ISOChecksum,
+			ChecksumType: b.config.ISOChecksumType,
+			Description:  "ISO",
+			Extension:    b.config.TargetExtension,
+			ResultKey:    "iso_path",
+			TargetPath:   b.config.TargetPath,
+			Url:          b.config.ISOUrls,
+		},
+		remoteUpload: &stepRemoteUpload{
+			Key:     "iso_path",
+			Message: "Uploading ISO to remoteUpload machine...",
+		},
+	}
+
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
 			RemoteType:        b.config.RemoteType,
 			ToolsUploadFlavor: b.config.ToolsUploadFlavor,
 		},
-		&stepDownload{
-			step: &common.StepDownload{
-				Checksum:     b.config.ISOChecksum,
-				ChecksumType: b.config.ISOChecksumType,
-				Description:  "ISO",
-				Extension:    b.config.TargetExtension,
-				ResultKey:    "iso_path",
-				TargetPath:   b.config.TargetPath,
-				Url:          b.config.ISOUrls,
-			}},
+		stepVerifyCache,
 		&vmwcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 		},
@@ -239,12 +246,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepRemoteUpload{
 			Key:     "floppy_path",
-			Message: "Uploading Floppy to remote machine...",
+			Message: "Uploading Floppy to remoteUpload machine...",
 		},
-		&stepRemoteUpload{
-			Key:     "iso_path",
-			Message: "Uploading ISO to remote machine...",
-		},
+		stepVerifyCache.remoteUpload,
 		&stepCreateDisk{},
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{

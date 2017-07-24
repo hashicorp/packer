@@ -13,20 +13,21 @@ import (
 	"runtime"
 )
 
-type stepDownload struct {
-	step *common.StepDownload
+type stepVerifyCache struct {
+	download     *common.StepDownload
+	remoteUpload *stepRemoteUpload
 }
 
-func (s *stepDownload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepVerifyCache) Run(state multistep.StateBag) multistep.StepAction {
 	cache := state.Get("cache").(packer.Cache)
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if esx5, ok := driver.(*ESX5Driver); ok {
-		ui.Say("Verifying remote cache")
+		ui.Say("Verifying remoteUpload cache")
 
-		for _, url := range s.step.Url {
-			targetPath := s.step.TargetPath
+		for _, url := range s.download.Url {
+			targetPath := s.download.TargetPath
 
 			if u, err := neturl.Parse(url); err == nil {
 				if u.Scheme == "file" {
@@ -45,16 +46,19 @@ func (s *stepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 			if targetPath == "" {
 				hash := sha1.Sum([]byte(url))
-				cacheKey := fmt.Sprintf("%s.%s", hex.EncodeToString(hash[:]), s.step.Extension)
+				cacheKey := fmt.Sprintf("%s.%s", hex.EncodeToString(hash[:]), s.download.Extension)
 				targetPath = cache.Lock(cacheKey)
 				cache.Unlock(cacheKey)
 			}
 
 			remotePath := esx5.cachePath(targetPath)
 			ui.Message(remotePath)
-			if esx5.verifyChecksum(s.step.ChecksumType, s.step.Checksum, remotePath) {
-				state.Put(s.step.ResultKey, "skip_upload:"+remotePath)
-				ui.Message("Remote cache verified, skipping download step")
+
+			if esx5.verifyChecksum(s.download.ChecksumType, s.download.Checksum, remotePath) {
+				ui.Message("Remote cache verified, skipping download/upload step")
+
+				s.remoteUpload.Skip = true
+				state.Put(s.download.ResultKey, remotePath)
 				return multistep.ActionContinue
 			}
 
@@ -62,7 +66,7 @@ func (s *stepDownload) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	return s.step.Run(state)
+	return s.download.Run(state)
 }
 
-func (s *stepDownload) Cleanup(multistep.StateBag) {}
+func (s *stepVerifyCache) Cleanup(multistep.StateBag) {}
