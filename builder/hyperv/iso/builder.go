@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
@@ -42,14 +41,15 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig         `mapstructure:",squash"`
-	common.HTTPConfig           `mapstructure:",squash"`
-	common.ISOConfig            `mapstructure:",squash"`
-	common.FloppyConfig         `mapstructure:",squash"`
-	hypervcommon.OutputConfig   `mapstructure:",squash"`
-	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.RunConfig      `mapstructure:",squash"`
-	hypervcommon.ShutdownConfig `mapstructure:",squash"`
+	common.PackerConfig               `mapstructure:",squash"`
+	common.HTTPConfig                 `mapstructure:",squash"`
+	common.ISOConfig                  `mapstructure:",squash"`
+	common.FloppyConfig               `mapstructure:",squash"`
+	hypervcommon.OutputConfig         `mapstructure:",squash"`
+	hypervcommon.SSHConfig            `mapstructure:",squash"`
+	hypervcommon.RunConfig            `mapstructure:",squash"`
+	hypervcommon.ShutdownConfig       `mapstructure:",squash"`
+	hypervcommon.GuestAdditionsConfig `mapstructure:",squash"`
 
 	// The size, in megabytes, of the hard disk to create for the VM.
 	// By default, this is 130048 (about 127 GB).
@@ -59,12 +59,6 @@ type Config struct {
 	RamSize uint `mapstructure:"ram_size"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
-
-	// Should integration services iso be mounted
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
-
-	// The path to the integration services iso
-	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
@@ -157,34 +151,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
 	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
-	// Errors
-	if b.config.GuestAdditionsMode == "" {
-		if b.config.GuestAdditionsPath != "" {
-			b.config.GuestAdditionsMode = "attach"
-		} else {
-			b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
-
-			if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-				if err != nil {
-					b.config.GuestAdditionsPath = ""
-					b.config.GuestAdditionsMode = "none"
-				} else {
-					b.config.GuestAdditionsMode = "attach"
-				}
-			}
-		}
-	}
-
-	if b.config.GuestAdditionsPath == "" && b.config.GuestAdditionsMode == "attach" {
-		b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
-
-		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-			if err != nil {
-				b.config.GuestAdditionsPath = ""
-			}
-		}
-	}
-
 	for _, isoPath := range b.config.SecondaryDvdImages {
 		if _, err := os.Stat(isoPath); os.IsNotExist(err) {
 			if err != nil {
@@ -194,32 +160,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	numberOfIsos := len(b.config.SecondaryDvdImages)
-
-	if b.config.GuestAdditionsMode == "attach" {
-		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Guest additions iso does not exist: %s", err))
-			}
-		}
-
-		numberOfIsos = numberOfIsos + 1
-	}
-
-	if b.config.Generation < 2 && numberOfIsos > 2 {
-		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		}
-	} else if b.config.Generation > 1 && len(b.config.SecondaryDvdImages) > 16 {
-		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		}
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(&b.config.ctx, len(b.config.SecondaryDvdImages), b.config.Generation)...)
 
 	if b.config.EnableVirtualizationExtensions {
 		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
