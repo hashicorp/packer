@@ -30,14 +30,13 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
-	source := state.Get("source").(string)
 
 	ui.Say("Creating instance...")
 
 	// Create a new parameter struct.
 	p := client.VirtualMachine.NewDeployVirtualMachineParams(
 		config.ServiceOffering,
-		source,
+		state.Get("source").(string),
 		config.Zone,
 	)
 
