@@ -152,6 +152,25 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
 	}
 
+	// Test good - ISOChecksumURL GNU style with query parameters
+	i = testISOConfig()
+	i.ISOChecksum = ""
+	i.RawSingleISOUrl = "http://www.packer.io/the-OS.iso?stuff=boo"
+
+	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
+	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
+	warns, err = i.Prepare(nil)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if i.ISOChecksum != "bar0" {
+		t.Fatalf("should've found \"bar0\" got: %s", i.ISOChecksum)
+	}
 }
 
 func TestISOConfigPrepare_ISOChecksumType(t *testing.T) {
