@@ -64,16 +64,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&stepKeypair{
-			Debug:            b.config.PackerDebug,
-			DebugKeyPath:     fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
-			SSHAgentAuth:     b.config.Comm.SSHAgentAuth,
-			TemporaryKeyPair: b.config.TemporaryKeypair,
-			KeyPair:          b.config.Keypair,
-			PrivateKeyFile:   b.config.Comm.SSHPrivateKey,
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
+			KeyPair:              b.config.Keypair,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			TemporaryKeyPairName: b.config.TemporaryKeypairName,
 		},
 		&stepCreateInstance{
-			Debug: b.config.PackerDebug,
 			Ctx:   b.config.ctx,
+			Debug: b.config.PackerDebug,
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
