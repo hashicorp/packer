@@ -103,7 +103,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
-		return nil, true, fmt.Errorf("Error connecting to vSphere: %s", err)
+		return nil, false, fmt.Errorf("Error connecting to vSphere: %s", err)
 	}
 
 	state := new(multistep.BasicStateBag)
@@ -114,12 +114,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepChooseDatacenter{
 			Datacenter: p.config.Datacenter,
 		},
+		&stepCreateFolder{
+			Folder: p.config.Folder,
+		},
 		&stepFetchVm{
 			VMName: p.config.VMName,
 			Source: source,
-		},
-		&stepCreateFolder{
-			Folder: p.config.Folder,
 		},
 		&stepMarkAsTemplate{},
 		&stepMoveTemplate{
@@ -131,7 +131,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	runner.Run(state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
-		return nil, true, rawErr.(error)
+		return nil, false, rawErr.(error)
 	}
 	return artifact, true, nil
 }
