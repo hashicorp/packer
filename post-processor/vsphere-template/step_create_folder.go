@@ -36,18 +36,24 @@ func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 		for {
 			root, err = finder.Folder(context.Background(), filepath.ToSlash(filepath.Join(base, path)))
 			if err != nil {
-				_, folder := filepath.Split(path)
-				folders = append(folders, folder)
-				if i := strings.LastIndex(path, "/"); i == 0 {
-					root, err = finder.Folder(context.Background(), filepath.ToSlash(base))
-					if err != nil {
-						state.Put("error", err)
-						ui.Error(err.Error())
-						return multistep.ActionHalt
+				if _, ok := err.(*find.NotFoundError); ok {
+					_, folder := filepath.Split(path)
+					folders = append(folders, folder)
+					if i := strings.LastIndex(path, "/"); i == 0 {
+						root, err = finder.Folder(context.Background(), filepath.ToSlash(base))
+						if err != nil {
+							state.Put("error", err)
+							ui.Error(err.Error())
+							return multistep.ActionHalt
+						}
+						break
+					} else {
+						path = path[:i]
 					}
-					break
 				} else {
-					path = path[:i]
+					state.Put("error", err)
+					ui.Error(err.Error())
+					return multistep.ActionHalt
 				}
 			} else {
 				break
