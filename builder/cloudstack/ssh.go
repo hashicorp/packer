@@ -12,9 +12,8 @@ import (
 )
 
 func commHost(state multistep.StateBag) (string, error) {
-
-	ip, hasIp := state.Get("ipaddress").(string)
-	if !hasIp {
+	ip, hasIP := state.Get("ipaddress").(string)
+	if !hasIP {
 		return "", fmt.Errorf("Failed to retrieve IP address")
 	}
 
