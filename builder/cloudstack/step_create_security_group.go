@@ -51,13 +51,13 @@ func (s *stepCreateSecurityGroup) Run(state multistep.StateBag) multistep.StepAc
 	// Create Ingress rule
 	i := client.SecurityGroup.NewAuthorizeSecurityGroupIngressParams()
 	i.SetCidrlist(config.CIDRList)
-	if config.Project != "" {
-		i.SetProjectid(config.Project)
-	}
 	i.SetProtocol("TCP")
 	i.SetSecuritygroupid(sg.Id)
 	i.SetStartport(config.Comm.Port())
 	i.SetEndport(config.Comm.Port())
+	if config.Project != "" {
+		i.SetProjectid(config.Project)
+	}
 
 	_, err = client.SecurityGroup.AuthorizeSecurityGroupIngress(i)
 	if err != nil {
