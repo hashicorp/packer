@@ -12,14 +12,12 @@ import (
 )
 
 type stepKeypair struct {
-	Debug            bool
-	SSHAgentAuth     bool
-	DebugKeyPath     string
-	TemporaryKeyPair string
-	KeyPair          string
-	PrivateKeyFile   string
-
-	doCleanup bool
+	Debug                bool
+	DebugKeyPath         string
+	KeyPair              string
+	PrivateKeyFile       string
+	SSHAgentAuth         bool
+	TemporaryKeyPairName string
 }
 
 func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
@@ -50,19 +48,17 @@ func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	if s.TemporaryKeyPair == "" {
-		ui.Say("Not using temporary keypair")
+	if s.TemporaryKeyPairName == "" {
+		ui.Say("Not using a keypair")
 		state.Put("keypair", "")
 		return multistep.ActionContinue
 	}
 
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.TemporaryKeyPair))
-	p := client.SSH.NewCreateSSHKeyPairParams(
-		s.TemporaryKeyPair,
-	)
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.TemporaryKeyPairName))
 
+	p := client.SSH.NewCreateSSHKeyPairParams(s.TemporaryKeyPairName)
 	keypair, err := client.SSH.CreateSSHKeyPair(p)
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary keypair: %s", err)
@@ -78,10 +74,9 @@ func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPair))
+	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPairName))
 
-	// If we're in debug mode, output the private key to the working
-	// directory.
+	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
@@ -110,32 +105,29 @@ func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	// we created a temporary key, so remember to clean it up
-	s.doCleanup = true
-
 	// Set some state data for use in future steps
-	state.Put("keypair", s.TemporaryKeyPair)
+	state.Put("keypair", s.TemporaryKeyPairName)
 	state.Put("privateKey", keypair.Privatekey)
 
 	return multistep.ActionContinue
 }
 
 func (s *stepKeypair) Cleanup(state multistep.StateBag) {
-	if !s.doCleanup {
+	if s.TemporaryKeyPairName == "" {
 		return
 	}
 
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 
-	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPair))
+	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
 
 	_, err := client.SSH.DeleteSSHKeyPair(client.SSH.NewDeleteSSHKeyPairParams(
-		s.TemporaryKeyPair,
+		s.TemporaryKeyPairName,
 	))
 	if err != nil {
 		ui.Error(err.Error())
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPair))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
 	}
 }
