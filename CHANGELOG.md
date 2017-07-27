@@ -2,9 +2,11 @@
 
 ### IMPROVEMENTS:
 
-* builder/parallels: Remove soon to be removed --vmtype flag in createvm. 
-    [GH-5172]
 * builder/alicloud: Increase polling timeout. [GH-5148]
+* builder/parallels: Remove soon to be removed --vmtype flag in createvm.
+    [GH-5172]
+* core: Strip query parameters from ISO URLs when checking against a checksum
+    file. [GH-5181]
 
 ## 1.0.3 (July 17, 2017)
 
