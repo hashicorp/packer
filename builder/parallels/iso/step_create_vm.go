@@ -27,7 +27,6 @@ func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		"create", name,
 		"--distribution", config.GuestOSType,
 		"--dst", config.OutputDir,
-		"--vmtype", "vm",
 		"--no-hdd",
 	}
 
