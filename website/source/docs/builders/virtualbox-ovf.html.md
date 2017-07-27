@@ -65,9 +65,6 @@ builder.
 -   `source_path` (string) - The path to an OVF or OVA file that acts as the
     source of this build. It can also be a URL.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
