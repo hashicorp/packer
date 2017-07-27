@@ -18,13 +18,13 @@ type stepMoveTemplate struct {
 func (s *stepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	finder := state.Get("finder").(*find.Finder)
-	dc := state.Get("datacenter").(string)
+	dcPath := state.Get("dcPath").(string)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.Folder != "" {
 		ui.Say("Moving template...")
 
-		folder, err := finder.Folder(context.Background(), filepath.ToSlash(filepath.Join("/", dc, "vm", s.Folder)))
+		folder, err := finder.Folder(context.Background(), filepath.ToSlash(filepath.Join(dcPath, "vm", s.Folder)))
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
