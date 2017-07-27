@@ -1,7 +1,14 @@
+## UNRELEASED
+
+### IMPROVEMENTS:
+
+* builder/parallels: Remove soon to be removed --vmtype flag in createvm. 
+    [GH-5172]
+
 ## 1.0.3 (July 17, 2017)
 
-### IMRPOVEMENTS:
-* builder/Azure: Update to latest Azure SDK, enabling support for managed
+### IMPROVEMENTS:
+* builder/azure: Update to latest Azure SDK, enabling support for managed
     disks. [GH-4511]
 * builder/cloudstack: Add default cidr_list [ 0.0.0.0/0 ]. [GH-5125]
 * builder/cloudstack: Add support for ssh_agent_auth. [GH-5130]
