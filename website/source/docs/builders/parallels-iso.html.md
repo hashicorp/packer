@@ -85,9 +85,6 @@ builder.
     and "other". This can be omitted only if `parallels_tools_mode`
     is "disable".
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type

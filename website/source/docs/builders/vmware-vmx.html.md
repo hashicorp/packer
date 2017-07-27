@@ -56,9 +56,6 @@ builder.
 
 -   `source_path` (string) - Path to the source VMX file to clone.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
