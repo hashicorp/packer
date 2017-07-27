@@ -27,7 +27,7 @@ func (s *stepChooseDatacenter) Run(state multistep.StateBag) multistep.StepActio
 	}
 
 	finder.SetDatacenter(dc)
-	state.Put("datacenter", dc.Name())
+	state.Put("dcPath", dc.InventoryPath)
 	state.Put("finder", finder)
 	return multistep.ActionContinue
 }
