@@ -42,6 +42,7 @@ self-install. Still, the example serves to show the basic configuration:
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
+  "ssh_password": "packer",
   "shutdown_command": "shutdown -P now"
 }
 ```
@@ -81,6 +82,9 @@ builder.
     this is an HTTP URL, Packer will download it and cache it between runs.
 
 -   `ssh_username` (string) - The username to use to SSH into the machine once
+    the OS is installed.
+
+-   `ssh_password` (string) - The password to use to SSH into the machine once
     the OS is installed.
 
 ### Optional:
