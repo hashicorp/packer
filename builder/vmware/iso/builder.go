@@ -349,6 +349,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	return &Artifact{
 		builderId: builderId,
+		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
 	}, nil
