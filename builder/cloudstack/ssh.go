@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	packerssh "github.com/cstuntz/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 	"golang.org/x/crypto/ssh"

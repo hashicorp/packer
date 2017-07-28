@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 )

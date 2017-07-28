@@ -6,7 +6,7 @@ import (
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // Config of alicloud

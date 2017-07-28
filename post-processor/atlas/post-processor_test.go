@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 func TestPostProcessorConfigure(t *testing.T) {

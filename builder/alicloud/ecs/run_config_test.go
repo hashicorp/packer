@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/cstuntz/packer/helper/communicator"
 )
 
 func testConfig() *RunConfig {

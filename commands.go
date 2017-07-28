@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/version"
+	"github.com/cstuntz/packer/command"
+	"github.com/cstuntz/packer/version"
 	"github.com/mitchellh/cli"
 )
 

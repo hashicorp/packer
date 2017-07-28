@@ -3,9 +3,9 @@ package null
 import (
 	"log"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

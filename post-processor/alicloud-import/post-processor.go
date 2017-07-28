@@ -11,11 +11,11 @@ import (
 	packercommon "github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/denverdino/aliyungo/ram"
-	packerecs "github.com/hashicorp/packer/builder/alicloud/ecs"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	packerecs "github.com/cstuntz/packer/builder/alicloud/ecs"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/helper/config"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 const (

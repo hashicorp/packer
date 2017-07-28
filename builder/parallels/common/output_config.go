@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // OutputConfig contains the configuration for builder's output.

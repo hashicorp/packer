@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )

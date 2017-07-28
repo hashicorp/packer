@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 
-	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/cstuntz/packer/builder/azure/common/constants"
 
 	"github.com/mitchellh/multistep"
 )

@@ -3,8 +3,8 @@ package common
 import (
 	"time"
 
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // SSHConfig contains the configuration for SSH communicator.

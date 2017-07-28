@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 // These are the extensions of files and directories that are unnecessary for the function

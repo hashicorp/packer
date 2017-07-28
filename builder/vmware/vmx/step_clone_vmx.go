@@ -5,8 +5,8 @@ import (
 	"log"
 	"path/filepath"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
+	vmwcommon "github.com/cstuntz/packer/builder/vmware/common"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

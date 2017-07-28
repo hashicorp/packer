@@ -3,7 +3,7 @@ package chroot
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 	"os"
 	"os/exec"

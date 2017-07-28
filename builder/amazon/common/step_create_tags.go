@@ -7,9 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	retry "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	retry "github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 )
 

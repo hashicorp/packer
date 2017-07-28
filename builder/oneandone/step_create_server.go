@@ -3,7 +3,7 @@ package oneandone
 import (
 	"fmt"
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 	"strings"
 	"time"

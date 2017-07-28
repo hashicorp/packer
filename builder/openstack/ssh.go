@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	packerssh "github.com/cstuntz/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"

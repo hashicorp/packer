@@ -4,8 +4,8 @@
 package arm
 
 import (
-	"github.com/hashicorp/packer/builder/azure/common"
-	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/cstuntz/packer/builder/azure/common"
+	"github.com/cstuntz/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
 )
 

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

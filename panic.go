@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/panicwrap"
 )
 
@@ -20,7 +20,7 @@ A crash log has been placed at "crash.log" relative to your current
 working directory. It would be immensely helpful if you could please
 report the crash with Packer[1] so that we can fix this.
 
-[1]: https://github.com/hashicorp/packer/issues
+[1]: https://github.com/cstuntz/packer/issues
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!! PACKER CRASH !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 `

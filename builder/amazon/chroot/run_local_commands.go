@@ -3,9 +3,9 @@ package chroot
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/shell-local"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/post-processor/shell-local"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ctx interpolate.Context, ui packer.Ui) error {

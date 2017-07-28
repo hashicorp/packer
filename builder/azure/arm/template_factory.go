@@ -7,8 +7,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 
 	"fmt"
-	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/builder/azure/common/template"
+	"github.com/cstuntz/packer/builder/azure/common/constants"
+	"github.com/cstuntz/packer/builder/azure/common/template"
 )
 
 type templateFactoryFunc func(*Config) (*resources.Deployment, error)

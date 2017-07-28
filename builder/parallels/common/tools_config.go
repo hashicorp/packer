@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // These are the different valid mode values for "parallels_tools_mode" which

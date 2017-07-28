@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 	"github.com/masterzen/winrm"
 )
 

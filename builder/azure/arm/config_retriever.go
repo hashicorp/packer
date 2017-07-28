@@ -9,7 +9,7 @@ package arm
 
 import (
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/cstuntz/packer/builder/azure/common"
 )
 
 type configRetriever struct {

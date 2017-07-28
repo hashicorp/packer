@@ -4,10 +4,10 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/helper/config"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

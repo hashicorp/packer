@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 type ShutdownConfig struct {

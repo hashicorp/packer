@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	awscommon "github.com/cstuntz/packer/builder/amazon/common"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 )
 

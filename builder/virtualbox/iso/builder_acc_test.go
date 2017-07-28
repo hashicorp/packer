@@ -3,7 +3,7 @@ package iso
 import (
 	"testing"
 
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	builderT "github.com/cstuntz/packer/helper/builder/testing"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {

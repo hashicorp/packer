@@ -1,7 +1,7 @@
 package googlecompute
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/cstuntz/packer/helper/communicator"
 	"github.com/mitchellh/multistep"
 )
 

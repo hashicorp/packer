@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/common/uuid"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

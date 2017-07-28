@@ -8,8 +8,8 @@ import (
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	builderT "github.com/cstuntz/packer/helper/builder/testing"
+	"github.com/cstuntz/packer/packer"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {

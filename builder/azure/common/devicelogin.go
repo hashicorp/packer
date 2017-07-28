@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/hashicorp/packer/version"
+	"github.com/cstuntz/packer/version"
 	"github.com/mitchellh/go-homedir"
 )
 

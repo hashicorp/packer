@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/packer/communicator/winrm"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/communicator/winrm"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

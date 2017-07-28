@@ -8,7 +8,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 // An implementation of packer.Communicator where the communicator is actually

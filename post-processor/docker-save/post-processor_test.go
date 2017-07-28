@@ -2,7 +2,7 @@ package dockersave
 
 import (
 	"bytes"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"testing"
 )
 

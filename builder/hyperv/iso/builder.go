@@ -7,14 +7,14 @@ import (
 	"os"
 	"strings"
 
-	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
-	"github.com/hashicorp/packer/common"
-	powershell "github.com/hashicorp/packer/common/powershell"
-	"github.com/hashicorp/packer/common/powershell/hyperv"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	hypervcommon "github.com/cstuntz/packer/builder/hyperv/common"
+	"github.com/cstuntz/packer/common"
+	powershell "github.com/cstuntz/packer/common/powershell"
+	"github.com/cstuntz/packer/common/powershell/hyperv"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/helper/config"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 )
 

@@ -12,16 +12,16 @@ import (
 	"strings"
 	"time"
 
-	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
+	packerAzureCommon "github.com/cstuntz/packer/builder/azure/common"
 
-	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/builder/azure/common/lin"
+	"github.com/cstuntz/packer/builder/azure/common/constants"
+	"github.com/cstuntz/packer/builder/azure/common/lin"
 
 	"github.com/Azure/azure-sdk-for-go/arm/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
-	packerCommon "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
+	packerCommon "github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hashicorp/packer/common/uuid"
-	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/common/uuid"
+	"github.com/cstuntz/packer/helper/communicator"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // RunConfig contains configuration for running an instance from a source

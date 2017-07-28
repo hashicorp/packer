@@ -2,7 +2,7 @@ package triton
 
 import (
 	"bytes"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 	"testing"
 )

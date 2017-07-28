@@ -2,7 +2,7 @@ package arm
 
 import (
 	"github.com/approvals/go-approval-tests"
-	"github.com/hashicorp/packer/common/json"
+	"github.com/cstuntz/packer/common/json"
 	"strings"
 	"testing"
 )

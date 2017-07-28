@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/cstuntz/packer/helper/communicator"
 )
 
 func testSSHConfig() *SSHConfig {

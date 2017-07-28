@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // HTTPConfig contains configuration for the local HTTP Server

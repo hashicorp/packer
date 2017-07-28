@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/packer"
+	parallelscommon "github.com/cstuntz/packer/builder/parallels/common"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

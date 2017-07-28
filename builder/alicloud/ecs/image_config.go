@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/denverdino/aliyungo/common"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template/interpolate"
 	"regexp"
 	"strings"
 )

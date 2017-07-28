@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 type AWSProvider struct{}

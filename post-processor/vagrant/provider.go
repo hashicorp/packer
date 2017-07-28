@@ -1,7 +1,7 @@
 package vagrant
 
 import (
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 // Provider is the interface that each provider must implement in order

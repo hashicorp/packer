@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/template"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/template"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a

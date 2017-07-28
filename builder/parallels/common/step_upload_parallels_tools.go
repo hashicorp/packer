@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 )
 

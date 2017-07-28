@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dylanmei/winrmtest"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/packer"
 )
 
 const PAYLOAD = "stuff"

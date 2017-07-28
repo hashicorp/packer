@@ -11,9 +11,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/cstuntz/packer/command"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/packer/plugin"
 	"github.com/kardianos/osext"
 )
 

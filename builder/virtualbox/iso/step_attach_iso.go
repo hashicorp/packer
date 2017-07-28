@@ -2,8 +2,8 @@ package iso
 
 import (
 	"fmt"
-	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/hashicorp/packer/packer"
+	vboxcommon "github.com/cstuntz/packer/builder/virtualbox/common"
+	"github.com/cstuntz/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 

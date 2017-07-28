@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder/amazon/common"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"github.com/hashicorp/packer/packer"
+	"github.com/cstuntz/packer/builder/amazon/common"
+	builderT "github.com/cstuntz/packer/helper/builder/testing"
+	"github.com/cstuntz/packer/packer"
 )
 
 type TFBuilder struct {

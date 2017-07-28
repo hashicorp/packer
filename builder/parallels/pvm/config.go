@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	parallelscommon "github.com/cstuntz/packer/builder/parallels/common"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/helper/config"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.

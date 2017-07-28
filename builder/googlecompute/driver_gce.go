@@ -17,9 +17,9 @@ import (
 
 	"google.golang.org/api/compute/v1"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
+	"github.com/cstuntz/packer/common"
+	"github.com/cstuntz/packer/packer"
+	"github.com/cstuntz/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
