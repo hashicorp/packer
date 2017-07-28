@@ -142,7 +142,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vmwcommon.NewLocalArtifact(b.config.OutputDir)
+	return vmwcommon.NewLocalArtifact(b.config.VMName, b.config.OutputDir)
 }
 
 // Cancel.
