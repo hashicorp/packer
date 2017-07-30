@@ -1,5 +1,0 @@
-FROM golang:1.8.3
-ARG GLIDE_VERSION=0.12.3
-
-RUN wget -nv https://github.com/Masterminds/glide/releases/download/v$GLIDE_VERSION/glide-v$GLIDE_VERSION-linux-amd64.tar.gz -O- | \
-tar xzf - -C /usr/local/bin/ --strip-components=1 linux-amd64/glide
