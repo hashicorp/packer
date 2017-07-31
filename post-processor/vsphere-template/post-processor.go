@@ -107,6 +107,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Error connecting to vSphere: %s", err)
 	}
 
+	defer c.Logout(context.Background())
+
 	state := new(multistep.BasicStateBag)
 	state.Put("ui", ui)
 	state.Put("client", c)
