@@ -55,6 +55,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"host":     &p.config.Host,
 		"username": &p.config.Username,
 		"password": &p.config.Password,
+		"vm_name":  &p.config.VMName,
 	}
 
 	for key, ptr := range vc {

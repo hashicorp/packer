@@ -39,16 +39,11 @@ each category, the available configuration keys are alphabetized.
 
 Required:
 
--   `host` (string) - The vSphere host that contains the VM built by the vmware-iso.
-    
--   `insecure` (boolean) - If it's true Skip verification of server certificate. 
-    Default is false    
+-   `host` (string) - The vSphere host that contains the VM built by the vmware-iso. 
 
--   `password` (string) - Password to use to authenticate to the
-    vSphere endpoint.
+-   `password` (string) - Password to use to authenticate to the vSphere endpoint.
 
--   `username` (string) - The username to use to authenticate to the
-    vSphere endpoint.
+-   `username` (string) - The username to use to authenticate to the vSphere endpoint.
 
 -   `vm_name` (string) - The name of the VM once it is uploaded.
 
@@ -57,3 +52,5 @@ Optional:
 -   `datacenter` (string) - If you have more than one, you will need to specify which one the ESXi used.
 
 -   `folder` (string) - Target path where the template will be created. 
+
+-   `insecure` (boolean) - If it's true skip verification of server certificate. Default is false  

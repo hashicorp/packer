@@ -2,7 +2,7 @@ package vsphere_template
 
 import (
 	"context"
-	"path/filepath"
+	"path"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
@@ -24,7 +24,7 @@ func (s *stepMoveTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	if s.Folder != "" {
 		ui.Say("Moving template...")
 
-		folder, err := finder.Folder(context.Background(), filepath.ToSlash(filepath.Join(dcPath, "vm", s.Folder)))
+		folder, err := finder.Folder(context.Background(), path.Join(dcPath, "vm", s.Folder))
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
