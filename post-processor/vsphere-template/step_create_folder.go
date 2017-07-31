@@ -3,8 +3,7 @@ package vsphere_template
 import (
 	"context"
 	"fmt"
-	"path/filepath"
-	"strings"
+	"path"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
@@ -24,8 +23,8 @@ func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 	if s.Folder != "" {
 		ui.Say("Creating or checking destination folders...")
 
-		base := filepath.Join(dcPath, "vm")
-		path := filepath.ToSlash(filepath.Join(base, s.Folder))
+		base := path.Join(dcPath, "vm")
+		fullPath := path.Join(base, s.Folder)
 		si := object.NewSearchIndex(cli.Client)
 
 		var folders []string
@@ -36,23 +35,24 @@ func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
 		// If we don't find it, we save the folder name and continue with the previous path
 		// The iteration ends when we find an existing path otherwise it throws error
 		for {
-			ref, err = si.FindByInventoryPath(context.Background(), path)
+			ref, err = si.FindByInventoryPath(context.Background(), fullPath)
 			if err != nil {
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
 			if ref == nil {
-				_, folder := filepath.Split(path)
-				folders = append(folders, folder)
-				path = path[:strings.LastIndex(path, "/")]
+				dir, folder := path.Split(fullPath)
+				fullPath = path.Clean(dir)
 
-				if path == dcPath {
-					err = fmt.Errorf("vSphere base path %s not found", filepath.ToSlash(base))
+				if fullPath == dcPath {
+					err = fmt.Errorf("vSphere base path %s not found", base)
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
 				}
+
+				folders = append(folders, folder)
 			} else {
 				break
 			}
