@@ -11,21 +11,23 @@ _packer_cmds=(
 )
 
 __build() {
-    _arguments \
-      '-debug[Debug mode enabled for builds]' \
-      '-force[Force a build to continue if artifacts exist, deletes existing artifacts]' \
-      '-machine-readable[Machine-readable output]' \
-      '-except=[(foo,bar,baz) Build all builds other than these]' \
-      '-only=[(foo,bar,baz) Only build the given builds by name]' \
-      '-parallel=[(false) Disable parallelization (on by default)]' \
-      '-var[("key=value") Variable for templates, can be used multiple times.]' \
-      '-var-file=[(path) JSON file containing user variables.]'
+  _arguments \
+    '-debug[Debug mode enabled for builds]' \
+    '-force[Force a build to continue if artifacts exist, deletes existing artifacts]' \
+    '-machine-readable[Machine-readable output]' \
+    '-except=[(foo,bar,baz) Build all builds other than these]' \
+    '-only=[(foo,bar,baz) Only build the given builds by name]' \
+    '-parallel=[(false) Disable parallelization (on by default)]' \
+    '-var[("key=value") Variable for templates, can be used multiple times.]' \
+    '-var-file=[(path) JSON file containing user variables.]'
+  _files -g "*.json"
 }
 
 
 __inspect() {
   _arguments \
     '-machine-readable[Machine-readable output]' 
+  _files -g "*.json"
 }
 
 __push() {
@@ -34,15 +36,17 @@ __push() {
     '-token=[(<token>) Access token to use to upload.]' \
     '-var[("key=value") Variable for templates, can be used multiple times.]' \
     '-var-file=[(path) JSON file containing user variables.]'
+  _files -g "*.json"
 }
 
 __validate() {
-    _arguments \
-      '-syntax-only[Only check syntax. Do not verify config of the template.]' \
-      '-except=[(foo,bar,baz) Validate all builds other than these]' \
-      '-only=[(foo,bar,baz) Validate only these builds]' \
-      '-var[("key=value") Variable for templates, can be used multiple times.]' \
-      '-var-file=[(path) JSON file containing user variables.]'
+  _arguments \
+    '-syntax-only[Only check syntax. Do not verify config of the template.]' \
+    '-except=[(foo,bar,baz) Validate all builds other than these]' \
+    '-only=[(foo,bar,baz) Validate only these builds]' \
+    '-var[("key=value") Variable for templates, can be used multiple times.]' \
+    '-var-file=[(path) JSON file containing user variables.]'
+  _files -g "*.json"
 }
 
 
