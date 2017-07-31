@@ -7,6 +7,7 @@
     [GH-5172]
 * core: Strip query parameters from ISO URLs when checking against a checksum
     file. [GH-5181]
+* contrib: add json files to zsh completion. [GH-5195]
 
 ## 1.0.3 (July 17, 2017)
 
