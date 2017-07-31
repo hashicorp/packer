@@ -305,12 +305,6 @@
 			"versionExact": "v1.10.14"
 		},
 		{
-			"path": "github.com/aws/aws-sdk-go/private/endpoints",
-			"revision": "v1.10.14",
-			"version": "v1.10.14",
-			"versionExact": "v1.10.14"
-		},
-		{
 			"checksumSHA1": "wk7EyvDaHwb5qqoOP/4d3cV0708=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/private/protocol",
