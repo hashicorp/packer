@@ -135,8 +135,22 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	var instanceId string
+	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error tagging source instance: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	if spotPrice == "" || spotPrice == "0" {
+
+		var runTag ec2.TagSpecification
+		runTag.SetResourceType("instance")
+		runTag.SetTags(ec2Tags)
+
+		runTags := []*ec2.TagSpecification{&runTag}
+
 		runOpts := &ec2.RunInstancesInput{
 			ImageId:             &s.SourceAMI,
 			InstanceType:        &s.InstanceType,
@@ -147,6 +161,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 			EbsOptimized:        &s.EbsOptimized,
+			TagSpecifications:   runTags,
 		}
 
 		if keyName != "" {
@@ -281,14 +296,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	ui.Say("Adding tags to source instance")
 	if _, exists := s.Tags["Name"]; !exists {
 		s.Tags["Name"] = "Packer Builder"
-	}
-
-	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
-	if err != nil {
-		err := fmt.Errorf("Error tagging source instance: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
 	}
 
 	ReportTags(ui, ec2Tags)
