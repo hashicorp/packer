@@ -10,8 +10,9 @@ import (
 )
 
 type StepCreateTempDir struct {
-	TempPath string
-	dirPath  string
+	TempPath    string
+	VhdTempPath string
+	dirPath     string
 }
 
 func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
@@ -33,6 +34,22 @@ func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
 
 	s.dirPath = packerTempDir
 	state.Put("packerTempDir", packerTempDir)
+
+	if s.VhdTempPath == "" {
+		// Fall back to regular temp dir if no separate VHD temp dir set.
+		state.Put("packerVhdTempDir", packerTempDir)
+	} else {
+		packerVhdTempDir, err := ioutil.TempDir(s.VhdTempPath, "packerhv-vhd")
+		if err != nil {
+			err := fmt.Errorf("Error creating temporary VHD directory: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		s.dirPath = packerVhdTempDir
+		state.Put("packerVhdTempDir", packerVhdTempDir)
+	}
 
 	//	ui.Say("packerTempDir = '" + packerTempDir + "'")
 

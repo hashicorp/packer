@@ -187,27 +187,27 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64, switchName string, generation uint) error {
+func CreateVirtualMachine(vmName string, path string, vhdRoot string, ram int64, diskSize int64, switchName string, generation uint) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+param([string]$vmName, [string]$path, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
+		err := ps.Run(script, vmName, path, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
 		return err
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+param([string]$vmName, [string]$path, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
+		err := ps.Run(script, vmName, path, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
 
 		if err != nil {
 			return err
