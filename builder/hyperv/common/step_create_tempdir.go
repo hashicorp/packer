@@ -10,9 +10,12 @@ import (
 )
 
 type StepCreateTempDir struct {
+	// The user-supplied root directores into which we create subdirectories.
 	TempPath    string
 	VhdTempPath string
-	dirPath     string
+	// The subdirectories with the randomly generated name.
+	dirPath    string
+	vhdDirPath string
 }
 
 func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
@@ -47,7 +50,7 @@ func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		s.dirPath = packerVhdTempDir
+		s.vhdDirPath = packerVhdTempDir
 		state.Put("packerVhdTempDir", packerVhdTempDir)
 	}
 
@@ -57,17 +60,25 @@ func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepCreateTempDir) Cleanup(state multistep.StateBag) {
-	if s.dirPath == "" {
-		return
-	}
-
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deleting temporary directory...")
+	if s.dirPath != "" {
+		ui.Say("Deleting temporary directory...")
 
-	err := os.RemoveAll(s.dirPath)
+		err := os.RemoveAll(s.dirPath)
 
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting temporary directory: %s", err))
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting temporary directory: %s", err))
+		}
+	}
+
+	if s.vhdDirPath != "" && s.dirPath != s.vhdDirPath {
+		ui.Say("Deleting temporary VHD directory...")
+
+		err := os.RemoveAll(s.vhdDirPath)
+
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting temporary VHD directory: %s", err))
+		}
 	}
 }
