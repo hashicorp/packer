@@ -51,6 +51,23 @@ func CopyContents(dst, src string) error {
 	return nil
 }
 
+// Creates a (hard) link to a file, ensuring that all parent directories also exist.
+func LinkFile(dst, src string) error {
+	dstDir, _ := filepath.Split(dst)
+	if dstDir != "" {
+		err := os.MkdirAll(dstDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := os.Link(src, dst); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // DirToBox takes the directory and compresses it into a Vagrant-compatible
 // box. This function does not perform checks to verify that dir is
 // actually a proper box. This is an expected precondition.
