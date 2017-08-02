@@ -24,7 +24,7 @@ It is recommended that you familiarise yourself with the
 [Key Concepts and Terminology](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Concepts/concepts.htm)
 prior to using this builder if you have not done so already.
 
-The builder does *not* manage images. Once it creates an image, it is up to you
+The builder _does not_ manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
 ## Authorization
@@ -43,13 +43,7 @@ In addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
- -  `access_cfg_file` (string) - The path to the
-    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm).
-    Defaults to `$HOME/.oraclebmc/config`.
-
- -  `access_cfg_file_account` (string) - The specific account in the
-    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
-    to use. Defaults to `DEFAULT`.
+### Required
 
  -  `availability_domain` (string) - The name of the
     [Availability Domain](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/regions.htm)
@@ -78,23 +72,6 @@ builder.
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
- -  `image_name` (string) - The name to assign to the resulting custom image.
-
- -  `key_file` (string) - Full path and filename of the private key. Overrides
-    value provided by the
-    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
-    if present.
-
- -  `pass_phrase` (string) - Pass phrase used to decrypt the private key used
-    to sign requests to the BMCS API. Overrides value provided by the
-    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
-    if present.
-
- -  `region` (string) - An Oracle Bare Metal Cloud Services region. Overrides
-    value provided by the
-    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
-    if present.
-
  -  `shape` (string) - The template that determines the number of
     CPUs, amount of memory, and other resources allocated to a newly created
     instance.
@@ -113,6 +90,34 @@ builder.
     Note: the subnet must be configured to allow access via your chosen
     [communicator](/docs/templates/communicator.html) (communicator defaults to
     [SSH tcp/22](/docs/templates/communicator.html#ssh_port)).
+
+
+### Optional
+
+ -  `access_cfg_file` (string) - The path to the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm).
+    Defaults to `$HOME/.oraclebmc/config`.
+
+ -  `access_cfg_file_account` (string) - The specific account in the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+    to use. Defaults to `DEFAULT`.
+
+ -  `image_name` (string) - The name to assign to the resulting custom image.
+
+ -  `key_file` (string) - Full path and filename of the private key. Overrides
+    value provided by the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+    if present.
+
+ -  `pass_phrase` (string) - Pass phrase used to decrypt the private key used
+    to sign requests to the BMCS API. Overrides value provided by the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+    if present.
+
+ -  `region` (string) - An Oracle Bare Metal Cloud Services region. Overrides
+    value provided by the
+    [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
+    if present.
 
  -  `tenancy_ocid` (string) - The OCID of your tenancy. Overrides value provided
     by the
@@ -135,7 +140,8 @@ substituted with the letter `a` and OCIDS have been shortened for brevity.
   "compartment_ocid": "ocid1.compartment.oc1..aaa",
   "availability_domain": "aaaa:PHX-AD-1",
   "subnet_ocid": "ocid1.subnet.oc1..aaa",
-  "base_image_ocid": "ocid1.image.oc1..aaa",
+  "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
+  "ssh_username": "opc",
   "shape": "VM.Standard1.1",
   "image_name": "ExampleImage"
 }
