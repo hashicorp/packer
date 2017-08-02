@@ -19,22 +19,33 @@ func commHost(state multistep.StateBag) (string, error) {
 	return ipAddress, nil
 }
 
-func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
-	c := state.Get("config").(*Config)
-	privateKey := state.Get("privateKey").(string)
+// SSHConfig returns a function that can be used for the SSH communicator
+// config for connecting to the instance created over SSH using the private key
+// or password.
+func SSHConfig(username, password string) func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		privateKey, hasKey := state.GetOk("privateKey")
+		if hasKey {
 
-	signer, err := ssh.ParsePrivateKey([]byte(privateKey))
-	if err != nil {
-		return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			return &ssh.ClientConfig{
+				User:            username,
+				Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			}, nil
+
+		}
+
+		return &ssh.ClientConfig{
+			User:            username,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Auth: []ssh.AuthMethod{
+				ssh.Password(password),
+				ssh.KeyboardInteractive(packerssh.PasswordKeyboardInteractive(password)),
+			},
+		}, nil
 	}
-
-	return &ssh.ClientConfig{
-		User: c.Comm.SSHUsername,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
-			ssh.Password(c.Comm.SSHPassword),
-			ssh.KeyboardInteractive(
-				packerssh.PasswordKeyboardInteractive(c.Comm.SSHPassword)),
-		},
-	}, nil
 }

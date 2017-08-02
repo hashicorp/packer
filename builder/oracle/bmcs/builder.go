@@ -56,16 +56,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&stepCreateSSHKey{
-			Debug:        b.config.PackerDebug,
-			DebugKeyPath: fmt.Sprintf("bmc_%s.pem", b.config.PackerBuildName),
+		&stepKeyPair{
+			Debug:          b.config.PackerDebug,
+			DebugKeyPath:   fmt.Sprintf("bmcs_%s.pem", b.config.PackerBuildName),
+			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
 		},
 		&stepCreateInstance{},
 		&stepInstanceInfo{},
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
+			Config: &b.config.Comm,
+			Host:   commHost,
+			SSHConfig: SSHConfig(
+				b.config.Comm.SSHUsername,
+				b.config.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
 		&stepImage{},

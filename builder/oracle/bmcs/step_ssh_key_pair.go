@@ -12,6 +12,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"runtime"
 
@@ -20,17 +21,41 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type stepCreateSSHKey struct {
-	Debug        bool
-	DebugKeyPath string
+type stepKeyPair struct {
+	Debug          bool
+	DebugKeyPath   string
+	PrivateKeyFile string
 }
 
-func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.PrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		if err != nil {
+			err = fmt.Errorf("Error loading configured private key file: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+		key, err := ssh.ParsePrivateKey(privateKeyBytes)
+		if err != nil {
+			err = fmt.Errorf("Error parsing 'ssh_private_key_file': %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+		state.Put("publicKey", string(ssh.MarshalAuthorizedKey(key.PublicKey())))
+		state.Put("privateKey", string(privateKeyBytes))
+
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Creating temporary ssh key for instance...")
 
-	priv, err := rsa.GenerateKey(rand.Reader, 2014)
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		err = fmt.Errorf("Error creating temporary SSH key: %s", err)
 		ui.Error(err.Error())
@@ -40,11 +65,7 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 
 	// ASN.1 DER encoded form
 	privDer := x509.MarshalPKCS1PrivateKey(priv)
-	privBlk := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   privDer,
-	}
+	privBlk := pem.Block{Type: "RSA PRIVATE KEY", Headers: nil, Bytes: privDer}
 
 	// Set the private key in the statebag for later
 	state.Put("privateKey", string(pem.EncodeToMemory(&privBlk)))
@@ -61,7 +82,8 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
 	state.Put("publicKey", pubSSHFormat)
 
-	// If we're in debug mode, output the private key to the working directory.
+	// If we're in debug mode, output the private key to the working
+	// directory.
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
@@ -95,6 +117,6 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
+func (s *stepKeyPair) Cleanup(state multistep.StateBag) {
 	// Nothing to do
 }
