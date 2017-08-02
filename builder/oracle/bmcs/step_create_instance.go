@@ -26,7 +26,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	instanceID, err := driver.CreateInstance(publicKey)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Problem creating instance: %s", err))
+		err = fmt.Errorf("Problem creating instance: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
@@ -36,9 +38,10 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Say("Waiting for instance to enter 'RUNNING' state...")
 
-	err = driver.WaitForInstanceState(instanceID, []string{"STARTING", "PROVISIONING"}, "RUNNING")
-	if err != nil {
-		state.Put("error", fmt.Errorf("Error waiting for instance to start:  %s", err))
+	if err = driver.WaitForInstanceState(instanceID, []string{"STARTING", "PROVISIONING"}, "RUNNING"); err != nil {
+		err = fmt.Errorf("Error waiting for instance to start: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
@@ -60,13 +63,17 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui.Say(fmt.Sprintf("Terminating instance (%s)...", id))
 
 	if err := driver.TerminateInstance(id); err != nil {
-		state.Put("error", fmt.Sprintf("Error terminating instance. Please terminate manually: %s", err))
+		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return
 	}
 
 	err := driver.WaitForInstanceState(id, []string{"TERMINATING"}, "TERMINATED")
 	if err != nil {
-		state.Put("error", fmt.Sprintf("Error terminating instance. Please terminate manually: %s", err))
+		err = fmt.Errorf("Error terminating instance. Please terminate manually: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return
 	}
 
