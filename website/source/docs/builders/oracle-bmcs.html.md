@@ -67,8 +67,8 @@ builder.
  -  `compartment_ocid` (string) - The OCID of the
     [compartment](https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/choosingcompartments.htm)
 
- -  `fingerprint` (string) - Fingerprint for the key pair being used. Overrides
-    value provided by the
+ -  `fingerprint` (string) - Fingerprint for the BMCS API signing key.
+    Overrides value provided by the
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
@@ -104,13 +104,13 @@ builder.
 
  -  `image_name` (string) - The name to assign to the resulting custom image.
 
- -  `key_file` (string) - Full path and filename of the private key. Overrides
-    value provided by the
+ -  `key_file` (string) - Full path and filename of the BMCS API signing key.
+    Overrides value provided by the
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
- -  `pass_phrase` (string) - Pass phrase used to decrypt the private key used
-    to sign requests to the BMCS API. Overrides value provided by the
+ -  `pass_phrase` (string) - Pass phrase used to decrypt the BMCS API signing
+    key. Overrides value provided by the
     [BMCS config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
