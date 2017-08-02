@@ -130,10 +130,7 @@ func TestConfig(t *testing.T) {
 
 	// Test the correct errors are produced when required template keys are
 	// omitted.
-	requiredKeys := []string{
-		"availability_domain", "base_image_ocid", "shape",
-		"image_name", "subnet_ocid",
-	}
+	requiredKeys := []string{"availability_domain", "base_image_ocid", "shape", "subnet_ocid"}
 	for _, k := range requiredKeys {
 		t.Run(k+"_required", func(t *testing.T) {
 			raw := testConfig(cfgFile)
@@ -146,6 +143,20 @@ func TestConfig(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("ImageNameDefaultedIfEmpty", func(t *testing.T) {
+		raw := testConfig(cfgFile)
+		delete(raw, "image_name")
+
+		c, errs := NewConfig(raw)
+		if errs != nil {
+			t.Errorf("Unexpected error(s): %s", errs)
+		}
+
+		if !strings.Contains(c.ImageName, "packer-") {
+			t.Errorf("got default ImageName %q, want image name 'packer-{{timestamp}}'", c.ImageName)
+		}
+	})
 
 	// Test that AccessCfgFile properties are overridden by their
 	// corosponding template keys.
