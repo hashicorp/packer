@@ -1,0 +1,55 @@
+#
+# REDIRECTS FILE
+#
+# This is a sample redirect file. Redirects allow individual projects to add
+# their own redirect rules in a declarative manner using Fastly edge
+# dictionaries.
+#
+# FORMAT
+#
+# Redirects are in the format. There must be at least one space between the
+# original path and the new path, and there must be exactly two entries per
+# line.
+#
+#     /original-path    /new-path
+#
+# GLOB MATCHING
+#
+# Because of the way lookup tables work, there is no support for glob matching.
+# Fastly does not provide a way to iterate through the lookup table, so it is
+# not possible to run through the table and find anything that matches. As such
+# URLs must match directly.
+#
+# More complex redirects are possible, but must be added directly to the
+# configuration. Please contact the release engineering team for assistance.
+#
+# DELETING
+#
+# Deleting items is not supported at this time. To delete an item, contact the
+# release engineering team and they will delete the dictionary item.
+#
+# MISC
+#
+# - Blank lines are ignored
+# - Comments are hash-style
+# - URLs are limited to 256 characters
+# - Items are case-sensitive (please use all lowercase)
+#
+
+/docs/installation.html                         /docs/install/index.html
+/docs/command-line/machine-readable.html        /docs/commands/index.html
+/docs/command-line/introduction.html            /docs/commands/index.html
+/docs/templates/introduction.html               /docs/templates/index.html
+/docs/builders/azure-arm.html                   /docs/builders/azure.html
+/docs/templates/veewee-to-packer.html           /guides/veewee-to-packer.html
+/docs/extend/developing-plugins.html            /docs/extending/plugins.html
+/docs/extending/developing-plugins.html         /docs/extending/plugins.html
+/docs/extend/builder.html                       /docs/extending/custom-builders.html
+/docs/getting-started/setup.html                /docs/getting-started/install.html
+/docs/other/community.html                      /downloads-community.html
+/community                                      /community.html
+/community/index.html                           /community.html
+/docs/other/environmental-variables.html        /docs/other/environment-variables.html
+/docs/platforms.html                            /docs/builders/index.html
+/intro/platforms.html                           /docs/builders/index.html
+/docs/templates/configuration-templates.html    /docs/templates/engine.html
