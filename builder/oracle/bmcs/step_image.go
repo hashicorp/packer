@@ -26,13 +26,17 @@ func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	image, err := driver.CreateImage(instanceID)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error creating image from instance: %s", err))
+		err = fmt.Errorf("Error creating image from instance: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	err = driver.WaitForImageCreation(image.ID)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error waiting for image creation to finish: %s", err))
+		err = fmt.Errorf("Error waiting for image creation to finish: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 

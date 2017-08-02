@@ -24,7 +24,9 @@ func (s *stepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	ip, err := driver.GetInstanceIP(id)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error getting instance's public IP: %s", err))
+		err = fmt.Errorf("Error getting instance's public IP: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
