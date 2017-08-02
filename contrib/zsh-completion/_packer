@@ -1,70 +1,66 @@
-#compdef packer
-
-local -a _packer_cmds
-_packer_cmds=(
+_packer () {
+  local -a sub_commands && sub_commands=(
     'build:Build image(s) from template'
     'fix:Fixes templates from old versions of packer'
     'inspect:See components of a template'
     'push:Push template files to a Packer build service'
     'validate:Check that a template is valid'
     'version:Prints the Packer version'
-)
+  )
 
-__build() {
-  _arguments \
-    '-debug[Debug mode enabled for builds]' \
-    '-force[Force a build to continue if artifacts exist, deletes existing artifacts]' \
-    '-machine-readable[Machine-readable output]' \
-    '-except=[(foo,bar,baz) Build all builds other than these]' \
-    '-only=[(foo,bar,baz) Only build the given builds by name]' \
-    '-parallel=[(false) Disable parallelization (on by default)]' \
-    '-var[("key=value") Variable for templates, can be used multiple times.]' \
+  local -a build_arguments && build_arguments=(
+    '-debug[Debug mode enabled for builds]'
+    '-force[Force a build to continue if artifacts exist, deletes existing artifacts]'
+    '-machine-readable[Machine-readable output]'
+    '-except=[(foo,bar,baz) Build all builds other than these]'
+    '-only=[(foo,bar,baz) Only build the given builds by name]'
+    '-parallel=[(false) Disable parallelization (on by default)]'
+    '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON file containing user variables.]'
-  _files -g "*.json"
-}
-
-
-__inspect() {
-  _arguments \
+    '(-)*:files:_files -g "*.json"'
+  )
+  
+  local -a inspect_arguments && inspect_arguments=(
     '-machine-readable[Machine-readable output]' 
-  _files -g "*.json"
-}
+    '(-)*:files:_files -g "*.json"'
+  )
 
-__push() {
-  _arguments \
-    '-name=[(<name>) The destination build in Atlas.]' \
-    '-token=[(<token>) Access token to use to upload.]' \
-    '-var[("key=value") Variable for templates, can be used multiple times.]' \
+  local -a push_arguments && push_arguments=(
+    '-name=[(<name>) The destination build in Atlas.]'
+    '-token=[(<token>) Access token to use to upload.]'
+    '-var[("key=value") Variable for templates, can be used multiple times.]'
+    '-var-file=[(path) JSON file containing user variables.]' 
+    '(-)*:files:_files -g "*.json"'
+  )
+
+  local -a validate_arguments && validate_arguments=(
+    '-syntax-only[Only check syntax. Do not verify config of the template.]'
+    '-except=[(foo,bar,baz) Validate all builds other than these]'
+    '-only=[(foo,bar,baz) Validate only these builds]'
+    '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON file containing user variables.]'
-  _files -g "*.json"
+    '(-)*:files:_files -g "*.json"'
+  )
+
+  _arguments -C \
+    ':command:->command' \
+    '*::options:->options'
+
+  case $state in
+      command)
+        _describe -t commands 'command' sub_commands ;;
+      options)
+        case $line[1] in
+          build)
+            _arguments -s -S : $build_arguments ;;
+          inspect)
+            _arguments -s -S : $inspect_arguments ;;
+          push)
+            _arguments -s -S : $push_arguments ;;
+          validate)
+            _arguments -s -S : $validate_arguments ;;
+        esac
+      ;;
+  esac
 }
-
-__validate() {
-  _arguments \
-    '-syntax-only[Only check syntax. Do not verify config of the template.]' \
-    '-except=[(foo,bar,baz) Validate all builds other than these]' \
-    '-only=[(foo,bar,baz) Validate only these builds]' \
-    '-var[("key=value") Variable for templates, can be used multiple times.]' \
-    '-var-file=[(path) JSON file containing user variables.]'
-  _files -g "*.json"
-}
-
-
-_arguments '*:: :->command'
-
-if (( CURRENT == 1 )); then
-  _describe -t commands "packer command" _packer_cmds
-  return
-fi
-
-local -a _command_args
-case "$words[1]" in
-  build)
-    __build ;;
-  inspect)
-    __inspect ;;
-  push)
-    __push ;;
-  validate)
-    __validate ;;
-esac
+_packer "$@"
