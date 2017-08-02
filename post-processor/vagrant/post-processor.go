@@ -38,6 +38,7 @@ type Config struct {
 	OutputPath          string   `mapstructure:"output"`
 	Override            map[string]interface{}
 	VagrantfileTemplate string `mapstructure:"vagrantfile_template"`
+	TempPath            string `mapstructure:"temp_path"`
 
 	ctx interpolate.Context
 }
@@ -88,7 +89,7 @@ func (p *PostProcessor) PostProcessProvider(name string, provider Provider, ui p
 	}
 
 	// Create a temporary directory for us to build the contents of the box in
-	dir, err := ioutil.TempDir("", "packer")
+	dir, err := ioutil.TempDir(config.TempPath, "packer")
 	if err != nil {
 		return nil, false, err
 	}
