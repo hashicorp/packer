@@ -188,8 +188,13 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	}
 
 	if c.ImageName == "" {
-		errs = packer.MultiErrorAppend(
-			errs, errors.New("'image_name' must be specified"))
+		name, err := interpolate.Render("packer-{{timestamp}}", nil)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("unable to parse image name: %s", err))
+		} else {
+			c.ImageName = name
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
