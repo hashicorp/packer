@@ -1,3 +1,5 @@
+#compdef packer
+
 _packer () {
   local -a sub_commands && sub_commands=(
     'build:Build image(s) from template'
