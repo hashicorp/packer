@@ -67,8 +67,7 @@ The SSH communicator has the following options:
 -   `ssh_bastion_password` (string) - The password to use to authenticate
     with the bastion host.
 
--   `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to
-    1.  
+-   `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to 1.  
 
 -   `ssh_bastion_private_key_file` (string) - A private key file to use
     to authenticate with the bastion host.
