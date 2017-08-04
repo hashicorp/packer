@@ -37,16 +37,25 @@ type DescribeVRoutersResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/vrouter&describevrouters
 func (client *Client) DescribeVRouters(args *DescribeVRoutersArgs) (vrouters []VRouterSetType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeVRoutersResponse{}
-
-	err = client.Invoke("DescribeVRouters", args, &response)
-
+	response, err := client.DescribeVRoutersWithRaw(args)
 	if err == nil {
 		return response.VRouters.VRouter, &response.PaginationResult, nil
 	}
 
 	return nil, nil, err
+}
+
+func (client *Client) DescribeVRoutersWithRaw(args *DescribeVRoutersArgs) (response *DescribeVRoutersResponse, err error) {
+	args.Validate()
+	response = &DescribeVRoutersResponse{}
+
+	err = client.Invoke("DescribeVRouters", args, response)
+
+	if err == nil {
+		return response, nil
+	}
+
+	return nil, err
 }
 
 type ModifyVRouterAttributeArgs struct {

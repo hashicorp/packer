@@ -76,13 +76,21 @@ type DescribeResourceByTagsResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/tags&describeresourcebytags
 func (client *Client) DescribeResourceByTags(args *DescribeResourceByTagsArgs) (resources []ResourceItemType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeResourceByTagsResponse{}
-	err = client.Invoke("DescribeResourceByTags", args, &response)
+	response, err := client.DescribeResourceByTagsWithRaw(args)
 	if err != nil {
 		return nil, nil, err
 	}
 	return response.Resources.Resource, &response.PaginationResult, nil
+}
+
+func (client *Client) DescribeResourceByTagsWithRaw(args *DescribeResourceByTagsArgs) (response *DescribeResourceByTagsResponse, err error) {
+	args.Validate()
+	response = &DescribeResourceByTagsResponse{}
+	err = client.Invoke("DescribeResourceByTags", args, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 type TagItemType struct {
