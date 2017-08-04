@@ -95,16 +95,24 @@ type DescribeVpcsResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/vpc&describevpcs
 func (client *Client) DescribeVpcs(args *DescribeVpcsArgs) (vpcs []VpcSetType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeVpcsResponse{}
-
-	err = client.Invoke("DescribeVpcs", args, &response)
-
-	if err == nil {
-		return response.Vpcs.Vpc, &response.PaginationResult, nil
+	response, err := client.DescribeVpcsWithRaw(args)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return nil, nil, err
+	return response.Vpcs.Vpc, &response.PaginationResult, nil
+}
+
+func (client *Client) DescribeVpcsWithRaw(args *DescribeVpcsArgs) (response *DescribeVpcsResponse, err error) {
+	args.Validate()
+	response = &DescribeVpcsResponse{}
+
+	err = client.Invoke("DescribeVpcs", args, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, err
 }
 
 type ModifyVpcAttributeArgs struct {

@@ -15,7 +15,7 @@ type InstanceStatus string
 
 // Constants of InstanceStatus
 const (
-	Creating = InstanceStatus("Creating") // For backward compatability
+	Creating = InstanceStatus("Creating") // For backward compatibility
 	Pending  = InstanceStatus("Pending")
 	Running  = InstanceStatus("Running")
 	Starting = InstanceStatus("Starting")
@@ -94,16 +94,25 @@ type DescribeInstanceStatusResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/instance&describeinstancestatus
 func (client *Client) DescribeInstanceStatus(args *DescribeInstanceStatusArgs) (instanceStatuses []InstanceStatusItemType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeInstanceStatusResponse{}
-
-	err = client.Invoke("DescribeInstanceStatus", args, &response)
+	response, err := client.DescribeInstanceStatusWithRaw(args)
 
 	if err == nil {
 		return response.InstanceStatuses.InstanceStatus, &response.PaginationResult, nil
 	}
 
 	return nil, nil, err
+}
+
+func (client *Client) DescribeInstanceStatusWithRaw(args *DescribeInstanceStatusArgs) (response *DescribeInstanceStatusResponse, err error) {
+	args.Validate()
+	response = &DescribeInstanceStatusResponse{}
+
+	err = client.Invoke("DescribeInstanceStatus", args, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 type StopInstanceArgs struct {
@@ -254,6 +263,7 @@ type InstanceAttributesType struct {
 		Tag []TagItemType
 	}
 	SpotStrategy SpotStrategyType
+	KeyPairName  string
 }
 
 type DescribeInstanceAttributeResponse struct {
@@ -408,16 +418,24 @@ type DescribeInstancesResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/instance&describeinstances
 func (client *Client) DescribeInstances(args *DescribeInstancesArgs) (instances []InstanceAttributesType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeInstancesResponse{}
-
-	err = client.Invoke("DescribeInstances", args, &response)
-
-	if err == nil {
-		return response.Instances.Instance, &response.PaginationResult, nil
+	response, err := client.DescribeInstancesWithRaw(args)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return nil, nil, err
+	return response.Instances.Instance, &response.PaginationResult, nil
+}
+
+func (client *Client) DescribeInstancesWithRaw(args *DescribeInstancesArgs) (response *DescribeInstancesResponse, err error) {
+	args.Validate()
+	response = &DescribeInstancesResponse{}
+
+	err = client.Invoke("DescribeInstances", args, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 type DeleteInstanceArgs struct {
@@ -517,6 +535,7 @@ type CreateInstanceArgs struct {
 	AutoRenew               bool
 	AutoRenewPeriod         int
 	SpotStrategy            SpotStrategyType
+	KeyPairName             string
 }
 
 type CreateInstanceResponse struct {
