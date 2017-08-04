@@ -45,7 +45,9 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 
 	port := s.CommConfig.Port()
 	if port == 0 {
-		panic("port must be set to a non-zero value.")
+		if s.CommConfig.Type != "none" {
+			panic("port must be set to a non-zero value.")
+		}
 	}
 
 	// Create the group
