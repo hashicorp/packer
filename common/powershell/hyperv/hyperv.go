@@ -192,6 +192,10 @@ func CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64,
 	if generation == 2 {
 		var script = `
 param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
@@ -202,6 +206,10 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 	} else {
 		var script = `
 param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $path -ChildPath $vhdx
 New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
@@ -221,6 +229,10 @@ func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
 
 	var script = `
 param([string]$vmName, [int]$cpu)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMProcessor -VMName $vmName -Count $cpu
 `
 	var ps powershell.PowerShellCmd
@@ -232,6 +244,10 @@ func SetVirtualMachineVirtualizationExtensions(vmName string, enableVirtualizati
 
 	var script = `
 param([string]$vmName, [string]$exposeVirtualizationExtensionsString)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $exposeVirtualizationExtensions = [System.Boolean]::Parse($exposeVirtualizationExtensionsString)
 Set-VMProcessor -VMName $vmName -ExposeVirtualizationExtensions $exposeVirtualizationExtensions
 `
@@ -248,6 +264,10 @@ func SetVirtualMachineDynamicMemory(vmName string, enableDynamicMemory bool) err
 
 	var script = `
 param([string]$vmName, [string]$enableDynamicMemoryString)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $enableDynamicMemory = [System.Boolean]::Parse($enableDynamicMemoryString)
 Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
 `
@@ -263,6 +283,10 @@ Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
 func SetVirtualMachineMacSpoofing(vmName string, enableMacSpoofing bool) error {
 	var script = `
 param([string]$vmName, $enableMacSpoofing)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
 `
 
@@ -280,6 +304,10 @@ Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
 func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool) error {
 	var script = `
 param([string]$vmName, $enableSecureBoot)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
 `
 
@@ -298,7 +326,10 @@ func DeleteVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName
 if (($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::Off) -and ($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::OffCritical)) {
     Stop-VM -VM $vm -TurnOff -Force -Confirm:$false
@@ -316,6 +347,10 @@ func ExportVirtualMachine(vmName string, path string) error {
 
 	var script = `
 param([string]$vmName, [string]$path)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Export-VM -Name $vmName -Path $path
 
 if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.VMCX')))
@@ -419,6 +454,10 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 func CompactDisks(expPath string, vhdDir string) error {
 	var script = `
 param([string]$srcPath, [string]$vhdDirName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
     Optimize-VHD -Path $_.FullName -Mode Full
 }
@@ -447,6 +486,10 @@ func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
 
 	var script = `
 param([string]$switchName,[string]$switchType)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $switches = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switches.Count -eq 0) {
   New-VMSwitch -Name $switchName -SwitchType $switchType
@@ -465,6 +508,10 @@ func DeleteVirtualSwitch(switchName string) error {
 
 	var script = `
 param([string]$switchName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $switch = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switch -ne $null) {
     $switch | Remove-VMSwitch -Force -Confirm:$false
@@ -480,6 +527,10 @@ func StartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
   Start-VM -Name $vmName -Confirm:$false
@@ -495,6 +546,10 @@ func RestartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Restart-VM $vmName -Force -Confirm:$false
 `
 
@@ -507,6 +562,10 @@ func StopVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
     Stop-VM -VM $vm -Force -Confirm:$false
@@ -540,6 +599,10 @@ func EnableVirtualMachineIntegrationService(vmName string, integrationServiceNam
 
 	var script = `
 param([string]$vmName,[string]$integrationServiceId)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Get-VMIntegrationService -VmName $vmName | ?{$_.Id -match $integrationServiceId} | Enable-VMIntegrationService
 `
 
@@ -552,6 +615,10 @@ func SetNetworkAdapterVlanId(switchName string, vlanId string) error {
 
 	var script = `
 param([string]$networkAdapterName,[string]$vlanId)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $networkAdapterName -Access -VlanId $vlanId
 `
 
@@ -564,6 +631,10 @@ func SetVirtualMachineVlanId(vmName string, vlanId string) error {
 
 	var script = `
 param([string]$vmName,[string]$vlanId)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 `
 	var ps powershell.PowerShellCmd
@@ -574,6 +645,10 @@ Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 func GetExternalOnlineVirtualSwitch() (string, error) {
 
 	var script = `
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $adapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | Sort-Object -Descending -Property Speed
 foreach ($adapter in $adapters) {
   $switch = Get-VMSwitch -SwitchType External | Where-Object { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
@@ -599,6 +674,10 @@ func CreateExternalVirtualSwitch(vmName string, switchName string) error {
 
 	var script = `
 param([string]$vmName,[string]$switchName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $switch = $null
 $names = @('ethernet','wi-fi','lan')
 $adapters = foreach ($name in $names) {
@@ -632,6 +711,10 @@ func GetVirtualMachineSwitchName(vmName string) (string, error) {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 (Get-VMNetworkAdapter -VMName $vmName).SwitchName
 `
 
@@ -648,6 +731,10 @@ func ConnectVirtualMachineNetworkAdapterToSwitch(vmName string, switchName strin
 
 	var script = `
 param([string]$vmName,[string]$switchName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $switchName
 `
 
@@ -660,6 +747,10 @@ func UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) err
 
 	var script = `
 param([string]$vmName,[string]$switchName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 Set-VMNetworkAdapterVlan -VMName $vmName -Untagged
 Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $switchName -Untagged
 `
@@ -673,6 +764,10 @@ func IsRunning(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 `
@@ -692,6 +787,10 @@ func IsOff(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off
 `
@@ -711,6 +810,10 @@ func Uptime(vmName string) (uint64, error) {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.Uptime.TotalSeconds
 `
@@ -729,6 +832,10 @@ $vm.Uptime.TotalSeconds
 func Mac(vmName string) (string, error) {
 	var script = `
 param([string]$vmName, [int]$adapterIndex)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 try {
   $adapter = Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
   $mac = $adapter[$adapterIndex].MacAddress
@@ -750,6 +857,10 @@ $mac
 func IpAddress(mac string) (string, error) {
 	var script = `
 param([string]$mac, [int]$addressIndex)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 try {
   $ip = Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
 
@@ -772,6 +883,10 @@ func TurnOff(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
   Stop-VM -Name $vmName -TurnOff -Force -Confirm:$false
@@ -787,6 +902,10 @@ func ShutDown(vmName string) error {
 
 	var script = `
 param([string]$vmName)
+if(-not (Get-Module Hyper-V))
+{
+	Import-Module Hyper-V
+}
 $vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
   Stop-VM -Name $vmName -Force -Confirm:$false
@@ -807,6 +926,11 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
 
+	if(-not (Get-Module Hyper-V))
+	{
+		Import-Module Hyper-V
+	}
+	
 	function Get-VMConsole
 	{
 	    [CmdletBinding()]
