@@ -219,6 +219,24 @@ func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtual
 	return nil
 }
 
+func (s *TemplateBuilder) SetPrivateVirtualNetworWithPublicIp(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
+	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
+	s.setVariable("virtualNetworkName", virtualNetworkName)
+	s.setVariable("subnetName", subnetName)
+
+	s.deleteResourceByType(resourceVirtualNetworks)
+	resource, err := s.getResourceByType(resourceNetworkInterfaces)
+	if err != nil {
+		return err
+	}
+
+	s.deleteResourceDependency(resource, func(s string) bool {
+		return strings.Contains(s, "Microsoft.Network/virtualNetworks")
+	})
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetTags(tags *map[string]*string) error {
 	if tags == nil || len(*tags) == 0 {
 		return nil
