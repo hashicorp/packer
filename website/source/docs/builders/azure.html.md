@@ -131,9 +131,12 @@ When creating a managed image the following two options are required.
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
 
+-   `private_virtual_network_with_public_ip` (boolean) This value allows you to set a `virtual_network_name` and obtain
+    a public IP. If this value is not set and `virtual_network_name` is defined Packer is only allowed to be executed
+    from a host on the same subnet / virtual network.
+
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM. This option enables private
-    communication with the VM, no public IP address is **used** or **provisioned**. This value should only be set if
-    Packer is executed from a host on the same subnet / virtual network.
+    communication with the VM, no public IP address is **used** or **provisioned** (unless you set `private_virtual_network_with_public_ip`).
 
 -   `virtual_network_resource_group_name` (string) If virtual\_network\_name is set, this value **may** also be set. If
     virtual\_network\_name is set, and this value is not set the builder attempts to determine the resource group
