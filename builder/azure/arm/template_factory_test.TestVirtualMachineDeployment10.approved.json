@@ -1,0 +1,141 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminPassword": {
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "dnsNameForPublicIP": {
+      "type": "string"
+    },
+    "osDiskName": {
+      "type": "string"
+    },
+    "storageAccountBlobEndpoint": {
+      "type": "string"
+    },
+    "vmName": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('publicIPAddressApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('publicIPAddressName')]",
+      "properties": {
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        },
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+      },
+      "type": "Microsoft.Network/publicIPAddresses"
+    },
+    {
+      "apiVersion": "[variables('networkInterfacesApiVersion')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[variables('nicName')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "type": "Microsoft.Network/networkInterfaces"
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[parameters('vmName')]",
+      "properties": {
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": false
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "adminPassword": "[parameters('adminPassword')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "computerName": "[parameters('vmName')]",
+          "linuxConfiguration": {
+            "ssh": {
+              "publicKeys": [
+                {
+                  "keyData": "",
+                  "path": "[variables('sshKeyPath')]"
+                }
+              ]
+            }
+          }
+        },
+        "storageProfile": {
+          "imageReference": {
+            "offer": "--image-offer--",
+            "publisher": "--image-publisher--",
+            "sku": "--image-sku--",
+            "version": "--version--"
+          },
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "fromImage",
+            "name": "osdisk",
+            "osType": "Linux"
+          }
+        }
+      },
+      "type": "Microsoft.Compute/virtualMachines"
+    }
+  ],
+  "variables": {
+    "addressPrefix": "10.0.0.0/16",
+    "apiVersion": "2017-03-30",
+    "location": "[resourceGroup().location]",
+    "managedDiskApiVersion": "2017-03-30",
+    "networkInterfacesApiVersion": "2017-04-01",
+    "nicName": "packerNic",
+    "publicIPAddressApiVersion": "2017-04-01",
+    "publicIPAddressName": "packerPublicIP",
+    "publicIPAddressType": "Dynamic",
+    "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+    "subnetAddressPrefix": "10.0.0.0/24",
+    "subnetName": "--virtual_network_subnet_name--",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "virtualNetworkName": "--virtual_network_name--",
+    "virtualNetworkResourceGroup": "--virtual_network_resource_group_name--",
+    "virtualNetworksApiVersion": "2017-04-01",
+    "vmStorageAccountContainerName": "images",
+    "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+  }
+}

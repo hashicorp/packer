@@ -34,10 +34,11 @@ import (
 )
 
 const (
-	DefaultCloudEnvironmentName = "Public"
-	DefaultImageVersion         = "latest"
-	DefaultUserName             = "packer"
-	DefaultVMSize               = "Standard_A1"
+	DefaultCloudEnvironmentName              = "Public"
+	DefaultImageVersion                      = "latest"
+	DefaultUserName                          = "packer"
+	DefaultPrivateVirtualNetworkWithPublicIp = false
+	DefaultVMSize                            = "Standard_A1"
 )
 
 var (
@@ -78,19 +79,20 @@ type Config struct {
 	manageImageLocation           string
 
 	// Deployment
-	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
-	ResourceGroupName               string             `mapstructure:"resource_group_name"`
-	StorageAccount                  string             `mapstructure:"storage_account"`
-	TempComputeName                 string             `mapstructure:"temp_compute_name"`
-	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`
-	storageAccountBlobEndpoint      string
-	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
-	cloudEnvironment                *azure.Environment
-	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
-	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
-	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
-	CustomDataFile                  string `mapstructure:"custom_data_file"`
-	customData                      string
+	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
+	ResourceGroupName                 string             `mapstructure:"resource_group_name"`
+	StorageAccount                    string             `mapstructure:"storage_account"`
+	TempComputeName                   string             `mapstructure:"temp_compute_name"`
+	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
+	storageAccountBlobEndpoint        string
+	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
+	cloudEnvironment                  *azure.Environment
+	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip"`
+	VirtualNetworkName                string `mapstructure:"virtual_network_name"`
+	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name"`
+	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
+	CustomDataFile                    string `mapstructure:"custom_data_file"`
+	customData                        string
 
 	// OS
 	OSType       string `mapstructure:"os_type"`
