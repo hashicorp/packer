@@ -16,7 +16,7 @@ type GuestAdditionsConfig struct {
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 }
 
-func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context, numberOfIsos int, generation uint) (errs []error) {
+func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context, secondaryDvdImages []string, generation uint) (errs []error) {
 	// Errors
 	if c.GuestAdditionsMode == "" {
 		if c.GuestAdditionsPath != "" {
@@ -45,6 +45,7 @@ func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context, numberOfIsos in
 		}
 	}
 
+	numberOfIsos := len(secondaryDvdImages)
 	totalNumIsos := numberOfIsos
 	if c.GuestAdditionsMode == "attach" {
 		if _, err := os.Stat(c.GuestAdditionsPath); os.IsNotExist(err) {
@@ -59,15 +60,15 @@ func (c *GuestAdditionsConfig) Prepare(ctx *interpolate.Context, numberOfIsos in
 
 	if generation < 2 && totalNumIsos > 2 {
 		if c.GuestAdditionsMode == "attach" {
-			errs = append(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = append(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(secondaryDvdImages, ", ")))
 		} else {
-			errs = append(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = append(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(secondaryDvdImages, ", ")))
 		}
 	} else if generation > 1 && numberOfIsos > 16 {
 		if c.GuestAdditionsMode == "attach" {
-			errs = append(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = append(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(secondaryDvdImages, ", ")))
 		} else {
-			errs = append(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = append(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(secondaryDvdImages, ", ")))
 		}
 	}
 

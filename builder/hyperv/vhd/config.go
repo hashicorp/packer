@@ -89,13 +89,43 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Generation = 1
 	}
 
+	// Accumulate any errors and warnings
 	var errs *packer.MultiError
+	warnings := make([]string, 0)
+
+	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
+
+	err = b.checkDiskSize()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	err = b.checkRamSize()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	////////////
+	FINISH ME
+	///////////
+
+
+
+
 	if c.Generation == 2 {
 		if len(c.FloppyFiles) > 0 || len(c.FloppyDirectories) > 0 {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
+
+
+	return c, warnings, errs
 }
 
 func (c *Config) detectSwitchName() string {

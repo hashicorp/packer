@@ -1,6 +1,7 @@
 package vhd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
