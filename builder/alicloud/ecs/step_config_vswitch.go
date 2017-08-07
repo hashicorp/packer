@@ -113,7 +113,7 @@ func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.Step
 	}
 	if err := client.WaitForVSwitchAvailable(vpcId, s.VSwitchId, ALICLOUD_DEFAULT_TIMEOUT); err != nil {
 		state.Put("error", err)
-		ui.Error(fmt.Sprintf("Timeout waiting for vswitch to become avaiable: %v", err))
+		ui.Error(fmt.Sprintf("Timeout waiting for vswitch to become available: %v", err))
 		return multistep.ActionHalt
 	}
 	state.Put("vswitchid", vswitchId)
