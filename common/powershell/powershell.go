@@ -232,7 +232,7 @@ param([string]$moduleName)
 func HasVirtualMachineVirtualizationExtensions() (bool, error) {
 
 	var script = `	
-(GET-Command Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
+(GET-Command Hyper-V\Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
 `
 
 	var ps PowerShellCmd
