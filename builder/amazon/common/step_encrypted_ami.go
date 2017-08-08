@@ -117,19 +117,17 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	ui.Say("Deleting unencrypted snapshots")
 	snapshots := state.Get("snapshots").(map[string][]string)
 
+OuterLoop:
 	for _, blockDevice := range unencImage.BlockDeviceMappings {
 		if blockDevice.Ebs != nil && blockDevice.Ebs.SnapshotId != nil {
 			// If this packer run didn't create it, then don't delete it
-			doDelete := true
 			for _, origDevice := range s.AMIMappings {
 				if origDevice.SnapshotId == *blockDevice.Ebs.SnapshotId {
-					doDelete = false
+					ui.Message(fmt.Sprintf("Keeping Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
+					break OuterLoop
 				}
 			}
-			if doDelete == false {
-				ui.Message(fmt.Sprintf("Keeping Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
-				continue
-			}
+
 			ui.Message(fmt.Sprintf("Deleting Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
 			deleteSnapOpts := &ec2.DeleteSnapshotInput{
 				SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
