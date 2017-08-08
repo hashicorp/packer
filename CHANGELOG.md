@@ -6,6 +6,7 @@
 * builder/parallels: Remove soon to be removed --vmtype flag in createvm.
     [GH-5172]
 * contrib: add json files to zsh completion. [GH-5195]
+* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
 
 ### BUG FIXES:
 * builder/amazon: fix builds when using the null communicator. [GH-5217]
