@@ -12,6 +12,7 @@
 * builder/amazon: fix builds when using the null communicator. [GH-5217]
 * core: Strip query parameters from ISO URLs when checking against a checksum
     file. [GH-5181]
+* command/push: fix handling of symlinks. [GH-5226]
 
 ## 1.0.3 (July 17, 2017)
 
