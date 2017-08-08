@@ -2,12 +2,13 @@ package plugin
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func helperProcess(s ...string) *exec.Cmd {
@@ -48,7 +49,7 @@ func TestHelperProcess(*testing.T) {
 		os.Exit(2)
 	}
 
-	cmd, args := args[0], args[1:]
+	cmd, _ := args[0], args[1:]
 	switch cmd {
 	case "bad-version":
 		fmt.Printf("%s1|tcp|:1234\n", APIVersion)

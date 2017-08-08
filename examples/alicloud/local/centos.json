@@ -1,0 +1,60 @@
+{"variables": {
+    "box_basename": "centos-6.8",
+    "build_timestamp": "{{isotime \"20060102150405\"}}",
+    "cpus": "1",
+    "disk_size": "4096",
+    "git_revision": "__unknown_git_revision__",
+    "headless": "",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
+    "iso_checksum_type": "md5",
+    "iso_name": "CentOS-6.8-x86_64-minimal.iso",
+    "ks_path": "centos-6.8/ks.cfg",
+    "memory": "512",
+    "metadata": "floppy/dummy_metadata.json",
+    "mirror": "http://mirrors.aliyun.com/centos",
+    "mirror_directory": "6.8/isos/x86_64",
+    "name": "centos-6.8",
+    "no_proxy": "{{env `no_proxy`}}",
+    "template": "centos-6.8-x86_64",
+    "version": "2.1.TIMESTAMP"
+  },
+  "builders":[
+    {
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `ks_path`}}<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": "{{user `disk_size`}}",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_url": "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "output_directory": "packer-{{user `template`}}-qemu",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_username": "root",
+      "ssh_wait_timeout": "10000s",
+      "type": "qemu",
+      "vm_name": "{{ user `template` }}.raw",      
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "format": "raw"
+    }
+  ],
+"post-processors":[
+    {
+      "type":"alicloud-import",
+      "oss_bucket_name": "packer",
+      "image_name": "packer_import",
+      "image_os_type": "linux",
+      "image_platform": "CentOS",
+      "image_architecture": "x86_64",
+      "image_system_size": "40",
+      "region":"cn-beijing"
+    }
+  ]
+}
