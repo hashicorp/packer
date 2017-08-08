@@ -124,7 +124,7 @@ OuterLoop:
 			for _, origDevice := range s.AMIMappings {
 				if origDevice.SnapshotId == *blockDevice.Ebs.SnapshotId {
 					ui.Message(fmt.Sprintf("Keeping Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
-					break OuterLoop
+					continue OuterLoop
 				}
 			}
 
