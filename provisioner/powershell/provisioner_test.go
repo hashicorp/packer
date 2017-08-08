@@ -41,6 +41,9 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
 	readFile, err := ioutil.ReadFile(file)
 	expectedContents := "foo\nbar\n"
+	if err != nil {
+		t.Fatalf("Should not be error: %s", err)
+	}
 	s := string(readFile[:])
 	if s != expectedContents {
 		t.Fatalf("Expected generated inlineScript to equal '%s', got '%s'", expectedContents, s)

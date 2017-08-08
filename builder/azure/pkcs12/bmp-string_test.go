@@ -63,7 +63,7 @@ func TestBMPString(t *testing.T) {
 
 	// some character outside the BMP should error
 	tst = "\U0001f000 East wind (Mahjong)"
-	str, err = bmpString(tst)
+	_, err = bmpString(tst)
 	if err == nil {
 		t.Errorf("expected '%s' to throw error because the first character is not in the BMP", tst)
 	}

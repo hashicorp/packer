@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -34,6 +35,9 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
 	readFile, err := ioutil.ReadFile(file)
+	if err != nil {
+		t.Fatalf("Should not be error: %s", err)
+	}
 	expectedContents := "foo\nbar\n"
 	s := string(readFile[:])
 	if s != expectedContents {

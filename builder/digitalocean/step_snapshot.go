@@ -85,12 +85,12 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 			}
 			imageTransfer, _, err := client.ImageActions.Transfer(context.TODO(), images[0].ID, transferRequest)
 			if err != nil {
-				err := fmt.Errorf("Error transfering snapshot: %s", err)
+				err := fmt.Errorf("Error transferring snapshot: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-			ui.Say(fmt.Sprintf("Transfering Snapshot ID: %d", imageTransfer.ID))
+			ui.Say(fmt.Sprintf("transferring Snapshot ID: %d", imageTransfer.ID))
 			if err := waitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
 				client, 20*time.Minute); err != nil {
 				// If we get an error the first time, actually report it
