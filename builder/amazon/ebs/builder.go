@@ -191,6 +191,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			KeyID:             b.config.AMIKmsKeyId,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
 			Name:              b.config.AMIName,
+			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
