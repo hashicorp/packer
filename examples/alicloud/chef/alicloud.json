@@ -9,7 +9,7 @@
     "secret_key":"{{user `secret_key`}}",
     "region":"cn-beijing",
     "image_name":"packer_chef2",
-    "source_image":"ubuntu_14_0405_64_40G_base_20170222.vhd",
+    "source_image":"ubuntu_14_0405_64_40G_alibase_20170625.vhd",
     "ssh_username":"root",
     "instance_type":"ecs.n1.medium",
     "io_optimized":"true",
