@@ -13,6 +13,8 @@
 * core: Strip query parameters from ISO URLs when checking against a checksum
     file. [GH-5181]
 * command/push: fix handling of symlinks. [GH-5226]
+* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
+* builder/docker: Correctly handle case when uploading an empty directory. [GH-5234]
 
 ## 1.0.3 (July 17, 2017)
 
