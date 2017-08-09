@@ -120,9 +120,6 @@ func (m *Meta) FlagSet(n string, fs FlagSetFlags) *flag.FlagSet {
 		f.Var((*kvflag.Flag)(&m.flagVars), "var", "")
 		f.Var((*kvflag.FlagJSON)(&m.flagVars), "var-file", "")
 	}
-	if len(m.flagVars) == 0 {
-		m.flagVars = make(map[string]string)
-	}
 
 	// Create an io.Writer that writes to our Ui properly for errors.
 	// This is kind of a hack, but it does the job. Basically: create
