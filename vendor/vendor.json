@@ -855,6 +855,12 @@
 			"revision": "792786c7400a136282c1664665ae0a8db921c6c2"
 		},
 		{
+			"checksumSHA1": "Kq0fF7R65dDcGReuhf47O3LQgrY=",
+			"path": "github.com/profitbricks/profitbricks-sdk-go",
+			"revision": "7bdb11aecb0e457ea23c86898c6b49bfc0eb4bb1",
+			"revisionTime": "2017-08-01T13:52:49Z"
+		},
+		{
 			"checksumSHA1": "TvF3ym5sZVNqGlUOS9HgOIl/sZM=",
 			"path": "github.com/satori/go.uuid",
 			"revision": "d41af8bb6a7704f00bc3b7cba9355ae6a5a80048"

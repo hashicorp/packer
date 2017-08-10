@@ -7,26 +7,26 @@ import (
 )
 
 type FirewallRule struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties FirewallruleProperties     `json:"properties,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+	Id         string                 `json:"id,omitempty"`
+	Type_      string                 `json:"type,omitempty"`
+	Href       string                 `json:"href,omitempty"`
+	Metadata   *Metadata              `json:"metadata,omitempty"`
+	Properties FirewallruleProperties `json:"properties,omitempty"`
+	Response   string                 `json:"Response,omitempty"`
+	Headers    *http.Header           `json:"headers,omitempty"`
+	StatusCode int                    `json:"headers,omitempty"`
 }
 
 type FirewallruleProperties struct {
-	Name           string `json:"name,omitempty"`
-	Protocol       string `json:"protocol,omitempty"`
-	SourceMac      string `json:"sourceMac,omitempty"`
-	SourceIp       string `json:"sourceIp,omitempty"`
-	TargetIp       string `json:"targetIp,omitempty"`
-	IcmpCode       int    `json:"icmpCode,omitempty"`
-	IcmpType       int    `json:"icmpType,omitempty"`
-	PortRangeStart int    `json:"portRangeStart,omitempty"`
-	PortRangeEnd   int    `json:"portRangeEnd,omitempty"`
+	Name           string  `json:"name,omitempty"`
+	Protocol       string  `json:"protocol,omitempty"`
+	SourceMac      *string `json:"sourceMac,omitempty"`
+	SourceIp       *string `json:"sourceIp,omitempty"`
+	TargetIp       *string `json:"targetIp,omitempty"`
+	IcmpCode       *int    `json:"icmpCode,omitempty"`
+	IcmpType       *int    `json:"icmpType,omitempty"`
+	PortRangeStart *int    `json:"portRangeStart,omitempty"`
+	PortRangeEnd   *int    `json:"portRangeEnd,omitempty"`
 }
 
 type FirewallRules struct {
