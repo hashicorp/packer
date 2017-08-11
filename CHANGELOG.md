@@ -15,6 +15,8 @@
 * command/push: fix handling of symlinks. [GH-5226]
 * builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
 * builder/docker: Correctly handle case when uploading an empty directory. [GH-5234]
+* command/push: Don't push variables if they are unspecified. Reverts to
+  behavior in 1.0.1. [GH-5235]
 
 ## 1.0.3 (July 17, 2017)
 
@@ -60,7 +62,7 @@
     provisioner stdout [GH-4719]
 * post-processor/checksum: Fix interpolation of "output". [GH-5112]
 * push: Push vars in packer config, not just those set from command line and in
-    var-file. [GH-4992]
+    var-file. [GH-5101]
 
 ## 1.0.2 (June 21, 2017)
 
