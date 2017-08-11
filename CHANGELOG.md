@@ -1,22 +1,30 @@
-## UNRELEASED
+## 1.0.4 (August 11, 2017)
 
 ### IMPROVEMENTS:
 
 * builder/alicloud: Increase polling timeout. [GH-5148]
+* builder/azure: Add `private_virtual_network_with_public_ip` option to
+    optionally obtain a public IP. [GH-5222]
+* builder/googlecompute: use a more portable method of obtaining zone.
+    [GH-5192]
+* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
 * builder/parallels: Remove soon to be removed --vmtype flag in createvm.
     [GH-5172]
 * contrib: add json files to zsh completion. [GH-5195]
-* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
 
 ### BUG FIXES:
+
+* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
 * builder/amazon: fix builds when using the null communicator. [GH-5217]
+* builder/docker: Correctly handle case when uploading an empty directory.
+    [GH-5234]
+* command/push: Don't push variables if they are unspecified. Reverts to
+    behavior in 1.0.1. [GH-5235]
+* command/push: fix handling of symlinks. [GH-5226]
 * core: Strip query parameters from ISO URLs when checking against a checksum
     file. [GH-5181]
-* command/push: fix handling of symlinks. [GH-5226]
-* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
-* builder/docker: Correctly handle case when uploading an empty directory. [GH-5234]
-* command/push: Don't push variables if they are unspecified. Reverts to
-  behavior in 1.0.1. [GH-5235]
+* provisioner/ansible-remote: Fix issue where packer could hang communicating
+    with ansible-remote. [GH-5146]
 
 ## 1.0.3 (July 17, 2017)
 
