@@ -24,7 +24,7 @@ const (
 	// ErrCodeRead is an error that is returned during HTTP reads.
 	ErrCodeRead = "ReadError"
 
-	// ErrCodeResponseTimeout is the connection timeout error that is recieved
+	// ErrCodeResponseTimeout is the connection timeout error that is received
 	// during body reads.
 	ErrCodeResponseTimeout = "ResponseTimeout"
 
