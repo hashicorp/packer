@@ -135,6 +135,13 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	var instanceId string
+
+	ui.Say("Adding tags to source instance")
+	if _, exists := s.Tags["Name"]; !exists {
+		s.Tags["Name"] = "Packer Builder"
+	}
+
+	createTagsAfterInstanceStarts := true
 	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
@@ -142,16 +149,9 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
 	ReportTags(ui, ec2Tags)
 
 	if spotPrice == "" || spotPrice == "0" {
-
-		var runTag ec2.TagSpecification
-		runTag.SetResourceType("instance")
-		runTag.SetTags(ec2Tags)
-
-		runTags := []*ec2.TagSpecification{&runTag}
 
 		runOpts := &ec2.RunInstancesInput{
 			ImageId:             &s.SourceAMI,
@@ -163,7 +163,16 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 			Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 			EbsOptimized:        &s.EbsOptimized,
-			TagSpecifications:   runTags,
+		}
+
+		if len(ec2Tags) > 0 {
+			runTags := &ec2.TagSpecification{
+				ResourceType: aws.String("instance"),
+				Tags:         ec2Tags,
+			}
+
+			runOpts.SetTagSpecifications([]*ec2.TagSpecification{runTags})
+			createTagsAfterInstanceStarts = false
 		}
 
 		if keyName != "" {
@@ -273,29 +282,6 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		}
 		instanceId = *spotResp.SpotInstanceRequests[0].InstanceId
 
-		// Retry creating tags for about 2.5 minutes
-		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
-			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
-				Tags:      ec2Tags,
-				Resources: []*string{spotResp.SpotInstanceRequests[0].InstanceId},
-			})
-			if err == nil {
-				return true, nil
-			}
-			if awsErr, ok := err.(awserr.Error); ok {
-				if awsErr.Code() == "InvalidInstanceID.NotFound" {
-					return false, nil
-				}
-			}
-			return true, err
-		})
-
-		if err != nil {
-			err := fmt.Errorf("Error tagging source instance: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
 	}
 
 	// Set the instance ID so that the cleanup works properly
@@ -319,9 +305,30 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	instance := latestInstance.(*ec2.Instance)
 
-	ui.Say("Adding tags to source instance")
-	if _, exists := s.Tags["Name"]; !exists {
-		s.Tags["Name"] = "Packer Builder"
+	if createTagsAfterInstanceStarts {
+		// Retry creating tags for about 2.5 minutes
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      ec2Tags,
+				Resources: []*string{instance.InstanceId},
+			})
+			if err == nil {
+				return true, nil
+			}
+			if awsErr, ok := err.(awserr.Error); ok {
+				if awsErr.Code() == "InvalidInstanceID.NotFound" {
+					return false, nil
+				}
+			}
+			return true, err
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error tagging source instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	if s.Debug {
