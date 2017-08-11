@@ -111,8 +111,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 
 		var finished CommandFinished
 		decoder := gob.NewDecoder(conn)
-		err = decoder.Decode(&finished)
-		if err != nil {
+		if err := decoder.Decode(&finished); err != nil {
 			log.Printf("[ERR] Error decoding response stream %d: %s",
 				responseStreamId, err)
 			cmd.SetExited(123)
@@ -130,12 +129,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err error) {
 	// Pipe the reader through to the connection
 	streamId := c.mux.NextId()
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		serveSingleCopy("uploadData", c.mux, streamId, nil, r)
-	}()
+	go serveSingleCopy("uploadData", c.mux, streamId, nil, r)
 
 	args := CommunicatorUploadArgs{
 		Path:           path,
@@ -147,7 +141,6 @@ func (c *communicator) Upload(path string, r io.Reader, fi *os.FileInfo) (err er
 	}
 
 	err = c.client.Call("Communicator.Upload", &args, new(interface{}))
-	wg.Wait()
 	return
 }
 
