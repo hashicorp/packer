@@ -1,5 +1,10 @@
 ## UNRELEASED
 
+### IMPROVEMENTS:
+
+* provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
+
+
 ## 1.0.4 (August 11, 2017)
 
 ### IMPROVEMENTS:
