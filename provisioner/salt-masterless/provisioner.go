@@ -384,7 +384,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("rm -rf '%s'", dir),
+		Command: fmt.Sprintf(p.sudo("rm -rf '%s'"), dir),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
