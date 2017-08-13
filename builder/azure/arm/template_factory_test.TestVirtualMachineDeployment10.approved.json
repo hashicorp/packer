@@ -110,6 +110,9 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            },
             "name": "osdisk",
             "osType": "Linux"
           }
