@@ -50,7 +50,10 @@ builder.
     
 #### VHD or Managed Image
 
-The Azure builder can create either a VHD, or a managed image. When creating a VHD the following two options are required.
+The Azure builder can create either a VHD, or a managed image. If you
+are creating a VHD, you **must** start with a VHD.  Likewise, if you
+want to create a managed image you **must** start with a managed
+image.  When creating a VHD the following two options are required.
 
 -   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
     organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
