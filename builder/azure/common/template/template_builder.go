@@ -101,7 +101,7 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string) error {
+func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccountType compute.StorageAccountTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -115,11 +115,14 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string) error {
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
+	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
+		StorageAccountType: storageAccountType,
+	}
 
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version, imageID string) error {
+func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version, imageID string, storageAccountType compute.StorageAccountTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -137,6 +140,9 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
+	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
+		StorageAccountType: storageAccountType,
+	}
 
 	return nil
 }
