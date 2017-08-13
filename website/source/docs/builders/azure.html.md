@@ -107,6 +107,10 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
+    
+-   `managed_image_storage_account_type` (string) Specify the storage
+    account type for a managed image.  Valid values are Standard_LRS
+    and Premium\_LRS.  The default is Standard\_LRS.
                 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
