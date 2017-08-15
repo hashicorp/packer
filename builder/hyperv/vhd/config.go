@@ -23,13 +23,7 @@ type Config struct {
 	hypervcommon.RunConfig            `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig       `mapstructure:",squash"`
 	hypervcommon.GuestAdditionsConfig `mapstructure:",squash"`
-
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
-	// The size, in megabytes, of the computer memory in the VM.
-	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
+	hypervcommon.SizeConfig           `mapstructure:",squash"`
 
 	// Should integration services iso be mounted
 	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
@@ -99,16 +93,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
-
-	err = b.checkDiskSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
-	err = b.checkRamSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
+	errs = packer.MultiErrorAppend(errs, c.SizeConfig.Prepare(&c.ctx)...)
 
 	////////////
 	FINISH ME

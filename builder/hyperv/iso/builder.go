@@ -50,13 +50,8 @@ type Config struct {
 	hypervcommon.RunConfig            `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig       `mapstructure:",squash"`
 	hypervcommon.GuestAdditionsConfig `mapstructure:",squash"`
+	hypervcommon.SizeConfig           `mapstructure:",squash"`
 
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
-	// The size, in megabytes, of the computer memory in the VM.
-	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -112,16 +107,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-
-	err = b.checkDiskSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
-	err = b.checkRamSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.SizeConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
@@ -386,38 +372,6 @@ func appendWarnings(slice []string, data ...string) []string {
 	slice = slice[0:n]
 	copy(slice[m:n], data)
 	return slice
-}
-
-func (b *Builder) checkDiskSize() error {
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = DefaultDiskSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
-
-	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
-	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
-	}
-
-	return nil
-}
-
-func (b *Builder) checkRamSize() error {
-	if b.config.RamSize == 0 {
-		b.config.RamSize = DefaultRamSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
-
-	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
-	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
-	}
-
-	return nil
 }
 
 func (b *Builder) checkHostAvailableMemory() string {
