@@ -69,27 +69,51 @@ listed below:
 -   `puppet_server` (string) - Hostname of the Puppet server. By default
     "puppet" will be used.
 
--   `staging_dir` (string) - This is the directory where all the configuration
-    of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-server"
-    when guest_os_type unix and "C:/Windows/Temp/packer-puppet-server" when windows.
-    This directory doesn't need to exist but must have proper permissions so that
-    the SSH user that Packer uses is able to create directories and write into this
-    folder. If the permissions are not correct, use a shell provisioner prior to this
-    to configure it properly.
+-   `staging_dir` (string) - This is the directory where all the
+    configuration of Puppet by Packer will be placed. By default this
+    is /tmp/packer-puppet-server. This directory doesn't need to exist but
+    must have proper permissions so that the SSH user that Packer uses is able
+    to create directories and write into this folder. If the permissions are not
+    correct, use a shell provisioner prior to this to configure it properly.
 
 -   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
     binary for running `puppet agent`. Usually, this would be found via the `$PATH`
     or `%PATH%` environment variable, but some builders (notably, the Docker one) do
     not run profile-setup scripts, therefore the path is usually empty.
 
--   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
-    various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
-    below for more information.
-
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
      Windows friendly paths and commands. By default, this is "unix".
+
+-   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
+    various [configuration template variables](/docs/templates/engine.html) available. By default,
+    Packer uses the following command (broken across multiple lines for readability) to execute Puppet:
+
+```
+{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
+```
+
+The following command is used if guest OS type is windows:
+
+```
+{{.FacterVars}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
+```
 
 ## Default Facts
 
