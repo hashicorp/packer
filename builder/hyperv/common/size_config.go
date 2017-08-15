@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	powershell "github.com/hashicorp/packer/common/powershell"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -38,6 +39,25 @@ func (c *SizeConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, err)
 	}
 	return errs
+}
+
+func (c *SizeConfig) ValidateAvailable() string {
+	if powershellAvailable, _, _ := powershell.IsPowershellAvailable(); powershellAvailable {
+		freeMB := powershell.GetHostAvailableMemory()
+
+		if (freeMB - float64(c.RamSize)) < LowRam {
+			return "Hyper-V might fail to create a VM if there is not enough free memory in the system."
+		}
+	}
+
+	return ""
+}
+
+func (c *SizeConfig) ValidateMinimum() string {
+	if c.RamSize < MinNestedVirtualizationRamSize {
+		return "For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs."
+	}
+	return ""
 }
 
 func (c *SizeConfig) checkDiskSize() error {
