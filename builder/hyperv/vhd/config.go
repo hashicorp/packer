@@ -3,6 +3,7 @@ package vhd
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
@@ -24,12 +25,6 @@ type Config struct {
 	hypervcommon.ShutdownConfig       `mapstructure:",squash"`
 	hypervcommon.GuestAdditionsConfig `mapstructure:",squash"`
 	hypervcommon.SizeConfig           `mapstructure:",squash"`
-
-	// Should integration services iso be mounted
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
-
-	// The path to the integration services iso
-	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
 	BootCommand                    []string `mapstructure:"boot_command"`
 	Checksum                       string   `mapstructure:"checksum"`
@@ -73,9 +68,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.VMName == "" {
 		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
 	}
+
 	if c.SwitchName == "" {
 		c.SwitchName = c.detectSwitchName()
 	}
+	log.Println(fmt.Sprintf("Using switch %s", c.SwitchName))
+
 	if c.Cpu < 1 {
 		c.Cpu = 1
 	}
