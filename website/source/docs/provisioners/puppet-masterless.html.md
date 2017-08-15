@@ -105,7 +105,7 @@ multiple manifests you should use `manifest_file` instead.
 
 -   `staging_directory` (string) - This is the directory where all the configuration
     of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-masterless"
-    when guest_os_type unix and "C:/Windows/Temp/packer-puppet-masterless" when windows.
+    when guest OS type is unix and "C:/Windows/Temp/packer-puppet-masterless" when windows.
     This directory doesn't need to exist but must have proper permissions so that the SSH
     user that Packer uses is able to create directories and write into this folder.
     If the permissions are not correct, use a shell provisioner prior to this to configure
@@ -133,7 +133,7 @@ puppet apply --verbose --modulepath='{{.ModulePath}}'
 {{.ManifestFile}}
 ```
 
-The following command is used if guest_os_type is windows:
+The following command is used if guest OS type is windows:
 
 ```
 cd {{.WorkingDir}} &&
