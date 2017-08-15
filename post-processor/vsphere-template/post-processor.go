@@ -97,11 +97,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			break
 		}
 	}
-	// In some occasions when the VM is mark as template it loses its configuration if it's done immediately
-	// after the ESXi creates it. If vSphere is given a few seconds this behavior doesn't reappear.
+	// In some occasions the VM state is powered on and if we immediately try to mark as template
+	// (after the ESXi creates it) it will fail. If vSphere is given a few seconds this behavior doesn't reappear.
 	ui.Message("Waiting 10s for VMWare vSphere to start")
 	time.Sleep(10 * time.Second)
-
 	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
 		return nil, false, fmt.Errorf("Error connecting to vSphere: %s", err)
@@ -120,13 +119,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		&stepFetchVm{
+		&stepMarkAsTemplate{
 			VMName: p.config.VMName,
 			Source: source,
-		},
-		&stepMarkAsTemplate{},
-		&stepMoveTemplate{
-			Folder: p.config.Folder,
 		},
 	}
 
