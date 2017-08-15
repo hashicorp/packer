@@ -52,9 +52,9 @@ Location:
 * `template` - [**mandatory**] name of source VM. Path is optional.
 * `vm_name` - [**mandatory**] name of target VM.
 * `folder` - VM folder where target VM is created.
-* `host` - [**mandatory**] vSphere host where target VM is created.
+* `host` - [**mandatory**] vSphere host or cluster where target VM is created. If hosts are groupped into folders, full path should be specified: `folder/host`.
 * `resource_pool` - by default a root of vSphere host.
-* `datastore` - required if vSphere host has multiple datastores attached.
+* `datastore` - required if target is a cluster, or a host with multiple datastores.
 * `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
 
 Hardware customization:
@@ -96,7 +96,7 @@ Post-processing:
       "template": "folder/ubuntu",
       "vm_name": "vm-1",
       "folder": "folder1/folder2",
-      "host": "esxi-1.domain.com",
+      "host": "folder/esxi-1.domain.com",
       "resource_pool": "pool1/pool2",
       "datastore": "datastore1",
       "linked_clone": true,
