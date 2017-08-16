@@ -11,6 +11,9 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"errors"
 	"time"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25"
 )
 
 type Driver struct {
@@ -27,8 +30,22 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	if err != nil {
 		return nil, err
 	}
-	vcenter_url.User = url.UserPassword(config.Username, config.Password)
-	client, err := govmomi.NewClient(ctx, vcenter_url, config.InsecureConnection)
+	credentials := url.UserPassword(config.Username, config.Password)
+	vcenter_url.User = credentials
+
+	soapClient := soap.NewClient(vcenter_url, config.InsecureConnection)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
+	client := &govmomi.Client{
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
+	}
+
+	err = client.SessionManager.Login(ctx, credentials)
 	if err != nil {
 		return nil, err
 	}
