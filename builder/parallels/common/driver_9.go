@@ -13,7 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/xmlpath.v2"
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
 )
 
 // Parallels9Driver is a base type for Parallels builders.
@@ -78,13 +79,19 @@ func getConfigValueFromXpath(path, xpath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	xpathComp := xmlpath.MustCompile(xpath)
-	root, err := xmlpath.Parse(file)
+
+	doc, err := xmltree.ParseXML(file)
 	if err != nil {
 		return "", err
 	}
-	value, _ := xpathComp.String(root)
-	return value, nil
+
+	xpExec := goxpath.MustParse(xpath)
+	node, err := xpExec.Exec(doc)
+	if err != nil {
+		return "", err
+	}
+
+	return node.String(), nil
 }
 
 // Finds an application bundle by identifier (for "darwin" platform only)
