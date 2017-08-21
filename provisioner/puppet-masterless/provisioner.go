@@ -68,8 +68,10 @@ type Config struct {
 }
 
 type guestOSTypeConfig struct {
-	stagingDir     string
-	executeCommand string
+	stagingDir       string
+	executeCommand   string
+	facterVarsFmt    string
+	modulePathJoiner string
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
@@ -83,6 +85,8 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"--detailed-exitcodes " +
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}",
+		facterVarsFmt:    "FACTER_%s='%s'",
+		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
 		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
@@ -94,6 +98,8 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"--detailed-exitcodes " +
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}",
+		facterVarsFmt:    "SET \"FACTER_%s=%s\" &",
+		modulePathJoiner: ";",
 	},
 }
 
@@ -130,12 +136,32 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	// Set some defaults
+	if p.config.GuestOSType == "" {
+		p.config.GuestOSType = provisioner.DefaultOSType
+	}
+	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
+	if p.config.ExecuteCommand == "" {
+		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
+	}
+
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = "/tmp/packer-puppet-masterless"
+		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
 	if p.config.WorkingDir == "" {
@@ -192,26 +218,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("module_path[%d] must point to a directory", i))
 		}
-	}
-
-	if p.config.GuestOSType == "" {
-		p.config.GuestOSType = provisioner.DefaultOSType
-	}
-	p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
-
-	var ok bool
-	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
-	if !ok {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
-	if err != nil {
-		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -271,23 +277,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// Compile the facter variables
 	facterVars := make([]string, 0, len(p.config.Facter))
 	for k, v := range p.config.Facter {
-		facterVars = append(facterVars, fmt.Sprintf("FACTER_%s='%s'", k, v))
+		facterVars = append(facterVars, fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, k, v))
 	}
 
 	// Execute Puppet
-	var facterVarsString string
-	if p.config.GuestOSType == provisioner.UnixOSType {
-		facterVarsString = strings.Join(facterVars, " ")
-	} else {
-		facterVarsString = "SET " + strings.Join(facterVars, " && SET ")
-	}
-
 	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:      facterVarsString,
+		FacterVars:      strings.Join(facterVars, " "),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
-		ModulePath:      strings.Join(modulePaths, ":"),
+		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
 		PuppetBinDir:    p.config.PuppetBinDir,
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
