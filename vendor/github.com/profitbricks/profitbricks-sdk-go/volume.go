@@ -4,24 +4,27 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/url"
 )
 
 type Volume struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties VolumeProperties           `json:"properties,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+	Id         string           `json:"id,omitempty"`
+	Type_      string           `json:"type,omitempty"`
+	Href       string           `json:"href,omitempty"`
+	Metadata   *Metadata        `json:"metadata,omitempty"`
+	Properties VolumeProperties `json:"properties,omitempty"`
+	Response   string           `json:"Response,omitempty"`
+	Headers    *http.Header     `json:"headers,omitempty"`
+	StatusCode int              `json:"headers,omitempty"`
 }
 
 type VolumeProperties struct {
 	Name                string   `json:"name,omitempty"`
 	Type                string   `json:"type,omitempty"`
 	Size                int      `json:"size,omitempty"`
+	AvailabilityZone    string   `json:"availabilityZone,omitempty"`
 	Image               string   `json:"image,omitempty"`
+	ImageAlias          string   `json:"imageAlias,omitempty"`
 	ImagePassword       string   `json:"imagePassword,omitempty"`
 	SshKeys             []string `json:"sshKeys,omitempty"`
 	Bus                 string   `json:"bus,omitempty"`
@@ -95,12 +98,14 @@ func DeleteVolume(dcid, volid string) Resp {
 	return is_delete(path)
 }
 
-func CreateSnapshot(dcid string, volid string, name string) Snapshot {
+func CreateSnapshot(dcid string, volid string, name string, description string) Snapshot {
 	var path = volume_path(dcid, volid)
 	path = path + "/create-snapshot"
-	url := mk_url(path)
-	body := json.RawMessage("name=" + name)
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req_url := mk_url(path)
+	data := url.Values{}
+	data.Set("name", name)
+	data.Add("description", description)
+	req, _ := http.NewRequest("POST", req_url, bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", CommandHeader)
 	return toSnapshot(do(req))
 }
