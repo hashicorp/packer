@@ -79,21 +79,20 @@ func (c *Communicator) Upload(dst string, src io.Reader, fi *os.FileInfo) error 
 	}
 	tempfile.Close()
 
-	// Copy the file into place by copying the temporary file we put
-	// into the shared folder into the proper location in the container
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("command cp %s/%s %s", c.ContainerDir,
-			filepath.Base(tempfile.Name()), dst),
-	}
+	// Use docker cp to copy the file from the host to the container
+	// command format: docker cp /path/to/infile containerid:/path/to/outfile
+	cmd := exec.Command("docker", "cp", tempfile.Name(), fmt.Sprintf("%s:%s", c.ContainerId, dst))
 
-	if err := c.Start(cmd); err != nil {
+	log.Printf("Copying %s to %s on container %s.", tempfile.Name(), dst, c.ContainerId)
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
-	// Wait for the copy to complete
-	cmd.Wait()
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Upload failed with non-zero exit status: %d", cmd.ExitStatus)
+	if err := cmd.Wait(); err != nil {
+		err = fmt.Errorf("Error uploading %s: %s",
+			tempfile.Name(),
+			err)
+		return err
 	}
 
 	return nil
