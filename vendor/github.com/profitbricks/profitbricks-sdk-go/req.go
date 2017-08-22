@@ -9,20 +9,29 @@ import (
 )
 
 //FullHeader is the standard header to include with all http requests except is_patch and is_command
-const FullHeader = "application/vnd.profitbricks.resource+json"
+const FullHeader = "application/json"
+
+var AgentHeader = "profitbricks-sdk-go/3.0.1"
 
 //PatchHeader is used with is_patch .
-const PatchHeader = "application/vnd.profitbricks.partial-properties+json"
+const PatchHeader = "application/json"
 
 //CommandHeader is used with is_command
 const CommandHeader = "application/x-www-form-urlencoded"
 
 var Depth = "5"
+var Pretty = true
 
 // SetDepth is used to set Depth
 func SetDepth(newdepth string) string {
 	Depth = newdepth
 	return Depth
+}
+
+// SetDepth is used to set Depth
+func SetPretty(pretty bool) bool {
+	Pretty = pretty
+	return Pretty
 }
 
 // mk_url  either:
@@ -32,7 +41,8 @@ func SetDepth(newdepth string) string {
 func mk_url(path string) string {
 	if strings.HasPrefix(path, "http") {
 		//REMOVE AFTER TESTING
-		path := strings.Replace(path, "https://api.profitbricks.com/rest/v2", Endpoint, 1)
+		//FIXME @jasmin Is this still relevant?
+		path := strings.Replace(path, "https://api.profitbricks.com/cloudapi/v3", Endpoint, 1)
 		// END REMOVE
 		return path
 	}
@@ -48,6 +58,7 @@ func mk_url(path string) string {
 func do(req *http.Request) Resp {
 	client := &http.Client{}
 	req.SetBasicAuth(Username, Passwd)
+	req.Header.Add("User-Agent", AgentHeader)
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
@@ -67,6 +78,7 @@ func is_delete(path string) Resp {
 	url := mk_url(path)
 	req, _ := http.NewRequest("DELETE", url, nil)
 	req.Header.Add("Content-Type", FullHeader)
+	req.Header.Add("User-Agent", AgentHeader)
 	return do(req)
 }
 
@@ -76,5 +88,6 @@ func is_command(path string, jason string) Resp {
 	body := json.RawMessage(jason)
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	req.Header.Add("Content-Type", CommandHeader)
+	req.Header.Add("User-Agent", AgentHeader)
 	return do(req)
 }
