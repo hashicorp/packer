@@ -3,6 +3,7 @@
 ### IMPROVEMENTS:
 
 * provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
+* builder/profitbricks: added support for Cloud API v4. [GH-5233]
 
 
 ## 1.0.4 (August 11, 2017)
