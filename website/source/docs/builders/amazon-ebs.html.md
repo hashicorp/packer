@@ -409,7 +409,7 @@ configuration of `launch_block_device_mappings` will expand the root volume
   "ami_name": "packer-quick-start {{timestamp}}",
   "launch_block_device_mappings": [
     {
-      "device_name": "/dev/sda1",
+      "device_name": "/dev/sda",
       "volume_size": 40,
       "volume_type": "gp2",
       "delete_on_termination": true
