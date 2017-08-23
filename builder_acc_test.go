@@ -42,13 +42,22 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := d.VMInfo(vm, "name", "runtime.host", "resourcePool", "layoutEx.disk")
+		vmInfo, err := d.VMInfo(vm, "name", "parent", "runtime.host", "resourcePool", "layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
 
 		if vmInfo.Name != name {
 			t.Errorf("Invalid VM name: expected '%v', got '%v'", name, vmInfo.Name)
+		}
+
+		f := d.NewFolder(vmInfo.Parent)
+		folderPath, err := d.GetFolderPath(f)
+		if err != nil {
+			t.Fatalf("Cannot read folder name: %v", err)
+		}
+		if folderPath != "" {
+			t.Errorf("Invalid folder: expected '/', got '%v'", folderPath)
 		}
 
 		h := d.NewHost(vmInfo.Runtime.Host)
@@ -62,13 +71,12 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		}
 
 		p := d.NewResourcePool(vmInfo.ResourcePool)
-		poolInfo, err := d.ResourcePoolInfo(p, "owner", "parent")
+		poolPath, err := d.GetResourcePoolPath(p)
 		if err != nil {
-			t.Fatalf("Cannot read resource pool properties: %v", err)
+			t.Fatalf("Cannot read resource pool name: %v", err)
 		}
-
-		if poolInfo.Owner != *poolInfo.Parent {
-			t.Error("Not a root resource pool")
+		if poolPath != "" {
+			t.Error("Invalid resource pool: expected '/', got '%v'", poolPath)
 		}
 
 		if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
