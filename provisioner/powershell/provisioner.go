@@ -266,7 +266,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
-
 			if err := comm.Upload(p.config.RemotePath, f, nil); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
