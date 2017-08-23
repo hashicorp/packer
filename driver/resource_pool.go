@@ -4,6 +4,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"fmt"
 )
 
 func (d *Driver) NewResourcePool(ref *types.ManagedObjectReference) *object.ResourcePool {
@@ -23,4 +24,25 @@ func (d *Driver) ResourcePoolInfo(host *object.ResourcePool, params ...string) (
 		return nil, err
 	}
 	return &poolInfo, nil
+}
+
+func (d *Driver) GetResourcePoolPath(pool *object.ResourcePool) (string, error) {
+	f, err := d.ResourcePoolInfo(pool, "name", "parent")
+	if err != nil {
+		return "", err
+	}
+	if f.Parent.Type == "ComputeResource" {
+		return "", nil
+	} else {
+		parent := d.NewResourcePool(f.Parent)
+		parentPath, err := d.GetResourcePoolPath(parent)
+		if err != nil {
+			return "", err
+		}
+		if parentPath == "" {
+			return f.Name, nil
+		} else {
+			return fmt.Sprintf("%v/%v", parentPath, f.Name), nil
+		}
+	}
 }

@@ -142,6 +142,44 @@ func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
 	}
 }
 
+func TestBuilderAcc_resourcePool(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: resourcePoolConfig(),
+		Check:    checkResourcePool(t, "pool1/pool2"),
+	})
+}
+
+func resourcePoolConfig() string {
+	config := defaultConfig()
+	config["resource_pool"] = "pool1/pool2"
+	config["linked_clone"] = true // speed up
+	return renderConfig(config)
+}
+
+func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
+
+		vmInfo, err := d.VMInfo(vm, "resourcePool")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		p := d.NewResourcePool(vmInfo.ResourcePool)
+		path, err := d.GetResourcePoolPath(p)
+		if err != nil {
+			t.Fatalf("Cannot read resource pool name: %v", err)
+		}
+		if path != pool {
+			t.Errorf("Wrong folder. expected: %v, got: %v", pool, path)
+		}
+
+		return nil
+	}
+}
+
 func TestBuilderAcc_linkedClone(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
