@@ -68,7 +68,7 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		h := conn.NewHost(vmInfo.Runtime.Host)
 		hostInfo, err := conn.HostInfo(h, "name")
 		if err != nil {
-			t.Fatal("Cannot read VM properties: ", err)
+			t.Fatal("Cannot read host properties: ", err)
 		}
 
 		if hostInfo.Name != host {
@@ -126,6 +126,39 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 
 		if len(vmInfo.LayoutEx.Disk[0].Chain) != 3 {
 			t.Error("Not a linked clone")
+		}
+
+		return nil
+	}
+}
+
+func TestBuilderAcc_snapshot(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: snapshotConfig(),
+		Check:    checkSnapshot(t),
+	})
+}
+
+func snapshotConfig() string {
+	config := defaultConfig()
+	config["create_snapshot"] = true
+	return renderConfig(config)
+}
+
+func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+
+		vm := getVM(t, d, artifacts)
+		vmInfo, err := d.VMInfo(vm, "layoutEx.disk")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		layers := len(vmInfo.LayoutEx.Disk[0].Chain)
+		if layers != 2 {
+			t.Errorf("VM should have a single snapshot. expected 2 disk layers, got %v", layers)
 		}
 
 		return nil
