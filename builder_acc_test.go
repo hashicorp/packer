@@ -104,6 +104,44 @@ func checkArtifact(t *testing.T) builderT.TestCheckFunc {
 	}
 }
 
+func TestBuilderAcc_folder(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: folderConfig(),
+		Check:    checkFolder(t, "folder1"),
+	})
+}
+
+func folderConfig() string {
+	config := defaultConfig()
+	config["folder"] = "folder1"
+	config["linked_clone"] = true // speed up
+	return renderConfig(config)
+}
+
+func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
+
+		vmInfo, err := d.VMInfo(vm, "parent")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		f := d.NewFolder(vmInfo.Parent)
+		path, err := d.GetFolderPath(f)
+		if err != nil {
+			t.Fatalf("Cannot read folder name: %v", err)
+		}
+		if path != folder {
+			t.Errorf("Wrong folder. expected: %v, got: %v", folder, path)
+		}
+
+		return nil
+	}
+}
+
 func TestBuilderAcc_linkedClone(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -179,8 +217,8 @@ func TestBuilderAcc_template(t *testing.T) {
 
 func templateConfig() string {
 	config := defaultConfig()
-	config["linked_clone"] = true
 	config["convert_to_template"] = true
+	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
 
