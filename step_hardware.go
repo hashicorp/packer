@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/object"
 	"fmt"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type HardwareConfig struct {
@@ -32,13 +33,20 @@ type StepConfigureHardware struct {
 
 func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if *s.config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware parameters...")
 
-		err := d.ConfigureVM(vm, s.config)
+		err := d.ConfigureVM(vm, &driver.HardwareConfig{
+			CPUs:           s.config.CPUs,
+			CPUReservation: s.config.CPUReservation,
+			CPULimit:       s.config.CPULimit,
+			RAM:            s.config.RAM,
+			RAMReservation: s.config.RAMReservation,
+			RAMReserveAll:  s.config.RAMReserveAll,
+		})
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

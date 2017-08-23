@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 	"bytes"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type ShutdownConfig struct {
@@ -40,7 +41,7 @@ type StepShutdown struct {
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.config.Command != "" {

@@ -4,6 +4,7 @@ import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/object"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type StepConvertToTemplate struct{
@@ -12,7 +13,7 @@ type StepConvertToTemplate struct{
 
 func (s *StepConvertToTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	if s.ConvertToTemplate {

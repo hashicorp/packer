@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"fmt"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type ConnectConfig struct {
@@ -34,12 +35,18 @@ type StepConnect struct {
 }
 
 func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
-	driver, err := NewDriver(s.config)
+	d, err := driver.NewDriver(&driver.ConnectConfig{
+		VCenterServer:      s.config.VCenterServer,
+		Username:           s.config.Username,
+		Password:           s.config.Password,
+		InsecureConnection: s.config.InsecureConnection,
+		Datacenter:         s.config.Datacenter,
+	})
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	state.Put("driver", driver)
+	state.Put("driver", d)
 
 	return multistep.ActionContinue
 }

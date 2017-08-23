@@ -5,6 +5,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/hashicorp/packer/packer"
 	"fmt"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type CloneConfig struct {
@@ -39,11 +40,19 @@ type StepCloneVM struct {
 
 func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 
 	ui.Say("Cloning VM...")
 
-	vm, err := d.CloneVM(s.config)
+	vm, err := d.CloneVM(&driver.CloneConfig{
+		Template:     s.config.Template,
+		VMName:       s.config.VMName,
+		Folder:       s.config.Folder,
+		Host:         s.config.Host,
+		ResourcePool: s.config.ResourcePool,
+		Datastore:    s.config.Datastore,
+		LinkedClone:  s.config.LinkedClone,
+	})
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -62,7 +71,7 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 
 	if vm, ok := state.GetOk("vm"); ok {
 		ui := state.Get("ui").(packer.Ui)
-		d := state.Get("driver").(*Driver)
+		d := state.Get("driver").(*driver.Driver)
 
 		ui.Say("Destroying VM...")
 

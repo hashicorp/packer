@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/object"
 	"fmt"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type StepRun struct {
@@ -12,7 +13,7 @@ type StepRun struct {
 
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	ui.Say("Power on VM...")
@@ -42,7 +43,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*Driver)
+	d := state.Get("driver").(*driver.Driver)
 	vm := state.Get("vm").(*object.VirtualMachine)
 
 	ui.Say("Power off VM...")

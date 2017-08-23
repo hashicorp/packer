@@ -1,4 +1,4 @@
-package main
+package driver
 
 import (
 	"github.com/vmware/govmomi"
@@ -21,6 +21,33 @@ type Driver struct {
 	client     *govmomi.Client
 	finder     *find.Finder
 	datacenter *object.Datacenter
+}
+
+type ConnectConfig struct {
+	VCenterServer      string
+	Username           string
+	Password           string
+	InsecureConnection bool
+	Datacenter         string
+}
+
+type CloneConfig struct {
+	Template     string
+	VMName       string
+	Folder       string
+	Host         string
+	ResourcePool string
+	Datastore    string
+	LinkedClone  bool
+}
+
+type HardwareConfig struct {
+	CPUs           int32
+	CPUReservation int64
+	CPULimit       int64
+	RAM            int64
+	RAMReservation int64
+	RAMReserveAll  bool
 }
 
 func NewDriver(config *ConnectConfig) (*Driver, error) {
