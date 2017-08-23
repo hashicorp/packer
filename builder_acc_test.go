@@ -108,13 +108,13 @@ func TestBuilderAcc_folder(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: folderConfig(),
-		Check:    checkFolder(t, "folder1"),
+		Check:    checkFolder(t, "folder1/folder2"),
 	})
 }
 
 func folderConfig() string {
 	config := defaultConfig()
-	config["folder"] = "folder1"
+	config["folder"] = "folder1/folder2"
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
