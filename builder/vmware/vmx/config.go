@@ -51,7 +51,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Defaults
 	if c.VMName == "" {
-		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
+		c.VMName = fmt.Sprintf(
+			"packer-%s-%d", c.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
 	// Prepare the errors
