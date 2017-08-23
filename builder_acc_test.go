@@ -39,24 +39,10 @@ func defaultConfig() map[string]interface{} {
 
 func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		if len(artifacts) > 1 {
-			t.Fatal("more than 1 artifact")
-		}
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
 
-		artifactRaw := artifacts[0]
-		artifact, ok := artifactRaw.(*Artifact)
-		if !ok {
-			t.Fatalf("unknown artifact: %#v", artifactRaw)
-		}
-
-		conn := testConn(t)
-
-		vm, err := conn.FindVM(artifact.Name)
-		if err != nil {
-			t.Fatal("Cannot find VM: ", err)
-		}
-
-		vmInfo, err := conn.VMInfo(vm, "name", "runtime.host", "resourcePool", "layoutEx.disk")
+		vmInfo, err := d.VMInfo(vm, "name", "runtime.host", "resourcePool", "layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -65,8 +51,8 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 			t.Errorf("Invalid VM name: expected '%v', got '%v'", name, vmInfo.Name)
 		}
 
-		h := conn.NewHost(vmInfo.Runtime.Host)
-		hostInfo, err := conn.HostInfo(h, "name")
+		h := d.NewHost(vmInfo.Runtime.Host)
+		hostInfo, err := d.HostInfo(h, "name")
 		if err != nil {
 			t.Fatal("Cannot read host properties: ", err)
 		}
@@ -75,8 +61,8 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 			t.Errorf("Invalid host name: expected '%v', got '%v'", host, hostInfo.Name)
 		}
 
-		p := conn.NewResourcePool(vmInfo.ResourcePool)
-		poolInfo, err := conn.ResourcePoolInfo(p, "owner", "parent")
+		p := d.NewResourcePool(vmInfo.ResourcePool)
+		poolInfo, err := d.ResourcePoolInfo(p, "owner", "parent")
 		if err != nil {
 			t.Fatalf("Cannot read resource pool properties: %v", err)
 		}
@@ -87,6 +73,31 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 
 		if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
 			t.Error("Not a full clone")
+		}
+
+		return nil
+	}
+}
+
+func TestBuilderAcc_artifact(t *testing.T) {
+	config := defaultConfig()
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: renderConfig(config),
+		Check:    checkArtifact(t),
+	})
+}
+
+func checkArtifact(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			t.Fatal("more than 1 artifact")
+		}
+
+		artifactRaw := artifacts[0]
+		_, ok := artifactRaw.(*Artifact)
+		if !ok {
+			t.Fatalf("unknown artifact: %#v", artifactRaw)
 		}
 
 		return nil
@@ -109,17 +120,10 @@ func linkedCloneConfig() string {
 
 func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		artifactRaw := artifacts[0]
-		artifact, _ := artifactRaw.(*Artifact)
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
 
-		conn := testConn(t)
-
-		vm, err := conn.FindVM(artifact.Name)
-		if err != nil {
-			t.Fatalf("Cannot find VM: %v", err)
-		}
-
-		vmInfo, err := conn.VMInfo(vm, "layoutEx.disk")
+		vmInfo, err := d.VMInfo(vm, "layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
