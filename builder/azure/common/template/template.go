@@ -45,6 +45,7 @@ type OSDiskUnion struct {
 	Caching      compute.CachingTypes              `json:"caching,omitempty"`
 	CreateOption compute.DiskCreateOptionTypes     `json:"createOption,omitempty"`
 	DiskSizeGB   *int32                            `json:"diskSizeGB,omitempty"`
+	ManagedDisk  *compute.ManagedDiskParameters    `json:"managedDisk,omitempty"`
 }
 
 // Union of the StorageProfile and ImageStorageProfile types.
