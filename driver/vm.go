@@ -6,6 +6,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 	"errors"
 	"time"
+	"fmt"
 )
 
 type VirtualMachine struct {
@@ -44,7 +45,7 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 		return nil, err
 	}
 	return &VirtualMachine{
-		vm: vm,
+		vm:     vm,
 		driver: d,
 	}, nil
 }
@@ -79,13 +80,31 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
-	if config.Datastore != "" {
-		datastore, err := template.driver.FindDatastore(config.Datastore)
+	if config.Datastore == "" {
+		host, err := template.driver.FindHost(config.Host)
 		if err != nil {
 			return nil, err
 		}
-		datastoreRef := datastore.ds.Reference()
-		relocateSpec.Datastore = &datastoreRef
+
+		info, err := host.Info("datastore")
+		if err != nil {
+			return nil, err
+		}
+
+		if len(info.Datastore) > 1 {
+			return nil, fmt.Errorf("Target host has several datastores. Specify 'datastore' parameter explicitly")
+		}
+
+		ref := info.Datastore[0].Reference()
+		relocateSpec.Datastore = &ref
+	} else {
+		ds, err := template.driver.FindDatastore(config.Datastore)
+		if err != nil {
+			return nil, err
+		}
+
+		ref := ds.ds.Reference()
+		relocateSpec.Datastore = &ref
 	}
 
 	var cloneSpec types.VirtualMachineCloneSpec

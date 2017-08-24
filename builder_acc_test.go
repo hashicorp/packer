@@ -15,7 +15,7 @@ func TestBuilderAcc_default(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: renderConfig(config),
-		Check:    checkDefault(t, config["vm_name"].(string), config["host"].(string)),
+		Check:    checkDefault(t, config["vm_name"].(string), config["host"].(string), "datastore1"),
 	})
 }
 
@@ -36,12 +36,12 @@ func defaultConfig() map[string]interface{} {
 	return config
 }
 
-func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc {
+func checkDefault(t *testing.T, name string, host string, datastore string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "layoutEx.disk")
+		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -64,7 +64,6 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		if err != nil {
 			t.Fatal("Cannot read host properties: ", err)
 		}
-
 		if hostInfo.Name != host {
 			t.Errorf("Invalid host name: expected '%v', got '%v'", host, hostInfo.Name)
 		}
@@ -76,6 +75,16 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		}
 		if poolPath != "" {
 			t.Error("Invalid resource pool: expected '/', got '%v'", poolPath)
+		}
+
+		dsr := vmInfo.Datastore[0].Reference()
+		ds := d.NewDatastore(&dsr)
+		dsInfo, err := ds.Info("name")
+		if err != nil {
+			t.Fatal("Cannot read datastore properties: ", err)
+		}
+		if dsInfo.Name != datastore {
+			t.Errorf("Invalid datastore name: expected '%v', got '%v'", datastore, dsInfo.Name)
 		}
 
 		if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
@@ -185,6 +194,63 @@ func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func TestBuilderAcc_datastore(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: datastoreConfig(),
+		Check:    checkDatastore(t, "datastore1"), // on esxi-1.vsphere55.test
+	})
+}
+
+func datastoreConfig() string {
+	config := defaultConfig()
+	config["template"] = "ubuntu-host4" // on esxi-4.vsphere55.test
+	return renderConfig(config)
+}
+
+func checkDatastore(t *testing.T, name string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("datastore")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		n := len(vmInfo.Datastore)
+		if n != 1 {
+			t.Fatalf("VM should have 1 datastore, got %v", n)
+		}
+
+		ds := d.NewDatastore(&vmInfo.Datastore[0])
+		info, err := ds.Info("name")
+		if err != nil {
+			t.Fatalf("Cannot read datastore properties: %v", err)
+		}
+		if info.Name != name {
+			t.Errorf("Wrong datastore. expected: %v, got: %v", name, info.Name)
+		}
+
+		return nil
+	}
+}
+
+func TestBuilderAcc_multipleDatastores(t *testing.T) {
+	t.Skip("test must fail")
+
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: multipleDatastoresConfig(),
+	})
+}
+
+func multipleDatastoresConfig() string {
+	config := defaultConfig()
+	config["host"] = "esxi-4.vsphere55.test" // host with 2 datastores
+	return renderConfig(config)
 }
 
 func TestBuilderAcc_linkedClone(t *testing.T) {
