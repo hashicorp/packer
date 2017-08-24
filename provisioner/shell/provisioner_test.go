@@ -32,8 +32,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if *p.config.ExpectDisconnect != true {
-		t.Errorf("expected ExpectDisconnect to be true")
+	if *p.config.ExpectDisconnect != false {
+		t.Errorf("expected ExpectDisconnect to default to false")
 	}
 
 	if p.config.RemotePath == "" {
