@@ -74,9 +74,11 @@ type Config struct {
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
 
-	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName              string `mapstructure:"managed_image_name"`
-	manageImageLocation           string
+	ManagedImageResourceGroupName  string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName               string `mapstructure:"managed_image_name"`
+	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type"`
+	managedImageStorageAccountType compute.StorageAccountTypes
+	manageImageLocation            string
 
 	// Deployment
 	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
@@ -405,6 +407,10 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
+	if c.ManagedImageStorageAccountType == "" {
+		c.managedImageStorageAccountType = compute.StandardLRS
+	}
+
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
@@ -597,5 +603,14 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
 	} else {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
+	}
+
+	switch c.ManagedImageStorageAccountType {
+	case "", string(compute.StandardLRS):
+		c.managedImageStorageAccountType = compute.StandardLRS
+	case string(compute.PremiumLRS):
+		c.managedImageStorageAccountType = compute.PremiumLRS
+	default:
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
 }
