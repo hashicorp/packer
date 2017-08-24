@@ -195,9 +195,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
 		},
 		&awscommon.StepDeregisterAMI{
+			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.AMIForceDeregister,
 			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
 			AMIName:             b.config.AMIName,
+			Regions:             b.config.AMIRegions,
 		},
 		&StepRegisterAMI{
 			RootDevice:   b.config.RootDevice,
