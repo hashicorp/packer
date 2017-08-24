@@ -7,42 +7,61 @@ import (
 	"fmt"
 )
 
-func (d *Driver) NewFolder(ref *types.ManagedObjectReference) *object.Folder {
-	return object.NewFolder(d.client.Client, *ref)
+type Folder struct {
+	driver *Driver
+	folder *object.Folder
 }
 
-func (d *Driver) FolderInfo(folder *object.Folder, params ...string) (*mo.Folder, error) {
+func (d *Driver) NewFolder(ref *types.ManagedObjectReference) *Folder {
+	return &Folder{
+		folder: object.NewFolder(d.client.Client, *ref),
+		driver: d,
+	}
+}
+
+func (d *Driver) FindFolder(name string) (*Folder, error) {
+	f, err := d.finder.Folder(d.ctx, fmt.Sprintf("/%v/vm/%v", d.datacenter.Name(), name))
+	if err != nil {
+		return nil, err
+	}
+	return &Folder{
+		folder: f,
+		driver: d,
+	}, nil
+}
+
+func (f *Folder) Info(params ...string) (*mo.Folder, error) {
 	var p []string
 	if len(params) == 0 {
 		p = []string{"*"}
 	} else {
 		p = params
 	}
-	var folderInfo mo.Folder
-	err := folder.Properties(d.ctx, folder.Reference(), p, &folderInfo)
+	var info mo.Folder
+	err := f.folder.Properties(f.driver.ctx, f.folder.Reference(), p, &info)
 	if err != nil {
 		return nil, err
 	}
-	return &folderInfo, nil
+	return &info, nil
 }
 
-func (d *Driver) GetFolderPath(folder *object.Folder) (string, error) {
-	f, err := d.FolderInfo(folder, "name", "parent")
+func (f *Folder) Path() (string, error) {
+	info, err := f.Info("name", "parent")
 	if err != nil {
 		return "", err
 	}
-	if f.Parent.Type == "Datacenter" {
+	if info.Parent.Type == "Datacenter" {
 		return "", nil
 	} else {
-		parent := d.NewFolder(f.Parent)
-		parentPath, err := d.GetFolderPath(parent)
+		parent := f.driver.NewFolder(info.Parent)
+		path, err := parent.Path()
 		if err != nil {
 			return "", err
 		}
-		if parentPath == "" {
-			return f.Name, nil
+		if path == "" {
+			return info.Name, nil
 		} else {
-			return fmt.Sprintf("%v/%v", parentPath, f.Name), nil
+			return fmt.Sprintf("%v/%v", path, info.Name), nil
 		}
 	}
 }

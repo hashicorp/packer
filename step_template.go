@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/object"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
@@ -13,12 +12,11 @@ type StepConvertToTemplate struct{
 
 func (s *StepConvertToTemplate) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	if s.ConvertToTemplate {
 		ui.Say("Convert VM into template...")
-		err := d.ConvertToTemplate(vm)
+		err := vm.ConvertToTemplate()
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

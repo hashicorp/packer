@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/object"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
@@ -13,13 +12,12 @@ type StepCreateSnapshot struct{
 
 func (s *StepCreateSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	if s.createSnapshot {
 		ui.Say("Creating snapshot...")
 
-		err := d.CreateSnapshot(vm)
+		err := vm.CreateSnapshot("Created by Packer")
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt

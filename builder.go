@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	gossh "golang.org/x/crypto/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
-	"github.com/vmware/govmomi/object"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type Builder struct {
@@ -93,7 +93,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	artifact := &Artifact{
 		Name: b.config.VMName,
-		VM:   state.Get("vm").(*object.VirtualMachine),
+		VM:   state.Get("vm").(*driver.VirtualMachine),
 	}
 	return artifact, nil
 }

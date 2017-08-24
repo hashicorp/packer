@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/object"
 	"fmt"
 	"log"
 	"time"
@@ -41,8 +40,7 @@ type StepShutdown struct {
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	if s.config.Command != "" {
 		ui.Say("Executing shutdown command...")
@@ -62,7 +60,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	} else {
 		ui.Say("Shut down VM...")
 
-		err := d.StartShutdown(vm)
+		err := vm.StartShutdown()
 		if err != nil {
 			state.Put("error", fmt.Errorf("Cannot shut down VM: %v", err))
 			return multistep.ActionHalt
@@ -70,7 +68,7 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Waiting max %s for shutdown to complete", s.config.Timeout)
-	err := d.WaitForShutdown(vm, s.config.Timeout)
+	err := vm.WaitForShutdown(s.config.Timeout)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

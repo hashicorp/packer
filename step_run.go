@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/object"
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
@@ -13,18 +12,18 @@ type StepRun struct {
 
 func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	ui.Say("Power on VM...")
-	err := d.PowerOn(vm)
+
+	err := vm.PowerOn()
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	ui.Say("Waiting for IP...")
-	ip, err := d.WaitForIP(vm)
+	ip, err := vm.WaitForIP()
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -43,11 +42,11 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	ui.Say("Power off VM...")
-	err := d.PowerOff(vm)
+
+	err := vm.PowerOff()
 	if err != nil {
 		ui.Error(err.Error())
 	}

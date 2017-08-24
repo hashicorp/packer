@@ -1,15 +1,14 @@
 package main
 
 import (
-	"github.com/vmware/govmomi/object"
-	"context"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 const BuilderId = "jetbrains.vsphere"
 
 type Artifact struct {
 	Name string
-	VM   *object.VirtualMachine
+	VM   *driver.VirtualMachine
 }
 
 func (a *Artifact) BuilderId() string {
@@ -33,11 +32,9 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	ctx := context.TODO()
-	task, err := a.VM.Destroy(ctx)
+	err := a.VM.Destroy()
 	if err != nil {
 		return err
 	}
-	_, err = task.WaitForResult(ctx, nil)
-	return err
+	return nil
 }

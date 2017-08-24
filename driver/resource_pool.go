@@ -2,47 +2,66 @@ package driver
 
 import (
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/mo"
 	"fmt"
 )
 
-func (d *Driver) NewResourcePool(ref *types.ManagedObjectReference) *object.ResourcePool {
-	return object.NewResourcePool(d.client.Client, *ref)
+type ResourcePool struct {
+	pool   *object.ResourcePool
+	driver *Driver
 }
 
-func (d *Driver) ResourcePoolInfo(host *object.ResourcePool, params ...string) (*mo.ResourcePool, error){
-	var p []string
-	if len(params) == 0 {
-		p = []string{"*"}
-	} else {
-		p = params
+func (d *Driver) NewResourcePool(ref *types.ManagedObjectReference) *ResourcePool {
+	return &ResourcePool{
+		pool:   object.NewResourcePool(d.client.Client, *ref),
+		driver: d,
 	}
-	var poolInfo mo.ResourcePool
-	err := host.Properties(d.ctx, host.Reference(), p, &poolInfo)
+}
+
+func (d *Driver) FindResourcePool(host string, name string) (*ResourcePool, error) {
+	p, err := d.finder.ResourcePool(d.ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", d.datacenter.Name(), host, name))
 	if err != nil {
 		return nil, err
 	}
-	return &poolInfo, nil
+	return &ResourcePool{
+		pool: p,
+		driver: d,
+	}, nil
 }
 
-func (d *Driver) GetResourcePoolPath(pool *object.ResourcePool) (string, error) {
-	f, err := d.ResourcePoolInfo(pool, "name", "parent")
+func (p *ResourcePool) Info(params ...string) (*mo.ResourcePool, error) {
+	var params2 []string
+	if len(params) == 0 {
+		params2 = []string{"*"}
+	} else {
+		params2 = params
+	}
+	var info mo.ResourcePool
+	err := p.pool.Properties(p.driver.ctx, p.pool.Reference(), params2, &info)
+	if err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+func (p *ResourcePool) Path() (string, error) {
+	poolInfo, err := p.Info("name", "parent")
 	if err != nil {
 		return "", err
 	}
-	if f.Parent.Type == "ComputeResource" {
+	if poolInfo.Parent.Type == "ComputeResource" {
 		return "", nil
 	} else {
-		parent := d.NewResourcePool(f.Parent)
-		parentPath, err := d.GetResourcePoolPath(parent)
+		parent := p.driver.NewResourcePool(poolInfo.Parent)
+		parentPath, err := parent.Path()
 		if err != nil {
 			return "", err
 		}
 		if parentPath == "" {
-			return f.Name, nil
+			return poolInfo.Name, nil
 		} else {
-			return fmt.Sprintf("%v/%v", parentPath, f.Name), nil
+			return fmt.Sprintf("%v/%v", parentPath, poolInfo.Name), nil
 		}
 	}
 }

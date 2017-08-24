@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/object"
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
@@ -33,13 +32,12 @@ type StepConfigureHardware struct {
 
 func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	d := state.Get("driver").(*driver.Driver)
-	vm := state.Get("vm").(*object.VirtualMachine)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	if *s.config != (HardwareConfig{}) {
 		ui.Say("Customizing hardware parameters...")
 
-		err := d.ConfigureVM(vm, &driver.HardwareConfig{
+		err := vm.Configure(&driver.HardwareConfig{
 			CPUs:           s.config.CPUs,
 			CPUReservation: s.config.CPUReservation,
 			CPULimit:       s.config.CPULimit,

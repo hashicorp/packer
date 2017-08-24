@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/mitchellh/multistep"
-	"github.com/vmware/govmomi/object"
 	"github.com/hashicorp/packer/packer"
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
@@ -44,9 +43,14 @@ func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Cloning VM...")
 
-	vm, err := d.CloneVM(&driver.CloneConfig{
-		Template:     s.config.Template,
-		VMName:       s.config.VMName,
+	template, err := d.FindVM(s.config.Template)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	vm, err := template.Clone(&driver.CloneConfig{
+		Name:         s.config.VMName,
 		Folder:       s.config.Folder,
 		Host:         s.config.Host,
 		ResourcePool: s.config.ResourcePool,
@@ -69,15 +73,13 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	if vm, ok := state.GetOk("vm"); ok {
-		ui := state.Get("ui").(packer.Ui)
-		d := state.Get("driver").(*driver.Driver)
+	ui := state.Get("ui").(packer.Ui)
+	vm := state.Get("vm").(*driver.VirtualMachine)
 
-		ui.Say("Destroying VM...")
+	ui.Say("Destroying VM...")
 
-		err := d.DestroyVM(vm.(*object.VirtualMachine))
-		if err != nil {
-			ui.Error(err.Error())
-		}
+	err := vm.Destroy()
+	if err != nil {
+		ui.Error(err.Error())
 	}
 }

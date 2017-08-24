@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"encoding/json"
 	"math/rand"
-	"github.com/vmware/govmomi/object"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
@@ -42,7 +41,7 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := d.VMInfo(vm, "name", "parent", "runtime.host", "resourcePool", "layoutEx.disk")
+		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -52,7 +51,7 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		}
 
 		f := d.NewFolder(vmInfo.Parent)
-		folderPath, err := d.GetFolderPath(f)
+		folderPath, err := f.Path()
 		if err != nil {
 			t.Fatalf("Cannot read folder name: %v", err)
 		}
@@ -61,7 +60,7 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		}
 
 		h := d.NewHost(vmInfo.Runtime.Host)
-		hostInfo, err := d.HostInfo(h, "name")
+		hostInfo, err := h.Info("name")
 		if err != nil {
 			t.Fatal("Cannot read host properties: ", err)
 		}
@@ -71,7 +70,7 @@ func checkDefault(t *testing.T, name string, host string) builderT.TestCheckFunc
 		}
 
 		p := d.NewResourcePool(vmInfo.ResourcePool)
-		poolPath, err := d.GetResourcePoolPath(p)
+		poolPath, err := p.Path()
 		if err != nil {
 			t.Fatalf("Cannot read resource pool name: %v", err)
 		}
@@ -132,13 +131,13 @@ func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := d.VMInfo(vm, "parent")
+		vmInfo, err := vm.Info("parent")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
 
 		f := d.NewFolder(vmInfo.Parent)
-		path, err := d.GetFolderPath(f)
+		path, err := f.Path()
 		if err != nil {
 			t.Fatalf("Cannot read folder name: %v", err)
 		}
@@ -170,13 +169,13 @@ func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := d.VMInfo(vm, "resourcePool")
+		vmInfo, err := vm.Info("resourcePool")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
 
 		p := d.NewResourcePool(vmInfo.ResourcePool)
-		path, err := d.GetResourcePoolPath(p)
+		path, err := p.Path()
 		if err != nil {
 			t.Fatalf("Cannot read resource pool name: %v", err)
 		}
@@ -207,7 +206,7 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 		d := testConn(t)
 		vm := getVM(t, d, artifacts)
 
-		vmInfo, err := d.VMInfo(vm, "layoutEx.disk")
+		vmInfo, err := vm.Info("layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -239,7 +238,7 @@ func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
 		d := testConn(t)
 
 		vm := getVM(t, d, artifacts)
-		vmInfo, err := d.VMInfo(vm, "layoutEx.disk")
+		vmInfo, err := vm.Info("layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -273,7 +272,7 @@ func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 		d := testConn(t)
 
 		vm := getVM(t, d, artifacts)
-		vmInfo, err := d.VMInfo(vm, "config.template")
+		vmInfo, err := vm.Info("config.template")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -315,7 +314,7 @@ func testConn(t *testing.T) *driver.Driver {
 	return d
 }
 
-func getVM(t *testing.T, d *driver.Driver, artifacts []packer.Artifact) *object.VirtualMachine {
+func getVM(t *testing.T, d *driver.Driver, artifacts []packer.Artifact) *driver.VirtualMachine {
 	artifactRaw := artifacts[0]
 	artifact, _ := artifactRaw.(*Artifact)
 

@@ -2,25 +2,33 @@ package driver
 
 import (
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
-func (d *Driver) NewHost(ref *types.ManagedObjectReference) *object.HostSystem {
-	return object.NewHostSystem(d.client.Client, *ref)
+type Host struct {
+	driver *Driver
+	host *object.HostSystem
 }
 
-func (d *Driver) HostInfo(host *object.HostSystem, params ...string) (*mo.HostSystem, error){
+func (d *Driver) NewHost(ref *types.ManagedObjectReference) *Host {
+	return &Host{
+		host: object.NewHostSystem(d.client.Client, *ref),
+		driver: d,
+	}
+}
+
+func (h *Host) Info(params ...string) (*mo.HostSystem, error){
 	var p []string
 	if len(params) == 0 {
 		p = []string{"*"}
 	} else {
 		p = params
 	}
-	var hostInfo mo.HostSystem
-	err := host.Properties(d.ctx, host.Reference(), p, &hostInfo)
+	var info mo.HostSystem
+	err := h.host.Properties(h.driver.ctx, h.host.Reference(), p, &info)
 	if err != nil {
 		return nil, err
 	}
-	return &hostInfo, nil
+	return &info, nil
 }
