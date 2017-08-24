@@ -792,6 +792,26 @@ func TestConfigShouldRejectVhdAndManagedImageOutput(t *testing.T) {
 	}
 }
 
+// If the user specified a build of a VHD, but started with a managed image it should be rejected.
+func TestConfigShouldRejectManagedImageSourceAndVhdOutput(t *testing.T) {
+	config := map[string]interface{}{
+		"image_url":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject VHD and Managed Image build")
+	}
+}
+
 func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 	config := map[string]interface{}{
 		"custom_managed_image_resource_group_name": "ignore",
