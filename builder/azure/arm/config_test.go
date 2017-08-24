@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/packer"
 )
@@ -48,6 +49,10 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	if c.ObjectID != "" {
 		t.Errorf("Expected 'ObjectID' to be nil, but it was '%s'!", c.ObjectID)
 	}
+
+	if c.managedImageStorageAccountType == "" {
+		t.Errorf("Expected 'managedImageStorageAccountType' to be populated, but it was empty!")
+	}
 }
 
 func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
@@ -56,6 +61,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues["ssh_username"] = "override_username"
 	builderValues["vm_size"] = "override_vm_size"
 	builderValues["communicator"] = "ssh"
+	builderValues["managed_image_storage_account_type"] = "Premium_LRS"
 
 	c, _, err := newConfig(builderValues, getPackerConfiguration())
 
@@ -64,23 +70,27 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	}
 
 	if c.Password != "override_password" {
-		t.Errorf("Expected 'Password' to be set to 'override_password', but found '%s'!", c.Password)
+		t.Errorf("Expected 'Password' to be set to 'override_password', but found %q!", c.Password)
 	}
 
 	if c.Comm.SSHPassword != "override_password" {
-		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to 'override_password', but found '%s'!", c.Comm.SSHPassword)
+		t.Errorf("Expected 'c.Comm.SSHPassword' to be set to 'override_password', but found %q!", c.Comm.SSHPassword)
 	}
 
 	if c.UserName != "override_username" {
-		t.Errorf("Expected 'UserName' to be set to 'override_username', but found '%s'!", c.UserName)
+		t.Errorf("Expected 'UserName' to be set to 'override_username', but found %q!", c.UserName)
 	}
 
 	if c.Comm.SSHUsername != "override_username" {
-		t.Errorf("Expected 'c.Comm.SSHUsername' to be set to 'override_username', but found '%s'!", c.Comm.SSHUsername)
+		t.Errorf("Expected 'c.Comm.SSHUsername' to be set to 'override_username', but found %q!", c.Comm.SSHUsername)
 	}
 
 	if c.VMSize != "override_vm_size" {
-		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found '%s'!", c.VMSize)
+		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found %q!", c.VMSize)
+	}
+
+	if c.managedImageStorageAccountType != compute.PremiumLRS {
+		t.Errorf("Expected 'managed_image_storage_account_type' to be set to 'Premium_LRS', but found %q!", c.managedImageStorageAccountType)
 	}
 }
 
@@ -823,6 +833,52 @@ func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
+func TestConfigShouldRejectMalformedManageImageStorageAccountTypes(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+		"managed_image_storage_account_type":       "--invalid--",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
+func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	storage_account_types := []string{"Premium_LRS", "Standard_LRS"}
+
+	for _, x := range storage_account_types {
+		config["managed_image_storage_account_type"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if err != nil {
+			t.Fatalf("expected config to accept a managed_image_storage_account_type of %q", x)
+		}
 	}
 }
 
