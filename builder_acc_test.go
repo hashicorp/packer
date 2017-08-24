@@ -285,6 +285,99 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 	}
 }
 
+func TestBuilderAcc_hardware(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: hardwareConfig(),
+		Check:    checkHardware(t),
+	})
+}
+
+func hardwareConfig() string {
+	config := defaultConfig()
+	config["CPUs"] = 2
+	config["CPU_reservation"] = 1000
+	config["CPU_limit"] = 1500
+	config["RAM"] = 2048
+	config["RAM_reservation"] = 1024
+	config["linked_clone"] = true // speed up
+
+	return renderConfig(config)
+}
+
+func checkHardware(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+
+		vm := getVM(t, d, artifacts)
+		vmInfo, err := vm.Info("config")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		cpuSockets := vmInfo.Config.Hardware.NumCPU
+		if cpuSockets != 2 {
+			t.Errorf("VM should have 2 CPU sockets, got %v", cpuSockets)
+		}
+
+		cpuReservation := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Reservation
+		if cpuReservation != 1000 {
+			t.Errorf("VM should have CPU reservation for 1000 Mhz, got %v", cpuReservation)
+		}
+
+		cpuLimit := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Limit
+		if cpuLimit != 1500 {
+			t.Errorf("VM should have CPU reservation for 1500 Mhz, got %v", cpuLimit)
+		}
+
+		ram := vmInfo.Config.Hardware.MemoryMB
+		if ram != 2048 {
+			t.Errorf("VM should have 2048 MB of RAM, got %v", ram)
+		}
+
+		ramReservation := vmInfo.Config.MemoryAllocation.GetResourceAllocationInfo().Reservation
+		if ramReservation != 1024 {
+			t.Errorf("VM should have RAM reservation for 1024 MB, got %v", ramReservation)
+		}
+
+		return nil
+	}
+}
+
+func TestBuilderAcc_RAMReservation(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: RAMReservationConfig(),
+		Check:    checkRAMReservation(t),
+	})
+}
+
+func RAMReservationConfig() string {
+	config := defaultConfig()
+	config["RAM_reserve_all"] = true
+	config["linked_clone"] = true // speed up
+
+	return renderConfig(config)
+}
+
+func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+
+		vm := getVM(t, d, artifacts)
+		vmInfo, err := vm.Info("config")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		if *vmInfo.Config.MemoryReservationLockedToMax != true {
+			t.Errorf("VM should have all RAM reserved")
+		}
+
+		return nil
+	}
+}
+
 func TestBuilderAcc_snapshot(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
