@@ -74,7 +74,12 @@ func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
+
+	st := state.Get("vm")
+	if st == nil {
+		return
+	}
+	vm := st.(*driver.VirtualMachine)
 
 	ui.Say("Destroying VM...")
 
