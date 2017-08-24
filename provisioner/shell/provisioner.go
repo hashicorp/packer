@@ -105,7 +105,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExpectDisconnect == nil {
-		t := true
+		t := false
 		p.config.ExpectDisconnect = &t
 	}
 
