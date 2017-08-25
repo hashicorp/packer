@@ -17,9 +17,10 @@ import (
 // Produces:
 //   source_image *ec2.Image - the source AMI info
 type StepSourceAMIInfo struct {
-	SourceAmi          string
-	EnhancedNetworking bool
-	AmiFilters         AmiFilterOptions
+	SourceAmi             string
+	EnableSriovNetSupport bool
+	EnableENASupport      bool
+	AmiFilters            AmiFilterOptions
 }
 
 // Build a slice of AMI filter options from the filters provided.
@@ -103,7 +104,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if s.EnhancedNetworking && *image.VirtualizationType != "hvm" {
+	if (s.EnableENASupport || s.EnableSriovNetSupport) && *image.VirtualizationType != "hvm" {
 		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
 		state.Put("error", err)
 		ui.Error(err.Error())
