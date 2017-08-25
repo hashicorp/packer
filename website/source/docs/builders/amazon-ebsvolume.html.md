@@ -104,11 +104,18 @@ builder.
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    If you want to set this, but not `sriov_support`, make sure to leave `enhanced_networking: false`.
+    Default `false`.
+
 -   `enhanced_networking` (boolean) - Enable enhanced
     networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
     `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
     sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). To enable SriovNetSupport and ENA support independently, use `sriov_support` and `ena_support` instead of `enhanced_networking`.  Using `enhanced_networking: true` will automatically set both `sriov_support` and `ena_support` to `true`, overriding any values you set. Default `false`.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
@@ -207,6 +214,13 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)` or `Windows (Amazon VPC)`
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs.   If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    If you want to set this, but not `ena_support`, make sure to leave `enhanced_networking: false`.
+    Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
