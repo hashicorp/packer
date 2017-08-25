@@ -67,7 +67,8 @@ Hardware customization:
 
 Provisioning:
 * `ssh_username` - [**mandatory**] username in guest OS.
-* `ssh_password` - [**mandatory**] password in guest OS.
+* `ssh_password` - [**mandatory if ssh_private_key_file is not present**] password in guest OS.
+* `ssh_private_key_file` - [**mandatory if ssh_password is not present**] password in guest OS.
 
 Post-processing:
 * `shutdown_command` - VMware guest tools are used by default.

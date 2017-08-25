@@ -4,12 +4,10 @@ import (
 	"errors"
 
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/hashicorp/packer/helper/communicator"
-	gossh "golang.org/x/crypto/ssh"
-	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"github.com/mitchellh/multistep"
 )
 
 type Builder struct {
@@ -29,6 +27,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
+	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -45,21 +44,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepRun{},
 		&communicator.StepConnect{
 			Config:    &b.config.Config,
-			Host:      func(state multistep.StateBag) (string, error) {
-				return state.Get("ip").(string), nil
-			},
-			SSHConfig: func(multistep.StateBag) (*gossh.ClientConfig, error) {
-				return &gossh.ClientConfig{
-					User: b.config.Config.SSHUsername,
-					Auth: []gossh.AuthMethod{
-						gossh.Password(b.config.Config.SSHPassword),
-						gossh.KeyboardInteractive(
-							ssh.PasswordKeyboardInteractive(b.config.Config.SSHPassword)),
-					},
-					// TODO: add a proper verification
-					HostKeyCallback: gossh.InsecureIgnoreHostKey(),
-				}, nil
-			},
+			Host:      commHost,
+			SSHConfig: sshConfig,
 		},
 		&common.StepProvision{},
 		&StepShutdown{
