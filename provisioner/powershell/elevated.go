@@ -60,7 +60,7 @@ $t.XmlText = @'
 '@
 if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}
 $f = $s.GetFolder("\")
-$f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", "{{.Password}}", 1, $null) | Out-Null
+$f.RegisterTaskDefinition($name, $t, 6, '{{.User}}', '{{.Password}}', 1, $null) | Out-Null
 $t = $f.GetTask("\$name")
 $t.Run($null) | Out-Null
 $timeout = 10
