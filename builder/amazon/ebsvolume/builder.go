@@ -23,8 +23,9 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 	awscommon.RunConfig    `mapstructure:",squash"`
 
-	VolumeMappings        []BlockDevice `mapstructure:"ebs_volumes"`
-	AMIEnhancedNetworking bool          `mapstructure:"enhanced_networking"`
+	VolumeMappings  []BlockDevice `mapstructure:"ebs_volumes"`
+	ENASupport      bool          `mapstructure:"ena_support"`
+	SriovNetSupport bool          `mapstructure:"sriov_support"`
 
 	launchBlockDevices awscommon.BlockDevices
 	ctx                interpolate.Context
@@ -103,9 +104,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-			AmiFilters:         b.config.SourceAmiFilter,
+			SourceAmi:             b.config.SourceAmi,
+			EnableSriovNetSupport: b.config.SriovNetSupport,
+			EnableENASupport:      b.config.ENASupport,
+			AmiFilters:            b.config.SourceAmiFilter,
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
@@ -164,7 +166,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
-			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
+			EnableSriovNetSupport: b.config.SriovNetSupport,
+			EnableENASupport:      b.config.ENASupport,
 		},
 	}
 
