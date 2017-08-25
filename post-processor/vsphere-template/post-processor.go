@@ -99,7 +99,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
 	// (after the ESXi creates it) it will fail. If vSphere is given a few seconds this behavior doesn't reappear.
-	ui.Message("Waiting 10s for VMWare vSphere to start")
+	ui.Message("Waiting 10s for VMware vSphere to start")
 	time.Sleep(10 * time.Second)
 	c, err := govmomi.NewClient(context.Background(), p.url, p.config.Insecure)
 	if err != nil {
