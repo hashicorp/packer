@@ -21,8 +21,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-const DefaultRemotePath = "c:/Windows/Temp/script.ps1"
-
 var retryableSleep = 2 * time.Second
 
 type Config struct {
@@ -137,7 +135,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.RemotePath == "" {
-		p.config.RemotePath = DefaultRemotePath
+		uuid := uuid.TimeOrderedUUID()
+		p.config.RemotePath = fmt.Sprintf(`c:/Windows/Temp/script-%s.ps1`, uuid)
 	}
 
 	if p.config.Scripts == nil {
@@ -267,7 +266,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			if _, err := f.Seek(0, 0); err != nil {
 				return err
 			}
-
 			if err := comm.Upload(p.config.RemotePath, f, nil); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
