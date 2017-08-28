@@ -4,7 +4,10 @@
 
 * provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
 * builder/profitbricks: added support for Cloud API v4. [GH-5233]
-* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding Warning: not backwards compatible. Need to run fixer on packer configs that use ssh_disable_agent.[GH-5024]
+
+### BACKWARDS INCOMPATIBILITIES:
+
+* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent.[GH-5024]
 * provisioner/shell: Set default for ExpectDisconnect to false [GH-5283]
 
 ### BUG FIXES:
