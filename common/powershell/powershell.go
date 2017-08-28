@@ -17,6 +17,14 @@ const (
 	powerShellTrue  = "True"
 )
 
+func IsTrue(s string) bool {
+	return s == powerShellTrue
+}
+
+func IsFalse(s string) bool {
+	return s == powerShellFalse
+}
+
 type PowerShellCmd struct {
 	Stdout io.Writer
 	Stderr io.Writer
