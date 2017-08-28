@@ -60,6 +60,7 @@ import (
 	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
 	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
+	posixrestartprovisioner "github.com/hashicorp/packer/provisioner/posix-restart"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
@@ -109,6 +110,7 @@ var Provisioners = map[string]packer.Provisioner{
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
 	"converge":          new(convergeprovisioner.Provisioner),
 	"file":              new(fileprovisioner.Provisioner),
+	"posix-restart":     new(posixrestartprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
 	"puppet-server":     new(puppetserverprovisioner.Provisioner),
