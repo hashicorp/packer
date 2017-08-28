@@ -17,9 +17,8 @@ type AMIConfig struct {
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AMITags                 map[string]string `mapstructure:"tags"`
-	AMIEnhancedNetworking   bool              `mapstructure:"enhanced_networking"`
-	ENASupport              bool              `mapstructure:"ena_support"`
-	SriovNetSupport         bool              `mapstructure:"sriov_support"`
+	AMIENASupport           bool              `mapstructure:"ena_support"`
+	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
@@ -104,12 +103,6 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 				}
 			}
 		}
-	}
-	// Backwards-compatibility hack. Enhanced networking used to be hardcoded to do this.
-	// If users want granular choice on ENA vs SR-IOV they must not set enhanced_networking.
-	if c.AMIEnhancedNetworking {
-		c.ENASupport = true
-		c.SriovNetSupport = true
 	}
 
 	if len(c.AMIName) < 3 || len(c.AMIName) > 128 {

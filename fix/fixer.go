@@ -31,6 +31,7 @@ func init() {
 		"sshkeypath":               new(FixerSSHKeyPath),
 		"manifest-filename":        new(FixerManifestFilename),
 		"amazon-shutdown_behavior": new(FixerAmazonShutdownBehavior),
+		"enhanced-networking":      new(FixerEnhancedNetworking),
 	}
 
 	FixerOrder = []string{
@@ -45,5 +46,6 @@ func init() {
 		"sshkeypath",
 		"manifest-filename",
 		"amazon-shutdown_behavior",
+		"enhanced-networking",
 	}
 }
