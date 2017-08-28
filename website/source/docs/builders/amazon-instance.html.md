@@ -457,3 +457,6 @@ sudo -i -n ec2-upload-bundle \
 
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-upload-bundle` command.
+Additionally, `{{.Token}}` is available when overriding this command. You must
+create your own bundle command with the addition of `-t {{.Token}} ` if you are
+assuming a role.
