@@ -105,6 +105,9 @@ The SSH communicator has the following options:
 -   `ssh_username` (string) - The username to connect to SSH with. Required
     if using SSH.
 
+- `ssh_wait_for_password` (boolean) - If true, wait for the generated password
+    to be used to authenticate with SSH. Defaults to false.
+     
 ## WinRM Communicator
 
 The WinRM communicator has the following options.

@@ -33,6 +33,7 @@ type Config struct {
 	SSHBastionPassword    string        `mapstructure:"ssh_bastion_password"`
 	SSHBastionPrivateKey  string        `mapstructure:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod string        `mapstructure:"ssh_file_transfer_method"`
+	SSHWaitForPassword    bool          `mapstructure:"ssh_wait_for_password"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
