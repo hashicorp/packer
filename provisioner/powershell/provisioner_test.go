@@ -67,7 +67,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.RemotePath != DefaultRemotePath {
+	matched, _ := regexp.MatchString("c:/Windows/Temp/script-.*.ps1", p.config.RemotePath)
+	if !matched {
 		t.Errorf("unexpected remote path: %s", p.config.RemotePath)
 	}
 
@@ -471,6 +472,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	config["scripts"] = []string{tempFile.Name()}
 	config["packer_build_name"] = "foobuild"
 	config["packer_builder_type"] = "footype"
+	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 	ui := testUi()
 
 	p := new(Provisioner)
@@ -517,6 +519,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	envVars[0] = "FOO=BAR"
 	envVars[1] = "BAR=BAZ"
 	config["environment_vars"] = envVars
+	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
@@ -626,6 +629,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 func TestProvision_createCommandText(t *testing.T) {
 
 	config := testConfig()
+	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.communicator = comm
