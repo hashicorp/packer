@@ -4,10 +4,15 @@
 
 * provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
 * builder/profitbricks: added support for Cloud API v4. [GH-5233]
+* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding Warning: not backwards compatible. Need to run fixer on packer configs that use ssh_disable_agent.[GH-5024]
+* provisioner/shell: Set default for ExpectDisconnect to false [GH-5283]
 
 ### BUG FIXES:
 
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
+* provisioner/windows-restart: The first powershell provisioner after a restart now works [GH-5272]
+* builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
+* builder/docker: Fix file uploads [GH-5251]
 
 
 ## 1.0.4 (August 11, 2017)
