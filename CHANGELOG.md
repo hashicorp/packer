@@ -7,15 +7,16 @@
 
 ### BACKWARDS INCOMPATIBILITIES:
 
-* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent.[GH-5024]
-* provisioner/shell: Set default for ExpectDisconnect to false [GH-5283]
+* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
+* provisioner/shell: Set default for ExpectDisconnect to false. [GH-5283]
+* communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
 
 ### BUG FIXES:
 
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
-* provisioner/windows-restart: The first powershell provisioner after a restart now works [GH-5272]
+* provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
 * builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
-* builder/docker: Fix file uploads [GH-5251]
+* builder/docker: Fix file uploads. [GH-5251]
 
 
 ## 1.0.4 (August 11, 2017)
