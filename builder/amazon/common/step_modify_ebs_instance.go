@@ -10,8 +10,8 @@ import (
 )
 
 type StepModifyEBSBackedInstance struct {
-	EnableENASupport      bool
-	EnableSriovNetSupport bool
+	EnableAMIENASupport      bool
+	EnableAMISriovNetSupport bool
 }
 
 func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -21,7 +21,7 @@ func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.St
 
 	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 	// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
-	if s.EnableSriovNetSupport {
+	if s.EnableAMISriovNetSupport {
 		ui.Say("Enabling Enhanced Networking (SR-IOV)...")
 		simple := "simple"
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
@@ -38,7 +38,7 @@ func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.St
 
 	// Set EnaSupport to true.
 	// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
-	if s.EnableENASupport {
+	if s.EnableAMIENASupport {
 		ui.Say("Enabling Enhanced Networking (ENA)...")
 		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
 			InstanceId: instance.InstanceId,

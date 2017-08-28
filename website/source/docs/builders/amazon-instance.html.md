@@ -189,11 +189,7 @@ builder.
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
-    sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+-   `enhanced_networking` (boolean) - deprecated. Default `false`. For now, setting to `true` will set `ena_support` to `true` in order to preserve backwards compatability.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Defaults to `false`.

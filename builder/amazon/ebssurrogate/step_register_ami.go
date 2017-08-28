@@ -12,9 +12,11 @@ import (
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct {
-	RootDevice   RootBlockDevice
-	BlockDevices []*ec2.BlockDeviceMapping
-	image        *ec2.Image
+	RootDevice               RootBlockDevice
+	BlockDevices             []*ec2.BlockDeviceMapping
+	EnableAMIENASupport      bool
+	EnableAMISriovNetSupport bool
+	image                    *ec2.Image
 }
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
@@ -35,16 +37,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		BlockDeviceMappings: blockDevicesExcludingRoot,
 	}
 
-	if config.AMIEnhancedNetworking {
+	if s.EnableAMISriovNetSupport {
 		// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
-
+	}
+	if s.EnableAMIENASupport {
 		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)
 	}
-
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error registering AMI: %s", err))
