@@ -29,6 +29,7 @@ func init() {
 		"parallels-headless":       new(FixerParallelsHeadless),
 		"parallels-deprecations":   new(FixerParallelsDeprecations),
 		"sshkeypath":               new(FixerSSHKeyPath),
+		"sshdisableagent":          new(FixerSSHDisableAgent),
 		"manifest-filename":        new(FixerManifestFilename),
 		"amazon-shutdown_behavior": new(FixerAmazonShutdownBehavior),
 	}
@@ -43,6 +44,7 @@ func init() {
 		"parallels-headless",
 		"parallels-deprecations",
 		"sshkeypath",
+		"sshdisableagent",
 		"manifest-filename",
 		"amazon-shutdown_behavior",
 	}
