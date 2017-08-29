@@ -32,6 +32,7 @@ func init() {
 		"sshdisableagent":          new(FixerSSHDisableAgent),
 		"manifest-filename":        new(FixerManifestFilename),
 		"amazon-shutdown_behavior": new(FixerAmazonShutdownBehavior),
+		"enhanced-networking":      new(FixerEnhancedNetworking),
 	}
 
 	FixerOrder = []string{
@@ -47,5 +48,6 @@ func init() {
 		"sshdisableagent",
 		"manifest-filename",
 		"amazon-shutdown_behavior",
+		"enhanced-networking",
 	}
 }

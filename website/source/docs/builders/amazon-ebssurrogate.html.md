@@ -158,11 +158,10 @@ builder.
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
-    sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -294,6 +293,12 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded

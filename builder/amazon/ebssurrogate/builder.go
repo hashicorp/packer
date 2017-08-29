@@ -129,9 +129,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceDeregister: b.config.AMIForceDeregister,
 		},
 		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-			AmiFilters:         b.config.SourceAmiFilter,
+			SourceAmi:                b.config.SourceAmi,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
+			AmiFilters:               b.config.SourceAmiFilter,
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
@@ -189,7 +190,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
-			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&StepSnapshotNewRootVolume{
 			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
@@ -202,8 +204,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Regions:             b.config.AMIRegions,
 		},
 		&StepRegisterAMI{
-			RootDevice:   b.config.RootDevice,
-			BlockDevices: b.config.BlockDevices.BuildAMIDevices(),
+			RootDevice:               b.config.RootDevice,
+			BlockDevices:             b.config.BlockDevices.BuildAMIDevices(),
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
