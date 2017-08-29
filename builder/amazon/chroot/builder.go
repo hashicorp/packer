@@ -253,7 +253,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Regions:             b.config.AMIRegions,
 		},
 		&StepRegisterAMI{
-			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeSize:           b.config.RootVolumeSize,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
