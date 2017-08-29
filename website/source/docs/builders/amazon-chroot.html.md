@@ -133,8 +133,6 @@ each category, the available configuration keys are alphabetized.
     Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
--   `enhanced_networking` (boolean) - deprecated. Default `false`. For now, setting to `true` will set `ena_support` to `true` in order to preserve backwards compatability.
-
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
@@ -298,7 +296,6 @@ each category, the available configuration keys are alphabetized.
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
     policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
-    If you want to set this, but not `ena_support`, make sure to leave `enhanced_networking: false`.
     Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
