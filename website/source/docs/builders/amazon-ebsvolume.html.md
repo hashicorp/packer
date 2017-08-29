@@ -109,8 +109,6 @@ builder.
     Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
--   `enhanced_networking` (boolean) - deprecated. Default `false`. For now, setting to `true` will set `ena_support` to `true` in order to preserve backwards compatability.
-
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
@@ -213,7 +211,6 @@ builder.
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
     policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
-    If you want to set this, but not `ena_support`, make sure to leave `enhanced_networking: false`.
     Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
