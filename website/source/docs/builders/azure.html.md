@@ -50,7 +50,10 @@ builder.
     
 #### VHD or Managed Image
 
-The Azure builder can create either a VHD, or a managed image. When creating a VHD the following two options are required.
+The Azure builder can create either a VHD, or a managed image. If you
+are creating a VHD, you **must** start with a VHD.  Likewise, if you
+want to create a managed image you **must** start with a managed
+image.  When creating a VHD the following two options are required.
 
 -   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
     organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
@@ -107,6 +110,10 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
+    
+-   `managed_image_storage_account_type` (string) Specify the storage
+    account type for a managed image.  Valid values are Standard_LRS
+    and Premium\_LRS.  The default is Standard\_LRS.
                 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
@@ -131,9 +138,12 @@ When creating a managed image the following two options are required.
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
 
+-   `private_virtual_network_with_public_ip` (boolean) This value allows you to set a `virtual_network_name` and obtain
+    a public IP. If this value is not set and `virtual_network_name` is defined Packer is only allowed to be executed
+    from a host on the same subnet / virtual network.
+
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM. This option enables private
-    communication with the VM, no public IP address is **used** or **provisioned**. This value should only be set if
-    Packer is executed from a host on the same subnet / virtual network.
+    communication with the VM, no public IP address is **used** or **provisioned** (unless you set `private_virtual_network_with_public_ip`).
 
 -   `virtual_network_resource_group_name` (string) If virtual\_network\_name is set, this value **may** also be set. If
     virtual\_network\_name is set, and this value is not set the builder attempts to determine the resource group

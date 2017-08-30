@@ -21,7 +21,6 @@ func pbDecrypterFor(algorithm pkix.AlgorithmIdentifier, password []byte) (cipher
 
 	k := deriveKeyByAlg[algorithmName](params.Salt, password, params.Iterations)
 	iv := deriveIVByAlg[algorithmName](params.Salt, password, params.Iterations)
-	password = nil
 
 	code, err := blockcodeByAlg[algorithmName](k)
 	if err != nil {
@@ -34,7 +33,6 @@ func pbDecrypterFor(algorithm pkix.AlgorithmIdentifier, password []byte) (cipher
 
 func pbDecrypt(info decryptable, password []byte) (decrypted []byte, err error) {
 	cbc, err := pbDecrypterFor(info.GetAlgorithm(), password)
-	password = nil
 	if err != nil {
 		return nil, err
 	}

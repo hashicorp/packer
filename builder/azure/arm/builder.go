@@ -119,7 +119,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	endpointConnectType := PublicEndpoint
-	if b.isPrivateNetworkCommunication() {
+	if b.isPublicPrivateNetworkCommunication() && b.isPrivateNetworkCommunication() {
+		endpointConnectType = PublicEndpointInPrivateNetwork
+	} else if b.isPrivateNetworkCommunication() {
 		endpointConnectType = PrivateEndpoint
 	}
 
@@ -243,6 +245,10 @@ func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
 			ui.Say(fmt.Sprintf("Error setting permissions of debug key: %s", err))
 		}
 	}
+}
+
+func (b *Builder) isPublicPrivateNetworkCommunication() bool {
+	return DefaultPrivateVirtualNetworkWithPublicIp != b.config.PrivateVirtualNetworkWithPublicIp
 }
 
 func (b *Builder) isPrivateNetworkCommunication() bool {

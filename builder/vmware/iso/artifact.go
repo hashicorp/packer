@@ -8,6 +8,7 @@ import (
 // of files associated with the resulting machine.
 type Artifact struct {
 	builderId string
+	id        string
 	dir       OutputDir
 	f         []string
 }
@@ -20,8 +21,8 @@ func (a *Artifact) Files() []string {
 	return a.f
 }
 
-func (*Artifact) Id() string {
-	return "VM"
+func (a *Artifact) Id() string {
+	return a.id
 }
 
 func (a *Artifact) String() string {
