@@ -26,7 +26,6 @@ type Config struct {
 	Username            string `mapstructure:"username"`
 	Password            string `mapstructure:"password"`
 	Datacenter          string `mapstructure:"datacenter"`
-	VMName              string `mapstructure:"vm_name"`
 	Folder              string `mapstructure:"folder"`
 
 	ctx interpolate.Context
@@ -55,7 +54,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		"host":     &p.config.Host,
 		"username": &p.config.Username,
 		"password": &p.config.Password,
-		"vm_name":  &p.config.VMName,
 	}
 
 	for key, ptr := range vc {
@@ -120,7 +118,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			Folder: p.config.Folder,
 		},
 		&stepMarkAsTemplate{
-			VMName: p.config.VMName,
+			VMName: artifact.Id(),
 			Source: source,
 		},
 	}

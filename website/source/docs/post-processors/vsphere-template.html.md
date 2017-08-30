@@ -25,7 +25,6 @@ An example is shown below, showing only the post-processor configuration:
    "insecure": true,
    "username": "root",
    "password": "secret",      
-   "vm_name": "distro-7.3",
    "datacenter": "mydatacenter",
    "folder": "/packer-templates/os/distro-7"   
 }
@@ -44,8 +43,6 @@ Required:
 -   `password` (string) - Password to use to authenticate to the vSphere endpoint.
 
 -   `username` (string) - The username to use to authenticate to the vSphere endpoint.
-
--   `vm_name` (string) - The name of the VM once it is uploaded.
 
 Optional:
 
