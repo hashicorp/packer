@@ -12,42 +12,50 @@ import (
 )
 
 func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
-	var testSubject = &StepGetIPAddress{
-		get:      func(string, string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
-		endpoint: PublicEndpoint,
-		say:      func(message string) {},
-		error:    func(e error) {},
-	}
+	endpoints := []EndpointType{PublicEndpoint, PublicEndpointInPrivateNetwork}
 
-	stateBag := createTestStateBagStepGetIPAddress()
+	for _, endpoint := range endpoints {
+		var testSubject = &StepGetIPAddress{
+			get:      func(string, string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
+			endpoint: endpoint,
+			say:      func(message string) {},
+			error:    func(e error) {},
+		}
 
-	var result = testSubject.Run(stateBag)
-	if result != multistep.ActionHalt {
-		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
-	}
+		stateBag := createTestStateBagStepGetIPAddress()
 
-	if _, ok := stateBag.GetOk(constants.Error); ok == false {
-		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+		var result = testSubject.Run(stateBag)
+		if result != multistep.ActionHalt {
+			t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+		}
+
+		if _, ok := stateBag.GetOk(constants.Error); ok == false {
+			t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+		}
 	}
 }
 
 func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
-	var testSubject = &StepGetIPAddress{
-		get:      func(string, string, string) (string, error) { return "", nil },
-		endpoint: PublicEndpoint,
-		say:      func(message string) {},
-		error:    func(e error) {},
-	}
+	endpoints := []EndpointType{PublicEndpoint, PublicEndpointInPrivateNetwork}
 
-	stateBag := createTestStateBagStepGetIPAddress()
+	for _, endpoint := range endpoints {
+		var testSubject = &StepGetIPAddress{
+			get:      func(string, string, string) (string, error) { return "", nil },
+			endpoint: endpoint,
+			say:      func(message string) {},
+			error:    func(e error) {},
+		}
 
-	var result = testSubject.Run(stateBag)
-	if result != multistep.ActionContinue {
-		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
-	}
+		stateBag := createTestStateBagStepGetIPAddress()
 
-	if _, ok := stateBag.GetOk(constants.Error); ok == true {
-		t.Fatalf("Expected the step to not set stateBag['%s'], but it was.", constants.Error)
+		var result = testSubject.Run(stateBag)
+		if result != multistep.ActionContinue {
+			t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+		}
+
+		if _, ok := stateBag.GetOk(constants.Error); ok == true {
+			t.Fatalf("Expected the step to not set stateBag['%s'], but it was.", constants.Error)
+		}
 	}
 }
 
@@ -55,50 +63,53 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualResourceGroupName string
 	var actualIPAddressName string
 	var actualNicName string
+	endpoints := []EndpointType{PublicEndpoint, PublicEndpointInPrivateNetwork}
 
-	var testSubject = &StepGetIPAddress{
-		get: func(resourceGroupName string, ipAddressName string, nicName string) (string, error) {
-			actualResourceGroupName = resourceGroupName
-			actualIPAddressName = ipAddressName
-			actualNicName = nicName
+	for _, endpoint := range endpoints {
+		var testSubject = &StepGetIPAddress{
+			get: func(resourceGroupName string, ipAddressName string, nicName string) (string, error) {
+				actualResourceGroupName = resourceGroupName
+				actualIPAddressName = ipAddressName
+				actualNicName = nicName
 
-			return "127.0.0.1", nil
-		},
-		endpoint: PublicEndpoint,
-		say:      func(message string) {},
-		error:    func(e error) {},
-	}
+				return "127.0.0.1", nil
+			},
+			endpoint: endpoint,
+			say:      func(message string) {},
+			error:    func(e error) {},
+		}
 
-	stateBag := createTestStateBagStepGetIPAddress()
-	var result = testSubject.Run(stateBag)
+		stateBag := createTestStateBagStepGetIPAddress()
+		var result = testSubject.Run(stateBag)
 
-	if result != multistep.ActionContinue {
-		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
-	}
+		if result != multistep.ActionContinue {
+			t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+		}
 
-	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
-	var expectedIPAddressName = stateBag.Get(constants.ArmPublicIPAddressName).(string)
-	var expectedNicName = stateBag.Get(constants.ArmNicName).(string)
+		var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
+		var expectedIPAddressName = stateBag.Get(constants.ArmPublicIPAddressName).(string)
+		var expectedNicName = stateBag.Get(constants.ArmNicName).(string)
 
-	if actualIPAddressName != expectedIPAddressName {
-		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
-	}
+		if actualIPAddressName != expectedIPAddressName {
+			t.Fatal("Expected StepGetIPAddress to source 'constants.ArmIPAddressName' from the state bag, but it did not.")
+		}
 
-	if actualResourceGroupName != expectedResourceGroupName {
-		t.Fatal("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
-	}
+		if actualResourceGroupName != expectedResourceGroupName {
+			t.Fatal("Expected StepGetIPAddress to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+		}
 
-	if actualNicName != expectedNicName {
-		t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmNetworkInterfaceName' from the state bag, but it did not.")
-	}
+		if actualNicName != expectedNicName {
+			t.Fatalf("Expected StepGetIPAddress to source 'constants.ArmNetworkInterfaceName' from the state bag, but it did not.")
+		}
 
-	expectedIPAddress, ok := stateBag.GetOk(constants.SSHHost)
-	if !ok {
-		t.Fatalf("Expected the state bag to have a value for '%s', but it did not.", constants.SSHHost)
-	}
+		expectedIPAddress, ok := stateBag.GetOk(constants.SSHHost)
+		if !ok {
+			t.Fatalf("Expected the state bag to have a value for '%s', but it did not.", constants.SSHHost)
+		}
 
-	if expectedIPAddress != "127.0.0.1" {
-		t.Fatalf("Expected the value of stateBag[%s] to be '127.0.0.1', but got '%s'.", constants.SSHHost, expectedIPAddress)
+		if expectedIPAddress != "127.0.0.1" {
+			t.Fatalf("Expected the value of stateBag[%s] to be '127.0.0.1', but got '%s'.", constants.SSHHost, expectedIPAddress)
+		}
 	}
 }
 

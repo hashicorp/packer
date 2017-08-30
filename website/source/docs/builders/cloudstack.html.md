@@ -34,36 +34,29 @@ builder.
 ### Required:
 
 -   `api_url` (string) - The CloudStack API endpoint we will connect to.
+    It can also be specified via environment variable `CLOUDSTACK_API_URL`,
+    if set.
 
--   `api_key` (string) - The API key used to sign all API requests.
-
--   `cidr_list` (array) - List of CIDR's that will have access to the new
-    instance. This is needed in order for any provisioners to be able to
-    connect to the instance. Usually this will be the NAT address of your
-    current location. Only required when `use_local_ip_address` is `false`.
-
--   `instance_name` (string) - The name of the instance. Defaults to
-    "packer-UUID" where UUID is dynamically generated.
+-   `api_key` (string) - The API key used to sign all API requests. It
+    can also be specified via environment variable `CLOUDSTACK_API_KEY`,
+    if set.
 
 -   `network` (string) - The name or ID of the network to connect the instance
     to.
 
 -   `secret_key` (string) - The secret key used to sign all API requests.
+    It can also be specified via environment variable `CLOUDSTACK_SECRET_KEY`,
+    if set.
 
 -   `service_offering` (string) - The name or ID of the service offering used
     for the instance.
 
--   `soure_iso` (string) - The name or ID of an ISO that will be mounted before
+-   `source_iso` (string) - The name or ID of an ISO that will be mounted before
     booting the instance. This option is mutual exclusive with `source_template`.
+    When using `source_iso`, both `disk_offering` and `hypervisor` are required.
 
 -   `source_template` (string) - The name or ID of the template used as base
     template for the instance. This option is mutual explusive with `source_iso`.
-
--   `template_name` (string) - The name of the new template. Defaults to
-    "packer-{{timestamp}}" where timestamp will be the current time.
-
--   `template_display_text` (string) - The display text of the new template.
-    Defaults to the `template_name`.
 
 -   `template_os` (string) - The name or ID of the template OS for the new
     template that will be created.
@@ -75,6 +68,11 @@ builder.
 
 -   `async_timeout` (int) - The time duration to wait for async calls to
     finish. Defaults to 30m.
+
+-   `cidr_list` (array) - List of CIDR's that will have access to the new
+    instance. This is needed in order for any provisioners to be able to
+    connect to the instance. Defaults to `[ "0.0.0.0/0" ]`. Only required
+    when `use_local_ip_address` is `false`.
 
 -   `disk_offering` (string) - The name or ID of the disk offering used for the
     instance. This option is only available (and also required) when using
@@ -111,17 +109,33 @@ builder.
     access the instance. The SSH key pair is assumed to be already available
     within CloudStack.
 
+-   `instance_name` (string) - The name of the instance. Defaults to
+    "packer-UUID" where UUID is dynamically generated.
+
 -   `project` (string) - The name or ID of the project to deploy the instance to.
 
 -   `public_ip_address` (string) - The public IP address or it's ID used for
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
 
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the source instance. No temporary keypair will
+    be created, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. To use this option with a key pair already configured in the source
+    image, leave the `keypair` blank. To associate an existing key pair
+    with the source instance, set the `keypair` field to the name of the key pair.
+
 -   `ssl_no_verify` (boolean) - Set to `true` to skip SSL verification. Defaults
     to `false`.
 
+-   `template_display_text` (string) - The display text of the new template.
+    Defaults to the `template_name`.
+
 -   `template_featured` (boolean) - Set to `true` to indicate that the template
     is featured. Defaults to `false`.
+
+-   `template_name` (string) - The name of the new template. Defaults to
+    "packer-{{timestamp}}" where timestamp will be the current time.
 
 -   `template_public` (boolean) - Set to `true` to indicate that the template is
     available for all accounts. Defaults to `false`.
@@ -135,7 +149,14 @@ builder.
 -   `template_scalable` (boolean) - Set to `true` to indicate that the template
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to `false`.
 
--   `user_data` (string) - User data to launch with the instance.
+-   `user_data` (string) - User data to launch with the instance. This is a
+    [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
+    details.
+
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance. This file will be parsed as a
+    [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
+    details.
 
 -   `use_local_ip_address` (boolean) - Set to `true` to indicate that the
     provisioners should connect to the local IP address of the instance.
@@ -147,7 +168,7 @@ The available variables are:
 -  `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
-    blank!
+    blank.
 
 ## Basic Example
 
@@ -161,12 +182,13 @@ Here is a basic example.
   "secret_key": "YOUR_SECRET_KEY",
 
   "disk_offering": "Small - 20GB",
-  "cidr_list": ["0.0.0.0/0"],
   "hypervisor": "KVM",
   "network": "management",
   "service_offering": "small",
   "source_iso": "CentOS-7.0-1406-x86_64-Minimal",
   "zone": "NL1",
+
+  "ssh_username": "root",
 
   "template_name": "Centos7-x86_64-KVM-Packer",
   "template_display_text": "Centos7-x86_64 KVM Packer",

@@ -144,7 +144,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	// todo: remove/reword after the migration
 	if p.config.Type == "vagrant.box" {
-		return nil, false, fmt.Errorf("As of June 27th, Vagrant-related functionality has been removed from Terraform\n" +
+		return nil, false, fmt.Errorf("Vagrant-related functionality has been removed from Terraform\n" +
 			"Enterprise into its own product, Vagrant Cloud. For more information see\n" +
 			"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
 			"Please replace the Atlas post-processor with the Vagrant Cloud post-processor,\n" +

@@ -113,7 +113,7 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	}
 	params.Payload = extra
 
-	ctx, cancel := context.WithTimeout(context.Background(), 550*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
 	defer cancel()
 
 	return checkpoint.Report(ctx, params)

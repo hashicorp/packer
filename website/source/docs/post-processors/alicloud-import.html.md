@@ -4,9 +4,10 @@ description: |
     various builders and imports it to an Alicloud customized image list.
 layout: docs
 page_title: 'Alicloud Import Post-Processor'
+sidebar_current: 'docs-post-processors-alicloud-import'
 ---
 
-# Aicloud Import Post-Processor
+# Alicloud Import Post-Processor
 
 Type: `alicloud-import`
 

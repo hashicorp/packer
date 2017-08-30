@@ -165,11 +165,10 @@ builder.
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
-    sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -179,7 +178,8 @@ builder.
 
 -   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
     AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
-    process). Default `false`.
+    process). Packer will always run this operation, even if the base
+    AMI has an encrypted boot volume to start with. Default `false`.
 
 -   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
@@ -300,6 +300,12 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
@@ -445,8 +451,8 @@ images exist when this template is run:
   "ssh_username": "ubuntu",
   "ami_name": "packer-quick-start {{timestamp}}",
   "tags": {
-  "OS_Version": "Ubuntu",
-  "Release": "Latest"
+    "OS_Version": "Ubuntu",
+    "Release": "Latest"
   }
 }
 ```

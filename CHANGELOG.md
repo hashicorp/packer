@@ -1,20 +1,98 @@
-## (UNRELEASED)
+## UNRELEASED
 
-### IMRPOVEMENTS:
-* core: Experimental Android ARM support. [GH-5111]
-* postprocessor/atlas: Disallow pushing vagrant.box artifacts now that Vagrant cloud is live. [GH-4780]
-* builder/cloudstack: Add support for using a HTTP server. [GH-5017]
-* builder/cloudstack: Make expunge optional and improve logging output. [GH-5099]
-* builder/googlecompute: Allow using URL's for network and subnetwork. [GH-5035]
+### IMPROVEMENTS:
+
+* provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
+* builder/profitbricks: added support for Cloud API v4. [GH-5233]
+* builder/vmware: Set artifact ID to `VMName`. [GH-5187]
+
+### BACKWARDS INCOMPATIBILITIES:
+
+* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
+* provisioner/shell: Set default for ExpectDisconnect to false. [GH-5283]
+* communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
 
 ### BUG FIXES:
-* builder/hyperv: Verify membership in the group Hyper-V Administrators by SID not name. [GH-5022]
-* builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
-* builder/amazon: Fix panic that happens if ami_block_device_mappings is empty. [GH-5059]
+
+* builder/vmware: Fix timestamp in default VMName. [GH-5274]
+* provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
+* builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
+* builder/docker: Fix file uploads. [GH-5251]
+
+
+## 1.0.4 (August 11, 2017)
+
+### IMPROVEMENTS:
+
+* builder/alicloud: Increase polling timeout. [GH-5148]
+* builder/azure: Add `private_virtual_network_with_public_ip` option to
+    optionally obtain a public IP. [GH-5222]
+* builder/googlecompute: use a more portable method of obtaining zone.
+    [GH-5192]
+* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
+* builder/parallels: Remove soon to be removed --vmtype flag in createvm.
+    [GH-5172]
+* contrib: add json files to zsh completion. [GH-5195]
+
+### BUG FIXES:
+
+* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
+* builder/amazon: fix builds when using the null communicator. [GH-5217]
+* builder/docker: Correctly handle case when uploading an empty directory.
+    [GH-5234]
+* command/push: Don't push variables if they are unspecified. Reverts to
+    behavior in 1.0.1. [GH-5235]
+* command/push: fix handling of symlinks. [GH-5226]
+* core: Strip query parameters from ISO URLs when checking against a checksum
+    file. [GH-5181]
+* provisioner/ansible-remote: Fix issue where packer could hang communicating
+    with ansible-remote. [GH-5146]
+
+## 1.0.3 (July 17, 2017)
+
+### IMPROVEMENTS:
+* builder/azure: Update to latest Azure SDK, enabling support for managed
+    disks. [GH-4511]
+* builder/cloudstack: Add default cidr_list [ 0.0.0.0/0 ]. [GH-5125]
+* builder/cloudstack: Add support for ssh_agent_auth. [GH-5130]
+* builder/cloudstack: Add support for using a HTTP server. [GH-5017]
+* builder/cloudstack: Allow reading api_url, api_key, and secret_key from env
+    vars. [GH-5124]
+* builder/cloudstack: Make expunge optional and improve logging output.
+    [GH-5099]
+* builder/googlecompute: Allow using URL's for network and subnetwork.
+    [GH-5035]
+* builder/hyperv: Add support for floppy_dirs with hyperv-iso builder.
+* builder/hyperv: Add support for override of system %temp% path.
+* core: Experimental Android ARM support. [GH-5111]
+* post-processor/atlas: Disallow packer push of vagrant.box artifacts to atlas.
+    [GH-4780]
+* postprocessor/atlas: Disallow pushing vagrant.box artifacts now that Vagrant
+    cloud is live. [GH-4780]
+
+### BUG FIXES:
+* builder/amazon: Fix panic that happens if ami_block_device_mappings is empty.
+    [GH-5059]
 * builder/azure: Write private SSH to file in debug mode. [GH-5070] [GH-5074]
-* builder/cloudstack: Properly report back errors. [GH-5103]
-* builder/parallels: Skip missing paths when looking for unnecessary files. [GH-5058]
+* builder/cloudstack: Properly report back errors. [GH-5103] [GH-5123]
+* builder/docker: Fix windows filepath in docker-toolbox call [GH-4887]
+* builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
+* builder/hyperv: Use SID to verify membersip in Admin group, fixing for non-
+    english users. [GH-5022]
+* builder/hyperv: Verify membership in the group Hyper-V Administrators by SID
+    not name. [GH-5022]
+* builder/openstack: Update gophercloud version, fixing builds  > 1 hr long.
+    [GH-5046]
+* builder/parallels: Skip missing paths when looking for unnecessary files.
+    [GH-5058]
 * builder/vmware-esxi: Fix VNC port discovery default timeout. [GH-5051]
+* communicator/ssh: Add ProvisionerTypes to communicator tests, resolving panic
+    [GH-5116]
+* communicator/ssh: Resolve race condition that sometimes truncates ssh
+    provisioner stdout [GH-4719]
+* post-processor/checksum: Fix interpolation of "output". [GH-5112]
+* push: Push vars in packer config, not just those set from command line and in
+    var-file. [GH-5101]
 
 ## 1.0.2 (June 21, 2017)
 

@@ -113,7 +113,6 @@ func pbkdf(hash func([]byte) []byte, u, v int, salt, password []byte, r int, ID 
 		for len(P) < times*v {
 			P = append(P, password...)
 		}
-		password = nil
 		P = P[:times*v]
 	}
 

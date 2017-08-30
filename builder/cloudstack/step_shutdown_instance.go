@@ -30,7 +30,9 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	// Shutdown the virtual machine.
 	_, err := client.VirtualMachine.StopVirtualMachine(p)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error shutting down instance %s: %s", config.InstanceName, err))
+		err := fmt.Errorf("Error shutting down instance %s: %s", config.InstanceName, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 

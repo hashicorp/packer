@@ -8,18 +8,18 @@ import (
 )
 
 type Datacenter struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties DatacenterProperties       `json:"properties,omitempty"`
-	Entities   DatacenterEntities         `json:"entities,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+	Id         string               `json:"id,omitempty"`
+	Type_      string               `json:"type,omitempty"`
+	Href       string               `json:"href,omitempty"`
+	Metadata   *Metadata            `json:"metadata,omitempty"`
+	Properties DatacenterProperties `json:"properties,omitempty"`
+	Entities   DatacenterEntities   `json:"entities,omitempty"`
+	Response   string               `json:"Response,omitempty"`
+	Headers    *http.Header         `json:"headers,omitempty"`
+	StatusCode int                  `json:"headers,omitempty"`
 }
 
-type DatacenterElementMetadata struct {
+type Metadata struct {
 	CreatedDate      time.Time `json:"createdDate,omitempty"`
 	CreatedBy        string    `json:"createdBy,omitempty"`
 	Etag             string    `json:"etag,omitempty"`
