@@ -8,8 +8,8 @@ import (
 )
 
 func genUUID() string {
-	uuid, _ := uuid.NewV4()
-	return "uuid:" + uuid.String()
+	id, _ := uuid.NewV4()
+	return "uuid:" + id.String()
 }
 
 func defaultHeaders(message *soap.SoapMessage, url string, params *Parameters) *soap.SoapHeader {
@@ -37,10 +37,10 @@ func NewOpenShellRequest(uri string, params *Parameters) *soap.SoapMessage {
 		AddOption(soap.NewHeaderOption("WINRS_CODEPAGE", "65001")).
 		Build()
 
-	body := message.CreateBodyElement("Shell", soap.NS_WIN_SHELL)
-	input := message.CreateElement(body, "InputStreams", soap.NS_WIN_SHELL)
+	body := message.CreateBodyElement("Shell", soap.DOM_NS_WIN_SHELL)
+	input := message.CreateElement(body, "InputStreams", soap.DOM_NS_WIN_SHELL)
 	input.SetContent("stdin")
-	output := message.CreateElement(body, "OutputStreams", soap.NS_WIN_SHELL)
+	output := message.CreateElement(body, "OutputStreams", soap.DOM_NS_WIN_SHELL)
 	output.SetContent("stdout stderr")
 
 	return message
@@ -77,16 +77,16 @@ func NewExecuteCommandRequest(uri, shellId, command string, arguments []string, 
 		AddOption(soap.NewHeaderOption("WINRS_SKIP_CMD_SHELL", "FALSE")).
 		Build()
 
-	body := message.CreateBodyElement("CommandLine", soap.NS_WIN_SHELL)
+	body := message.CreateBodyElement("CommandLine", soap.DOM_NS_WIN_SHELL)
 
 	// ensure special characters like & don't mangle the request XML
 	command = "<![CDATA[" + command + "]]>"
-	commandElement := message.CreateElement(body, "Command", soap.NS_WIN_SHELL)
+	commandElement := message.CreateElement(body, "Command", soap.DOM_NS_WIN_SHELL)
 	commandElement.SetContent(command)
 
 	for _, arg := range arguments {
 		arg = "<![CDATA[" + arg + "]]>"
-		argumentsElement := message.CreateElement(body, "Arguments", soap.NS_WIN_SHELL)
+		argumentsElement := message.CreateElement(body, "Arguments", soap.DOM_NS_WIN_SHELL)
 		argumentsElement.SetContent(arg)
 	}
 
@@ -104,8 +104,8 @@ func NewGetOutputRequest(uri, shellId, commandId, streams string, params *Parame
 		ShellId(shellId).
 		Build()
 
-	receive := message.CreateBodyElement("Receive", soap.NS_WIN_SHELL)
-	desiredStreams := message.CreateElement(receive, "DesiredStream", soap.NS_WIN_SHELL)
+	receive := message.CreateBodyElement("Receive", soap.DOM_NS_WIN_SHELL)
+	desiredStreams := message.CreateElement(receive, "DesiredStream", soap.DOM_NS_WIN_SHELL)
 	desiredStreams.SetAttr("CommandId", commandId)
 	desiredStreams.SetContent(streams)
 
@@ -126,8 +126,8 @@ func NewSendInputRequest(uri, shellId, commandId string, input []byte, params *P
 
 	content := base64.StdEncoding.EncodeToString(input)
 
-	send := message.CreateBodyElement("Send", soap.NS_WIN_SHELL)
-	streams := message.CreateElement(send, "Stream", soap.NS_WIN_SHELL)
+	send := message.CreateBodyElement("Send", soap.DOM_NS_WIN_SHELL)
+	streams := message.CreateElement(send, "Stream", soap.DOM_NS_WIN_SHELL)
 	streams.SetAttr("Name", "stdin")
 	streams.SetAttr("CommandId", commandId)
 	streams.SetContent(content)
@@ -146,9 +146,9 @@ func NewSignalRequest(uri string, shellId string, commandId string, params *Para
 		ShellId(shellId).
 		Build()
 
-	signal := message.CreateBodyElement("Signal", soap.NS_WIN_SHELL)
+	signal := message.CreateBodyElement("Signal", soap.DOM_NS_WIN_SHELL)
 	signal.SetAttr("CommandId", commandId)
-	code := message.CreateElement(signal, "Code", soap.NS_WIN_SHELL)
+	code := message.CreateElement(signal, "Code", soap.DOM_NS_WIN_SHELL)
 	code.SetContent("http://schemas.microsoft.com/wbem/wsman/1/windows/shell/signal/terminate")
 
 	return message
