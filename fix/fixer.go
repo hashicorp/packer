@@ -29,8 +29,10 @@ func init() {
 		"parallels-headless":       new(FixerParallelsHeadless),
 		"parallels-deprecations":   new(FixerParallelsDeprecations),
 		"sshkeypath":               new(FixerSSHKeyPath),
+		"sshdisableagent":          new(FixerSSHDisableAgent),
 		"manifest-filename":        new(FixerManifestFilename),
 		"amazon-shutdown_behavior": new(FixerAmazonShutdownBehavior),
+		"enhanced-networking":      new(FixerEnhancedNetworking),
 	}
 
 	FixerOrder = []string{
@@ -43,7 +45,9 @@ func init() {
 		"parallels-headless",
 		"parallels-deprecations",
 		"sshkeypath",
+		"sshdisableagent",
 		"manifest-filename",
 		"amazon-shutdown_behavior",
+		"enhanced-networking",
 	}
 }

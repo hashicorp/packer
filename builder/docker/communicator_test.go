@@ -71,6 +71,7 @@ func TestUploadDownload(t *testing.T) {
 				upload,
 				download,
 			},
+			ProvisionerTypes: []string{"", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
@@ -161,6 +162,7 @@ func TestLargeDownload(t *testing.T) {
 				downloadCupcake,
 				downloadBigcake,
 			},
+			ProvisionerTypes: []string{"", "", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}

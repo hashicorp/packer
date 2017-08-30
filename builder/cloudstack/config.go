@@ -79,8 +79,27 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	var errs *packer.MultiError
 
 	// Set some defaults.
+	if c.APIURL == "" {
+		// Default to environment variable for api_url, if it exists
+		c.APIURL = os.Getenv("CLOUDSTACK_API_URL")
+	}
+
+	if c.APIKey == "" {
+		// Default to environment variable for api_key, if it exists
+		c.APIKey = os.Getenv("CLOUDSTACK_API_KEY")
+	}
+
+	if c.SecretKey == "" {
+		// Default to environment variable for secret_key, if it exists
+		c.SecretKey = os.Getenv("CLOUDSTACK_SECRET_KEY")
+	}
+
 	if c.AsyncTimeout == 0 {
 		c.AsyncTimeout = 30 * time.Minute
+	}
+
+	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
+		c.CIDRList = []string{"0.0.0.0/0"}
 	}
 
 	if c.InstanceName == "" {
@@ -112,10 +131,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.SecretKey == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a secret_key must be specified"))
-	}
-
-	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
-		errs = packer.MultiErrorAppend(errs, errors.New("a cidr_list must be specified"))
 	}
 
 	if c.Network == "" {

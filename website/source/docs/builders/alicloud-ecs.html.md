@@ -4,6 +4,7 @@ description: |
     customized images based on an existing base images.
 layout: docs
 page_title: Alicloud Image Builder
+sidebar_current: 'docs-builders-alicloud-ecs'
 ---
 
 # Alicloud Image Builder

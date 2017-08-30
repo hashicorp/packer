@@ -22,6 +22,15 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	var err error
 	var errs *packer.MultiError
 
+	if config.Comm.SSHPrivateKey != "" {
+		privateKey, err := ioutil.ReadFile(config.Comm.SSHPrivateKey)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Error loading configured private key file: %s", err))
+		}
+
+		state.Put("privateKey", privateKey)
+	}
+
 	// First get the project and zone UUID's so we can use them in other calls when needed.
 	if config.Project != "" && !isUUID(config.Project) {
 		config.Project, _, err = client.Project.GetProjectID(config.Project)
@@ -134,6 +143,7 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	// nil interface.
 	if errs != nil && len(errs.Errors) > 0 {
 		state.Put("error", errs)
+		ui.Error(errs.Error())
 		return multistep.ActionHalt
 	}
 

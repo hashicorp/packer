@@ -109,9 +109,6 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     boot directly from it. When passing a path to an IMG or QCOW2 file, you
     should set `disk_image` to "true".
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.

@@ -80,7 +80,6 @@ from ubuntu as an simple example:
     "LABEL version=1.0",
     "ONBUILD RUN date",
     "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
-    "MAINTAINER Captain Kirk",
     "ENTRYPOINT /var/www/start.sh"
   ]
 }
@@ -204,6 +203,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
     mount into this container. The key of the object is the host path, the value
     is the container path.
+
+-   `container_dir` (string) - The directory inside container to mount
+     temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
+     By default this is set to `/packer-files`.
 
 ## Using the Artifact: Export
 

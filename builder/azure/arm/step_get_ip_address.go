@@ -16,12 +16,14 @@ type EndpointType int
 const (
 	PublicEndpoint EndpointType = iota
 	PrivateEndpoint
+	PublicEndpointInPrivateNetwork
 )
 
 var (
 	EndpointCommunicationText = map[EndpointType]string{
-		PublicEndpoint:  "PublicEndpoint",
-		PrivateEndpoint: "PrivateEndpoint",
+		PublicEndpoint:                 "PublicEndpoint",
+		PrivateEndpoint:                "PrivateEndpoint",
+		PublicEndpointInPrivateNetwork: "PublicEndpointInPrivateNetwork",
 	}
 )
 
@@ -46,6 +48,8 @@ func NewStepGetIPAddress(client *AzureClient, ui packer.Ui, endpoint EndpointTyp
 		step.get = step.getPrivateIP
 	case PublicEndpoint:
 		step.get = step.getPublicIP
+	case PublicEndpointInPrivateNetwork:
+		step.get = step.getPublicIPInPrivateNetwork
 	}
 
 	return step
@@ -68,6 +72,11 @@ func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName s
 	}
 
 	return *resp.IPAddress, nil
+}
+
+func (s *StepGetIPAddress) getPublicIPInPrivateNetwork(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
+	s.getPrivateIP(resourceGroupName, ipAddressName, interfaceName)
+	return s.getPublicIP(resourceGroupName, ipAddressName, interfaceName)
 }
 
 func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {

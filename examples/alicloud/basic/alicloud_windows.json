@@ -9,7 +9,7 @@
     "secret_key":"{{user `secret_key`}}",
     "region":"cn-beijing",
     "image_name":"packer_test",
-    "source_image":"win2012_64_datactr_r2_en_40G_alibase_20160622.vhd",
+    "source_image":"win2008r2_64_ent_sp1_zh-cn_40G_alibase_20170622.vhd",
     "instance_type":"ecs.n1.tiny",
     "io_optimized":"true",
     "image_force_delete":"true",

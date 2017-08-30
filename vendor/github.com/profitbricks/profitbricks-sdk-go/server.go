@@ -3,20 +3,19 @@ package profitbricks
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
 type Server struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties ServerProperties           `json:"properties,omitempty"`
-	Entities   *ServerEntities            `json:"entities,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+	Id         string           `json:"id,omitempty"`
+	Type_      string           `json:"type,omitempty"`
+	Href       string           `json:"href,omitempty"`
+	Metadata   *Metadata        `json:"metadata,omitempty"`
+	Properties ServerProperties `json:"properties,omitempty"`
+	Entities   *ServerEntities  `json:"entities,omitempty"`
+	Response   string           `json:"Response,omitempty"`
+	Headers    *http.Header     `json:"headers,omitempty"`
+	StatusCode int              `json:"headers,omitempty"`
 }
 
 type ServerProperties struct {
@@ -81,7 +80,6 @@ func GetServer(dcid, srvid string) Server {
 	path := server_path(dcid, srvid)
 	url := mk_url(path) + `?depth=` + Depth
 	req, _ := http.NewRequest("GET", url, nil)
-	fmt.Println(path)
 	req.Header.Add("Content-Type", FullHeader)
 	return toServer(do(req))
 }

@@ -53,7 +53,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	if config.ImageUrl != "" {
 		builder.SetImageUrl(config.ImageUrl, osType)
 	} else if config.CustomManagedImageName != "" {
-		builder.SetManagedDiskUrl(config.customManagedImageID)
+		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType)
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
 			config.SubscriptionID,
@@ -63,7 +63,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.ImageSku,
 			config.ImageVersion)
 
-		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID)
+		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID, config.managedImageStorageAccountType)
 	} else {
 		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
 	}
@@ -76,7 +76,12 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetCustomData(config.customData)
 	}
 
-	if config.VirtualNetworkName != "" {
+	if config.VirtualNetworkName != "" && DefaultPrivateVirtualNetworkWithPublicIp != config.PrivateVirtualNetworkWithPublicIp {
+		builder.SetPrivateVirtualNetworWithPublicIp(
+			config.VirtualNetworkResourceGroupName,
+			config.VirtualNetworkName,
+			config.VirtualNetworkSubnetName)
+	} else if config.VirtualNetworkName != "" {
 		builder.SetVirtualNetwork(
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,

@@ -76,7 +76,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.PBUrl == "" {
-		c.PBUrl = "https://api.profitbricks.com/rest/v2"
+		c.PBUrl = "https://api.profitbricks.com/cloudapi/v4"
 	}
 
 	if c.Cores == 0 {

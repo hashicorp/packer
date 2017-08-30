@@ -1,8 +1,11 @@
 package restart
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,7 +17,7 @@ import (
 )
 
 var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
-var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
+var DefaultRestartCheckCommand = winrm.Powershell(`if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
 var TryCheckReboot = "shutdown.exe -f -r -t 60"
 var AbortReboot = "shutdown.exe -a"
@@ -119,6 +122,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
+
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
@@ -170,9 +174,11 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(p *Provisioner) error {
-	cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-
 	for {
+		cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+		var buf, buf2 bytes.Buffer
+		cmd.Stdout = &buf
+		cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
 		select {
 		case <-p.cancel:
 			log.Println("Communicator wait canceled, exiting loop")
@@ -183,12 +189,20 @@ var waitForCommunicator = func(p *Provisioner) error {
 		log.Printf("Checking that communicator is connected with: '%s'", cmd.Command)
 
 		err := cmd.StartWithUi(p.comm, p.ui)
+
 		if err != nil {
 			log.Printf("Communication connection err: %s", err)
 			continue
 		}
 
 		log.Printf("Connected to machine")
+		stdoutToRead := buf2.String()
+		buf2.Reset()
+		buf.Reset()
+		if !strings.Contains(stdoutToRead, "restarted.") {
+			log.Printf("echo didn't succeed; retrying...")
+			continue
+		}
 		break
 	}
 

@@ -20,6 +20,7 @@ type Config struct {
 	Auth                  Auth
 	Https                 bool
 	Insecure              bool
+	TLSServerName         string
 	CACertBytes           []byte
 	ConnectTimeout        time.Duration
 	OperationTimeout      time.Duration
@@ -33,7 +34,7 @@ type Auth struct {
 }
 
 func New(addr string, config *Config) (*Winrmcp, error) {
-	endpoint, err := parseEndpoint(addr, config.Https, config.Insecure, config.CACertBytes, config.ConnectTimeout)
+	endpoint, err := parseEndpoint(addr, config.Https, config.Insecure, config.TLSServerName, config.CACertBytes, config.ConnectTimeout)
 	if err != nil {
 		return nil, err
 	}
