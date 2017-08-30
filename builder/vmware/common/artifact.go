@@ -14,13 +14,14 @@ const BuilderId = "mitchellh.vmware"
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
 type localArtifact struct {
+	id  string
 	dir string
 	f   []string
 }
 
 // NewLocalArtifact returns a VMware artifact containing the files
 // in the given directory.
-func NewLocalArtifact(dir string) (packer.Artifact, error) {
+func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
 	files := make([]string, 0, 5)
 	visit := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -37,6 +38,7 @@ func NewLocalArtifact(dir string) (packer.Artifact, error) {
 	}
 
 	return &localArtifact{
+		id:  id,
 		dir: dir,
 		f:   files,
 	}, nil
@@ -50,8 +52,8 @@ func (a *localArtifact) Files() []string {
 	return a.f
 }
 
-func (*localArtifact) Id() string {
-	return "VM"
+func (a *localArtifact) Id() string {
+	return a.id
 }
 
 func (a *localArtifact) String() string {
