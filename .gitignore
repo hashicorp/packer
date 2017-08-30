@@ -21,3 +21,4 @@ packer-test*.log
 
 .idea/
 *.iml
+Thumbs.db
