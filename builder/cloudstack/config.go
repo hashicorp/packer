@@ -27,23 +27,24 @@ type Config struct {
 	HTTPGetOnly  bool          `mapstructure:"http_get_only"`
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
-	CIDRList          []string `mapstructure:"cidr_list"`
-	DiskOffering      string   `mapstructure:"disk_offering"`
-	DiskSize          int64    `mapstructure:"disk_size"`
-	Expunge           bool     `mapstructure:"expunge"`
-	Hypervisor        string   `mapstructure:"hypervisor"`
-	InstanceName      string   `mapstructure:"instance_name"`
-	Keypair           string   `mapstructure:"keypair"`
-	Network           string   `mapstructure:"network"`
-	Project           string   `mapstructure:"project"`
-	PublicIPAddress   string   `mapstructure:"public_ip_address"`
-	ServiceOffering   string   `mapstructure:"service_offering"`
-	SourceTemplate    string   `mapstructure:"source_template"`
-	SourceISO         string   `mapstructure:"source_iso"`
-	UserData          string   `mapstructure:"user_data"`
-	UserDataFile      string   `mapstructure:"user_data_file"`
-	UseLocalIPAddress bool     `mapstructure:"use_local_ip_address"`
-	Zone              string   `mapstructure:"zone"`
+	CIDRList             []string `mapstructure:"cidr_list"`
+	DiskOffering         string   `mapstructure:"disk_offering"`
+	DiskSize             int64    `mapstructure:"disk_size"`
+	Expunge              bool     `mapstructure:"expunge"`
+	Hypervisor           string   `mapstructure:"hypervisor"`
+	InstanceName         string   `mapstructure:"instance_name"`
+	Keypair              string   `mapstructure:"keypair"`
+	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
+	Network              string   `mapstructure:"network"`
+	Project              string   `mapstructure:"project"`
+	PublicIPAddress      string   `mapstructure:"public_ip_address"`
+	ServiceOffering      string   `mapstructure:"service_offering"`
+	SourceTemplate       string   `mapstructure:"source_template"`
+	SourceISO            string   `mapstructure:"source_iso"`
+	UserData             string   `mapstructure:"user_data"`
+	UserDataFile         string   `mapstructure:"user_data_file"`
+	UseLocalIPAddress    bool     `mapstructure:"use_local_ip_address"`
+	Zone                 string   `mapstructure:"zone"`
 
 	TemplateName            string `mapstructure:"template_name"`
 	TemplateDisplayText     string `mapstructure:"template_display_text"`
@@ -118,6 +119,14 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.TemplateDisplayText == "" {
 		c.TemplateDisplayText = c.TemplateName
+	}
+
+	// If we are not given an explicit keypair, ssh_password or ssh_private_key_file,
+	// then create a temporary one, but only if the temporary_keypair_name has not
+	// been provided.
+	if c.Keypair == "" && c.TemporaryKeypairName == "" &&
+		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+		c.TemporaryKeypairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	// Process required parameters.
