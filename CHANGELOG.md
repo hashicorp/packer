@@ -6,6 +6,7 @@
 * builder/profitbricks: added support for Cloud API v4. [GH-5233]
 * builder/vmware: Set artifact ID to `VMName`. [GH-5187]
 * core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
+* builder/cloudstack: Add support for Security Groups. [GH-5175]
 
 ### BACKWARDS INCOMPATIBILITIES:
 
