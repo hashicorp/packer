@@ -89,17 +89,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateTemplate{},
 	}
 
-	// Configure the runner.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
-	// Run the steps.
+	// Configure the runner and run the steps.
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that
