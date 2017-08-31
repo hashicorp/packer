@@ -16,18 +16,10 @@ func commHost(state multistep.StateBag) (string, error) {
 func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	config := state.Get("config").(*Config)
 
-	clientConfig := &ssh.ClientConfig{
-		User: config.Config.SSHUsername,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(config.Config.SSHPassword),
-			ssh.KeyboardInteractive(
-				packerssh.PasswordKeyboardInteractive(config.Config.SSHPassword)),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
+	var auth []ssh.AuthMethod
 
-	if config.Config.SSHPrivateKey != "" {
-		privateKey, err := ioutil.ReadFile(config.Config.SSHPrivateKey)
+	if config.Comm.SSHPrivateKey != "" {
+		privateKey, err := ioutil.ReadFile(config.Comm.SSHPrivateKey)
 		if err != nil {
 			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
 		}
@@ -37,8 +29,20 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}
 
-		clientConfig.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+	} else {
+		auth = []ssh.AuthMethod{
+			ssh.Password(config.Comm.SSHPassword),
+			ssh.KeyboardInteractive(
+				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
+		}
 	}
+
+	clientConfig := &ssh.ClientConfig{
+		User:            config.Comm.SSHUsername,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	clientConfig.Auth = auth
 
 	return clientConfig, nil
 }

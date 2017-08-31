@@ -13,7 +13,7 @@ type Config struct {
 	ConnectConfig 			`mapstructure:",squash"`
 	CloneConfig 			`mapstructure:",squash"`
 	HardwareConfig 			`mapstructure:",squash"`
-	communicator.Config 	`mapstructure:",squash"`
+	Comm communicator.Config 	`mapstructure:",squash"`
 	ShutdownConfig         	`mapstructure:",squash"`
 	CreateSnapshot    bool 	`mapstructure:"create_snapshot"`
 	ConvertToTemplate bool 	`mapstructure:"convert_to_template"`
@@ -34,7 +34,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	errs := new(packer.MultiError)
-	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.CloneConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)

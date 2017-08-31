@@ -277,7 +277,7 @@ func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
 
-		if len(vmInfo.LayoutEx.Disk[0].Chain) != 3 {
+		if len(vmInfo.LayoutEx.Disk[0].Chain) != 2 {
 			t.Error("Not a linked clone")
 		}
 
@@ -376,6 +376,21 @@ func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func TestBuilderAcc_sshKey(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: sshKeyConfig(),
+	})
+}
+
+func sshKeyConfig() string {
+	config := defaultConfig()
+	config["ssh_password"] = ""
+	config["ssh_private_key_file"] = "test-key.pem"
+	config["linked_clone"] = true // speed up
+	return renderConfig(config)
 }
 
 func TestBuilderAcc_snapshot(t *testing.T) {
