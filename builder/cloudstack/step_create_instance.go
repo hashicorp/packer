@@ -49,6 +49,10 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		p.SetKeypair(keypair.(string))
 	}
 
+	if securitygroups, ok := state.GetOk("security_groups"); ok {
+		p.SetSecuritygroupids(securitygroups.([]string))
+	}
+
 	// If we use an ISO, configure the disk offering.
 	if config.SourceISO != "" {
 		p.SetDiskofferingid(config.DiskOffering)
