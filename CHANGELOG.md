@@ -7,6 +7,7 @@
 * builder/vmware: Set artifact ID to `VMName`. [GH-5187]
 * core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
 * builder/cloudstack: Add support for Security Groups. [GH-5175]
+* provisioner/puppet: Add `guest_os_type` option to add support for Windows. [GH-5252]
 
 ### BACKWARDS INCOMPATIBILITIES:
 
