@@ -28,7 +28,7 @@ type Config struct {
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
 	CIDRList             []string `mapstructure:"cidr_list"`
-	CreateSecurityGroup bool     `mapstructure:"create_security_group"`
+	CreateSecurityGroup  bool     `mapstructure:"create_security_group"`
 	DiskOffering         string   `mapstructure:"disk_offering"`
 	DiskSize             int64    `mapstructure:"disk_size"`
 	Expunge              bool     `mapstructure:"expunge"`
