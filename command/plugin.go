@@ -54,6 +54,7 @@ import (
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
+	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
 	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
@@ -136,6 +137,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
+	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")
