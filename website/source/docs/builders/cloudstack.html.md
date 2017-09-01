@@ -74,6 +74,11 @@ builder.
     connect to the instance. Defaults to `[ "0.0.0.0/0" ]`. Only required
     when `use_local_ip_address` is `false`.
 
+-   `create_security_group` (boolean) - If `true` a temporary security group
+    will be created which allows traffic towards the instance from the
+    `cidr_list`. This option will be ignored if `security_groups` is also
+    defined. Requires `expunge` set to `true`. Defaults to `false`.
+
 -   `disk_offering` (string) - The name or ID of the disk offering used for the
     instance. This option is only available (and also required) when using
     `source_iso`.
@@ -118,6 +123,9 @@ builder.
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
 
+-   `security_groups` (array of strings) - A list of security group IDs or names
+    to associate the instance with.
+
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
     authenticate connections to the source instance. No temporary keypair will
     be created, and the values of `ssh_password` and `ssh_private_key_file` will
@@ -148,6 +156,10 @@ builder.
 
 -   `template_scalable` (boolean) - Set to `true` to indicate that the template
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to `false`.
+
+-   `temporary_keypair_name` (string) - The name of the temporary SSH key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 -   `user_data` (string) - User data to launch with the instance. This is a
     [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
