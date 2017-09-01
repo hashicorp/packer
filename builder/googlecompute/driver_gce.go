@@ -380,6 +380,15 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		})
 	}
 
+	var guestAccelerators []*compute.AcceleratorConfig
+	if c.AcceleratorCount > 0 {
+		ac := &compute.AcceleratorConfig{
+			AcceleratorCount: c.AcceleratorCount,
+			AcceleratorType:  c.AcceleratorType,
+		}
+		guestAccelerators = append(guestAccelerators, ac)
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -397,7 +406,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				},
 			},
 		},
-		MachineType: machineType.SelfLink,
+		GuestAccelerators: guestAccelerators,
+		MachineType:       machineType.SelfLink,
 		Metadata: &compute.Metadata{
 			Items: metadata,
 		},
