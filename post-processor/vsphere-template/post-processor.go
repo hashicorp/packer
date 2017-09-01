@@ -122,8 +122,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			Source: source,
 		},
 	}
-
-	runner := &multistep.BasicRunner{Steps: steps}
+	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
