@@ -1,6 +1,8 @@
 package cloudstack
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
@@ -61,8 +63,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
+		&stepKeypair{
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
+			KeyPair:              b.config.Keypair,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			TemporaryKeyPairName: b.config.TemporaryKeypairName,
+		},
+		&stepCreateSecurityGroup{},
 		&stepCreateInstance{
-			Ctx: b.config.ctx,
+			Ctx:   b.config.ctx,
+			Debug: b.config.PackerDebug,
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
@@ -78,17 +90,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateTemplate{},
 	}
 
-	// Configure the runner.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
-	// Run the steps.
+	// Configure the runner and run the steps.
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that

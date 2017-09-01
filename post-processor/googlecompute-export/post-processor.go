@@ -120,14 +120,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 
 		// Run the steps.
-		if p.config.PackerDebug {
-			p.runner = &multistep.DebugRunner{
-				Steps:   steps,
-				PauseFn: common.MultistepDebugFn(ui),
-			}
-		} else {
-			p.runner = &multistep.BasicRunner{Steps: steps}
-		}
+		p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
 		p.runner.Run(state)
 	}
 
