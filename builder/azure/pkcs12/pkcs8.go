@@ -1,3 +1,6 @@
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package pkcs12
 
 import (
@@ -28,7 +31,7 @@ var (
 
 // marshalPKCS8PrivateKey converts a private key to PKCS#8 encoded form.
 // See http://www.rsa.com/rsalabs/node.asp?id=2130 and RFC5208.
-func marshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
+func marshalPKCS8PrivateKey(key interface{}) (der []byte, err error) {
 	pkcs := pkcs8{
 		Version: 0,
 	}
