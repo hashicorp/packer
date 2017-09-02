@@ -32,7 +32,7 @@ func CopyContents(dst, src string) error {
 
 	dstDir, _ := filepath.Split(dst)
 	if dstDir != "" {
-		err := os.MkdirAll(dstDir, os.ModePerm)
+		err := os.MkdirAll(dstDir, 0755)
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ func CopyContents(dst, src string) error {
 func LinkFile(dst, src string) error {
 	dstDir, _ := filepath.Split(dst)
 	if dstDir != "" {
-		err := os.MkdirAll(dstDir, os.ModePerm)
+		err := os.MkdirAll(dstDir, 0755)
 		if err != nil {
 			return err
 		}
