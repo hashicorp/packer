@@ -145,18 +145,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// the clean up actions for each step will be executed reverse order
 	}
 
-	// Run the steps.
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	// Run
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// Report any errors.
