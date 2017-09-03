@@ -26,10 +26,10 @@ func defaultConfig() map[string]interface{} {
 		"password":            "jetbrains",
 		"insecure_connection": true,
 
-		"template": "basic",
+		"template": "alpine",
 		"host":     "esxi-1.vsphere55.test",
 
-		"ssh_username": "jetbrains",
+		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 	}
 	config["vm_name"] = fmt.Sprintf("test-%v", rand.Intn(1000))
@@ -206,7 +206,7 @@ func TestBuilderAcc_datastore(t *testing.T) {
 
 func datastoreConfig() string {
 	config := defaultConfig()
-	config["template"] = "ubuntu-host4" // on esxi-4.vsphere55.test
+	config["template"] = "alpine-host4" // on esxi-4.vsphere55.test
 	return renderConfig(config)
 }
 
