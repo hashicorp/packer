@@ -37,15 +37,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Failed creating Hyper-V driver: %s", err)
 	}
 
-	// Set up the state.
-	state := new(multistep.BasicStateBag)
-	state.Put("cache", cache)
-	state.Put("config", &b.config)
-	state.Put("debug", b.config.PackerDebug)
-	state.Put("driver", driver)
-	state.Put("hook", hook)
-	state.Put("ui", ui)
-
 	steps := []multistep.Step{
 		&hypervcommon.StepCreateTempDir{
 			TempPath: b.config.TempPath,
@@ -144,6 +135,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 		// the clean up actions for each step will be executed reverse order
 	}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
+	state.Put("config", &b.config)
+	state.Put("debug", b.config.PackerDebug)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
 
 	// Run
 	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
