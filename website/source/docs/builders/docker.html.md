@@ -1,11 +1,12 @@
 ---
 description: |
-    The `docker` Packer builder builds Docker images using Docker. The builder
-    starts a Docker container, runs provisioners within this container, then exports
-    the container for reuse or commits the image.
+    The docker Packer builder builds Docker images using Docker. The builder
+    starts a Docker container, runs provisioners within this container, then
+    exports the container for reuse or commits the image.
 layout: docs
-page_title: Docker Builder
-...
+page_title: 'Docker - Builders'
+sidebar_current: 'docs-builders-docker'
+---
 
 # Docker Builder
 
@@ -16,25 +17,23 @@ Docker. The builder starts a Docker container, runs provisioners within this
 container, then exports the container for reuse or commits the image.
 
 Packer builds Docker containers *without* the use of
-[Dockerfiles](https://docs.docker.com/reference/builder/). By not using
-Dockerfiles, Packer is able to provision containers with portable scripts or
+[Dockerfiles](https://docs.docker.com/engine/reference/builder/). By not using
+`Dockerfiles`, Packer is able to provision containers with portable scripts or
 configuration management systems that are not tied to Docker in any way. It also
-has a simpler mental model: you provision containers much the same way you
+has a simple mental model: you provision containers much the same way you
 provision a normal virtualized or dedicated server. For more information, read
 the section on [Dockerfiles](#dockerfiles).
 
 The Docker builder must run on a machine that has Docker installed. Therefore
-the builder only works on machines that support Docker (modern Linux machines).
-If you want to use Packer to build Docker containers on another platform, use
-[Vagrant](https://www.vagrantup.com) to start a Linux environment, then run
-Packer within that environment.
+the builder only works on machines that support Docker. You can learn about
+what [platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/) in the Docker documentation.
 
 ## Basic Example: Export
 
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will effectively repackage an image.
 
-``` {.javascript}
+``` json
 {
   "type": "docker",
   "image": "ubuntu",
@@ -48,7 +47,7 @@ Below is another example, the same as above but instead of exporting the running
 container, this one commits the container to an image. The image can then be
 more easily tagged, pushed, etc.
 
-``` {.javascript}
+``` json
 {
   "type": "docker",
   "image": "ubuntu",
@@ -58,55 +57,67 @@ more easily tagged, pushed, etc.
 
 ## Basic Example: Changes to Metadata
 
-Below is an example using the changes argument of the builder. This feature allows the source images metadata to be changed when committed back into the Docker environment. It is derived from the `docker commit --change` command line [option to Docker](https://docs.docker.com/engine/reference/commandline/commit/).
+Below is an example using the changes argument of the builder. This feature
+allows the source images metadata to be changed when committed back into the
+Docker environment. It is derived from the `docker commit --change` command
+line [option to
+Docker](https://docs.docker.com/engine/reference/commandline/commit/).
 
-Example uses of all of the options, assuming one is building an NGINX image from ubuntu as an simple example:
+Example uses of all of the options, assuming one is building an NGINX image
+from ubuntu as an simple example:
 
-```
+``` json
 {
-	"type": "docker",
-	"image": "ubuntu",
-	"commit": true,
-	"changes": [
-		"USER www-data",
-		"WORKDIR /var/www",
-		"ENV HOSTNAME www.example.com",
-		"VOLUME /test1 /test2",
-		"EXPOSE 80 443",
-		"CMD [\"nginx\", \"-g\", \"daemon off;\"]",
-		"MAINTAINER Captain Kirk",
-		"ENTRYPOINT /var/www/start.sh"
-	]
+  "type": "docker",
+  "image": "ubuntu",
+  "commit": true,
+  "changes": [
+    "USER www-data",
+    "WORKDIR /var/www",
+    "ENV HOSTNAME www.example.com",
+    "VOLUME /test1 /test2",
+    "EXPOSE 80 443",
+    "LABEL version=1.0",
+    "ONBUILD RUN date",
+    "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+    "ENTRYPOINT /var/www/start.sh"
+  ]
 }
 ```
 
 Allowed metadata fields that can be changed are:
 
-- CMD
-	- String, supports both array (escaped) and string form
-	- EX: `”CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
-	- EX: `"CMD nginx -g daemon off;”`
-- ENTRYPOINT
-	- String 
-	- EX: `“ENTRYPOINT /var/www/start.sh”`
-- ENV
-	- String, note there is no equal sign: 
-	- EX: `“ENV HOSTNAME www.example.com”` not `“ENV HOSTNAME=www.example.com”`
-- EXPOSE
-	- String, space separated ports 
-	- EX: `“EXPOSE 80 443”`
-- MAINTAINER
-	- String 
-	- EX: `“MAINTAINER NAME”`
-- USER
-	- String 
-	- EX: `“USER USERNAME”`
-- VOLUME
-	- String 
-	- EX: `“VOLUME FROM TO“`
-- WORKDIR
-	- String
-	- EX: `“WORKDIR PATH”`
+-   CMD
+    -   String, supports both array (escaped) and string form
+    -   EX: `"CMD [\"nginx\", \"-g\", \"daemon off;\"]"`
+    -   EX: `"CMD nginx -g daemon off;"`
+-   ENTRYPOINT
+    -   String
+    -   EX: `"ENTRYPOINT /var/www/start.sh"`
+-   ENV
+    -   String, note there is no equal sign:
+    -   EX: `"ENV HOSTNAME www.example.com"` not `"ENV HOSTNAME=www.example.com"`
+-   EXPOSE
+    -   String, space separated ports
+    -   EX: `"EXPOSE 80 443"`
+-   LABEL
+    -   String, space separated key=value pairs
+    -   EX: `"LABEL version=1.0"`
+-   ONBUILD
+    -   String
+    -   EX: `"ONBUILD RUN date"`
+-   MAINTAINER
+    -   String, deprecated in Docker version 1.13.0
+    -   EX: `"MAINTAINER NAME"`
+-   USER
+    -   String
+    -   EX: `"USER USERNAME"`
+-   VOLUME
+    -   String
+    -   EX: `"VOLUME FROM TO"`
+-   WORKDIR
+    -   String
+    -   EX: `"WORKDIR PATH"`
 
 ## Configuration Reference
 
@@ -193,6 +204,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     mount into this container. The key of the object is the host path, the value
     is the container path.
 
+-   `container_dir` (string) - The directory inside container to mount
+     temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
+     By default this is set to `/packer-files`.
+
 ## Using the Artifact: Export
 
 Once the tar artifact has been generated, you will likely want to import, tag,
@@ -209,13 +224,13 @@ created image. This is accomplished using a sequence definition (a collection of
 post-processors that are treated as as single pipeline, see
 [Post-Processors](/docs/templates/post-processors.html) for more information):
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [
       {
         "type": "docker-import",
-        "repository": "mitchellh/packer",
+        "repository": "hashicorp/packer",
         "tag": "0.7"
       },
       "docker-push"
@@ -233,7 +248,7 @@ pushing the image to a container repository.
 If you want to do this manually, however, perhaps from a script, you can import
 the image using the process below:
 
-``` {.text}
+``` shell
 $ docker import - registry.mydomain.com/mycontainer:latest < artifact.tar
 ```
 
@@ -248,13 +263,13 @@ which tags and pushes an image. This is accomplished using a sequence definition
 (a collection of post-processors that are treated as as single pipeline, see
 [Post-Processors](/docs/templates/post-processors.html) for more information):
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [
       {
         "type": "docker-tag",
-        "repository": "mitchellh/packer",
+        "repository": "hashicorp/packer",
         "tag": "0.7"
       },
       "docker-push"
@@ -273,13 +288,13 @@ Going a step further, if you wanted to tag and push an image to multiple
 container repositories, this could be accomplished by defining two,
 nearly-identical sequence definitions, as demonstrated by the example below:
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [
       {
         "type": "docker-tag",
-        "repository": "mitchellh/packer",
+        "repository": "hashicorp/packer",
         "tag": "0.7"
       },
       "docker-push"
@@ -305,7 +320,7 @@ Packer can tag and push images for use in
 processors work as described above and example configuration properties are
 shown below:
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [

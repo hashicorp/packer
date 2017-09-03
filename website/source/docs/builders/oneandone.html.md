@@ -1,9 +1,9 @@
 ---
-description: |
-    The 1&1 builder is able to create images for 1&1 cloud.
+description: 'The 1&1 builder is able to create images for 1&1 cloud.'
 layout: docs
-page_title: 1&1 Builder
-...
+page_title: '1&1 - Builders'
+sidebar_current: 'docs-builders-oneandone'
+---
 
 # 1&1 Builder
 
@@ -30,30 +30,30 @@ builder.
 ### Optional
 
 -   `data_center_name` - Name of virtual data center. Possible values "ES", "US", "GB", "DE". Default value "US"
- 
+
 -   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
--   `image_name` (string) - Resulting image. If "image_name" is not provided Packer will generate it
+-   `image_name` (string) - Resulting image. If "image\_name" is not provided Packer will generate it
 
 -   `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
 
--   `url` (string) - Endpoint for the 1&1 REST API. Default URL "https://cloudpanel-api.1and1.com/v1"
-
+-   `url` (string) - Endpoint for the 1&1 REST API. Default URL "<https://cloudpanel-api.1and1.com/v1>"
 
 ## Example
 
 Here is a basic example:
 
-```json
+``` json
 {
-   "builders":[
-      {
-         "type":"oneandone",
-         "disk_size":"50",
-         "image_name":"test5",
-         "source_image_name":"ubuntu1604-64min",
-         "ssh_username" :"root"
-      }
-   ]
+  "builders":[
+    {
+      "type":"oneandone",
+      "disk_size":"50",
+      "image_name":"test5",
+      "source_image_name":"ubuntu1604-64min",
+      "ssh_username" :"root",
+      "ssh_private_key_file" : "/path/to/private/ssh/key"
+    }
+  ]
 }
 ```

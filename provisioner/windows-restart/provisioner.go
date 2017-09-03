@@ -1,20 +1,23 @@
 package restart
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
-var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
+var DefaultRestartCheckCommand = winrm.Powershell(`if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
 var TryCheckReboot = "shutdown.exe -f -r -t 60"
 var AbortReboot = "shutdown.exe -a"
@@ -116,9 +119,10 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 		cmd = &packer.RemoteCmd{Command: trycommand}
 		err = cmd.StartWithUi(comm, ui)
 		if err != nil {
-			// Couldnt execute, we asume machine is rebooting already
+			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
+
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
@@ -147,7 +151,7 @@ WaitLoop:
 		select {
 		case <-waitDone:
 			if err != nil {
-				ui.Error(fmt.Sprintf("Error waiting for WinRM: %s", err))
+				ui.Error(fmt.Sprintf("Error waiting for machine to restart: %s", err))
 				return err
 			}
 
@@ -155,7 +159,7 @@ WaitLoop:
 			close(p.cancel)
 			break WaitLoop
 		case <-timeout:
-			err := fmt.Errorf("Timeout waiting for WinRM.")
+			err := fmt.Errorf("Timeout waiting for machine to restart.")
 			ui.Error(err.Error())
 			close(p.cancel)
 			return err
@@ -170,25 +174,35 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(p *Provisioner) error {
-	cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-
 	for {
+		cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+		var buf, buf2 bytes.Buffer
+		cmd.Stdout = &buf
+		cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
 		select {
 		case <-p.cancel:
-			log.Println("Communicator wait cancelled, exiting loop")
-			return fmt.Errorf("Communicator wait cancelled")
+			log.Println("Communicator wait canceled, exiting loop")
+			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
 
-		log.Printf("Attempting to communicator to machine with: '%s'", cmd.Command)
+		log.Printf("Checking that communicator is connected with: '%s'", cmd.Command)
 
 		err := cmd.StartWithUi(p.comm, p.ui)
+
 		if err != nil {
 			log.Printf("Communication connection err: %s", err)
 			continue
 		}
 
 		log.Printf("Connected to machine")
+		stdoutToRead := buf2.String()
+		buf2.Reset()
+		buf.Reset()
+		if !strings.Contains(stdoutToRead, "restarted.") {
+			log.Printf("echo didn't succeed; retrying...")
+			continue
+		}
 		break
 	}
 
@@ -217,7 +231,7 @@ func (p *Provisioner) retryable(f func() error) error {
 
 		// Create an error and log it
 		err = fmt.Errorf("Retryable error: %s", err)
-		log.Printf(err.Error())
+		log.Print(err.Error())
 
 		// Check if we timed out, otherwise we retry. It is safe to
 		// retry since the only error case above is if the command

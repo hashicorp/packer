@@ -1,8 +1,10 @@
 ---
-description: |-
-  The Hyper-V Packer builder is able to create Hyper-V virtual machines and export them.
-layout: "docs"
-page_title: "Hyper-V Builder (from an ISO)"
+description: |
+    The Hyper-V Packer builder is able to create Hyper-V virtual machines and
+    export them.
+layout: docs
+page_title: 'Hyper-V ISO - Builders'
+sidebar_current: 'docs-builders-hyperv-iso'
 ---
 
 # Hyper-V Builder (from an ISO)
@@ -23,7 +25,7 @@ Here is a basic example. This example is not functional. It will start the
 OS installer but then fail because we don't provide the preseed file for
 Ubuntu to self-install. Still, the example serves to show the basic configuration:
 
-```javascript
+``` json
 {
   "type": "hyperv-iso",
   "iso_url": "http://releases.ubuntu.com/12.04/ubuntu-12.04.5-server-amd64.iso",
@@ -108,13 +110,21 @@ can be configured for this builder.
     listed in this setting get placed into the root directory of the floppy
     and the floppy is attached as the first floppy device. Currently, no
     support exists for creating sub-directories on the floppy. Wildcard
-    characters (*, ?, and []) are allowed. Directory names are also allowed,
+    characters (`*`, `?`, and `[]`) are allowed. Directory names are also allowed,
     which will add all the files found in the directory to the floppy.
+
+- `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
 -   `generation` (integer) - The Hyper-V generation for the virtual machine. By
     default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
-    drives and dvd drives will also be scsi and not ide. 
+    drives and dvd drives will also be scsi and not ide.
 
 -   `guest_additions_mode` (string) - How should guest additions be installed.
     If value `attach` then attach iso image with by specified by `guest_additions_path`.
@@ -160,10 +170,10 @@ can be configured for this builder.
 -   `ram_size` (integer) - The size, in megabytes, of the ram to create
     for the VM. By default, this is 1 GB.
 
-*   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a 
-    VM when it is booted. This is most useful for unattended Windows installs, which 
-    look for an `Autounattend.xml` file on removable media. By default, no 
-    secondary iso will be attached. 
+-   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a
+    VM when it is booted. This is most useful for unattended Windows installs, which
+    look for an `Autounattend.xml` file on removable media. By default, no
+    secondary iso will be attached.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the machine once all
     the provisioning is done. By default this is an empty string, which tells Packer to just
@@ -179,21 +189,24 @@ can be configured for this builder.
 -   `skip_compaction` (bool) - If true skip compacting the hard disk for virtual machine when
     exporting. This defaults to false.
 
--   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting 
+-   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting
     this to an empty string, Packer will try to determine the switch to use by looking for
     external switch that is up and running.
 
--   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card. 
+-   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
 
 -   `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
-    machine. By default none is set. If none is set then vlans are not set on the virtual machine's 
+    machine. By default none is set. If none is set then vlans are not set on the virtual machine's
     network card.
 
 -   `vm_name` (string) - This is the name of the virtual machine for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
     where "BUILDNAME" is the name of the build.
+
+-   `temp_path` (string) - This is the temporary path in which Packer will create the virtual
+    machine. Default value is system `%temp%`
 
 ## Boot Command
 
@@ -233,19 +246,19 @@ will be replaced by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -255,21 +268,21 @@ will be replaced by the proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.    
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, otherwise they will be held down until the machine reboots. Use lowercase characters as well inside modifiers. For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html).
+[template engine](/docs/templates/engine.html).
 The available variables are:
 
-* `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
-  that is started serving the directory specified by the `http_directory`
-  configuration parameter. If `http_directory` isn't specified, these will
-  be blank!
+-   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
+    that is started serving the directory specified by the `http_directory`
+    configuration parameter. If `http_directory` isn't specified, these will
+    be blank!
 
 Example boot command. This is actually a working boot command used to start
 an Ubuntu 12.04 installer:
 
-```text
+``` json
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -290,20 +303,20 @@ for the version of Hyper-V that is running.
 
 ## Generation 1 vs Generation 2
 
-Floppy drives are no longer supported by generation 2 machines. This requires you to 
+Floppy drives are no longer supported by generation 2 machines. This requires you to
 take another approach when dealing with preseed or answer files. Two possible options
 are using virtual dvd drives or using the built in web server.
 
-When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines. 
+When dealing with Windows you need to enable UEFI drives for generation 2 virtual machines.
 
 ## Creating iso from directory
 
-Programs like mkisofs can be used to create an iso from a directory. 
+Programs like mkisofs can be used to create an iso from a directory.
 There is a [windows version of mkisofs](http://opensourcepack.blogspot.co.uk/p/cdrtools.html).
 
 Example powershell script. This is an actually working powershell script used to create a Windows answer iso:
 
-```text
+``` powershell
 $isoFolder = "answer-iso"
 if (test-path $isoFolder){
   remove-item $isoFolder -Force -Recurse
@@ -323,7 +336,7 @@ copy windows\common\win-updates.ps1 $isoFolder\
 copy windows\common\run-sysprep.ps1 $isoFolder\
 copy windows\common\run-sysprep.cmd $isoFolder\
 
-$textFile = "$isoFolder\Autounattend.xml" 
+$textFile = "$isoFolder\Autounattend.xml"
 
 $c = Get-Content -Encoding UTF8 $textFile
 
@@ -337,54 +350,56 @@ if (test-path $isoFolder){
 }
 ```
 
-
 ## Example For Windows Server 2012 R2 Generation 2
 
 Packer config:
 
-```javascript
+``` json
 {
   "builders": [
-  {
-    "vm_name":"windows2012r2",
-    "type": "hyperv-iso",
-    "disk_size": 61440,
-    "floppy_files": [],
-    "secondary_iso_images": [
-      "./windows/windows-2012R2-serverdatacenter-amd64/answer.iso"
-    ],
-    "http_directory": "./windows/common/http/",
-    "boot_wait": "0s",
-    "boot_command": [
-      "a<wait>a<wait>a"
-    ],
-    "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
-    "iso_checksum_type": "md5",
-    "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
-    "communicator":"winrm",
-    "winrm_username": "vagrant",
-    "winrm_password": "vagrant",
-    "winrm_timeout" : "4h",
-    "shutdown_command": "f:\\run-sysprep.cmd",  
-    "ram_size": 4096,
-    "cpu": 4,
-    "generation": 2,
-    "switch_name":"LAN",
-    "enable_secure_boot":true
-  }],
-  "provisioners": [{
-    "type": "powershell",
-    "elevated_user":"vagrant",
-    "elevated_password":"vagrant",
-    "scripts": [
-      "./windows/common/install-7zip.ps1",
-      "./windows/common/install-chef.ps1",
-      "./windows/common/compile-dotnet-assemblies.ps1",
-      "./windows/common/cleanup.ps1",
-      "./windows/common/ultradefrag.ps1",
-      "./windows/common/sdelete.ps1"
-    ]
-  }],
+    {
+      "vm_name":"windows2012r2",
+      "type": "hyperv-iso",
+      "disk_size": 61440,
+      "floppy_files": [],
+      "secondary_iso_images": [
+        "./windows/windows-2012R2-serverdatacenter-amd64/answer.iso"
+      ],
+      "http_directory": "./windows/common/http/",
+      "boot_wait": "0s",
+      "boot_command": [
+        "a<wait>a<wait>a"
+      ],
+      "iso_url": "http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.16384.WINBLUE_RTM.130821-1623_X64FRE_SERVER_EVAL_EN-US-IRM_SSS_X64FREE_EN-US_DV5.ISO",
+      "iso_checksum_type": "md5",
+      "iso_checksum": "458ff91f8abc21b75cb544744bf92e6a",
+      "communicator":"winrm",
+      "winrm_username": "vagrant",
+      "winrm_password": "vagrant",
+      "winrm_timeout" : "4h",
+      "shutdown_command": "f:\\run-sysprep.cmd",  
+      "ram_size": 4096,
+      "cpu": 4,
+      "generation": 2,
+      "switch_name":"LAN",
+      "enable_secure_boot":true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "elevated_user":"vagrant",
+      "elevated_password":"vagrant",
+      "scripts": [
+        "./windows/common/install-7zip.ps1",
+        "./windows/common/install-chef.ps1",
+        "./windows/common/compile-dotnet-assemblies.ps1",
+        "./windows/common/cleanup.ps1",
+        "./windows/common/ultradefrag.ps1",
+        "./windows/common/sdelete.ps1"
+      ]
+    }
+  ],
   "post-processors": [
     {
       "type": "vagrant",
@@ -397,7 +412,7 @@ Packer config:
 
 autounattend.xml:
 
-```xml
+``` xml
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="windowsPE">
@@ -483,7 +498,7 @@ autounattend.xml:
                         </CreatePartition>         
                         <CreatePartition wcm:action="add">
                             <Order>4</Order>
-                            <Extend>true</Extend> 
+                            <Extend>true</Extend>
                             <Type>Primary</Type>
                         </CreatePartition>
                     </CreatePartitions>
@@ -576,7 +591,7 @@ autounattend.xml:
             <HKLMProxyEnable>true</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
         </component>  
-Finish Setup cache proxy during installation --> 
+Finish Setup cache proxy during installation -->
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <AutoLogon>
                 <Password>
@@ -794,12 +809,11 @@ Finish Setup cache proxy during installation -->
     </settings>
     <cpi:offlineImage cpi:source="wim:c:/projects/baseboxes/9600.16384.winblue_rtm.130821-1623_x64fre_server_eval_en-us-irm_sss_x64free_en-us_dv5_slipstream/sources/install.wim#Windows Server 2012 R2 SERVERDATACENTER" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>
-
 ```
 
 sysprep-unattend.xml:
 
-```text
+``` text
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="generalize">
@@ -808,7 +822,7 @@ sysprep-unattend.xml:
         </component>
     </settings>
     <settings pass="oobeSystem">
-<!-- Setup proxy after sysprep 
+<!-- Setup proxy after sysprep
        <component name="Microsoft-Windows-IE-ClientNetworkProtocolImplementation" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <POLICYProxySettingsPerUser>1</POLICYProxySettingsPerUser>
             <HKLMProxyEnable>false</HKLMProxyEnable>
@@ -868,7 +882,7 @@ a virtual switch with an `External` connection type.
 
 ### Packer config:
 
-```javascript
+``` json
 {
   "variables": {
     "vm_name": "ubuntu-xenial",
@@ -880,45 +894,46 @@ a virtual switch with an `External` connection type.
     "iso_checksum": "DE5EE8665048F009577763EFBF4A6F0558833E59"
   },
   "builders": [
-  {
-    "vm_name":"{{user `vm_name`}}",
-    "type": "hyperv-iso",
-    "disk_size": "{{user `disk_size`}}",
-    "guest_additions_mode": "disable",
-    "iso_url": "{{user `iso_url`}}",
-    "iso_checksum_type": "{{user `iso_checksum_type`}}",
-    "iso_checksum": "{{user `iso_checksum`}}",
-    "communicator":"ssh",
-    "ssh_username": "packer",
-    "ssh_password": "packer",
-    "ssh_timeout" : "4h",
-    "http_directory": "./",
-    "boot_wait": "5s",
-    "boot_command": [
-      "<esc><wait10><esc><esc><enter><wait>",
-      "set gfxpayload=1024x768<enter>",
-      "linux /install/vmlinuz ",
-      "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/hyperv-taliesins.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-      "hostname={{.Name}} ",
-      "fb=false debconf/frontend=noninteractive ",
-      "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
-      "keyboard-configuration/variant=USA console-setup/ask_detect=false <enter>",
-      "initrd /install/initrd.gz<enter>",
-      "boot<enter>"
-    ],
-    "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
-    "ram_size": "{{user `ram_size`}}",
-    "cpu": "{{user `cpu`}}",
-    "generation": 2,
-    "enable_secure_boot": false
-  }]
+    {
+      "vm_name":"{{user `vm_name`}}",
+      "type": "hyperv-iso",
+      "disk_size": "{{user `disk_size`}}",
+      "guest_additions_mode": "disable",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "communicator":"ssh",
+      "ssh_username": "packer",
+      "ssh_password": "packer",
+      "ssh_timeout" : "4h",
+      "http_directory": "./",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<esc><wait10><esc><esc><enter><wait>",
+        "set gfxpayload=1024x768<enter>",
+        "linux /install/vmlinuz ",
+        "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/hyperv-taliesins.cfg ",
+        "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+        "hostname={{.Name}} ",
+        "fb=false debconf/frontend=noninteractive ",
+        "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+        "keyboard-configuration/variant=USA console-setup/ask_detect=false <enter>",
+        "initrd /install/initrd.gz<enter>",
+        "boot<enter>"
+      ],
+      "shutdown_command": "echo 'packer' | sudo -S -E shutdown -P now",
+      "ram_size": "{{user `ram_size`}}",
+      "cpu": "{{user `cpu`}}",
+      "generation": 2,
+      "enable_secure_boot": false
+    }
+]
 }
 ```
 
 ### preseed.cfg:
 
-```text
+``` text
 ## Options to set on the command line
 d-i debian-installer/locale string en_US.utf8
 d-i console-setup/ask_detect boolean false

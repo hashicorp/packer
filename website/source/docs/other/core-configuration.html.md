@@ -1,13 +1,13 @@
 ---
 description: |
     There are a few configuration settings that affect Packer globally by
-    configuring the core of Packer. These settings all have reasonable defaults, so
-    you generally don't have to worry about it until you want to tweak a
-    configuration. If you're just getting started with Packer, don't worry about
-    core configuration for now.
+    configuring the core of Packer. These settings all have reasonable defaults,
+    so you generally don't have to worry about it until you want to tweak a
+    configuration.
 layout: docs
-page_title: Core Configuration
-...
+page_title: 'Core Configuration - Other'
+sidebar_current: 'docs-other-core-configuration'
+---
 
 # Core Configuration
 
@@ -32,13 +32,13 @@ The format of the configuration file is basic JSON.
 Below is the list of all available configuration parameters for the core
 configuration file. None of these are required, since all have sane defaults.
 
--   `plugin_min_port` and `plugin_max_port` (integer) - These are the minimum
-    and maximum ports that Packer uses for communication with plugins, since
-    plugin communication happens over TCP connections on your local host. By
-    default these are 10,000 and 25,000, respectively. Be sure to set a fairly
-    wide range here, since Packer can easily use over 25 ports on a single run.
+-   `plugin_min_port` and `plugin_max_port` (integer) - These are the minimum and
+    maximum ports that Packer uses for communication with plugins, since plugin
+    communication happens over TCP connections on your local host. By default
+    these are 10,000 and 25,000, respectively. Be sure to set a fairly wide range
+    here, since Packer can easily use over 25 ports on a single run.
 
--   `builders`, `commands`, `post-processors`, and `provisioners` are objects
-    that are used to install plugins. The details of how exactly these are set
-    is covered in more detail in the [installing plugins documentation
-    page](/docs/extend/plugins.html).
+-   `builders`, `commands`, `post-processors`, and `provisioners` are objects that
+    are used to install plugins. The details of how exactly these are set is
+    covered in more detail in the [installing plugins documentation
+    page](/docs/extending/plugins.html).

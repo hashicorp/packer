@@ -10,63 +10,66 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/plugin"
 
-	amazonchrootbuilder "github.com/mitchellh/packer/builder/amazon/chroot"
-	amazonebsbuilder "github.com/mitchellh/packer/builder/amazon/ebs"
-	amazonebssurrogatebuilder "github.com/mitchellh/packer/builder/amazon/ebssurrogate"
-	amazonebsvolumebuilder "github.com/mitchellh/packer/builder/amazon/ebsvolume"
-	amazoninstancebuilder "github.com/mitchellh/packer/builder/amazon/instance"
-	azurearmbuilder "github.com/mitchellh/packer/builder/azure/arm"
-	cloudstackbuilder "github.com/mitchellh/packer/builder/cloudstack"
-	digitaloceanbuilder "github.com/mitchellh/packer/builder/digitalocean"
-	dockerbuilder "github.com/mitchellh/packer/builder/docker"
-	filebuilder "github.com/mitchellh/packer/builder/file"
-	googlecomputebuilder "github.com/mitchellh/packer/builder/googlecompute"
-	hypervisobuilder "github.com/mitchellh/packer/builder/hyperv/iso"
-	lxdbuilder "github.com/mitchellh/packer/builder/lxd"
-	nullbuilder "github.com/mitchellh/packer/builder/null"
-	oneandonebuilder "github.com/mitchellh/packer/builder/oneandone"
-	openstackbuilder "github.com/mitchellh/packer/builder/openstack"
-	parallelsisobuilder "github.com/mitchellh/packer/builder/parallels/iso"
-	parallelspvmbuilder "github.com/mitchellh/packer/builder/parallels/pvm"
-	profitbricksbuilder "github.com/mitchellh/packer/builder/profitbricks"
-	qemubuilder "github.com/mitchellh/packer/builder/qemu"
-	tritonbuilder "github.com/mitchellh/packer/builder/triton"
-	virtualboxisobuilder "github.com/mitchellh/packer/builder/virtualbox/iso"
-	virtualboxovfbuilder "github.com/mitchellh/packer/builder/virtualbox/ovf"
-	vmwareisobuilder "github.com/mitchellh/packer/builder/vmware/iso"
-	vmwarevmxbuilder "github.com/mitchellh/packer/builder/vmware/vmx"
-	amazonimportpostprocessor "github.com/mitchellh/packer/post-processor/amazon-import"
-	artificepostprocessor "github.com/mitchellh/packer/post-processor/artifice"
-	atlaspostprocessor "github.com/mitchellh/packer/post-processor/atlas"
-	checksumpostprocessor "github.com/mitchellh/packer/post-processor/checksum"
-	compresspostprocessor "github.com/mitchellh/packer/post-processor/compress"
-	dockerimportpostprocessor "github.com/mitchellh/packer/post-processor/docker-import"
-	dockerpushpostprocessor "github.com/mitchellh/packer/post-processor/docker-push"
-	dockersavepostprocessor "github.com/mitchellh/packer/post-processor/docker-save"
-	dockertagpostprocessor "github.com/mitchellh/packer/post-processor/docker-tag"
-	googlecomputeexportpostprocessor "github.com/mitchellh/packer/post-processor/googlecompute-export"
-	manifestpostprocessor "github.com/mitchellh/packer/post-processor/manifest"
-	shelllocalpostprocessor "github.com/mitchellh/packer/post-processor/shell-local"
-	vagrantpostprocessor "github.com/mitchellh/packer/post-processor/vagrant"
-	vagrantcloudpostprocessor "github.com/mitchellh/packer/post-processor/vagrant-cloud"
-	vspherepostprocessor "github.com/mitchellh/packer/post-processor/vsphere"
-	ansibleprovisioner "github.com/mitchellh/packer/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/mitchellh/packer/provisioner/ansible-local"
-	chefclientprovisioner "github.com/mitchellh/packer/provisioner/chef-client"
-	chefsoloprovisioner "github.com/mitchellh/packer/provisioner/chef-solo"
-	convergeprovisioner "github.com/mitchellh/packer/provisioner/converge"
-	fileprovisioner "github.com/mitchellh/packer/provisioner/file"
-	powershellprovisioner "github.com/mitchellh/packer/provisioner/powershell"
-	puppetmasterlessprovisioner "github.com/mitchellh/packer/provisioner/puppet-masterless"
-	puppetserverprovisioner "github.com/mitchellh/packer/provisioner/puppet-server"
-	saltmasterlessprovisioner "github.com/mitchellh/packer/provisioner/salt-masterless"
-	shellprovisioner "github.com/mitchellh/packer/provisioner/shell"
-	shelllocalprovisioner "github.com/mitchellh/packer/provisioner/shell-local"
-	windowsrestartprovisioner "github.com/mitchellh/packer/provisioner/windows-restart"
-	windowsshellprovisioner "github.com/mitchellh/packer/provisioner/windows-shell"
+	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
+	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"
+	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
+	amazonebssurrogatebuilder "github.com/hashicorp/packer/builder/amazon/ebssurrogate"
+	amazonebsvolumebuilder "github.com/hashicorp/packer/builder/amazon/ebsvolume"
+	amazoninstancebuilder "github.com/hashicorp/packer/builder/amazon/instance"
+	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
+	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
+	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
+	dockerbuilder "github.com/hashicorp/packer/builder/docker"
+	filebuilder "github.com/hashicorp/packer/builder/file"
+	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
+	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
+	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
+	nullbuilder "github.com/hashicorp/packer/builder/null"
+	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
+	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
+	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
+	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
+	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
+	qemubuilder "github.com/hashicorp/packer/builder/qemu"
+	tritonbuilder "github.com/hashicorp/packer/builder/triton"
+	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
+	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
+	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
+	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
+	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
+	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
+	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
+	atlaspostprocessor "github.com/hashicorp/packer/post-processor/atlas"
+	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
+	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
+	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
+	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
+	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
+	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
+	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
+	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
+	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
+	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
+	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
+	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
+	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
+	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
+	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
+	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
+	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
+	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
+	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
+	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
+	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
+	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
+	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
+	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
+	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
+	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
+	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
 )
 
 type PluginCommand struct {
@@ -74,6 +77,7 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
+	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
@@ -119,6 +123,7 @@ var Provisioners = map[string]packer.Provisioner{
 }
 
 var PostProcessors = map[string]packer.PostProcessor{
+	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"atlas":                new(atlaspostprocessor.PostProcessor),
@@ -134,6 +139,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
+	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner)-(.+)")

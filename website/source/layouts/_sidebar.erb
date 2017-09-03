@@ -1,26 +1,30 @@
-<!-- Overlay for fixed sidebar -->
 <div class="sidebar-overlay"></div>
 
-<!-- Material sidebar -->
-<aside id="sidebar" class="sidebar sidebar-default sidebar-fixed-right" role="navigation">
-    <!-- Sidebar header -->
-    <div class="sidebar-header header-cover">
-        <!-- Sidebar brand image -->
-        <div class="sidebar-image">
-            <img src="<%= image_path('logo-header@2x.png') %>" width="24px" height="34px">
-        </div>
-    </div>
+<aside class="sidebar" role="navigation">
+  <div class="sidebar-header">
+    <%= inline_svg "logo-text.svg", height: 42, class: "logo" %>
+  </div>
 
-    <!-- Sidebar navigation -->
-    <ul class="main nav sidebar-nav">
-        <li class="first"><a href="/intro">Intro</a></li>
-        <li><a href="/docs">Docs</a></li>
-        <li><a href="/community">Community</a></li>
-    </ul>
-    <div class="divider"></div>
-    <!-- Sidebar navigation 2-->
-    <ul class="external nav sidebar-nav">
-        <li class="first"><a class="v-btn gray sml" href="/downloads.html"><%= partial "layouts/svg/svg-download" %>Download</a></li>
-        <li class=""><a class="v-btn gray sml" href="https://github.com/mitchellh/packer"><%= partial "layouts/svg/svg-github" %>GitHub</a></li>
-    </ul>
+  <ul class="nav sidebar-nav">
+    <li><a href="/intro/index.html">Intro</a></li>
+    <li><a href="/guides/index.html">Guides</a></li>
+    <li><a href="/docs/index.html">Docs</a></li>
+    <li><a href="/community.html">Community</a></li>
+    <li><a href="/assets/files/press-kit.zip">Press Kit</a></li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <ul class="external nav sidebar-nav">
+    <li>
+      <a href="/downloads.html">
+        <%= inline_svg "download.svg" %> Download
+      </a>
+    </li>
+    <li>
+      <a href="https://github.com/hashicorp/packer">
+        <%= inline_svg "github.svg" %> GitHub
+      </a>
+    </li>
+  </ul>
 </aside>

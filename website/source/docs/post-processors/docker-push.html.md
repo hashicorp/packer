@@ -3,8 +3,9 @@ description: |
     The Packer Docker push post-processor takes an artifact from the docker-import
     post-processor and pushes it to a Docker registry.
 layout: docs
-page_title: 'Docker Push Post-Processor'
-...
+page_title: 'Docker Push - Post-Processors'
+sidebar_current: 'docs-post-processors-docker-push'
+---
 
 # Docker Push Post-Processor
 
@@ -47,7 +48,7 @@ This post-processor has only optional configuration:
 
 -   `login_server` (string) - The server address to login to.
 
-Note: When using _Docker Hub_ or _Quay_ registry servers, `login` must to be
+Note: When using *Docker Hub* or *Quay* registry servers, `login` must to be
 set to `true` and `login_email`, `login_username`, **and** `login_password`
 must to be set to your registry credentials. When using Docker Hub,
 `login_server` can be omitted.

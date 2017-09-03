@@ -1,11 +1,12 @@
 ---
 description: |
-    The Chef Client Packer provisioner installs and configures software on machines
-    built by Packer using chef-client. Packer configures a Chef client to talk to a
-    remote Chef Server to provision the machine.
+    The chef-client Packer provisioner installs and configures software on
+    machines built by Packer using chef-client. Packer configures a Chef client to
+    talk to a remote Chef Server to provision the machine.
 layout: docs
-page_title: 'Chef-Client Provisioner'
-...
+page_title: 'Chef Client - Provisioners'
+sidebar_current: 'docs-provisioners-chef-client'
+---
 
 # Chef Client Provisioner
 
@@ -24,7 +25,7 @@ installed, using the official Chef installers provided by Chef.
 The example below is fully functional. It will install Chef onto the remote
 machine and run Chef client.
 
-``` {.javascript}
+``` json
 {
   "type": "chef-client",
   "server_url": "https://mychefserver.com/"
@@ -33,7 +34,7 @@ machine and run Chef client.
 
 Note: to properly clean up the Chef node and client the machine on which packer
 is running must have knife on the path and configured globally, i.e,
-\~/.chef/knife.rb must be present and configured for the target chef server
+`~/.chef/knife.rb` must be present and configured for the target chef server
 
 ## Configuration Reference
 
@@ -56,16 +57,16 @@ configuration is actually required.
 
 -   `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+    Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 -   `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -73,7 +74,7 @@ configuration is actually required.
 
 -   `knife_command` (string) - The command used to run Knife during node clean-up. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 -   `node_name` (string) - The name of the node to register with the
@@ -81,7 +82,7 @@ configuration is actually required.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
-    then the sudo will be omitted. This has no effect when guest_os_type is
+    then the sudo will be omitted. This has no effect when guest\_os\_type is
     windows.
 
 -   `run_list` (array of strings) - The [run
@@ -106,7 +107,7 @@ configuration is actually required.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
-    "/tmp/packer-chef-client" when guest_os_type unix and
+    "/tmp/packer-chef-client" when guest\_os\_type unix and
     "$env:TEMP/packer-chef-client" when windows. This directory doesn't need to
     exist but must have proper permissions so that the user that Packer uses is
     able to create directories and write into this folder. By default the
@@ -134,7 +135,7 @@ template if you'd like to set custom configurations.
 
 The default value for the configuration template is:
 
-``` {.liquid}
+``` liquid
 log_level        :info
 log_location     STDOUT
 chef_server_url  "{{.ServerUrl}}"
@@ -160,12 +161,12 @@ ssl_verify_mode :{{.SslVerifyMode}}
 ```
 
 This template is a [configuration
-template](/docs/templates/configuration-templates.html) and has a set of
+template](/docs/templates/engine.html) and has a set of
 variables available to use:
 
 -   `ChefEnvironment` - The Chef environment name.
 -   `EncryptedDataBagSecretPath` - The path to the secret key file to decrypt
-     encrypted data bags.
+    encrypted data bags.
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `SslVerifyMode` - Whether Chef SSL verify mode is on or off.
@@ -177,18 +178,18 @@ variables available to use:
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Chef:
 
-``` {.liquid}
+``` liquid
 {{if .Sudo}}sudo {{end}}chef-client \
   --no-color \
   -c {{.ConfigPath}} \
   -j {{.JsonPath}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
-``` {.liquid}
+``` liquid
 c:/opscode/chef/bin/chef-client.bat \
   --no-color \
   -c {{.ConfigPath}} \
@@ -210,15 +211,15 @@ By default, Packer uses the following command (broken across multiple lines for
 readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
-``` {.text}
+``` text
 curl -L https://www.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
-``` {.text}
+``` text
 powershell.exe -Command "(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait"
 ```
 
@@ -229,17 +230,17 @@ This command can be customized using the `install_command` configuration.
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Chef:
 
-``` {.liquid}
+``` liquid
 {{if .Sudo}}sudo {{end}}knife \
   {{.Args}} \
   {{.Flags}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
-``` {.liquid}
+``` liquid
 c:/opscode/chef/bin/knife.bat \
   {{.Args}} \
   {{.Flags}}
@@ -253,7 +254,6 @@ contain various template variables, defined below:
 -   `Flags` - The command flags that are getting passed to the Knife command..
 -   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
     value of the `prevent_sudo` configuration.
-
 
 ## Folder Permissions
 
@@ -276,14 +276,13 @@ mode, while passing a `run_list` using a variable.
     export PACKER_CHEF_DIR=/var/chef-packer
     # Comma separated run_list
     export PACKER_CHEF_RUN_LIST="recipe[apt],recipe[nginx]"
-    ...
 
 **Packer variables**
 
 Set the necessary Packer variables using environment variables or provide a [var
 file](/docs/templates/user-variables.html).
 
-``` {.liquid}
+``` json
 "variables": {
   "chef_dir": "{{env `PACKER_CHEF_DIR`}}",
   "chef_run_list": "{{env `PACKER_CHEF_RUN_LIST`}}",
@@ -300,7 +299,7 @@ Make sure we have the correct directories and permissions for the `chef-client`
 provisioner. You will need to bootstrap the Chef run by providing the necessary
 cookbooks using Berkshelf or some other means.
 
-``` {.liquid}
+``` json
 {
   "type": "file",
   "source": "{{user `packer_chef_bootstrap_dir`}}",

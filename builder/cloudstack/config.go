@@ -6,17 +6,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Config holds all the details needed to configure the builder.
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	common.HTTPConfig   `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	APIURL       string        `mapstructure:"api_url"`
@@ -26,22 +27,26 @@ type Config struct {
 	HTTPGetOnly  bool          `mapstructure:"http_get_only"`
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
-	DiskOffering      string   `mapstructure:"disk_offering"`
-	DiskSize          int64    `mapstructure:"disk_size"`
-	CIDRList          []string `mapstructure:"cidr_list"`
-	Hypervisor        string   `mapstructure:"hypervisor"`
-	InstanceName      string   `mapstructure:"instance_name"`
-	Keypair           string   `mapstructure:"keypair"`
-	Network           string   `mapstructure:"network"`
-	Project           string   `mapstructure:"project"`
-	PublicIPAddress   string   `mapstructure:"public_ip_address"`
-	ServiceOffering   string   `mapstructure:"service_offering"`
-	SourceTemplate    string   `mapstructure:"source_template"`
-	SourceISO         string   `mapstructure:"source_iso"`
-	UserData          string   `mapstructure:"user_data"`
-	UserDataFile      string   `mapstructure:"user_data_file"`
-	UseLocalIPAddress bool     `mapstructure:"use_local_ip_address"`
-	Zone              string   `mapstructure:"zone"`
+	CIDRList             []string `mapstructure:"cidr_list"`
+	CreateSecurityGroup  bool     `mapstructure:"create_security_group"`
+	DiskOffering         string   `mapstructure:"disk_offering"`
+	DiskSize             int64    `mapstructure:"disk_size"`
+	Expunge              bool     `mapstructure:"expunge"`
+	Hypervisor           string   `mapstructure:"hypervisor"`
+	InstanceName         string   `mapstructure:"instance_name"`
+	Keypair              string   `mapstructure:"keypair"`
+	Network              string   `mapstructure:"network"`
+	Project              string   `mapstructure:"project"`
+	PublicIPAddress      string   `mapstructure:"public_ip_address"`
+	SecurityGroups       []string `mapstructure:"security_groups"`
+	ServiceOffering      string   `mapstructure:"service_offering"`
+	SourceISO            string   `mapstructure:"source_iso"`
+	SourceTemplate       string   `mapstructure:"source_template"`
+	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
+	UseLocalIPAddress    bool     `mapstructure:"use_local_ip_address"`
+	UserData             string   `mapstructure:"user_data"`
+	UserDataFile         string   `mapstructure:"user_data_file"`
+	Zone                 string   `mapstructure:"zone"`
 
 	TemplateName            string `mapstructure:"template_name"`
 	TemplateDisplayText     string `mapstructure:"template_display_text"`
@@ -64,6 +69,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"user_data",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, err
@@ -72,8 +82,27 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	var errs *packer.MultiError
 
 	// Set some defaults.
+	if c.APIURL == "" {
+		// Default to environment variable for api_url, if it exists
+		c.APIURL = os.Getenv("CLOUDSTACK_API_URL")
+	}
+
+	if c.APIKey == "" {
+		// Default to environment variable for api_key, if it exists
+		c.APIKey = os.Getenv("CLOUDSTACK_API_KEY")
+	}
+
+	if c.SecretKey == "" {
+		// Default to environment variable for secret_key, if it exists
+		c.SecretKey = os.Getenv("CLOUDSTACK_SECRET_KEY")
+	}
+
 	if c.AsyncTimeout == 0 {
 		c.AsyncTimeout = 30 * time.Minute
+	}
+
+	if len(c.CIDRList) == 0 {
+		c.CIDRList = []string{"0.0.0.0/0"}
 	}
 
 	if c.InstanceName == "" {
@@ -94,6 +123,14 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.TemplateDisplayText = c.TemplateName
 	}
 
+	// If we are not given an explicit keypair, ssh_password or ssh_private_key_file,
+	// then create a temporary one, but only if the temporary_keypair_name has not
+	// been provided.
+	if c.Keypair == "" && c.TemporaryKeypairName == "" &&
+		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+		c.TemporaryKeypairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+	}
+
 	// Process required parameters.
 	if c.APIURL == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a api_url must be specified"))
@@ -107,12 +144,12 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New("a secret_key must be specified"))
 	}
 
-	if len(c.CIDRList) == 0 && !c.UseLocalIPAddress {
-		errs = packer.MultiErrorAppend(errs, errors.New("a cidr_list must be specified"))
-	}
-
 	if c.Network == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("a network must be specified"))
+	}
+
+	if c.CreateSecurityGroup && !c.Expunge {
+		errs = packer.MultiErrorAppend(errs, errors.New("auto creating a temporary security group requires expunge"))
 	}
 
 	if c.ServiceOffering == "" {

@@ -6,9 +6,9 @@ package arm
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepValidateTemplate struct {
@@ -40,6 +40,9 @@ func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploy
 	}
 
 	_, err = s.client.Validate(resourceGroupName, deploymentName, *deployment)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 

@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
+	commonssh "github.com/hashicorp/packer/common/ssh"
+	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	commonssh "github.com/mitchellh/packer/common/ssh"
-	"github.com/mitchellh/packer/communicator/ssh"
-	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -198,6 +198,16 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 		}
 	}
 
+	vncTimeout := time.Duration(15 * time.Second)
+	envTimeout := os.Getenv("PACKER_ESXI_VNC_PROBE_TIMEOUT")
+	if envTimeout != "" {
+		if parsedTimeout, err := time.ParseDuration(envTimeout); err != nil {
+			log.Printf("Error parsing PACKER_ESXI_VNC_PROBE_TIMEOUT. Falling back to default (15s). %s", err)
+		} else {
+			vncTimeout = parsedTimeout
+		}
+	}
+
 	for port := portMin; port <= portMax; port++ {
 		if _, ok := listenPorts[fmt.Sprintf("%d", port)]; ok {
 			log.Printf("Port %d in use", port)
@@ -205,7 +215,7 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 		}
 		address := fmt.Sprintf("%s:%d", d.Host, port)
 		log.Printf("Trying address: %s...", address)
-		l, err := net.DialTimeout("tcp", address, 30*time.Second)
+		l, err := net.DialTimeout("tcp", address, vncTimeout)
 
 		if err != nil {
 			if e, ok := err.(*net.OpError); ok {
@@ -385,8 +395,9 @@ func (d *ESX5Driver) connect() error {
 	sshConfig := &ssh.Config{
 		Connection: ssh.ConnectFunc("tcp", address),
 		SSHConfig: &gossh.ClientConfig{
-			User: d.Username,
-			Auth: auth,
+			User:            d.Username,
+			Auth:            auth,
+			HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 		},
 	}
 

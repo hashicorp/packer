@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -88,6 +88,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 
@@ -103,11 +104,13 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeys(signer),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 
 		} else {
 			return &ssh.ClientConfig{
-				User: username,
+				User:            username,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth: []ssh.AuthMethod{
 					ssh.Password(password),
 					ssh.KeyboardInteractive(

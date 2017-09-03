@@ -1,13 +1,14 @@
 ---
 description: |
-    This VMware Packer builder is able to create VMware virtual machines from an ISO
-    file as a source. It currently supports building virtual machines on hosts
+    This VMware Packer builder is able to create VMware virtual machines from an
+    ISO file as a source. It currently supports building virtual machines on hosts
     running VMware Fusion for OS X, VMware Workstation for Linux and Windows, and
     VMware Player on Linux. It can also build machines directly on VMware vSphere
     Hypervisor using SSH as opposed to the vSphere API.
 layout: docs
-page_title: VMware Builder from ISO
-...
+page_title: 'VMware ISO - Builders'
+sidebar_current: 'docs-builders-vmware-iso'
+---
 
 # VMware Builder (from ISO)
 
@@ -34,13 +35,14 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "vmware-iso",
   "iso_url": "http://old-releases.ubuntu.com/releases/precise/ubuntu-12.04.2-server-amd64.iso",
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
+  "ssh_password": "packer",
   "shutdown_command": "shutdown -P now"
 }
 ```
@@ -78,9 +80,6 @@ builder.
 -   `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
-
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
 
 ### Optional:
 
@@ -228,7 +227,7 @@ builder.
     compacted at the end of the build process using `vmware-vdiskmanager`. In
     certain rare cases, this might actually end up making the resulting disks
     slightly larger. If you find this to be the case, you can disable compaction
-    using this configuration value.  Defaults to `false`.
+    using this configuration value. Defaults to `false`.
 
 -   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
     not export the VM. Useful if the build output is not the resultant image,
@@ -252,7 +251,7 @@ builder.
 -   `tools_upload_path` (string) - The path in the VM to upload the
     VMware tools. This only takes effect if `tools_upload_flavor` is non-empty.
     This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is "esx5".
@@ -277,8 +276,13 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
+-   `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces from
+    the VMX file after building. This is for advanced users who understand the
+    ramifications, but is useful for building Vagrant boxes since Vagrant will
+    create ethernet interfaces when provisioning a box.
+
 -   `vmx_template_path` (string) - Path to a [configuration
-    template](/docs/templates/configuration-templates.html) that defines the
+    template](/docs/templates/engine.html) that defines the
     contents of the virtual machine VMX file for VMware. This is for **advanced
     users only** as this can render the virtual machine non-functional. See
     below for more information. For basic VMX modifications, try
@@ -311,10 +315,10 @@ template.
 The boot command is "typed" character for character over a VNC connection to the
 machine, simulating a human actually typing the keyboard.
 
--> Keystrokes are typed as separate key up/down events over VNC with a
-   default 100ms delay. The delay alleviates issues with latency and CPU
-   contention. For local builds you can tune this delay by specifying
-   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+-&gt; Keystrokes are typed as separate key up/down events over VNC with a
+default 100ms delay. The delay alleviates issues with latency and CPU
+contention. For local builds you can tune this delay by specifying
+e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
 
 There are a set of special keys available. If these are in your boot
 command, they will be replaced by the proper key:
@@ -341,19 +345,19 @@ command, they will be replaced by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
 -   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -370,7 +374,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -381,7 +385,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -400,11 +404,11 @@ Ubuntu 12.04 installer:
 The heart of a VMware machine is the "vmx" file. This contains all the virtual
 hardware metadata necessary for the VM to function. Packer by default uses a
 [safe, flexible VMX
-file](https://github.com/mitchellh/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
+file](https://github.com/hashicorp/packer/blob/20541a7eda085aa5cf35bfed5069592ca49d106e/builder/vmware/step_create_vmx.go#L84).
 But for advanced users, this template can be customized. This allows Packer to
 build virtual machines of effectively any guest operating system type.
 
-\~&gt; **This is an advanced feature.** Modifying the VMX template can easily
+~&gt; **This is an advanced feature.** Modifying the VMX template can easily
 cause your virtual machine to not boot properly. Please only modify the template
 if you know what you're doing.
 
@@ -430,7 +434,7 @@ machine.
 Before using a remote vSphere Hypervisor, you need to enable GuestIPHack by
 running the following command:
 
-``` {.text}
+``` text
 esxcli system settings advanced set -o /Net/GuestIPHack -i 1
 ```
 
@@ -474,7 +478,22 @@ modify as well:
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`.
+    Before using this option, you need to install `ovftool`. This option 
+	works currently only with option remote_type set to "esx5".
+
+### VNC port discovery
+
+Packer needs to decide on a port to use for VNC when building remotely. To find
+an open port, we try to connect to ports in the range of `vnc_port_min` to
+`vnc_port_max`. If we notice something is listening on a port in the range, we
+try to connect to the next one, and so on until we find a port that has nothing
+listening on it. If you have many clients building on the ESXi host, there
+might be competition for the VNC ports. You can adjust how long packer waits
+for a connection timeout by setting `PACKER_ESXI_VNC_PROBE_TIMEOUT`. This
+defaults to 15 seconds. Set this shorter if vnc connections are refused, and
+set it longer if Packer can't find an open port. This is intended as an
+advanced configuration option. Please make sure your firewall settings are
+correct before adjusting.
 
 ### Using a Floppy for Linux kickstart file or preseed
 
@@ -482,7 +501,7 @@ Depending on your network configuration, it may be difficult to use packer's
 built-in HTTP server with ESXi. Instead, you can provide a kickstart or preseed
 file by attaching a floppy disk. An example below, based on RHEL:
 
-``` {.javascript}
+``` json
 {
   "builders": [
     {
@@ -496,9 +515,9 @@ file by attaching a floppy disk. An example below, based on RHEL:
 }
 ```
 
-It's also worth noting that `ks=floppy` has been deprecated.  Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
+It's also worth noting that `ks=floppy` has been deprecated. Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
 
-``` {.javascript}
+``` json
 {
   "builders": [
     {

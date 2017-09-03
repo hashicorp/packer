@@ -7,7 +7,8 @@ language: go
 
 go:
   - 1.7.4
-  - 1.8
+  - 1.8.3
+  - 1.9
 
 install:
   - make deps
@@ -21,5 +22,3 @@ branches:
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - go: 1.4.3

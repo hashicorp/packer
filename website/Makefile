@@ -1,22 +1,24 @@
-all: build
+VERSION?="0.3.28"
 
-init:
-	bundle
+build:
+	@echo "==> Starting build in Docker..."
+	@docker run \
+		--interactive \
+		--rm \
+		--tty \
+		--volume "$(shell pwd):/website" \
+		hashicorp/middleman-hashicorp:${VERSION} \
+		bundle exec middleman build --verbose --clean
 
-docker-dev:
-	docker run -it --expose 4567 -p 4567:4567 -v "$(PWD)":/usr/src/app -w /usr/src/app ruby:2.3.1 \
-	  bash -c "apt-get update && apt-get -qy install curl git libgmp3-dev nodejs && \
-	  gem install bundler && bundle install && make dev"
+website:
+	@echo "==> Starting website in Docker..."
+	@docker run \
+		--interactive \
+		--rm \
+		--tty \
+		--publish "4567:4567" \
+		--publish "35729:35729" \
+		--volume "$(shell pwd):/website" \
+		hashicorp/middleman-hashicorp:${VERSION}
 
-dev: init
-	PACKER_DISABLE_DOWNLOAD_FETCH=true PACKER_VERSION=1.0 bundle exec middleman server
-
-build: init
-	PACKER_DISABLE_DOWNLOAD_FETCH=true PACKER_VERSION=1.0 bundle exec middleman build
-
-format:
-	bundle exec htmlbeautifier -t 2 source/*.erb
-	bundle exec htmlbeautifier -t 2 source/layouts/*.erb
-	@pandoc -v > /dev/null || echo "pandoc must be installed in order to format markdown content"
-	pandoc -v > /dev/null && find . -iname "*.html.md" | xargs -I{} bash -c "pandoc -r markdown -w markdown --tab-stop=4 --atx-headers -s --columns=80 {} > {}.new"\; || true
-	pandoc -v > /dev/null && find . -iname "*.html.md" | xargs -I{} bash -c "mv {}.new {}"\; || true
+.PHONY: build website

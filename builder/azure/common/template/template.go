@@ -35,6 +35,25 @@ type Resource struct {
 	Resources  *[]Resource         `json:"resources,omitempty"`
 }
 
+type OSDiskUnion struct {
+	OsType       compute.OperatingSystemTypes      `json:"osType,omitempty"`
+	OsState      compute.OperatingSystemStateTypes `json:"osState,omitempty"`
+	BlobURI      *string                           `json:"blobUri,omitempty"`
+	Name         *string                           `json:"name,omitempty"`
+	Vhd          *compute.VirtualHardDisk          `json:"vhd,omitempty"`
+	Image        *compute.VirtualHardDisk          `json:"image,omitempty"`
+	Caching      compute.CachingTypes              `json:"caching,omitempty"`
+	CreateOption compute.DiskCreateOptionTypes     `json:"createOption,omitempty"`
+	DiskSizeGB   *int32                            `json:"diskSizeGB,omitempty"`
+	ManagedDisk  *compute.ManagedDiskParameters    `json:"managedDisk,omitempty"`
+}
+
+// Union of the StorageProfile and ImageStorageProfile types.
+type StorageProfileUnion struct {
+	ImageReference *compute.ImageReference `json:"imageReference,omitempty"`
+	OsDisk         *OSDiskUnion            `json:"osDisk,omitempty"`
+}
+
 /////////////////////////////////////////////////
 // Template > Resource > Properties
 type Properties struct {
@@ -50,10 +69,11 @@ type Properties struct {
 	OsProfile                    *compute.OSProfile                  `json:"osProfile,omitempty"`
 	PublicIPAllocatedMethod      *network.IPAllocationMethod         `json:"publicIPAllocationMethod,omitempty"`
 	Sku                          *Sku                                `json:"sku,omitempty"`
-	StorageProfile               *compute.StorageProfile             `json:"storageProfile,omitempty"`
-	Subnets                      *[]network.Subnet                   `json:"subnets,omitempty"`
-	TenantId                     *string                             `json:"tenantId,omitempty"`
-	Value                        *string                             `json:"value,omitempty"`
+	//StorageProfile3              *compute.StorageProfile             `json:"storageProfile,omitempty"`
+	StorageProfile *StorageProfileUnion `json:"storageProfile,omitempty"`
+	Subnets        *[]network.Subnet    `json:"subnets,omitempty"`
+	TenantId       *string              `json:"tenantId,omitempty"`
+	Value          *string              `json:"value,omitempty"`
 }
 
 type AccessPolicies struct {

@@ -1,10 +1,11 @@
 ---
 description: |
-    The `puppet-server` Packer provisioner provisions Packer machines with Puppet by
-    connecting to a Puppet master.
+    The puppet-server Packer provisioner provisions Packer machines with Puppet
+    by connecting to a Puppet master.
 layout: docs
-page_title: Puppet Server Provisioner
-...
+page_title: 'Puppet Server - Provisioners'
+sidebar_current: 'docs-provisioners-puppet-server'
+---
 
 # Puppet Server Provisioner
 
@@ -24,7 +25,7 @@ this.
 The example below is fully functional and expects a Puppet server to be
 accessible from your network.
 
-``` {.javascript}
+``` json
 {
    "type": "puppet-server",
    "options": "--test --pluginsync",
@@ -80,20 +81,38 @@ listed below:
     or `%PATH%` environment variable, but some builders (notably, the Docker one) do
     not run profile-setup scripts, therefore the path is usually empty.
 
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
+
 -   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
-    various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
-    below for more information. By default, Packer uses the following command:
+    various [configuration template variables](/docs/templates/engine.html) available. By default,
+    Packer uses the following command (broken across multiple lines for readability) to execute Puppet:
 
 ```
-{{.FacterVars}} {{if .Sudo}} sudo -E {{end}} \
-  {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent --onetime --no-daemonize \
-  {{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}} \
-  {{if ne .Options \"\"}}{{.Options}} {{end}} \
-  {{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}} \
-  {{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}} \
-  {{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' \
-  {{end}} --detailed-exitcodes
+{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
+```
+
+The following command is used if guest OS type is windows:
+
+```
+{{.FacterVars}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
 ```
 
 ## Default Facts

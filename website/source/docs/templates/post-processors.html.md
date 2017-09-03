@@ -1,13 +1,14 @@
 ---
 description: |
-    The post-processor section within a template configures any post-processing that
-    will be done to images built by the builders. Examples of post-processing would
-    be compressing files, uploading artifacts, etc.
+    The post-processor section within a template configures any post-processing
+    that will be done to images built by the builders. Examples of post-processing
+    would be compressing files, uploading artifacts, etc.
 layout: docs
-page_title: 'Templates: Post-Processors'
-...
+page_title: 'Post-Processors - Templates'
+sidebar_current: 'docs-templates-post-processors'
+---
 
-# Templates: Post-Processors
+# Template Post-Processors
 
 The post-processor section within a template configures any post-processing that
 will be done to images built by the builders. Examples of post-processing would
@@ -24,7 +25,7 @@ post-processor.
 
 Within a template, a section of post-processor definitions looks like this:
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     // ... one or more post-processor definitions here
@@ -43,15 +44,14 @@ apply to, if you wish.
 
 Within the `post-processors` array in a template, there are three ways to define
 a post-processor. There are *simple* definitions, *detailed* definitions, and
-*sequence* definitions. Don't worry, they're all very easy to understand, and
-the "simple" and "detailed" definitions are simply shortcuts for the "sequence"
-definition.
+*sequence* definitions. Another way to think about this is that the "simple" and
+"detailed" definitions are shortcuts for the "sequence" definition.
 
 A **simple definition** is just a string; the name of the post-processor. An
 example is shown below. Simple definitions are used when no additional
 configuration is needed for the post-processor.
 
-``` {.javascript}
+``` json
 {
   "post-processors": ["compress"]
 }
@@ -63,7 +63,7 @@ post-processor, but may also contain additional configuration for the
 post-processor. A detailed definition is used when additional configuration is
 needed beyond simply the type for the post-processor. An example is shown below.
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     {
@@ -84,7 +84,7 @@ compressed then uploaded, but the compressed result is not kept.
 
 It is very important that any post processors that need to be run in order, be sequenced!
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [
@@ -102,7 +102,7 @@ simply shortcuts for a **sequence** definition of only one element.
 
 It is important to sequence post processors when creating and uploading vagrant boxes to Atlas via Packer. Using a sequence will ensure that the post processors are ran in order and creates the vagrant box prior to uploading the box to Atlas.
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     [
@@ -138,7 +138,7 @@ In some cases, however, you may want to keep the intermediary artifacts. You can
 tell Packer to keep these artifacts by setting the `keep_input_artifact`
 configuration to `true`. An example is shown below:
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     {
@@ -172,7 +172,7 @@ effectively the same. `only` and `except` can only be specified on "detailed"
 configurations. If you have a sequence of post-processors to run, `only` and
 `except` will only affect that single post-processor in the sequence.
 
-``` {.javascript}
+``` json
 {
   "type": "vagrant",
   "only": ["virtualbox-iso"]

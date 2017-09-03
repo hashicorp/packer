@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -200,6 +200,9 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	delete(config, "facter")
 	p = new(Provisioner)
 	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 	if p.config.Facter == nil {
 		t.Fatalf("err: Default facts are not set in the Puppet provisioner!")
 	}

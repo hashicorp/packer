@@ -2,16 +2,29 @@ package cloudstack
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"net"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
+// userDataTemplateData represents variables for user_data interpolation
+type userDataTemplateData struct {
+	HTTPIP   string
+	HTTPPort uint
+}
+
 // stepCreateInstance represents a Packer build step that creates CloudStack instances.
-type stepCreateInstance struct{}
+type stepCreateInstance struct {
+	Debug bool
+	Ctx   interpolate.Context
+}
 
 // Run executes the Packer build step that creates a CloudStack instance.
 func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
@@ -32,8 +45,12 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	p.SetName(config.InstanceName)
 	p.SetDisplayname("Created by Packer")
 
-	if config.Keypair != "" {
-		p.SetKeypair(config.Keypair)
+	if keypair, ok := state.GetOk("keypair"); ok {
+		p.SetKeypair(keypair.(string))
+	}
+
+	if securitygroups, ok := state.GetOk("security_groups"); ok {
+		p.SetSecuritygroupids(securitygroups.([]string))
 	}
 
 	// If we use an ISO, configure the disk offering.
@@ -50,6 +67,8 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Retrieve the zone object.
 	zone, _, err := client.Zone.GetZoneByID(config.Zone)
 	if err != nil {
+		err := fmt.Errorf("Failed to get zone %s by ID: %s", config.Zone, err)
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -65,8 +84,24 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	if config.UserData != "" {
-		ud, err := getUserData(config.UserData, config.HTTPGetOnly)
+		httpPort := state.Get("http_port").(uint)
+		httpIP, err := hostIP()
 		if err != nil {
+			err := fmt.Errorf("Failed to determine host IP: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		common.SetHTTPIP(httpIP)
+
+		s.Ctx.Data = &userDataTemplateData{
+			httpIP,
+			httpPort,
+		}
+
+		ud, err := s.generateUserData(config.UserData, config.HTTPGetOnly)
+		if err != nil {
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -77,11 +112,19 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Create the new instance.
 	instance, err := client.VirtualMachine.DeployVirtualMachine(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating new instance %s: %s", config.InstanceName, err))
+		err := fmt.Errorf("Error creating new instance %s: %s", config.InstanceName, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	ui.Message("Instance has been created!")
+
+	// In debug-mode, we output the password
+	if s.Debug {
+		ui.Message(fmt.Sprintf(
+			"Password (since debug is enabled) \"%s\"", instance.Password))
+	}
 
 	// Set the auto generated password if a password was not explicitly configured.
 	switch config.Comm.Type {
@@ -109,6 +152,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 // Cleanup any resources that may have been created during the Run phase.
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	instanceID, ok := state.Get("instance_id").(string)
@@ -119,9 +163,6 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	// Create a new parameter struct.
 	p := client.VirtualMachine.NewDestroyVirtualMachineParams(instanceID)
 
-	// Set expunge so the instance is completely removed
-	p.SetExpunge(true)
-
 	ui.Say("Deleting instance...")
 	if _, err := client.VirtualMachine.DestroyVirtualMachine(p); err != nil {
 		// This is a very poor way to be told the ID does no longer exist :(
@@ -131,23 +172,53 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		ui.Error(fmt.Sprintf("Error destroying instance: %s", err))
+		ui.Error(fmt.Sprintf("Error destroying instance. Please destroy it manually.\n\n"+
+			"\tName: %s\n"+
+			"\tError: %s", config.InstanceName, err))
+		return
+	}
+
+	// We could expunge the VM while destroying it, but if the user doesn't have
+	// rights that single call could error out leaving the VM running. So but
+	// splitting these calls we make sure the VM is always deleted, even when the
+	// expunge fails.
+	if config.Expunge {
+		// Create a new parameter struct.
+		p := client.VirtualMachine.NewExpungeVirtualMachineParams(instanceID)
+
+		ui.Say("Expunging instance...")
+		if _, err := client.VirtualMachine.ExpungeVirtualMachine(p); err != nil {
+			// This is a very poor way to be told the ID does no longer exist :(
+			if strings.Contains(err.Error(), fmt.Sprintf(
+				"Invalid parameter id value=%s due to incorrect long value format, "+
+					"or entity does not exist", instanceID)) {
+				return
+			}
+
+			ui.Error(fmt.Sprintf("Error expunging instance. Please expunge it manually.\n\n"+
+				"\tName: %s\n"+
+				"\tError: %s", config.InstanceName, err))
+			return
+		}
 	}
 
 	ui.Message("Instance has been deleted!")
-
 	return
 }
 
-// getUserData returns the user data as a base64 encoded string.
-func getUserData(userData string, httpGETOnly bool) (string, error) {
-	ud := base64.StdEncoding.EncodeToString([]byte(userData))
+// generateUserData returns the user data as a base64 encoded string.
+func (s *stepCreateInstance) generateUserData(userData string, httpGETOnly bool) (string, error) {
+	renderedUserData, err := interpolate.Render(userData, &s.Ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error rendering user_data: %s", err)
+	}
 
-	// deployVirtualMachine uses POST by default, so max userdata is 32K
+	ud := base64.StdEncoding.EncodeToString([]byte(renderedUserData))
+
+	// DeployVirtualMachine uses POST by default which allows 32K of
+	// userdata. If using GET instead the userdata is limited to 2K.
 	maxUD := 32768
-
 	if httpGETOnly {
-		// deployVirtualMachine using GET instead, so max userdata is 2K
 		maxUD = 2048
 	}
 
@@ -158,4 +229,21 @@ func getUserData(userData string, httpGETOnly bool) (string, error) {
 	}
 
 	return ud, nil
+}
+
+func hostIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", errors.New("No host IP found")
 }

@@ -1,6 +1,248 @@
-## (Unreleased)
+## UNRELEASED
+
+### IMPROVEMENTS:
+
+* provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
+* builder/profitbricks: added support for Cloud API v4. [GH-5233]
+* builder/vmware: Set artifact ID to `VMName`. [GH-5187]
+* core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
+* builder/cloudstack: Add support for Security Groups. [GH-5175]
+* provisioner/puppet: Add `guest_os_type` option to add support for Windows. [GH-5252]
+
+### BACKWARDS INCOMPATIBILITIES:
+
+* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
+* provisioner/shell: Set default for ExpectDisconnect to false. [GH-5283]
+* communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
+
+### BUG FIXES:
+
+* builder/vmware: Fix timestamp in default VMName. [GH-5274]
+* provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
+* builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
+* builder/docker: Fix file uploads. [GH-5251]
+
+
+## 1.0.4 (August 11, 2017)
+
+### IMPROVEMENTS:
+
+* builder/alicloud: Increase polling timeout. [GH-5148]
+* builder/azure: Add `private_virtual_network_with_public_ip` option to
+    optionally obtain a public IP. [GH-5222]
+* builder/googlecompute: use a more portable method of obtaining zone.
+    [GH-5192]
+* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
+* builder/parallels: Remove soon to be removed --vmtype flag in createvm.
+    [GH-5172]
+* contrib: add json files to zsh completion. [GH-5195]
+
+### BUG FIXES:
+
+* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
+* builder/amazon: fix builds when using the null communicator. [GH-5217]
+* builder/docker: Correctly handle case when uploading an empty directory.
+    [GH-5234]
+* command/push: Don't push variables if they are unspecified. Reverts to
+    behavior in 1.0.1. [GH-5235]
+* command/push: fix handling of symlinks. [GH-5226]
+* core: Strip query parameters from ISO URLs when checking against a checksum
+    file. [GH-5181]
+* provisioner/ansible-remote: Fix issue where packer could hang communicating
+    with ansible-remote. [GH-5146]
+
+## 1.0.3 (July 17, 2017)
+
+### IMPROVEMENTS:
+* builder/azure: Update to latest Azure SDK, enabling support for managed
+    disks. [GH-4511]
+* builder/cloudstack: Add default cidr_list [ 0.0.0.0/0 ]. [GH-5125]
+* builder/cloudstack: Add support for ssh_agent_auth. [GH-5130]
+* builder/cloudstack: Add support for using a HTTP server. [GH-5017]
+* builder/cloudstack: Allow reading api_url, api_key, and secret_key from env
+    vars. [GH-5124]
+* builder/cloudstack: Make expunge optional and improve logging output.
+    [GH-5099]
+* builder/googlecompute: Allow using URL's for network and subnetwork.
+    [GH-5035]
+* builder/hyperv: Add support for floppy_dirs with hyperv-iso builder.
+* builder/hyperv: Add support for override of system %temp% path.
+* core: Experimental Android ARM support. [GH-5111]
+* post-processor/atlas: Disallow packer push of vagrant.box artifacts to atlas.
+    [GH-4780]
+* postprocessor/atlas: Disallow pushing vagrant.box artifacts now that Vagrant
+    cloud is live. [GH-4780]
+
+### BUG FIXES:
+* builder/amazon: Fix panic that happens if ami_block_device_mappings is empty.
+    [GH-5059]
+* builder/azure: Write private SSH to file in debug mode. [GH-5070] [GH-5074]
+* builder/cloudstack: Properly report back errors. [GH-5103] [GH-5123]
+* builder/docker: Fix windows filepath in docker-toolbox call [GH-4887]
+* builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
+* builder/hyperv: Use SID to verify membersip in Admin group, fixing for non-
+    english users. [GH-5022]
+* builder/hyperv: Verify membership in the group Hyper-V Administrators by SID
+    not name. [GH-5022]
+* builder/openstack: Update gophercloud version, fixing builds  > 1 hr long.
+    [GH-5046]
+* builder/parallels: Skip missing paths when looking for unnecessary files.
+    [GH-5058]
+* builder/vmware-esxi: Fix VNC port discovery default timeout. [GH-5051]
+* communicator/ssh: Add ProvisionerTypes to communicator tests, resolving panic
+    [GH-5116]
+* communicator/ssh: Resolve race condition that sometimes truncates ssh
+    provisioner stdout [GH-4719]
+* post-processor/checksum: Fix interpolation of "output". [GH-5112]
+* push: Push vars in packer config, not just those set from command line and in
+    var-file. [GH-5101]
+
+## 1.0.2 (June 21, 2017)
+
+### BUG FIXES:
+* communicator/ssh: Fix truncated stdout from remote ssh provisioner. [GH-5050]
+* builder/amazon: Fix bugs related to stop instance command. [GH-4719]
+* communicator/ssh: Fix ssh connection errors. [GH-5038]
+* core: Remove logging that shouldn't be there when running commands. [GH-5042]
+* provisioner/shell: Fix bug where scripts were being run under `sh`. [GH-5043]
+
+### IMRPOVEMENTS:
+
+* provisioner/windows-restart: make it clear that timeouts come from the
+    provisioner, not winrm. [GH-5040]
+
+## 1.0.1 (June 19, 2017)
+
+### IMPROVEMENTS:
+
+* builder/amazon: Allow amis to be copied to other regions, encrypted with
+    custom KMS keys. [GH-4948]
+* builder/amazon: Allow configuration of api endpoint to support api-compatible
+    cloud providers. [GH-4896]
+* builder/amazon: Fix regex used for ami name validation [GH-4902]
+* builder/amazon: Look up vpc from subnet id if no vpc was specified. [GH-4879]
+* builder/amazon: Print temporary security group name to the UI. [GH-4997]
+* builder/amazon: Support Assume Role with MFA and ECS Task Roles. Also updates
+    to a newer version of aws-sdk-go. [GH-4996]
+* builder/amazon: Use retry logic when creating instance tags. [GH-4876]
+* builder/amazon: Validate ami name. [GH-4762]
+* builder/azure: Add build output to artifact. [GH-4953]
+* builder/azure: Use disk URI as artifact ID. [GH-4981]
+* builder/digitalocean: Added support for monitoring. [GH-4782]
+* builder/digitalocean: Support for copying snapshot to other regions.
+    [GH-4893]
+* builder/hyper-v: Remove the check for administrator rights when sending key
+    strokes to Hyper-V. [GH-4687] # builder/openstack: Fix private key error
+    message to match documentation [GH-4898]
+* builder/null: Support SSH agent auth [GH-4956]
+* builder/openstack: Add ssh agent support. [GH-4655]
+* builder/openstack: Support client x509 certificates. [GH-4921]
+* builder/parallels-iso: Configuration of disk type, plain or expanding.
+    [GH-4621]
+* builder/triton: An SSH agent can be used to authenticate requests, making
+    `triton_key_material` optional. [GH-4838]
+* builder/triton: If no source machine networks are specified, instances are
+    started on the default public and internal networks. [GH-4838]
+* builder/virtualbox: Add sata port count configuration option. [GH-4699]
+* builder/virtualbox: Don't add port forwarding when using "none" communicator.
+    [GH-4960]
+* builder/vmware: Add option to remove interfaces from the vmx. [GH-4927]
+* builder/vmware: Properly remove mounted CDs on OS X. [GH-4810]
+* builder/vmware: VNC probe timeout is configurable. [GH-4919]
+* command/push: add `-sensitive` flag to mark pushed vars are sensitive.
+    [GH-4970]
+* command/push: Vagrant support in Terraform Enterprise is deprecated.
+    [GH-4950]
+* communicator/ssh: Add ssh agent support for bastion connections. [GH-4940]
+* communicator/winrm: Add NTLM authentication support. [GH-4979]
+* communicator/winrm: Add support for file downloads. [GH-4748]
+* core: add telemetry for better product support. [GH-5015]
+* core: Build binaries for arm64 [GH-4892]
+* post-processor/amazon-import: Add support for `license_type`. [GH-4634]
+* post-processor/vagrant-cloud: Get vagrant cloud token from environment.
+    [GH-4982]
+* provisioner/ansible-local: Add extra-vars `packer_build_name`,
+    `packer_builder_type`, and `packer_http_addr`. [GH-4821]
+* provisioner/ansible: Add `inventory_directory` option to control where to
+    place the generated inventory file. [GH-4760]
+* provisioner/ansible: Add `skip_version_check` flag for when ansible will be
+    installed from a prior provisioner. [GH-4983]
+* provisioner/ansible: Add extra-vars `packer_build_name` and
+    `packer_builder_type`. [GH-4821]
+* provisioner/chef-solo: Add option to select Chef version. [GH-4791]
+* provisioner/salt: Add salt bin directory configuration. [GH-5009]
+* provisioner/salt: Add support for grains. [GH-4961]
+* provisioner/shell: Use `env` to set environment variables to support freebsd
+    out of the box. [GH-4909]
+* website/docs: Clarify language, improve formatting. [GH-4866]
+* website/docs: Update docker metadata fields that can be changed. [GH-4867]
+
+
+### BUG FIXES:
+
+* builder/amazon-ebssurrogate: Use ami device settings when creating the AMI.
+    [GH-4972]
+* builder/amazon: don't try to delete extra volumes during clean up. [GH-4930]
+* builder/amazon: fix `force_delete_snapshot` when the launch instance has
+    extra volumes. [GH-4931]
+* builder/amazon: Only delete temporary key if we created one. [GH-4850]
+* builder/azure: Replace calls to panic with error returns. [GH-4846]
+* communicator/winrm: Use KeepAlive to keep long-running connections open.
+    [GH-4952]
+* core: Correctly reject config files which have junk after valid json.
+    [GH-4906]
+* post-processor/checksum: fix crash when invalid checksum is used. [GH-4812]
+* post-processor/vagrant-cloud: don't read files to upload in to memory first.
+    [GH-5005]
+* post-processor/vagrant-cloud: only upload once under normal conditions.
+    [GH-5008]
+* provisioner/ansible-local: Correctly set the default staging directory under
+    Windows. [GH-4792]
+
+### FEATURES:
+
+* **New builder:** `alicloud-ecs` for building Alicloud ECS images. [GH-4619]
+
+
+## 1.0.0 (April 4, 2017)
+
+### BUG FIXES:
+
+* builder/amazon: Fix b/c issue by reporting again the tags we create.
+    [GH-4704]
+* builder/amazon: Fix crash in `step_region_copy`. [GH-4642]
+* builder/googlecompute: Correct values for `on_host_maintenance`. [GH-4643]
+* builder/googlecompute: Use "default" service account. [GH-4749]
+* builder/hyper-v: Don't wait for shutdown_command to return. [GH-4691]
+* builder/virtualbox: fix `none` communicator by allowing skipping upload of
+    version file. [GH-4678]
+* builder/virtualbox: retry removing floppy controller. [GH-4705]
+* communicator/ssh: don't return error if we can't close connection. [GH-4741]
+* communicator/ssh: fix nil pointer error. [GH-4690]
+* core: fix version number
+* core: Invoking packer `--help` or `--version` now exits with status 0.
+    [GH-4723]
+* core: show correct step name when debugging. [GH-4672]
+* communicator/winrm: Directory uploads behave more like scp. [GH-4438]
+
+### IMPROVEMENTS:
+
+* builder/amazon-chroot: Ability to give an empty list in `copy_files` to
+    prevent the default `/etc/resolv.conf` file from being copied. If
+    `copy_files` isn't given at all, the default behavior remains. [GH-4708]
+* builder/amazon: set force_deregister to true on -force. [GH-4649]
+* builder/amazon: validate ssh key name/file. [GH-4665]
+* builder/ansible: Clearer error message when we have problems getting the
+    ansible version. [GH-4694]
+* builder/hyper-v: validate output dir in step, not in config. [GH-4645]
+* More diligently try to complete azure-setup.sh. [GH-4752]
+* website: fix display on ios devices. [GH-4618]
 
 ## 0.12.3 (March 1, 2017)
+
+### BACKWARDS INCOMPATIBILITIES:
+
+* provisioner/ansible: by default, the staging dir will be randomized. [GH-4472]
 
 ### FEATURES:
 
@@ -8,44 +250,43 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon-chroot: support encrypted boot volume. [GH-4584]
 * builder/amazon: Add BuildRegion and SourceAMI template variables. [GH-4399]
 * builder/amazon: Change EC2 Windows password timeout to 20 minutes. [GH-4590]
-* builder/amazon-chroot: support encrypted boot volume. [GH-4584]
-* builder/docker: create export dir if needed. [GH-4439]
-* builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
-* builder/openstack: add reuse_ips option to try to re-use existing IPs. [GH-4564]
-* communicator/docker: preserve file mode. [GH-4443]
-* communicator/winrm: support ProxyFromEnvironment. [GH-4463]
-* core: make VNC links clickable in terminal. [GH-4497] [GH-4498]
-* post-processor/amazon-import: support AMI attributes on import [GH-4216]
-* provisioner/ansible: use randomized staging dir [GH-4472]
-* communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
 * builder/amazon: enable ena when `enhanced_networking` is set. [GH-4578]
-* builder/vmware-esxi: try for longer to connect to vnc port. [GH-4480]
-    [GH-4610]
-* core: don't show ui color if we're not colorized. [GH-4525]
-* builder/vmware: don't cache ip address so we know if it changes. [GH-4532]
-* builder/vmware: allow extra options for ovftool. [GH-4536]
-* docs: add community page. [GH-4550]
-* post-processor/docker-import: print stderr on docker import failure.
-    [GH-4529]
 * builder/azure:: add two new config variables for temp_compute_name and
     temp_resource_group_name. [GH-4468]
-
+* builder/docker: create export dir if needed. [GH-4439]
+* builder/googlecompute: Add `on_host_maintenance` option. [GH-4544]
+* builder/openstack: add reuse_ips option to try to re-use existing IPs.
+    [GH-4564]
+* builder/vmware-esxi: try for longer to connect to vnc port. [GH-4480]
+    [GH-4610]
+* builder/vmware: allow extra options for ovftool. [GH-4536]
+* builder/vmware: don't cache ip address so we know if it changes. [GH-4532]
+* communicator/docker: preserve file mode. [GH-4443]
+* communicator/ssh: Use SSH agent when enabled for bastion step. [GH-4598]
+* communicator/winrm: support ProxyFromEnvironment. [GH-4463]
+* core: don't show ui color if we're not colorized. [GH-4525]
+* core: make VNC links clickable in terminal. [GH-4497] [GH-4498]
+* docs: add community page. [GH-4550]
+* post-processor/amazon-import: support AMI attributes on import [GH-4216]
+* post-processor/docker-import: print stderr on docker import failure.
+    [GH-4529]
 
 ### BUG FIXES:
 
-* builder/amazon: Fix ssh agent authentication. [GH-4597]
 * builder/amazon-ebsvolume: Fix interpolation of block_device. [GH-4464]
+* builder/amazon: Fix ssh agent authentication. [GH-4597]
+* builder/docker: Don't force tag if using a docker version that doesn't
+    support it. [GH-4560]
 * builder/googlecompute: fix bug when creating image from custom image_family.
     [GH-4518]
 * builder/virtualbox: remove guest additions before saving image. [GH-4496]
 * core: always check for an error first when walking a path. [GH-4467]
-* builder/docker: Don't force tag if using a docker version that doesn't
-    support it. [GH-4560]
+* core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 * provisioner/chef-client: only upload knife config if we're cleaning.
     [GH-4534]
-* core: update crypto/ssh lib to fix large file uploads. [GH-4546]
 
 ## 0.12.2 (January 20, 2017)
 
@@ -58,12 +299,13 @@
 
 * builder/hyperv-iso: add `iso_target_extension` option. [GH-4294]
 * builder/openstack: Add support for instance metadata. [GH-4361]
-* builder/openstack: Attempt to use existing floating IPs before allocating
-    a new one. [GH-4357]
+* builder/openstack: Attempt to use existing floating IPs before allocating a
+    new one. [GH-4357]
 * builder/parallels-iso: add `iso_target_extension` option. [GH-4294]
 * builder/qemu: add `iso_target_extension` option. [GH-4294]
 * builder/qemu: add `use_default_display` option for osx compatibility.
     [GH-4293]
+* builder/qemu: Detect input disk image format during copy/convert. [GH-4343]
 * builder/virtualbox-iso: add `iso_target_extension` option. [GH-4294]
 * builder/virtualbox: add `skip_export` option to skip exporting the VM after
     build completes. [GH-4339]
@@ -75,23 +317,22 @@
 * builder/vmware: Try to use `ip address` to find host IP. [GH-4411]
 * common/step_http\_server: set `PACKER_HTTP_ADDR` env var for accessing http
     server from inside builder. [GH-4409]
-* provisioner/powershell: Allow equals sign in value of environment
-    variables. [GH-4328]
+* provisioner/powershell: Allow equals sign in value of environment variables.
+    [GH-4328]
 * provisioner/puppet-server: Add default facts.  [GH-4286]
-* builder/qemu: Detect input disk image format during copy/convert. [GH-4343]
 
 ### BUG FIXES:
 
 * builder/amazon-chroot: Panic in AMI region copy step. [GH-4341]
 * builder/amazon: Crashes when new EBS vols are used. [GH-4308]
 * builder/amazon: Fix crash in amazon-instance. [GH-4372]
+* builder/amazon: fix run volume tagging [GH-4420]
+* builder/amazon: fix when using non-existant security\_group\_id. [GH-4425]
 * builder/amazon: Properly error if we don't have the
     ec2:DescribeSecurityGroups permission. [GH-4304]
 * builder/amazon: Properly wait for security group to exist. [GH-4369]
-* builder/amazon: fix run volume tagging [GH-4420]
-* builder/amazon: fix when using non-existant security\_group\_id. [GH-4425]
-* builder/docker: Fix crash when performing log in to ECR with an invalid
-    URL. [GH-4385]
+* builder/docker: Fix crash when performing log in to ECR with an invalid URL.
+    [GH-4385]
 * builder/openstack: fix for finding resource by ID. [GH-4301]
 * builder/qemu: Explicitly set WinRMPort for StepConnect. [GH-4321]
 * builder/virtualbox: Explicitly set WinRMPort for StepConnect. [GH-4321]
@@ -102,8 +343,7 @@
 * command/push: Don't interpolate variables when pushing. [GH-4389]
 * common/step_http_server: make port range inclusive. [GH-4398]
 * communicator/winrm: update winrm client, resolving `MaxMemoryPerShellMB`
-    errors and properly error logging instead of panicking. [GH-4412]
-    [GH-4424]
+    errors and properly error logging instead of panicking. [GH-4412] [GH-4424]
 * provider/windows-shell: Allows equals sign in env var value. [GH-4423]
 
 ## 0.12.1 (December 15, 2016)
@@ -115,9 +355,9 @@
     "packer fix template.json" to migrate a template. [GH-4285]
 * builder/openstack: No long supports the `api_key` option for rackspace.
     [GH-4283]
-* post-processor/manifest: Changed `filename` field to be `output`, to be
-    more consistent with other post-processors. `packer fix` will fix this
-    for you. [GH-4192]
+* post-processor/manifest: Changed `filename` field to be `output`, to be more
+    consistent with other post-processors. `packer fix` will fix this for you.
+    [GH-4192]
 * post-processor/shell-local: Now runs per-builder instead of per-file. The
     filename is no longer passed in as an argument to the script, but instead
     needs to be gleaned from the manifest post-processor. [GH-4189]

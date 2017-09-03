@@ -1,9 +1,11 @@
 ---
 description: |
-    The manifest post-processor writes a JSON file with the build artifacts and IDs from a packer run.
+    The manifest post-processor writes a JSON file with the build artifacts and
+    IDs from a packer run.
 layout: docs
-page_title: 'Manifest Post-Processor'
-...
+page_title: 'Manifest - Post-Processors'
+sidebar_current: 'docs-post-processors-manifest'
+---
 
 # Manifest Post-Processor
 
@@ -28,7 +30,7 @@ You can specify manifest more than once and write each build to its own file, or
 
 You can simply add `{"type":"manifest"}` to your post-processor section. Below is a more verbose example:
 
-``` {.javascript}
+``` json
 {
   "post-processors": [
     {

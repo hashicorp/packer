@@ -9,10 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const DefaultTempConfigDir = "/tmp/salt"
@@ -33,6 +33,9 @@ type Config struct {
 
 	// Local path to the minion config
 	MinionConfig string `mapstructure:"minion_config"`
+
+	// Local path to the minion grains
+	GrainsFile string `mapstructure:"grains_file"`
 
 	// Local path to the salt state tree
 	LocalStateTree string `mapstructure:"local_state_tree"`
@@ -57,6 +60,9 @@ type Config struct {
 
 	// Arguments to pass to salt-call
 	SaltCallArgs string `mapstructure:"salt_call_args"`
+
+	// Directory containing salt-call
+	SaltBinDir string `mapstructure:"salt_bin_dir"`
 
 	// Command line args passed onto salt-call
 	CmdArgs string ""
@@ -105,6 +111,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.MinionConfig != "" && (p.config.RemoteStateTree != "" || p.config.RemotePillarRoots != "") {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("remote_state_tree and remote_pillar_roots only apply when minion_config is not used"))
+	}
+
+	err = validateFileConfig(p.config.GrainsFile, "grains_file", false)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	// build the command line args to pass onto salt
@@ -208,6 +219,26 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
+	if p.config.GrainsFile != "" {
+		ui.Message(fmt.Sprintf("Uploading grains file: %s", p.config.GrainsFile))
+		src = p.config.GrainsFile
+		dst = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "grains"))
+		if err = p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading local grains file to remote: %s", err)
+		}
+
+		// move grains file into /etc/salt
+		ui.Message(fmt.Sprintf("Make sure directory %s exists", "/etc/salt"))
+		if err := p.createDir(ui, comm, "/etc/salt"); err != nil {
+			return fmt.Errorf("Error creating remote salt configuration directory: %s", err)
+		}
+		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "grains"))
+		dst = "/etc/salt/grains"
+		if err = p.moveFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Unable to move %s/grains to /etc/salt/grains: %s", p.config.TempConfigDir, err)
+		}
+	}
+
 	ui.Message(fmt.Sprintf("Uploading local state tree: %s", p.config.LocalStateTree))
 	src = p.config.LocalStateTree
 	dst = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "states"))
@@ -253,7 +284,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	ui.Message(fmt.Sprintf("Running: salt-call --local %s", p.config.CmdArgs))
-	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("salt-call --local %s", p.config.CmdArgs))}
+	cmd := &packer.RemoteCmd{Command: p.sudo(fmt.Sprintf("%s --local %s", filepath.Join(p.config.SaltBinDir, "salt-call"), p.config.CmdArgs))}
 	if err = cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
@@ -353,7 +384,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("rm -rf '%s'", dir),
+		Command: fmt.Sprintf(p.sudo("rm -rf '%s'"), dir),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err

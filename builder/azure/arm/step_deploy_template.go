@@ -6,10 +6,10 @@ package arm
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepDeployTemplate struct {
@@ -40,7 +40,12 @@ func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deployment
 		return err
 	}
 
-	_, err = s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
+	_, errChan := s.client.DeploymentsClient.CreateOrUpdate(resourceGroupName, deploymentName, *deployment, cancelCh)
+
+	err = <-errChan
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 

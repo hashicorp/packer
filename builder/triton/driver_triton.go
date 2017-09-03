@@ -1,16 +1,17 @@
 package triton
 
 import (
+	"context"
 	"errors"
-	"strings"
+	"net/http"
 	"time"
 
-	"github.com/joyent/gosdc/cloudapi"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
+	"github.com/joyent/triton-go"
 )
 
 type driverTriton struct {
-	client *cloudapi.Client
+	client *triton.Client
 	ui     packer.Ui
 }
 
@@ -27,30 +28,27 @@ func NewDriverTriton(ui packer.Ui, config Config) (Driver, error) {
 }
 
 func (d *driverTriton) CreateImageFromMachine(machineId string, config Config) (string, error) {
-	opts := cloudapi.CreateImageFromMachineOpts{
-		Machine:     machineId,
+	image, err := d.client.Images().CreateImageFromMachine(context.Background(), &triton.CreateImageFromMachineInput{
+		MachineID:   machineId,
 		Name:        config.ImageName,
 		Version:     config.ImageVersion,
 		Description: config.ImageDescription,
-		Homepage:    config.ImageHomepage,
+		HomePage:    config.ImageHomepage,
 		EULA:        config.ImageEULA,
 		ACL:         config.ImageACL,
 		Tags:        config.ImageTags,
-	}
-
-	image, err := d.client.CreateImageFromMachine(opts)
+	})
 	if err != nil {
 		return "", err
 	}
 
-	return image.Id, err
+	return image.ID, err
 }
 
 func (d *driverTriton) CreateMachine(config Config) (string, error) {
-	opts := cloudapi.CreateMachineOpts{
+	input := &triton.CreateMachineInput{
 		Package:         config.MachinePackage,
 		Image:           config.MachineImage,
-		Networks:        config.MachineNetworks,
 		Metadata:        config.MachineMetadata,
 		Tags:            config.MachineTags,
 		FirewallEnabled: config.MachineFirewallEnabled,
@@ -59,29 +57,39 @@ func (d *driverTriton) CreateMachine(config Config) (string, error) {
 	if config.MachineName == "" {
 		// If not supplied generate a name for the source VM: "packer-builder-[image_name]".
 		// The version is not used because it can contain characters invalid for a VM name.
-		opts.Name = "packer-builder-" + config.ImageName
+		input.Name = "packer-builder-" + config.ImageName
 	} else {
-		opts.Name = config.MachineName
+		input.Name = config.MachineName
 	}
 
-	machine, err := d.client.CreateMachine(opts)
+	if len(config.MachineNetworks) > 0 {
+		input.Networks = config.MachineNetworks
+	}
+
+	machine, err := d.client.Machines().CreateMachine(context.Background(), input)
 	if err != nil {
 		return "", err
 	}
 
-	return machine.Id, nil
+	return machine.ID, nil
 }
 
 func (d *driverTriton) DeleteImage(imageId string) error {
-	return d.client.DeleteImage(imageId)
+	return d.client.Images().DeleteImage(context.Background(), &triton.DeleteImageInput{
+		ImageID: imageId,
+	})
 }
 
 func (d *driverTriton) DeleteMachine(machineId string) error {
-	return d.client.DeleteMachine(machineId)
+	return d.client.Machines().DeleteMachine(context.Background(), &triton.DeleteMachineInput{
+		ID: machineId,
+	})
 }
 
-func (d *driverTriton) GetMachine(machineId string) (string, error) {
-	machine, err := d.client.GetMachine(machineId)
+func (d *driverTriton) GetMachineIP(machineId string) (string, error) {
+	machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
+		ID: machineId,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +98,9 @@ func (d *driverTriton) GetMachine(machineId string) (string, error) {
 }
 
 func (d *driverTriton) StopMachine(machineId string) error {
-	return d.client.StopMachine(machineId)
+	return d.client.Machines().StopMachine(context.Background(), &triton.StopMachineInput{
+		MachineID: machineId,
+	})
 }
 
 // waitForMachineState uses the supplied client to wait for the state of
@@ -101,7 +111,9 @@ func (d *driverTriton) StopMachine(machineId string) error {
 func (d *driverTriton) WaitForMachineState(machineId string, state string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.GetMachine(machineId)
+			machine, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
+				ID: machineId,
+			})
 			if machine == nil {
 				return false, err
 			}
@@ -118,16 +130,16 @@ func (d *driverTriton) WaitForMachineState(machineId string, state string, timeo
 func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.GetMachine(machineId)
+			_, err := d.client.Machines().GetMachine(context.Background(), &triton.GetMachineInput{
+				ID: machineId,
+			})
 			if err != nil {
-				//TODO(jen20): is there a better way here than searching strings?
-				if strings.Contains(err.Error(), "410") || strings.Contains(err.Error(), "404") {
+				// Return true only when we receive a 410 (Gone) response.  A 404
+				// indicates that the machine is being deleted whereas a 410 indicates
+				// that this process has completed.
+				if triErr, ok := err.(*triton.TritonError); ok && triErr.StatusCode == http.StatusGone {
 					return true, nil
 				}
-			}
-
-			if machine != nil {
-				return false, nil
 			}
 
 			return false, err
@@ -140,7 +152,9 @@ func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Dur
 func (d *driverTriton) WaitForImageCreation(imageId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			image, err := d.client.GetImage(imageId)
+			image, err := d.client.Images().GetImage(context.Background(), &triton.GetImageInput{
+				ImageID: imageId,
+			})
 			if image == nil {
 				return false, err
 			}

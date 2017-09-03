@@ -6,8 +6,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepCreateEncryptedAMICopy struct {
@@ -15,6 +15,7 @@ type StepCreateEncryptedAMICopy struct {
 	KeyID             string
 	EncryptBootVolume bool
 	Name              string
+	AMIMappings       []BlockDevice
 }
 
 func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,7 +26,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Encrypt boot not set, so skip step
 	if !s.EncryptBootVolume {
 		if kmsKeyId != "" {
-			log.Printf(fmt.Sprintf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId))
+			log.Printf("Ignoring KMS Key ID: %s, encrypted=false", kmsKeyId)
 		}
 		return multistep.ActionContinue
 	}
@@ -36,14 +37,14 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	var region, id string
 	if amis != nil {
 		for region, id = range amis {
-			break // Only get the first
+			break // There is only ever one region:ami pair in this map
 		}
 	}
 
 	ui.Say(fmt.Sprintf("Copying AMI: %s(%s)", region, id))
 
 	if kmsKeyId != "" {
-		ui.Say(fmt.Sprintf("Encypting with KMS Key ID: %s", kmsKeyId))
+		ui.Say(fmt.Sprintf("Encrypting with KMS Key ID: %s", kmsKeyId))
 	}
 
 	copyOpts := &ec2.CopyImageInput{
@@ -116,9 +117,18 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	ui.Say("Deleting unencrypted snapshots")
 	snapshots := state.Get("snapshots").(map[string][]string)
 
+OuterLoop:
 	for _, blockDevice := range unencImage.BlockDeviceMappings {
 		if blockDevice.Ebs != nil && blockDevice.Ebs.SnapshotId != nil {
-			ui.Message(fmt.Sprintf("Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
+			// If this packer run didn't create it, then don't delete it
+			for _, origDevice := range s.AMIMappings {
+				if origDevice.SnapshotId == *blockDevice.Ebs.SnapshotId {
+					ui.Message(fmt.Sprintf("Keeping Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
+					continue OuterLoop
+				}
+			}
+
+			ui.Message(fmt.Sprintf("Deleting Snapshot ID: %s", *blockDevice.Ebs.SnapshotId))
 			deleteSnapOpts := &ec2.DeleteSnapshotInput{
 				SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
 			}
@@ -161,7 +171,7 @@ func (s *StepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancelation or error...")
+	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))

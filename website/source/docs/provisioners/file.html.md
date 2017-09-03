@@ -1,11 +1,13 @@
 ---
 description: |
     The file Packer provisioner uploads files to machines built by Packer. The
-    recommended usage of the file provisioner is to use it to upload files, and then
-    use shell provisioner to move them to the proper place, set permissions, etc.
+    recommended usage of the file provisioner is to use it to upload files, and
+    then use shell provisioner to move them to the proper place, set permissions,
+    etc.
 layout: docs
-page_title: File Provisioner
-...
+page_title: 'File - Provisioners'
+sidebar_current: 'docs-provisioners-file'
+---
 
 # File Provisioner
 
@@ -20,7 +22,7 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
-``` {.json}
+``` json
 {
   "type": "file",
   "source": "app.tar.gz",
@@ -43,7 +45,7 @@ The available configuration options are listed below. All elements are required.
     directories must already exist.
 
 -   `direction` (string) - The direction of the file transfer. This defaults to
-    "upload." If it is set to "download" then the file "source" in the machine
+    "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
 
 ## Directory Uploads
@@ -54,7 +56,11 @@ know.
 
 First, the destination directory must already exist. If you need to create it,
 use a shell provisioner just prior to the file provisioner in order to create
-the directory.
+the directory. If the destination directory does not exist, the file
+provisioner may succeed, but it will have undefined results. Note that the
+`docker` builder does not have this requirement. It will create any needed
+destination directories, but it's generally best practice to not rely on this
+behavior.
 
 Next, the existence of a trailing slash on the source path will determine
 whether the directory name will be embedded within the destination, or whether
@@ -80,8 +86,8 @@ treat local symlinks as regular files. If you wish to preserve symlinks when
 uploading, it's recommended that you use `tar`. Below is an example of what
 that might look like:
 
-```
-ᐅ ls -l files
+``` text
+$ ls -l files
 total 16
 drwxr-xr-x  3 mwhooker  staff  102 Jan 27 17:10 a
 lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
@@ -89,22 +95,25 @@ lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
 lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
 ```
 
-```json
-"provisioners": [
-	{
-		"type": "shell-local",
-		"command": "mkdir -p toupload; tar cf toupload/files.tar files"
-	},
-	{
-		"destination": "/tmp/",
-		"source": "./toupload",
-		"type": "file"
-	},
-	{
-		"inline": [
-			"cd /tmp && tar xf toupload/files.tar",
-		],
-		"type": "shell"
-	}
-]
+``` json
+{
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "command": "mkdir -p toupload; tar cf toupload/files.tar files"
+    },
+    {
+      "destination": "/tmp/",
+      "source": "./toupload",
+      "type": "file"
+    },
+    {
+      "inline": [
+        "cd /tmp && tar xf toupload/files.tar",
+        "rm toupload/files.tar"
+      ],
+      "type": "shell"
+    }
+  ]
+}
 ```

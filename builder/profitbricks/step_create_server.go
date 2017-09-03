@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/profitbricks/profitbricks-sdk-go"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepCreateServer struct{}
@@ -25,34 +26,33 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	}
 	ui.Say("Creating Virtual Data Center...")
 	img := s.getImageId(c.Image, c)
+	alias := ""
+	if img == "" {
+		alias = s.getImageAlias(c.Image, c.Region, ui)
+	}
 
 	datacenter := profitbricks.Datacenter{
 		Properties: profitbricks.DatacenterProperties{
 			Name:     c.SnapshotName,
 			Location: c.Region,
 		},
-		Entities: profitbricks.DatacenterEntities{
-			Servers: &profitbricks.Servers{
-				Items: []profitbricks.Server{
+	}
+	server := profitbricks.Server{
+		Properties: profitbricks.ServerProperties{
+			Name:  c.SnapshotName,
+			Ram:   c.Ram,
+			Cores: c.Cores,
+		},
+		Entities: &profitbricks.ServerEntities{
+			Volumes: &profitbricks.Volumes{
+				Items: []profitbricks.Volume{
 					{
-						Properties: profitbricks.ServerProperties{
-							Name:  c.SnapshotName,
-							Ram:   c.Ram,
-							Cores: c.Cores,
-						},
-						Entities: &profitbricks.ServerEntities{
-							Volumes: &profitbricks.Volumes{
-								Items: []profitbricks.Volume{
-									{
-										Properties: profitbricks.VolumeProperties{
-											Type:  c.DiskType,
-											Size:  c.DiskSize,
-											Name:  c.SnapshotName,
-											Image: img,
-										},
-									},
-								},
-							},
+						Properties: profitbricks.VolumeProperties{
+							Type:       c.DiskType,
+							Size:       c.DiskSize,
+							Name:       c.SnapshotName,
+							ImageAlias: alias,
+							Image:      img,
 						},
 					},
 				},
@@ -60,18 +60,22 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 		},
 	}
 	if c.SSHKey != "" {
-		datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Properties.SshKeys = []string{c.SSHKey}
+		server.Entities.Volumes.Items[0].Properties.SshKeys = []string{c.SSHKey}
 	}
 
 	if c.Comm.SSHPassword != "" {
-		datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Properties.ImagePassword = c.Comm.SSHPassword
+		server.Entities.Volumes.Items[0].Properties.ImagePassword = c.Comm.SSHPassword
 	}
 
 	datacenter = profitbricks.CompositeCreateDatacenter(datacenter)
 	if datacenter.StatusCode > 299 {
 		if datacenter.StatusCode > 299 {
 			var restError RestError
-			json.Unmarshal([]byte(datacenter.Response), &restError)
+			err := json.Unmarshal([]byte(datacenter.Response), &restError)
+			if err != nil {
+				ui.Error(fmt.Sprintf("Error decoding json response: %s", err.Error()))
+				return multistep.ActionHalt
+			}
 			if len(restError.Messages) > 0 {
 				ui.Error(restError.Messages[0].Message)
 			} else {
@@ -83,33 +87,45 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 
 	err := s.waitTillProvisioned(datacenter.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a datacenter %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a datacenter %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
 	state.Put("datacenter_id", datacenter.Id)
 
-	lan := profitbricks.CreateLan(datacenter.Id, profitbricks.Lan{
-		Properties: profitbricks.LanProperties{
+	server = profitbricks.CreateServer(datacenter.Id, server)
+	if server.StatusCode > 299 {
+		ui.Error(fmt.Sprintf("Error occurred %s", parseErrorMessage(server.Response)))
+		return multistep.ActionHalt
+	}
+
+	err = s.waitTillProvisioned(server.Headers.Get("Location"), *c)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error occurred while creating a server %s", err.Error()))
+		return multistep.ActionHalt
+	}
+
+	lan := profitbricks.CreateLan(datacenter.Id, profitbricks.CreateLanRequest{
+		Properties: profitbricks.CreateLanProperties{
 			Public: true,
 			Name:   c.SnapshotName,
 		},
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(lan.Response)))
+		ui.Error(fmt.Sprintf("Error occurred %s", parseErrorMessage(lan.Response)))
 		return multistep.ActionHalt
 	}
 
 	err = s.waitTillProvisioned(lan.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a LAN %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a LAN %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
 	lanId, _ := strconv.Atoi(lan.Id)
-	nic := profitbricks.CreateNic(datacenter.Id, datacenter.Entities.Servers.Items[0].Id, profitbricks.Nic{
-		Properties: profitbricks.NicProperties{
+	nic := profitbricks.CreateNic(datacenter.Id, server.Id, profitbricks.Nic{
+		Properties: &profitbricks.NicProperties{
 			Name: c.SnapshotName,
 			Lan:  lanId,
 			Dhcp: true,
@@ -117,19 +133,19 @@ func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
 	})
 
 	if lan.StatusCode > 299 {
-		ui.Error(fmt.Sprintf("Error occured %s", parseErrorMessage(nic.Response)))
+		ui.Error(fmt.Sprintf("Error occurred %s", parseErrorMessage(nic.Response)))
 		return multistep.ActionHalt
 	}
 
 	err = s.waitTillProvisioned(nic.Headers.Get("Location"), *c)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error occured while creating a NIC %s", err.Error()))
+		ui.Error(fmt.Sprintf("Error occurred while creating a NIC %s", err.Error()))
 		return multistep.ActionHalt
 	}
 
-	state.Put("volume_id", datacenter.Entities.Servers.Items[0].Entities.Volumes.Items[0].Id)
+	state.Put("volume_id", server.Entities.Volumes.Items[0].Id)
 
-	server := profitbricks.GetServer(datacenter.Id, datacenter.Entities.Servers.Items[0].Id)
+	server = profitbricks.GetServer(datacenter.Id, server.Id)
 
 	state.Put("server_ip", server.Entities.Nics.Items[0].Properties.Ips[0])
 
@@ -146,9 +162,11 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 
 	if dcId, ok := state.GetOk("datacenter_id"); ok {
 		resp := profitbricks.DeleteDatacenter(dcId.(string))
-		s.checkForErrors(resp)
-		err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c)
-		if err != nil {
+		if err := s.checkForErrors(resp); err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
+		}
+		if err := s.waitTillProvisioned(resp.Headers.Get("Location"), *c); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error deleting Virtual Data Center. Please destroy it manually: %s", err))
 		}
@@ -182,7 +200,7 @@ func (d *stepCreateServer) setPB(username string, password string, url string) {
 
 func (d *stepCreateServer) checkForErrors(instance profitbricks.Resp) error {
 	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occured %s", string(instance.Body)))
+		return errors.New(fmt.Sprintf("Error occurred %s", string(instance.Body)))
 	}
 	return nil
 }
@@ -213,6 +231,25 @@ func (d *stepCreateServer) getImageId(imageName string, c *Config) string {
 		}
 		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && images.Items[i].Properties.ImageType == diskType && images.Items[i].Properties.Location == c.Region && images.Items[i].Properties.Public == true {
 			return images.Items[i].Id
+		}
+	}
+	return ""
+}
+
+func (d *stepCreateServer) getImageAlias(imageAlias string, location string, ui packer.Ui) string {
+	if imageAlias == "" {
+		return ""
+	}
+	locations := profitbricks.GetLocation(location)
+	if len(locations.Properties.ImageAliases) > 0 {
+		for _, i := range locations.Properties.ImageAliases {
+			alias := ""
+			if i != "" {
+				alias = i
+			}
+			if alias != "" && strings.ToLower(alias) == strings.ToLower(imageAlias) {
+				return alias
+			}
 		}
 	}
 	return ""

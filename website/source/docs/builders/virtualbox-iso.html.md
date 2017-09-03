@@ -1,10 +1,11 @@
 ---
 description: |
-    The VirtualBox Packer builder is able to create VirtualBox virtual machines and
-    export them in the OVF format, starting from an ISO image.
+    The VirtualBox Packer builder is able to create VirtualBox virtual machines
+    and export them in the OVF format, starting from an ISO image.
 layout: docs
-page_title: 'VirtualBox Builder (from an ISO)'
-...
+page_title: 'VirtualBox ISO - Builders'
+sidebar_current: 'docs-builders-virtualbox-iso'
+---
 
 # VirtualBox Builder (from an ISO)
 
@@ -25,7 +26,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
@@ -76,12 +77,6 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
--   `ssh_password` (string) - The password to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -106,7 +101,7 @@ builder.
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
-    ``` {.json}
+    ``` json
     {
       "type": "virtualbox-iso",
       "export_opts":
@@ -173,7 +168,7 @@ builder.
     where the VirtualBox guest additions ISO will be uploaded. By default this
     is "VBoxGuestAdditions.iso" which should upload into the login directory of
     the user. This is a [configuration
-    template](/docs/templates/configuration-templates.html) where the `Version`
+    template](/docs/templates/engine.html) where the `Version`
     variable is replaced with the VirtualBox version.
 
 -   `guest_additions_sha256` (string) - The SHA256 checksum of the guest
@@ -197,6 +192,11 @@ builder.
     hard drive is attached to, defaults to "ide". When set to "sata", the drive
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
+
+-   `sata_port_count` (integer) - The number of ports available on any SATA
+    controller created, defaults to 1. VirtualBox supports up to 30 ports on a
+    maxiumum of 1 SATA controller. Increasing this value can be useful if you
+    want to attach additional drives.
 
 -   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
@@ -292,7 +292,7 @@ builder.
     defined itself as an array of strings, where each string represents a single
     argument on the command-line to `VBoxManage` (but excluding
     `VBoxManage` itself). Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use
     `VBoxManage` are below.
 
@@ -304,7 +304,8 @@ builder.
     upload a file that contains the VirtualBox version that was used to create
     the machine. This information can be useful for provisioning. By default
     this is ".vbox\_version", which will generally be upload it into the
-    home directory.
+    home directory. Set to an empty string to skip uploading this file, which
+    can be useful when using the `none` communicator.
 
 -   `vm_name` (string) - This is the name of the OVF file for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
@@ -388,7 +389,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -399,7 +400,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -440,7 +441,7 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
-``` {.javascript}
+``` json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
@@ -455,6 +456,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.

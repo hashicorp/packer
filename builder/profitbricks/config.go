@@ -2,12 +2,12 @@ package profitbricks
 
 import (
 	"errors"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 	"os"
 )
 
@@ -76,7 +76,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.PBUrl == "" {
-		c.PBUrl = "https://api.profitbricks.com/rest/v2"
+		c.PBUrl = "https://api.profitbricks.com/cloudapi/v4"
 	}
 
 	if c.Cores == 0 {

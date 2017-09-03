@@ -7,15 +7,14 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const BuilderId = "packer.post-processor.amazon-import"
@@ -33,7 +32,8 @@ type Config struct {
 	Name        string            `mapstructure:"ami_name"`
 	Description string            `mapstructure:"ami_description"`
 	Users       []string          `mapstructure:"ami_users"`
-	Groups      []string          `mapstrcuture:"ami_groups"`
+	Groups      []string          `mapstructure:"ami_groups"`
+	LicenseType string            `mapstructure:"license_type"`
 
 	ctx interpolate.Context
 }
@@ -42,7 +42,7 @@ type PostProcessor struct {
 	config Config
 }
 
-// Entry point for configuration parisng when we've defined
+// Entry point for configuration parsing when we've defined
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -74,7 +74,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check we have AWS access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
-	// define all our required paramaters
+	// define all our required parameters
 	templates := map[string]*string{
 		"s3_bucket_name": &p.config.S3Bucket,
 	}
@@ -98,10 +98,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
-	config, err := p.config.Config()
+	session, err := p.config.Session()
 	if err != nil {
 		return nil, false, err
 	}
+	config := session.Config
 
 	// Render this key since we didn't in the configure phase
 	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
@@ -123,13 +124,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Hope we found something useful
 	if source == "" {
 		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
-	}
-
-	// Set up the AWS session
-	log.Println("Creating AWS session")
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, false, err
 	}
 
 	// open the source file
@@ -161,7 +155,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -170,7 +164,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-	})
+	}
+
+	if p.config.LicenseType != "" {
+		ui.Message(fmt.Sprintf("Setting license type to '%s'", p.config.LicenseType))
+		params.LicenseType = &p.config.LicenseType
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
@@ -178,7 +179,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
 
-	// Wait for import process to complete, this takess a while
+	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 
 	stateChange := awscommon.StateChangeConf{
@@ -239,7 +240,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
-		ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
 			ImageId: &createdami,
 		})
 
@@ -307,7 +308,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	}
 
-	// Apply atttributes for AMI specified in config
+	// Apply attributes for AMI specified in config
 	// (duped from builder/amazon/common/step_modify_ami_attributes.go)
 	options := make(map[string]*ec2.ModifyImageAttributeInput)
 	if p.config.Description != "" {

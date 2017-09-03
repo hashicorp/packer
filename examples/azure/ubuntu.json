@@ -21,7 +21,7 @@
     "os_type": "Linux",
     "image_publisher": "Canonical",
     "image_offer": "UbuntuServer",
-    "image_sku": "16.04.0-LTS",
+    "image_sku": "16.04-LTS",
 
     "azure_tags": {
         "dept": "engineering",
@@ -29,7 +29,7 @@
     },
 
     "location": "West US",
-    "vm_size": "Standard_A2"
+    "vm_size": "Standard_DS2_v2"
   }],
   "provisioners": [{
     "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",

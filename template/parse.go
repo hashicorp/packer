@@ -264,13 +264,15 @@ func (r *rawTemplate) parsePostProcessor(
 func Parse(r io.Reader) (*Template, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
-	r = io.TeeReader(r, &buf)
+	if _, err := buf.ReadFrom(r); err != nil {
+		return nil, err
+	}
 
 	// First, decode the object into an interface{}. We do this instead of
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json.NewDecoder(r).Decode(&raw); err != nil {
+	if err := json.Unmarshal(buf.Bytes(), &raw); err != nil {
 		return nil, err
 	}
 

@@ -1,16 +1,13 @@
 ---
 description: |
-    The `triton` Packer builder is able to create new images for use with Triton.
-    These images can be used with both the Joyent public cloud (which is powered by
-    Triton) as well with private Triton installations. This builder uses the Triton
-    Cloud API to create images. The builder creates and launches a temporary VM
-    based on a specified source image, runs any provisioning necessary, uses the
-    Triton "VM to image" functionality to create a reusable image and finally
-    destroys the temporary VM. This reusable image can then be used to launch new
-    VM's.
+    The triton Packer builder is able to create new images for use with Triton.
+    These images can be used with both the Joyent public cloud (which is powered
+    by Triton) as well with private Triton installations. This builder uses the
+    Triton Cloud API to create images.
 layout: docs
-page_title: Triton Builder
-...
+page_title: 'Triton - Builders'
+sidebar_current: 'docs-builders-triton'
+---
 
 # Triton Builder
 
@@ -28,10 +25,17 @@ Docker images on Triton you should use the Packer Docker builder.
 The builder creates and launches a temporary VM based on a specified source
 image, runs any provisioning necessary, uses the Triton "VM to image"
 functionality to create a reusable image and finally destroys the temporary VM.
-This reusable image can then be used to launch new VM's.
+This reusable image can then be used to launch new machines.
 
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
+
+~&gt; **Private installations of Triton must have custom images enabled!** To use
+the Triton builder with a private/on-prem installation of Joyent's Triton
+software, you'll need an operator to manually
+[enable custom images](https://docs.joyent.com/private-cloud/install/image-management)
+after installing Triton. This is not a requirement for Joyent's public cloud
+offering of Triton.
 
 ## Configuration Reference
 
@@ -47,9 +51,9 @@ builder.
 -   `triton_account` (string) - The username of the Triton account to use when
     using the Triton Cloud API.
 -   `triton_key_id` (string) - The fingerprint of the public key of the SSH key
-    pair to use for authentication with the Triton Cloud API.
--   `triton_key_material` (string) - Path to the file in which the private key
-    of `triton_key_id` is stored. For example `~/.ssh/id_rsa`.
+    pair to use for authentication with the Triton Cloud API. If
+    `triton_key_material` is not set, it is assumed that the SSH agent has the
+    private key corresponding to this key ID loaded.
 
 -   `source_machine_image` (string) - The UUID of the image to base the new
     image on. Triton supports multiple types of images, called 'brands' in
@@ -79,9 +83,14 @@ builder.
 ### Optional:
 
 -   `triton_url` (string) - The URL of the Triton cloud API to use. If omitted
-    it will default to the URL of the Joyent Public cloud. If you are using your
-    own private Triton installation you will have to supply the URL of the cloud
-    API of your own Triton installation.
+    it will default to the `us-sw-1` region of the Joyent Public cloud. If
+    you are using your own private Triton installation you will have to supply
+    the URL of the cloud API of your own Triton installation.
+
+-   `triton_key_material` (string) - Path to the file in which the private key
+    of `triton_key_id` is stored. For example `/home/soandso/.ssh/id_rsa`. If
+    this is not specified, the SSH agent is used to sign requests with the
+    `triton_key_id` specified.
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
@@ -107,7 +116,9 @@ builder.
 -   `source_machine_networks` (array of strings) - The UUID's of Triton networks
     added to the source machine used for creating the image. For example if any
     of the provisioners which are run need Internet access you will need to add
-    the UUID's of the appropriate networks here.
+    the UUID's of the appropriate networks here. If this is not specified,
+    instances will be placed into the default Triton public and internal
+    networks.
 -   `source_machine_tags` (object of key/value strings) - Tags applied to the VM
     used to create the image.
 
@@ -127,20 +138,26 @@ builder.
 Below is a minimal example to create an joyent-brand image on the Joyent public
 cloud:
 
-``` {.javascript}
-"builders": [{
-  "type": "triton",
-  "triton_account": "triton_username",
-  "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
-  "triton_key_material": "~/.ssh/id_rsa",
-  "source_machine_name": "image-builder",
-  "source_machine_package": "g3-standard-0.5-smartos",
-  "source_machine_image": "70e3ae72-96b6-11e6-9056-9737fd4d0764",
-  "ssh_username": "root",
-  "ssh_private_key_file": "~/.ssh/id_rsa",
-  "image_name": "my_new_image",
-  "image_version": "1.0.0",
-}],
+``` json
+{
+  "builders": [
+    {
+      "type": "triton",
+
+      "triton_account": "triton_username",
+      "triton_key_id": "6b:95:03:3d:d3:6e:52:69:01:96:1a:46:4a:8d:c1:7e",
+
+      "source_machine_name": "image-builder",
+      "source_machine_package": "g4-highcpu-128M",
+      "source_machine_image": "f6acf198-2037-11e7-8863-8fdd4ce58b6a",
+
+      "ssh_username": "root",
+
+      "image_name": "my_new_image",
+      "image_version": "1.0.0"
+    }
+  ]
+}
 ```
 
 In the above example the SSH key used for `triton_key_material` (connecting to
@@ -149,3 +166,9 @@ started) are the same. This is because Triton automatically configures the root
 users to be able to login via SSH with the same key used to create the VM via
 the Cloud API. In more advanced scenarios for example when using a
 `source_machine_image` one might use different credentials.
+
+Available `triton_key_id`, `source_machine_package`, `source_machine_image`, and
+`source_machine_networks` can be found by using the following
+[Triton CLI](https://docs.joyent.com/public-cloud/api-access/cloudapi)
+commands: `triton key list`, `triton package list`, `triton image list`, and
+`triton network list` respectively.

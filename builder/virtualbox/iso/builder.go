@@ -6,13 +6,13 @@ import (
 	"log"
 	"strings"
 
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderId = "mitchellh.virtualbox"
@@ -46,6 +46,7 @@ type Config struct {
 	GuestOSType            string   `mapstructure:"guest_os_type"`
 	HardDriveDiscard       bool     `mapstructure:"hard_drive_discard"`
 	HardDriveInterface     string   `mapstructure:"hard_drive_interface"`
+	SATAPortCount          int      `mapstructure:"sata_port_count"`
 	HardDriveNonrotational bool     `mapstructure:"hard_drive_nonrotational"`
 	ISOInterface           string   `mapstructure:"iso_interface"`
 	KeepRegistered         bool     `mapstructure:"keep_registered"`
@@ -126,6 +127,15 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.HardDriveInterface != "ide" && b.config.HardDriveInterface != "sata" && b.config.HardDriveInterface != "scsi" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("hard_drive_interface can only be ide, sata, or scsi"))
+	}
+
+	if b.config.SATAPortCount == 0 {
+		b.config.SATAPortCount = 1
+	}
+
+	if b.config.SATAPortCount > 30 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("sata_port_count cannot be greater than 30"))
 	}
 
 	if b.config.ISOInterface != "ide" && b.config.ISOInterface != "sata" {
@@ -246,7 +256,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			WinRMPort: vboxcommon.SSHPort,
 		},
 		&vboxcommon.StepUploadVersion{
-			Path: b.config.VBoxVersionFile,
+			Path: *b.config.VBoxVersionFile,
 		},
 		&vboxcommon.StepUploadGuestAdditions{
 			GuestAdditionsMode: b.config.GuestAdditionsMode,

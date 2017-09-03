@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"regexp"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -83,6 +83,18 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
+	// Then try to get the SG's UUID's.
+	if len(config.SecurityGroups) > 0 {
+		for i := range config.SecurityGroups {
+			if !isUUID(config.SecurityGroups[i]) {
+				config.SecurityGroups[i], _, err = client.SecurityGroup.GetSecurityGroupID(config.SecurityGroups[i], cloudstack.WithProject(config.Project))
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, &retrieveErr{"network", config.SecurityGroups[i], err})
+				}
+			}
+		}
+	}
+
 	if !isUUID(config.ServiceOffering) {
 		config.ServiceOffering, _, err = client.ServiceOffering.GetServiceOfferingID(config.ServiceOffering)
 		if err != nil {
@@ -133,12 +145,12 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 	// an interface with type *packer.MultiError and value nil which is different then a
 	// nil interface.
 	if errs != nil && len(errs.Errors) > 0 {
+		state.Put("error", errs)
 		ui.Error(errs.Error())
 		return multistep.ActionHalt
 	}
 
 	ui.Message("Config has been prepared!")
-
 	return multistep.ActionContinue
 }
 

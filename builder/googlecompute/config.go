@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -26,6 +26,8 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	AcceleratorType      string            `mapstructure:"accelerator_type"`
+	AcceleratorCount     int64             `mapstructure:"accelerator_count"`
 	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
@@ -54,7 +56,6 @@ type Config struct {
 	Zone                 string            `mapstructure:"zone"`
 
 	Account            AccountFile
-	privateKeyBytes    []byte
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
@@ -93,15 +94,20 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
 	}
-	// Setting OnHostMaintenance Correct Defaults
-	//   "MIGRATE" : Possible if Preemptible is false
-	//   "TERMINATE": Posssible if Preemptible is true
-	if c.OnHostMaintenance == "" && c.Preemptible {
-		c.OnHostMaintenance = "MIGRATE"
-	}
 
-	if c.OnHostMaintenance == "" && !c.Preemptible {
+	if c.OnHostMaintenance == "MIGRATE" && c.Preemptible {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be TERMINATE when using preemptible instances."))
+	}
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible and default if Preemptible is false
+	//   "TERMINATE": Required if Preemptible is true
+	if c.Preemptible {
 		c.OnHostMaintenance = "TERMINATE"
+	} else {
+		if c.OnHostMaintenance == "" {
+			c.OnHostMaintenance = "MIGRATE"
+		}
 	}
 
 	// Make sure user sets a valid value for on_host_maintenance option
@@ -199,6 +205,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.OmitExternalIP && !c.UseInternalIP {
 		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
+	}
+
+	if c.AcceleratorCount > 0 && len(c.AcceleratorType) == 0 {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
+	}
+
+	if c.AcceleratorCount > 0 && c.OnHostMaintenance != "TERMINATE" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
 	}
 
 	// Check for any errors.

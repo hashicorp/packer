@@ -97,9 +97,9 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 	}
 }
 
-func TestTargettedUi(t *testing.T) {
+func TestTargetedUI(t *testing.T) {
 	bufferUi := testUi()
-	targettedUi := &TargettedUi{
+	targettedUi := &TargetedUI{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
@@ -142,11 +142,11 @@ func TestColoredUi_ImplUi(t *testing.T) {
 	}
 }
 
-func TestTargettedUi_ImplUi(t *testing.T) {
+func TestTargetedUI_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &TargettedUi{}
+	raw = &TargetedUI{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("TargettedUi must implement Ui")
+		t.Fatalf("TargetedUI must implement Ui")
 	}
 }
 

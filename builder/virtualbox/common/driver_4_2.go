@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,7 +16,7 @@ type VBox42Driver struct {
 	VBoxManagePath string
 }
 
-func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
+func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcount int) error {
 	version, err := d.Version()
 	if err != nil {
 		return err
@@ -30,7 +31,7 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 		"storagectl", vmName,
 		"--name", name,
 		"--add", "sata",
-		portCountArg, "1",
+		portCountArg, strconv.Itoa(portcount),
 	}
 
 	return d.VBoxManage(command...)

@@ -1,11 +1,12 @@
 ---
 description: |
-    The Chef solo Packer provisioner installs and configures software on machines
+    The chef-solo Packer provisioner installs and configures software on machines
     built by Packer using chef-solo. Cookbooks can be uploaded from your local
     machine to the remote machine or remote paths can be used.
 layout: docs
-page_title: 'Chef-Solo Provisioner'
-...
+page_title: 'Chef Solo - Provisioners'
+sidebar_current: 'docs-provisioners-chef-solo'
+---
 
 # Chef Solo Provisioner
 
@@ -24,7 +25,7 @@ installed, using the official Chef installers provided by Chef Inc.
 The example below is fully functional and expects cookbooks in the "cookbooks"
 directory relative to your working directory.
 
-``` {.javascript}
+``` json
 {
   "type": "chef-solo",
   "cookbook_paths": ["cookbooks"]
@@ -65,16 +66,16 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `execute_command` (string) - The command used to execute Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+    Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
 
 -   `json` (object) - An arbitrary mapping of JSON that will be available as
@@ -82,7 +83,7 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
-    then the sudo will be omitted. This has no effect when guest_os_type is
+    then the sudo will be omitted. This has no effect when guest\_os\_type is
     windows.
 
 -   `remote_cookbook_paths` (array of strings) - A list of paths on the remote
@@ -103,12 +104,14 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
-    "/tmp/packer-chef-solo" when guest_os_type unix and
+    "/tmp/packer-chef-solo" when guest\_os\_type unix and
     "$env:TEMP/packer-chef-solo" when windows. This directory doesn't need to
     exist but must have proper permissions so that the user that Packer uses is
     able to create directories and write into this folder. If the permissions
     are not correct, use a shell provisioner prior to this to configure it
     properly.
+-   `version` (string) - The version of Chef to be installed. By default this is
+    empty which will install the latest version of Chef.
 
 ## Chef Configuration
 
@@ -119,12 +122,12 @@ template if you'd like to set custom configurations.
 
 The default value for the configuration template is:
 
-``` {.liquid}
+``` liquid
 cookbook_path [{{.CookbookPaths}}]
 ```
 
 This template is a [configuration
-template](/docs/templates/configuration-templates.html) and has a set of
+template](/docs/templates/engine.html) and has a set of
 variables available to use:
 
 -   `ChefEnvironment` - The current enabled environment. Only non-empty if the
@@ -141,18 +144,18 @@ variables available to use:
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Chef:
 
-``` {.liquid}
+``` liquid
 {{if .Sudo}}sudo {{end}}chef-solo \
   --no-color \
   -c {{.ConfigPath}} \
   -j {{.JsonPath}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
 variable changes don't immediately propogate to running processes.
 
-``` {.liquid}
+``` liquid
 c:/opscode/chef/bin/chef-solo.bat \
   --no-color \
   -c {{.ConfigPath}} \
@@ -174,16 +177,16 @@ By default, Packer uses the following command (broken across multiple lines for
 readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
-``` {.text}
-curl -L https://www.chef.io/chef/install.sh | \
-  {{if .Sudo}}sudo{{end}} bash
+``` text
+curl -L https://omnitruck.chef.io/install.sh | \
+  {{if .Sudo}}sudo{{end}} bash -s --{{if .Version}} -v {{.Version}}{{end}}
 ```
 
-When guest_os_type is set to "windows", Packer uses the following command to
+When guest\_os\_type is set to "windows", Packer uses the following command to
 install the latest version of Chef:
 
-``` {.text}
-powershell.exe -Command "(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait"
+``` text
+powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"
 ```
 
 This command can be customized using the `install_command` configuration.

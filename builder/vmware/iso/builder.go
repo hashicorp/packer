@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderIdESX = "mitchellh.vmware-esx"
@@ -200,6 +200,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+
+	exportOutputPath := b.config.OutputDir
+
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		b.config.OutputDir = b.config.VMName
 	}
@@ -298,13 +301,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
 		&StepExport{
 			Format:     b.config.Format,
 			SkipExport: b.config.SkipExport,
+			OutputDir:  exportOutputPath,
 		},
 	}
 
@@ -330,7 +336,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var files []string
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
+		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
@@ -347,6 +353,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	return &Artifact{
 		builderId: builderId,
+		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
 	}, nil

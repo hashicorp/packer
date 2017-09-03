@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/packer/builder/amazon/common"
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/builder/amazon/common"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -255,15 +254,11 @@ func testAccPreCheck(t *testing.T) {
 
 func testEC2Conn() (*ec2.EC2, error) {
 	access := &common.AccessConfig{RawRegion: "us-east-1"}
-	config, err := access.Config()
+	session, err := access.Session()
 	if err != nil {
 		return nil, err
 	}
 
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, err
-	}
 	return ec2.New(session), nil
 }
 

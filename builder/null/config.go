@@ -3,11 +3,11 @@ package null
 import (
 	"fmt"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
@@ -31,24 +31,30 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if es := c.CommConfig.Prepare(nil); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
-	if c.CommConfig.Host() == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("a Host must be specified, please reference your communicator documentation"))
-	}
 
-	if c.CommConfig.User() == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("a Username must be specified, please reference your communicator documentation"))
-	}
+	if c.CommConfig.Type != "none" {
+		if c.CommConfig.Host() == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("a Host must be specified, please reference your communicator documentation"))
+		}
 
-	if c.CommConfig.Password() == "" && c.CommConfig.SSHPrivateKey == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("one authentication method must be specified, please reference your communicator documentation"))
-	}
+		if c.CommConfig.User() == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("a Username must be specified, please reference your communicator documentation"))
+		}
 
-	if c.CommConfig.SSHPassword != "" && c.CommConfig.SSHPrivateKey != "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("only one of ssh_password and ssh_private_key_file must be specified"))
+		if !c.CommConfig.SSHAgentAuth && c.CommConfig.Password() == "" && c.CommConfig.SSHPrivateKey == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("one authentication method must be specified, please reference your communicator documentation"))
+		}
+
+		if (c.CommConfig.SSHAgentAuth &&
+			(c.CommConfig.SSHPassword != "" || c.CommConfig.SSHPrivateKey != "")) ||
+			(c.CommConfig.SSHPassword != "" && c.CommConfig.SSHPrivateKey != "") {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("only one of ssh_agent_auth, ssh_password, and ssh_private_key_file must be specified"))
+
+		}
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

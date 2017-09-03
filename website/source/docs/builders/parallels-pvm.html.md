@@ -4,8 +4,9 @@ description: |
     machines and export them in the PVM format, starting from an existing PVM
     (exported virtual machine image).
 layout: docs
-page_title: 'Parallels Builder (from a PVM)'
-...
+page_title: 'Parallels PVM - Builders'
+sidebar_current: 'docs-builders-parallels-pvm'
+---
 
 # Parallels Builder (from a PVM)
 
@@ -25,7 +26,7 @@ create the image. The imported machine is deleted prior to finishing the build.
 Here is a basic example. This example is functional if you have an PVM matching
 the settings here.
 
-``` {.javascript}
+``` json
 {
   "type": "parallels-pvm",
   "parallels_tools_flavor": "lin",
@@ -60,9 +61,6 @@ builder.
 
 -   `source_path` (string) - The path to a PVM directory that acts as the source
     of this build.
-
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
 
 ### Optional:
 
@@ -105,7 +103,7 @@ builder.
 -   `parallels_tools_guest_path` (string) - The path in the VM to upload
     Parallels Tools. This only takes effect if `parallels_tools_mode`
     is "upload". This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of
     `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
     which should upload into the login directory of the user.
@@ -124,7 +122,7 @@ builder.
     itself as an array of strings, where each string represents a single
     argument on the command-line to `prlctl` (but excluding `prlctl` itself).
     Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use `prlctl`
     are below.
 
@@ -207,19 +205,19 @@ proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -230,7 +228,7 @@ proper key:
     for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 ## prlctl Commands
@@ -245,7 +243,7 @@ Extra `prlctl` commands are defined in the template in the `prlctl` section. An
 example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-``` {.javascript}
+``` json
 {
   "prlctl": [
     ["set", "{{.Name}}", "--memsize", "1024"],
@@ -260,6 +258,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.

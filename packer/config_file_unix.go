@@ -1,4 +1,4 @@
-// +build darwin freebsd linux netbsd openbsd
+// +build darwin freebsd linux netbsd openbsd solaris
 
 package packer
 

@@ -1,22 +1,20 @@
 ---
-description: |
-    With Packer installed, let's just dive right into it and build our first image.
-    Our first image will be an Amazon EC2 AMI with Redis pre-installed. This is just
-    an example. Packer can create images for many platforms with anything
-    pre-installed.
 layout: intro
-next_title: Provision
-next_url: '/intro/getting-started/provision.html'
-page_title: Build an Image
-prev_url: '/intro/getting-started/setup.html'
-...
+sidebar_current: intro-getting-started-build-image
+page_title: Build an Image - Getting Started
+description: |-
+  With Packer installed, let's just dive right into it and build our first
+  image. Our first image will be an Amazon EC2 AMI with Redis pre-installed.
+  This is just an example. Packer can create images for many platforms with
+  anything pre-installed.
+---
 
 # Build an Image
 
 With Packer installed, let's just dive right into it and build our first image.
 Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) with
 Redis pre-installed. This is just an example. Packer can create images for [many
-platforms](/intro/platforms.html) with anything pre-installed.
+platforms][platforms] with anything pre-installed.
 
 If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
 For the example, we'll use a "t2.micro" instance to build our image, which
@@ -24,11 +22,11 @@ qualifies under the AWS [free-tier](https://aws.amazon.com/free/), meaning it
 will be free. If you already have an AWS account, you may be charged some amount
 of money, but it shouldn't be more than a few cents.
 
--&gt; **Note:** If you're not using an account that qualifies under the AWS
+-> **Note:** If you're not using an account that qualifies under the AWS
 free-tier, you may be charged to run these examples. The charge should only be a
 few cents, but we're not responsible if it ends up being more.
 
-Packer can build images for [many platforms](/intro/platforms.html) other than
+Packer can build images for [many platforms][platforms] other than
 AWS, but AWS requires no additional software installed on your computer and
 their [free-tier](https://aws.amazon.com/free/) makes it free to use for most
 people. This is why we chose to use AWS for the example. If you're uncomfortable
@@ -46,7 +44,7 @@ as machine generated templates to easily be made.
 We'll start by creating the entire template, then we'll go over each section
 briefly. Create a file `example.json` and fill it with the following contents:
 
-``` {.javascript}
+```json
 {
   "variables": {
     "aws_access_key": "",
@@ -57,7 +55,15 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-fce3c696",
+    "source_ami_filter": {
+      "filters": {
+      "virtualization-type": "hvm",
+      "name": "*ubuntu-xenial-16.04-amd64-server-*",
+      "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
     "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
@@ -86,7 +92,7 @@ re-packaging it into a new AMI.
 The additional keys within the object are configuration for this builder,
 specifying things such as access keys, the source AMI to build from and more.
 The exact set of configuration variables available for a builder are specific to
-each builder and can be found within the [documentation](/docs).
+each builder and can be found within the [documentation](/docs/index.html).
 
 Before we take this template and build an image from it, let's validate the
 template by running `packer validate example.json`. This command checks the
@@ -94,7 +100,7 @@ syntax as well as the configuration values to verify they look valid. The output
 should look similar to below, because the template should be valid. If there are
 any errors, this command will tell you.
 
-``` {.text}
+```text
 $ packer validate example.json
 Template validated successfully.
 ```
@@ -113,14 +119,14 @@ With a properly validated template. It is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
--&gt; **Note:** For the tutorial it is convenient to use the credentials in the
+-> **Note:** For the tutorial it is convenient to use the credentials in the
 command line. However, it is potentially insecure. See our documentation for
 other ways to [specify Amazon credentials](/docs/builders/amazon.html#specifying-amazon-credentials).
 
--&gt; **Note:** When using packer on Windows, replace the single-quotes in the 
+-> **Note:** When using packer on Windows, replace the single-quotes in the
 command below with double-quotes.
 
-``` {.text}
+```text
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \
@@ -158,7 +164,7 @@ artifact: the AMI in us-east-1 that was created.
 This AMI is ready to use. If you wanted you could go and launch this AMI right now
 and it would work great.
 
--&gt; **Note:** Your AMI ID will surely be different than the one above. If you
+-> **Note:** Your AMI ID will surely be different than the one above. If you
 try to launch the one in the example output above, you will get an error. If you
 want to try to launch your AMI, get the ID from the Packer output.
 
@@ -167,17 +173,17 @@ able to determine the default VPC, which the `t2` instance types require. This
 can happen if you created your AWS account before `2013-12-04`.  You can either
 change the `instance_type` to `m3.medium`, or specify a VPC. Please see
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html for more
-information. If you specify a `vpc_id`, you will also need to set `subnet_id`. 
+information. If you specify a `vpc_id`, you will also need to set `subnet_id`.
 Unless you modify your subnet's [IPv4 public addressing attribute](
 http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/vpc-ip-addressing.html#subnet-public-ip),
-you will also need to set `associate_public_ip_address` to `true`, or set up a 
+you will also need to set `associate_public_ip_address` to `true`, or set up a
 [VPN](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_VPN.html).
 
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
 they're built, it is up to you to launch or destroy them as you see fit. If you
-want to store and namespace images for easy reference, you can use [Atlas by
+want to store and namespace images for quick reference, you can use [Atlas by
 HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
 storing images at the end of this getting started guide.
 
@@ -193,3 +199,5 @@ Congratulations! You've just built your first image with Packer. Although the
 image was pretty useless in this case (nothing was changed about it), this page
 should've given you a general idea of how Packer works, what templates are and
 how to validate and build templates into machine images.
+
+[platforms]: /docs/builders/index.html

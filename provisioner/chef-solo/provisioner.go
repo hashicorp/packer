@@ -12,11 +12,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/provisioner"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type guestOSTypeConfig struct {
@@ -28,12 +28,12 @@ type guestOSTypeConfig struct {
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-solo --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash -s --{{if .Version}} -v {{.Version}}{{end}}",
 		stagingDir:     "/tmp/packer-chef-solo",
 	},
 	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-solo.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"",
+		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; Install-Project{{if .Version}} -v {{.Version}}{{end}}\"",
 		stagingDir:     "C:/Windows/Temp/packer-chef-solo",
 	},
 }
@@ -57,6 +57,7 @@ type Config struct {
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
 	GuestOSType                string   `mapstructure:"guest_os_type"`
+	Version                    string   `mapstructure:"version"`
 
 	ctx interpolate.Context
 }
@@ -91,7 +92,8 @@ type ExecuteTemplate struct {
 }
 
 type InstallChefTemplate struct {
-	Sudo bool
+	Sudo    bool
+	Version string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -229,7 +231,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with chef-solo")
 
 	if !p.config.SkipInstall {
-		if err := p.installChef(ui, comm); err != nil {
+		if err := p.installChef(ui, comm, p.config.Version); err != nil {
 			return fmt.Errorf("Error installing Chef: %s", err)
 		}
 	}
@@ -462,11 +464,12 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 	return nil
 }
 
-func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator) error {
+func (p *Provisioner) installChef(ui packer.Ui, comm packer.Communicator, version string) error {
 	ui.Message("Installing Chef...")
 
 	p.config.ctx.Data = &InstallChefTemplate{
-		Sudo: !p.config.PreventSudo,
+		Sudo:    !p.config.PreventSudo,
+		Version: version,
 	}
 	command, err := interpolate.Render(p.config.InstallCommand, &p.config.ctx)
 	if err != nil {

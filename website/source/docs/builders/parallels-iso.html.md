@@ -1,10 +1,12 @@
 ---
 description: |
-    The Parallels Packer builder is able to create Parallels Desktop for Mac virtual
-    machines and export them in the PVM format, starting from an ISO image.
+    The Parallels Packer builder is able to create Parallels Desktop for Mac
+    virtual machines and export them in the PVM format, starting from an ISO
+    image.
 layout: docs
-page_title: 'Parallels Builder (from an ISO)'
-...
+page_title: 'Parallels ISO - Builders'
+sidebar_current: 'docs-builders-parallels-iso'
+---
 
 # Parallels Builder (from an ISO)
 
@@ -25,7 +27,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "parallels-iso",
   "guest_os_type": "ubuntu",
@@ -83,10 +85,6 @@ builder.
     and "other". This can be omitted only if `parallels_tools_mode`
     is "disable".
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -104,6 +102,14 @@ builder.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
+
+-   `disk_type` (string) - The type for image file based virtual disk drives,
+    defaults to `expand`. Valid options are `expand` (expanding disk) that the
+    image file is small initially and grows in size as you add data to it, and
+    `plain` (plain disk) that the image file has a fixed size from the moment it
+    is created (i.e the space is allocated for the full drive). Plain disks
+    perform faster than expanding disks. `skip_compaction` will be set to true
+    automatically for plain disks.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -175,7 +181,7 @@ builder.
 -   `parallels_tools_guest_path` (string) - The path in the virtual machine to
     upload Parallels Tools. This only takes effect if `parallels_tools_mode`
     is "upload". This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of
     `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
     which should upload into the login directory of the user.
@@ -194,7 +200,7 @@ builder.
     itself as an array of strings, where each string represents a single
     argument on the command-line to `prlctl` (but excluding `prlctl` itself).
     Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use `prlctl`
     are below.
 
@@ -218,9 +224,10 @@ builder.
     "5m", or five minutes.
 
 -   `skip_compaction` (boolean) - Virtual disk image is compacted at the end of
-    the build process using `prl_disk_tool` utility. In certain rare cases, this
-    might corrupt the resulting disk image. If you find this to be the case,
-    you can disable compaction using this configuration value.
+    the build process using `prl_disk_tool` utility (except for the case that
+    `disk_type` is set to `plain`). In certain rare cases, this might corrupt
+    the resulting disk image. If you find this to be the case, you can disable
+    compaction using this configuration value.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is
@@ -265,19 +272,19 @@ proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -287,14 +294,14 @@ proper key:
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
-When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them, 
-otherwise they will be held down until the machine reboots. Use lowercase 
-characters as well inside modifiers. 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers.
 
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -305,7 +312,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -331,7 +338,7 @@ Extra `prlctl` commands are defined in the template in the `prlctl` section. An
 example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-``` {.javascript}
+``` json
 {
   "prlctl": [
     ["set", "{{.Name}}", "--memsize", "1024"],
@@ -345,7 +352,6 @@ executed in the order defined. So in the above example, the memory will be set
 followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
-`prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+`prlctl`. Each argument is treated as a [template engine](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.

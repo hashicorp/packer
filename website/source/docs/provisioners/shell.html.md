@@ -4,8 +4,9 @@ description: |
     scripts. Shell provisioning is the easiest way to get software installed and
     configured on a machine.
 layout: docs
-page_title: Shell Provisioner
-...
+page_title: 'Shell - Provisioners'
+sidebar_current: 'docs-provisioners-shell-remote'
+---
 
 # Shell Provisioner
 
@@ -23,7 +24,7 @@ Shell](/docs/provisioners/windows-shell.html) provisioners.
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": ["echo foo"]
@@ -67,7 +68,7 @@ Optional parameters:
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
     of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
@@ -86,11 +87,11 @@ Optional parameters:
     the machine. This defaults to '/tmp'.
 
 -   `remote_file` (string) - The filename the uploaded script will have on the machine.
-    This defaults to 'script_nnn.sh'.
+    This defaults to 'script\_nnn.sh'.
 
 -   `remote_path` (string) - The full path to the uploaded script will have on the
-     machine. By default this is remote_folder/remote_file, if set this option will
-     override both remote_folder and remote_file.
+    machine. By default this is remote\_folder/remote\_file, if set this option will
+    override both remote\_folder and remote\_file.
 
 -   `skip_clean` (boolean) - If true, specifies that the helper scripts
     uploaded to the system will not be removed by Packer. This defaults to
@@ -115,7 +116,7 @@ Some operating systems default to a non-root user. For example if you login as
 `ubuntu` and can sudo using the password `packer`, then you'll want to change
 `execute_command` to be:
 
-``` {.text}
+``` text
 "echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
 ```
 
@@ -131,7 +132,9 @@ FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
-    chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+``` text
+chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+```
 
 Note the addition of `env` before `{{ .Vars }}`.
 
@@ -168,9 +171,9 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put use "pause_before" to make Packer wait before executing the next script:
+machine restarts. For this, put use "pause\_before" to make Packer wait before executing the next script:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "script": "script.sh",
@@ -183,7 +186,7 @@ causing the provisioner to hang despite a reboot occurring. In this case, make
 sure you shut down the network interfaces on reboot or in your shell script. For
 example, on Gentoo:
 
-``` {.text}
+``` text
 /etc/init.d/net.eth0 stop
 ```
 
@@ -203,7 +206,7 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": [
@@ -246,7 +249,7 @@ would be:
     create race conditions. Your first provisioner can tell the machine to wait
     until it completely boots.
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]

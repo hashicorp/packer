@@ -40,7 +40,7 @@ func (c *VersionCommand) Run(args []string) int {
 	var versionString bytes.Buffer
 	fmt.Fprintf(&versionString, "Packer v%s", c.Version)
 	if c.VersionPrerelease != "" {
-		fmt.Fprintf(&versionString, ".%s", c.VersionPrerelease)
+		fmt.Fprintf(&versionString, "-%s", c.VersionPrerelease)
 
 		if c.Revision != "" {
 			fmt.Fprintf(&versionString, " (%s)", c.Revision)

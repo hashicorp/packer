@@ -2,14 +2,16 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 type StepCreateTempDir struct {
-	dirPath string
+	TempPath string
+	dirPath  string
 }
 
 func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
@@ -17,8 +19,11 @@ func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Creating temporary directory...")
 
-	tempDir := os.TempDir()
-	packerTempDir, err := ioutil.TempDir(tempDir, "packerhv")
+	if s.TempPath == "" {
+		s.TempPath = os.TempDir()
+	}
+
+	packerTempDir, err := ioutil.TempDir(s.TempPath, "packerhv")
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary directory: %s", err)
 		state.Put("error", err)

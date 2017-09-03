@@ -6,8 +6,9 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"sync"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Communicator where the communicator is actually
@@ -67,19 +68,31 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 	var args CommunicatorStartArgs
 	args.Command = cmd.Command
 
+	var wg sync.WaitGroup
+
 	if cmd.Stdin != nil {
 		args.StdinStreamId = c.mux.NextId()
-		go serveSingleCopy("stdin", c.mux, args.StdinStreamId, nil, cmd.Stdin)
+		go func() {
+			serveSingleCopy("stdin", c.mux, args.StdinStreamId, nil, cmd.Stdin)
+		}()
 	}
 
 	if cmd.Stdout != nil {
+		wg.Add(1)
 		args.StdoutStreamId = c.mux.NextId()
-		go serveSingleCopy("stdout", c.mux, args.StdoutStreamId, cmd.Stdout, nil)
+		go func() {
+			defer wg.Done()
+			serveSingleCopy("stdout", c.mux, args.StdoutStreamId, cmd.Stdout, nil)
+		}()
 	}
 
 	if cmd.Stderr != nil {
+		wg.Add(1)
 		args.StderrStreamId = c.mux.NextId()
-		go serveSingleCopy("stderr", c.mux, args.StderrStreamId, cmd.Stderr, nil)
+		go func() {
+			defer wg.Done()
+			serveSingleCopy("stderr", c.mux, args.StderrStreamId, cmd.Stderr, nil)
+		}()
 	}
 
 	responseStreamId := c.mux.NextId()
@@ -87,6 +100,7 @@ func (c *communicator) Start(cmd *packer.RemoteCmd) (err error) {
 
 	go func() {
 		conn, err := c.mux.Accept(responseStreamId)
+		wg.Wait()
 		if err != nil {
 			log.Printf("[ERR] Error accepting response stream %d: %s",
 				responseStreamId, err)

@@ -5,8 +5,9 @@ description: |
     virtual machines on hosts running VMware Fusion Professional for OS X, VMware
     Workstation for Linux and Windows, and VMware Player on Linux.
 layout: docs
-page_title: VMware Builder from VMX
-...
+page_title: 'VMware VMX - Builders'
+sidebar_current: 'docs-builders-vmware-vmx'
+---
 
 # VMware Builder (from VMX)
 
@@ -31,7 +32,7 @@ VMware virtual machine.
 Here is an example. This example is fully functional as long as the source path
 points to a real VMX file with the proper settings:
 
-``` {.javascript}
+``` json
 {
   "type": "vmware-vmx",
   "source_path": "/path/to/a/vm.vmx",
@@ -54,9 +55,6 @@ builder.
 ### Required:
 
 -   `source_path` (string) - Path to the source VMX file to clone.
-
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
 
 ### Optional:
 
@@ -146,7 +144,7 @@ builder.
 -   `tools_upload_path` (string) - The path in the VM to upload the
     VMware tools. This only takes effect if `tools_upload_flavor` is non-empty.
     This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
     By default the upload path is set to `{{.Flavor}}.iso`.
 
@@ -162,8 +160,13 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
+-   `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces from
+    the VMX file after building. This is for advanced users who understand the
+    ramifications, but is useful for building Vagrant boxes since Vagrant will
+    create ethernet interfaces when provisioning a box.
+
 -   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-     to for VNC. By default packer will use 127.0.0.1 for this.
+    to for VNC. By default packer will use 127.0.0.1 for this.
 
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
     used to secure the VNC communication with the VM.
@@ -187,10 +190,10 @@ template.
 The boot command is "typed" character for character over a VNC connection to the
 machine, simulating a human actually typing the keyboard.
 
--> Keystrokes are typed as separate key up/down events over VNC with a
-   default 100ms delay. The delay alleviates issues with latency and CPU
-   contention. For local builds you can tune this delay by specifying
-   e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+-&gt; Keystrokes are typed as separate key up/down events over VNC with a
+default 100ms delay. The delay alleviates issues with latency and CPU
+contention. For local builds you can tune this delay by specifying
+e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
 
 There are a set of special keys available. If these are in your boot
 command, they will be replaced by the proper key:
@@ -217,21 +220,21 @@ command, they will be replaced by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
--   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl 
-    key. 
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl
+    key.
 
--   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the 
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the
     shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -242,7 +245,7 @@ command, they will be replaced by the proper key:
     for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -253,7 +256,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",

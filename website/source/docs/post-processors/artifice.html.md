@@ -1,13 +1,15 @@
 ---
 description: |
-    The artifice post-processor overrides the artifact list from an upstream builder
-    or post-processor. All downstream post-processors will see the new artifacts you
-    specify. The primary use-case is to build artifacts inside a packer builder --
-    for example, spinning up an EC2 instance to build a docker container -- and then
-    extracting the docker container and throwing away the EC2 instance.
+    The artifice post-processor overrides the artifact list from an upstream
+    builder or post-processor. All downstream post-processors will see the new
+    artifacts you specify. The primary use-case is to build artifacts inside a
+    packer builder -- for example, spinning up an EC2 instance to build a docker
+    container -- and then extracting the docker container and throwing away the
+    EC2 instance.
 layout: docs
-page_title: 'Artifice Post-Processor'
-...
+page_title: 'Artifice - Post-Processors'
+sidebar_current: 'docs-post-processors-artifice'
+---
 
 # Artifice Post-Processor
 
@@ -71,7 +73,7 @@ This minimal example:
 VMX is a fast way to build and test locally, but you can easily substitute
 another builder.
 
-``` {.javascript}
+``` json
 {
   "builders": [
     {
@@ -126,21 +128,25 @@ proceeding artifact is passed to subsequent post-processors. If you use only one
 set of square braces the post-processors will run individually against the build
 artifact (the vmx file in this case) and it will not have the desired result.
 
-      "post-processors": [
-        [       <--- Start post-processor chain
-          {
-            "type": "artifice",
-            "files": ["consul"]
-          },
-          {
-            "type": "atlas",
-            ...
-          }
-        ],      <--- End post-processor chain
-        {
-          "type":"compress"  <-- Standalone post-processor
-        }
-      ]
+``` json
+{
+  "post-processors": [
+    [       // <--- Start post-processor chain
+      {
+        "type": "artifice",
+        "files": ["consul"]
+      },
+      {
+        "type": "atlas",
+        ...
+      }
+    ],      // <--- End post-processor chain
+    {
+      "type":"compress"  // <-- Standalone post-processor
+    }
+  ]
+}
+```
 
 You can create multiple post-processor chains to handle multiple builders (for
 example, building linux and windows binaries during the same build).

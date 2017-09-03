@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestLocalArtifact_impl(t *testing.T) {
@@ -29,13 +29,16 @@ func TestNewLocalArtifact(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	a, err := NewLocalArtifact(td)
+	a, err := NewLocalArtifact("vm1", td)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
 	if a.BuilderId() != BuilderId {
 		t.Fatalf("bad: %#v", a.BuilderId())
+	}
+	if a.Id() != "vm1" {
+		t.Fatalf("bad: %#v", a.Id())
 	}
 	if len(a.Files()) != 1 {
 		t.Fatalf("should length 1: %d", len(a.Files()))

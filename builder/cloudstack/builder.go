@@ -1,10 +1,12 @@
 package cloudstack
 
 import (
+	"fmt"
+
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -56,42 +58,53 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Build the steps.
 	steps := []multistep.Step{
 		&stepPrepareConfig{},
-		&stepCreateInstance{},
+		&common.StepHTTPServer{
+			HTTPDir:     b.config.HTTPDir,
+			HTTPPortMin: b.config.HTTPPortMin,
+			HTTPPortMax: b.config.HTTPPortMax,
+		},
+		&stepKeypair{
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
+			KeyPair:              b.config.Keypair,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			TemporaryKeyPairName: b.config.TemporaryKeypairName,
+		},
+		&stepCreateSecurityGroup{},
+		&stepCreateInstance{
+			Ctx:   b.config.ctx,
+			Debug: b.config.PackerDebug,
+		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
+			Config: &b.config.Comm,
+			Host:   commHost,
+			SSHConfig: SSHConfig(
+				b.config.Comm.SSHAgentAuth,
+				b.config.Comm.SSHUsername,
+				b.config.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
 		&stepShutdownInstance{},
 		&stepCreateTemplate{},
 	}
 
-	// Configure the runner.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
-	// Run the steps.
+	// Configure the runner and run the steps.
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
-	// If there are no templates, then just return
-	template, ok := state.Get("template").(*cloudstack.CreateTemplateResponse)
-	if !ok || template == nil {
-		return nil, nil
+	// If there was an error, return that
+	if rawErr, ok := state.GetOk("error"); ok {
+		ui.Error(rawErr.(error).Error())
+		return nil, rawErr.(error)
 	}
 
 	// Build the artifact and return it
 	artifact := &Artifact{
 		client:   client,
 		config:   b.config,
-		template: template,
+		template: state.Get("template").(*cloudstack.CreateTemplateResponse),
 	}
 
 	return artifact, nil

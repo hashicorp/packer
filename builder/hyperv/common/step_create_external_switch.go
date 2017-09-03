@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step creates switch for VM.

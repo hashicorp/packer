@@ -1,10 +1,11 @@
 ---
 description: |
-    The `amazon-ebsvolume` Packer builder is like the EBS builder, but is
-    intended to create EBS volumes rather than a machine image.
+    The amazon-ebsvolume Packer builder is like the EBS builder, but is intended
+    to create EBS volumes rather than a machine image.
 layout: docs
-page_title: 'Amazon EBS Volume Builder'
-...
+page_title: 'Amazon EBS Volume - Builders'
+sidebar_current: 'docs-builders-amazon-ebsvolume'
+---
 
 # EBS Volume Builder
 
@@ -14,17 +15,17 @@ The `amazon-ebsvolume` Packer builder is able to create Amazon Elastic Block
 Store volumes which are prepopulated with filesystems or data.
 
 This builder builds EBS volumes by launching an EC2 instance from a source AMI,
-provisioning that running machine, and then destroying the source machine, keeping
-the volumes intact.
+provisioning that running machine, and then destroying the source machine,
+keeping the volumes intact.
 
-This is all done in your own AWS account. The builder will create temporary
-key pairs, security group rules, etc. that provide it temporary access to the
+This is all done in your own AWS account. The builder will create temporary key
+pairs, security group rules, etc. that provide it temporary access to the
 instance while the image is being created.
 
-The builder does *not* manage EBS Volumes. Once it creates volumes and stores
-it in your account, it is up to you to use, delete, etc. the volumes.
+The builder does *not* manage EBS Volumes. Once it creates volumes and stores it
+in your account, it is up to you to use, delete, etc. the volumes.
 
--> **Note:** Temporary resources are, by default, all created with the prefix
+-&gt; **Note:** Temporary resources are, by default, all created with the prefix
 `packer`. This can be useful if you want to restrict the security groups and
 key pairs Packer is able to operate on.
 
@@ -62,7 +63,7 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+        example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
@@ -83,8 +84,8 @@ builder.
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
     -   `tags` (map) - Tags to apply to the volume. These are retained after the
-        builder completes. This is a [configuration template]
-        (/docs/templates/configuration-templates.html) where the `SourceAMI`
+        builder completes. This is a \[template engine\]
+        (/docs/templates/engine.html) where the `SourceAMI`
         variable is replaced with the source AMI ID and `BuildRegion` variable
         is replaced with the value of `region`.
 
@@ -95,22 +96,44 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `custom_endpoint_ec2` (string) - this option is useful if you use
+    another cloud provider that provide a compatible API with aws EC2,
+    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
+-   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the time.
+
+-   `profile` (string) - The profile to use in the shared credentials file for
+    AWS. See Amazon's documentation on [specifying
+    profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+    for more details.
+
+-   `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
+    along with the custom kms key id to use for encryption for that region.
+    Keys must match the regions provided in `ami_regions`. If you just want to
+    encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
+    If you want a region to be encrypted with that region's default key ID, you can
+    use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
+    However, you cannot use default key IDs if you are using this in conjunction with
+    `snapshot_users` -- in that situation you must use custom keys.
+
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with the value of `region`.
 
@@ -129,7 +152,7 @@ builder.
     Defaults to `stop`.
 
 -   `skip_region_validation` (boolean) - Set to `true` if you want to skip
-    validation of the region configuration option.  Defaults to `false`.
+    validation of the region configuration option. Defaults to `false`.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
@@ -142,8 +165,9 @@ builder.
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
 
-    ``` {.javascript}
-    "source_ami_filter": {
+    ``` json
+    {
+      "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
           "name": "*ubuntu-xenial-16.04-amd64-server-*",
@@ -151,6 +175,7 @@ builder.
         },
         "owners": ["099720109477"],
         "most_recent": true
+      }
     }
     ```
 
@@ -159,15 +184,15 @@ builder.
     example, `most_recent` will cause this to succeed by selecting the newest image.
 
     -   `filters` (map of strings) - filters used to select a `source_ami`.
-         NOTE: This will fail unless *exactly* one AMI is returned.
-         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-         is valid.
+        NOTE: This will fail unless *exactly* one AMI is returned.
+        Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+        is valid.
 
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-         This is helpful to limit the AMIs to a trusted third party, or to your own account.
+        This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
     -   `most_recent` (bool) - Selects the newest created image when true.
-         This is most useful for selecting a daily distro build.
+        This is most useful for selecting a daily distro build.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
@@ -181,6 +206,12 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)` or `Windows (Amazon VPC)`
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
@@ -198,7 +229,7 @@ builder.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name that looks like
-    `packer_<UUID>`, where \<UUID\> is a 36 character unique identifier.
+    `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
@@ -214,54 +245,55 @@ builder.
 
 -   `vpc_id` (string) - If launching into a VPC subnet, Packer needs the VPC ID
     in order to create a temporary security group within the VPC. Requires `subnet_id`
-    to be set.
+    to be set. If this field is left blank, Packer will try to get the VPC ID from the
+    `subnet_id`.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
 
 ## Basic Example
 
-```
+``` json
 {
-   "type" : "amazon-ebsvolume",
-   "secret_key" : "YOUR SECRET KEY HERE",
-   "access_key" : "YOUR KEY HERE",
-   "region" : "us-east-1",
-   "ssh_username" : "ubuntu",
-   "instance_type" : "t2.medium",
-   "source_ami" : "ami-40d28157",
-   "ebs_volumes" : [
-      {
-         "volume_type" : "gp2",
-         "device_name" : "/dev/xvdf",
-         "delete_on_termination" : false,
-         "tags" : {
-            "zpool" : "data",
-            "Name" : "Data1"
-         },
-         "volume_size" : 10
+  "type" : "amazon-ebsvolume",
+  "secret_key" : "YOUR SECRET KEY HERE",
+  "access_key" : "YOUR KEY HERE",
+  "region" : "us-east-1",
+  "ssh_username" : "ubuntu",
+  "instance_type" : "t2.medium",
+  "source_ami" : "ami-40d28157",
+  "ebs_volumes" : [
+    {
+      "volume_type" : "gp2",
+      "device_name" : "/dev/xvdf",
+      "delete_on_termination" : false,
+      "tags" : {
+        "zpool" : "data",
+        "Name" : "Data1"
       },
-      {
-         "volume_type" : "gp2",
-         "device_name" : "/dev/xvdg",
-         "tags" : {
-            "zpool" : "data",
-            "Name" : "Data2"
-         },
-         "delete_on_termination" : false,
-         "volume_size" : 10
+      "volume_size" : 10
+    },
+    {
+      "volume_type" : "gp2",
+      "device_name" : "/dev/xvdg",
+      "tags" : {
+        "zpool" : "data",
+        "Name" : "Data2"
       },
-      {
-         "volume_size" : 10,
-         "tags" : {
-            "Name" : "Data3",
-            "zpool" : "data"
-         },
-         "delete_on_termination" : false,
-         "device_name" : "/dev/xvdh",
-         "volume_type" : "gp2"
-      }
-   ]
+      "delete_on_termination" : false,
+      "volume_size" : 10
+    },
+    {
+      "volume_size" : 10,
+      "tags" : {
+        "Name" : "Data3",
+        "zpool" : "data"
+      },
+      "delete_on_termination" : false,
+      "device_name" : "/dev/xvdh",
+      "volume_type" : "gp2"
+    }
+  ]
 }
 ```
 

@@ -3,8 +3,9 @@ description: |
     The windows-shell Packer provisioner runs commands on Windows using the cmd
     shell.
 layout: docs
-page_title: Windows Shell Provisioner
-...
+page_title: 'Windows Shell - Provisioners'
+sidebar_current: 'docs-provisioners-windows-shell'
+---
 
 # Windows Shell Provisioner
 
@@ -17,7 +18,7 @@ The windows-shell Packer provisioner runs commands on a Windows machine using
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "windows-shell",
   "inline": ["dir c:\\"]
@@ -60,7 +61,7 @@ Optional parameters:
 
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `{{ .Vars }}"{{ .Path }}"`. The value of this is treated as
-    [configuration template](/docs/templates/configuration-templates.html).
+    [template engine](/docs/templates/engine.html).
     There are two available variables: `Path`, which is the path to the script
     to run, and `Vars`, which is the list of `environment_vars`, if configured.
 
@@ -73,7 +74,6 @@ Optional parameters:
     exists in order to deal with times when SSH may restart, such as a
     system reboot. Set this to a higher value if reboots take a longer amount
     of time.
-
 
 ## Default Environmental Variables
 

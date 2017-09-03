@@ -8,14 +8,17 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		capture: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error {
+		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
+		generalizeVM: func(string, string) error {
+			return nil
 		},
 		get: func(client *AzureClient) *CaptureTemplate {
 			return nil
@@ -38,7 +41,10 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		capture: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error { return nil },
+		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error { return nil },
+		generalizeVM: func(string, string) error {
+			return nil
+		},
 		get: func(client *AzureClient) *CaptureTemplate {
 			return nil
 		},
@@ -70,11 +76,14 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	var testSubject = &StepCaptureImage{
-		capture: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
+		captureVhd: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 			actualVirtualMachineCaptureParameters = parameters
 
+			return nil
+		},
+		generalizeVM: func(string, string) error {
 			return nil
 		},
 		get: func(client *AzureClient) *CaptureTemplate {
@@ -116,9 +125,16 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 func createTestStateBagStepCaptureImage() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
+	stateBag.Put(constants.ArmLocation, "localhost")
 	stateBag.Put(constants.ArmComputeName, "Unit Test: ComputeName")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
 	stateBag.Put(constants.ArmVirtualMachineCaptureParameters, &compute.VirtualMachineCaptureParameters{})
+
+	stateBag.Put(constants.ArmIsManagedImage, false)
+	stateBag.Put(constants.ArmManagedImageResourceGroupName, "")
+	stateBag.Put(constants.ArmManagedImageName, "")
+	stateBag.Put(constants.ArmManagedImageLocation, "")
+	stateBag.Put(constants.ArmImageParameters, &compute.Image{})
 
 	return stateBag
 }
