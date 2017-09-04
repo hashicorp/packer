@@ -71,7 +71,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	// As a work around, we tar up the folder, upload it as a file, then extract it
 
 	// Don't use 'z' flag as compressing may take longer and the transfer is likely local.
-	// If this isn't the case, it is possible for the user to crompress in another step then transfer.
+	// If this isn't the case, it is possible for the user to compress in another step then transfer.
 	// It wouldn't be possibe to disable compression, without exposing this option.
 	tar, err := c.CmdWrapper(fmt.Sprintf("tar -cf - -C %s .", src))
 	if err != nil {
