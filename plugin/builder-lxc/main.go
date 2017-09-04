@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/mitchellh/packer/builder/lxc"
-	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/hashicorp/packer/builder/lxc"
+	"github.com/hashicorp/packer/packer/plugin"
 )
 
 func main() {
