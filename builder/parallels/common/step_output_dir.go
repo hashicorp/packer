@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepOutputDir sets up the output directory by creating it if it does
@@ -20,6 +20,7 @@ type StepOutputDir struct {
 	success bool
 }
 
+// Run sets up the output directory.
 func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
@@ -48,6 +49,7 @@ func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
+// Cleanup deletes the output directory.
 func (s *StepOutputDir) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)

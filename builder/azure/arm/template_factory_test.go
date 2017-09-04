@@ -1,13 +1,14 @@
 package arm
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	"github.com/approvals/go-approval-tests"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/builder/azure/common/template"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/template"
 )
 
 // Ensure the link values are not set, and the concrete values are set.
@@ -194,6 +195,148 @@ func TestVirtualMachineDeployment06(t *testing.T) {
 			"tag02": "value02",
 			"tag03": "value03",
 		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Verify that custom data are properly inserted
+func TestVirtualMachineDeployment07(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "https://localhost/custom.vhd",
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The user specifies a configuration value for the setting custom_data_file.
+	// The config type will read that file, and base64 encode it.  The encoded
+	// contents are then assigned to Config's customData property, which are directly
+	// injected into the template.
+	//
+	// I am not aware of an easy to mimic this situation in a test without having
+	// a file on disk, which I am loathe to do.  The alternative is to inject base64
+	// encoded data myself, which is what I am doing here.
+	customData := `#cloud-config
+growpart:
+  mode: off
+`
+	base64CustomData := base64.StdEncoding.EncodeToString([]byte(customData))
+	c.customData = base64CustomData
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building from a custom managed image.
+func TestVirtualMachineDeployment08(t *testing.T) {
+	config := map[string]interface{}{
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"os_type":                                  constants.Target_Linux,
+		"communicator":                             "none",
+		"custom_managed_image_resource_group_name": "CustomManagedImageResourceGroupName",
+		"custom_managed_image_name":                "CustomManagedImageName",
+		"managed_image_name":                       "ManagedImageName",
+		"managed_image_resource_group_name":        "ManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building from a platform managed image.
+func TestVirtualMachineDeployment09(t *testing.T) {
+	config := map[string]interface{}{
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"os_type":                           constants.Target_Linux,
+		"communicator":                      "none",
+		"image_publisher":                   "--image-publisher--",
+		"image_offer":                       "--image-offer--",
+		"image_sku":                         "--image-sku--",
+		"image_version":                     "--version--",
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Ensure the VM template is correct when building with PublicIp and connect to Private Network
+func TestVirtualMachineDeployment10(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
+		"image_publisher": "--image-publisher--",
+		"image_offer":     "--image-offer--",
+		"image_sku":       "--image-sku--",
+		"image_version":   "--version--",
+
+		"virtual_network_resource_group_name":    "--virtual_network_resource_group_name--",
+		"virtual_network_name":                   "--virtual_network_name--",
+		"virtual_network_subnet_name":            "--virtual_network_subnet_name--",
+		"private_virtual_network_with_public_ip": true,
+
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())

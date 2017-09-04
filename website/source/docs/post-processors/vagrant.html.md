@@ -1,12 +1,13 @@
 ---
 description: |
-    The Packer Vagrant post-processor takes a build and converts the artifact into a
-    valid Vagrant box, if it can. This lets you use Packer to automatically create
-    arbitrarily complex Vagrant boxes, and is in fact how the official boxes
-    distributed by Vagrant are created.
+    The Packer Vagrant post-processor takes a build and converts the artifact into
+    a valid Vagrant box, if it can. This lets you use Packer to automatically
+    create arbitrarily complex Vagrant boxes, and is in fact how the official
+    boxes distributed by Vagrant are created.
 layout: docs
-page_title: 'Vagrant Post-Processor'
-...
+page_title: 'Vagrant - Post-Processors'
+sidebar_current: 'docs-post-processors-vagrant-box'
+---
 
 # Vagrant Post-Processor
 
@@ -65,7 +66,7 @@ more details about certain options in following sections.
 
 -   `output` (string) - The full path to the box file that will be created by
     this post-processor. This is a [configuration
-    template](/docs/templates/configuration-templates.html). The variable
+    template](/docs/templates/engine.html). The variable
     `Provider` is replaced by the Vagrant provider the box is for. The variable
     `ArtifactId` is replaced by the ID of the input artifact. The variable
     `BuildName` is replaced with the name of the build. By default, the value of
@@ -84,7 +85,7 @@ post-processor lets you do this.
 
 Specify overrides within the `override` configuration by provider name:
 
-``` {.javascript}
+``` json
 {
   "type": "vagrant",
   "compression_level": 1,

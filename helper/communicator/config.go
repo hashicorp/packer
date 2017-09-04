@@ -3,11 +3,11 @@ package communicator
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/masterzen/winrm"
 )
 
 // Config is the common configuration that communicators allow within
@@ -16,21 +16,23 @@ type Config struct {
 	Type string `mapstructure:"communicator"`
 
 	// SSH
-	SSHHost               string        `mapstructure:"ssh_host"`
-	SSHPort               int           `mapstructure:"ssh_port"`
-	SSHUsername           string        `mapstructure:"ssh_username"`
-	SSHPassword           string        `mapstructure:"ssh_password"`
-	SSHPrivateKey         string        `mapstructure:"ssh_private_key_file"`
-	SSHPty                bool          `mapstructure:"ssh_pty"`
-	SSHTimeout            time.Duration `mapstructure:"ssh_timeout"`
-	SSHDisableAgent       bool          `mapstructure:"ssh_disable_agent"`
-	SSHHandshakeAttempts  int           `mapstructure:"ssh_handshake_attempts"`
-	SSHBastionHost        string        `mapstructure:"ssh_bastion_host"`
-	SSHBastionPort        int           `mapstructure:"ssh_bastion_port"`
-	SSHBastionUsername    string        `mapstructure:"ssh_bastion_username"`
-	SSHBastionPassword    string        `mapstructure:"ssh_bastion_password"`
-	SSHBastionPrivateKey  string        `mapstructure:"ssh_bastion_private_key_file"`
-	SSHFileTransferMethod string        `mapstructure:"ssh_file_transfer_method"`
+	SSHHost                   string        `mapstructure:"ssh_host"`
+	SSHPort                   int           `mapstructure:"ssh_port"`
+	SSHUsername               string        `mapstructure:"ssh_username"`
+	SSHPassword               string        `mapstructure:"ssh_password"`
+	SSHPrivateKey             string        `mapstructure:"ssh_private_key_file"`
+	SSHPty                    bool          `mapstructure:"ssh_pty"`
+	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
+	SSHAgentAuth              bool          `mapstructure:"ssh_agent_auth"`
+	SSHDisableAgentForwarding bool          `mapstructure:"ssh_disable_agent_forwarding"`
+	SSHHandshakeAttempts      int           `mapstructure:"ssh_handshake_attempts"`
+	SSHBastionHost            string        `mapstructure:"ssh_bastion_host"`
+	SSHBastionPort            int           `mapstructure:"ssh_bastion_port"`
+	SSHBastionAgentAuth       bool          `mapstructure:"ssh_bastion_agent_auth"`
+	SSHBastionUsername        string        `mapstructure:"ssh_bastion_username"`
+	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
+	SSHBastionPrivateKey      string        `mapstructure:"ssh_bastion_private_key_file"`
+	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -40,7 +42,8 @@ type Config struct {
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
-	WinRMTransportDecorator func(*http.Transport) http.RoundTripper
+	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
+	WinRMTransportDecorator func() winrm.Transporter
 }
 
 // Port returns the port that will be used for access based on config.
@@ -145,7 +148,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	// Validation
 	var errs []error
 	if c.SSHUsername == "" {
-		errs = append(errs, errors.New("An ssh_username must be specified"))
+		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
 	if c.SSHPrivateKey != "" {
@@ -158,7 +161,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SSHBastionHost != "" {
+	if c.SSHBastionHost != "" && !c.SSHBastionAgentAuth {
 		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
@@ -183,6 +186,10 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 
 	if c.WinRMTimeout == 0 {
 		c.WinRMTimeout = 30 * time.Minute
+	}
+
+	if c.WinRMUseNTLM == true {
+		c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
 	}
 
 	var errs []error

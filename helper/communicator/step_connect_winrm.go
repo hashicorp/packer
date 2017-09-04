@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/communicator/winrm"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/communicator/winrm"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepConnectWinRM is a multistep Step implementation that waits for WinRM
@@ -96,6 +96,7 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 			log.Printf("[DEBUG] Error getting WinRM host: %s", err)
 			continue
 		}
+
 		port := s.Config.WinRMPort
 		if s.WinRMPort != nil {
 			port, err = s.WinRMPort(state)

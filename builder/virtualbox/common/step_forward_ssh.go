@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"net"
 
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step adds a NAT port forwarding definition so that SSH is available
@@ -32,25 +32,23 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
 
+	if s.CommConfig.Type == "none" {
+		log.Printf("Not using a communicator, skipping setting up port forwarding...")
+		state.Put("sshHostPort", 0)
+		return multistep.ActionContinue
+	}
+
 	guestPort := s.CommConfig.Port()
 	sshHostPort := guestPort
 	if !s.SkipNatMapping {
 		log.Printf("Looking for available communicator (SSH, WinRM, etc) port between %d and %d",
 			s.HostPortMin, s.HostPortMax)
-		offset := 0
 
-		portRange := int(s.HostPortMax - s.HostPortMin)
-		if portRange > 0 {
-			// Have to check if > 0 to avoid a panic
-			offset = rand.Intn(portRange)
-		}
+		portRange := int(s.HostPortMax - s.HostPortMin + 1)
+		offset := rand.Intn(portRange)
 
 		for {
 			sshHostPort = offset + int(s.HostPortMin)
-			if sshHostPort >= int(s.HostPortMax) {
-				offset = 0
-				sshHostPort = int(s.HostPortMin)
-			}
 			log.Printf("Trying port: %d", sshHostPort)
 			l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", sshHostPort))
 			if err == nil {
@@ -58,6 +56,9 @@ func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
 				break
 			}
 			offset++
+			if offset == portRange {
+				offset = 0
+			}
 		}
 
 		// Create a forwarded port mapping to the VM

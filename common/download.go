@@ -132,7 +132,7 @@ func (d *DownloadClient) Get() (string, error) {
 
 		// Remove forward slash on absolute Windows file URLs before processing
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
-			finalPath = finalPath[1:len(finalPath)]
+			finalPath = finalPath[1:]
 		}
 		// Keep track of the source so we can make sure not to delete this later
 		sourcePath = finalPath
@@ -205,7 +205,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 	log.Printf("Verifying checksum of %s", path)
 	d.config.Hash.Reset()
 	io.Copy(d.config.Hash, f)
-	return bytes.Compare(d.config.Hash.Sum(nil), d.config.Checksum) == 0, nil
+	return bytes.Equal(d.config.Hash.Sum(nil), d.config.Checksum), nil
 }
 
 // HTTPDownloader is an implementation of Downloader that downloads

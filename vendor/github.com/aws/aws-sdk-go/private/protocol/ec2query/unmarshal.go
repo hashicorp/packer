@@ -1,6 +1,6 @@
 package ec2query
 
-//go:generate go run ../../../models/protocol_tests/generate.go ../../../models/protocol_tests/output/ec2.json unmarshal_test.go
+//go:generate go run -tags codegen ../../../models/protocol_tests/generate.go ../../../models/protocol_tests/output/ec2.json unmarshal_test.go
 
 import (
 	"encoding/xml"
@@ -42,7 +42,7 @@ type xmlErrorResponse struct {
 	XMLName   xml.Name `xml:"Response"`
 	Code      string   `xml:"Errors>Error>Code"`
 	Message   string   `xml:"Errors>Error>Message"`
-	RequestID string   `xml:"RequestId"`
+	RequestID string   `xml:"RequestID"`
 }
 
 // UnmarshalError unmarshals a response error for the EC2 protocol.

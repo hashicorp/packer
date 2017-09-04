@@ -5,8 +5,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepPreValidate provides an opportunity to pre-validate any configuration for
@@ -28,7 +28,7 @@ func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Prevalidating AMI Name...")
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-		Filters: []*ec2.Filter{&ec2.Filter{
+		Filters: []*ec2.Filter{{
 			Name:   aws.String("name"),
 			Values: []*string{aws.String(s.DestAmiName)},
 		}}})

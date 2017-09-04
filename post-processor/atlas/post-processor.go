@@ -8,11 +8,11 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const (
@@ -138,11 +138,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			return errs
 		}
 	}
-
 	return nil
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+	// todo: remove/reword after the migration
+	if p.config.Type == "vagrant.box" {
+		return nil, false, fmt.Errorf("Vagrant-related functionality has been removed from Terraform\n" +
+			"Enterprise into its own product, Vagrant Cloud. For more information see\n" +
+			"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
+			"Please replace the Atlas post-processor with the Vagrant Cloud post-processor,\n" +
+			"and see https://www.packer.io/docs/post-processors/vagrant-cloud.html for\n" +
+			"more detail.\n")
+	}
 	if _, err := p.client.Artifact(p.config.user, p.config.name); err != nil {
 		if err != atlas.ErrNotFound {
 			return nil, false, fmt.Errorf(

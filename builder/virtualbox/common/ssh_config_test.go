@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func testSSHConfig() *SSHConfig {
@@ -102,25 +102,6 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
 	c.Comm.SSHPrivateKey = tf.Name()
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) > 0 {
-		t.Fatalf("should not have error: %#v", errs)
-	}
-}
-
-func TestSSHConfigPrepare_SSHUser(t *testing.T) {
-	var c *SSHConfig
-	var errs []error
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = ""
-	errs = c.Prepare(testConfigTemplate(t))
-	if len(errs) == 0 {
-		t.Fatalf("should have error")
-	}
-
-	c = testSSHConfig()
-	c.Comm.SSHUsername = "exists"
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)

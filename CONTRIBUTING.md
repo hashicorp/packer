@@ -54,7 +54,7 @@ If you have never worked with Go before, you will have to complete the
 following steps in order to be able to compile and test Packer. These instructions target POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to adjust them for Windows or other shells.
 
 1. [Download](https://golang.org/dl) and install Go. The instructions below
-   are for go 1.6. Earlier versions of Go are no longer supported.
+   are for go 1.7. Earlier versions of Go are no longer supported.
 
 2. Set and export the `GOPATH` environment variable and update your `PATH`. For
    example, you can add to your `.bash_profile`.
@@ -65,28 +65,28 @@ following steps in order to be able to compile and test Packer. These instructio
     ```
 
 3. Download the Packer source (and its dependencies) by running `go get
-   github.com/mitchellh/packer`. This will download the Packer source to
-   `$GOPATH/src/github.com/mitchellh/packer`.
+   github.com/hashicorp/packer`. This will download the Packer source to
+   `$GOPATH/src/github.com/hashicorp/packer`.
 
-4. When working on packer `cd $GOPATH/src/github.com/mitchellh/packer` so you
+4. When working on packer `cd $GOPATH/src/github.com/hashicorp/packer` so you
    can run `make` and easily access other files. Run `make help` to get
    information about make targets.
 
 5. Make your changes to the Packer source. You can run `make` in
-   `$GOPATH/src/github.com/mitchellh/packer` to run tests and build the packer
+   `$GOPATH/src/github.com/hashicorp/packer` to run tests and build the packer
    binary. Any compilation errors will be shown when the binaries are
    rebuilding. If you don't have `make` you can simply run `go build -o bin/packer .` from the project root.
 
 6. After running building packer successfully, use
-   `$GOPATH/src/github.com/mitchellh/packer/bin/packer` to build a machine and
-   verify your changes work. For instance: `$GOPATH/src/github.com/mitchellh/packer/bin/packer build template.json`.
+   `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
+   verify your changes work. For instance: `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
 
 7. If everything works well and the tests pass, run `go fmt` on your code
    before submitting a pull-request.
 
 ### Opening an Pull Request
 
-When you are ready to open a pull-request, you will need to [fork packer](https://github.com/mitchellh/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
+When you are ready to open a pull-request, you will need to [fork packer](https://github.com/hashicorp/packer#fork-destination-box), push your changes to your fork, and then open a pull-request.
 
 For example, my github username is `cbednarski` so I would do the following:
 
@@ -100,11 +100,28 @@ From there, open your fork in your browser to open a new pull-request.
 
 ### Tips for Working on Packer
 
-#### Godeps
+#### Working on forks
 
-If you are submitting a change that requires new or updated dependencies, please include them in `Godeps/Godeps.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.
+The easiest way to work on a fork is to set it as a remote of the packer project. After following the steps in "Setting up Go to work on Packer":
 
-Note that you will need to use [Godep](https://github.com/tools/godep) to do this. This step is recommended but not required; if you don't use Godep please indicate in your PR which dependencies have changed and to what versions.
+1. Navigate to $GOPATH/src/github.com/hashicorp/packer
+2. Add the remote `git remote add <name of remote> <github url of fork>`. For example `git remote add mwhooker https://github.com/mwhooker/packer.git`.
+3. Checkout a feature branch: `git checkout -b new-feature`
+4. Make changes
+5. (Optional) Push your changes to the fork: `git push -u <name of remote> new-feature`
+
+This way you can push to your fork to create a PR, but the code on disk still lives in the spot where the go cli tools are expecting to find it.
+
+#### Govendor
+
+If you are submitting a change that requires new or updated dependencies, please include them in `vendor/vendor.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.
+
+Note that you will need to use [govendor](https://github.com/kardianos/govendor) to do this. This step is recommended but not required; if you don't use govendor please indicate in your PR which dependencies have changed and to what versions.
+
+Use `govendor fetch <project>` to add dependencies to the project. See
+[govendor quick
+start](https://github.com/kardianos/govendor#quick-start-also-see-the-faq) for
+examples.
 
 Please only apply the minimal vendor changes to get your PR to work. Packer does not attempt to track the latest version for each dependency.
 

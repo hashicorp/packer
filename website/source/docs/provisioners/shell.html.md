@@ -4,8 +4,9 @@ description: |
     scripts. Shell provisioning is the easiest way to get software installed and
     configured on a machine.
 layout: docs
-page_title: Shell Provisioner
-...
+page_title: 'Shell - Provisioners'
+sidebar_current: 'docs-provisioners-shell-remote'
+---
 
 # Shell Provisioner
 
@@ -23,7 +24,7 @@ Shell](/docs/provisioners/windows-shell.html) provisioners.
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": ["echo foo"]
@@ -67,9 +68,13 @@ Optional parameters:
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
     of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
+
+-   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+    server disconnects us. A disconnect might happen if you restart the ssh
+    server or reboot the host. May default to false in the future.
 
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
@@ -82,11 +87,11 @@ Optional parameters:
     the machine. This defaults to '/tmp'.
 
 -   `remote_file` (string) - The filename the uploaded script will have on the machine.
-    This defaults to 'script_nnn.sh'.
+    This defaults to 'script\_nnn.sh'.
 
 -   `remote_path` (string) - The full path to the uploaded script will have on the
-     machine. By default this is remote_folder/remote_file, if set this option will
-     override both remote_folder and remote_file.
+    machine. By default this is remote\_folder/remote\_file, if set this option will
+    override both remote\_folder and remote\_file.
 
 -   `skip_clean` (boolean) - If true, specifies that the helper scripts
     uploaded to the system will not be removed by Packer. This defaults to
@@ -111,25 +116,25 @@ Some operating systems default to a non-root user. For example if you login as
 `ubuntu` and can sudo using the password `packer`, then you'll want to change
 `execute_command` to be:
 
-``` {.text}
-"echo 'packer' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'"
+``` text
+"echo 'packer' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
 ```
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
-is being piped in with the value of `packer`. The `-E` flag tells `sudo` to
-preserve the environment, allowing our environmental variables to work within
-the script.
+is being piped in with the value of `packer`.
 
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX sematics. In order
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
 for packer to pass environment variables you will need to change the
 `execute_command` to:
 
-    chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+``` text
+chmod +x {{ .Path }}; env {{ .Vars }} {{ .Path }}
+```
 
 Note the addition of `env` before `{{ .Vars }}`.
 
@@ -147,6 +152,13 @@ commonly useful environmental variables:
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
 
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
+
 ## Handling Reboots
 
 Provisioning sometimes involves restarts, usually when updating the operating
@@ -159,12 +171,14 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put a long `sleep` after the reboot so that SSH will
-eventually be killed automatically:
+machine restarts. For this, put use "pause\_before" to make Packer wait before executing the next script:
 
-``` {.text}
-reboot
-sleep 60
+``` json
+{
+  "type": "shell",
+  "script": "script.sh",
+  "pause_before": "10s"
+}
 ```
 
 Some OS configurations don't properly kill all network connections on reboot,
@@ -172,7 +186,7 @@ causing the provisioner to hang despite a reboot occurring. In this case, make
 sure you shut down the network interfaces on reboot or in your shell script. For
 example, on Gentoo:
 
-``` {.text}
+``` text
 /etc/init.d/net.eth0 stop
 ```
 
@@ -192,7 +206,7 @@ provisioner](/docs/provisioners/file.html) (more secure) or using `ssh-keyscan`
 to populate the file (less secure). An example of the latter accessing github
 would be:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": [
@@ -209,9 +223,9 @@ would be:
 
 -   On Ubuntu, the `/bin/sh` shell is
     [dash](https://en.wikipedia.org/wiki/Debian_Almquist_shell). If your script
-    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific commands
-    in it, then put `#!/bin/bash` at the top of your script. Differences between
-    dash and bash can be found on the
+    has [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell))-specific
+    commands in it, then put `#!/bin/bash -e` at the top of your script.
+    Differences between dash and bash can be found on the
     [DashAsBinSh](https://wiki.ubuntu.com/DashAsBinSh) Ubuntu wiki page.
 
 *My shell works when I login but fails with the shell provisioner*
@@ -235,7 +249,7 @@ would be:
     create race conditions. Your first provisioner can tell the machine to wait
     until it completely boots.
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]

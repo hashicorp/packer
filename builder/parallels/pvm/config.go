@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
 type Config struct {
 	common.PackerConfig                 `mapstructure:",squash"`
-	parallelscommon.FloppyConfig        `mapstructure:",squash"`
+	common.FloppyConfig                 `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
@@ -27,7 +27,7 @@ type Config struct {
 	BootCommand []string `mapstructure:"boot_command"`
 	SourcePath  string   `mapstructure:"source_path"`
 	VMName      string   `mapstructure:"vm_name"`
-	ReassignMac bool     `mapstructure:"reassign_mac"`
+	ReassignMAC bool     `mapstructure:"reassign_mac"`
 
 	ctx interpolate.Context
 }

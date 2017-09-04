@@ -19,7 +19,7 @@ func TestFunctionsCalled(t *testing.T) {
 		{
 			"foo {{user `bar`}}",
 			map[string]struct{}{
-				"user": struct{}{},
+				"user": {},
 			},
 		},
 	}

@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
-	"github.com/mitchellh/packer/template"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -87,7 +87,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 // BuildNames returns the builds that are available in this configured core.
 func (c *Core) BuildNames() []string {
 	r := make([]string, 0, len(c.builds))
-	for n, _ := range c.builds {
+	for n := range c.builds {
 		r = append(r, n)
 	}
 	sort.Strings(r)
@@ -154,6 +154,7 @@ func (c *Core) Build(n string) (Build, error) {
 		}
 
 		provisioners = append(provisioners, coreBuildProvisioner{
+			pType:       rawP.Type,
 			provisioner: provisioner,
 			config:      config,
 		})

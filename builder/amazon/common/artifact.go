@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // Artifact is an artifact implementation that contains built AMIs.
@@ -51,7 +51,7 @@ func (a *Artifact) String() string {
 	}
 
 	sort.Strings(amiStrings)
-	return fmt.Sprintf("AMIs were created:\n\n%s", strings.Join(amiStrings, "\n"))
+	return fmt.Sprintf("AMIs were created:\n%s\n", strings.Join(amiStrings, "\n"))
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -73,9 +73,25 @@ func (a *Artifact) Destroy() error {
 			Credentials: a.Conn.Config.Credentials,
 			Region:      aws.String(region),
 		}
-		sess := session.New(regionConfig)
-		regionConn := ec2.New(sess)
+		session, err := session.NewSession(regionConfig)
+		if err != nil {
+			return err
+		}
+		regionConn := ec2.New(session)
 
+		// Get image metadata
+		imageResp, err := regionConn.DescribeImages(&ec2.DescribeImagesInput{
+			ImageIds: []*string{&imageId},
+		})
+		if err != nil {
+			errors = append(errors, err)
+		}
+		if len(imageResp.Images) == 0 {
+			err := fmt.Errorf("Error retrieving details for AMI (%s), no images found", imageId)
+			errors = append(errors, err)
+		}
+
+		// Deregister ami
 		input := &ec2.DeregisterImageInput{
 			ImageId: &imageId,
 		}

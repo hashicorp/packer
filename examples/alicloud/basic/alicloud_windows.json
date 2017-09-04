@@ -1,0 +1,25 @@
+{
+  "variables": {
+    "access_key": "{{env `ALICLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `ALICLOUD_SECRET_KEY`}}"
+  },
+  "builders": [{
+    "type":"alicloud-ecs",
+    "access_key":"{{user `access_key`}}",
+    "secret_key":"{{user `secret_key`}}",
+    "region":"cn-beijing",
+    "image_name":"packer_test",
+    "source_image":"win2008r2_64_ent_sp1_zh-cn_40G_alibase_20170622.vhd",
+    "instance_type":"ecs.n1.tiny",
+    "io_optimized":"true",
+    "image_force_delete":"true",
+    "communicator": "winrm",
+    "winrm_port": 5985,
+    "winrm_username": "Administrator",
+    "winrm_password": "Test1234"
+  }],
+  "provisioners": [{
+      "type": "powershell",
+      "inline": ["dir c:\\"]
+  }]
+}

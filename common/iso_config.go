@@ -8,9 +8,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // ISOConfig contains configuration for downloading ISO images.
@@ -20,21 +21,19 @@ type ISOConfig struct {
 	ISOChecksumType string   `mapstructure:"iso_checksum_type"`
 	ISOUrls         []string `mapstructure:"iso_urls"`
 	TargetPath      string   `mapstructure:"iso_target_path"`
+	TargetExtension string   `mapstructure:"iso_target_extension"`
 	RawSingleISOUrl string   `mapstructure:"iso_url"`
 }
 
-func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
-	// Validation
-	var errs []error
-	var err error
-	var warnings []string
-
+func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
 	if c.RawSingleISOUrl == "" && len(c.ISOUrls) == 0 {
 		errs = append(
 			errs, errors.New("One of iso_url or iso_urls must be specified."))
+		return
 	} else if c.RawSingleISOUrl != "" && len(c.ISOUrls) > 0 {
 		errs = append(
 			errs, errors.New("Only one of iso_url or iso_urls may be specified."))
+		return
 	} else if c.RawSingleISOUrl != "" {
 		c.ISOUrls = []string{c.RawSingleISOUrl}
 	}
@@ -80,7 +79,13 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 							return warnings, errs
 						}
 					case "file":
-						file, err := os.Open(u.Path)
+						path := u.Path
+
+						if runtime.GOOS == "windows" && len(path) > 2 && path[0] == '/' && path[2] == ':' {
+							path = strings.TrimLeft(path, "/")
+						}
+
+						file, err := os.Open(path)
 						if err != nil {
 							errs = append(errs, err)
 							return warnings, errs
@@ -106,12 +111,19 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 	c.ISOChecksum = strings.ToLower(c.ISOChecksum)
 
 	for i, url := range c.ISOUrls {
-		c.ISOUrls[i], err = DownloadableURL(url)
+		url, err := DownloadableURL(url)
 		if err != nil {
 			errs = append(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))
+		} else {
+			c.ISOUrls[i] = url
 		}
 	}
+
+	if c.TargetExtension == "" {
+		c.TargetExtension = "iso"
+	}
+	c.TargetExtension = strings.ToLower(c.TargetExtension)
 
 	// Warnings
 	if c.ISOChecksumType == "none" {
@@ -124,7 +136,13 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) ([]string, []error) {
 }
 
 func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
-	errNotFound := fmt.Errorf("No checksum for %q found at: %s", filepath.Base(c.ISOUrls[0]), c.ISOChecksumURL)
+	u, err := url.Parse(c.ISOUrls[0])
+	if err != nil {
+		return err
+	}
+	filename := filepath.Base(u.Path)
+
+	errNotFound := fmt.Errorf("No checksum for %q found at: %s", filename, c.ISOChecksumURL)
 	for {
 		line, err := rd.ReadString('\n')
 		if err != nil && line == "" {
@@ -136,7 +154,7 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		}
 		if strings.ToLower(parts[0]) == c.ISOChecksumType {
 			// BSD-style checksum
-			if parts[1] == fmt.Sprintf("(%s)", filepath.Base(c.ISOUrls[0])) {
+			if parts[1] == fmt.Sprintf("(%s)", filename) {
 				c.ISOChecksum = parts[3]
 				return nil
 			}
@@ -146,7 +164,7 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 				// Binary mode
 				parts[1] = parts[1][1:]
 			}
-			if parts[1] == filepath.Base(c.ISOUrls[0]) {
+			if parts[1] == filename {
 				c.ISOChecksum = parts[0]
 				return nil
 			}

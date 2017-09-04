@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -47,6 +48,17 @@ func TestConfigPrepare(t *testing.T) {
 		},
 
 		{
+			"source_image_family",
+			nil,
+			false,
+		},
+		{
+			"source_image_family",
+			"foo",
+			false,
+		},
+
+		{
 			"zone",
 			nil,
 			true,
@@ -94,6 +106,21 @@ func TestConfigPrepare(t *testing.T) {
 			true,
 		},
 		{
+			"on_host_maintenance",
+			nil,
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"TERMINATE",
+			false,
+		},
+		{
+			"on_host_maintenance",
+			"SO VERY BAD",
+			true,
+		},
+		{
 			"preemptible",
 			nil,
 			false,
@@ -128,6 +155,21 @@ func TestConfigPrepare(t *testing.T) {
 			"foo bar",
 			true,
 		},
+		{
+			"scopes",
+			[]string{},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control", "https://www.googleapis.com/auth/sqlservice.admin"},
+			false,
+		},
+		{
+			"scopes",
+			[]string{"https://www.googleapis.com/auth/cloud-platform"},
+			false,
+		},
 	}
 
 	for _, tc := range cases {
@@ -143,6 +185,65 @@ func TestConfigPrepare(t *testing.T) {
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, tc.Key)
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
+func TestConfigPrepareAccelerator(t *testing.T) {
+	cases := []struct {
+		Keys   []string
+		Values []interface{}
+		Err    bool
+	}{
+		{
+			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
+			[]interface{}{1, "MIGRATE", "something_valid"},
+			true,
+		},
+		{
+			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
+			[]interface{}{1, "TERMINATE", "something_valid"},
+			false,
+		},
+		{
+			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
+			[]interface{}{1, "TERMINATE", nil},
+			true,
+		},
+		{
+			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
+			[]interface{}{1, "TERMINATE", ""},
+			true,
+		},
+		{
+			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
+			[]interface{}{1, "TERMINATE", "something_valid"},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw := testConfig(t)
+
+		errStr := ""
+		for k := range tc.Keys {
+
+			// Create the string for error reporting
+			// convert value to string if it can be converted
+			errStr += fmt.Sprintf("%s:%v, ", tc.Keys[k], tc.Values[k])
+			if tc.Values[k] == nil {
+				delete(raw, tc.Keys[k])
+			} else {
+				raw[tc.Keys[k]] = tc.Values[k]
+			}
+		}
+
+		_, warns, errs := NewConfig(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
 		} else {
 			testConfigOk(t, warns, errs)
 		}
@@ -202,6 +303,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"account_file": testAccountFile(t),
 		"project_id":   "hashicorp",
 		"source_image": "foo",
+		"ssh_username": "root",
 		"image_family": "bar",
 		"zone":         "us-east1-a",
 	}

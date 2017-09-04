@@ -1,0 +1,31 @@
+{
+  "variables": {
+    "access_key": "{{env `ALICLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `ALICLOUD_SECRET_KEY`}}"
+  },
+  "builders": [{
+    "type":"alicloud-ecs",
+    "access_key":"{{user `access_key`}}",
+    "secret_key":"{{user `secret_key`}}",
+    "region":"cn-beijing",
+    "image_name":"packer_jenkins",
+    "source_image":"ubuntu_14_0405_64_40G_alibase_20170625.vhd",
+    "ssh_username":"root",
+    "instance_type":"ecs.n1.medium",
+    "io_optimized":"true",
+    "image_force_delete":"true",
+    "ssh_password":"Test12345"
+  }],
+  "provisioners": [{
+    "type": "file",
+    "source": "examples/alicloud/jenkins/jenkins.sh",
+    "destination": "/root/"	
+   },{
+    "type": "shell",
+    "inline": [
+	"cd /root/",
+    "chmod 755 jenkins.sh",
+	"./jenkins.sh"
+    ]
+  }]
+}

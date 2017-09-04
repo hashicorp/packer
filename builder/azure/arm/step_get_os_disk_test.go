@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 
 	"github.com/mitchellh/multistep"
 )
@@ -110,7 +110,7 @@ func createTestStateBagStepGetOSDisk() multistep.StateBag {
 
 func createVirtualMachineFromUri(vhdUri string) compute.VirtualMachine {
 	vm := compute.VirtualMachine{
-		Properties: &compute.VirtualMachineProperties{
+		VirtualMachineProperties: &compute.VirtualMachineProperties{
 			StorageProfile: &compute.StorageProfile{
 				OsDisk: &compute.OSDisk{
 					Vhd: &compute.VirtualHardDisk{

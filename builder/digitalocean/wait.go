@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ func waitForDropletUnlocked(
 			attempts += 1
 
 			log.Printf("[DEBUG] Checking droplet lock state... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -57,7 +58,7 @@ func waitForDropletUnlocked(
 	}
 }
 
-// waitForState simply blocks until the droplet is in
+// waitForDropletState simply blocks until the droplet is in
 // a state we expect, while eventually timing out.
 func waitForDropletState(
 	desiredState string, dropletId int,
@@ -72,7 +73,7 @@ func waitForDropletState(
 			attempts += 1
 
 			log.Printf("Checking droplet status... (attempt: %d)", attempts)
-			droplet, _, err := client.Droplets.Get(dropletId)
+			droplet, _, err := client.Droplets.Get(context.TODO(), dropletId)
 			if err != nil {
 				result <- err
 				return
@@ -103,6 +104,106 @@ func waitForDropletState(
 		return err
 	case <-time.After(timeout):
 		err := fmt.Errorf("Timeout while waiting to for droplet to become '%s'", desiredState)
+		return err
+	}
+}
+
+// waitForActionState simply blocks until the droplet action is in
+// a state we expect, while eventually timing out.
+func waitForActionState(
+	desiredState string, dropletId, actionId int,
+	client *godo.Client, timeout time.Duration) error {
+	done := make(chan struct{})
+	defer close(done)
+
+	result := make(chan error, 1)
+	go func() {
+		attempts := 0
+		for {
+			attempts += 1
+
+			log.Printf("Checking action status... (attempt: %d)", attempts)
+			action, _, err := client.DropletActions.Get(context.TODO(), dropletId, actionId)
+			if err != nil {
+				result <- err
+				return
+			}
+
+			if action.Status == desiredState {
+				result <- nil
+				return
+			}
+
+			// Wait 3 seconds in between
+			time.Sleep(3 * time.Second)
+
+			// Verify we shouldn't exit
+			select {
+			case <-done:
+				// We finished, so just exit the goroutine
+				return
+			default:
+				// Keep going
+			}
+		}
+	}()
+
+	log.Printf("Waiting for up to %d seconds for action to become %s", timeout/time.Second, desiredState)
+	select {
+	case err := <-result:
+		return err
+	case <-time.After(timeout):
+		err := fmt.Errorf("Timeout while waiting to for action to become '%s'", desiredState)
+		return err
+	}
+}
+
+// waitForImageState simply blocks until the image action is in
+// a state we expect, while eventually timing out.
+func waitForImageState(
+	desiredState string, imageId, actionId int,
+	client *godo.Client, timeout time.Duration) error {
+	done := make(chan struct{})
+	defer close(done)
+
+	result := make(chan error, 1)
+	go func() {
+		attempts := 0
+		for {
+			attempts += 1
+
+			log.Printf("Checking action status... (attempt: %d)", attempts)
+			action, _, err := client.ImageActions.Get(context.TODO(), imageId, actionId)
+			if err != nil {
+				result <- err
+				return
+			}
+
+			if action.Status == desiredState {
+				result <- nil
+				return
+			}
+
+			// Wait 3 seconds in between
+			time.Sleep(3 * time.Second)
+
+			// Verify we shouldn't exit
+			select {
+			case <-done:
+				// We finished, so just exit the goroutine
+				return
+			default:
+				// Keep going
+			}
+		}
+	}()
+
+	log.Printf("Waiting for up to %d seconds for image transter to become %s", timeout/time.Second, desiredState)
+	select {
+	case err := <-result:
+		return err
+	case <-time.After(timeout):
+		err := fmt.Errorf("Timeout while waiting to for image transter to become '%s'", desiredState)
 		return err
 	}
 }

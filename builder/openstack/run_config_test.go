@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func init() {
@@ -68,13 +68,5 @@ func TestRunConfigPrepare_SSHPort(t *testing.T) {
 
 	if c.Comm.SSHPort != 44 {
 		t.Fatalf("invalid value: %d", c.Comm.SSHPort)
-	}
-}
-
-func TestRunConfigPrepare_SSHUsername(t *testing.T) {
-	c := testRunConfig()
-	c.Comm.SSHUsername = ""
-	if err := c.Prepare(nil); len(err) != 0 {
-		t.Fatalf("err: %s", err)
 	}
 }

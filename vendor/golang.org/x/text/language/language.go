@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate go run maketables.go gen_common.go -output tables.go
+//go:generate go run gen.go gen_common.go -output tables.go
 //go:generate go run gen_index.go
 
 // Package language implements BCP 47 language tags and related functionality.
@@ -100,7 +100,7 @@
 //
 // BCP 47 - Tags for Identifying Languages
 // http://tools.ietf.org/html/bcp47
-package language
+package language // import "golang.org/x/text/language"
 
 // TODO: Remove above NOTE after:
 // - verifying that tables are dropped correctly (most notably matcher tables).
@@ -129,8 +129,15 @@ const (
 // specific language or locale. All language tag values are guaranteed to be
 // well-formed.
 type Tag struct {
-	lang     langID
-	region   regionID
+	lang   langID
+	region regionID
+	// TODO: we will soon run out of positions for script. Idea: instead of
+	// storing lang, region, and script codes, store only the compact index and
+	// have a lookup table from this code to its expansion. This greatly speeds
+	// up table lookup, speed up common variant cases.
+	// This will also immediately free up 3 extra bytes. Also, the pVariant
+	// field can now be moved to the lookup table, as the compact index uniquely
+	// determines the offset of a possible variant.
 	script   scriptID
 	pVariant byte   // offset in str, includes preceding '-'
 	pExt     uint16 // offset of first extension, includes preceding '-'
@@ -347,11 +354,11 @@ func (t *Tag) remakeString() {
 	var buf [max99thPercentileSize]byte // avoid extra memory allocation in most cases.
 	b := buf[:t.genCoreBytes(buf[:])]
 	if extra != "" {
-		diff := uint8(len(b)) - t.pVariant
+		diff := len(b) - int(t.pVariant)
 		b = append(b, '-')
 		b = append(b, extra...)
-		t.pVariant += diff
-		t.pExt += uint16(diff)
+		t.pVariant = uint8(int(t.pVariant) + diff)
+		t.pExt = uint16(int(t.pExt) + diff)
 	} else {
 		t.pVariant = uint8(len(b))
 		t.pExt = uint16(len(b))
@@ -593,7 +600,7 @@ func (t Tag) Extension(x byte) (ext Extension, ok bool) {
 			return Extension{ext}, true
 		}
 	}
-	return Extension{string(x)}, false
+	return Extension{}, false
 }
 
 // Extensions returns all extensions of t.

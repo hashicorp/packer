@@ -6,9 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -22,40 +22,52 @@ type StepCreateVolume struct {
 }
 
 func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
+	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	image := state.Get("source_image").(*ec2.Image)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
-	// Determine the root device snapshot
-	log.Printf("Searching for root device of the image (%s)", *image.RootDeviceName)
-	var rootDevice *ec2.BlockDeviceMapping
-	for _, device := range image.BlockDeviceMappings {
-		if *device.DeviceName == *image.RootDeviceName {
-			rootDevice = device
-			break
+	var createVolume *ec2.CreateVolumeInput
+	if config.FromScratch {
+		createVolume = &ec2.CreateVolumeInput{
+			AvailabilityZone: instance.Placement.AvailabilityZone,
+			Size:             aws.Int64(s.RootVolumeSize),
+			VolumeType:       aws.String(ec2.VolumeTypeGp2),
+		}
+	} else {
+		// Determine the root device snapshot
+		image := state.Get("source_image").(*ec2.Image)
+		log.Printf("Searching for root device of the image (%s)", *image.RootDeviceName)
+		var rootDevice *ec2.BlockDeviceMapping
+		for _, device := range image.BlockDeviceMappings {
+			if *device.DeviceName == *image.RootDeviceName {
+				rootDevice = device
+				break
+			}
+		}
+
+		if rootDevice == nil {
+			err := fmt.Errorf("Couldn't find root device!")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		ui.Say("Creating the root volume...")
+		vs := *rootDevice.Ebs.VolumeSize
+		if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
+			vs = s.RootVolumeSize
+		}
+
+		createVolume = &ec2.CreateVolumeInput{
+			AvailabilityZone: instance.Placement.AvailabilityZone,
+			Size:             aws.Int64(vs),
+			SnapshotId:       rootDevice.Ebs.SnapshotId,
+			VolumeType:       rootDevice.Ebs.VolumeType,
+			Iops:             rootDevice.Ebs.Iops,
 		}
 	}
 
-	if rootDevice == nil {
-		err := fmt.Errorf("Couldn't find root device!")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	ui.Say("Creating the root volume...")
-	vs := *rootDevice.Ebs.VolumeSize
-	if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
-		vs = s.RootVolumeSize
-	}
-	createVolume := &ec2.CreateVolumeInput{
-		AvailabilityZone: instance.Placement.AvailabilityZone,
-		Size:             aws.Int64(vs),
-		SnapshotId:       rootDevice.Ebs.SnapshotId,
-		VolumeType:       rootDevice.Ebs.VolumeType,
-		Iops:             rootDevice.Ebs.Iops,
-	}
 	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)

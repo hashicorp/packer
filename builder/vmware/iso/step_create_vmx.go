@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type vmxTemplateData struct {
@@ -70,7 +70,7 @@ func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
 	ctx := config.ctx
 
 	if len(config.AdditionalDiskSize) > 0 {
-		for i, _ := range config.AdditionalDiskSize {
+		for i := range config.AdditionalDiskSize {
 			ctx.Data = &additionalDiskTemplateData{
 				DiskNumber: i + 1,
 				DiskName:   config.DiskName,

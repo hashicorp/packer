@@ -1,11 +1,12 @@
 ---
 description: |
-    The Atlas post-processor for Packer receives an artifact from a Packer build and
-    uploads it to Atlas. Atlas hosts and serves artifacts, allowing you to version
-    and distribute them in a simple way.
+    The Atlas post-processor for Packer receives an artifact from a Packer build
+    and uploads it to Atlas. Atlas hosts and serves artifacts, allowing you to
+    version and distribute them in a simple way.
 layout: docs
-page_title: 'Atlas Post-Processor'
-...
+page_title: 'Atlas - Post-Processor'
+sidebar_current: 'docs-post-processors-atlas'
+---
 
 # Atlas Post-Processor
 
@@ -13,13 +14,15 @@ Type: `atlas`
 
 The Atlas post-processor uploads artifacts from your packer builds to Atlas for
 hosting. Artifacts hosted in Atlas are automatically made available for use
-with Vagrant and Terraform, and Atlas provides additional features for managing
+with Terraform, and Atlas provides additional features for managing
 versions and releases. [Learn more about packer in
 Atlas.](https://atlas.hashicorp.com/help/packer/features)
 
 You can also use the push command to [run packer builds in
-Atlas](/docs/command-line/push.html). The push command and Atlas post-processor
+Atlas](/docs/commands/push.html). The push command and Atlas post-processor
 can be used together or independently.
+
+~&gt; If you'd like to publish a Vagrant box to [Vagrant Cloud](https://vagrantcloud.com), you must use the [`vagrant-cloud`](/docs/post-processors/vagrant-cloud.html) post-processor.
 
 ## Workflow
 
@@ -46,13 +49,6 @@ The configuration allows you to specify and access the artifact in Atlas.
 
 ### Required:
 
--   `token` (string) - Your access token for the Atlas API.
-
--&gt; Login to Atlas to [generate an Atlas
-Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
-configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
-you can also use `token` configuration option.
-
 -   `artifact` (string) - The shorthand tag for your artifact that maps to
     Atlas, i.e `hashicorp/foobar` for `atlas.hashicorp.com/hashicorp/foobar`.
     You must have access to the organization—hashicorp in this example—in order
@@ -60,20 +56,26 @@ you can also use `token` configuration option.
 
 -   `artifact_type` (string) - For uploading artifacts to Atlas.
     `artifact_type` can be set to any unique identifier, however, the following
-    are recommended for consistency - `amazon.image`, `digitalocean.image`,
-    `docker.image`, `googlecompute.image`, `openstack.image`,
-    `parallels.image`, `qemu.image`, `virtualbox.image`, `vmware.image`,
-    `custom.image`, and `vagrant.box`.
+    are recommended for consistency - `amazon.image`, `azure.image`,
+    `cloudstack.image`, `digitalocean.image`, `docker.image`,
+    `googlecompute.image`, `hyperv.image`, `oneandone.image`,
+    `openstack.image`, `parallels.image`, `profitbricks.image`, `qemu.image`,
+    `triton.image`, `virtualbox.image`, `vmware.image`, and `custom.image`.
 
 ### Optional:
+
+-   `token` (string) - Your access token for the Atlas API.
+
+-&gt; Login to Atlas to [generate an Atlas
+Token](https://atlas.hashicorp.com/settings/tokens). The most convenient way to
+configure your token is to set it to the `ATLAS_TOKEN` environment variable, but
+you can also use `token` configuration option.
 
 -   `atlas_url` (string) - Override the base URL for Atlas. This is useful if
     you're using Atlas Enterprise in your own network. Defaults to
     `https://atlas.hashicorp.com/api/v1`.
 
--   `metadata` (map) - Send metadata about the artifact. If the artifact type
-    is `vagrant.box`, you must specify a `provider` metadata about what
-    provider to use.
+-   `metadata` (map) - Send metadata about the artifact.
 
     -   `description` (string) - Inside the metadata blob you can add a information
         about the uploaded artifact to Atlas. This will be reflected in the box
@@ -93,43 +95,46 @@ you can also use `token` configuration option.
 
 ### Example Configuration
 
-``` {.javascript}
+``` json
 {
-    "variables": {
-        "aws_access_key": "ACCESS_KEY_HERE",
-        "aws_secret_key": "SECRET_KEY_HERE",
-        "atlas_token": "ATLAS_TOKEN_HERE"
-    },
-    "builders": [{
-        "type": "amazon-ebs",
-        "access_key": "{{user `aws_access_key`}}",
-        "secret_key": "{{user `aws_secret_key`}}",
-        "region": "us-east-1",
-        "source_ami": "ami-fce3c696",
-        "instance_type": "t2.micro",
-        "ssh_username": "ubuntu",
-        "ami_name": "atlas-example {{timestamp}}"
-    }],
-    "provisioners": [
+  "variables": {
+    "aws_access_key": "ACCESS_KEY_HERE",
+    "aws_secret_key": "SECRET_KEY_HERE",
+    "atlas_token": "ATLAS_TOKEN_HERE"
+  },
+  "builders": [
     {
-        "type": "shell",
-        "inline": [
-            "sleep 30",
-            "sudo apt-get update",
-            "sudo apt-get install apache2 -y"
-        ]
-    }],
-    "post-processors": [
-      {
-        "type": "atlas",
-        "token": "{{user `atlas_token`}}",
-        "artifact": "hashicorp/foobar",
-        "artifact_type": "amazon.image",
-        "metadata": {
-          "created_at": "{{timestamp}}"
-        }
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-fce3c696",
+      "instance_type": "t2.micro",
+      "ssh_username": "ubuntu",
+      "ami_name": "atlas-example {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30",
+        "sudo apt-get update",
+        "sudo apt-get install apache2 -y"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "atlas",
+      "token": "{{user `atlas_token`}}",
+      "artifact": "hashicorp/foobar",
+      "artifact_type": "amazon.image",
+      "metadata": {
+        "created_at": "{{timestamp}}"
       }
-    ]
+    }
+  ]
 }
 ```
 

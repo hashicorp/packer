@@ -1,13 +1,11 @@
 {
     "variables": {
-        "bucket_name": null,
         "account_file": null,
         "project_id": null
     },
 
     "builders": [{
         "type": "googlecompute",
-        "bucket_name": "{{user `bucket_name`}}",
         "account_file": "{{user `account_file`}}",
         "project_id": "{{user `project_id`}}",
 

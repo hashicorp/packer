@@ -4,8 +4,9 @@ description: |
     scripts. Shell provisioning is the easiest way to get software installed and
     configured on a machine.
 layout: docs
-page_title: PowerShell Provisioner
-...
+page_title: 'PowerShell - Provisioners'
+sidebar_current: 'docs-provisioners-powershell'
+---
 
 # PowerShell Provisioner
 
@@ -18,7 +19,7 @@ It assumes that the communicator in use is WinRM.
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "powershell",
   "inline": ["dir c:\\"]
@@ -62,7 +63,7 @@ Optional parameters:
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `powershell "& { {{.Vars}}{{.Path}}; exit $LastExitCode}"`.
     The value of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
@@ -82,3 +83,24 @@ Optional parameters:
 
 -   `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
     default this is just 0.
+
+## Default Environmental Variables
+
+In addition to being able to specify custom environmental variables using the
+`environment_vars` configuration, the provisioner automatically defines certain
+commonly useful environmental variables:
+
+-   `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+    This is most useful when Packer is making multiple builds and you want to
+    distinguish them slightly from a common provisioning script.
+
+-   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
+    machine that the script is running on. This is useful if you want to run
+    only certain parts of the script on systems built with certain builders.
+
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.

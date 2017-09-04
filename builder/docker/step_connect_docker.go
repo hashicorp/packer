@@ -24,7 +24,7 @@ func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
 	comm := &Communicator{
 		ContainerId:  containerId,
 		HostDir:      tempDir,
-		ContainerDir: "/packer-files",
+		ContainerDir: config.ContainerDir,
 		Version:      version,
 		Config:       config,
 	}

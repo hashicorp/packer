@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const DefaultRemotePath = "c:/Windows/Temp/script.bat"
@@ -150,11 +150,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if errs != nil {
-		return errs
-	}
-
-	return nil
+	return errs
 }
 
 // This function takes the inline scripts, concatenates them
@@ -188,13 +184,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
-	// Build our variables up by adding in the build name and builder type
-	envVars := make([]string, len(p.config.Vars)+2)
-	envVars[0] = "PACKER_BUILD_NAME=" + p.config.PackerBuildName
-	envVars[1] = "PACKER_BUILDER_TYPE=" + p.config.PackerBuilderType
-
-	copy(envVars, p.config.Vars)
-
 	if p.config.Inline != nil {
 		temp, err := extractScript(p)
 		if err != nil {
@@ -214,10 +203,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		defer f.Close()
 
 		// Create environment variables to set before executing the command
-		flattendVars, err := p.createFlattenedEnvVars()
-		if err != nil {
-			return err
-		}
+		flattendVars := p.createFlattenedEnvVars()
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
@@ -280,7 +266,7 @@ func (p *Provisioner) retryable(f func() error) error {
 
 		// Create an error and log it
 		err = fmt.Errorf("Retryable error: %s", err)
-		log.Printf(err.Error())
+		log.Print(err.Error())
 
 		// Check if we timed out, otherwise we retry. It is safe to
 		// retry since the only error case above is if the command
@@ -294,21 +280,21 @@ func (p *Provisioner) retryable(f func() error) error {
 	}
 }
 
-func (p *Provisioner) createFlattenedEnvVars() (flattened string, err error) {
+func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
 	flattened = ""
 	envVars := make(map[string]string)
 
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
 
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
-		keyValue := strings.Split(envVar, "=")
-		if len(keyValue) != 2 {
-			err = errors.New("Shell provisioner environment variables must be in key=value format")
-			return
-		}
+		keyValue := strings.SplitN(envVar, "=", 2)
 		envVars[keyValue[0]] = keyValue[1]
 	}
 	// Create a list of env var keys in sorted order

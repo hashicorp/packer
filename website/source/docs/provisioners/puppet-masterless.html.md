@@ -1,14 +1,14 @@
 ---
 description: |
     The masterless Puppet Packer provisioner configures Puppet to run on the
-    machines by Packer from local modules and manifest files. Modules and manifests
-    can be uploaded from your local machine to the remote machine or can simply use
-    remote paths (perhaps obtained using something like the shell provisioner).
-    Puppet is run in masterless mode, meaning it never communicates to a Puppet
-    master.
+    machines by Packer from local modules and manifest files. Modules and
+    manifests can be uploaded from your local machine to the remote machine or can
+    simply use remote paths. Puppet is run in masterless mode, meaning it never
+    communicates to a Puppet master.
 layout: docs
-page_title: 'Puppet (Masterless) Provisioner'
-...
+page_title: 'Puppet Masterless - Provisioners'
+sidebar_current: 'docs-provisioners-puppet-masterless'
+---
 
 # Puppet (Masterless) Provisioner
 
@@ -30,9 +30,9 @@ this.
 ## Basic Example
 
 The example below is fully functional and expects the configured manifest file
-to exist relative to your working directory:
+to exist relative to your working directory.
 
-``` {.javascript}
+``` json
 {
   "type": "puppet-masterless",
   "manifest_file": "site.pp"
@@ -56,8 +56,12 @@ Optional parameters:
 
 -   `execute_command` (string) - The command used to execute Puppet. This has
     various [configuration template
-    variables](/docs/templates/configuration-templates.html) available. See
+    variables](/docs/templates/engine.html) available. See
     below for more information.
+
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
 
 -   `extra_arguments` (array of strings) - This is an array of additional options to
     pass to the puppet command when executing puppet. This allows for
@@ -82,9 +86,14 @@ Optional parameters:
     `manifest_file`. It is a separate directory that will be set as the
     "manifestdir" setting on Puppet.
 
-\~&gt; `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
+~&gt; `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
+
+-   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
+    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
+    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
+    not run profile-setup scripts, therefore the path is usually empty.
 
 -   `module_paths` (array of strings) - This is an array of paths to module
     directories on your local filesystem. These will be uploaded to the
@@ -94,12 +103,13 @@ multiple manifests you should use `manifest_file` instead.
     executed to run Puppet are executed with `sudo`. If this is true, then the
     sudo will be omitted.
 
--   `staging_directory` (string) - This is the directory where all the
-    configuration of Puppet by Packer will be placed. By default this
-    is "/tmp/packer-puppet-masterless". This directory doesn't need to exist but
-    must have proper permissions so that the SSH user that Packer uses is able
-    to create directories and write into this folder. If the permissions are not
-    correct, use a shell provisioner prior to this to configure it properly.
+-   `staging_directory` (string) - This is the directory where all the configuration
+    of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-masterless"
+    when guest OS type is unix and "C:/Windows/Temp/packer-puppet-masterless" when windows.
+    This directory doesn't need to exist but must have proper permissions so that the SSH
+    user that Packer uses is able to create directories and write into this folder.
+    If the permissions are not correct, use a shell provisioner prior to this to configure
+    it properly.
 
 -   `working_directory` (string) - This is the directory from which the puppet
     command will be run. When using hiera with a relative path, this option
@@ -112,15 +122,28 @@ multiple manifests you should use `manifest_file` instead.
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Puppet:
 
-``` {.liquid}
-cd {{.WorkingDir}} && \
-{{.FacterVars}}{{if .Sudo}} sudo -E {{end}}puppet apply \
-  --verbose \
-  --modulepath='{{.ModulePath}}' \
-  {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
-  {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
-  --detailed-exitcodes \
-  {{.ManifestFile}}
+```
+cd {{.WorkingDir}} &&
+{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}
+puppet apply --verbose --modulepath='{{.ModulePath}}'
+{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+--detailed-exitcodes
+{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+{{.ManifestFile}}
+```
+
+The following command is used if guest OS type is windows:
+
+```
+cd {{.WorkingDir}} &&
+{{.FacterVars}} &&
+puppet apply --verbose --modulepath='{{.ModulePath}}'
+{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+--detailed-exitcodes
+{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+{{.ManifestFile}}
 ```
 
 This command can be customized using the `execute_command` configuration. As you

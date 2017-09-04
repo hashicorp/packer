@@ -5,9 +5,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // stepCleanupVolumes cleans up any orphaned volumes that were not designated to
@@ -30,12 +30,6 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		instance = instanceRaw.(*ec2.Instance)
 	}
 	ui := state.Get("ui").(packer.Ui)
-	amisRaw := state.Get("amis")
-	if amisRaw == nil {
-		ui.Say("No AMIs to cleanup")
-		return
-	}
-
 	if instance == nil {
 		ui.Say("No volumes to clean up, skipping")
 		return
@@ -43,22 +37,8 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Cleaning up any extra volumes...")
 
-	// We don't actually care about the value here, but we need Set behavior
-	save := make(map[string]struct{})
-	for _, b := range s.BlockDevices.AMIMappings {
-		if !b.DeleteOnTermination {
-			save[b.DeviceName] = struct{}{}
-		}
-	}
-
-	for _, b := range s.BlockDevices.LaunchMappings {
-		if !b.DeleteOnTermination {
-			save[b.DeviceName] = struct{}{}
-		}
-	}
-
 	// Collect Volume information from the cached Instance as a map of volume-id
-	// to device name, to compare with save list above
+	// to device name, to compare with save list below
 	var vl []*string
 	volList := make(map[string]string)
 	for _, bdm := range instance.BlockDeviceMappings {
@@ -72,7 +52,7 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	// date information on them
 	resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name:   aws.String("volume-id"),
 				Values: vl,
 			},
@@ -97,21 +77,22 @@ func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	// Filter out any devices marked for saving
-	for saveName, _ := range save {
+	// Filter out any devices created as part of the launch mappings, since
+	// we'll let amazon follow the `delete_on_termination` setting.
+	for _, b := range s.BlockDevices.LaunchMappings {
 		for volKey, volName := range volList {
-			if volName == saveName {
+			if volName == b.DeviceName {
 				delete(volList, volKey)
 			}
 		}
 	}
 
 	// Destroy remaining volumes
-	for k, _ := range volList {
+	for k := range volList {
 		ui.Say(fmt.Sprintf("Destroying volume (%s)...", k))
 		_, err := ec2conn.DeleteVolume(&ec2.DeleteVolumeInput{VolumeId: aws.String(k)})
 		if err != nil {
-			ui.Say(fmt.Sprintf("Error deleting volume: %s", k))
+			ui.Say(fmt.Sprintf("Error deleting volume: %s", err))
 		}
 
 	}

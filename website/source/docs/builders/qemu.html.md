@@ -3,8 +3,9 @@ description: |
     The Qemu Packer builder is able to create KVM and Xen virtual machine images.
     Support for Xen is experimental at this time.
 layout: docs
-page_title: QEMU Builder
-...
+page_title: 'QEMU - Builders'
+sidebar_current: 'docs-builders-qemu'
+---
 
 # QEMU Builder
 
@@ -25,14 +26,14 @@ necessary to run the virtual machine on KVM or Xen.
 Here is a basic example. This example is functional so long as you fixup paths
 to files, URLS for ISOs and checksums.
 
-``` {.javascript}
+``` json
 {
   "builders":
   [
     {
       "type": "qemu",
-      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.5-x86_64-minimal.iso",
-      "iso_checksum": "0d9dc37b5dd4befa1c440d2174e88a87",
+      "iso_url": "http://mirror.raystedman.net/centos/6/isos/x86_64/CentOS-6.8-x86_64-minimal.iso",
+      "iso_checksum": "0ca12fe5f28c2ceed4f4084b41ff8a0b",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
       "shutdown_command": "shutdown -P now",
@@ -53,8 +54,7 @@ to files, URLS for ISOs and checksums.
       "net_device": "virtio-net",
       "disk_interface": "virtio",
       "boot_wait": "5s",
-      "boot_command":
-      [
+      "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
       ]
     }
@@ -105,9 +105,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `iso_url` (string) - A URL to the ISO containing the installation image.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
-
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
+    This can also be a URL to an IMG or QCOW2 file, in which case QEMU will
+    boot directly from it. When passing a path to an IMG or QCOW2 file, you
+    should set `disk_image` to "true".
 
 ### Optional:
 
@@ -146,10 +146,17 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide", "scsi", "virtio" or "virtio-scsi". Note also
+    values include any of "ide", "scsi", "virtio" or "virtio-scsi"^\* . Note also
     that any boot commands or kickstart type scripts must have proper
     adjustments for resulting device names. The Qemu builder uses "virtio" by
     default.
+
+    ^\* Please be aware that use of the "scsi" disk interface has been disabled
+    by Red Hat due to a bug described
+    [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220).
+    If you are running Qemu on RHEL or a RHEL variant such as CentOS, you
+    *must* choose one of the other listed interfaces. Using the "scsi"
+    interface under these circumstances will cause the build to fail.
 
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
@@ -162,7 +169,17 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     is attached as the first floppy device. Currently, no support exists for
     creating sub-directories on the floppy. Wildcard characters (\*, ?,
     and \[\]) are allowed. Directory names are also allowed, which will add all
-    the files found in the directory to the floppy.
+    the files found in the directory to the floppy. The summary size of the
+    listed files must not exceed 1.44 MB. The supported ways to move large
+    files into the OS are using `http_directory` or [the file provisioner](https://www.packer.io/docs/provisioners/file.html).
+
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
 -   `format` (string) - Either "qcow2" or "raw", this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
@@ -191,6 +208,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
 
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
+
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
     original filename as its name.
@@ -209,7 +229,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     values "ne2k\_pci", "i82551", "i82557b", "i82559er", "rtl8139", "e1000",
     "pcnet", "virtio", "virtio-net", "virtio-net-pci", "usb-net", "i82559a",
     "i82559b", "i82559c", "i82550", "i82562", "i82557a", "i82557c", "i82801",
-    "vmxnet3", "i82558a" or "i82558b".  The Qemu builder uses "virtio-net" by
+    "vmxnet3", "i82558a" or "i82558b". The Qemu builder uses "virtio-net" by
     default.
 
 -   `output_directory` (string) - This is the path to the directory where the
@@ -230,7 +250,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     switch/value pairs. Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
-\~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
+~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
 of conflicting arguments causing failures of your run. For instance, using
 --no-acpi could break the ability to send power signal type commands (e.g.,
 shutdown -P now) to the virtual machine, thus preventing proper shutdown. To see
@@ -239,8 +259,8 @@ command. The arguments are all printed for review.
 
 The following shows a sample usage:
 
-``` {.javascript}
-  // ...
+``` json
+{
   "qemuargs": [
     [ "-m", "1024M" ],
     [ "--no-acpi", "" ],
@@ -252,41 +272,45 @@ The following shows a sample usage:
     ],
     [ "-device", "virtio-net,netdev=mynet0" ]
   ]
-  // ...
+}
 ```
 
 would produce the following (not including other defaults supplied by the
 builder and not otherwise conflicting with the qemuargs):
 
-<pre class="prettyprint">
-  qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
-</pre>
+``` text
+qemu-system-x86 -m 1024m --no-acpi -netdev user,id=mynet0,hostfwd=hostip:hostport-guestip:guestport -device virtio-net,netdev=mynet0"
+```
 
-\~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
+~&gt; **Windows Users:** [QEMU for Windows](https://qemu.weilnetz.de/) builds are available though an environmental variable does need
 to be set for QEMU for Windows to redirect stdout to the console instead of stdout.txt.
 
 The following shows the environment variable that needs to be set for Windows QEMU support:
 
-```json
-  setx SDL_STDIO_REDIRECT=0
+``` text
+setx SDL_STDIO_REDIRECT=0
 ```
 
 You can also use the `SSHHostPort` template variable to produce a packer
 template that can be invoked by `make` in parallel:
 
-``` {.javascript}
-  // ...
+``` json
+{
   "qemuargs": [
-          [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
-          [ "-device", "virtio-net,netdev=forward,id=net0"],
-          ...
-        ]
-  // ...
+    [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
+    [ "-device", "virtio-net,netdev=forward,id=net0"]
+  ]
+}
 ```
+
 `make -j 3 my-awesome-packer-templates` spawns 3 packer processes, each of which
 will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
 default port of `5985` or whatever value you have the service set to listen on.
+
+-   `use_default_display` (boolean) - If true, do not pass a `-display` option
+    to qemu, allowing it to choose the default. This may be needed when running
+    under OS X.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -337,9 +361,15 @@ all typed in sequence. It is an array only to improve readability within the
 template.
 
 The boot command is "typed" character for character over a VNC connection to the
-machine, simulating a human actually typing the keyboard. There are a set of
-special keys available. If these are in your boot command, they will be replaced
-by the proper key:
+machine, simulating a human actually typing the keyboard.
+
+-&gt; Keystrokes are typed as separate key up/down events over VNC with a
+default 100ms delay. The delay alleviates issues with latency and CPU
+contention. For local builds you can tune this delay by specifying
+e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+
+There are a set of special keys available. If these are in your boot
+command, they will be replaced by the proper key:
 
 -   `<bs>` - Backspace
 
@@ -363,15 +393,38 @@ by the proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
+
+-   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
+
+-   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
+
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
+
+-   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
+
+-   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
+
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
+
+-   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
+
+-   `<leftShiftOff>` `<rightShiftOff>` - Simulates releasing a held shift key.
+
 -   `<wait>` `<wait5>` `<wait10>` - Adds a 1, 5 or 10 second pause before
     sending any additional keys. This is useful if you have to generally wait
     for the UI to update before typing more.
 
--   `<waitXX> ` - Add user defined time.Duration pause before sending any
+-   `<waitXX>` - Add user defined time.Duration pause before sending any
     additional keys. For example `<wait10m>` or `<wait1m20s>`
 
+When using modifier keys `ctrl`, `alt`, `shift` ensure that you release them,
+otherwise they will be held down until the machine reboots. Use lowercase
+characters as well inside modifiers. For example: to simulate ctrl+c use
+`<leftCtrlOn>c<leftCtrlOff>`.
+
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -382,10 +435,19 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 CentOS 6.4 installer:
 
-``` {.javascript}
-"boot_command":
-[
-  "<tab><wait>",
-  " ks=http://10.0.2.2:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
-]
+``` json
+{
+"boot_command": [
+    "<tab><wait>",
+    " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter>"
+  ]
+}
 ```
+
+### Troubleshooting
+
+Some users have experienced errors complaining about invalid keymaps. This
+seems to be related to having a `common` directory or file in the directory
+they've run Packer in, like the packer source directory. This appears to be an
+upstream bug with qemu, and the best solution for now is to remove the
+file/directory or run in another directory.

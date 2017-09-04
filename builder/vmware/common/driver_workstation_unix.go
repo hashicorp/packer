@@ -15,7 +15,7 @@ import (
 )
 
 func workstationCheckLicense() error {
-	matches, err := filepath.Glob("/etc/vmware/license-*")
+	matches, err := filepath.Glob("/etc/vmware/license-ws-*")
 	if err != nil {
 		return fmt.Errorf("Error looking for VMware license: %s", err)
 	}

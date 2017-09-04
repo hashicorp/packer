@@ -9,10 +9,11 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/subscriptions"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
+	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/go-homedir"
-	"github.com/mitchellh/packer/version"
 )
 
 var (
@@ -39,13 +40,13 @@ var (
 
 // Authenticate fetches a token from the local file cache or initiates a consent
 // flow and waits for token to be obtained.
-func Authenticate(env azure.Environment, tenantID string, say func(string)) (*azure.ServicePrincipalToken, error) {
+func Authenticate(env azure.Environment, tenantID string, say func(string)) (*adal.ServicePrincipalToken, error) {
 	clientID, ok := clientIDs[env.Name]
 	if !ok {
 		return nil, fmt.Errorf("packer-azure application not set up for Azure environment %q", env.Name)
 	}
 
-	oauthCfg, err := env.OAuthConfigForTenant(tenantID)
+	oauthCfg, err := adal.NewOAuthConfig(env.ActiveDirectoryEndpoint, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to obtain oauth config for azure environment: %v", err)
 	}
@@ -56,7 +57,7 @@ func Authenticate(env azure.Environment, tenantID string, say func(string)) (*az
 
 	tokenPath := tokenCachePath(tenantID)
 	saveToken := mkTokenCallback(tokenPath)
-	saveTokenCallback := func(t azure.Token) error {
+	saveTokenCallback := func(t adal.Token) error {
 		say("Azure token expired. Saving the refreshed token...")
 		return saveToken(t)
 	}
@@ -110,8 +111,8 @@ func Authenticate(env azure.Environment, tenantID string, say func(string)) (*az
 
 // tokenFromFile returns a token from the specified file if it is found, otherwise
 // returns nil. Any error retrieving or creating the token is returned as an error.
-func tokenFromFile(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clientID, resource string,
-	callback azure.TokenRefreshCallback) (*azure.ServicePrincipalToken, error) {
+func tokenFromFile(say func(string), oauthCfg adal.OAuthConfig, tokenPath, clientID, resource string,
+	callback adal.TokenRefreshCallback) (*adal.ServicePrincipalToken, error) {
 	say(fmt.Sprintf("Loading auth token from file: %s", tokenPath))
 	if _, err := os.Stat(tokenPath); err != nil {
 		if os.IsNotExist(err) { // file not found
@@ -120,12 +121,12 @@ func tokenFromFile(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clie
 		return nil, err
 	}
 
-	token, err := azure.LoadToken(tokenPath)
+	token, err := adal.LoadToken(tokenPath)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to load token from file: %v", err)
 	}
 
-	spt, err := azure.NewServicePrincipalTokenFromManualToken(oauthCfg, clientID, resource, *token, callback)
+	spt, err := adal.NewServicePrincipalTokenFromManualToken(oauthCfg, clientID, resource, *token, callback)
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing service principal token: %v", err)
 	}
@@ -136,9 +137,9 @@ func tokenFromFile(say func(string), oauthCfg azure.OAuthConfig, tokenPath, clie
 // consent application on a browser and in the meanwhile the authentication
 // endpoint is polled until user gives consent, denies or the flow times out.
 // Returned token must be saved.
-func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, clientID, resource string) (*azure.ServicePrincipalToken, error) {
+func tokenFromDeviceFlow(say func(string), oauthCfg adal.OAuthConfig, clientID, resource string) (*adal.ServicePrincipalToken, error) {
 	cl := autorest.NewClientWithUserAgent(userAgent)
-	deviceCode, err := azure.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
+	deviceCode, err := adal.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start device auth: %v", err)
 	}
@@ -147,12 +148,12 @@ func tokenFromDeviceFlow(say func(string), oauthCfg azure.OAuthConfig, clientID,
 	// the code 0000000 to authenticate.”
 	say(fmt.Sprintf("Microsoft Azure: %s", to.String(deviceCode.Message)))
 
-	token, err := azure.WaitForUserCompletion(&cl, deviceCode)
+	token, err := adal.WaitForUserCompletion(&cl, deviceCode)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to complete device auth: %v", err)
 	}
 
-	spt, err := azure.NewServicePrincipalTokenFromManualToken(oauthCfg, clientID, resource, *token)
+	spt, err := adal.NewServicePrincipalTokenFromManualToken(oauthCfg, clientID, resource, *token)
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing service principal token: %v", err)
 	}
@@ -173,9 +174,9 @@ func tokenCachePath(tenantID string) string {
 // mkTokenCallback returns a callback function that can be used to save the
 // token initially or register to the Azure SDK to be called when the token is
 // refreshed.
-func mkTokenCallback(path string) azure.TokenRefreshCallback {
-	return func(t azure.Token) error {
-		if err := azure.SaveToken(path, 0600, t); err != nil {
+func mkTokenCallback(path string) adal.TokenRefreshCallback {
+	return func(t adal.Token) error {
+		if err := adal.SaveToken(path, 0600, t); err != nil {
 			return err
 		}
 		return nil
@@ -186,9 +187,9 @@ func mkTokenCallback(path string) azure.TokenRefreshCallback {
 // sure if the access_token valid, if not it uses SDK’s functionality to
 // automatically refresh the token using refresh_token (which might have
 // expired). This check is essentially to make sure refresh_token is good.
-func validateToken(env azure.Environment, token *azure.ServicePrincipalToken) error {
+func validateToken(env azure.Environment, token *adal.ServicePrincipalToken) error {
 	c := subscriptionsClient(env.ResourceManagerEndpoint)
-	c.Authorizer = token
+	c.Authorizer = autorest.NewBearerAuthorizer(token)
 	_, err := c.List()
 	if err != nil {
 		return fmt.Errorf("Token validity check failed: %v", err)
@@ -230,7 +231,7 @@ func FindTenantID(env azure.Environment, subscriptionID string) (string, error) 
 	return m[1], nil
 }
 
-func subscriptionsClient(baseURI string) subscriptions.Client {
-	client := subscriptions.NewClientWithBaseURI(baseURI)
+func subscriptionsClient(baseURI string) subscriptions.GroupClient {
+	client := subscriptions.NewGroupClientWithBaseURI(baseURI)
 	return client
 }

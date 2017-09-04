@@ -20,15 +20,19 @@ var FixerOrder []string
 
 func init() {
 	Fixers = map[string]Fixer{
-		"iso-md5":                new(FixerISOMD5),
-		"createtime":             new(FixerCreateTime),
-		"pp-vagrant-override":    new(FixerVagrantPPOverride),
-		"virtualbox-gaattach":    new(FixerVirtualBoxGAAttach),
-		"virtualbox-rename":      new(FixerVirtualBoxRename),
-		"vmware-rename":          new(FixerVMwareRename),
-		"parallels-headless":     new(FixerParallelsHeadless),
-		"parallels-deprecations": new(FixerParallelsDeprecations),
-		"sshkeypath":             new(FixerSSHKeyPath),
+		"iso-md5":                  new(FixerISOMD5),
+		"createtime":               new(FixerCreateTime),
+		"pp-vagrant-override":      new(FixerVagrantPPOverride),
+		"virtualbox-gaattach":      new(FixerVirtualBoxGAAttach),
+		"virtualbox-rename":        new(FixerVirtualBoxRename),
+		"vmware-rename":            new(FixerVMwareRename),
+		"parallels-headless":       new(FixerParallelsHeadless),
+		"parallels-deprecations":   new(FixerParallelsDeprecations),
+		"sshkeypath":               new(FixerSSHKeyPath),
+		"sshdisableagent":          new(FixerSSHDisableAgent),
+		"manifest-filename":        new(FixerManifestFilename),
+		"amazon-shutdown_behavior": new(FixerAmazonShutdownBehavior),
+		"enhanced-networking":      new(FixerEnhancedNetworking),
 	}
 
 	FixerOrder = []string{
@@ -41,5 +45,9 @@ func init() {
 		"parallels-headless",
 		"parallels-deprecations",
 		"sshkeypath",
+		"sshdisableagent",
+		"manifest-filename",
+		"amazon-shutdown_behavior",
+		"enhanced-networking",
 	}
 }

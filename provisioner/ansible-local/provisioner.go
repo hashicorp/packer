@@ -7,10 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
@@ -85,7 +86,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = DefaultStagingDir
+		p.config.StagingDir = filepath.ToSlash(filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID()))
 	}
 
 	// Validation
@@ -293,9 +294,10 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
-	extraArgs := ""
+	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s\" ",
+		p.config.PackerBuildName, p.config.PackerBuilderType, common.GetHTTPAddr())
 	if len(p.config.ExtraArguments) > 0 {
-		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
+		extraArgs = extraArgs + strings.Join(p.config.ExtraArguments, " ")
 	}
 
 	// Fetch external dependencies

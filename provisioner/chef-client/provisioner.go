@@ -12,12 +12,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/provisioner"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type guestOSTypeConfig struct {
@@ -28,13 +28,13 @@ type guestOSTypeConfig struct {
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: guestOSTypeConfig{
+	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
-	provisioner.WindowsOSType: guestOSTypeConfig{
+	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
 		installCommand: "powershell.exe -Command \"(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
@@ -98,9 +98,9 @@ type InstallChefTemplate struct {
 }
 
 type KnifeTemplate struct {
-		Sudo  bool
-		Flags string
-		Args  string
+	Sudo  bool
+	Flags string
+	Args  string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -280,20 +280,25 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	err = p.executeChef(ui, comm, configPath, jsonPath)
 
-	knifeConfigPath, err2 := p.createKnifeConfig(
-		ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
-	if err2 != nil {
-		return fmt.Errorf("Error creating knife config on node: %s", err2)
-	}
-	if !p.config.SkipCleanNode {
-		if err2 := p.cleanNode(ui, comm, nodeName, knifeConfigPath); err2 != nil {
-			return fmt.Errorf("Error cleaning up chef node: %s", err2)
-		}
-	}
+	if !(p.config.SkipCleanNode && p.config.SkipCleanClient) {
 
-	if !p.config.SkipCleanClient {
-		if err2 := p.cleanClient(ui, comm, nodeName, knifeConfigPath); err2 != nil {
-			return fmt.Errorf("Error cleaning up chef client: %s", err2)
+		knifeConfigPath, knifeErr := p.createKnifeConfig(
+			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
+
+		if knifeErr != nil {
+			return fmt.Errorf("Error creating knife config on node: %s", knifeErr)
+		}
+
+		if !p.config.SkipCleanNode {
+			if err := p.cleanNode(ui, comm, nodeName, knifeConfigPath); err != nil {
+				return fmt.Errorf("Error cleaning up chef node: %s", err)
+			}
+		}
+
+		if !p.config.SkipCleanClient {
+			if err := p.cleanClient(ui, comm, nodeName, knifeConfigPath); err != nil {
+				return fmt.Errorf("Error cleaning up chef client: %s", err)
+			}
 		}
 	}
 
@@ -312,20 +317,6 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
-}
-
-func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
-	if err := p.createDir(ui, comm, dst); err != nil {
-		return err
-	}
-
-	// Make sure there is a trailing "/" so that the directory isn't
-	// created on the other side.
-	if src[len(src)-1] != '/' {
-		src = src + "/"
-	}
-
-	return comm.UploadDir(dst, src, nil)
 }
 
 func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, remotePath string, localPath string) error {
@@ -500,7 +491,7 @@ func (p *Provisioner) knifeExec(ui packer.Ui, comm packer.Communicator, node str
 	}
 
 	p.config.ctx.Data = &KnifeTemplate{
-		Sudo: !p.config.PreventSudo,
+		Sudo:  !p.config.PreventSudo,
 		Flags: strings.Join(flags, " "),
 		Args:  strings.Join(args, " "),
 	}

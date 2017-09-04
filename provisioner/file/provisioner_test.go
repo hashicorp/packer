@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -191,6 +191,10 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 
 		if _, err := os.Stat(path); err != nil {
 			t.Fatalf("stat of download dir should not error: %s", err)
+		}
+
+		if _, err := os.Stat(config["destination"].(string)); err != nil {
+			t.Fatalf("stat of destination file should not error: %s", err)
 		}
 	}
 }

@@ -1,0 +1,27 @@
+---
+- hosts: default:packer-test
+  gather_facts: no
+  tasks:
+    - name: touch
+      raw: touch /tmp/ansible-raw-test
+    - name: raw test
+      raw: date
+    - name: command test
+      command: echo "the command module"
+    - name: prepare remote directory
+      command: mkdir /tmp/remote-dir
+      args:
+        creates: /tmp/remote-dir
+    - name: transfer file.txt
+      copy: src=dir/file.txt dest=/tmp/remote-dir/file.txt
+    - name: fetch file.text
+      fetch: src=/tmp/remote-dir/file.txt dest=fetched-dir validate=yes fail_on_missing=yes
+    - name: copy contents of directory
+      copy: src=dir/contents-only/ dest=/tmp/remote-dir
+    - name: fetch contents of directory
+      fetch: src=/tmp/remote-dir/file.txt dest="fetched-dir/{{ inventory_hostname }}/tmp/remote-dir/contents-only/" flat=yes validate=yes fail_on_missing=yes
+    - name: copy directory recursively
+      copy: src=dir/subdir dest=/tmp/remote-dir
+    - name: fetch recursively copied directory
+      fetch: src=/tmp/remote-dir/subdir/file.txt dest=fetched-dir validate=yes fail_on_missing=yes
+    - copy: src=largish-file.txt dest=/tmp/largish-file.txt

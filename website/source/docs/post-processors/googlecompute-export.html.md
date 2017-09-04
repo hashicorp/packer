@@ -1,13 +1,15 @@
 ---
 description: |
-    The Google Compute Image Exporter post-processor exports an image from a Packer
-    googlecompute builder run and uploads it to Google Cloud Storage. The exported
-    images can be easily shared and uploaded to other Google Cloud Projects.
+    The Google Compute Image Exporter post-processor exports an image from a
+    Packer googlecompute builder run and uploads it to Google Cloud Storage. The
+    exported images can be easily shared and uploaded to other Google Cloud
+    Projects.
 layout: docs
-page_title: 'Google Compute Image Exporter'
-...
+page_title: 'Google Compute Image Exporter - Post-Processors'
+sidebar_current: 'docs-post-processors-googlecompute-export'
+---
 
-# Google Compoute Image Exporter Post-Processor
+# Google Compute Image Exporter Post-Processor
 
 Type: `googlecompute-export`
 
@@ -23,7 +25,6 @@ to the provided GCS `paths` using the same credentials.
 As such, the authentication credentials that built the image must have write
 permissions to the GCS `paths`.
 
-
 ## Configuration
 
 ### Required
@@ -33,22 +34,22 @@ permissions to the GCS `paths`.
 
 ### Optional
 
--   `keep_input_artifact` (bool) - If true, do not delete the Google Compute Engine 
+-   `keep_input_artifact` (bool) - If true, do not delete the Google Compute Engine
     (GCE) image being exported.
-    
+
 ## Basic Example
 
-The following example builds a GCE image in the project, `my-project`, with an 
+The following example builds a GCE image in the project, `my-project`, with an
 account whose keyfile is `account.json`. After the image build, a temporary VM will
-be created to export the image as a gzipped tarball to 
-`gs://mybucket1/path/to/file1.tar.gz` and `gs://mybucket2/path/to/file2.tar.gz`. 
+be created to export the image as a gzipped tarball to
+`gs://mybucket1/path/to/file1.tar.gz` and `gs://mybucket2/path/to/file2.tar.gz`.
 `keep_input_artifact` is true, so the GCE image won't be deleted after the export.
 
 In order for this example to work, the account associated with `account.json` must
 have write access to both `gs://mybucket1/path/to/file1.tar.gz` and
 `gs://mybucket2/path/to/file2.tar.gz`.
 
-``` {.json}
+``` json
 {
   "builders": [
     {
@@ -65,7 +66,7 @@ have write access to both `gs://mybucket1/path/to/file1.tar.gz` and
       "paths": [
         "gs://mybucket1/path/to/file1.tar.gz",
         "gs://mybucket2/path/to/file2.tar.gz"
-      ]
+      ],
       "keep_input_artifact": true
     }
   ]

@@ -1,0 +1,34 @@
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type": "shell-local",
+        "command": "echo 'TODO(bhcleek): write the public key to $HOME/.ssh/known_hosts and stop using ANSIBLE_HOST_KEY_CHECKING=False'"
+      }, {
+        "type":  "ansible",
+        "playbook_file": "./playbook.yml",
+        "extra_arguments": [
+          "--private-key", "ansible-test-id"
+        ],
+        "sftp_command": "/usr/lib/sftp-server -e -l INFO",
+        "use_sftp": true,
+        "ansible_env_vars": ["PACKER_ANSIBLE_TEST=1", "ANSIBLE_HOST_KEY_CHECKING=False"],
+        "groups": ["PACKER_TEST"],
+        "empty_groups": ["PACKER_EMPTY_GROUP"],
+        "host_alias": "packer-test",
+        "user": "packer",
+        "local_port": 2222,
+        "ssh_host_key_file": "ansible-server.key",
+        "ssh_authorized_key_file": "ansible-test-id.pub"
+     }
+    ],
+    "builders": [{
+        "type": "googlecompute",
+        "account_file": "{{user `account_file`}}",
+        "project_id": "{{user `project_id`}}",
+        "image_name": "packerbats-alloptions-{{timestamp}}",
+        "source_image": "debian-8-jessie-v20161027",
+        "zone": "us-central1-a",
+        "ssh_username": "debian"
+    }]
+}

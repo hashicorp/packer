@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type mountPathData struct {
@@ -33,9 +33,17 @@ type StepMountDevice struct {
 func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
-	image := state.Get("source_image").(*ec2.Image)
 	device := state.Get("device").(string)
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
+
+	var virtualizationType string
+	if config.FromScratch {
+		virtualizationType = config.AMIVirtType
+	} else {
+		image := state.Get("source_image").(*ec2.Image)
+		virtualizationType = *image.VirtualizationType
+		log.Printf("Source image virtualization type is: %s", virtualizationType)
+	}
 
 	ctx := config.ctx
 	ctx.Data = &mountPathData{Device: filepath.Base(device)}
@@ -65,9 +73,8 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Source image virtualization type is: %s", *image.VirtualizationType)
 	deviceMount := device
-	if *image.VirtualizationType == "hvm" {
+	if virtualizationType == "hvm" {
 		deviceMount = fmt.Sprintf("%s%d", device, s.MountPartition)
 	}
 	state.Put("deviceMount", deviceMount)
@@ -75,7 +82,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 
-	// build mount options from mount_options config, usefull for nouuid options
+	// build mount options from mount_options config, useful for nouuid options
 	// or other specific device type settings for mount
 	opts := ""
 	if len(s.MountOptions) > 0 {

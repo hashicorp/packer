@@ -1,0 +1,24 @@
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type":  "ansible",
+        "playbook_file": "./playbook.yml",
+        "extra_arguments": [
+        ],
+        "sftp_command": "/usr/bin/false",
+        "use_sftp": false
+      }
+    ],
+    "builders": [
+      {
+        "type": "googlecompute",
+        "account_file": "{{user `account_file`}}",
+        "project_id": "{{user `project_id`}}",
+        "image_name": "packerbats-scp-{{timestamp}}",
+        "source_image": "debian-8-jessie-v20161027",
+        "zone": "us-central1-a",
+        "ssh_username": "debian"
+      }
+    ]
+}

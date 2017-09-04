@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
-	packrpc "github.com/mitchellh/packer/packer/rpc"
+	"github.com/hashicorp/packer/packer"
+	packrpc "github.com/hashicorp/packer/packer/rpc"
 	"io"
 	"io/ioutil"
 	"log"
@@ -291,7 +291,7 @@ func (c *Client) Start() (addr net.Addr, err error) {
 	// so they dont' block since it is an io.Pipe
 	defer func() {
 		go func() {
-			for _ = range linesCh {
+			for range linesCh {
 			}
 		}()
 	}()

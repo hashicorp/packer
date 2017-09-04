@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderIdESX = "mitchellh.vmware-esx"
@@ -28,6 +28,7 @@ type Config struct {
 	common.PackerConfig      `mapstructure:",squash"`
 	common.HTTPConfig        `mapstructure:",squash"`
 	common.ISOConfig         `mapstructure:",squash"`
+	common.FloppyConfig      `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
@@ -37,19 +38,20 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
+	BootCommand         []string `mapstructure:"boot_command"`
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	FloppyFiles         []string `mapstructure:"floppy_files"`
 	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
-	Version             string   `mapstructure:"version"`
-	VMName              string   `mapstructure:"vm_name"`
-	BootCommand         []string `mapstructure:"boot_command"`
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
+	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	SkipExport          bool     `mapstructure:"skip_export"`
+	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	Version             string   `mapstructure:"version"`
 
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`
@@ -97,6 +99,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -113,10 +116,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if b.config.RemoteType == "esx5" {
 			b.config.DiskTypeId = "zeroedthick"
 		}
-	}
-
-	if b.config.FloppyFiles == nil {
-		b.config.FloppyFiles = make([]string, 0)
 	}
 
 	if b.config.GuestOSType == "" {
@@ -201,6 +200,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+
+	exportOutputPath := b.config.OutputDir
+
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		b.config.OutputDir = b.config.VMName
 	}
@@ -225,7 +227,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Checksum:     b.config.ISOChecksum,
 			ChecksumType: b.config.ISOChecksumType,
 			Description:  "ISO",
-			Extension:    "iso",
+			Extension:    b.config.TargetExtension,
 			ResultKey:    "iso_path",
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
@@ -234,7 +236,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 		},
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&stepRemoteUpload{
 			Key:     "floppy_path",
@@ -298,27 +301,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
 		&StepExport{
-			Format: b.config.Format,
+			Format:     b.config.Format,
+			SkipExport: b.config.SkipExport,
+			OutputDir:  exportOutputPath,
 		},
 	}
 
 	// Run!
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// If there was an error, return that
@@ -339,7 +336,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var files []string
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
+		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
@@ -356,6 +353,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	return &Artifact{
 		builderId: builderId,
+		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
 	}, nil

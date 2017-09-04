@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
+// ShutdownConfig contains the configuration for VM shutdown.
 type ShutdownConfig struct {
 	ShutdownCommand    string `mapstructure:"shutdown_command"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
@@ -14,6 +15,7 @@ type ShutdownConfig struct {
 	ShutdownTimeout time.Duration ``
 }
 
+// Prepare sets default values to the VM shutdown configuration.
 func (c *ShutdownConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.RawShutdownTimeout == "" {
 		c.RawShutdownTimeout = "5m"

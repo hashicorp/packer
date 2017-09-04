@@ -1,0 +1,25 @@
+{
+  "variables": {
+    "access_key": "{{env `ALICLOUD_ACCESS_KEY`}}",
+    "secret_key": "{{env `ALICLOUD_SECRET_KEY`}}"
+  },
+  "builders": [{
+    "type":"alicloud-ecs",
+    "access_key":"{{user `access_key`}}",
+    "secret_key":"{{user `secret_key`}}",
+    "region":"cn-beijing",
+    "image_name":"packer_with_data_disk",
+    "source_image":"centos_7_2_64_40G_base_20170222.vhd",
+    "ssh_username":"root",
+    "instance_type":"ecs.n1.tiny",
+    "io_optimized":"true",
+    "image_disk_mappings":[{"disk_name":"data1","disk_size":20},{"disk_name":"data1","disk_size":20,"disk_device":"/dev/xvdz"}]
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "yum install redis.x86_64 -y"
+    ]
+  }]
+}

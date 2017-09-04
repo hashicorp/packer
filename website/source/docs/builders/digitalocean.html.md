@@ -1,13 +1,14 @@
 ---
 description: |
-    The `digitalocean` Packer builder is able to create new images for use with
-    DigitalOcean. The builder takes a source image, runs any provisioning necessary
-    on the image after launching it, then snapshots it into a reusable image. This
-    reusable image can then be used as the foundation of new servers that are
-    launched within DigitalOcean.
+    The digitalocean Packer builder is able to create new images for use with
+    DigitalOcean. The builder takes a source image, runs any provisioning
+    necessary on the image after launching it, then snapshots it into a reusable
+    image. This reusable image can then be used as the foundation of new servers
+    that are launched within DigitalOcean.
 layout: docs
-page_title: DigitalOcean Builder
-...
+page_title: 'DigitalOcean - Builders'
+sidebar_current: 'docs-builders-digitalocean'
+---
 
 # DigitalOcean Builder
 
@@ -40,17 +41,17 @@ builder.
 
 -   `image` (string) - The name (or slug) of the base image to use. This is the
     image that will be used to launch a new droplet and provision it. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-images](https://developers.digitalocean.com/documentation/v2/#list-all-images) for
-    details on how to get a list of the the accepted image names/slugs.
+    <https://developers.digitalocean.com/documentation/v2/#list-all-images> for
+    details on how to get a list of the accepted image names/slugs.
 
 -   `region` (string) - The name (or slug) of the region to launch the
     droplet in. Consequently, this is the region where the snapshot will
     be available. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-regions](https://developers.digitalocean.com/documentation/v2/#list-all-regions) for
+    <https://developers.digitalocean.com/documentation/v2/#list-all-regions> for
     the accepted region names/slugs.
 
 -   `size` (string) - The name (or slug) of the droplet size to use. See
-    [https://developers.digitalocean.com/documentation/v2/\#list-all-sizes](https://developers.digitalocean.com/documentation/v2/#list-all-sizes) for
+    <https://developers.digitalocean.com/documentation/v2/#list-all-sizes> for
     the accepted size names/slugs.
 
 ### Optional:
@@ -65,10 +66,16 @@ builder.
 -   `private_networking` (boolean) - Set to `true` to enable private networking
     for the droplet being created. This defaults to `false`, or not enabled.
 
+-   `monitoring` (boolean) - Set to `true` to enable monitoring
+    for the droplet being created. This defaults to `false`, or not enabled.
+
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. This must be unique. To help make this unique, use a
     function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+    templates](/docs/templates/engine.html) for more info)
+
+-   `snapshot_regions` (array of strings) - The regions of the resulting snapshot that will
+    appear in your account.
 
 -   `state_timeout` (string) - The time to wait, as a duration string, for a
     droplet to enter a desired state (such as "active") before timing out. The
@@ -76,17 +83,21 @@ builder.
 
 -   `user_data` (string) - User data to launch with the Droplet.
 
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the Droplet.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
 access tokens:
 
-``` {.javascript}
+``` json
 {
   "type": "digitalocean",
   "api_token": "YOUR API KEY",
-  "image": "ubuntu-12-04-x64",
-  "region": "nyc2",
-  "size": "512mb"
+  "image": "ubuntu-14-04-x64",
+  "region": "nyc3",
+  "size": "512mb",
+  "ssh_username": "root"
 }
 ```

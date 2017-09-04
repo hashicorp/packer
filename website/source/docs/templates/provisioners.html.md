@@ -4,10 +4,11 @@ description: |
     provisioners that Packer should use to install and configure software within
     running machines prior to turning them into machine images.
 layout: docs
-page_title: 'Templates: Provisioners'
-...
+page_title: 'Provisioners - Templates'
+sidebar_current: 'docs-templates-provisioners'
+---
 
-# Templates: Provisioners
+# Template Provisioners
 
 Within the template, the provisioners section contains an array of all the
 provisioners that Packer should use to install and configure software within
@@ -24,7 +25,7 @@ be referenced from the documentation for that specific provisioner.
 
 Within a template, a section of provisioner definitions looks like this:
 
-``` {.javascript}
+``` json
 {
   "provisioners": [
     // ... one or more provisioner definitions here
@@ -49,7 +50,7 @@ specifies a path to a shell script to execute within the machines being created.
 An example provisioner definition is shown below, configuring the shell
 provisioner to run a local script within the machines:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "script": "script.sh"
@@ -66,7 +67,7 @@ provisioner on anything other than the specified builds.
 An example of `only` being used is shown below, but the usage of `except` is
 effectively the same:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "script": "script.sh",
@@ -96,11 +97,10 @@ identical. However, they may initially need to be run differently.
 
 This example is shown below:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "script": "script.sh",
-
   "override": {
     "vmware-iso": {
       "execute_command": "echo 'password' | sudo -S bash {{.Path}}"
@@ -126,7 +126,7 @@ Every provisioner definition in a Packer template can take a special
 configuration `pause_before` that is the amount of time to pause before running
 that provisioner. By default, there is no pause. An example is shown below:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "script": "script.sh",

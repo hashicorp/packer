@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_impl(t *testing.T) {
@@ -25,7 +25,7 @@ func TestNewArtifact(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if err := os.Mkdir(filepath.Join(td, "b"), 0755); err != nil {
+	if err = os.Mkdir(filepath.Join(td, "b"), 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

@@ -133,7 +133,7 @@ func TestFuncIsotime(t *testing.T) {
 
 	currentTime := time.Now().UTC()
 	if currentTime.Sub(val) > 2*time.Second {
-		t.Fatalf("val: %d (current: %d)", val, currentTime)
+		t.Fatalf("val: %v (current: %v)", val, currentTime)
 	}
 }
 

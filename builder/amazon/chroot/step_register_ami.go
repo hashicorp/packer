@@ -5,35 +5,53 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct {
-	RootVolumeSize int64
+	RootVolumeSize           int64
+	EnableAMIENASupport      bool
+	EnableAMISriovNetSupport bool
 }
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	image := state.Get("source_image").(*ec2.Image)
 	snapshotId := state.Get("snapshot_id").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Registering the AMI...")
-	blockDevices := make([]*ec2.BlockDeviceMapping, len(image.BlockDeviceMappings))
-	for i, device := range image.BlockDeviceMappings {
+
+	var (
+		registerOpts   *ec2.RegisterImageInput
+		mappings       []*ec2.BlockDeviceMapping
+		image          *ec2.Image
+		rootDeviceName string
+	)
+
+	if config.FromScratch {
+		mappings = config.AMIBlockDevices.BuildAMIDevices()
+		rootDeviceName = config.RootDeviceName
+	} else {
+		image = state.Get("source_image").(*ec2.Image)
+		mappings = image.BlockDeviceMappings
+		rootDeviceName = *image.RootDeviceName
+	}
+
+	newMappings := make([]*ec2.BlockDeviceMapping, len(mappings))
+	for i, device := range mappings {
 		newDevice := device
-		if *newDevice.DeviceName == *image.RootDeviceName {
+		if *newDevice.DeviceName == rootDeviceName {
 			if newDevice.Ebs != nil {
 				newDevice.Ebs.SnapshotId = aws.String(snapshotId)
 			} else {
 				newDevice.Ebs = &ec2.EbsBlockDevice{SnapshotId: aws.String(snapshotId)}
 			}
 
-			if s.RootVolumeSize > *newDevice.Ebs.VolumeSize {
+			if config.FromScratch || s.RootVolumeSize > *newDevice.Ebs.VolumeSize {
 				newDevice.Ebs.VolumeSize = aws.Int64(s.RootVolumeSize)
 			}
 		}
@@ -44,14 +62,30 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			newDevice.Ebs.Encrypted = nil
 		}
 
-		blockDevices[i] = newDevice
+		newMappings[i] = newDevice
 	}
 
-	registerOpts := buildRegisterOpts(config, image, blockDevices)
+	if config.FromScratch {
+		registerOpts = &ec2.RegisterImageInput{
+			Name:                &config.AMIName,
+			Architecture:        aws.String(ec2.ArchitectureValuesX8664),
+			RootDeviceName:      aws.String(rootDeviceName),
+			VirtualizationType:  aws.String(config.AMIVirtType),
+			BlockDeviceMappings: newMappings,
+		}
+	} else {
+		registerOpts = buildRegisterOpts(config, image, newMappings)
+	}
 
-	// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
-	if config.AMIEnhancedNetworking {
+	if s.EnableAMISriovNetSupport {
+		// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
+		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
+	}
+	if s.EnableAMIENASupport {
+		// Set EnaSupport to true
+		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
+		registerOpts.EnaSupport = aws.Bool(true)
 	}
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
@@ -88,12 +122,12 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {}
 
-func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
+func buildRegisterOpts(config *Config, image *ec2.Image, mappings []*ec2.BlockDeviceMapping) *ec2.RegisterImageInput {
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
 		Architecture:        image.Architecture,
 		RootDeviceName:      image.RootDeviceName,
-		BlockDeviceMappings: blockDevices,
+		BlockDeviceMappings: mappings,
 		VirtualizationType:  image.VirtualizationType,
 	}
 
@@ -105,6 +139,5 @@ func buildRegisterOpts(config *Config, image *ec2.Image, blockDevices []*ec2.Blo
 		registerOpts.KernelId = image.KernelId
 		registerOpts.RamdiskId = image.RamdiskId
 	}
-
 	return registerOpts
 }

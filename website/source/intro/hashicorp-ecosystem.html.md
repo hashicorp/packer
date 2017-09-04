@@ -1,17 +1,16 @@
 ---
-description: Learn how Packer fits in with the rest of the HashiCorp ecosystem of tools
 layout: intro
-next_title: 'Getting Started: Install Packer'
-next_url: '/intro/getting-started/setup.html'
-page_title: Packer and the HashiCorp Ecosystem
-prev_url: '/intro/platforms.html'
-...
+sidebar_current: intro-ecosystem
+page_title: Packer and the HashiCorp Ecosystem - Introduction
+description: |-
+  Learn how Packer fits in with the rest of the HashiCorp ecosystem of tools
+---
 
 # Packer and the HashiCorp Ecosystem
 
 HashiCorp is the creator of the open source projects Vagrant, Packer, Terraform,
-Serf, and Consul, and the commercial product Atlas. Packer is just one piece of
-the ecosystem HashiCorp has built to make application delivery a versioned,
+Serf, Consul, Nomad, and the commercial product Atlas. Packer is just one piece
+of the ecosystem HashiCorp has built to make application delivery a versioned,
 auditable, repeatable, and collaborative process. To learn more about our
 beliefs on the qualities of the modern datacenter and responsible application
 delivery, read [The Atlas Mindset: Version Control for
@@ -61,3 +60,9 @@ production. Vagrant environments reduce the friction of developing a project and
 reduce the risk of unexpected behavior appearing after deployment. Vagrant boxes
 can be built in parallel with production artifacts with Packer to maintain
 parity between development and production.
+
+[Nomad](https://www.nomadproject.io/?utm_source=packer&utm_campaign=HashicorpEcosystem)
+is a HashiCorp tool for managing a cluster of machines and running applications
+on them. Nomad abstracts away machines and the location of applications, and
+instead enables users to declare what they want to run and Nomad handles where
+they should run and how to run them.

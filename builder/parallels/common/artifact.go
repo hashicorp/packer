@@ -2,13 +2,14 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/hashicorp/packer/packer"
 )
 
-// This is the common builder ID to all of these artifacts.
+// BuilderId is the common builder ID to all of these artifacts.
 const BuilderId = "packer.parallels"
 
 // These are the extensions of files and directories that are unnecessary for the function
@@ -27,6 +28,17 @@ type artifact struct {
 func NewArtifact(dir string) (packer.Artifact, error) {
 	files := make([]string, 0, 5)
 	visit := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) {
+				// It's possible that the path in question existed prior to visit being invoked, but has
+				// since been deleted. This happens, for example, if you have the VM console open while
+				// building. Opening the console creates a <vm name>.app directory which is gone by the time
+				// visit is invoked, resulting in err being a "file not found" error. In this case, skip the
+				// entire path and continue to the next one.
+				return filepath.SkipDir
+			}
+			return err
+		}
 		for _, unnecessaryFile := range unnecessaryFiles {
 			if unnecessary, _ := regexp.MatchString(unnecessaryFile, path); unnecessary {
 				return os.RemoveAll(path)
@@ -37,7 +49,7 @@ func NewArtifact(dir string) (packer.Artifact, error) {
 			files = append(files, path)
 		}
 
-		return err
+		return nil
 	}
 
 	if err := filepath.Walk(dir, visit); err != nil {

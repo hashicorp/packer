@@ -8,10 +8,10 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var builtins = map[string]string{
@@ -110,9 +110,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
+	password := url.QueryEscape(p.config.Password)
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
 		url.QueryEscape(p.config.Username),
-		url.QueryEscape(p.config.Password),
+		password,
 		p.config.Host,
 		p.config.Datacenter,
 		p.config.Cluster)
@@ -128,7 +129,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s", strings.Join(args, " "))
+	log.Printf("Starting ovftool with parameters: %s",
+		strings.Replace(
+			strings.Join(args, " "),
+			password,
+			"<password>",
+			-1))
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

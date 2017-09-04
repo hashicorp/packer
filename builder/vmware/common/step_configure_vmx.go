@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step configures a VMX by setting some default settings as well
@@ -44,7 +44,7 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 	// Delete any generated addresses since we want to regenerate
 	// them. Conflicting MAC addresses is a bad time.
 	addrRegex := regexp.MustCompile(`(?i)^ethernet\d+\.generatedAddress`)
-	for k, _ := range vmxData {
+	for k := range vmxData {
 		if addrRegex.MatchString(k) {
 			delete(vmxData, k)
 		}

@@ -1,58 +1,112 @@
 ---
-description: Packer is a free and open source tool for creating golden images
-  for multiple platforms from a single source configuration.
+description: |-
+  Packer is a free and open source tool for creating golden images for multiple
+  platforms from a single source configuration.
 ---
 
-<div class="home">
-  <header class="dark-background">
-    <div class="container hero">
-      <div class="row">
-        <div class="col-md-4 col-md-offset-1">
-          <h2>
-            <span class="text-green">Packer</span> is a tool for creating machine and container images for multiple platforms from a single source configuration.
-          </h2>
-        </div>
+<header>
+  <div class="container hero">
+    <div class="row">
+
+      <div class="col-md-offset-3 col-md-6 col-sm-offset-2 col-sm-8">
+        <%= inline_svg "logo-hashicorp.svg", height: 120, class: "logo" %>
+
+        <h1>
+          Build Automated Machine Images
+        </h1>
+
+        <a class="button primary" href="/intro/index.html">Get Started</a>
+        <a class="button" href="/downloads.html">Download <%= latest_version %></a>
       </div>
     </div>
-  </header>
-  <section class="belt download">
-    <div class="container">
-      <div class="row download-row">
-        <div class="download-container">
-          <h2 class="uppercase"><a href="/downloads.html">Download v<%= latest_version %></a></h2>
+  </div>
+</header>
+
+<section id="automated" class="marketing">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="terminal">
+          <span class="circle"></span>
+          <span class="circle"></span>
+          <span class="circle"></span>
+          <div class="terminal-content">
+            <span>$ packer build template.json</span>
+            <span class="vbox">==> virtualbox: virtualbox output will be in this color.</span>
+            <span class="vmware">==> vmware: vmware output will be in this color.</span>
+            <span></span>
+            <span class="vmware">==> vmware: Copying or downloading ISO. Progress will be reported periodically.</span>
+            <span class="vmware">==> vmware: Creating virtual machine disk</span>
+            <span class="vmware">==> vmware: Building and writing VMX file</span>
+            <span class="vmware">==> vmware: Starting HTTP server on port 8964</span>
+            <span class="vmware">==> vmware: Starting virtual machine...</span>
+            <span class="vbox">==> virtualbox: Downloading VirtualBox guest additions. Progress will be shown periodically.</span>
+            <span class="vbox">==> virtualbox: Copying or downloading ISO. Progress will be reported periodically.</span>
+            <span class="vbox">==> virtualbox: Starting HTTP server on port 8081</span>
+            <span class="vbox">==> virtualbox: Creating virtual machine...</span>
+            <span class="vbox">==> virtualbox: Creating hard drive...</span>
+            <span class="vbox">==> virtualbox: Creating forwarded port mapping for SSH (host port 3213)</span>
+            <span class="vbox">==> virtualbox: Executing custom VBoxManage commands...</span>
+            <span class="vbox">    virtualbox: Executing: modifyvm packer --memory 480</span>
+            <span class="vbox">    virtualbox: Executing: modifyvm packer --cpus 1</span>
+            <span class="vbox">==> virtualbox: Starting the virtual machine...</span>
+            <span class="vmware">==> vmware: Waiting 10s for boot...</span>
+            <span class="vbox">==> virtualbox: Waiting 10s for boot...</span>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-  <section class="marketting padded-lg">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <%= image_tag 'screenshots/vmware_and_virtualbox.png', class: 'img-responsive' %>
-        </div>
-        <div class="col-md-6">
-          <h2 class="text-green text-center">Modern, Automated</h2>
-          <p>
-            Packer is easy to use and automates the creation of any type of machine image. It embraces modern configuration management by encouraging you to use automated scripts to install and configure the software within your Packer-made images. Packer brings machine images into the modern age, unlocking untapped potential and opening new opportunities.
+      <div class="col-md-6">
+        <span class="callout">Infrastructure as code</span>
+        <h2>Modern, Automated</h2>
+        <p>
+          Packer is easy to use and automates the creation of any type of
+          machine image. It embraces modern configuration management by
+          encouraging you to use automated scripts to install and configure
+          the software within your Packer-made images. Packer brings machine
+          images into the modern age, unlocking untapped potential and opening
+          new opportunities.
         </p>
-        </div>
       </div>
     </div>
-  </section>
-  <section class="marketting padded-lg">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <h2 class="text-green text-center">Works Great With</h2>
-          <p>
-            Out of the box Packer comes with support to build images for Amazon EC2, DigitalOcean, Docker, Google Compute Engine, QEMU, VirtualBox, VMware, Microsoft Azure, and more. Support for more platforms is on the way, and anyone can add new platforms via plugins.
+  </div>
+</section>
+
+<section id="integrations" class="marketing invert">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <span class="callout">Integrations</span>
+        <h2>Works Out of The Box</h2>
+        <p>
+          Out of the box Packer comes with support to build images for
+          Amazon EC2, CloudStack, DigitalOcean, Docker, Google Compute
+          Engine, Microsoft Azure, QEMU, VirtualBox, VMware, and more.
+          Support for more platforms is on the way, and anyone can add
+          new platforms via plugins.
         </p>
-        </div>
-        <div class="col-md-6">
-          <%= image_tag 'screenshots/works_with.png', class: 'img-responsive' %>
+      </div>
+      <div class="col-md-6">
+        <div class="integrations-list">
+          <div class="integration">
+            <%= image_tag("integrations/azure.svg", alt: "Microsoft Azure") %>
+          </div>
+          <div class="integration">
+            <%= image_tag("integrations/aws.svg", alt: "Amazon AWS") %>
+          </div>
+          <div class="integration">
+            <%= image_tag("integrations/vmware.svg", alt: "VMware") %>
+          </div>
+          <div class="integration">
+            <%= image_tag("integrations/google-cloud.svg", alt: "Google Cloud") %>
+          </div>
+          <div class="integration">
+            <%= image_tag("integrations/docker.svg", alt: "Docker") %>
+          </div>
+          <div class="integration">
+            <%= image_tag("integrations/digitalocean.svg", alt: "Digital Ocean") %>
+          </div>
         </div>
       </div>
     </div>
-  </section>
-</div>
-<!-- /.home -->
+  </div>
+</section>

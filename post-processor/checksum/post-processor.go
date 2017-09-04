@@ -11,10 +11,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
@@ -30,37 +30,10 @@ type PostProcessor struct {
 	config Config
 }
 
-func (p *PostProcessor) Configure(raws ...interface{}) error {
-	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate: true,
-		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
-		},
-	}, raws...)
-	if err != nil {
-		return err
-	}
-
-	if p.config.ChecksumTypes == nil {
-		p.config.ChecksumTypes = []string{"md5"}
-	}
-
-	if p.config.OutputPath == "" {
-		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}" + ".checksum"
-	}
-
-	errs := new(packer.MultiError)
-
-	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Error parsing target template: %s", err))
-	}
-
-	if len(errs.Errors) > 0 {
-		return errs
-	}
-
-	return nil
+type outputPathTemplate struct {
+	BuildName    string
+	BuilderType  string
+	ChecksumType string
 }
 
 func getHash(t string) hash.Hash {
@@ -82,24 +55,67 @@ func getHash(t string) hash.Hash {
 	return h
 }
 
+func (p *PostProcessor) Configure(raws ...interface{}) error {
+	err := config.Decode(&p.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &p.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{"output"},
+		},
+	}, raws...)
+	if err != nil {
+		return err
+	}
+	errs := new(packer.MultiError)
+
+	if p.config.ChecksumTypes == nil {
+		p.config.ChecksumTypes = []string{"md5"}
+	}
+
+	for _, k := range p.config.ChecksumTypes {
+		if h := getHash(k); h == nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Unrecognized checksum type: %s", k))
+		}
+	}
+
+	if p.config.OutputPath == "" {
+		p.config.OutputPath = "packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum"
+	}
+
+	if err = interpolate.Validate(p.config.OutputPath, &p.config.ctx); err != nil {
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("Error parsing target template: %s", err))
+	}
+
+	if len(errs.Errors) > 0 {
+		return errs
+	}
+
+	return nil
+}
+
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	files := artifact.Files()
 	var h hash.Hash
-	var checksumFile string
 
 	newartifact := NewArtifact(artifact.Files())
+	opTpl := &outputPathTemplate{
+		BuildName:   p.config.PackerBuildName,
+		BuilderType: p.config.PackerBuilderType,
+	}
 
 	for _, ct := range p.config.ChecksumTypes {
 		h = getHash(ct)
+		opTpl.ChecksumType = ct
+		p.config.ctx.Data = &opTpl
 
 		for _, art := range files {
-			if len(artifact.Files()) > 1 {
-				checksumFile = filepath.Join(filepath.Dir(art), ct+"sums")
-			} else if p.config.OutputPath != "" {
-				checksumFile = p.config.OutputPath
-			} else {
-				checksumFile = fmt.Sprintf("%s.%s", art, ct+"sum")
+			checksumFile, err := interpolate.Render(p.config.OutputPath, &p.config.ctx)
+			if err != nil {
+				return nil, false, err
 			}
+
 			if _, err := os.Stat(checksumFile); err != nil {
 				newartifact.files = append(newartifact.files, checksumFile)
 			}
@@ -124,6 +140,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			fr.Close()
 			fw.WriteString(fmt.Sprintf("%x\t%s\n", h.Sum(nil), filepath.Base(art)))
 			fw.Close()
+			h.Reset()
 		}
 	}
 

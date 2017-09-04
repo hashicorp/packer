@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 
 	"os"
 )
@@ -38,7 +38,6 @@ func (s *stepConvertDisk) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	command = append(command, []string{
-		"-f", config.Format,
 		"-O", config.Format,
 		sourcePath,
 		targetPath,

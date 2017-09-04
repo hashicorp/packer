@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step copies the virtual disk that will be used as the
@@ -22,7 +22,6 @@ func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	command := []string{
 		"convert",
-		"-f", config.Format,
 		"-O", config.Format,
 		isoPath,
 		path,

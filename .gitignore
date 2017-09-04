@@ -19,3 +19,7 @@ packer-test*.log
 
 *.received.txt
 *.received.json
+
+.idea/
+*.iml
+Thumbs.db

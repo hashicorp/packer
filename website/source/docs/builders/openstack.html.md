@@ -1,15 +1,14 @@
 ---
 description: |
-    The `openstack` Packer builder is able to create new images for use with
-    OpenStack. The builder takes a source image, runs any provisioning necessary on
-    the image after launching it, then creates a new reusable image. This reusable
-    image can then be used as the foundation of new servers that are launched within
-    OpenStack. The builder will create temporary keypairs that provide temporary
-    access to the server while the image is being created. This simplifies
-    configuration quite a bit.
+    The openstack Packer builder is able to create new images for use with
+    OpenStack. The builder takes a source image, runs any provisioning necessary
+    on the image after launching it, then creates a new reusable image. This
+    reusable image can then be used as the foundation of new servers that are
+    launched within OpenStack.
 layout: docs
-page_title: OpenStack Builder
-...
+page_title: 'OpenStack - Builders'
+sidebar_current: 'docs-builders-openstack'
+---
 
 # OpenStack Builder
 
@@ -26,9 +25,9 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
-\~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
+~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
 builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
-installed _if you are using temporary key pairs_, i.g. don't use
+installed *if you are using temporary key pairs*, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
 [`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
 OS'es have OpenSSL installed by default except Windows.
@@ -73,15 +72,18 @@ builder.
 
 ### Optional:
 
--   `api_key` (string) - The API key used to access OpenStack. Some OpenStack
-    installations require this.
-
 -   `availability_zone` (string) - The availability zone to launch the
     server in. If this isn't specified, the default enforced by your OpenStack
     cluster will be used. This may be required for some OpenStack clusters.
 
+-   `cacert` (string) - Custom CA certificate file path.
+    If ommited the OS\_CACERT environment variable can be used.
+
 -   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
-     cloud-init metadata.
+    cloud-init metadata.
+
+-   `cert` (string) - Client certificate file path for SSL client authentication.
+    If omitted the OS\_CERT environment variable can be used.
 
 -   `domain_name` or `domain_id` (string) - The Domain name or ID you are
     authenticating with. OpenStack installations require this if identity v3 is used.
@@ -96,11 +98,26 @@ builder.
 -   `floating_ip_pool` (string) - The name of the floating IP pool to use to
     allocate a floating IP.
 
+-   `image_members` (array of strings) - List of members to add to the image
+    after creation. An image member is usually a project (also called the
+    “tenant”) with whom the image is shared.
+
+-   `image_visibility` (string) - One of "public", "private", "shared", or
+    "community".
+
 -   `insecure` (boolean) - Whether or not the connection to OpenStack can be
     done over an insecure connection. By default this is false.
 
+-   `key` (string) - Client private key file path for SSL client authentication.
+    If ommited the OS\_KEY environment variable can be used.
+
 -   `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
+
+-   `instance_metadata` (object of key/value strings) - Metadata that is
+    applied to the server instance created by Packer. Also called server
+    properties in some documentation. The strings have a max size of 255 bytes
+    each.
 
 -   `networks` (array of strings) - A list of networks by UUID to attach to
     this instance.
@@ -113,6 +130,13 @@ builder.
     launch the server to create the AMI. If not specified, Packer will use the
     environment variable `OS_REGION_NAME`, if set.
 
+-   `reuse_ips` (boolean) - Whether or not to attempt to reuse existing
+    unassigned floating ips in the project before allocating a new one. Note
+    that it is not possible to safely do this concurrently, so if you are
+    running multiple openstack builds concurrently, or if other processes are
+    assigning and using floating IPs in the same openstack project while packer
+    is running, you should not set this to true. Defaults to false.
+
 -   `security_groups` (array of strings) - A list of security groups by name to
     add to this instance.
 
@@ -122,21 +146,34 @@ builder.
 
 -   `ssh_ip_version` (string) - The IP version to use for SSH connections, valid
     values are `4` and `6`. Useful on dual stacked instances where the default
-    behaviour is to connect via whichever IP address is returned first from the
+    behavior is to connect via whichever IP address is returned first from the
     OpenStack API.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. By default, this is blank, and Packer will
     generate a temporary keypair.
+    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
-    must be specified with this.
+    or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
+
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the source instance. No temporary keypair will
+    be created, and the values of `ssh_password` and `ssh_private_key_file` will
+    be ignored. To use this option with a key pair already configured in the source
+    image, leave the `ssh_keypair_name` blank. To associate an existing key pair
+    with the source instance, set the `ssh_keypair_name` field to the name
+    of the key pair.
+
+-   `temporary_key_pair_name` (string) - The name of the temporary key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
     Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
     is also called Project in later versions of OpenStack.
 
--   `use_floating_ip` (boolean) - _Deprecated_ use `floating_ip` or `floating_ip_pool`
+-   `use_floating_ip` (boolean) - *Deprecated* use `floating_ip` or `floating_ip_pool`
     instead.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
@@ -150,7 +187,7 @@ builder.
 
 Here is a basic example. This is a example to build on DevStack running in a VM.
 
-``` {.javascript}
+``` json
 {
   "type": "openstack",
   "identity_endpoint": "http://<destack-ip>:5000/v3",
@@ -165,7 +202,6 @@ Here is a basic example. This is a example to build on DevStack running in a VM.
   "flavor": "m1.tiny",
   "insecure": "true"
 }
-
 ```
 
 ## Basic Example: Rackspace public cloud
@@ -173,7 +209,7 @@ Here is a basic example. This is a example to build on DevStack running in a VM.
 Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
 (Precise Pangolin) on Rackspace OpenStack cloud offering.
 
-``` {.javascript}
+``` json
 {
   "type": "openstack",
   "username": "foo",
@@ -191,7 +227,7 @@ Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
 This example builds an Ubuntu 14.04 image on a private OpenStack cloud, powered
 by Metacloud.
 
-``` {.javascript}
+``` json
 {
   "type": "openstack",
   "ssh_username": "root",
@@ -221,29 +257,31 @@ This is slightly different when identity v3 is used:
 
 This will authenticate the user on the domain and scope you to the project.
 A tenant is the same as a project. It's optional to use names or IDs in v3.
-This means you can use `OS_USERNAME` or `OS_USERID`,  `OS_TENANT_ID` or
+This means you can use `OS_USERNAME` or `OS_USERID`, `OS_TENANT_ID` or
 `OS_TENANT_NAME` and `OS_DOMAIN_ID` or `OS_DOMAIN_NAME`.
 
 The above example would be equivalent to an RC file looking like this :
 
-    export OS_AUTH_URL="https://identity.myprovider/v3"
-    export OS_USERNAME="myuser"
-    export OS_PASSWORD="password"
-    export OS_USER_DOMAIN_NAME="mydomain"
-    export OS_PROJECT_DOMAIN_NAME="mydomain"
+``` shell
+export OS_AUTH_URL="https://identity.myprovider/v3"
+export OS_USERNAME="myuser"
+export OS_PASSWORD="password"
+export OS_USER_DOMAIN_NAME="mydomain"
+export OS_PROJECT_DOMAIN_NAME="mydomain"
+```
 
 ## Notes on OpenStack Authorization
 
 The simplest way to get all settings for authorization agains OpenStack is to
-go into the OpenStack Dashboard (Horizon) select your _Project_ and navigate
-_Project, Access & Security_, select _API Access_ and _Download OpenStack RC
-File v3_. Source the file, and select your wanted region by setting
-environment variable `OS_REGION_NAME` or `OS_REGION_ID` and `export
-OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
+go into the OpenStack Dashboard (Horizon) select your *Project* and navigate
+*Project, Access & Security*, select *API Access* and *Download OpenStack RC
+File v3*. Source the file, and select your wanted region by setting
+environment variable `OS_REGION_NAME` or `OS_REGION_ID` and `export OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
 
-\~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
+~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
 `OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
 
 To troubleshoot authorization issues test you environment variables with the
 OpenStack cli. It can be installed with
-```pip install --user python-openstackclient```.
+
+    $ pip install --user python-openstackclient

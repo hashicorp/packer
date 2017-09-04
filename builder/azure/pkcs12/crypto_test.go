@@ -21,7 +21,6 @@ func pbDecrypterFor(algorithm pkix.AlgorithmIdentifier, password []byte) (cipher
 
 	k := deriveKeyByAlg[algorithmName](params.Salt, password, params.Iterations)
 	iv := deriveIVByAlg[algorithmName](params.Salt, password, params.Iterations)
-	password = nil
 
 	code, err := blockcodeByAlg[algorithmName](k)
 	if err != nil {
@@ -34,7 +33,6 @@ func pbDecrypterFor(algorithm pkix.AlgorithmIdentifier, password []byte) (cipher
 
 func pbDecrypt(info decryptable, password []byte) (decrypted []byte, err error) {
 	cbc, err := pbDecrypterFor(info.GetAlgorithm(), password)
-	password = nil
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +45,7 @@ func pbDecrypt(info decryptable, password []byte) (decrypted []byte, err error) 
 	if psLen := int(decrypted[len(decrypted)-1]); psLen > 0 && psLen <= cbc.BlockSize() {
 		m := decrypted[:len(decrypted)-psLen]
 		ps := decrypted[len(decrypted)-psLen:]
-		if bytes.Compare(ps, bytes.Repeat([]byte{byte(psLen)}, psLen)) != 0 {
+		if !bytes.Equal(ps, bytes.Repeat([]byte{byte(psLen)}, psLen)) {
 			return nil, ErrDecryption
 		}
 		decrypted = m
@@ -87,7 +85,7 @@ func TestPbDecrypterFor(t *testing.T) {
 	expectedM := []byte{185, 73, 135, 249, 137, 1, 122, 247}
 	cbc.CryptBlocks(M, M)
 
-	if bytes.Compare(M, expectedM) != 0 {
+	if !bytes.Equal(M, expectedM) {
 		t.Errorf("expected M to be '%d', but found '%d", expectedM, M)
 	}
 }
@@ -127,7 +125,7 @@ func TestPbDecrypt(t *testing.T) {
 			if err != nil {
 				t.Errorf("error decrypting C=%x: %v", c, err)
 			}
-			if bytes.Compare(m, e) != 0 {
+			if !bytes.Equal(m, e) {
 				t.Errorf("expected C=%x to be decoded to M=%x, but found %x", c, e, m)
 			}
 		case error:

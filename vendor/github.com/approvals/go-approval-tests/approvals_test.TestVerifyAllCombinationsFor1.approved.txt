@@ -1,0 +1,5 @@
+uppercase
+
+
+[Christopher] => CHRISTOPHER
+[Llewellyn] => LLEWELLYN

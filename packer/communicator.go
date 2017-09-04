@@ -5,9 +5,14 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/mitchellh/iochan"
 )
+
+// CmdDisconnect is a sentinel value to indicate a RemoteCmd
+// exited because the remote side disconnected us.
+const CmdDisconnect int = 2300218
 
 // RemoteCmd represents a remote command being prepared or run.
 type RemoteCmd struct {
@@ -150,11 +155,11 @@ OutputLoop:
 	// Make sure we finish off stdout/stderr because we may have gotten
 	// a message from the exit channel before finishing these first.
 	for output := range stdoutCh {
-		ui.Message(strings.TrimSpace(output))
+		ui.Message(r.cleanOutputLine(output))
 	}
 
 	for output := range stderrCh {
-		ui.Message(strings.TrimSpace(output))
+		ui.Message(r.cleanOutputLine(output))
 	}
 
 	return nil
@@ -192,7 +197,7 @@ func (r *RemoteCmd) Wait() {
 // UI output when we're reading from a remote command.
 func (r *RemoteCmd) cleanOutputLine(line string) string {
 	// Trim surrounding whitespace
-	line = strings.TrimSpace(line)
+	line = strings.TrimRightFunc(line, unicode.IsSpace)
 
 	// Trim up to the first carriage return, since that text would be
 	// lost anyways.

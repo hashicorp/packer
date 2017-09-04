@@ -5,8 +5,9 @@ description: |
     repository and tag to the image and lets you use the other Docker
     post-processors such as docker-push to push the image to a registry.
 layout: docs
-page_title: 'docker-import Post-Processor'
-...
+page_title: 'Docker Import - Post-Processors'
+sidebar_current: 'docs-post-processors-docker-import'
+---
 
 # Docker Import Post-Processor
 
@@ -21,8 +22,8 @@ registry.
 
 ## Configuration
 
-The configuration for this post-processor is extremely simple. At least a
-repository is required.
+The configuration for this post-processor only requires a `repository`, a `tag`
+is optional.
 
 -   `repository` (string) - The repository of the imported image.
 
@@ -32,16 +33,16 @@ repository is required.
 
 An example is shown below, showing only the post-processor configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "docker-import",
-  "repository": "mitchellh/packer",
+  "repository": "hashicorp/packer",
   "tag": "0.7"
 }
 ```
 
 This example would take the image created by the Docker builder and import it
-into the local Docker process with a name of `mitchellh/packer:0.7`.
+into the local Docker process with a name of `hashicorp/packer:0.7`.
 
 Following this, you can use the
 [docker-push](/docs/post-processors/docker-push.html) post-processor to push it

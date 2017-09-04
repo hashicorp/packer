@@ -28,7 +28,7 @@ func TestPrlctlConfigPrepare_Prlctl(t *testing.T) {
 	}
 
 	expected := [][]string{
-		[]string{"foo", "bar", "baz"},
+		{"foo", "bar", "baz"},
 	}
 
 	if !reflect.DeepEqual(c.Prlctl, expected) {

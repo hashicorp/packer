@@ -1,15 +1,13 @@
 ---
-description: |
-    So far we've shown how Packer can automatically build an image and provision it.
-    This on its own is already quite powerful. But Packer can do better than that.
-    Packer can create multiple images for multiple platforms in parallel, all
-    configured from a single template.
 layout: intro
-next_title: Vagrant Boxes
-next_url: '/intro/getting-started/vagrant.html'
-page_title: Parallel Builds
-prev_url: '/intro/getting-started/provision.html'
-...
+sidebar_current: intro-getting-started-parallel-builds
+page_title: Parallel Builds - Getting Started
+description: |-
+  So far we've shown how Packer can automatically build an image and provision
+  it. This on its own is already quite powerful. But Packer can do better than
+  that. Packer can create multiple images for multiple platforms in parallel,
+  all configured from a single template.
+---
 
 # Parallel Builds
 
@@ -61,20 +59,21 @@ We now have to modify the template to add DigitalOcean to it. Modify the
 template we've been using and add the following JSON object to the `builders`
 array.
 
-``` {.javascript}
+```json
 {
   "type": "digitalocean",
   "api_token": "{{user `do_api_token`}}",
   "image": "ubuntu-14-04-x64",
   "region": "nyc3",
-  "size": "512mb"
+  "size": "512mb",
+  "ssh_username": "root"
 }
 ```
 
 You'll also need to modify the `variables` section of the template to include
 the access keys for DigitalOcean.
 
-``` {.javascript}
+```json
 "variables": {
   "do_api_token": "",
   // ...
@@ -83,7 +82,7 @@ the access keys for DigitalOcean.
 
 The entire template should now look like this:
 
-``` {.javascript}
+```json
 {
   "variables": {
     "aws_access_key": "",
@@ -104,7 +103,8 @@ The entire template should now look like this:
     "api_token": "{{user `do_api_token`}}",
     "image": "ubuntu-14-04-x64",
     "region": "nyc3",
-    "size": "512mb"
+    "size": "512mb",
+    "ssh_username": "root"
   }],
   "provisioners": [{
     "type": "shell",
@@ -124,7 +124,7 @@ that as long as you specify a unique `name` for each build.
 
 Validate the template with `packer validate`. This is always a good practice.
 
--&gt; **Note:** If you're looking for more **DigitalOcean configuration
+-> **Note:** If you're looking for more **DigitalOcean configuration
 options**, you can find them on the [DigitalOcean Builder
 page](/docs/builders/digitalocean.html) in the documentation. The documentation
 is more of a reference manual that contains a listing of all the available
@@ -137,7 +137,7 @@ include all of it, but a portion of it is reproduced below. Note that the
 ordering and wording of the lines may be slightly different, but the effect is
 the same.
 
-``` {.text}
+```text
 $ packer build \
     -var 'aws_access_key=YOUR ACCESS KEY' \
     -var 'aws_secret_key=YOUR SECRET KEY' \
@@ -166,7 +166,8 @@ us-east-1: ami-376d1d5e
 
 As you can see, Packer builds both the Amazon and DigitalOcean images in
 parallel. It outputs information about each in different colors (although you
-can't see that in the block above) so that it is easy to identify.
+can't see that in the block above), making it is easier to identify the actions
+executed when you execute the command.
 
 At the end of the build, Packer outputs both of the artifacts created (an AMI
 and a DigitalOcean snapshot). Both images created are bare bones Ubuntu

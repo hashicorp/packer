@@ -6,11 +6,11 @@ import (
 	"log"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 )
 
 // Builder implements packer.Builder and builds the actual VMware
@@ -62,7 +62,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Force: b.config.PackerForce,
 		},
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&StepCloneVMX{
 			OutputDir: b.config.OutputDir,
@@ -118,20 +119,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+		},
 	}
 
 	// Run the steps.
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// Report any errors.
@@ -148,7 +142,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vmwcommon.NewLocalArtifact(b.config.OutputDir)
+	return vmwcommon.NewLocalArtifact(b.config.VMName, b.config.OutputDir)
 }
 
 // Cancel.

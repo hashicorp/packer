@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepTeardownInstance represents a Packer build step that tears down GCE
@@ -71,8 +71,8 @@ func (s *StepTeardownInstance) Cleanup(state multistep.StateBag) {
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error deleting disk. Please delete it manually.\n\n"+
-				"DiskName: %s\n" +
-				"Zone: %s\n" +
+				"DiskName: %s\n"+
+				"Zone: %s\n"+
 				"Error: %s", config.DiskName, config.Zone, err))
 	}
 

@@ -3,12 +3,15 @@ package openstack
 import (
 	"crypto/tls"
 	"fmt"
-	"net/http"
 	"os"
 
-	"github.com/mitchellh/packer/template/interpolate"
-	"github.com/rackspace/gophercloud"
-	"github.com/rackspace/gophercloud/openstack"
+	"crypto/x509"
+	"io/ioutil"
+
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to openstack access
@@ -16,7 +19,6 @@ type AccessConfig struct {
 	Username         string `mapstructure:"username"`
 	UserID           string `mapstructure:"user_id"`
 	Password         string `mapstructure:"password"`
-	APIKey           string `mapstructure:"api_key"`
 	IdentityEndpoint string `mapstructure:"identity_endpoint"`
 	TenantID         string `mapstructure:"tenant_id"`
 	TenantName       string `mapstructure:"tenant_name"`
@@ -25,6 +27,9 @@ type AccessConfig struct {
 	Insecure         bool   `mapstructure:"insecure"`
 	Region           string `mapstructure:"region"`
 	EndpointType     string `mapstructure:"endpoint_type"`
+	CACertFile       string `mapstructure:"cacert"`
+	ClientCertFile   string `mapstructure:"cert"`
+	ClientKeyFile    string `mapstructure:"key"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -42,9 +47,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Legacy RackSpace stuff. We're keeping this around to keep things BC.
-	if c.APIKey == "" {
-		c.APIKey = os.Getenv("SDK_API_KEY")
-	}
 	if c.Password == "" {
 		c.Password = os.Getenv("SDK_PASSWORD")
 	}
@@ -57,9 +59,21 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.Username == "" {
 		c.Username = os.Getenv("SDK_USERNAME")
 	}
+	if c.CACertFile == "" {
+		c.CACertFile = os.Getenv("OS_CACERT")
+	}
+	if c.ClientCertFile == "" {
+		c.ClientCertFile = os.Getenv("OS_CERT")
+	}
+	if c.ClientKeyFile == "" {
+		c.ClientKeyFile = os.Getenv("OS_KEY")
+	}
 
 	// Get as much as possible from the end
 	ao, _ := openstack.AuthOptionsFromEnv()
+
+	// Make sure we reauth as needed
+	ao.AllowReauth = true
 
 	// Override values if we have them in our config
 	overrides := []struct {
@@ -68,7 +82,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.Username, &ao.Username},
 		{&c.UserID, &ao.UserID},
 		{&c.Password, &ao.Password},
-		{&c.APIKey, &ao.APIKey},
 		{&c.IdentityEndpoint, &ao.IdentityEndpoint},
 		{&c.TenantID, &ao.TenantID},
 		{&c.TenantName, &ao.TenantName},
@@ -87,13 +100,36 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		return []error{err}
 	}
 
+	tls_config := &tls.Config{}
+
+	if c.CACertFile != "" {
+		caCert, err := ioutil.ReadFile(c.CACertFile)
+		if err != nil {
+			return []error{err}
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		tls_config.RootCAs = caCertPool
+	}
+
 	// If we have insecure set, then create a custom HTTP client that
 	// ignores SSL errors.
 	if c.Insecure {
-		config := &tls.Config{InsecureSkipVerify: true}
-		transport := &http.Transport{TLSClientConfig: config}
-		client.HTTPClient.Transport = transport
+		tls_config.InsecureSkipVerify = true
 	}
+
+	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(c.ClientCertFile, c.ClientKeyFile)
+		if err != nil {
+			return []error{err}
+		}
+
+		tls_config.Certificates = []tls.Certificate{cert}
+	}
+
+	transport := cleanhttp.DefaultTransport()
+	transport.TLSClientConfig = tls_config
+	client.HTTPClient.Transport = transport
 
 	// Auth
 	err = openstack.Authenticate(client, ao)
@@ -107,6 +143,13 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 func (c *AccessConfig) computeV2Client() (*gophercloud.ServiceClient, error) {
 	return openstack.NewComputeV2(c.osClient, gophercloud.EndpointOpts{
+		Region:       c.Region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *AccessConfig) imageV2Client() (*gophercloud.ServiceClient, error) {
+	return openstack.NewImageServiceV2(c.osClient, gophercloud.EndpointOpts{
 		Region:       c.Region,
 		Availability: c.getEndpointType(),
 	})

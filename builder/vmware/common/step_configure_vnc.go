@@ -8,8 +8,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -63,7 +63,7 @@ func VNCPassword(skipPassword bool) string {
 	}
 	length := int(8)
 
-	charSet := []byte("1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./!@#%^*()_+QWERTYUIOP{}|ASDFGHJKL:XCVBNM<>?")
+	charSet := []byte("012345689abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	charSetLength := len(charSet)
 
 	password := make([]byte, length)

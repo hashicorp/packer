@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var reImageFamily = regexp.MustCompile(`^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$`)
@@ -26,6 +26,8 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	AcceleratorType      string            `mapstructure:"accelerator_type"`
+	AcceleratorCount     int64             `mapstructure:"accelerator_count"`
 	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
@@ -37,11 +39,15 @@ type Config struct {
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
+	NetworkProjectId     string            `mapstructure:"network_project_id"`
 	OmitExternalIP       bool              `mapstructure:"omit_external_ip"`
+	OnHostMaintenance    string            `mapstructure:"on_host_maintenance"`
 	Preemptible          bool              `mapstructure:"preemptible"`
 	RawStateTimeout      string            `mapstructure:"state_timeout"`
 	Region               string            `mapstructure:"region"`
+	Scopes               []string          `mapstructure:"scopes"`
 	SourceImage          string            `mapstructure:"source_image"`
+	SourceImageFamily    string            `mapstructure:"source_image_family"`
 	SourceImageProjectId string            `mapstructure:"source_image_project_id"`
 	StartupScriptFile    string            `mapstructure:"startup_script_file"`
 	Subnetwork           string            `mapstructure:"subnetwork"`
@@ -49,10 +55,10 @@ type Config struct {
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
-	Account         AccountFile
-	privateKeyBytes []byte
-	stateTimeout    time.Duration
-	ctx             interpolate.Context
+	Account            AccountFile
+	stateTimeout       time.Duration
+	imageAlreadyExists bool
+	ctx                interpolate.Context
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -87,6 +93,27 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.ImageDescription == "" {
 		c.ImageDescription = "Created by Packer"
+	}
+
+	if c.OnHostMaintenance == "MIGRATE" && c.Preemptible {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be TERMINATE when using preemptible instances."))
+	}
+	// Setting OnHostMaintenance Correct Defaults
+	//   "MIGRATE" : Possible and default if Preemptible is false
+	//   "TERMINATE": Required if Preemptible is true
+	if c.Preemptible {
+		c.OnHostMaintenance = "TERMINATE"
+	} else {
+		if c.OnHostMaintenance == "" {
+			c.OnHostMaintenance = "MIGRATE"
+		}
+	}
+
+	// Make sure user sets a valid value for on_host_maintenance option
+	if !(c.OnHostMaintenance == "MIGRATE" || c.OnHostMaintenance == "TERMINATE") {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("on_host_maintenance must be one of MIGRATE or TERMINATE."))
 	}
 
 	if c.ImageName == "" {
@@ -128,10 +155,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.RawStateTimeout = "5m"
 	}
 
-	if c.Comm.SSHUsername == "" {
-		c.Comm.SSHUsername = "root"
-	}
-
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
@@ -142,9 +165,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs, errors.New("a project_id must be specified"))
 	}
 
-	if c.SourceImage == "" {
+	if c.Scopes == nil {
+		c.Scopes = []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/compute",
+			"https://www.googleapis.com/auth/devstorage.full_control",
+		}
+	}
+
+	if c.SourceImage == "" && c.SourceImageFamily == "" {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("a source_image must be specified"))
+			errs, errors.New("a source_image or source_image_family must be specified"))
 	}
 
 	if c.Zone == "" {
@@ -174,6 +205,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.OmitExternalIP && !c.UseInternalIP {
 		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
+	}
+
+	if c.AcceleratorCount > 0 && len(c.AcceleratorType) == 0 {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
+	}
+
+	if c.AcceleratorCount > 0 && c.OnHostMaintenance != "TERMINATE" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
 	}
 
 	// Check for any errors.

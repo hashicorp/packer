@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var (
@@ -23,23 +23,29 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	Commit     bool
-	Discard    bool
-	ExportPath string `mapstructure:"export_path"`
-	Image      string
-	Pty        bool
-	Pull       bool
-	RunCommand []string `mapstructure:"run_command"`
-	Volumes    map[string]string
-	Privileged bool `mapstructure:"privileged"`
+	Commit       bool
+	Discard      bool
+	ExportPath   string `mapstructure:"export_path"`
+	Image        string
+	Pty          bool
+	Pull         bool
+	RunCommand   []string `mapstructure:"run_command"`
+	Volumes      map[string]string
+	Privileged   bool `mapstructure:"privileged"`
+	Author       string
+	Changes      []string
+	Message      string
+	ContainerDir string `mapstructure:"container_dir"`
 
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
-	Login         bool
-	LoginEmail    string `mapstructure:"login_email"`
-	LoginPassword string `mapstructure:"login_password"`
-	LoginServer   string `mapstructure:"login_server"`
-	LoginUsername string `mapstructure:"login_username"`
+	Login           bool
+	LoginEmail      string `mapstructure:"login_email"`
+	LoginPassword   string `mapstructure:"login_password"`
+	LoginServer     string `mapstructure:"login_server"`
+	LoginUsername   string `mapstructure:"login_username"`
+	EcrLogin        bool   `mapstructure:"ecr_login"`
+	AwsAccessConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -105,6 +111,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if fi, err := os.Stat(c.ExportPath); err == nil && fi.IsDir() {
 			errs = packer.MultiErrorAppend(errs, errExportPathNotFile)
 		}
+	}
+
+	if c.ContainerDir == "" {
+		c.ContainerDir = "/packer-files"
+	}
+
+	if c.EcrLogin && c.LoginServer == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("ECR login requires login server to be provided."))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

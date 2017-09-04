@@ -7,13 +7,14 @@ package vagrantcloud
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
@@ -40,9 +41,10 @@ type boxDownloadUrlTemplate struct {
 }
 
 type PostProcessor struct {
-	config Config
-	client *VagrantCloudClient
-	runner multistep.Runner
+	config         Config
+	client         *VagrantCloudClient
+	runner         multistep.Runner
+	warnAtlasToken bool
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -62,6 +64,17 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Default configuration
 	if p.config.VagrantCloudUrl == "" {
 		p.config.VagrantCloudUrl = VAGRANT_CLOUD_URL
+	}
+
+	if p.config.AccessToken == "" {
+		envToken := os.Getenv("VAGRANT_CLOUD_TOKEN")
+		if envToken == "" {
+			envToken = os.Getenv("ATLAS_TOKEN")
+			if envToken != "" {
+				p.warnAtlasToken = true
+			}
+		}
+		p.config.AccessToken = envToken
 	}
 
 	// Accumulate any errors
@@ -101,6 +114,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			"Unknown files in artifact from vagrant post-processor: %s", artifact.Files())
 	}
 
+	if p.warnAtlasToken {
+		ui.Message("Warning: Using Vagrant Cloud token found in ATLAS_TOKEN. Please make sure it is correct, or set VAGRANT_CLOUD_TOKEN")
+	}
+
 	// create the HTTP client
 	p.client = VagrantCloudClient{}.New(p.config.VagrantCloudUrl, p.config.AccessToken)
 
@@ -135,7 +152,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			new(stepCreateProvider),
 			new(stepPrepareUpload),
 			new(stepUpload),
-			new(stepVerifyUpload),
 			new(stepReleaseVersion),
 		}
 	} else {
@@ -148,15 +164,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Run the steps
-	if p.config.PackerDebug {
-		p.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		p.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
 	p.runner.Run(state)
 
 	// If there was an error, return that

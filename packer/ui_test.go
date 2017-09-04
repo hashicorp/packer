@@ -16,6 +16,12 @@ func readWriter(ui *BasicUi) (result string) {
 	return
 }
 
+// Reset the input Reader than add some input to it.
+func writeReader(ui *BasicUi, input string) {
+	buffer := ui.Reader.(*bytes.Buffer)
+	buffer.WriteString(input)
+}
+
 func readErrorWriter(ui *BasicUi) (result string) {
 	buffer := ui.ErrorWriter.(*bytes.Buffer)
 	result = buffer.String()
@@ -91,9 +97,9 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 	}
 }
 
-func TestTargettedUi(t *testing.T) {
+func TestTargetedUI(t *testing.T) {
 	bufferUi := testUi()
-	targettedUi := &TargettedUi{
+	targettedUi := &TargetedUI{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
@@ -136,11 +142,11 @@ func TestColoredUi_ImplUi(t *testing.T) {
 	}
 }
 
-func TestTargettedUi_ImplUi(t *testing.T) {
+func TestTargetedUI_ImplUi(t *testing.T) {
 	var raw interface{}
-	raw = &TargettedUi{}
+	raw = &TargetedUI{}
 	if _, ok := raw.(Ui); !ok {
-		t.Fatalf("TargettedUi must implement Ui")
+		t.Fatalf("TargetedUI must implement Ui")
 	}
 }
 
@@ -190,6 +196,45 @@ func TestBasicUi_Say(t *testing.T) {
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
+}
+
+func TestBasicUi_Ask(t *testing.T) {
+
+	var actual, expected string
+	var err error
+
+	var testCases = []struct {
+		Prompt, Input, Answer string
+	}{
+		{"[c]ontinue or [a]bort", "c\n", "c"},
+		{"[c]ontinue or [a]bort", "c", "c"},
+		// Empty input shouldn't give an error
+		{"Name", "Joe Bloggs\n", "Joe Bloggs"},
+		{"Name", "Joe Bloggs", "Joe Bloggs"},
+		{"Name", "\n", ""},
+	}
+
+	for _, testCase := range testCases {
+		// Because of the internal bufio we can't eaily reset the input, so create a new one each time
+		bufferUi := testUi()
+		writeReader(bufferUi, testCase.Input)
+
+		actual, err = bufferUi.Ask(testCase.Prompt)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if actual != testCase.Answer {
+			t.Fatalf("bad answer: %#v", actual)
+		}
+
+		actual = readWriter(bufferUi)
+		expected = testCase.Prompt + " "
+		if actual != expected {
+			t.Fatalf("bad prompt: %#v", actual)
+		}
+	}
+
 }
 
 func TestMachineReadableUi_ImplUi(t *testing.T) {

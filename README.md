@@ -1,11 +1,22 @@
 # Packer
 
-[![Build Status](https://travis-ci.org/mitchellh/packer.svg?branch=master)](https://travis-ci.org/mitchellh/packer)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/mitchellh/packer?branch=master&svg=true)](https://ci.appveyor.com/project/hashicorp/packer)
+[![Build Status][travis-badge]][travis]
+[![Windows Build Status][appveyor-badge]][appveyor]
+[![GoDoc][godoc-badge]][godoc]
+[![GoReportCard][report-badge]][report]
 
-* Website: http://www.packer.io
+[travis-badge]: https://travis-ci.org/hashicorp/packer.svg?branch=master
+[travis]: https://travis-ci.org/hashicorp/packer
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
+[appveyor]: https://ci.appveyor.com/project/hashicorp/packer
+[godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
+[godoc]: https://godoc.org/github.com/mitchellh/packer
+[report-badge]: https://goreportcard.com/badge/github.com/mitchellh/packer
+[report]: https://goreportcard.com/report/github.com/mitchellh/packer
+
+* Website: https://www.packer.io
 * IRC: `#packer-tool` on Freenode
-* Mailing list: [Google Groups](http://groups.google.com/group/packer-tool)
+* Mailing list: [Google Groups](https://groups.google.com/forum/#!forum/packer-tool)
 
 Packer is a tool for building identical machine images for multiple platforms
 from a single source configuration.
@@ -16,14 +27,19 @@ comes out of the box with support for the following platforms:
 
 * Amazon EC2 (AMI). Both EBS-backed and instance-store AMIs
 * Azure
+* CloudStack
 * DigitalOcean
 * Docker
 * Google Compute Engine
+* Hyper-V
+* 1&1
 * OpenStack
 * Parallels
+* ProfitBricks
 * QEMU. Both KVM and Xen images.
-* VirtualBox
+* Triton (Joyent Public Cloud)
 * VMware
+* VirtualBox
 
 Support for other platforms can be added via plugins.
 
@@ -31,15 +47,19 @@ The images that Packer creates can easily be turned into
 [Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
+Download and install packages and dependencies
+```
+go get github.com/hashicorp/packer
+```
 
 **Note:** There is a great
-[introduction and getting started guide](http://www.packer.io/intro)
+[introduction and getting started guide](https://www.packer.io/intro)
 for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
 
-First, [download a pre-built Packer binary](http://www.packer.io/downloads.html)
-for your operating system or [compile Packer yourself](#developing-packer).
+First, [download a pre-built Packer binary](https://www.packer.io/downloads.html)
+for your operating system or [compile Packer yourself](CONTRIBUTING.md#setting-up-go-to-work-on-packer).
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
@@ -58,8 +78,8 @@ file as `quick-start.json`. Export your AWS credentials as the
     "access_key": "{{user `access_key`}}",
     "secret_key": "{{user `secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-de0d9eb7",
-    "instance_type": "t1.micro",
+    "source_ami": "ami-af22d9b9",
+    "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
     "ami_name": "packer-example {{timestamp}}"
   }]
@@ -83,8 +103,8 @@ they're run, etc. is up to you.
 
 Comprehensive documentation is viewable on the Packer website:
 
-http://www.packer.io/docs
+https://www.packer.io/docs
 
 ## Developing Packer
 
-See [CONTRIBUTING.md](https://github.com/mitchellh/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.
+See [CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/CONTRIBUTING.md) for best practices and instructions on setting up your development environment to work on Packer.

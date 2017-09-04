@@ -3,23 +3,25 @@ package dockerpush
 import (
 	"fmt"
 
-	"github.com/mitchellh/packer/builder/docker"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/post-processor/docker-import"
-	"github.com/mitchellh/packer/post-processor/docker-tag"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/builder/docker"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/docker-import"
+	"github.com/hashicorp/packer/post-processor/docker-tag"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Login         bool
-	LoginEmail    string `mapstructure:"login_email"`
-	LoginUsername string `mapstructure:"login_username"`
-	LoginPassword string `mapstructure:"login_password"`
-	LoginServer   string `mapstructure:"login_server"`
+	Login                  bool
+	LoginEmail             string `mapstructure:"login_email"`
+	LoginUsername          string `mapstructure:"login_username"`
+	LoginPassword          string `mapstructure:"login_password"`
+	LoginServer            string `mapstructure:"login_server"`
+	EcrLogin               bool   `mapstructure:"ecr_login"`
+	docker.AwsAccessConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -42,6 +44,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
+	if p.config.EcrLogin && p.config.LoginServer == "" {
+		return fmt.Errorf("ECR login requires login server to be provided.")
+	}
 	return nil
 }
 
@@ -60,7 +65,19 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		driver = &docker.DockerDriver{Ctx: &p.config.ctx, Ui: ui}
 	}
 
-	if p.config.Login {
+	if p.config.EcrLogin {
+		ui.Message("Fetching ECR credentials...")
+
+		username, password, err := p.config.EcrGetLogin(p.config.LoginServer)
+		if err != nil {
+			return nil, false, err
+		}
+
+		p.config.LoginUsername = username
+		p.config.LoginPassword = password
+	}
+
+	if p.config.Login || p.config.EcrLogin {
 		ui.Message("Logging in...")
 		err := driver.Login(
 			p.config.LoginServer,

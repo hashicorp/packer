@@ -9,10 +9,13 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepRunSourceInstance struct {
@@ -22,8 +25,9 @@ type StepRunSourceInstance struct {
 	Debug                             bool
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
-	InstanceType                      string
 	IamInstanceProfile                string
+	InstanceInitiatedShutdownBehavior string
+	InstanceType                      string
 	SourceAMI                         string
 	SpotPrice                         string
 	SpotPriceProduct                  string
@@ -31,7 +35,7 @@ type StepRunSourceInstance struct {
 	Tags                              map[string]string
 	UserData                          string
 	UserDataFile                      string
-	InstanceInitiatedShutdownBehavior string
+	Ctx                               interpolate.Context
 
 	instanceId  string
 	spotRequest *ec2.SpotInstanceRequest
@@ -39,32 +43,12 @@ type StepRunSourceInstance struct {
 
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	keyName := state.Get("keyPair").(string)
-	tempSecurityGroupIds := state.Get("securityGroupIds").([]string)
-	ui := state.Get("ui").(packer.Ui)
-
-	securityGroupIds := make([]*string, len(tempSecurityGroupIds))
-	for i, sg := range tempSecurityGroupIds {
-		found := false
-		for i := 0; i < 5; i++ {
-			time.Sleep(time.Duration(i) * 5 * time.Second)
-			log.Printf("[DEBUG] Describing tempSecurityGroup to ensure it is available: %s", sg)
-			_, err := ec2conn.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{
-				GroupIds: []*string{aws.String(sg)},
-			})
-			if err == nil {
-				log.Printf("[DEBUG] Found security group %s", sg)
-				found = true
-				break
-			}
-			log.Printf("[DEBUG] Error in querying security group %s", err)
-		}
-		if found {
-			securityGroupIds[i] = aws.String(sg)
-		} else {
-			state.Put("error", fmt.Errorf("Timeout waiting for security group %s to become available", sg))
-		}
+	var keyName string
+	if name, ok := state.GetOk("keyPair"); ok {
+		keyName = name.(string)
 	}
+	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
+	ui := state.Get("ui").(packer.Ui)
 
 	userData := s.UserData
 	if s.UserDataFile != "" {
@@ -84,24 +68,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 
 	ui.Say("Launching a source AWS instance...")
-	imageResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
-		ImageIds: []*string{&s.SourceAMI},
-	})
-	if err != nil {
-		state.Put("error", fmt.Errorf("There was a problem with the source AMI: %s", err))
+	image, ok := state.Get("source_image").(*ec2.Image)
+	if !ok {
+		state.Put("error", fmt.Errorf("source_image type assertion failed"))
 		return multistep.ActionHalt
 	}
+	s.SourceAMI = *image.ImageId
 
-	if len(imageResp.Images) != 1 {
-		state.Put("error", fmt.Errorf("The source AMI '%s' could not be found.", s.SourceAMI))
-		return multistep.ActionHalt
-	}
-
-	if s.ExpectedRootDevice != "" && *imageResp.Images[0].RootDeviceType != s.ExpectedRootDevice {
+	if s.ExpectedRootDevice != "" && *image.RootDeviceType != s.ExpectedRootDevice {
 		state.Put("error", fmt.Errorf(
 			"The provided source AMI has an invalid root device type.\n"+
 				"Expected '%s', got '%s'.",
-			s.ExpectedRootDevice, *imageResp.Images[0].RootDeviceType))
+			s.ExpectedRootDevice, *image.RootDeviceType))
 		return multistep.ActionHalt
 	}
 
@@ -158,9 +136,24 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	var instanceId string
 
+	ui.Say("Adding tags to source instance")
+	if _, exists := s.Tags["Name"]; !exists {
+		s.Tags["Name"] = "Packer Builder"
+	}
+
+	createTagsAfterInstanceStarts := true
+	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error tagging source instance: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	ReportTags(ui, ec2Tags)
+
 	if spotPrice == "" || spotPrice == "0" {
+
 		runOpts := &ec2.RunInstancesInput{
-			KeyName:             &keyName,
 			ImageId:             &s.SourceAMI,
 			InstanceType:        &s.InstanceType,
 			UserData:            &userData,
@@ -172,9 +165,23 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			EbsOptimized:        &s.EbsOptimized,
 		}
 
+		if len(ec2Tags) > 0 {
+			runTags := &ec2.TagSpecification{
+				ResourceType: aws.String("instance"),
+				Tags:         ec2Tags,
+			}
+
+			runOpts.SetTagSpecifications([]*ec2.TagSpecification{runTags})
+			createTagsAfterInstanceStarts = false
+		}
+
+		if keyName != "" {
+			runOpts.KeyName = &keyName
+		}
+
 		if s.SubnetId != "" && s.AssociatePublicIpAddress {
 			runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
-				&ec2.InstanceNetworkInterfaceSpecification{
+				{
 					DeviceIndex:              aws.Int64(0),
 					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
 					SubnetId:                 &s.SubnetId,
@@ -203,29 +210,41 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		ui.Message(fmt.Sprintf(
 			"Requesting spot instance '%s' for: %s",
 			s.InstanceType, spotPrice))
-		runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-			SpotPrice: &spotPrice,
-			LaunchSpecification: &ec2.RequestSpotLaunchSpecification{
-				KeyName:            &keyName,
-				ImageId:            &s.SourceAMI,
-				InstanceType:       &s.InstanceType,
-				UserData:           &userData,
-				IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
-				NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
-					&ec2.InstanceNetworkInterfaceSpecification{
-						DeviceIndex:              aws.Int64(0),
-						AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-						SubnetId:                 &s.SubnetId,
-						Groups:                   securityGroupIds,
-						DeleteOnTermination:      aws.Bool(true),
-					},
-				},
-				Placement: &ec2.SpotPlacement{
-					AvailabilityZone: &availabilityZone,
-				},
-				BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
-				EbsOptimized:        &s.EbsOptimized,
+
+		runOpts := &ec2.RequestSpotLaunchSpecification{
+			ImageId:            &s.SourceAMI,
+			InstanceType:       &s.InstanceType,
+			UserData:           &userData,
+			IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
+			Placement: &ec2.SpotPlacement{
+				AvailabilityZone: &availabilityZone,
 			},
+			BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
+			EbsOptimized:        &s.EbsOptimized,
+		}
+
+		if s.SubnetId != "" && s.AssociatePublicIpAddress {
+			runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
+				{
+					DeviceIndex:              aws.Int64(0),
+					AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
+					SubnetId:                 &s.SubnetId,
+					Groups:                   securityGroupIds,
+					DeleteOnTermination:      aws.Bool(true),
+				},
+			}
+		} else {
+			runOpts.SubnetId = &s.SubnetId
+			runOpts.SecurityGroupIds = securityGroupIds
+		}
+
+		if keyName != "" {
+			runOpts.KeyName = &keyName
+		}
+
+		runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
+			SpotPrice:           &spotPrice,
+			LaunchSpecification: runOpts,
 		})
 		if err != nil {
 			err := fmt.Errorf("Error launching source spot instance: %s", err)
@@ -262,6 +281,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			return multistep.ActionHalt
 		}
 		instanceId = *spotResp.SpotInstanceRequests[0].InstanceId
+
 	}
 
 	// Set the instance ID so that the cleanup works properly
@@ -285,19 +305,30 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	instance := latestInstance.(*ec2.Instance)
 
-	ec2Tags := make([]*ec2.Tag, 1, len(s.Tags)+1)
-	ec2Tags[0] = &ec2.Tag{Key: aws.String("Name"), Value: aws.String("Packer Builder")}
-	for k, v := range s.Tags {
-		ec2Tags = append(ec2Tags, &ec2.Tag{Key: aws.String(k), Value: aws.String(v)})
-	}
+	if createTagsAfterInstanceStarts {
+		// Retry creating tags for about 2.5 minutes
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      ec2Tags,
+				Resources: []*string{instance.InstanceId},
+			})
+			if err == nil {
+				return true, nil
+			}
+			if awsErr, ok := err.(awserr.Error); ok {
+				if awsErr.Code() == "InvalidInstanceID.NotFound" {
+					return false, nil
+				}
+			}
+			return true, err
+		})
 
-	_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
-		Tags:      ec2Tags,
-		Resources: []*string{instance.InstanceId},
-	})
-	if err != nil {
-		ui.Message(
-			fmt.Sprintf("Failed to tag a Name on the builder instance: %s", err))
+		if err != nil {
+			err := fmt.Errorf("Error tagging source instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	if s.Debug {
@@ -340,7 +371,10 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "cancelled",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 
 	}
 
@@ -357,6 +391,9 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			Target:  "terminated",
 		}
 
-		WaitForState(&stateChange)
+		_, err := WaitForState(&stateChange)
+		if err != nil {
+			ui.Error(err.Error())
+		}
 	}
 }

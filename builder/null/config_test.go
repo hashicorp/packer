@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mitchellh/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 func testConfig() map[string]interface{} {
@@ -67,20 +67,6 @@ func TestConfigPrepare_host(t *testing.T) {
 
 	// Good host
 	raw["ssh_host"] = "good"
-	_, warns, errs = NewConfig(raw)
-	testConfigOk(t, warns, errs)
-}
-
-func TestConfigPrepare_sshUsername(t *testing.T) {
-	raw := testConfig()
-
-	// No ssh_username
-	delete(raw, "ssh_username")
-	_, warns, errs := NewConfig(raw)
-	testConfigErr(t, warns, errs)
-
-	// Good ssh_username
-	raw["ssh_username"] = "good"
 	_, warns, errs = NewConfig(raw)
 	testConfigOk(t, warns, errs)
 }

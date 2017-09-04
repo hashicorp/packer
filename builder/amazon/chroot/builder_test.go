@@ -1,8 +1,9 @@
 package chroot
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -71,7 +72,7 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	}
 
 	config["chroot_mounts"] = [][]string{
-		[]string{"bad"},
+		{"bad"},
 	}
 	warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -115,5 +116,35 @@ func TestBuilderPrepare_CommandWrapper(t *testing.T) {
 	}
 	if err != nil {
 		t.Errorf("err: %s", err)
+	}
+}
+
+func TestBuilderPrepare_CopyFiles(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
+
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+
+	if len(b.config.CopyFiles) != 1 && b.config.CopyFiles[0] != "/etc/resolv.conf" {
+		t.Errorf("Was expecting default value for copy_files.")
+	}
+
+	config["copy_files"] = []string{}
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Errorf("err: %s", err)
+	}
+
+	if len(b.config.CopyFiles) > 0 {
+		t.Errorf("Was expecting no default value for copy_files.")
 	}
 }

@@ -1,0 +1,20 @@
+{
+    "variables": {},
+    "provisioners": [
+      {
+        "type":  "ansible",
+        "playbook_file": "./playbook.yml"
+      }
+    ],
+    "builders": [
+      {
+        "type": "googlecompute",
+        "account_file": "{{user `account_file`}}",
+        "project_id": "{{user `project_id`}}",
+        "image_name": "packerbats-minimal-{{timestamp}}",
+        "source_image": "debian-8-jessie-v20161027",
+        "zone": "us-central1-a",
+        "ssh_username": "debian"
+      }
+    ]
+}

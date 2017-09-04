@@ -2,9 +2,9 @@ package iso
 
 import (
 	"fmt"
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/packer"
 	"time"
 )
 
@@ -64,11 +64,19 @@ func (s *stepCreateVM) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
+
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if (config.KeepRegistered) && (!cancelled && !halted) {
+		ui.Say("Keeping virtual machine registered with VirtualBox host (keep_registered = true)")
+		return
+	}
 
 	ui.Say("Unregistering and deleting virtual machine...")
 	var err error = nil
 	for i := 0; i < 5; i++ {
-		err = driver.VBoxManage("unregistervm", s.vmName, "--delete")
+		err = driver.Delete(s.vmName)
 		if err == nil {
 			break
 		}

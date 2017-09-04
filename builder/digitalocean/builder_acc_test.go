@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -27,7 +27,9 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "nyc2",
 		"size": "512mb",
-		"image": "ubuntu-12-04-x64"
+		"image": "ubuntu-12-04-x64",
+		"user_date": "",
+		"user_date_file": ""
 	}]
 }
 `

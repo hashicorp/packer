@@ -24,6 +24,12 @@ const (
 	// force build is enabled.
 	ForceConfigKey = "packer_force"
 
+	// This key determines what to do when a normal multistep step fails
+	// - "cleanup" - run cleanup steps
+	// - "abort" - exit without cleanup
+	// - "ask" - ask the user
+	OnErrorConfigKey = "packer_on_error"
+
 	// TemplatePathKey is the path to the template that configured this build
 	TemplatePathKey = "packer_template_path"
 
@@ -50,7 +56,7 @@ type Build interface {
 	Run(Ui, Cache) ([]Artifact, error)
 
 	// Cancel will cancel a running build. This will block until the build
-	// is actually completely cancelled.
+	// is actually completely canceled.
 	Cancel()
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
@@ -67,6 +73,12 @@ type Build interface {
 	// When SetForce is set to true, existing artifacts from the build are
 	// deleted prior to the build.
 	SetForce(bool)
+
+	// SetOnError will determine what to do when a normal multistep step fails
+	// - "cleanup" - run cleanup steps
+	// - "abort" - exit without cleanup
+	// - "ask" - ask the user
+	SetOnError(string)
 }
 
 // A build struct represents a single build job, the result of which should
@@ -86,6 +98,7 @@ type coreBuild struct {
 
 	debug         bool
 	force         bool
+	onError       string
 	l             sync.Mutex
 	prepareCalled bool
 }
@@ -102,6 +115,7 @@ type coreBuildPostProcessor struct {
 // Keeps track of the provisioner and the configuration of the provisioner
 // within the build.
 type coreBuildProvisioner struct {
+	pType       string
 	provisioner Provisioner
 	config      []interface{}
 }
@@ -129,6 +143,7 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 		BuilderTypeConfigKey:   b.builderType,
 		DebugConfigKey:         b.debug,
 		ForceConfigKey:         b.force,
+		OnErrorConfigKey:       b.onError,
 		TemplatePathKey:        b.templatePath,
 		UserVariablesConfigKey: b.variables,
 	}
@@ -180,8 +195,10 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	// Add a hook for the provisioners if we have provisioners
 	if len(b.provisioners) > 0 {
 		provisioners := make([]Provisioner, len(b.provisioners))
+		provisionerTypes := make([]string, len(b.provisioners))
 		for i, p := range b.provisioners {
 			provisioners[i] = p.provisioner
+			provisionerTypes[i] = p.pType
 		}
 
 		if _, ok := hooks[HookProvision]; !ok {
@@ -189,21 +206,24 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 		}
 
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
-			Provisioners: provisioners,
+			Provisioners:     provisioners,
+			ProvisionerTypes: provisionerTypes,
 		})
 	}
 
 	hook := &DispatchHook{Mapping: hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	// The builder just has a normal Ui, but targetted
-	builderUi := &TargettedUi{
+	// The builder just has a normal Ui, but targeted
+	builderUi := &TargetedUI{
 		Target: b.Name(),
 		Ui:     originalUi,
 	}
 
 	log.Printf("Running builder: %s", b.builderType)
+	ts := CheckpointReporter.AddSpan(b.builderType, "builder")
 	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
+	ts.End(err)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +242,15 @@ PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
-			ppUi := &TargettedUi{
+			ppUi := &TargetedUI{
 				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
 				Ui:     originalUi,
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
+			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor")
 			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop
@@ -304,6 +326,14 @@ func (b *coreBuild) SetForce(val bool) {
 	}
 
 	b.force = val
+}
+
+func (b *coreBuild) SetOnError(val string) {
+	if b.prepareCalled {
+		panic("prepare has already been called")
+	}
+
+	b.onError = val
 }
 
 // Cancels the build if it is running.

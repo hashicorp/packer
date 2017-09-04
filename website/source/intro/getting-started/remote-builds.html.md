@@ -1,15 +1,13 @@
 ---
-description: |
-    Up to this point in the guide, you have been running Packer on your local
-    machine to build and provision images on AWS and DigitalOcean. However, you can
-    use Atlas by HashiCorp to both run Packer builds remotely and store the output
-    of builds.
 layout: intro
-next_title: Next Steps
-next_url: '/intro/getting-started/next.html'
-page_title: Remote Builds and Storage
-prev_url: '/intro/getting-started/vagrant.html'
-...
+sidebar_current: intro-getting-started-remote-builds
+page_title: Remote Builds and Storage - Getting Started
+description: |-
+  Up to this point in the guide, you have been running Packer on your local
+  machine to build and provision images on AWS and DigitalOcean. However, you
+  can use Atlas by HashiCorp to both run Packer builds remotely and store the
+  output of builds.
+---
 
 # Remote Builds and Storage
 
@@ -35,7 +33,7 @@ is updating the variables section to read variables from the Atlas environment
 rather than the local environment. Remove the `post-processors` section for now
 if it is still in your template.
 
-``` {.javascript}
+```json
 {
   "variables": {
     "aws_access_key": "{{env `aws_access_key`}}",
@@ -66,9 +64,14 @@ if it is still in your template.
 ```
 
 To get an Atlas username, [create an account
-here](https://atlas.hashicorp.com/account/new?utm_source=oss&utm_medium=getting-started&utm_campaign=packer).
-Replace "ATLAS\_USERNAME" with your username, then run
-`packer push -create example.json` to send the configuration to Atlas, which
+here](https://atlas.hashicorp.com/account/new?utm_source=oss&utm_medium=getting-started&utm_campaign=packer). Once you have an account, you will need to contact
+sales@hashicorp.com to start a trial, if you haven't already done so.
+
+Replace "ATLAS\_USERNAME" with your username in the above config. Generate an
+Atlas token by navigating to https://atlas.hashicorp.com/settings/tokens and set
+that token as an environment variable: `ATLAS_TOKEN=YOURTOKENHERE`.
+
+Then run `packer push example.json` to send the configuration to Atlas, which
 automatically starts the build.
 
 This build will fail since neither `aws_access_key` or `aws_secret_key` are set
@@ -80,7 +83,7 @@ with their respective values. Now restart the Packer build by either clicking
 'rebuild' in the Atlas UI or by running `packer push example.json` again. Now
 when you click on the active build, you can view the logs in real-time.
 
--&gt; **Note:** Whenever a change is made to the Packer template, you must
+-> **Note:** Whenever a change is made to the Packer template, you must
 `packer push` to update the configuration in Atlas.
 
 ## Store Packer Outputs
@@ -88,9 +91,9 @@ when you click on the active build, you can view the logs in real-time.
 Now we have Atlas building an AMI with Redis pre-configured. This is great, but
 it's even better to store and version the AMI output so it can be easily
 deployed by a tool like [Terraform](https://www.terraform.io). The `atlas`
-[post-processor](/docs/post-processors/atlas.html) makes this process simple:
+[post-processor](/docs/post-processors/atlas.html) makes this process easier:
 
-``` {.javascript}
+```json
 {
   "variables": ["..."],
   "builders": ["..."],

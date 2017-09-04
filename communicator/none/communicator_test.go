@@ -3,7 +3,7 @@ package none
 import (
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestCommIsCommunicator(t *testing.T) {
@@ -13,4 +13,3 @@ func TestCommIsCommunicator(t *testing.T) {
 		t.Fatalf("comm must be a communicator")
 	}
 }
-
