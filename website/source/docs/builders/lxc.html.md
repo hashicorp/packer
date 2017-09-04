@@ -85,13 +85,13 @@ Below is a fully functioning example.
 
 -  `target_runlevel` (int) - The minimum run level to wait for the container to reach. Note some distributions (Ubuntu) simulate run levels and may report 5 rather than 3.
 
--  `output_directory` (string) - The directory in which to save the exported tar.gz.
+-  `output_directory` (string) - The directory in which to save the exported tar.gz. Defaults to `output-<BuildName>` in the current directory.
 
--  `container_name` (string) - The name of the LXC container. Usually `/var/lib/lxc/containers/<container_name>`.
+-  `container_name` (string) - The name of the LXC container. Usually stored in `/var/lib/lxc/containers/<container_name>`. Defaults to `packer-<BuildName>`.
 
--  `command_wrapper` (string) - Allows you to specify a wrapper command, such as `ssh` so you can execute packer builds on a remote host.
+-  `command_wrapper` (string) - Allows you to specify a wrapper command, such as `ssh` so you can execute packer builds on a remote host. Defaults to Empty.
 
--  `init_timeout` (string) - The timeout in seconds to wait for the the container to start.
+-  `init_timeout` (string) - The timeout in seconds to wait for the the container to start. Defaults to 20 seconds.
 
--  `template_parameters` (array of strings) - Options to pass to the given `lxc-template` command, usually located in `/usr/share/lxc/templates/lxc-<template_name>``. Note: This gets passed as ARGV to the template command. Ensure you have an array of strings, as a single string with spaces probably won't work.
+-  `template_parameters` (array of strings) - Options to pass to the given `lxc-template` command, usually located in `/usr/share/lxc/templates/lxc-<template_name>``. Note: This gets passed as ARGV to the template command. Ensure you have an array of strings, as a single string with spaces probably won't work. Defaults to `[]`.
 
