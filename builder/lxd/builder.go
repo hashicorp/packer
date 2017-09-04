@@ -2,12 +2,11 @@ package lxd
 
 import (
 	"errors"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 	"log"
-	"runtime"
 )
 
 // The unique ID for this builder
@@ -33,10 +32,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	if runtime.GOOS != "linux" {
-		return nil, errors.New("The lxc builder only works on linux environments.")
-	}
-
 	wrappedCommand := func(command string) (string, error) {
 		b.config.ctx.Data = &wrappedCommandTemplate{Command: command}
 		return interpolate.Render(b.config.CommandWrapper, &b.config.ctx)
@@ -57,29 +52,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
 
 	// Run
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
 	b.runner.Run(state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
-	}
-
-	// If we were interrupted or cancelled, then just exit.
-	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		return nil, errors.New("Build was cancelled.")
-	}
-
-	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		return nil, errors.New("Build was halted.")
 	}
 
 	artifact := &Artifact{

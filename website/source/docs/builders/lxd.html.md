@@ -46,5 +46,7 @@ Below is a fully functioning example.
 
 -  `name` (string) - The name of the started container. Defaults to `packer-$PACKER_BUILD_NAME`.
 
--  `output_image` (string) - The name of the output artifact. Defaults to `name`
+-  `output_image` (string) - The name of the output artifact. Defaults to `name`.
+
+-  `command_wrapper` (string) - lets you prefix all builder commands, such as with `ssh` for a remote build host. Defaults to `""`.
 
