@@ -197,8 +197,6 @@ var waitForCommunicator = func(p *Provisioner) error {
 
 		log.Printf("Connected to machine")
 		stdoutToRead := buf2.String()
-		buf2.Reset()
-		buf.Reset()
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
