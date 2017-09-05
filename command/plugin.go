@@ -27,7 +27,7 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
-	lxdbuilder "github.com/hashicorp/packer/builder/lxd"	
+	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
@@ -78,7 +78,6 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packer.Builder{
-<<<<<<< HEAD
 	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),

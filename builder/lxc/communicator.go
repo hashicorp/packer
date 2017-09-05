@@ -2,7 +2,7 @@ package lxc
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
