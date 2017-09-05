@@ -1,7 +1,6 @@
 package lxd
 
 import (
-	"errors"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
