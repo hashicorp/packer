@@ -20,6 +20,7 @@
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
 * provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
 * builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
+* builder/cloudstack: Move ipaddress, host port, and source to statebag. [GH-5173] 
 * builder/docker: Fix file uploads. [GH-5251]
 
 
