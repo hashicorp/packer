@@ -1,6 +1,7 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -93,6 +94,34 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 		if blockDevice.Ebs != nil && blockDevice.Ebs.SnapshotId != nil {
 			encSnapshots = append(encSnapshots, *blockDevice.Ebs.SnapshotId)
 		}
+	}
+
+	// Wait for unencrypted AMI to be ready
+	stateChange = StateChangeConf{
+		Pending: []string{"pending"},
+		Target:  "available",
+		Refresh: func() (interface{}, string, error) {
+			resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(id)}})
+			if err != nil {
+				return nil, "", err
+			}
+
+			if len(resp.Images) == 0 {
+				return nil, "", errors.New("No images found.")
+			}
+
+			s := resp.Images[0]
+			return s, *s.State, nil
+		},
+		StepState: state,
+	}
+
+	ui.Say("Waiting for Unencrypted AMI to become ready...")
+	if _, err := WaitForState(&stateChange); err != nil {
+		err := fmt.Errorf("Error waiting for AMI : %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	// Get the unencrypted AMI image
