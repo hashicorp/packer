@@ -58,9 +58,7 @@ type Config struct {
 	TemplateScalable        bool   `mapstructure:"template_scalable"`
 	TemplateTag             string `mapstructure:"template_tag"`
 
-	ctx            interpolate.Context
-	hostAddress    string // The host address used by the communicators.
-	instanceSource string // This can be either a template ID or an ISO ID.
+	ctx interpolate.Context
 }
 
 // NewConfig parses and validates the given config.
