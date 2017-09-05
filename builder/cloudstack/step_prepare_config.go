@@ -53,26 +53,34 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	if config.PublicIPAddress != "" && !isUUID(config.PublicIPAddress) {
-		// Save the public IP address before replacing it with it's UUID.
-		config.hostAddress = config.PublicIPAddress
+	if config.PublicIPAddress != "" {
+		if isUUID(config.PublicIPAddress) {
+			ip, _, err := client.Address.GetPublicIpAddressByID(config.PublicIPAddress)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed to retrieve IP address: %s", err))
+			}
+			state.Put("ipaddress", ip.Ipaddress)
+		} else {
+			// Save the public IP address before replacing it with it's UUID.
+			state.Put("ipaddress", config.PublicIPAddress)
 
-		p := client.Address.NewListPublicIpAddressesParams()
-		p.SetIpaddress(config.PublicIPAddress)
+			p := client.Address.NewListPublicIpAddressesParams()
+			p.SetIpaddress(config.PublicIPAddress)
 
-		if config.Project != "" {
-			p.SetProjectid(config.Project)
-		}
+			if config.Project != "" {
+				p.SetProjectid(config.Project)
+			}
 
-		ipAddrs, err := client.Address.ListPublicIpAddresses(p)
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, err})
-		}
-		if err == nil && ipAddrs.Count != 1 {
-			errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, ipAddrs})
-		}
-		if err == nil && ipAddrs.Count == 1 {
-			config.PublicIPAddress = ipAddrs.PublicIpAddresses[0].Id
+			ipAddrs, err := client.Address.ListPublicIpAddresses(p)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, err})
+			}
+			if err == nil && ipAddrs.Count != 1 {
+				errs = packer.MultiErrorAppend(errs, &retrieveErr{"IP address", config.PublicIPAddress, ipAddrs})
+			}
+			if err == nil && ipAddrs.Count == 1 {
+				config.PublicIPAddress = ipAddrs.PublicIpAddresses[0].Id
+			}
 		}
 	}
 
@@ -104,23 +112,25 @@ func (s *stepPrepareConfig) Run(state multistep.StateBag) multistep.StepAction {
 
 	if config.SourceISO != "" {
 		if isUUID(config.SourceISO) {
-			config.instanceSource = config.SourceISO
+			state.Put("source", config.SourceISO)
 		} else {
-			config.instanceSource, _, err = client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
+			isoID, _, err := client.ISO.GetIsoID(config.SourceISO, "executable", config.Zone)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"ISO", config.SourceISO, err})
 			}
+			state.Put("source", isoID)
 		}
 	}
 
 	if config.SourceTemplate != "" {
 		if isUUID(config.SourceTemplate) {
-			config.instanceSource = config.SourceTemplate
+			state.Put("source", config.SourceTemplate)
 		} else {
-			config.instanceSource, _, err = client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
+			templateID, _, err := client.Template.GetTemplateID(config.SourceTemplate, "executable", config.Zone)
 			if err != nil {
 				errs = packer.MultiErrorAppend(errs, &retrieveErr{"template", config.SourceTemplate, err})
 			}
+			state.Put("source", templateID)
 		}
 	}
 

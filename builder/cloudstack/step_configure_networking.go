@@ -25,6 +25,7 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 	if config.UseLocalIPAddress {
 		ui.Message("Using the local IP address...")
+		state.Put("commPort", config.Comm.Port())
 		ui.Message("Networking has been setup!")
 		return multistep.ActionContinue
 	}
@@ -32,17 +33,10 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	// Generate a random public port used to configure our port forward.
 	rand.Seed(time.Now().UnixNano())
 	s.publicPort = 50000 + rand.Intn(10000)
+	state.Put("commPort", s.publicPort)
 
 	// Set the currently configured port to be the private port.
 	s.privatePort = config.Comm.Port()
-
-	// Set the SSH or WinRM port to be the randomly generated public port.
-	switch config.Comm.Type {
-	case "ssh":
-		config.Comm.SSHPort = s.publicPort
-	case "winrm":
-		config.Comm.WinRMPort = s.publicPort
-	}
 
 	// Retrieve the instance ID from the previously saved state.
 	instanceID, ok := state.Get("instance_id").(string)
@@ -91,7 +85,7 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 		// Set the IP address and it's ID.
 		config.PublicIPAddress = ipAddr.Id
-		config.hostAddress = ipAddr.Ipaddress
+		state.Put("ipaddress", ipAddr.Ipaddress)
 
 		// Store the IP address ID.
 		state.Put("ip_address_id", ipAddr.Id)
