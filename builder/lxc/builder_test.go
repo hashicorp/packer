@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
