@@ -1,5 +1,5 @@
 // This package implements a provisioner for Packer that executes
-// shell scripts within the remote machine.
+// powershell scripts within the remote machine.
 package powershell
 
 import (
@@ -34,7 +34,7 @@ type Config struct {
 	// in the context of a single shell.
 	Inline []string
 
-	// The local path of the shell script to upload and execute.
+	// The local path of the powershell script to upload and execute.
 	Script string
 
 	// An array of multiple scripts to run.
@@ -44,7 +44,7 @@ type Config struct {
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
 
-	// The remote path where the local shell script will be uploaded to.
+	// The remote path where the local powershell script will be uploaded to.
 	// This should be set to a writable file that is in a pre-existing directory.
 	RemotePath string `mapstructure:"remote_path"`
 
@@ -215,12 +215,12 @@ func extractScript(p *Provisioner) (string, error) {
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
 		if _, err := writer.WriteString(command + "\n"); err != nil {
-			return "", fmt.Errorf("Error preparing shell script: %s", err)
+			return "", fmt.Errorf("Error preparing powershell script: %s", err)
 		}
 	}
 
 	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing shell script: %s", err)
+		return "", fmt.Errorf("Error preparing powershell script: %s", err)
 	}
 
 	return temp.Name(), nil
@@ -242,12 +242,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Provisioning with shell script: %s", path))
+		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
 
 		log.Printf("Opening %s for reading", path)
 		f, err := os.Open(path)
 		if err != nil {
-			return fmt.Errorf("Error opening shell script: %s", err)
+			return fmt.Errorf("Error opening powershell script: %s", err)
 		}
 		defer f.Close()
 
@@ -462,16 +462,16 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "packer-elevated-shell.ps1")
 	writer := bufio.NewWriter(tmpFile)
 	if _, err := writer.WriteString(string(buffer.Bytes())); err != nil {
-		return "", fmt.Errorf("Error preparing elevated shell script: %s", err)
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
 
 	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing elevated shell script: %s", err)
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
 	tmpFile.Close()
 	f, err := os.Open(tmpFile.Name())
 	if err != nil {
-		return "", fmt.Errorf("Error opening temporary elevated shell script: %s", err)
+		return "", fmt.Errorf("Error opening temporary elevated powershell script: %s", err)
 	}
 	defer f.Close()
 
@@ -480,7 +480,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s] from [%s]", command, path, tmpFile.Name())
 	err = p.communicator.Upload(path, f, nil)
 	if err != nil {
-		return "", fmt.Errorf("Error preparing elevated shell script: %s", err)
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
 
 	// CMD formatted Path required for this op
