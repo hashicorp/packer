@@ -25,6 +25,10 @@
 * builder/cloudstack: Move ipaddress, host port, and source to statebag. [GH-5173] 
 * builder/docker: Fix file uploads. [GH-5251]
 
+### FEATURES:
+* **New builder:** `lxc` for building lxc images. [GH-3523]
+* **New builder:** `lxd` for building lxd images. [GH-3625]
+
 
 ## 1.0.4 (August 11, 2017)
 
