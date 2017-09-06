@@ -407,6 +407,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			},
 		},
 		GuestAccelerators: guestAccelerators,
+		Labels:            c.Labels,
 		MachineType:       machineType.SelfLink,
 		Metadata: &compute.Metadata{
 			Items: metadata,
