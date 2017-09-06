@@ -204,8 +204,8 @@ builder.
 -   `instance_name` (string) - A name to give the launched instance. Beware that
     this must be unique. Defaults to `"packer-{{uuid}}"`.
 
--   `labels` (object of key/value strings) - Labels applied to the launched
-    instance.
+-   `labels` (object of key/value strings) - Key/value pair labels to apply to
+    the launched instance.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
