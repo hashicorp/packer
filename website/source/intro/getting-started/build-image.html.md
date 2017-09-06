@@ -58,7 +58,7 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "source_ami_filter": {
       "filters": {
       "virtualization-type": "hvm",
-      "name": "*ubuntu-xenial-16.04-amd64-server-*",
+      "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
       "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
