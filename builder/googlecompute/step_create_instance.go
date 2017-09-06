@@ -106,6 +106,7 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		DiskSizeGb:        c.DiskSizeGb,
 		DiskType:          c.DiskType,
 		Image:             sourceImage,
+		Labels:            c.Labels,
 		MachineType:       c.MachineType,
 		Metadata:          metadata,
 		Name:              name,

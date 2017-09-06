@@ -65,6 +65,7 @@ type InstanceConfig struct {
 	DiskSizeGb        int64
 	DiskType          string
 	Image             *Image
+	Labels            map[string]string
 	MachineType       string
 	Metadata          map[string]string
 	Name              string
