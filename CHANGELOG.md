@@ -14,6 +14,7 @@
 * communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
 * provisioner/shell: Set default for ExpectDisconnect to false. [GH-5283]
 * communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
+* builder/amazon: Split `enhanced_networking` into `sriov_support` and `ena_support` to support finer grained control. Use `packer fix <template.json>` to automatically update your template to use `ena_support` where previously there was only `enhanced_networking`. Make sure to also add `sriov_support` if you need that feature, and to ensure `ena_support` is what you intended to be in your template. [GH-5284]
 
 ### BUG FIXES:
 
