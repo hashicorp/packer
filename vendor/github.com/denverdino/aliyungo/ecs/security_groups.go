@@ -108,16 +108,25 @@ type DescribeSecurityGroupsResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/securitygroup&describesecuritygroups
 func (client *Client) DescribeSecurityGroups(args *DescribeSecurityGroupsArgs) (securityGroupItems []SecurityGroupItemType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeSecurityGroupsResponse{}
-
-	err = client.Invoke("DescribeSecurityGroups", args, &response)
-
+	response, err := client.DescribeSecurityGroupsWithRaw(args)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return response.SecurityGroups.SecurityGroup, &response.PaginationResult, nil
+}
+
+func (client *Client) DescribeSecurityGroupsWithRaw(args *DescribeSecurityGroupsArgs) (response *DescribeSecurityGroupsResponse, err error) {
+	args.Validate()
+	response = &DescribeSecurityGroupsResponse{}
+
+	err = client.Invoke("DescribeSecurityGroups", args, response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 type CreateSecurityGroupArgs struct {

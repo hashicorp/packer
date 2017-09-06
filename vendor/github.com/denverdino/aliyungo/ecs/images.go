@@ -37,7 +37,7 @@ const (
 	ImageUsageNone     = ImageUsage("none")
 )
 
-// DescribeImagesArgs repsents arguements to describe images
+// DescribeImagesArgs repsents arguments to describe images
 type DescribeImagesArgs struct {
 	RegionId        common.Region
 	ImageId         string
@@ -63,12 +63,12 @@ type DescribeImagesResponse struct {
 type DiskDeviceMapping struct {
 	SnapshotId string
 	//Why Size Field is string-type.
-	Size       string
-	Device     string
+	Size   string
+	Device string
 	//For import images
-	Format     string
-	OSSBucket  string
-	OSSObject  string
+	Format    string
+	OSSBucket string
+	OSSObject string
 }
 
 //
@@ -102,21 +102,28 @@ type ImageType struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/image&describeimages
 func (client *Client) DescribeImages(args *DescribeImagesArgs) (images []ImageType, pagination *common.PaginationResult, err error) {
-
-	args.Validate()
-	response := DescribeImagesResponse{}
-	err = client.Invoke("DescribeImages", args, &response)
+	response, err := client.DescribeImagesWithRaw(args)
 	if err != nil {
 		return nil, nil, err
 	}
 	return response.Images.Image, &response.PaginationResult, nil
 }
 
-// CreateImageArgs repsents arguements to create image
+func (client *Client) DescribeImagesWithRaw(args *DescribeImagesArgs) (response *DescribeImagesResponse, err error) {
+	args.Validate()
+	response = &DescribeImagesResponse{}
+	err = client.Invoke("DescribeImages", args, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// CreateImageArgs repsents arguments to create image
 type CreateImageArgs struct {
 	RegionId     common.Region
 	SnapshotId   string
-        InstanceId   string
+	InstanceId   string
 	ImageName    string
 	ImageVersion string
 	Description  string
@@ -163,7 +170,7 @@ func (client *Client) DeleteImage(regionId common.Region, imageId string) error 
 	return client.Invoke("DeleteImage", &args, &response)
 }
 
-// ModifyImageSharePermission repsents arguements to share image
+// ModifyImageSharePermission repsents arguments to share image
 type ModifyImageSharePermissionArgs struct {
 	RegionId      common.Region
 	ImageId       string
@@ -232,17 +239,16 @@ func (client *Client) CopyImage(args *CopyImageArgs) (string, error) {
 	return response.ImageId, nil
 }
 
-
-// ImportImageArgs repsents arguements to import image from oss
+// ImportImageArgs repsents arguments to import image from oss
 type ImportImageArgs struct {
-	RegionId     common.Region
-	ImageName    string
-	ImageVersion string
-	Description  string
-	ClientToken  string
-	Architecture string
-	OSType	     string
-	Platform     string
+	RegionId           common.Region
+	ImageName          string
+	ImageVersion       string
+	Description        string
+	ClientToken        string
+	Architecture       string
+	OSType             string
+	Platform           string
 	DiskDeviceMappings struct {
 		DiskDeviceMapping []DiskDeviceMapping
 	}
@@ -259,8 +265,8 @@ func (client *Client) ImportImage(args *ImportImageArgs) (string, error) {
 
 type ImportImageResponse struct {
 	common.Response
-	RegionId common.Region
-	ImageId string
+	RegionId     common.Region
+	ImageId      string
 	ImportTaskId string
 }
 

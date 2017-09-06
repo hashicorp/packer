@@ -22,7 +22,7 @@ func (c *AlicloudAccessConfig) Client() (*ecs.Client, error) {
 	if err := c.loadAndValidate(); err != nil {
 		return nil, err
 	}
-	client := ecs.NewClient(c.AlicloudAccessKey, c.AlicloudSecretKey)
+	client := ecs.NewECSClient(c.AlicloudAccessKey, c.AlicloudSecretKey, common.Region(c.AlicloudRegion))
 	client.SetBusinessInfo("Packer")
 	if _, err := client.DescribeRegions(); err != nil {
 		return nil, err
