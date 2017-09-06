@@ -13,6 +13,7 @@
     "ssh_username":"root",
     "instance_type":"ecs.n1.medium",
     "io_optimized":"true",
+    "internet_charge_type":"PayByTraffic",
     "image_force_delete":"true",
     "ssh_password":"Test12345"
   }],
