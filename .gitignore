@@ -10,6 +10,7 @@
 test/.env
 *~
 *.received.*
+*.swp
 
 website/.bundle
 website/vendor
