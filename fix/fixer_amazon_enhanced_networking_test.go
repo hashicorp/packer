@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestFixerEnhancedNetworking_Impl(t *testing.T) {
-	var _ Fixer = new(FixerEnhancedNetworking)
+func TestFixerAmazonEnhancedNetworking_Impl(t *testing.T) {
+	var _ Fixer = new(FixerAmazonEnhancedNetworking)
 }
 
-func TestFixerEnhancedNetworking(t *testing.T) {
+func TestFixerAmazonEnhancedNetworking(t *testing.T) {
 	cases := []struct {
 		Input    map[string]interface{}
 		Expected map[string]interface{}
@@ -42,7 +42,7 @@ func TestFixerEnhancedNetworking(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		var f FixerEnhancedNetworking
+		var f FixerAmazonEnhancedNetworking
 
 		input := map[string]interface{}{
 			"builders": []map[string]interface{}{tc.Input},

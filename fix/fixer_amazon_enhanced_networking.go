@@ -4,11 +4,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerEnhancedNetworking is a Fixer that replaces the "enhanced_networking" configuration key
+// FixerAmazonEnhancedNetworking is a Fixer that replaces the "enhanced_networking" configuration key
 // with the clearer "ena_support".  This disambiguates ena_support from sriov_support.
-type FixerEnhancedNetworking struct{}
+type FixerAmazonEnhancedNetworking struct{}
 
-func (FixerEnhancedNetworking) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerAmazonEnhancedNetworking) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
 		Builders []map[string]interface{}
@@ -40,6 +40,6 @@ func (FixerEnhancedNetworking) Fix(input map[string]interface{}) (map[string]int
 	return input, nil
 }
 
-func (FixerEnhancedNetworking) Synopsis() string {
+func (FixerAmazonEnhancedNetworking) Synopsis() string {
 	return `Replaces "enhanced_networking" in builders with "ena_support"`
 }
