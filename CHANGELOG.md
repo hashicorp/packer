@@ -2,6 +2,7 @@
 
 ### IMPROVEMENTS:
 
+# builder/alicloud: Update alicloud go sdk and enable multi sites support for alicloud [GH-5219]
 * provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
 * builder/profitbricks: added support for Cloud API v4. [GH-5233]
 * builder/vmware: Set artifact ID to `VMName`. [GH-5187]
