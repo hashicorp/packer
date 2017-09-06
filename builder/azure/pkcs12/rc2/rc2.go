@@ -1,3 +1,7 @@
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package rc2 implements the RC2 cipher
 /*
 https://www.ietf.org/rfc/rfc2268.txt
@@ -10,7 +14,6 @@ package rc2
 import (
 	"crypto/cipher"
 	"encoding/binary"
-	"strconv"
 )
 
 // The rc2 block size in bytes
@@ -20,34 +23,15 @@ type rc2Cipher struct {
 	k [64]uint16
 }
 
-// KeySizeError indicates the supplied key was invalid
-type KeySizeError int
-
-func (k KeySizeError) Error() string { return "rc2: invalid key size " + strconv.Itoa(int(k)) }
-
-// EffectiveKeySizeError indicates the supplied effective key length was invalid
-type EffectiveKeySizeError int
-
-func (k EffectiveKeySizeError) Error() string {
-	return "rc2: invalid effective key size " + strconv.Itoa(int(k))
-}
-
 // New returns a new rc2 cipher with the given key and effective key length t1
 func New(key []byte, t1 int) (cipher.Block, error) {
-	if l := len(key); l == 0 || l > 128 {
-		return nil, KeySizeError(l)
-	}
-
-	if t1 < 8 || t1 > 1024 {
-		return nil, EffectiveKeySizeError(t1)
-	}
-
+	// TODO(dgryski): error checking for key length
 	return &rc2Cipher{
 		k: expandKey(key, t1),
 	}, nil
 }
 
-func (c *rc2Cipher) BlockSize() int { return BlockSize }
+func (*rc2Cipher) BlockSize() int { return BlockSize }
 
 var piTable = [256]byte{
 	0xd9, 0x78, 0xf9, 0xc4, 0x19, 0xdd, 0xb5, 0xed, 0x28, 0xe9, 0xfd, 0x79, 0x4a, 0xa0, 0xd8, 0x9d,
@@ -109,7 +93,6 @@ func (c *rc2Cipher) Encrypt(dst, src []byte) {
 
 	var j int
 
-	// These three mix blocks have not been extracted to a common function for to performance reasons.
 	for j <= 16 {
 		// mix r0
 		r0 = r0 + c.k[j] + (r3 & r2) + ((^r3) & r1)
@@ -130,6 +113,7 @@ func (c *rc2Cipher) Encrypt(dst, src []byte) {
 		r3 = r3 + c.k[j] + (r2 & r1) + ((^r2) & r0)
 		r3 = rotl16(r3, 5)
 		j++
+
 	}
 
 	r0 = r0 + c.k[r3&63]
@@ -138,6 +122,7 @@ func (c *rc2Cipher) Encrypt(dst, src []byte) {
 	r3 = r3 + c.k[r2&63]
 
 	for j <= 40 {
+
 		// mix r0
 		r0 = r0 + c.k[j] + (r3 & r2) + ((^r3) & r1)
 		r0 = rotl16(r0, 1)
@@ -157,6 +142,7 @@ func (c *rc2Cipher) Encrypt(dst, src []byte) {
 		r3 = r3 + c.k[j] + (r2 & r1) + ((^r2) & r0)
 		r3 = rotl16(r3, 5)
 		j++
+
 	}
 
 	r0 = r0 + c.k[r3&63]
@@ -165,6 +151,7 @@ func (c *rc2Cipher) Encrypt(dst, src []byte) {
 	r3 = r3 + c.k[r2&63]
 
 	for j <= 60 {
+
 		// mix r0
 		r0 = r0 + c.k[j] + (r3 & r2) + ((^r3) & r1)
 		r0 = rotl16(r0, 1)
@@ -248,6 +235,7 @@ func (c *rc2Cipher) Decrypt(dst, src []byte) {
 		r0 = rotl16(r0, 16-1)
 		r0 = r0 - c.k[j] - (r3 & r2) - ((^r3) & r1)
 		j--
+
 	}
 
 	r3 = r3 - c.k[r2&63]
@@ -256,6 +244,7 @@ func (c *rc2Cipher) Decrypt(dst, src []byte) {
 	r0 = r0 - c.k[r3&63]
 
 	for j >= 0 {
+
 		// unmix r3
 		r3 = rotl16(r3, 16-5)
 		r3 = r3 - c.k[j] - (r2 & r1) - ((^r2) & r0)
@@ -275,6 +264,7 @@ func (c *rc2Cipher) Decrypt(dst, src []byte) {
 		r0 = rotl16(r0, 16-1)
 		r0 = r0 - c.k[j] - (r3 & r2) - ((^r3) & r1)
 		j--
+
 	}
 
 	binary.LittleEndian.PutUint16(dst[0:], r0)
