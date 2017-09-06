@@ -26,6 +26,8 @@ import (
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
+	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
+	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
@@ -69,8 +71,6 @@ import (
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
-
-	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 )
 
 type PluginCommand struct {
@@ -91,6 +91,7 @@ var Builders = map[string]packer.Builder{
 	"file":                new(filebuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
+	"lxc":                 new(lxcbuilder.Builder),
 	"lxd":                 new(lxdbuilder.Builder),
 	"null":                new(nullbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
