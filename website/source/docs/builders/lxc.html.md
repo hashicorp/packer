@@ -65,7 +65,7 @@ Below is a fully functioning example.
       "template_parameters": [
         "-R","7",
         "-a","x86_64"
-       ],
+       ]
     }
   ]
 }
