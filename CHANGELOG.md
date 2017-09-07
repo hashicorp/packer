@@ -9,7 +9,7 @@
 * core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
 * builder/cloudstack: Add support for Security Groups. [GH-5175]
 * provisioner/puppet: Add `guest_os_type` option to add support for Windows. [GH-5252]
-* builder/googlecompute: Add `label` option for labeling launched instances. [GH-5308]
+* builder/googlecompute: Add `labels` option for labeling launched instances. [GH-5308]
 
 ### BACKWARDS INCOMPATIBILITIES:
 
