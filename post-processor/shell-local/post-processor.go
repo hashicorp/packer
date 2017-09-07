@@ -41,6 +41,8 @@ type Config struct {
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
 
+	ShellCommand []string `mapstructure:"shell_command"`
+
 	ctx interpolate.Context
 }
 
@@ -65,6 +67,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}, raws...)
 	if err != nil {
 		return err
+	}
+
+	if len(p.config.ShellCommand) == 0 {
+		p.config.ShellCommand = []string{"sh", "-c"}
 	}
 
 	if p.config.ExecuteCommand == "" {
@@ -178,7 +184,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
-		comm := &Communicator{}
+		comm := &Communicator{
+			p.config.ShellCommand,
+		}
 
 		cmd := &packer.RemoteCmd{Command: command}
 

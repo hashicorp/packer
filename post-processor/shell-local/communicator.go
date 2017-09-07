@@ -10,10 +10,18 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type Communicator struct{}
+type Communicator struct {
+	shellCommand []string
+}
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	localCmd := exec.Command("sh", "-c", cmd.Command)
+	var command []string
+	if len(c.shellCommand) > 1 {
+		command = append(c.shellCommand[1:], cmd.Command)
+	} else {
+		command = []string{cmd.Command}
+	}
+	localCmd := exec.Command(c.shellCommand[0], command...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
