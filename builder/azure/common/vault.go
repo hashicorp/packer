@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 // NOTE: vault APIs do not yet exist in the SDK, but once they do this code
 // should be removed.
 
