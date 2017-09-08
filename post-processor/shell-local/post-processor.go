@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -24,7 +25,7 @@ type Config struct {
 	Inline []string
 
 	// The shebang value used when running inline scripts.
-	InlineShebang string `mapstructure:"inline_shebang"`
+	InlineShebang []string `mapstructure:"inline_shebang"`
 
 	// The local path of the shell script to upload and execute.
 	Script string
@@ -40,8 +41,6 @@ type Config struct {
 	// should be used to specify where the script goes, {{ .Vars }}
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand string `mapstructure:"execute_command"`
-
-	ShellCommand []string `mapstructure:"shell_command"`
 
 	ctx interpolate.Context
 }
@@ -69,20 +68,19 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	if len(p.config.ShellCommand) == 0 {
-		p.config.ShellCommand = []string{"sh", "-c"}
-	}
-
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`
+		p.config.ExecuteCommand = `{{.Script}}`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
 		p.config.Inline = nil
 	}
 
-	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh -e"
+	if p.config.InlineShebang == nil {
+		p.config.InlineShebang = []string{"/bin/sh", "-e"}
+		if runtime.GOOS == "windows" {
+			p.config.InlineShebang = []string{"sh", "-e"}
+		}
 	}
 
 	if p.config.Scripts == nil {
@@ -182,10 +180,24 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Error processing command: %s", err)
 		}
 
+		ui.Say(fmt.Sprintf("Making script executable"))
+		if runtime.GOOS == "windows" {
+			err := os.Chmod(script, 0600) // read and write perms. Should be enough.
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			err := os.Chmod(script, 0777)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
 		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
 		comm := &Communicator{
-			p.config.ShellCommand,
+			p.config.Vars,
+			p.config.InlineShebang,
 		}
 
 		cmd := &packer.RemoteCmd{Command: command}

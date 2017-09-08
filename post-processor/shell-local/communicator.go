@@ -11,20 +11,22 @@ import (
 )
 
 type Communicator struct {
-	shellCommand []string
+	envVars []string
+	shebang []string
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	var command []string
-	if len(c.shellCommand) > 1 {
-		command = append(c.shellCommand[1:], cmd.Command)
+	if len(c.shebang) > 1 {
+		command = append(c.shebang[1:], cmd.Command)
 	} else {
 		command = []string{cmd.Command}
 	}
-	localCmd := exec.Command(c.shellCommand[0], command...)
+	localCmd := exec.Command(c.shebang[0], command...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
+	localCmd.Env = append(os.Environ(), c.envVars...)
 
 	// Start it. If it doesn't work, then error right away.
 	if err := localCmd.Start(); err != nil {
