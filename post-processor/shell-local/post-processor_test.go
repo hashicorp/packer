@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -47,6 +48,10 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 	}
 
 	expected := []string{"/bin/sh", "-e"}
+	if runtime.GOOS == "windows" {
+		expected = []string{"sh", "-e"}
+	}
+
 	if !reflect.DeepEqual(p.config.InlineShebang, expected) {
 		t.Fatalf("bad value: %+v; expected %+v", p.config.InlineShebang, expected)
 	}
