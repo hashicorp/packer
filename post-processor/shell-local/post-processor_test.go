@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -45,8 +46,9 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.InlineShebang != "/bin/sh -e" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
+	expected := []string{"/bin/sh", "-e"}
+	if !reflect.DeepEqual(p.config.InlineShebang, expected) {
+		t.Fatalf("bad value: %+v; expected %+v", p.config.InlineShebang, expected)
 	}
 
 	// Test with a good one
@@ -56,8 +58,8 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
-	if p.config.InlineShebang != "foo" {
+	expected = []string{"foo"}
+	if !reflect.DeepEqual(p.config.InlineShebang, expected) {
 		t.Fatalf("bad value: %s", p.config.InlineShebang)
 	}
 }
