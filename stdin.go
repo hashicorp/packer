@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 // setupStdin switches out stdin for a pipe. We do this so that we can
@@ -26,7 +27,7 @@ func setupStdin() {
 	// Register a signal handler for interrupt in order to close the
 	// writer end of our pipe so that readers get EOF downstream.
 	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		defer signal.Stop(ch)
