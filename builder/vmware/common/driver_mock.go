@@ -1,6 +1,7 @@
 package common
 
 import (
+	"net"
 	"sync"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -127,13 +128,41 @@ func (d *DriverMock) CommHost(state multistep.StateBag) (string, error) {
 	return d.CommHostResult, d.CommHostErr
 }
 
+func MockInterface() net.Interface {
+	interfaces, err := net.Interfaces()
+
+	// Build a dummy interface due to being unable to enumerate interfaces
+	if err != nil || len(interfaces) == 0 {
+		return net.Interface{
+			Index:        0,
+			MTU:          -1,
+			Name:         "dummy",
+			HardwareAddr: net.HardwareAddr{0, 0, 0, 0, 0, 0},
+			Flags:        net.FlagLoopback,
+		}
+	}
+
+	// Find the first loopback interface
+	for _, intf := range interfaces {
+		if intf.Flags&net.FlagLoopback == net.FlagLoopback {
+			return intf
+		}
+	}
+
+	// Fall-back to just the first one
+	return interfaces[0]
+}
+
 func (d *DriverMock) HostAddress(state multistep.StateBag) (string, error) {
+	intf := MockInterface()
+	d.HostAddressResult = intf.HardwareAddr.String()
 	d.HostAddressCalled = true
 	d.HostAddressState = state
 	return d.HostAddressResult, d.HostAddressErr
 }
 
 func (d *DriverMock) HostIP(state multistep.StateBag) (string, error) {
+	d.HostIPResult = "127.0.0.1"
 	d.HostIPCalled = true
 	d.HostIPState = state
 	return d.HostIPResult, d.HostIPErr
