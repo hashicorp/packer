@@ -375,7 +375,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps = append(steps,
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&common.StepHTTPServer{
