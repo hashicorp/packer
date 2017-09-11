@@ -14,7 +14,7 @@
 ### BACKWARDS INCOMPATIBILITIES:
 
 * communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
-* provisioner/shell: Set default for ExpectDisconnect to false. [GH-5283]
+* provisioner/shell: Set default for ExpectDisconnect to false. If your script causes the connection to be reset, you should set this to true to prevent errors. [GH-5283]
 * communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
 * builder/amazon: Split `enhanced_networking` into `sriov_support` and `ena_support` to support finer grained control. Use `packer fix <template.json>` to automatically update your template to use `ena_support` where previously there was only `enhanced_networking`. Make sure to also add `sriov_support` if you need that feature, and to ensure `ena_support` is what you intended to be in your template. [GH-5284]
 
@@ -23,12 +23,13 @@
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
 * provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
 * builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
-* builder/cloudstack: Move ipaddress, host port, and source to statebag. [GH-5173] 
+* builder/cloudstack: Move ipaddress, host port, and source to statebag. [GH-5173]
 * builder/docker: Fix file uploads. [GH-5251]
 
 ### FEATURES:
 * **New builder:** `lxc` for building lxc images. [GH-3523]
 * **New builder:** `lxd` for building lxd images. [GH-3625]
+* **New builder**: Oracle Bare Metal Cloud Services (BMCS) builder for creating custom images. [GH-4554]
 
 
 ## 1.0.4 (August 11, 2017)
