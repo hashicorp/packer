@@ -161,13 +161,14 @@ can be configured for this builder.
     recommended since ISO files are generally large and corruption does happen
     from time to time.
 
--   `iso_url` (string) - A URL to the ISO containing the installation image.
-    This URL can be either an HTTP URL or a file URL (or path to a file). If
-    this is an HTTP URL, Packer will download iso and cache it between runs.
+-   `iso_url` (string) - A URL to the ISO or VHD containing the installation
+    image. This URL can be either an HTTP URL or a file URL (or path to
+    a file). If this is an HTTP URL, Packer will download iso and cache it
+    between runs.
 
--   `iso_urls` (array of strings) - Multiple URLs for the ISO to download.
-    Packer will try these in order. If anything goes wrong attempting to
-    download or while downloading a single URL, it will move on to the next.
+-   `iso_urls` (array of strings) - Multiple URLs for the ISO or VHD to
+    download. Packer will try these in order. If anything goes wrong attempting
+    to download or while downloading a single URL, it will move on to the next.
     All URLs must point to the same file (same checksum). By default this is
     empty and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be
     specified.
