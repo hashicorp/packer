@@ -22,10 +22,10 @@ func TestCommunicator(t *testing.T) {
 	}
 
 	vars := []string{}
-	shebang := []string{"/bin/sh", "-e"}
+	cmdPrecursor := []string{"/bin/sh", "-e"}
 	c := &Communicator{
 		vars,
-		shebang,
+		cmdPrecursor,
 	}
 
 	// create a temporary script file
@@ -57,9 +57,9 @@ func TestCommunicator(t *testing.T) {
 
 	cmd.Wait()
 
-	// if cmd.ExitStatus != 0 {
-	// 	t.Fatalf("err bad exit status: %d", cmd.ExitStatus)
-	// }
+	if cmd.ExitStatus != 0 {
+		t.Fatalf("err bad exit status: %d", cmd.ExitStatus)
+	}
 
 	if strings.TrimSpace(buf.String()) != "foo" {
 		t.Fatalf("bad: %s", buf.String())
