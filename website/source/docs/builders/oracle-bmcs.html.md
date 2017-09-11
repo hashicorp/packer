@@ -1,9 +1,3 @@
----
-layout: docs
-sidebar_current: docs-builders-oracle-bmcs
-page_title: Oracle Bare Metal Cloud Services (BMCS) - Builders
-description: |-
-  The oracle-bmcs Packer builder is able to create new custom images for use
   with Oracle Bare Metal Cloud Services (BMCS). The builder takes an
   Oracle-provided base image, runs any provisioning necessary on the base image
   after launching it, and finally snapshots it creating a reusable custom
