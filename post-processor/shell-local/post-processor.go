@@ -70,6 +70,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	var errs *packer.MultiError
 	if len(p.config.ExecuteCommand) == 0 {
 		p.config.ExecuteCommand = []string{`/bin/sh`, `-e`, `{{.Script}}`}
+		if runtime.GOOS == "windows" {
+			p.config.ExecuteCommand = []string{`sh`, `-e`, `{{.Script}}`}
+		}
 	} else if len(p.config.ExecuteCommand) == 1 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("execute_command requires you to specify a slice of at least two "+
