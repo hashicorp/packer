@@ -1,7 +1,12 @@
+---
+description:
   with Oracle Bare Metal Cloud Services (BMCS). The builder takes an
   Oracle-provided base image, runs any provisioning necessary on the base image
   after launching it, and finally snapshots it creating a reusable custom
   image.
+layout: docs
+page_title: 'Oracle BMCS - Builders'
+sidebar_current: 'docs-builders-oracle-bmcs'
 ---
 
 # Oracle Bare Metal Cloud Services (BMCS) Builder
@@ -128,15 +133,15 @@ builder.
 Here is a basic example. Note that account specific configuration has been
 substituted with the letter `a` and OCIDS have been shortened for brevity.
 
-``` {.javascript}
+``` {.json}
 {
-  "type": "oracle-bmcs",
-  "compartment_ocid": "ocid1.compartment.oc1..aaa",
-  "availability_domain": "aaaa:PHX-AD-1",
-  "subnet_ocid": "ocid1.subnet.oc1..aaa",
-  "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
-  "ssh_username": "opc",
-  "shape": "VM.Standard1.1",
-  "image_name": "ExampleImage"
+    "availability_domain": "aaaa:PHX-AD-1",
+    "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
+    "compartment_ocid": "ocid1.compartment.oc1..aaa",
+    "image_name": "ExampleImage",
+    "shape": "VM.Standard1.1",
+    "ssh_username": "opc",
+    "subnet_ocid": "ocid1.subnet.oc1..aaa",
+    "type": "oracle-bmcs"
 }
 ```
