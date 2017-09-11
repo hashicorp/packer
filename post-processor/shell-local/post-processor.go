@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"sort"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
@@ -39,7 +39,7 @@ type Config struct {
 	// The command used to execute the script. The '{{ .Path }}' variable
 	// should be used to specify where the script goes, {{ .Vars }}
 	// can be used to inject the environment_vars into the environment.
-	ExecuteCommand string `mapstructure:"execute_command"`
+	ExecuteCommand []string `mapstructure:"execute_command"`
 
 	ctx interpolate.Context
 }
@@ -67,8 +67,16 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return err
 	}
 
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`
+	var errs *packer.MultiError
+	if len(p.config.ExecuteCommand) == 0 {
+		p.config.ExecuteCommand = []string{`/bin/sh`, `-e`, `{{.Script}}`}
+		if runtime.GOOS == "windows" {
+			p.config.ExecuteCommand = []string{`sh`, `-e`, `{{.Script}}`}
+		}
+	} else if len(p.config.ExecuteCommand) == 1 {
+		errs = packer.MultiErrorAppend(errs,
+			errors.New("execute_command requires you to specify a slice of at least two "+
+				"strings. Please see the shell-local docs for more detail."))
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -77,6 +85,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 	if p.config.InlineShebang == "" {
 		p.config.InlineShebang = "/bin/sh -e"
+		if runtime.GOOS == "windows" {
+			p.config.InlineShebang = "sh -e"
+		}
 	}
 
 	if p.config.Scripts == nil {
@@ -87,7 +98,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.Vars = make([]string, 0)
 	}
 
-	var errs *packer.MultiError
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Only one of script or scripts can be specified."))
@@ -159,30 +169,48 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 
 		tf.Close()
+		ui.Say(fmt.Sprintf("Making script executable"))
+		if runtime.GOOS == "windows" {
+			err := os.Chmod(tf.Name(), 0600) // read and write perms, which on windows is enough
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			err := os.Chmod(tf.Name(), 0744)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 	}
-
-	// Create environment variables to set before executing the command
-	flattenedEnvVars := p.createFlattenedEnvVars()
 
 	for _, script := range scripts {
 
 		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars:   flattenedEnvVars,
 			Script: script,
 		}
 
-		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
-		if err != nil {
-			return nil, false, fmt.Errorf("Error processing command: %s", err)
+		var interpolatedCommand []string
+		for _, cmdStr := range p.config.ExecuteCommand {
+			command, err := interpolate.Render(cmdStr, &p.config.ctx)
+			if err != nil {
+				return nil, false, fmt.Errorf("Error processing command: %s", err)
+			}
+			interpolatedCommand = append(interpolatedCommand, command)
 		}
 
 		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
-		comm := &Communicator{}
+		// RemoteCmd only takes a string, not a slice. To keep args separate until
+		// called by exec.Command in the communicator, pass all but last element directly
+		// into the communicator and only the last element of the slice to the remotecmd string.
+		comm := &Communicator{
+			p.config.Vars,
+			interpolatedCommand[:len(interpolatedCommand)-1],
+		}
 
-		cmd := &packer.RemoteCmd{Command: command}
+		cmd := &packer.RemoteCmd{Command: interpolatedCommand[len(interpolatedCommand)-1]}
 
-		log.Printf("starting local command: %s", command)
+		log.Printf("starting local command: %+v", interpolatedCommand)
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return nil, false, fmt.Errorf(
 				"Error executing script: %s\n\n"+
@@ -199,34 +227,4 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	return artifact, true, nil
-}
-
-func (p *PostProcessor) createFlattenedEnvVars() (flattened string) {
-	flattened = ""
-	envVars := make(map[string]string)
-
-	// Always available Packer provided env vars
-	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", p.config.PackerBuildName)
-	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", p.config.PackerBuilderType)
-
-	// Split vars into key/value components
-	for _, envVar := range p.config.Vars {
-		keyValue := strings.SplitN(envVar, "=", 2)
-		// Store pair, replacing any single quotes in value so they parse
-		// correctly with required environment variable format
-		envVars[keyValue[0]] = strings.Replace(keyValue[1], "'", `'"'"'`, -1)
-	}
-
-	// Create a list of env var keys in sorted order
-	var keys []string
-	for k := range envVars {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	// Re-assemble vars surrounding value with single quotes and flatten
-	for _, key := range keys {
-		flattened += fmt.Sprintf("%s='%s' ", key, envVars[key])
-	}
-	return
 }

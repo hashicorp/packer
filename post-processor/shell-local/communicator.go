@@ -10,13 +10,25 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type Communicator struct{}
+type Communicator struct {
+	envVars      []string
+	cmdPrecursor []string
+}
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	localCmd := exec.Command("sh", "-c", cmd.Command)
+	var command []string
+	if len(c.cmdPrecursor) > 1 {
+		// This is the default case.  cmdPrecursor is [`/bin/sh`, `-e`]
+		command = append(c.cmdPrecursor[1:], cmd.Command)
+	} else {
+		command = []string{cmd.Command}
+
+	}
+	localCmd := exec.Command(c.cmdPrecursor[0], command...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
+	localCmd.Env = append(os.Environ(), c.envVars...)
 
 	// Start it. If it doesn't work, then error right away.
 	if err := localCmd.Start(); err != nil {

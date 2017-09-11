@@ -56,11 +56,12 @@ Optional parameters:
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
--   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
+-   `execute_command` (array of strings) - The command to use to execute the script. By
+    default this is [`/bin/sh`, `-e`, `{{.Script}}`]
     The value of this is treated as [template engine](/docs/templates/engine.html).
-    There are two available variables: `Script`, which is the path to the script
-    to run, `Vars`, which is the list of `environment_vars`, if configured.
+    There is one environment variable: `Script`, which is the path to the script
+    to run. The command must contain at least two parts: a "loader" (e.g. "/bin/sh")
+    and the script itself.
 
 -   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
@@ -75,6 +76,8 @@ To many new users, the `execute_command` is puzzling. However, it provides an
 important function: customization of how the command is executed. The most
 common use case for this is dealing with **sudo password prompts**. You may also
 need to customize this if you use a non-POSIX shell, such as `tcsh` on FreeBSD.
+Note that any environment_vars you set will be set automatically, so you do not
+need to account for them in your execute_command customization.
 
 ## Default Environmental Variables
 

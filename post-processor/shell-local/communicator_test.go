@@ -2,6 +2,8 @@ package shell_local
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -19,11 +21,33 @@ func TestCommunicator(t *testing.T) {
 		return
 	}
 
-	c := &Communicator{}
+	vars := []string{}
+	cmdPrecursor := []string{"/bin/sh", "-e"}
+	c := &Communicator{
+		vars,
+		cmdPrecursor,
+	}
+
+	// create a temporary script file
+	tmpfile, err := ioutil.TempFile("", "script")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer os.Remove(tmpfile.Name())
+
+	content := []byte("/bin/echo foo")
+
+	if _, err := tmpfile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		t.Fatal(err)
+	}
 
 	var buf bytes.Buffer
 	cmd := &packer.RemoteCmd{
-		Command: "/bin/echo foo",
+		Command: tmpfile.Name(),
 		Stdout:  &buf,
 	}
 

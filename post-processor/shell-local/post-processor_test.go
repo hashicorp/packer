@@ -4,6 +4,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -45,8 +47,13 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if p.config.InlineShebang != "/bin/sh -e" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
+	expected := "/bin/sh -e"
+	if runtime.GOOS == "windows" {
+		expected = "sh -e"
+	}
+
+	if !reflect.DeepEqual(p.config.InlineShebang, expected) {
+		t.Fatalf("bad value: %+v; expected %+v", p.config.InlineShebang, expected)
 	}
 
 	// Test with a good one
@@ -56,8 +63,8 @@ func TestPostProcessorPrepare_InlineShebang(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
 	}
-
-	if p.config.InlineShebang != "foo" {
+	expected = "foo"
+	if !reflect.DeepEqual(p.config.InlineShebang, expected) {
 		t.Fatalf("bad value: %s", p.config.InlineShebang)
 	}
 }
@@ -213,42 +220,5 @@ func TestPostProcessorPrepare_EnvironmentVars(t *testing.T) {
 	err = p.Configure(config)
 	if err != nil {
 		t.Fatalf("should not have error: %s", err)
-	}
-}
-
-func TestPostProcessor_createFlattenedEnvVars(t *testing.T) {
-	var flattenedEnvVars string
-	config := testConfig()
-
-	userEnvVarTests := [][]string{
-		{},                     // No user env var
-		{"FOO=bar"},            // Single user env var
-		{"FOO=bar's"},          // User env var with single quote in value
-		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
-		{"FOO=bar=baz"},        // User env var with value containing equals
-		{"FOO==bar"},           // User env var with value starting with equals
-	}
-	expected := []string{
-		`PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar'"'"'s' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`BAZ='qux' FOO='bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='bar=baz' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-		`FOO='=bar' PACKER_BUILDER_TYPE='iso' PACKER_BUILD_NAME='vmware' `,
-	}
-
-	p := new(PostProcessor)
-	p.Configure(config)
-
-	// Defaults provided by Packer
-	p.config.PackerBuildName = "vmware"
-	p.config.PackerBuilderType = "iso"
-
-	for i, expectedValue := range expected {
-		p.config.Vars = userEnvVarTests[i]
-		flattenedEnvVars = p.createFlattenedEnvVars()
-		if flattenedEnvVars != expectedValue {
-			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
-		}
 	}
 }
