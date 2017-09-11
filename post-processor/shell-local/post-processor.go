@@ -130,6 +130,24 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 
+	ui.Say(fmt.Sprintf("\n" +
+		"--------------------------------------------------------------\n" +
+		"--------------------DEPRECATION WARNING-----------------------\n" +
+		"--------------------------------------------------------------\n" +
+		"The shell-local provisioner will be deprecated in version 1.2.0\n" +
+		"If you need access to packer variables in your post-processing \n" +
+		"shell scripts, please use the manifest post-processor\n" +
+		"(see https://www.packer.io/docs/post-processors/manifest.html).\n" +
+		"If you need additional information that's already in the artifact,\n" +
+		"please open a ticket so we can add it. If the manifest provisioner\n" +
+		"does not fit your use case, please comment on our deprecation ticket\n" +
+		"with your use case so we can make sure that the transition will be\n" +
+		"seamless for you: https://github.com/hashicorp/packer/issues/5330\n" +
+		"--------------------------------------------------------------\n" +
+		"--------------------DEPRECATION WARNING-----------------------\n" +
+		"--------------------------------------------------------------\n" +
+		"\n\n"))
+
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
