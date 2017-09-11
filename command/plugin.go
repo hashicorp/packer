@@ -26,12 +26,9 @@ import (
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
-<<<<<<< HEAD
+	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
-=======
-	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
->>>>>>> Can specify an iso, vhd or vhdx for download. If it is a vhd or vhdx it is used as the hard drive for spinning up a new machine, importing an exported virtual machine or cloning a virtual machine.
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
@@ -96,12 +93,9 @@ var Builders = map[string]packer.Builder{
 	"file":                new(filebuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
-<<<<<<< HEAD
+	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
 	"lxc":                 new(lxcbuilder.Builder),
 	"lxd":                 new(lxdbuilder.Builder),
-=======
-	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
->>>>>>> Only attach dvd drive if there is one
 	"null":                new(nullbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
