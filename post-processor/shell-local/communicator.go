@@ -11,18 +11,20 @@ import (
 )
 
 type Communicator struct {
-	envVars []string
-	shebang []string
+	envVars      []string
+	cmdPrecursor []string
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	var command []string
-	if len(c.shebang) > 1 {
-		command = append(c.shebang[1:], cmd.Command)
+	if len(c.cmdPrecursor) > 1 {
+		// This is the default case.  cmdPrecursor is [`/bin/sh`, `-e`]
+		command = append(c.cmdPrecursor[1:], cmd.Command)
 	} else {
 		command = []string{cmd.Command}
+
 	}
-	localCmd := exec.Command(c.shebang[0], command...)
+	localCmd := exec.Command(c.cmdPrecursor[0], command...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
 	localCmd.Stderr = cmd.Stderr
