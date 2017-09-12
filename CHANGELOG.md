@@ -29,7 +29,7 @@
 ### FEATURES:
 * **New builder:** `lxc` for building lxc images. [GH-3523]
 * **New builder:** `lxd` for building lxd images. [GH-3625]
-* **New builder**: Oracle Bare Metal Cloud Services (BMCS) builder for creating custom images. [GH-4554]
+* **New builder**: Oracle Cloud Infrastructure (OCI) builder for creating custom images. [GH-4554]
 
 
 ## 1.0.4 (August 11, 2017)
