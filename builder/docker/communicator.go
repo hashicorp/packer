@@ -18,7 +18,7 @@ import (
 )
 
 type Communicator struct {
-	ContainerId  string
+	ContainerID  string
 	HostDir      string
 	ContainerDir string
 	Version      *version.Version
@@ -29,9 +29,9 @@ type Communicator struct {
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
 	var cmd *exec.Cmd
 	if c.Config.Pty {
-		cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerId, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
+		cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerID, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
 	} else {
-		cmd = exec.Command("docker", "exec", "-i", c.ContainerId, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
+		cmd = exec.Command("docker", "exec", "-i", c.ContainerID, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
 	}
 
 	var (
@@ -93,10 +93,10 @@ func (c *Communicator) uploadReader(dst string, src io.Reader) error {
 func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) error {
 
 	// command format: docker cp /path/to/infile containerid:/path/to/outfile
-	log.Printf("Copying to %s on container %s.", dst, c.ContainerId)
+	log.Printf("Copying to %s on container %s.", dst, c.ContainerID)
 
 	localCmd := exec.Command("docker", "cp", "-",
-		fmt.Sprintf("%s:%s", c.ContainerId, filepath.Dir(dst)))
+		fmt.Sprintf("%s:%s", c.ContainerID, filepath.Dir(dst)))
 
 	stderrP, err := localCmd.StderrPipe()
 	if err != nil {
@@ -145,90 +145,53 @@ func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) er
 }
 
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
-	// Create the temporary directory that will store the contents of "src"
-	// for copying into the container.
-	td, err := ioutil.TempDir(c.HostDir, "dirupload")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(td)
+	/*
+		from https://docs.docker.com/engine/reference/commandline/cp/#extended-description
+		SRC_PATH specifies a directory
+			DEST_PATH does not exist
+				DEST_PATH is created as a directory and the contents of the source directory are copied into this directory
+			DEST_PATH exists and is a file
+				Error condition: cannot copy a directory to a file
+			DEST_PATH exists and is a directory
+				SRC_PATH does not end with /. (that is: slash followed by dot)
+					the source directory is copied into this directory
+				SRC_PATH does end with /. (that is: slash followed by dot)
+					the content of the source directory is copied into this directory
 
-	walkFn := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+		translating that in to our semantics:
 
-		relpath, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-		hostpath := filepath.Join(td, relpath)
+		if source ends in /
+			docker cp src. dest
+		otherwise, cp source dest
 
-		// If it is a directory, just create it
-		if info.IsDir() {
-			return os.MkdirAll(hostpath, info.Mode())
-		}
+	*/
 
-		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
-			dest, err := os.Readlink(path)
+	var dockerSource string
 
-			if err != nil {
-				return err
-			}
-
-			return os.Symlink(dest, hostpath)
-		}
-
-		// It is a file, copy it over, including mode.
-		src, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer src.Close()
-
-		dst, err := os.Create(hostpath)
-		if err != nil {
-			return err
-		}
-		defer dst.Close()
-
-		if _, err := io.Copy(dst, src); err != nil {
-			return err
-		}
-
-		si, err := src.Stat()
-		if err != nil {
-			return err
-		}
-
-		return dst.Chmod(si.Mode())
-	}
-
-	// Copy the entire directory tree to the temporary directory
-	if err := filepath.Walk(src, walkFn); err != nil {
-		return err
-	}
-
-	// Determine the destination directory
-	containerSrc := filepath.Join(c.ContainerDir, filepath.Base(td))
-	containerDst := dst
-	if src[len(src)-1] != '/' {
-		containerDst = filepath.Join(dst, filepath.Base(src))
+	if src[len(src)-1] == '/' {
+		dockerSource = fmt.Sprintf("%s.", src)
+	} else {
+		dockerSource = fmt.Sprintf("%s", src)
 	}
 
 	// Make the directory, then copy into it
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("set -e; mkdir -p %s; command cp -R %s/. %s",
-			containerDst, containerSrc, containerDst),
+	localCmd := exec.Command("docker", "cp", dockerSource, fmt.Sprintf("%s:%s", c.ContainerID, dst))
+
+	stderrP, err := localCmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("Failed to open pipe: %s", err)
 	}
-	if err := c.Start(cmd); err != nil {
+	if err := localCmd.Start(); err != nil {
+		return fmt.Errorf("Failed to copy: %s", err)
+	}
+	stderrOut, err := ioutil.ReadAll(stderrP)
+	if err != nil {
 		return err
 	}
 
 	// Wait for the copy to complete
-	cmd.Wait()
-	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Upload failed with non-zero exit status: %d", cmd.ExitStatus)
+	if err := localCmd.Wait(); err != nil {
+		return fmt.Errorf("Failed to upload to '%s' in container: %s. %s.", dst, stderrOut, err)
 	}
 
 	return nil
@@ -238,8 +201,8 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 // path and want to write to an io.Writer, not a file. We use - to make docker
 // cp to write to stdout, and then copy the stream to our destination io.Writer.
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	log.Printf("Downloading file from container: %s:%s", c.ContainerId, src)
-	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerId, src), "-")
+	log.Printf("Downloading file from container: %s:%s", c.ContainerID, src)
+	localCmd := exec.Command("docker", "cp", fmt.Sprintf("%s:%s", c.ContainerID, src), "-")
 
 	pipe, err := localCmd.StdoutPipe()
 	if err != nil {
