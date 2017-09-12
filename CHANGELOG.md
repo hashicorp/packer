@@ -38,10 +38,11 @@
 * builder/winrm: WinRM now waits to make sure commands can run successfully before considering itself connected. [GH-5300]
 
 ### FEATURES:
+
 * **New builder:** `lxc` for building lxc images. [GH-3523]
 * **New builder:** `lxd` for building lxd images. [GH-3625]
 * **New builder**: Oracle Cloud Infrastructure (OCI) builder for creating custom images. [GH-4554]
-* **NEW post-processor**: vSphere Template post-processor to be used with vmware-iso builder enabling user to mark a VM as a template. [GH-5114]
+* **New post-processor**: vSphere Template post-processor to be used with vmware-iso builder enabling user to mark a VM as a template. [GH-5114]
 
 
 ## 1.0.4 (August 11, 2017)
