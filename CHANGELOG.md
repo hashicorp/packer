@@ -11,7 +11,7 @@
 * builder/googlecompute: Add `labels` option for labeling launched instances. [GH-5308]
 * builder/azure: Update pkcs12 package. [GH-5301]
 * builder/googlecompute: Add support for accelerator api. [GH-5137]
-* builder/docker: Upload func in the Docker communicator now uses docker cp. [GH-5273]
+* builder/docker: Uploading files and directories now use docker cp. [GH-5273] [GH-5333]
 * core: Remove LGPL dependencies. [GH-5262]
 * builder/amazon: Upgrade aws-sdk-go to 1.10.14, add tags at instance run time. [GH-5196]
 * builder/azure: Add object_id to windows_custom_image.json. [GH-5285]
@@ -32,9 +32,9 @@
 
 * core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
+* builder/docker: Directory uploads now use the same semantics as the rest of the communicators. [GH-5333]
 * provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
 * builder/amazon: `force_deregister` works in all regions, not just original region. [GH-5250]
-* builder/docker: Fix file uploads on linux. [GH-5251]
 * builder/winrm: WinRM now waits to make sure commands can run successfully before considering itself connected. [GH-5300]
 
 ### FEATURES:
