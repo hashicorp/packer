@@ -2,7 +2,7 @@ set :base_url, "https://www.packer.io/"
 
 activate :hashicorp do |h|
   h.name         = "packer"
-  h.version      = "1.0.4"
+  h.version      = "1.1.0"
   h.github_slug  = "hashicorp/packer"
   h.website_root = "website"
 end
@@ -27,8 +27,8 @@ helpers do
       return "#{page.data.page_title} - Packer by HashiCorp"
     end
 
-     "Packer by HashiCorp"
-   end
+    "Packer by HashiCorp"
+  end
 
   # Get the description for the page
   #
@@ -81,7 +81,7 @@ helpers do
   def body_classes_for(page)
     classes = []
 
-    if !(layout = page.data.layout).blank?
+    if !(page.data.layout).blank?
       classes << "layout-#{page.data.layout}"
     end
 
