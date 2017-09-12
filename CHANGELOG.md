@@ -6,44 +6,42 @@
 * provisioner/salt-masterless: Also use sudo to clean up if we used sudo to install. [GH-5240]
 * builder/profitbricks: added support for Cloud API v4. [GH-5233]
 * builder/vmware: Set artifact ID to `VMName`. [GH-5187]
-* core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
 * builder/cloudstack: Add support for Security Groups. [GH-5175]
 * provisioner/puppet: Add `guest_os_type` option to add support for Windows. [GH-5252]
 * builder/googlecompute: Add `labels` option for labeling launched instances. [GH-5308]
-* builder/azure: Update pkcs12 package [GH-5301]
-* builder/googlecompute: builder now supports accelerator api [GH-5137]
-* builder/docker: Upload func in the Docker communicator now uses docker cp [GH-5273]
-* core: Remove LGPL dependencies [GH-5262]
-* builder/amazon: Upgrade aws-sdk-go to 1.10.14, add tags at instance run time [GH-5196]
-* builder/azure: Add object_id to windows_custom_image.json [GH-5285]
-* builder/azure: Add support for storage account for managed images [GH-5244]
-* core: Build solaris binary by default [GH-5268] [GH-5248]
+* builder/azure: Update pkcs12 package. [GH-5301]
+* builder/googlecompute: Add support for accelerator api. [GH-5137]
+* builder/docker: Upload func in the Docker communicator now uses docker cp. [GH-5273]
+* core: Remove LGPL dependencies. [GH-5262]
+* builder/amazon: Upgrade aws-sdk-go to 1.10.14, add tags at instance run time. [GH-5196]
+* builder/azure: Add object_id to windows_custom_image.json. [GH-5285]
+* builder/azure: Add support for storage account for managed images. [GH-5244]
+* core: Build solaris binary by default. [GH-5268] [GH-5248]
+* builder/vmware-esxi: Remote builds now respect `output_directory` [GH-4592]
 
 ### BACKWARDS INCOMPATIBILITIES:
 
-* communicator/ssh: Renamed ssh_disable_agent to ssh_disable_agent_forwarding. Need to run fixer on packer configs that use ssh_disable_agent. [GH-5024]
-* provisioner/shell: Set default for ExpectDisconnect to false. If your script causes the connection to be reset, you should set this to true to prevent errors. [GH-5283]
+* communicator/ssh: Renamed `ssh_disable_agent` to `ssh_disable_agent_forwarding`. Need to run fixer on packer configs that use `ssh_disable_agent`. [GH-5024]
+* provisioner/shell: Set default for `ExpectDisconnect` to `false`. If your script causes the connection to be reset, you should set this to `true` to prevent errors. [GH-5283]
 * communicator: Preserve left-sided white-space in remote command output. Make sure any scripts that parse this output can handle the new whitespace before upgrading. [GH-5167]
 * builder/amazon: Split `enhanced_networking` into `sriov_support` and `ena_support` to support finer grained control. Use `packer fix <template.json>` to automatically update your template to use `ena_support` where previously there was only `enhanced_networking`. Make sure to also add `sriov_support` if you need that feature, and to ensure `ena_support` is what you intended to be in your template. [GH-5284]
-* builder/cloudstack: Setup temporary SSH keypair; backwards incompatiblein the uncommon case that the source image allowed SSH auth with password but not with keypair. [GH-5174]
+* builder/cloudstack: Setup temporary SSH keypair; backwards incompatible in the uncommon case that the source image allowed SSH auth with password but not with keypair. [GH-5174]
 * builder/amazon: Changes way that AMI artifacts are printed out after build, aligning them to builder. Could affect output parsing. [GH-5281]
 
 ### BUG FIXES:
 
+* core: Fix issue where some builders wouldn't respect `-on-error` behavior. [GH-5297]
 * builder/vmware: Fix timestamp in default VMName. [GH-5274]
 * provisioner/windows-restart: The first powershell provisioner after a restart now works. [GH-5272]
-* builder/amazon: force_deregister works in all regions, not just original region. [GH-5250]
-* builder/cloudstack: Move ipaddress, host port, and source to statebag. [GH-5173]
-* builder/docker: Fix file uploads. [GH-5251]
+* builder/amazon: `force_deregister` works in all regions, not just original region. [GH-5250]
+* builder/docker: Fix file uploads on linux. [GH-5251]
 * builder/winrm: WinRM now waits to make sure commands can run successfully before considering itself connected. [GH-5300]
-* builder/vmware-esxi: separate localDir and outputDir [GH-4592]
 
 ### FEATURES:
 * **New builder:** `lxc` for building lxc images. [GH-3523]
 * **New builder:** `lxd` for building lxd images. [GH-3625]
 * **New builder**: Oracle Cloud Infrastructure (OCI) builder for creating custom images. [GH-4554]
-* **New builder**: Oracle Bare Metal Cloud Services (BMCS) builder for creating custom images. [GH-4554]
-* **NEW post-processor**: vSphere Template post-processor to be used with vmware-iso builder enabling user to mark a VM as a template.
+* **NEW post-processor**: vSphere Template post-processor to be used with vmware-iso builder enabling user to mark a VM as a template. [GH-5114]
 
 
 ## 1.0.4 (August 11, 2017)
