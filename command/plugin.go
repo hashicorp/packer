@@ -31,7 +31,7 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
-	oraclebmcsbuilder "github.com/hashicorp/packer/builder/oracle/bmcs"
+	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -97,7 +97,7 @@ var Builders = map[string]packer.Builder{
 	"null":                new(nullbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
-	"oracle-bmcs":         new(oraclebmcsbuilder.Builder),
+	"oracle-oci":          new(oracleocibuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
