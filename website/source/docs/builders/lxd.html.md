@@ -4,7 +4,8 @@ description: |
     container, runs provisioners within this container, then saves the container
     as an LXD image.
 layout: docs
-page_title: LXD Builder
+page_title: 'LXD - Builders'
+sidebar_current: 'docs-builders-lxd'
 ...
 
 # LXD Builder
@@ -20,7 +21,7 @@ This builder does not work with LXC.
 
 ## Basic Example
 
-Below is a fully functioning example. 
+Below is a fully functioning example.
 
 ``` {.javascript}
 {
@@ -39,14 +40,21 @@ Below is a fully functioning example.
 
 ### Required:
 
--  `image` (string) - The source image to use when creating the build container. This can be a (local or remote) image (name or fingerprint). E.G. my-base-image, ubuntu-daily:x, 08fababf6f27...
-    Note: The builder may appear to pause if required to download a remote image, as they are usually 100-200MB. `/var/log/lxd/lxd.log` will mention starting such downloads.
+-  `image` (string) - The source image to use when creating the build
+   container. This can be a (local or remote) image (name or fingerprint). E.G.
+   `my-base-image,` `ubuntu-daily:x,` `08fababf6f27`, ...
+
+    ~&gt; Note: The builder may appear to pause if required to download
+    a remote image, as they are usually 100-200MB. `/var/log/lxd/lxd.log` will
+    mention starting such downloads.
 
 ### Optional:
 
--  `name` (string) - The name of the started container. Defaults to `packer-$PACKER_BUILD_NAME`.
+-  `name` (string) - The name of the started container. Defaults to
+   `packer-$PACKER_BUILD_NAME`.
 
--  `output_image` (string) - The name of the output artifact. Defaults to `name`.
+-  `output_image` (string) - The name of the output artifact. Defaults to
+   `name`.
 
--  `command_wrapper` (string) - lets you prefix all builder commands, such as with `ssh` for a remote build host. Defaults to `""`.
-
+-  `command_wrapper` (string) - lets you prefix all builder commands, such as
+   with `ssh` for a remote build host. Defaults to `""`.
