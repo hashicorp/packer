@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"runtime"
 	"strings"
 	"time"
@@ -299,55 +298,54 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 	// TODO(mitchellh): deprecation warnings
 
-	networkSelfLink := ""
-	subnetworkSelfLink := ""
+	networkId := ""
+	subnetworkId := ""
 
-	if u, err := url.Parse(c.Network); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
-		// Network is a full server URL
-		// Parse out Network and NetworkProjectId from URL
-		// https://www.googleapis.com/compute/v1/projects/<ProjectId>/global/networks/<Network>
-		networkSelfLink = c.Network
-		parts := strings.Split(u.String(), "/")
-		if len(parts) >= 10 {
-			c.NetworkProjectId = parts[6]
-			c.Network = parts[9]
+	// Apply network naming requirements per
+	// https://cloud.google.com/compute/docs/reference/latest/instances#resource
+	switch c.Network {
+	// It is possible to omit the network property as long as a subnet is
+	// specified. That will be validated later.
+	case "":
+		d.ui.Message(fmt.Sprintf("Network: will be inferred from subnetwork"))
+		break
+	// This special short name should be expanded.
+	case "default":
+		networkId = "global/networks/default"
+	// A value other than "default" was provided for the network name.
+	default:
+		// If the value doesn't contain a slash, we assume it's not a full or
+		// partial URL. We will expand it into a partial URL here and avoid
+		// making an API call to discover the network as it's common for the
+		// caller to not have permission against network discovery APIs.
+		if !strings.Contains(c.Network, "/") {
+			networkId = "projects/" + c.NetworkProjectId + "/global/networks/" + c.Network
+			d.ui.Message(fmt.Sprintf("Network name: %q was expanded to the partial URL %q", c.Network, networkId))
 		}
 	}
-	if u, err := url.Parse(c.Subnetwork); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
-		// Subnetwork is a full server URL
-		subnetworkSelfLink = c.Subnetwork
-	}
 
-	// If subnetwork is ID's and not full service URL's look them up.
-	if subnetworkSelfLink == "" {
-
-		// Get the network
-		if c.NetworkProjectId == "" {
-			c.NetworkProjectId = d.projectId
+	// Apply subnetwork naming requirements per
+	// https://cloud.google.com/compute/docs/reference/latest/instances#resource
+	switch c.Subnetwork {
+	case "":
+		// You can't omit both subnetwork and network
+		if networkId == "" {
+			return nil, fmt.Errorf("both network and subnetwork were empty.")
 		}
-		d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-		network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
-		if err != nil {
-			return nil, err
-		}
-		networkSelfLink = network.SelfLink
-
-		// Subnetwork
-		// Validate Subnetwork config now that we have some info about the network
-		if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
-			// Network appears to be in "custom" mode, so a subnetwork is required
-			if c.Subnetwork == "" {
-				return nil, fmt.Errorf("a subnetwork must be specified")
-			}
-		}
-		// Get the subnetwork
-		if c.Subnetwork != "" {
-			d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-			subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
-			if err != nil {
-				return nil, err
-			}
-			subnetworkSelfLink = subnetwork.SelfLink
+		// An empty subnetwork is only valid for networks in legacy mode or
+		// auto-subnet mode. We could make an API call to get that information
+		// about the network, but it's common for the caller to not have
+		// permission to that API. We'll proceed assuming they're correct in
+		// omitting the subnetwork and let the compute.insert API surface an
+		// error about an invalid network configuration if it exists.
+		break
+	default:
+		// If the value doesn't contain a slash, we assume it's not a full or
+		// partial URL. We will expand it into a partial URL here and avoid
+		// making a call to discover the subnetwork.
+		if !strings.Contains(c.Subnetwork, "/") {
+			subnetworkId = "projects/" + c.NetworkProjectId + "/regions/" + c.Region + "/subnetworks/" + c.Subnetwork
+			d.ui.Message(fmt.Sprintf("Subnetwork: %q was expanded to the partial URL %q", c.Subnetwork, subnetworkId))
 		}
 	}
 
@@ -417,8 +415,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
-				Network:       networkSelfLink,
-				Subnetwork:    subnetworkSelfLink,
+				Network:       networkId,
+				Subnetwork:    subnetworkId,
 			},
 		},
 		Scheduling: &compute.Scheduling{
