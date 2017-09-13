@@ -86,6 +86,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.Network = "default"
 	}
 
+	if c.NetworkProjectId == "" {
+		c.NetworkProjectId = c.ProjectId
+	}
+
 	if c.DiskSizeGb == 0 {
 		c.DiskSizeGb = 10
 	}
