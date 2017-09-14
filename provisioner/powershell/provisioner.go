@@ -124,7 +124,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`
+		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; . {{.Vars}}; &'{{.Path}}'; exit $LastExitCode`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -413,10 +413,20 @@ func (p *Provisioner) generateCommandLineRunner(command string) (commandText str
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Can't double escape the env vars, lets create shiny new ones
 	flattenedEnvVars := p.createFlattenedEnvVars(true)
+	// Need to create a mini ps1 script containing all of the environment variables we want;
+	// we'll be dot-sourcing this later
+	envVarReader := strings.NewReader(flattenedEnvVars)
+	uuid := uuid.TimeOrderedUUID()
+	envVarPath := fmt.Sprintf(`${env:TEMP}\packer-env-vars-%s.ps1`, uuid)
+	log.Printf("Uploading env vars to %s", envVarPath)
+	err = p.communicator.Upload(envVarPath, envVarReader, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
+	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
+		Vars: envVarPath,
 	}
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
