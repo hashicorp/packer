@@ -102,6 +102,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"elevated_execute_command",
 			},
 		},
 	}, raws...)
