@@ -55,13 +55,20 @@ Optional parameters:
     and Packer should therefore not convert Windows line endings to Unix line
     endings (if there are any). By default this is false.
 
+-   `elevated_execute_command` (string) - The command to use to execute the elevated
+    script. By default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`.
+    The value of this is treated as [configuration
+    template](/docs/templates/engine.html). There are two
+    available variables: `Path`, which is the path to the script to run, and
+    `Vars`, which is the list of `environment_vars`, if configured.
+
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `powershell "& { {{.Vars}}{{.Path}}; exit $LastExitCode}"`.
+    default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`.
     The value of this is treated as [configuration
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
