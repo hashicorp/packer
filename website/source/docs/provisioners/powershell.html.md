@@ -56,11 +56,11 @@ Optional parameters:
     endings (if there are any). By default this is false.
 
 -   `elevated_execute_command` (string) - The command to use to execute the elevated
-    script. By default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`.
+    script. By default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; . {{.Vars}}; &'{{.Path}}'; exit $LastExitCode`.
     The value of this is treated as [configuration
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
-    `Vars`, which is the list of `environment_vars`, if configured.
+    `Vars`, which is the location of a temp file containing the list of `environment_vars`, if configured.
 
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
