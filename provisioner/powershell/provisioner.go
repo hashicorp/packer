@@ -469,12 +469,10 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		fmt.Printf("Error creating elevated template: %s", err)
 		return "", err
 	}
-	wrapperBytes := buffer.Bytes()
-	wrapperReader := bytes.NewReader(wrapperBytes)
 	uuid := uuid.TimeOrderedUUID()
 	path := fmt.Sprintf(`${env:TEMP}\packer-elevated-shell-%s.ps1`, uuid)
 	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
-	err = p.communicator.Upload(path, wrapperReader, nil)
+	err = p.communicator.Upload(path, &buffer, nil)
 	if err != nil {
 		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
