@@ -102,6 +102,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"elevated_execute_command",
 			},
 		},
 	}, raws...)
@@ -123,7 +124,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`
+		p.config.ElevatedExecuteCommand = `if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; . {{.Vars}}; &'{{.Path}}'; exit $LastExitCode`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -412,10 +413,20 @@ func (p *Provisioner) generateCommandLineRunner(command string) (commandText str
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Can't double escape the env vars, lets create shiny new ones
 	flattenedEnvVars := p.createFlattenedEnvVars(true)
+	// Need to create a mini ps1 script containing all of the environment variables we want;
+	// we'll be dot-sourcing this later
+	envVarReader := strings.NewReader(flattenedEnvVars)
+	uuid := uuid.TimeOrderedUUID()
+	envVarPath := fmt.Sprintf(`${env:TEMP}\packer-env-vars-%s.ps1`, uuid)
+	log.Printf("Uploading env vars to %s", envVarPath)
+	err = p.communicator.Upload(envVarPath, envVarReader, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
+	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
+		Vars: envVarPath,
 	}
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
@@ -458,27 +469,12 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		fmt.Printf("Error creating elevated template: %s", err)
 		return "", err
 	}
-
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "packer-elevated-shell.ps1")
-	writer := bufio.NewWriter(tmpFile)
-	if _, err := writer.WriteString(string(buffer.Bytes())); err != nil {
-		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
-	}
-
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
-	}
-	tmpFile.Close()
-	f, err := os.Open(tmpFile.Name())
-	if err != nil {
-		return "", fmt.Errorf("Error opening temporary elevated powershell script: %s", err)
-	}
-	defer f.Close()
-
+	wrapperBytes := buffer.Bytes()
+	wrapperReader := bytes.NewReader(wrapperBytes)
 	uuid := uuid.TimeOrderedUUID()
 	path := fmt.Sprintf(`${env:TEMP}\packer-elevated-shell-%s.ps1`, uuid)
-	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s] from [%s]", command, path, tmpFile.Name())
-	err = p.communicator.Upload(path, f, nil)
+	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
+	err = p.communicator.Upload(path, wrapperReader, nil)
 	if err != nil {
 		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
