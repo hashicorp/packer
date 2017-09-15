@@ -469,27 +469,12 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		fmt.Printf("Error creating elevated template: %s", err)
 		return "", err
 	}
-
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "packer-elevated-shell.ps1")
-	writer := bufio.NewWriter(tmpFile)
-	if _, err := writer.WriteString(string(buffer.Bytes())); err != nil {
-		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
-	}
-
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
-	}
-	tmpFile.Close()
-	f, err := os.Open(tmpFile.Name())
-	if err != nil {
-		return "", fmt.Errorf("Error opening temporary elevated powershell script: %s", err)
-	}
-	defer f.Close()
-
+	wrapperBytes := buffer.Bytes()
+	wrapperReader := bytes.NewReader(wrapperBytes)
 	uuid := uuid.TimeOrderedUUID()
 	path := fmt.Sprintf(`${env:TEMP}\packer-elevated-shell-%s.ps1`, uuid)
-	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s] from [%s]", command, path, tmpFile.Name())
-	err = p.communicator.Upload(path, f, nil)
+	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
+	err = p.communicator.Upload(path, wrapperReader, nil)
 	if err != nil {
 		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
