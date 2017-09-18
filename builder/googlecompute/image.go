@@ -5,6 +5,7 @@ import (
 )
 
 type Image struct {
+	Labels    map[string]string
 	Licenses  []string
 	Name      string
 	ProjectId string

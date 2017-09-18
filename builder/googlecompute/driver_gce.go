@@ -103,7 +103,7 @@ func (d *driverGCE) CreateImage(name, description, family, zone, disk string, im
 		Description: description,
 		Name:        name,
 		Family:      family,
-		Labels:      labels,
+		Labels:      image_labels,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
