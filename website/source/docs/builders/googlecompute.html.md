@@ -205,7 +205,7 @@ builder.
     this must be unique. Defaults to `"packer-{{uuid}}"`.
 
 -   `labels` (object of key/value strings) - Key/value pair labels to apply to
-    the launched instance.
+    the launched instance and the created image.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
