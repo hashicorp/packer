@@ -198,6 +198,9 @@ builder.
     instead of a specific image name. The image family always returns its
     latest image that is not deprecated.
 
+-   `image_labels` (object of key/value strings) - Key/value pair labels to
+    apply to the created image.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
@@ -205,7 +208,7 @@ builder.
     this must be unique. Defaults to `"packer-{{uuid}}"`.
 
 -   `labels` (object of key/value strings) - Key/value pair labels to apply to
-    the launched instance and the created image.
+    the launched instance.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 

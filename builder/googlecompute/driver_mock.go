@@ -81,7 +81,7 @@ type DriverMock struct {
 	WaitForInstanceErrCh <-chan error
 }
 
-func (d *DriverMock) CreateImage(name, description, family, zone, disk string, labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
 	d.CreateImageName = name
 	d.CreateImageDesc = description
 	d.CreateImageFamily = family
