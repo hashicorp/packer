@@ -39,7 +39,7 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	imageCh, errCh := driver.CreateImage(
 		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
-		config.DiskName, config.Labels)
+		config.DiskName, config.ImageLabels)
 	var err error
 	select {
 	case err = <-errCh:
