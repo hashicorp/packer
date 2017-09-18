@@ -35,6 +35,7 @@ type Config struct {
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
 	ImageFamily          string            `mapstructure:"image_family"`
+	ImageLabels          map[string]string `mapstructure:"image_labels"`
 	InstanceName         string            `mapstructure:"instance_name"`
 	Labels               map[string]string `mapstructure:"labels"`
 	MachineType          string            `mapstructure:"machine_type"`
