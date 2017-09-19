@@ -46,6 +46,7 @@ func TestStepCreateImage(t *testing.T) {
 	assert.Equal(t, d.CreateImageFamily, c.ImageFamily, "Incorrect image family passed to driver.")
 	assert.Equal(t, d.CreateImageZone, c.Zone, "Incorrect image zone passed to driver.")
 	assert.Equal(t, d.CreateImageDisk, c.DiskName, "Incorrect disk passed to driver.")
+	assert.Equal(t, d.CreateImageLabels, c.ImageLabels, "Incorrect image_labels passed to driver.")
 }
 
 func TestStepCreateImage_errorOnChannel(t *testing.T) {
