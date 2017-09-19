@@ -463,6 +463,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	var buffer bytes.Buffer
 
 	base64EncodedCommand, err := powershellEncode(command)
+	commandText := "powershell " + p.config.PowershellParameters + " -encodedCommand " + base64EncodedCommand
 	if err != nil {
 		return "", fmt.Errorf("Error encoding command: %s", err)
 	}
@@ -472,7 +473,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		Password:        p.config.ElevatedPassword,
 		TaskDescription: "Packer elevated task",
 		TaskName:        fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID()),
-		EncodedCommand:  base64EncodedCommand,
+		CommandText:     commandText,
 	})
 
 	if err != nil {
