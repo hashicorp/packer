@@ -82,6 +82,11 @@ type Config struct {
 	// such as 3010 - "The requested operation is successful. Changes will not be effective until the system is rebooted."
 	ValidExitCodes []int `mapstructure:"valid_exit_codes"`
 
+	// What parameters to use when invoking powershell to run the encoded command.
+	// by default this is "-executionpolicy bypass" but you may want to add other options
+	// such as -NoProfile
+	PowershellParameters string `mapstructure:"powershell_parameters"`
+
 	ctx interpolate.Context
 }
 
@@ -150,6 +155,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ValidExitCodes == nil {
 		p.config.ValidExitCodes = []int{0}
+	}
+
+	if p.config.PowershellParameters == "" {
+		p.config.PowershellParameters = "-executionpolicy bypass"
 	}
 
 	var errs error
@@ -405,7 +414,8 @@ func (p *Provisioner) generateCommandLineRunner(command string) (commandText str
 		return "", fmt.Errorf("Error encoding command: %s", err)
 	}
 
-	commandText = "powershell -executionpolicy bypass -encodedCommand " + base64EncodedCommand
+	commandText = "powershell " + p.config.PowershellParameters + " -encodedCommand " + base64EncodedCommand
+	log.Printf(commandText)
 
 	return commandText, nil
 }
