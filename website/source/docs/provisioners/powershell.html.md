@@ -56,7 +56,12 @@ Optional parameters:
     endings (if there are any). By default this is false.
 
 -   `elevated_execute_command` (string) - The command to use to execute the elevated
-    script. By default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; . {{.Vars}}; &'{{.Path}}'; exit $LastExitCode`.
+    script. By default this is as follows:
+
+    ``` powershell
+    powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+    ```
+
     The value of this is treated as [configuration
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
@@ -68,7 +73,12 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `powershell if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode`.
+    default this is as follows:
+
+    ``` powershell
+    powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"
+    ```
+
     The value of this is treated as [configuration
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
