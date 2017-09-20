@@ -78,6 +78,8 @@ Optional parameters:
     PowerShell script will be run with elevated privileges using the given
     Windows user.
 
+-   `powershell_parameters` (string) - under the hood, the powershell provisioner plugs your script and variables into `execute_command` or `elevated_execute_command` and then encodes that entire thing and runs it with `"powershell -executionpolicy bypass -encodedCommand " + base64EncodedCommand`. `powershell_parameters` exists so you can modify this wrapping command; e.g. `"powershell_parameters": "-NoProfile -executionpolicy bypass"` would make the final command `"powershell -NoProfile -executionpolicy bypass -encodedCommand " + base64EncodedCommand` You can modify `powershell_parameters` in addition to `execute_command` or independently of it, depending on your specific needs.
+
 -   `remote_path` (string) - The path where the script will be uploaded to in
     the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must be a
     writable location and any parent directories must already exist.

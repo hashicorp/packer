@@ -9,7 +9,7 @@ type elevatedOptions struct {
 	Password        string
 	TaskName        string
 	TaskDescription string
-	EncodedCommand  string
+	CommandText     string
 }
 
 var elevatedTemplate = template.Must(template.New("ElevatedCommand").Parse(`

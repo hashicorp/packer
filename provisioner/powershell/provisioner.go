@@ -451,7 +451,7 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	}
 
 	// Return the path to the elevated shell wrapper
-	command = fmt.Sprintf("powershell -executionpolicy bypass -file \"%s\"", path)
+	command = fmt.Sprintf("powershell "+p.config.PowershellParameters+" -file \"%s\"", path)
 
 	return command, err
 }
