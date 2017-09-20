@@ -45,26 +45,24 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
 	if err != nil {
-		err := fmt.Errorf("Error creating setting virtual machine cpu: %s", err)
+		err := fmt.Errorf("Error setting virtual machine cpu count: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if s.EnableDynamicMemory {
-		err = driver.SetVirtualMachineDynamicMemory(s.VMName, s.EnableDynamicMemory)
-		if err != nil {
-			err := fmt.Errorf("Error creating setting virtual machine dynamic memory: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	err = driver.SetVirtualMachineDynamicMemory(s.VMName, s.EnableDynamicMemory)
+	if err != nil {
+		err := fmt.Errorf("Error setting virtual machine dynamic memory: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	if s.EnableMacSpoofing {
 		err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
 		if err != nil {
-			err := fmt.Errorf("Error creating setting virtual machine mac spoofing: %s", err)
+			err := fmt.Errorf("Error setting virtual machine mac spoofing: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -85,7 +83,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		//This is only supported on Windows 10 and Windows Server 2016 onwards
 		err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
 		if err != nil {
-			err := fmt.Errorf("Error creating setting virtual machine virtualization extensions: %s", err)
+			err := fmt.Errorf("Error setting virtual machine virtualization extensions: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
