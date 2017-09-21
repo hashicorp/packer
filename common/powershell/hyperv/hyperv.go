@@ -213,8 +213,25 @@ New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHD
 			return err
 		}
 
+		err = DisableAutomaticCheckpoints(vmName)
+
+		if err != nil {
+			return err
+		}
+
 		return DeleteAllDvdDrives(vmName)
 	}
+}
+
+func DisableAutomaticCheckpoints(vmName string) error {
+	var script = `
+param([string]$vmName)
+if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
+	Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName)
+	return err
 }
 
 func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
