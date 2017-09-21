@@ -142,7 +142,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed: %s\n", err)
 	}
 
-	return artifact, false, nil
+	artifact = &Artifact{
+		datastore: p.config.Datastore,
+		files:     artifact.Files(),
+		vmfolder:  p.config.VMFolder,
+		vmname:    p.config.VMName,
+	}
+
+	return artifact, true, nil
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {

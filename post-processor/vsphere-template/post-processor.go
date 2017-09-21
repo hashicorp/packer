@@ -7,16 +7,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/builder/vmware/iso"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 )
 
 var builtins = map[string]string{
-	"mitchellh.vmware-esx": "vmware",
+	vsphere.BuilderId: "vmware",
+	iso.BuilderIdESX:  "vmware",
 }
 
 type Config struct {
@@ -90,11 +93,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	source := ""
 	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") {
+		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
 			source = path
 			break
 		}
 	}
+
+	if source == "" {
+		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
+	}
+
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
 	// (after the ESXi creates it) it will fail. If vSphere is given a few seconds this behavior doesn't reappear.
 	ui.Message("Waiting 10s for VMware vSphere to start")
@@ -117,10 +125,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		&stepMarkAsTemplate{
-			VMName: artifact.Id(),
-			Source: source,
-		},
+		NewStepMarkAsTemplate(artifact.Id(), source),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)

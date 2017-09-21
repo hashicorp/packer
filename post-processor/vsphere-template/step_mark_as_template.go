@@ -13,8 +13,30 @@ import (
 )
 
 type stepMarkAsTemplate struct {
-	VMName string
-	Source string
+	VMName       string
+	Source       string
+	RemoteFolder string
+}
+
+func NewStepMarkAsTemplate(vmname, source string) *stepMarkAsTemplate {
+	remoteFolder := "Discovered virtual machine"
+
+	if strings.Contains(vmname, "::") {
+		local := strings.Split(vmname, "::")
+
+		datastore := local[0]
+		remoteFolder = local[1]
+		vmname = local[2]
+
+		source = path.Join("/vmfs/volumes/", datastore, vmname, path.Base(source))
+
+	}
+
+	return &stepMarkAsTemplate{
+		VMName:       vmname,
+		Source:       source,
+		RemoteFolder: remoteFolder,
+	}
 }
 
 func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,7 +47,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Message("Marking as a template...")
 
-	vm, err := findRuntimeVM(cli, dcPath, s.VMName)
+	vm, err := findRuntimeVM(cli, dcPath, s.VMName, s.RemoteFolder)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -75,10 +97,10 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-// We will use the virtual machine created by vmware-iso builder
-func findRuntimeVM(cli *govmomi.Client, dcPath, name string) (*object.VirtualMachine, error) {
+// We will use the virtual machine created/uploaded by vmware builder (remote or local)
+func findRuntimeVM(cli *govmomi.Client, dcPath, name, remoteFolder string) (*object.VirtualMachine, error) {
 	si := object.NewSearchIndex(cli.Client)
-	fullPath := path.Join(dcPath, "vm", "Discovered virtual machine", name)
+	fullPath := path.Join(dcPath, "vm", remoteFolder, name)
 
 	ref, err := si.FindByInventoryPath(context.Background(), fullPath)
 	if err != nil {
