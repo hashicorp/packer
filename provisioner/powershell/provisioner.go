@@ -417,7 +417,7 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	// we'll be dot-sourcing this later
 	envVarReader := strings.NewReader(flattenedEnvVars)
 	uuid := uuid.TimeOrderedUUID()
-	envVarPath := fmt.Sprintf(`${env:TEMP}\packer-env-vars-%s.ps1`, uuid)
+	envVarPath := fmt.Sprintf(`${env:SYSTEMROOT}\Temp\packer-env-vars-%s.ps1`, uuid)
 	log.Printf("Uploading env vars to %s", envVarPath)
 	err = p.communicator.Upload(envVarPath, envVarReader, nil)
 	if err != nil {
