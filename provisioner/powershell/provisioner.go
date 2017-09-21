@@ -8,12 +8,14 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"sort"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
@@ -345,6 +347,8 @@ func (p *Provisioner) prepareEnvVars(elevated bool) (envVarPath string, err erro
 }
 
 func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
+	var buf bytes.Buffer
+	escapedEnvVarValue := ""
 	flattened = ""
 	envVars := make(map[string]string)
 
@@ -359,7 +363,16 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
 		keyValue := strings.SplitN(envVar, "=", 2)
-		envVars[keyValue[0]] = keyValue[1]
+		// Escape chars special to PS in each env var value
+		err := escapeSpecialPS(&buf, []byte(keyValue[1]))
+		if err != nil {
+			fmt.Printf("An error occured escaping chars special to PowerShell in env var value %s", keyValue[1])
+		}
+		escapedEnvVarValue = buf.String()
+		buf.Reset()
+
+		log.Printf("Env var %s converted to %s after escaping chars special to PS", keyValue[1], escapedEnvVarValue)
+		envVars[keyValue[0]] = escapedEnvVarValue
 	}
 
 	// Create a list of env var keys in sorted order
@@ -483,10 +496,27 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 
 	buffer.Reset()
 
+	// Escape characters special to PowerShell in the ElevatedUser string
+	err = escapeSpecialPS(&buffer, []byte(p.config.ElevatedUser))
+	if err != nil {
+		fmt.Printf("Error escaping chars special to Powershell in ElevatedUser %s", p.config.ElevatedUser)
+	}
+	escapedElevatedUser := buffer.String()
+	log.Printf("Elevated user %s converted to %s after escaping chars special to PowerShell", p.config.ElevatedUser, escapedElevatedUser)
+	buffer.Reset()
+	// Escape characters special to PowerShell in the ElevatedPassword string
+	err = escapeSpecialPS(&buffer, []byte(p.config.ElevatedPassword))
+	if err != nil {
+		fmt.Printf("Error escaping chars special to Powershell in ElevatedPassword %s", p.config.ElevatedPassword)
+	}
+	escapedElevatedPassword := buffer.String()
+	log.Printf("Elevated password %s converted to %s after escaping chars special to PowerShell", p.config.ElevatedPassword, escapedElevatedPassword)
+	buffer.Reset()
+
 	// Generate command
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
-		User:              p.config.ElevatedUser,
-		Password:          p.config.ElevatedPassword,
+		User:              escapedElevatedUser,
+		Password:          escapedElevatedPassword,
 		TaskName:          taskName,
 		TaskDescription:   "Packer elevated task",
 		LogFile:           logFile,
@@ -508,4 +538,53 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	// CMD formatted Path required for this op
 	path = fmt.Sprintf("%s-%s.ps1", "%TEMP%\\packer-elevated-shell", uuid)
 	return path, err
+}
+
+func escapeSpecialPS(w io.Writer, s []byte) error {
+	var esc []byte
+
+	last := 0
+	for i := 0; i < len(s); {
+		r, width := utf8.DecodeRune(s[i:])
+		i += width
+		switch r {
+		case '"':
+			esc = []byte("`\"") // Double quotes
+		case '\'':
+			esc = []byte("`'") // Single quotes
+		case '$':
+			esc = []byte("`$") // Dollar sign
+		case '`':
+			esc = []byte("``") // Backticks
+		default:
+			if !isInCharacterRange(r) || (r == 0xFFFD && width == 1) {
+				esc = []byte("\uFFFD") // Unicode replacement character
+				break
+			}
+			continue
+		}
+		if _, err := w.Write(s[last : i-width]); err != nil {
+			return err
+		}
+		if _, err := w.Write(esc); err != nil {
+			return err
+		}
+		last = i
+	}
+	if _, err := w.Write(s[last:]); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Decide whether the given rune is in the XML Character Range, per
+// the Char production of http://www.xml.com/axml/testaxml.htm,
+// Section 2.2 Characters.
+func isInCharacterRange(r rune) (inrange bool) {
+	return r == 0x09 ||
+		r == 0x0A ||
+		r == 0x0D ||
+		r >= 0x20 && r <= 0xDF77 ||
+		r >= 0xE000 && r <= 0xFFFD ||
+		r >= 0x10000 && r <= 0x10FFFF
 }
