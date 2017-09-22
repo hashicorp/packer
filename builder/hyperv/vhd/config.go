@@ -65,7 +65,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Defaults and clamping
 	if c.VMName == "" {
-		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
+		c.VMName = fmt.Sprintf("packer-%s", c.PackerBuildName)
 	}
 
 	if c.SwitchName == "" {
@@ -143,7 +143,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	return c, warnings, errs
+	if errs != nil && len(errs.Errors) > 0 {
+		return c, warnings, errs
+	}
+
+	return c, warnings, nil
 }
 
 func (c *Config) detectSwitchName() string {
