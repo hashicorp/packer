@@ -7,22 +7,22 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// This step copies a source virtual machine into the execution path
-type StepCopySourceVM struct {
+// This step copies a source vhd/vhdx into the execution path
+type StepCopySourceDisk struct {
 	SourcePath string
 	VMName     string
 }
 
-func (s *StepCopySourceVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCopySourceDisk) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Copying source virtual machine...")
+	ui.Say("Copying source disk...")
 
 	path := state.Get("packerTempDir").(string)
 
 	err := driver.CopySourceVirtualMachine(s.SourcePath, s.VMName, path)
 	if err != nil {
-		err := fmt.Errorf("Error copying source virtual machine: %s", err)
+		err := fmt.Errorf("Error copying source disk: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -31,5 +31,5 @@ func (s *StepCopySourceVM) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepCopySourceVM) Cleanup(state multistep.StateBag) {
+func (s *StepCopySourceDisk) Cleanup(state multistep.StateBag) {
 }

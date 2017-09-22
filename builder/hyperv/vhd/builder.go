@@ -57,7 +57,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepCreateSwitch{
 			SwitchName: b.config.SwitchName,
 		},
-		&hypervcommon.StepCopySourceVM{
+		&hypervcommon.StepCopySourceDisk{
 			SourcePath: b.config.SourcePath,
 			VMName:     b.config.VMName,
 		},
