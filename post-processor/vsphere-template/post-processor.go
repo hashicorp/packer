@@ -87,6 +87,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
+	ui.Say(fmt.Sprintf("Artifact %s with id %s and builderId %s", artifact, artifact.Id(), artifact.BuilderId()))
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
