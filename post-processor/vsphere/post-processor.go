@@ -149,8 +149,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		vmname:    p.config.VMName,
 	}
 
-	ui.Say(fmt.Sprintf("New artifact created %s with id %s and builderId %s", artifact, artifact.Id(), artifact.BuilderId()))
-
 	return artifact, true, nil
 }
 

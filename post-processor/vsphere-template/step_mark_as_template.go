@@ -28,7 +28,7 @@ func NewStepMarkAsTemplate(vmname, source string) *stepMarkAsTemplate {
 		remoteFolder = local[1]
 		vmname = local[2]
 
-		source = path.Join("/vmfs/volumes/", datastore, vmname, path.Base(source))
+		source = path.Join("/vmfs/volumes/", datastore, vmname, vmname+path.Ext(source))
 
 	}
 
