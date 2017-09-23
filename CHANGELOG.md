@@ -1,5 +1,9 @@
 ## UNRELEASED
 
+### IMPROVEMENTS:
+
+* builder/googlecompute: Support setting labels on the resulting image. [GH-5356]
+
 ### BUG FIXES:
 
 * builder/puppet-masterless: Make sure directories created with sudo are writable by the packer user. [GH-5351]
