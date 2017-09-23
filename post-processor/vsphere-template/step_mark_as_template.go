@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
@@ -18,18 +19,16 @@ type stepMarkAsTemplate struct {
 	RemoteFolder string
 }
 
-func NewStepMarkAsTemplate(vmname, source string) *stepMarkAsTemplate {
+func NewStepMarkAsTemplate(artifact packer.Artifact, source string) *stepMarkAsTemplate {
 	remoteFolder := "Discovered virtual machine"
+	vmname := artifact.Id()
 
-	if strings.Contains(vmname, "::") {
-		local := strings.Split(vmname, "::")
-
-		datastore := local[0]
-		remoteFolder = local[1]
-		vmname = local[2]
-
+	if artifact.BuilderId() == vsphere.BuilderId {
+		id := strings.Split(artifact.Id(), "::")
+		datastore := id[0]
+		remoteFolder = id[1]
+		vmname = id[2]
 		source = path.Join("/vmfs/volumes/", datastore, vmname, vmname+".vmx")
-
 	}
 
 	return &stepMarkAsTemplate{
