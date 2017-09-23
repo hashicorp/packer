@@ -13,6 +13,15 @@ type Artifact struct {
 	vmname    string
 }
 
+func NewArtifact(datastore, vmfolder, vmname string, files []string) *Artifact {
+	return &Artifact{
+		files:     files,
+		datastore: datastore,
+		vmfolder:  vmfolder,
+		vmname:    vmname,
+	}
+}
+
 func (*Artifact) BuilderId() string {
 	return BuilderId
 }

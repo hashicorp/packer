@@ -142,12 +142,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Failed: %s\n", err)
 	}
 
-	artifact = &Artifact{
-		datastore: p.config.Datastore,
-		files:     artifact.Files(),
-		vmfolder:  p.config.VMFolder,
-		vmname:    p.config.VMName,
-	}
+	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
 
 	return artifact, true, nil
 }
