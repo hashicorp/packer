@@ -15,6 +15,7 @@ type uploadCmdData struct {
 	ManifestPath    string
 	Region          string
 	SecretKey       string
+	Token           string
 }
 
 type StepUploadBundle struct {
@@ -40,11 +41,13 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	secretKey := config.SecretKey
 	session, err := config.AccessConfig.Session()
 	accessConfig := session.Config
+	var token string
 	if err == nil && accessKey == "" && secretKey == "" {
 		credentials, err := accessConfig.Credentials.Get()
 		if err == nil {
 			accessKey = credentials.AccessKeyID
 			secretKey = credentials.SecretAccessKey
+			token = credentials.SessionToken
 		}
 	}
 
@@ -55,6 +58,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		ManifestPath:    manifestPath,
 		Region:          region,
 		SecretKey:       secretKey,
+		Token:           token,
 	}
 	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, &config.ctx)
 	if err != nil {
