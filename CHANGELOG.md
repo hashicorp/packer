@@ -3,6 +3,7 @@
 ### IMPROVEMENTS:
 
 * builder/googlecompute: Support setting labels on the resulting image. [GH-5356]
+* builder/amazon: Support template functions in tag keys. [GH-5381]
 
 ### BUG FIXES:
 
