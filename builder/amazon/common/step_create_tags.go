@@ -166,13 +166,17 @@ func ConvertToEC2Tags(tags map[string]string, region, sourceAmiId string, ctx in
 			SourceAMI:   sourceAmiId,
 			BuildRegion: region,
 		}
+		interpolatedKey, err := interpolate.Render(key, &ctx)
+		if err != nil {
+			return ec2Tags, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
+		}
 		interpolatedValue, err := interpolate.Render(value, &ctx)
 		if err != nil {
 			return ec2Tags, fmt.Errorf("Error processing tag: %s:%s - %s", key, value, err)
 		}
 
 		ec2Tags = append(ec2Tags, &ec2.Tag{
-			Key:   aws.String(key),
+			Key:   aws.String(interpolatedKey),
 			Value: aws.String(interpolatedValue),
 		})
 	}
