@@ -217,6 +217,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			VpcId:            b.config.VpcId,
+			SecurityGroupSourceCidr: b.config.SecurityGroupSourceCidr,
 		},
 		&awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,

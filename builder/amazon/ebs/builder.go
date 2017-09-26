@@ -132,6 +132,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
+			SecurityGroupSourceCidr: b.config.SecurityGroupSourceCidr,
 		},
 		&stepCleanupVolumes{
 			BlockDevices: b.config.BlockDevices,

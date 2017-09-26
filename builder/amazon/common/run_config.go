@@ -40,6 +40,7 @@ type RunConfig struct {
 	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
 	SecurityGroupId                   string            `mapstructure:"security_group_id"`
 	SecurityGroupIds                  []string          `mapstructure:"security_group_ids"`
+	SecurityGroupSourceCidr           string            `mapstructure:"security_group_source_cidr"`
 	SubnetId                          string            `mapstructure:"subnet_id"`
 	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
 	UserData                          string            `mapstructure:"user_data"`
@@ -113,6 +114,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 			c.SecurityGroupIds = []string{c.SecurityGroupId}
 			c.SecurityGroupId = ""
 		}
+	}
+
+	if c.SecurityGroupSourceCidr == "" {
+		c.SecurityGroupSourceCidr = "0.0.0.0/0"
 	}
 
 	if c.InstanceInitiatedShutdownBehavior == "" {
