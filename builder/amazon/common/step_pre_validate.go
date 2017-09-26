@@ -26,7 +26,7 @@ func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 
-	ui.Say("Prevalidating AMI Name...")
+	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s", s.DestAmiName))
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 		Filters: []*ec2.Filter{{
 			Name:   aws.String("name"),
