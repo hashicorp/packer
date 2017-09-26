@@ -102,6 +102,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// If there was no template created, just return
+	if _, ok := state.GetOk("template"); !ok {
+		return nil, nil
+	}
+
 	// Build the artifact and return it
 	artifact := &Artifact{
 		client:   client,
