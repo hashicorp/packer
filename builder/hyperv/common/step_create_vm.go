@@ -59,14 +59,12 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	if s.EnableMacSpoofing {
-		err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
-		if err != nil {
-			err := fmt.Errorf("Error setting virtual machine mac spoofing: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
+	if err != nil {
+		err := fmt.Errorf("Error setting virtual machine mac spoofing: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	if s.Generation == 2 {
@@ -79,15 +77,13 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	if s.EnableVirtualizationExtensions {
-		//This is only supported on Windows 10 and Windows Server 2016 onwards
-		err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
-		if err != nil {
-			err := fmt.Errorf("Error setting virtual machine virtualization extensions: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	//This is only supported on Windows 10 and Windows Server 2016 onwards
+	err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
+	if err != nil {
+		err := fmt.Errorf("Error setting virtual machine virtualization extensions: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	// Set the final name in the state bag so others can use it
