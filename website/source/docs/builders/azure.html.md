@@ -216,6 +216,24 @@ The following provisioner snippet shows how to sysprep a Windows VM. Deprovision
 }
 ```
 
+In some circumstances the above isn't enough to reliably know that the sysprep is actually finished generalizing the image, the code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
+
+``` json
+{
+    "provisioners": [
+    {
+        "type": "powershell",
+        "inline": [
+            "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+            "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+        ]
+    }
+  ]
+}
+
+
+```
+
 ### Linux
 
 The following provisioner snippet shows how to deprovision a Linux VM. Deprovision should be the last operation executed by a build.
