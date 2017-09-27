@@ -123,6 +123,12 @@ Some operating systems default to a non-root user. For example if you login as
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
 is being piped in with the value of `packer`.
 
+The above example won't work if your environment vars contain spaces or single quotes; in these cases try removing the single quotes:
+
+``` text
+"echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}"
+```
+
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.
 
