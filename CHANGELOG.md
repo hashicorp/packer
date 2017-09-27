@@ -6,6 +6,7 @@
 * builder/amazon: Support template functions in tag keys. [GH-5381]
 * core: releases will now be build for ppc64le
 * builder/amazon-instance: Add `.Token` as a variable in the `BundleUploadCommand` template. [GH-5288]
+* builder/amazon: Output AMI Name during prevalidation. [GH-5389]
 
 ### BUG FIXES:
 
