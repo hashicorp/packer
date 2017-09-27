@@ -11,6 +11,7 @@
 ### BUG FIXES:
 
 * builder/puppet-masterless: Make sure directories created with sudo are writable by the packer user. [GH-5351]
+* builder/cloudstack: Fix panic if build is aborted. [GH-5388]
 
 ## 1.1.0 (September 12, 2017)
 
