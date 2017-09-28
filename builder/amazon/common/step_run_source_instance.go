@@ -33,6 +33,7 @@ type StepRunSourceInstance struct {
 	SpotPriceProduct                  string
 	SubnetId                          string
 	Tags                              map[string]string
+	VolumeTags                        map[string]string
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
@@ -149,6 +150,13 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	ec2VolumeTags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error tagging source instance volume: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 	ReportTags(ui, ec2Tags)
 
 	if spotPrice == "" || spotPrice == "0" {
@@ -165,14 +173,24 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			EbsOptimized:        &s.EbsOptimized,
 		}
 
+		var tagSpecs []*ec2.TagSpecification
 		if len(ec2Tags) > 0 {
-			runTags := &ec2.TagSpecification{
+			tagSpecs = append(tagSpecs, &ec2.TagSpecification{
 				ResourceType: aws.String("instance"),
 				Tags:         ec2Tags,
-			}
-
-			runOpts.SetTagSpecifications([]*ec2.TagSpecification{runTags})
+			})
 			createTagsAfterInstanceStarts = false
+		}
+
+		if len(ec2VolumeTags) > 0 {
+			tagSpecs = append(tagSpecs, &ec2.TagSpecification{
+				ResourceType: aws.String("volume"),
+				Tags:         ec2VolumeTags,
+			})
+		}
+
+		if len(tagSpecs) > 0 {
+			runOpts.SetTagSpecifications(tagSpecs)
 		}
 
 		if keyName != "" {
