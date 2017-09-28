@@ -48,6 +48,8 @@ This post-processor has only optional configuration:
 
 -   `login_server` (string) - The server address to login to.
 
+-   `remove` (boolean) - If it's true, the pushed image will be remove from your local machine. Default is false.
+
 Note: When using *Docker Hub* or *Quay* registry servers, `login` must to be
 set to `true` and `login_email`, `login_username`, **and** `login_password`
 must to be set to your registry credentials. When using Docker Hub,

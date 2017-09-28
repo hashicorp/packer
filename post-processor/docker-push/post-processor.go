@@ -22,6 +22,7 @@ type Config struct {
 	LoginServer            string `mapstructure:"login_server"`
 	EcrLogin               bool   `mapstructure:"ecr_login"`
 	docker.AwsAccessConfig `mapstructure:",squash"`
+	Remove                 bool
 
 	ctx interpolate.Context
 }
@@ -103,6 +104,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message("Pushing: " + name)
 	if err := driver.Push(name); err != nil {
 		return nil, false, err
+	}
+
+	if p.config.Remove {
+		ui.Say(fmt.Sprintf("Docker image: %s will be removed", name))
+		return artifact, false, nil
 	}
 
 	return nil, false, nil
