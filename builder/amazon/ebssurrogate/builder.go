@@ -166,10 +166,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VolumeTags:                        b.config.VolumeRunTags,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
-		&awscommon.StepTagEBSVolumes{
-			VolumeRunTags: b.config.VolumeRunTags,
-			Ctx:           b.config.ctx,
-		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
