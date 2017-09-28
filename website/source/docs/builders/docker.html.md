@@ -174,6 +174,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     `login_password` will be ignored. For more information see the
     [section on ECR](#amazon-ec2-container-registry).
 
+*   `exec_user` (string) - Username or UID (format: <name|uid>[:<group|gid>])
+    to run remote commands with. You may need this if you get permission errors
+    trying to run the `shell` or other  provisioners.
+
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image. The builder only logs in for the duration of
     the pull. It always logs out afterwards. For log into ECR see `ecr_login`.
