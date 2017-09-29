@@ -158,7 +158,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 		}
 		session, err := session.NewSession(&awsConfig)
 		if err != nil {
-			err := fmt.Errorf("Error creating AWS session: %s", err)
+			err := fmt.Errorf("Error creating AWS session: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -169,7 +169,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 			input.ImageId = &ami
 			_, err := regionconn.ModifyImageAttribute(input)
 			if err != nil {
-				err := fmt.Errorf("Error modify AMI attributes: %s", err)
+				err := fmt.Errorf("Error modify AMI attributes: %s", DecodeError(state, err))
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -192,7 +192,7 @@ func (s *StepModifyAMIAttributes) Run(state multistep.StateBag) multistep.StepAc
 				input.SnapshotId = &snapshot
 				_, err := regionconn.ModifySnapshotAttribute(input)
 				if err != nil {
-					err := fmt.Errorf("Error modify snapshot attributes: %s", err)
+					err := fmt.Errorf("Error modify snapshot attributes: %s", DecodeError(state, err))
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt

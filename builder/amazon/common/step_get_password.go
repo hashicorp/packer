@@ -114,7 +114,7 @@ func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-cha
 			InstanceId: instance.InstanceId,
 		})
 		if err != nil {
-			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", err)
+			err := fmt.Errorf("Error retrieving auto-generated instance password: %s", DecodeError(state, err))
 			return "", err
 		}
 

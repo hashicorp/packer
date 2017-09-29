@@ -57,7 +57,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 
 	copyResp, err := ec2conn.CopyImage(copyOpts)
 	if err != nil {
-		err := fmt.Errorf("Error copying AMI: %s", err)
+		err := fmt.Errorf("Error copying AMI: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -73,7 +73,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 
 	ui.Say("Waiting for AMI copy to become ready...")
 	if _, err := WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for AMI Copy: %s", err)
+		err := fmt.Errorf("Error waiting for AMI Copy: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -82,7 +82,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Get the encrypted AMI image, we need the new snapshot id's
 	encImagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(*copyResp.ImageId)}})
 	if err != nil {
-		err := fmt.Errorf("Error searching for AMI: %s", err)
+		err := fmt.Errorf("Error searching for AMI: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -98,7 +98,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	// Get the unencrypted AMI image
 	unencImagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{aws.String(id)}})
 	if err != nil {
-		err := fmt.Errorf("Error searching for AMI: %s", err)
+		err := fmt.Errorf("Error searching for AMI: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -109,7 +109,7 @@ func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.Ste
 	ui.Say("Deregistering unencrypted AMI")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: aws.String(id)}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
-		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", DecodeError(state, err)))
 		return multistep.ActionHalt
 	}
 
@@ -133,7 +133,7 @@ OuterLoop:
 				SnapshotId: aws.String(*blockDevice.Ebs.SnapshotId),
 			}
 			if _, err := ec2conn.DeleteSnapshot(deleteSnapOpts); err != nil {
-				ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", err))
+				ui.Error(fmt.Sprintf("Error deleting snapshot, may still be around: %s", DecodeError(state, err)))
 				return multistep.ActionHalt
 			}
 		}
@@ -147,7 +147,7 @@ OuterLoop:
 
 	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{copyResp.ImageId}})
 	if err != nil {
-		err := fmt.Errorf("Error searching for AMI: %s", err)
+		err := fmt.Errorf("Error searching for AMI: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -174,7 +174,7 @@ func (s *StepCreateEncryptedAMICopy) Cleanup(state multistep.StateBag) {
 	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
-		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", DecodeError(state, err)))
 		return
 	}
 }

@@ -99,7 +99,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			StartTime:           &startTime,
 		})
 		if err != nil {
-			err := fmt.Errorf("Error finding spot price: %s", err)
+			err := fmt.Errorf("Error finding spot price: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -122,7 +122,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		}
 		if price == 0 {
 			err := fmt.Errorf("No candidate spot prices found!")
-			state.Put("error", err)
+			state.Put("error", DecodeError(state, err))
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		} else {
@@ -144,7 +144,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	createTagsAfterInstanceStarts := true
 	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
 	if err != nil {
-		err := fmt.Errorf("Error tagging source instance: %s", err)
+		err := fmt.Errorf("Error tagging source instance: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -200,7 +200,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 		runResp, err := ec2conn.RunInstances(runOpts)
 		if err != nil {
-			err := fmt.Errorf("Error launching source instance: %s", err)
+			err := fmt.Errorf("Error launching source instance: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -247,7 +247,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			LaunchSpecification: runOpts,
 		})
 		if err != nil {
-			err := fmt.Errorf("Error launching source spot instance: %s", err)
+			err := fmt.Errorf("Error launching source spot instance: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -265,7 +265,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		}
 		_, err = WaitForState(&stateChange)
 		if err != nil {
-			err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", *spotRequestId, err)
+			err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", *spotRequestId, DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -275,7 +275,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			SpotInstanceRequestIds: []*string{spotRequestId},
 		})
 		if err != nil {
-			err := fmt.Errorf("Error finding spot request (%s): %s", *spotRequestId, err)
+			err := fmt.Errorf("Error finding spot request (%s): %s", *spotRequestId, DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -297,7 +297,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 	latestInstance, err := WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
+		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -324,7 +324,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		})
 
 		if err != nil {
-			err := fmt.Errorf("Error tagging source instance: %s", err)
+			err := fmt.Errorf("Error tagging source instance: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -362,7 +362,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			SpotInstanceRequestIds: []*string{s.spotRequest.SpotInstanceRequestId},
 		}
 		if _, err := ec2conn.CancelSpotInstanceRequests(input); err != nil {
-			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
+			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", DecodeError(state, err)))
 			return
 		}
 		stateChange := StateChangeConf{
@@ -373,7 +373,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 		_, err := WaitForState(&stateChange)
 		if err != nil {
-			ui.Error(err.Error())
+			ui.Error(DecodeError(state, err).Error())
 		}
 
 	}
@@ -382,7 +382,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 	if s.instanceId != "" {
 		ui.Say("Terminating the source AWS instance...")
 		if _, err := ec2conn.TerminateInstances(&ec2.TerminateInstancesInput{InstanceIds: []*string{&s.instanceId}}); err != nil {
-			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
+			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", DecodeError(state, err)))
 			return
 		}
 		stateChange := StateChangeConf{
@@ -393,7 +393,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 
 		_, err := WaitForState(&stateChange)
 		if err != nil {
-			ui.Error(err.Error())
+			ui.Error(DecodeError(state, err).Error())
 		}
 	}
 }

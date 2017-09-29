@@ -44,7 +44,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				}}})
 
 			if err != nil {
-				err := fmt.Errorf("Error describing AMI: %s", err)
+				err := fmt.Errorf("Error describing AMI: %s", DecodeError(state, err))
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -57,7 +57,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 				})
 
 				if err != nil {
-					err := fmt.Errorf("Error deregistering existing AMI: %s", err)
+					err := fmt.Errorf("Error deregistering existing AMI: %s", DecodeError(state, err))
 					state.Put("error", err)
 					ui.Error(err.Error())
 					return multistep.ActionHalt
@@ -73,7 +73,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 							})
 
 							if err != nil {
-								err := fmt.Errorf("Error deleting existing snapshot: %s", err)
+								err := fmt.Errorf("Error deleting existing snapshot: %s", DecodeError(state, err))
 								state.Put("error", err)
 								ui.Error(err.Error())
 								return multistep.ActionHalt

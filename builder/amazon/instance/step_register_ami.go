@@ -45,7 +45,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
 	if err != nil {
-		state.Put("error", fmt.Errorf("Error registering AMI: %s", err))
+		state.Put("error", fmt.Errorf("Error registering AMI: %s", awscommon.DecodeError(state, err)))
 		ui.Error(state.Get("error").(error).Error())
 		return multistep.ActionHalt
 	}
@@ -66,7 +66,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Waiting for AMI to become ready...")
 	if _, err := awscommon.WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		err := fmt.Errorf("Error waiting for AMI: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
