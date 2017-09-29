@@ -101,7 +101,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if c.Region != "" {
 		accessCfg.Region = c.Region
-	} else {
+	}
+
+	// Default if the template nor the API config contains a region.
+	if accessCfg.Region == "" {
 		accessCfg.Region = "us-phoenix-1"
 	}
 
