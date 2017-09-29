@@ -27,12 +27,25 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
-	var cmd *exec.Cmd
-	if c.Config.Pty {
-		cmd = exec.Command("docker", "exec", "-i", "-t", c.ContainerID, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
-	} else {
-		cmd = exec.Command("docker", "exec", "-i", c.ContainerID, "/bin/sh", "-c", fmt.Sprintf("(%s)", remote.Command))
+	dockerArgs := []string{
+		"exec",
+		"-i",
+		c.ContainerID,
+		"/bin/sh",
+		"-c",
+		fmt.Sprintf("(%s)", remote.Command),
 	}
+
+	if c.Config.Pty {
+		dockerArgs = append(dockerArgs[:2], append([]string{"-t"}, dockerArgs[2:]...)...)
+	}
+
+	if c.Config.ExecUser != "" {
+		dockerArgs = append(dockerArgs[:2],
+			append([]string{"-u", c.Config.ExecUser}, dockerArgs[2:]...)...)
+	}
+
+	cmd := exec.Command("docker", dockerArgs...)
 
 	var (
 		stdin_w io.WriteCloser
