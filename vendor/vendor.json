@@ -959,10 +959,10 @@
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
-			"checksumSHA1": "iApv8tX8vuAvzyY6VkOvW+IzJF8=",
+			"checksumSHA1": "XXmfaQ8fEupEgaGd6PptrLnrE54=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "078cc0a785c9da54158c0775f06f505fc1e867f8",
-			"revisionTime": "2017-06-07T14:21:56Z"
+			"revision": "e1b7d6e6b1b1a27984270784190f1d06ad91888b",
+			"revisionTime": "2017-09-29T21:51:32Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",
