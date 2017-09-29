@@ -15,6 +15,10 @@ import (
 
 var encodedFailureMessagePattern = regexp.MustCompile(`(?i).* Encoded authorization failure message: ([\w-]+)`)
 
+type stsClient interface {
+	DecodeAuthorizationMessage(input *sts.DecodeAuthorizationMessageInput) (*sts.DecodeAuthorizationMessageOutput, error)
+}
+
 // DecodeError replaces encoded authorization messages with the
 // decoded results
 func DecodeError(state multistep.StateBag, err error) error {
@@ -22,7 +26,7 @@ func DecodeError(state multistep.StateBag, err error) error {
 	if rf, ok := err.(awserr.RequestFailure); ok && rf.Code() == "UnauthorizedOperation" {
 		parts := encodedFailureMessagePattern.FindStringSubmatch(rf.Message())
 		if parts != nil && len(parts) > 1 {
-			stsConn := state.Get("sts").(*sts.STS)
+			stsConn := state.Get("sts").(stsClient)
 			result, decodeErr := stsConn.DecodeAuthorizationMessage(&sts.DecodeAuthorizationMessageInput{
 				EncodedMessage: aws.String(parts[1]),
 			})
