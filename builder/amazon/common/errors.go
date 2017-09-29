@@ -19,8 +19,8 @@ var encodedFailureMessagePattern = regexp.MustCompile(`(?i).* Encoded authorizat
 // decoded results
 func DecodeError(state multistep.StateBag, err error) error {
 
-	if ae, ok := err.(awserr.Error); ok && ae.Code() == "UnauthorizedOperation" {
-		parts := encodedFailureMessagePattern.FindStringSubmatch(ae.Message())
+	if rf, ok := err.(awserr.RequestFailure); ok && rf.Code() == "UnauthorizedOperation" {
+		parts := encodedFailureMessagePattern.FindStringSubmatch(rf.Message())
 		if parts != nil && len(parts) > 1 {
 			stsConn := state.Get("sts").(*sts.STS)
 			result, decodeErr := stsConn.DecodeAuthorizationMessage(&sts.DecodeAuthorizationMessageInput{
@@ -32,10 +32,8 @@ func DecodeError(state multistep.StateBag, err error) error {
 					log.Printf("[WARN] Attempted to pretty print authorization message: %v", ppErr)
 					msg = aws.StringValue(result.DecodedMessage)
 				}
-
-				return fmt.Errorf("You are not authorized to perform this operation. Authorization failure message: \n%s",
-					msg)
-
+				return fmt.Errorf("UnauthorizedOperation: You are not authorized to perform this operation. Authorization failure message: \n%s"+
+					"\nstatus code: %d, request id: %s", msg, rf.StatusCode(), rf.RequestID())
 			}
 			log.Printf("[WARN] Attempted to decode authorization message, but received: %v", decodeErr)
 		}
