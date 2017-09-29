@@ -71,6 +71,7 @@ type guestOSTypeConfig struct {
 	stagingDir       string
 	executeCommand   string
 	facterVarsFmt    string
+	facterVarsJoiner string
 	modulePathJoiner string
 }
 
@@ -86,6 +87,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
+		facterVarsJoiner: " ",
 		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
@@ -98,7 +100,8 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"--detailed-exitcodes " +
 			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
 			"{{.ManifestFile}}",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\" &",
+		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
+		facterVarsJoiner: " & ",
 		modulePathJoiner: ";",
 	},
 }
@@ -282,7 +285,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:      strings.Join(facterVars, " "),
+		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
