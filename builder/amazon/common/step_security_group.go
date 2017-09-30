@@ -33,7 +33,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 			},
 		)
 		if err != nil {
-			err := fmt.Errorf("Couldn't find specified security group: %s", err)
+			err := fmt.Errorf("Couldn't find specified security group: %s", DecodeError(state, err))
 			log.Printf("[DEBUG] %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -64,6 +64,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {
+		err = DecodeError(state, err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -98,7 +99,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if err != nil {
-		err := fmt.Errorf("Error creating temporary security group: %s", err)
+		err := fmt.Errorf("Error creating temporary security group: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -113,7 +114,7 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 	if err == nil {
 		log.Printf("[DEBUG] Found security group %s", s.createdGroupId)
 	} else {
-		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, err)
+		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, DecodeError(state, err))
 		log.Printf("[DEBUG] %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
@@ -142,7 +143,7 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 			break
 		}
 
-		log.Printf("Error deleting security group: %s", err)
+		log.Printf("Error deleting security group: %s", DecodeError(state, err))
 		time.Sleep(5 * time.Second)
 	}
 

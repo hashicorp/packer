@@ -72,7 +72,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
 	if err != nil {
-		err := fmt.Errorf("Error creating root volume: %s", err)
+		err := fmt.Errorf("Error creating root volume: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -100,7 +100,7 @@ func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
 
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for volume: %s", err)
+		err := fmt.Errorf("Error waiting for volume: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

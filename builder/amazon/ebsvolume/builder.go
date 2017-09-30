@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/sts"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -76,13 +77,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	ec2conn := ec2.New(session)
+	stsconn := sts.New(session)
+
+	// Setup the state bag and initial state for the steps
+	state := new(multistep.BasicStateBag)
+	state.Put("ec2", ec2conn)
+	state.Put("sts", stsconn)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
 
 	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically
 	if b.config.SubnetId != "" && (b.config.AvailabilityZone == "" || b.config.VpcId == "") {
 		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", b.config.SubnetId)
 		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&b.config.SubnetId}})
 		if err != nil {
-			return nil, err
+			return nil, awscommon.DecodeError(state, err)
 		}
 		if b.config.AvailabilityZone == "" {
 			b.config.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
@@ -94,12 +103,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		}
 	}
 
-	// Setup the state bag and initial state for the steps
-	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("ec2", ec2conn)
-	state.Put("hook", hook)
-	state.Put("ui", ui)
 
 	// Build the steps
 	steps := []multistep.Step{

@@ -29,7 +29,7 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	createResp, err := ec2conn.CreateImage(createOpts)
 	if err != nil {
-		err := fmt.Errorf("Error creating AMI: %s", err)
+		err := fmt.Errorf("Error creating AMI: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -51,7 +51,7 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Waiting for AMI to become ready...")
 	if _, err := awscommon.WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		err := fmt.Errorf("Error waiting for AMI: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -59,7 +59,7 @@ func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 	if err != nil {
-		err := fmt.Errorf("Error searching for AMI: %s", err)
+		err := fmt.Errorf("Error searching for AMI: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -95,7 +95,7 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
-		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", awscommon.DecodeError(state, err)))
 		return
 	}
 }

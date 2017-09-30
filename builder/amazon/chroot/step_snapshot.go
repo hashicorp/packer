@@ -32,7 +32,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		Description: &description,
 	})
 	if err != nil {
-		err := fmt.Errorf("Error creating snapshot: %s", err)
+		err := fmt.Errorf("Error creating snapshot: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -50,7 +50,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		Refresh: func() (interface{}, string, error) {
 			resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{SnapshotIds: []*string{&s.snapshotId}})
 			if err != nil {
-				return nil, "", err
+				return nil, "", awscommon.DecodeError(state, err)
 			}
 
 			if len(resp.Snapshots) == 0 {
@@ -64,7 +64,7 @@ func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	_, err = awscommon.WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for snapshot: %s", err)
+		err := fmt.Errorf("Error waiting for snapshot: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -94,7 +94,7 @@ func (s *StepSnapshot) Cleanup(state multistep.StateBag) {
 		ui.Say("Removing snapshot since we cancelled or halted...")
 		_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{SnapshotId: &s.snapshotId})
 		if err != nil {
-			ui.Error(fmt.Sprintf("Error: %s", err))
+			ui.Error(fmt.Sprintf("Error: %s", awscommon.DecodeError(state, err)))
 		}
 	}
 }

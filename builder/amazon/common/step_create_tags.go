@@ -46,7 +46,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		session, err := session.NewSession(&awsConfig)
 		if err != nil {
-			err := fmt.Errorf("Error creating AWS session: %s", err)
+			err := fmt.Errorf("Error creating AWS session: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -60,7 +60,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		})
 
 		if err != nil {
-			err := fmt.Errorf("Error retrieving details for AMI (%s): %s", ami, err)
+			err := fmt.Errorf("Error retrieving details for AMI (%s): %s", ami, DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -89,7 +89,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Creating AMI tags")
 		amiTags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, sourceAMI, s.Ctx)
 		if err != nil {
-			state.Put("error", err)
+			state.Put("error", DecodeError(state, err))
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -98,7 +98,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Say("Creating snapshot tags")
 		snapshotTags, err := ConvertToEC2Tags(s.SnapshotTags, *ec2conn.Config.Region, sourceAMI, s.Ctx)
 		if err != nil {
-			state.Put("error", err)
+			state.Put("error", DecodeError(state, err))
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
@@ -138,7 +138,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 		if err != nil {
 			err := fmt.Errorf("Error adding tags to Resources (%#v): %s", resourceIds, err)
-			state.Put("error", err)
+			state.Put("error", DecodeError(state, err))
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}

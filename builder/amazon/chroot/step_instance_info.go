@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -37,7 +38,7 @@ func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 	// Query the entire instance metadata
 	instancesResp, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{InstanceIds: []*string{&identity.InstanceID}})
 	if err != nil {
-		err := fmt.Errorf("Error getting instance data: %s", err)
+		err := fmt.Errorf("Error getting instance data: %s", awscommon.DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

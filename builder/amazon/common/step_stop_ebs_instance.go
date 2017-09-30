@@ -65,7 +65,7 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 		})
 
 		if err != nil {
-			err := fmt.Errorf("Error stopping instance: %s", err)
+			err := fmt.Errorf("Error stopping instance: %s", DecodeError(state, err))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -85,7 +85,7 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 	}
 	_, err = WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
+		err := fmt.Errorf("Error waiting for instance to stop: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

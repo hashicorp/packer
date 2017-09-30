@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/sts"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -83,7 +84,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	ec2conn := ec2.New(session)
-
+	stsconn := sts.New(session)
 	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically
 	if b.config.SubnetId != "" && (b.config.AvailabilityZone == "" || b.config.VpcId == "") {
 		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", b.config.SubnetId)
@@ -105,6 +106,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("ec2", ec2conn)
+	state.Put("sts", stsconn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 

@@ -73,7 +73,7 @@ func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("Using AMI Filters %v", params)
 	imageResp, err := ec2conn.DescribeImages(params)
 	if err != nil {
-		err := fmt.Errorf("Error querying AMI: %s", err)
+		err := fmt.Errorf("Error querying AMI: %s", DecodeError(state, err))
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
