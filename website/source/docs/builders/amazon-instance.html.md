@@ -189,6 +189,11 @@ builder.
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `decode_authorization_messages` (boolean) - Enable automatic decoding of any
+    encoded authorization (error) messages using the `sts:DecodeAuthorizationMessage` API.
+    Note: requires that the effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+    on resource `*`. Default `false`.
+
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
