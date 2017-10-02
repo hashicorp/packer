@@ -152,6 +152,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	}
 	ReportTags(ui, ec2Tags)
 
+	createVolTagsAfterInstanceStarts := true
 	volTags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
 	if err != nil {
 		err := fmt.Errorf("Error tagging volumes: %s", err)
@@ -193,6 +194,7 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			}
 
 			tagSpecs = append(tagSpecs, runVolTags)
+			createVolTagsAfterInstanceStarts = false
 		}
 
 		if len(tagSpecs) > 0 {
@@ -353,6 +355,44 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+	}
+
+	if createVolTagsAfterInstanceStarts {
+		volumeIds := make([]*string, 0)
+		for _, v := range instance.BlockDeviceMappings {
+			if ebs := v.Ebs; ebs != nil {
+				volumeIds = append(volumeIds, ebs.VolumeId)
+			}
+		}
+
+		if len(volumeIds) > 0 {
+			ui.Say("Adding tags to source EBS Volumes")
+			tags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+			if err != nil {
+				err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+			ReportTags(ui, tags)
+
+			_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Resources: volumeIds,
+				Tags:      tags,
+			})
+
+			if err != nil {
+				err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+
+			return multistep.ActionContinue
+
+		}
+
 	}
 
 	if s.Debug {
