@@ -151,6 +151,11 @@ builder.
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `decode_authorization_messages` (boolean) - Enable automatic decoding of any
+    encoded authorization (error) messages using the `sts:DecodeAuthorizationMessage` API.
+    Note: requires that the effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+    on resource `*`. Default `false`.
+
 -   `disable_stop_instance` (boolean) - Packer normally stops the build instance
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
