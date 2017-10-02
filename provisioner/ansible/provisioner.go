@@ -368,7 +368,11 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
+	var debugArgs []string
+	for _, arg := range cmd.Args {
+		debugArgs = append(debugArgs, fmt.Sprintf("%q", arg))
+	}
+	ui.Say(fmt.Sprintf("Executing Ansible:\n%s", strings.Join(debugArgs, " ")))
 	if err := cmd.Start(); err != nil {
 		return err
 	}
