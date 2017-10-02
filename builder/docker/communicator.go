@@ -18,12 +18,13 @@ import (
 )
 
 type Communicator struct {
-	ContainerID  string
-	HostDir      string
-	ContainerDir string
-	Version      *version.Version
-	Config       *Config
-	lock         sync.Mutex
+	ContainerID   string
+	HostDir       string
+	ContainerDir  string
+	Version       *version.Version
+	Config        *Config
+	containerUser *string
+	lock          sync.Mutex
 }
 
 func (c *Communicator) Start(remote *packer.RemoteCmd) error {
@@ -154,6 +155,10 @@ func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) er
 		return fmt.Errorf("Failed to upload to '%s' in container: %s. %s.", dst, stderrOut, err)
 	}
 
+	if err := c.fixDestinationOwner(dst); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -205,6 +210,10 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 	// Wait for the copy to complete
 	if err := localCmd.Wait(); err != nil {
 		return fmt.Errorf("Failed to upload to '%s' in container: %s. %s.", dst, stderrOut, err)
+	}
+
+	if err := c.fixDestinationOwner(dst); err != nil {
+		return err
 	}
 
 	return nil
@@ -309,4 +318,71 @@ func (c *Communicator) run(cmd *exec.Cmd, remote *packer.RemoteCmd, stdin io.Wri
 
 	// Set the exit status which triggers waiters
 	remote.SetExited(exitStatus)
+}
+
+// TODO Workaround for #5307. Remove once #5409 is fixed.
+func (c *Communicator) fixDestinationOwner(destination string) error {
+	if c.containerUser == nil {
+		containerUser, err := c.discoverContainerUser()
+		if err != nil {
+			return err
+		}
+		c.containerUser = &containerUser
+	}
+
+	if *c.containerUser != "" {
+		chownArgs := []string{
+			"docker", "exec", "--user", "root", c.ContainerID, "/bin/sh", "-c",
+			fmt.Sprintf("chown -R %s %s", *c.containerUser, destination),
+		}
+		if _, err := c.runLocalCommand(chownArgs[0], chownArgs[1:]...); err != nil {
+			return fmt.Errorf("Failed to set owner of the uploaded file: %s", err)
+		}
+	}
+
+	return nil
+}
+
+func (c *Communicator) discoverContainerUser() (string, error) {
+	var err error
+	var stdout []byte
+	inspectArgs := []string{"docker", "inspect", "--format", "{{.Config.User}}", c.ContainerID}
+	if stdout, err = c.runLocalCommand(inspectArgs[0], inspectArgs[1:]...); err != nil {
+		return "", fmt.Errorf("Failed to inspect the container: %s", err)
+	}
+	return strings.TrimSpace(string(stdout)), nil
+}
+
+func (c *Communicator) runLocalCommand(name string, arg ...string) (stdout []byte, err error) {
+	localCmd := exec.Command(name, arg...)
+
+	stdoutP, err := localCmd.StdoutPipe()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open stdout pipe, %s", err)
+	}
+
+	stderrP, err := localCmd.StderrPipe()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open stderr pipe, %s", err)
+	}
+
+	if err = localCmd.Start(); err != nil {
+		return nil, fmt.Errorf("failed to start command, %s", err)
+	}
+
+	stdout, err = ioutil.ReadAll(stdoutP)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from stdout pipe, %s", err)
+	}
+
+	stderr, err := ioutil.ReadAll(stderrP)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from stderr pipe, %s", err)
+	}
+
+	if err := localCmd.Wait(); err != nil {
+		return nil, fmt.Errorf("%s, %s", stderr, err)
+	}
+
+	return stdout, nil
 }
