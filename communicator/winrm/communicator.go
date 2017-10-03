@@ -122,7 +122,7 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 }
 
 // Upload implementation of communicator.Communicator interface
-func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) error {
+func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	wcp, err := c.newCopyClient()
 	if err != nil {
 		return err

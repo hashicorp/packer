@@ -533,6 +533,29 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
 
+	// find out if it's a directory
+	testDirectoryCommand := fmt.Sprintf("if [ -d \"%s\" ]; then echo directory; fi", path)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+	var buf, buf2 bytes.Buffer
+	cmd.Stdout = &buf
+	cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
+
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+
+	stdoutToRead := buf2.String()
+	if strings.Contains(stdoutToRead, "directory") {
+		log.Printf("upload locale is a directory")
+		target_dir = path
+		target_file = filepath.Base((*fi).Name())
+	}
+
+	log.Printf("target_file was %s", target_file)
+
 	// On windows, filepath.Dir uses backslash seperators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
 	// which works for unix and windows
