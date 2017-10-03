@@ -57,10 +57,7 @@ know.
 First, the destination directory must already exist. If you need to create it,
 use a shell provisioner just prior to the file provisioner in order to create
 the directory. If the destination directory does not exist, the file
-provisioner may succeed, but it will have undefined results. Note that the
-`docker` builder does not have this requirement. It will create any needed
-destination directories, but it's generally best practice to not rely on this
-behavior.
+provisioner may succeed, but it will have undefined results.
 
 Next, the existence of a trailing slash on the source path will determine
 whether the directory name will be embedded within the destination, or whether
