@@ -79,12 +79,14 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
+			"{{if .Sudo}}sudo -E {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
 			"--detailed-exitcodes " +
-			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
@@ -94,13 +96,14 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} && " +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
 			"--detailed-exitcodes " +
-			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
+		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
 		modulePathJoiner: ";",
 	},
