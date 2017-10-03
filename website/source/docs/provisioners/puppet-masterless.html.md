@@ -124,12 +124,14 @@ readability) to execute Puppet:
 
 ```
 cd {{.WorkingDir}} &&
-{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}
+ {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+{{if .Sudo}}sudo -E {{end}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
 puppet apply --verbose --modulepath='{{.ModulePath}}'
-{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+ {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
 {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
 --detailed-exitcodes
-{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+ {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 {{.ManifestFile}}
 ```
 
@@ -137,12 +139,13 @@ The following command is used if guest OS type is windows:
 
 ```
 cd {{.WorkingDir}} &&
-{{.FacterVars}} &&
+ {{.FacterVars}} &&
+ {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
 puppet apply --verbose --modulepath='{{.ModulePath}}'
-{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+ {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
 {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
 --detailed-exitcodes
-{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+ {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 {{.ManifestFile}}
 ```
 

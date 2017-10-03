@@ -1,12 +1,16 @@
 package puppetmasterless
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() map[string]interface{} {
@@ -26,6 +30,131 @@ func TestProvisioner_Impl(t *testing.T) {
 	if _, ok := raw.(packer.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
+}
+
+func TestGuestOSConfig_empty_unix(t *testing.T) {
+	config := testConfig()
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	// Execute Puppet
+	p.config.ctx.Data = &ExecuteTemplate{
+		ManifestFile: "/r/m/f",
+		PuppetBinDir: p.config.PuppetBinDir,
+		Sudo:         !p.config.PreventSudo,
+		WorkingDir:   p.config.WorkingDir,
+	}
+	log.Println(p.config.ExecuteCommand)
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "cd /tmp/packer-puppet-masterless && " +
+		"sudo -E puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+	assert.Equal(t, expected, command)
+}
+
+func TestGuestOSConfig_full_unix(t *testing.T) {
+	config := testConfig()
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	facterVars := []string{
+		fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, "lhs", "rhs"),
+		fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, "foo", "bar"),
+	}
+	modulePaths := []string{"/m/p", "/a/b"}
+	// Execute Puppet
+	p.config.ctx.Data = &ExecuteTemplate{
+		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
+		HieraConfigPath: "/h/c/p",
+		ManifestDir:     "/r/m/d",
+		ManifestFile:    "/r/m/f",
+		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		PuppetBinDir:    p.config.PuppetBinDir,
+		Sudo:            !p.config.PreventSudo,
+		WorkingDir:      p.config.WorkingDir,
+		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
+	}
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "cd /tmp/packer-puppet-masterless && FACTER_lhs='rhs' FACTER_foo='bar' " +
+		"sudo -E puppet apply " +
+		"--verbose --modulepath='/m/p:/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+	assert.Equal(t, expected, command)
+}
+
+func TestGuestOSConfig_empty_windows(t *testing.T) {
+	config := testConfig()
+	config["guest_os_type"] = "windows"
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	// Execute Puppet
+	p.config.ctx.Data = &ExecuteTemplate{
+		ManifestFile: "/r/m/f",
+		PuppetBinDir: p.config.PuppetBinDir,
+		Sudo:         !p.config.PreventSudo,
+		WorkingDir:   p.config.WorkingDir,
+	}
+	log.Println(p.config.ExecuteCommand)
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "cd C:/Windows/Temp/packer-puppet-masterless &&  && puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+	assert.Equal(t, expected, command)
+}
+
+func TestGuestOSConfig_full_windows(t *testing.T) {
+	config := testConfig()
+	config["guest_os_type"] = "windows"
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	facterVars := []string{
+		fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, "lhs", "rhs"),
+		fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, "foo", "bar"),
+	}
+	modulePaths := []string{"/m/p", "/a/b"}
+	// Execute Puppet
+	p.config.ctx.Data = &ExecuteTemplate{
+		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
+		HieraConfigPath: "/h/c/p",
+		ManifestDir:     "/r/m/d",
+		ManifestFile:    "/r/m/f",
+		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		PuppetBinDir:    p.config.PuppetBinDir,
+		Sudo:            !p.config.PreventSudo,
+		WorkingDir:      p.config.WorkingDir,
+		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
+	}
+	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "cd C:/Windows/Temp/packer-puppet-masterless && " +
+		"SET \"FACTER_lhs=rhs\" & SET \"FACTER_foo=bar\" && " +
+		"puppet apply --verbose --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+	assert.Equal(t, expected, command)
 }
 
 func TestProvisionerPrepare_puppetBinDir(t *testing.T) {
