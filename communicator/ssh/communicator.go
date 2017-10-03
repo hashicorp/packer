@@ -534,11 +534,8 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	target_file := filepath.Base(path)
 
 	// find out if it's a directory
-	testDirectoryCommand := fmt.Sprintf("if [ -d \"%s\" ]; then echo directory; fi", path)
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
 	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
-	var buf, buf2 bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
 
 	err := c.Start(cmd)
 
@@ -546,10 +543,9 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 		log.Printf("Unable to check whether remote path is a dir: %s", err)
 		return err
 	}
-
-	stdoutToRead := buf2.String()
-	if strings.Contains(stdoutToRead, "directory") {
-		log.Printf("upload locale is a directory")
+	cmd.Wait()
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
 		target_dir = path
 		target_file = filepath.Base((*fi).Name())
 	}
