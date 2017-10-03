@@ -156,6 +156,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
+		&awscommon.StepTagSpotEBSVolumes{
+			VolumeRunTags: b.config.VolumeRunTags,
+			Ctx:           b.config.ctx,
+			SpotPrice:     b.config.SpotPrice,
+		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
