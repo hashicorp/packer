@@ -80,7 +80,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
@@ -94,7 +94,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} && " +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
+			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' " +
 			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
 			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
 			"--detailed-exitcodes " +
