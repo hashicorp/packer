@@ -93,7 +93,7 @@ The SSH communicator has the following options:
 -   `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
 
 -   `ssh_private_key_file` (string) - Path to a PEM encoded private key
-    file to use to authentiate with SSH.
+    file to use to authenticate with SSH.
 
 -   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
     connection. This defaults to false.
