@@ -104,11 +104,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var instanceStep multistep.Step
 
 	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
-		instanceStep = &awscommon.StepRunSpotInstance{
+		instanceStep = &awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
-			SpotPrice:                b.config.SpotPrice,
-			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -123,9 +121,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		}
 	} else {
-		instanceStep = &awscommon.StepRunSourceInstance{
+		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -163,10 +163,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VpcId:            b.config.VpcId,
 		},
 		instanceStep,
-		&stepTagEBSVolumes{
-			VolumeMapping: b.config.VolumeMappings,
-			Ctx:           b.config.ctx,
-		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
