@@ -219,7 +219,7 @@ each category, the available configuration keys are alphabetized.
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
     to the `mount` command ran by Packer. Because this command is ran in a
-    shell, user discrestion is advised. See [this manual page for the mount
+    shell, user discretion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
 

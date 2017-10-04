@@ -76,7 +76,7 @@ Optional:
     remote machine.
 
 When using an inventory file, it's also required to `--limit` the hosts to the
-specified host you're buiding. The `--limit` argument can be provided in the
+specified host you're building. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
