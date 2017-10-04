@@ -56,7 +56,7 @@ builder.
     When using `source_iso`, both `disk_offering` and `hypervisor` are required.
 
 -   `source_template` (string) - The name or ID of the template used as base
-    template for the instance. This option is mutual explusive with `source_iso`.
+    template for the instance. This option is mutual exclusive with `source_iso`.
 
 -   `template_os` (string) - The name or ID of the template OS for the new
     template that will be created.
