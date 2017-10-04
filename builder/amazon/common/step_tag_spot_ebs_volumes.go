@@ -9,18 +9,19 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-type StepTagEBSVolumes struct {
+type StepTagSpotEBSVolumes struct {
 	VolumeRunTags map[string]string
 	Ctx           interpolate.Context
+	SpotPrice     string
 }
 
-func (s *StepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTagSpotEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	sourceAMI := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 
-	if len(s.VolumeRunTags) == 0 {
+	if len(s.VolumeRunTags) == 0 || s.SpotPrice == "" || s.SpotPrice == "0" {
 		return multistep.ActionContinue
 	}
 
@@ -60,6 +61,6 @@ func (s *StepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepTagEBSVolumes) Cleanup(state multistep.StateBag) {
+func (s *StepTagSpotEBSVolumes) Cleanup(state multistep.StateBag) {
 	// No cleanup...
 }

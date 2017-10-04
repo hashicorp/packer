@@ -152,12 +152,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
+			VolumeTags:               b.config.VolumeRunTags,
 			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		},
-		&awscommon.StepTagEBSVolumes{
+		&awscommon.StepTagSpotEBSVolumes{
 			VolumeRunTags: b.config.VolumeRunTags,
 			Ctx:           b.config.ctx,
+			SpotPrice:     b.config.SpotPrice,
 		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
