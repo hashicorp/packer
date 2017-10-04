@@ -302,8 +302,6 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 			return multistep.ActionHalt
 		}
 
-		return multistep.ActionContinue
-
 	}
 
 	if s.Debug {
