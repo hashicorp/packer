@@ -115,11 +115,9 @@ builder.
 
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
 
--   `io_optimized` (string) - I/O optimized. Optional values are:
-    -   none: none I/O Optimized
-    -   optimized: I/O Optimized
+-   `io_optimized` (bool) - I/O optimized.
 
-    Default value: none for Generation I instances; optimized for other instances.
+    Default value: false for Generation I instances; true for other instances.
 
 -   `force_stop_instance` (bool) - Whether to force shutdown upon device restart.
     The default value is `false`.
@@ -169,6 +167,9 @@ builder.
     -   PayByTraffic
 
     If this parameter is not specified, the default value is `PayByBandwidth`.
+    For the regions out of China, currently only support `PayByTraffic`, you must
+    set it manfully.
+
 
 -   `internet_max_bandwidth_out` (string) - Maximum outgoing bandwidth to the public
     network, measured in Mbps (Mega bit per second).
