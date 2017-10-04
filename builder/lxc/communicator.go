@@ -81,7 +81,7 @@ func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo)
 			return err
 		}
 		defer os.Remove(adjustedTempName)
-		exitStatus := ShellCommand(mvCmd).Run()
+		ShellCommand(mvCmd).Run()
 		// change cpCmd to use new file name as source
 		cpCmd, err = c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", adjustedTempName, dst))
 		if err != nil {
