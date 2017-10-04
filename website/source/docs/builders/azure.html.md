@@ -314,7 +314,7 @@ The Azure builder creates the following random values at runtime.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
--   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overriden by the user.
+-   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.
