@@ -71,6 +71,24 @@ func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo)
 		return err
 	}
 
+	if fi != nil {
+		tfDir := filepath.Dir(tf.Name())
+		// rename tempfile to match original file name. This makes sure that if file is being
+		// moved into a directory, the filename is preserved instead of a temp name.
+		adjustedTempName := filepath.Join(tfDir, (*fi).Name())
+		mvCmd, err := c.CmdWrapper(fmt.Sprintf("sudo mv %s %s", tf.Name(), adjustedTempName))
+		if err != nil {
+			return err
+		}
+		defer os.Remove(adjustedTempName)
+		exitStatus := ShellCommand(mvCmd).Run()
+		// change cpCmd to use new file name as source
+		cpCmd, err = c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", adjustedTempName, dst))
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Printf("Running copy command: %s", dst)
 
 	return ShellCommand(cpCmd).Run()
