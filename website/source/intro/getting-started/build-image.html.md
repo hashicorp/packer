@@ -462,9 +462,5 @@ us-east-1: ami-2970b753
 
 And if you navigate to your EC2 dashboard you should see your shiny new AMI.
 
-##FAQs:
-####Where did you get the windows source AMI from?  
-If you click the "AMIs" option under "Images" on the lefthand side of your EC2 dashboard, you'll get a view of all of you AMIs.  There is a toggle in the filter bar that allows you to switch from "Owned by me" to "Public Images".  From there, you can apply filters like `Owner : Amazon images` and `Platform : Windows` and do a keyword search for the particular flavor of windows you're interested in.
-
 
 [platforms]: /docs/builders/index.html
