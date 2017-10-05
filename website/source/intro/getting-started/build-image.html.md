@@ -234,7 +234,15 @@ Now save the following text in a file named `firstrun.json`:
             "instance_type": "t2.micro",
             "region": "us-east-1",
             "secret_key": "{{user `aws_secret_key`}}",
-            "source_ami": "ami-fce3c696",
+            "source_ami_filter": {
+              "filters": {
+              "virtualization-type": "hvm",
+              "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+              "root-device-type": "ebs"
+              },
+              "owners": ["099720109477"],
+              "most_recent": true
+            },
             "ssh_username": "ubuntu",
             "type": "amazon-ebs"
         }
@@ -247,8 +255,10 @@ Now save the following text in a file named `firstrun.json`:
         },
         {
             "type": "shell",
-            "inline":["ls -al /home/ubuntu",
-                      "cat /home/ubuntu/welcome.txt"]
+            "inline":[
+                "ls -al /home/ubuntu",
+                "cat /home/ubuntu/welcome.txt"
+            ]
         },
         {
             "type": "shell",
@@ -260,7 +270,7 @@ Now save the following text in a file named `firstrun.json`:
 
 and to build, run `packer build firstrun.json`
 
-Note that this example provides a `source_ami` instead of a `source_ami_filter` -- this means the example may be out of date by the time you try to use it, but it is provided here so you can see what it looks like to use an ami by name.
+Note that if you wanted to use a `source_ami` instead of a `source_ami_filter` it might look something like this: `"source_ami": "ami-fce3c696",`
 
 Your output will look like this: 
 
@@ -303,7 +313,7 @@ amazon-ebs output will be in this color.
 
 ### A windows example
 
-Note that this uses a larger instance.  You will be charged for it.
+Note that this uses a larger instance.  You will be charged for it. Also keep in mind that using windows AMIs incurs a fee that you don't get when you use linux AMIs.
 
 You'll need to have a boostrapping file to enable ssh or winrm; here's a basic example of that file.
 
@@ -349,8 +359,11 @@ The first example, `inline`, allows you to provide short snippets of code, and w
 Here's an example of a `sample_script.ps1` that will work with the environment variables we will set in our packer config; copy the contents into your own `sample_script.ps1` and provide the path to it in your packer config:
 
 ```
-Write-Output("PACKER_BUILD_NAME is automatically set for you, or you can set it in your builder variables; the default for this builder is: " + $Env:PACKER_BUILD_NAME )
-Write-Output("Remember that escaping variables in powershell requires backticks; for example VAR1 from our config is " + $Env:VAR1 )
+Write-Output("PACKER_BUILD_NAME is automatically set for you,)
+Write-Output("or you can set it in your builder variables; )
+Write-Output("the default for this builder is: " + $Env:PACKER_BUILD_NAME )
+Write-Output("Remember that escaping variables in powershell requires backticks: )
+Write-Output("for example, VAR1 from our config is " + $Env:VAR1 )
 Write-Output("Likewise, VAR2 is " + $Env:VAR2 )
 Write-Output("and VAR3 is " + $Env:VAR3 )
 ```
