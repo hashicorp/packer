@@ -41,3 +41,26 @@ You can simply add `{"type":"manifest"}` to your post-processor section. Below i
   ]
 }
 ```
+
+An example manifest file looks like:
+
+``` json
+{
+  "builds": [
+    {
+      "name": "docker",
+      "builder_type": "docker",
+      "build_time": 1507235854,
+      "files": [
+        {
+          "name": "packer_example",
+          "size": 387501056
+        }
+      ],
+      "artifact_id": "Container",
+      "packer_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
+    }
+  ],
+  "last_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
+}
+```
