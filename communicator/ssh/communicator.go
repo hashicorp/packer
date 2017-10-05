@@ -377,14 +377,30 @@ func (c *comm) connectToAgent() {
 
 func (c *comm) sftpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
 	sftpFunc := func(client *sftp.Client) error {
-		return sftpUploadFile(path, input, client, fi)
+		return c.sftpUploadFile(path, input, client, fi)
 	}
 
 	return c.sftpSession(sftpFunc)
 }
 
-func sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.FileInfo) error {
+func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.FileInfo) error {
 	log.Printf("[DEBUG] sftp: uploading %s", path)
+
+	// find out if destination is a directory (this is to replicate rsync behavior)
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+	cmd.Wait()
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
+		path = filepath.Join(path, filepath.Base((*fi).Name()))
+	}
 
 	f, err := client.Create(path)
 	if err != nil {
@@ -436,7 +452,7 @@ func (c *comm) sftpUploadDirSession(dst string, src string, excl []string) error
 				return nil
 			}
 
-			return sftpVisitFile(finalDst, path, info, client)
+			return c.sftpVisitFile(finalDst, path, info, client)
 		}
 
 		return filepath.Walk(src, walkFunc)
@@ -445,7 +461,7 @@ func (c *comm) sftpUploadDirSession(dst string, src string, excl []string) error
 	return c.sftpSession(sftpFunc)
 }
 
-func sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
+func (c *comm) sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
 	log.Printf("[DEBUG] sftp: creating dir %s", path)
 
 	if err := client.Mkdir(path); err != nil {
@@ -463,16 +479,16 @@ func sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
 	return nil
 }
 
-func sftpVisitFile(dst string, src string, fi os.FileInfo, client *sftp.Client) error {
+func (c *comm) sftpVisitFile(dst string, src string, fi os.FileInfo, client *sftp.Client) error {
 	if !fi.IsDir() {
 		f, err := os.Open(src)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		return sftpUploadFile(dst, f, client, &fi)
+		return c.sftpUploadFile(dst, f, client, &fi)
 	} else {
-		err := sftpMkdir(dst, client, fi)
+		err := c.sftpMkdir(dst, client, fi)
 		return err
 	}
 }
@@ -533,7 +549,7 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
 
-	// find out if it's a directory
+	// find out if destination is a directory (this is to replicate rsync behavior)
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
 	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
 
