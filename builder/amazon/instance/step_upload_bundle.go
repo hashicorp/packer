@@ -82,6 +82,12 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus == 3 {
+			ui.Error(fmt.Sprintf("Please check that the bucket `%s` "+
+				"does not exist, or exists and is writable. This error "+
+				"indicates that the bucket may be owned by somebody else.",
+				config.S3Bucket))
+		}
 		state.Put("error", fmt.Errorf(
 			"Bundle upload failed. Please see the output above for more\n"+
 				"details on what went wrong."))
