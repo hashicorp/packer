@@ -41,6 +41,8 @@ power of Packer templates.
 
 - [racker](https://github.com/aspring/racker) - an opinionated Ruby DSL for generating Packer templates
 
+- [packerlicious](https://github.com/mayn/packerlicious) - a python library for generating Packer templates
+
 ## Other
 
 - [suitcase](https://github.com/tmclaugh/suitcase) - Packer based build system for CentOS OS images
