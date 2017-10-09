@@ -197,9 +197,14 @@ can be configured for this builder.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
 
--   `vlan_id` (string) - This is the vlan of the virtual machine's network card for the new virtual
-    machine. By default none is set. If none is set then vlans are not set on the virtual machine's
-    network card.
+*   `vhd_temp_path` (string) - A separate path to be used for storing the VM's
+    disk image. The purpose is to enable reading and writing to take place on
+    different physical disks (read from VHD temp path, write to regular temp
+    path while exporting the VM) to eliminate a single-disk bottleneck.
+
+-   `vlan_id` (string) - This is the vlan of the virtual machine's network card
+    for the new virtual machine. By default none is set. If none is set then
+    vlans are not set on the virtual machine's network card.
 
 -   `vm_name` (string) - This is the name of the virtual machine for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",
@@ -377,7 +382,7 @@ Packer config:
       "winrm_username": "vagrant",
       "winrm_password": "vagrant",
       "winrm_timeout" : "4h",
-      "shutdown_command": "f:\\run-sysprep.cmd",  
+      "shutdown_command": "f:\\run-sysprep.cmd",
       "ram_size": 4096,
       "cpu": 4,
       "generation": 2,
@@ -495,7 +500,7 @@ autounattend.xml:
                             <Order>3</Order>
                             <Size>128</Size>
                             <Type>MSR</Type>
-                        </CreatePartition>         
+                        </CreatePartition>
                         <CreatePartition wcm:action="add">
                             <Order>4</Order>
                             <Extend>true</Extend>
@@ -590,7 +595,7 @@ autounattend.xml:
             <POLICYProxySettingsPerUser>0</POLICYProxySettingsPerUser>
             <HKLMProxyEnable>true</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
-        </component>  
+        </component>
 Finish Setup cache proxy during installation -->
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <AutoLogon>
@@ -828,7 +833,7 @@ sysprep-unattend.xml:
             <HKLMProxyEnable>false</HKLMProxyEnable>
             <HKLMProxyServer>cache-proxy:3142</HKLMProxyServer>
         </component>
-Finish proxy after sysprep -->  
+Finish proxy after sysprep -->
         <component language="neutral" name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0809:00000809</InputLocale>
             <SystemLocale>en-GB</SystemLocale>
