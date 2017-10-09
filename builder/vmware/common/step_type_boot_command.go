@@ -39,9 +39,15 @@ type StepTypeBootCommand struct {
 	BootCommand []string
 	VMName      string
 	Ctx         interpolate.Context
+	Skip        bool
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+	if s.Skip {
+		log.Println("Skipping boot command step...")
+		return multistep.ActionContinue
+	}
+
 	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)
