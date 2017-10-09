@@ -8,6 +8,7 @@
 * builder/amazon-instance: Add `.Token` as a variable in the `BundleUploadCommand` template. [GH-5288]
 * builder/amazon: Output AMI Name during prevalidation. [GH-5389]
 * builder/docker: Add option to set `--user` flag when running `exec`. [GH-5406]
+* post-processor/vagrant: When building from a builder/hyper-v artifact, link instead of copy when available. [GH-5207]
 
 ### BUG FIXES:
 
