@@ -30,12 +30,13 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
+	vhdPath := state.Get("packerVhdTempDir").(string)
 
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
