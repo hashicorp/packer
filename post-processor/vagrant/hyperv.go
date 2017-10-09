@@ -2,10 +2,11 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type HypervProvider struct{}
@@ -55,10 +56,18 @@ func (p *HypervProvider) Process(ui packer.Ui, artifact packer.Artifact, dir str
 
 		dstPath := filepath.Join(dstDir, filepath.Base(path))
 
-		if err = CopyContents(dstPath, path); err != nil {
-			ui.Message(fmt.Sprintf("err in copying: %s to %s", path, dstPath))
-			return
+		// We prefer to link the files where possible because they are often very huge.
+		// Some filesystem configurations do not allow hardlinks. As the possibilities
+		// of mounting different devices in different paths are flexible, we just try to
+		// link the file and copy if the link fails, thereby automatically optimizing with a safe fallback.
+		if err = LinkFile(dstPath, path); err != nil {
+			// ui.Message(fmt.Sprintf("err in linking: %s to %s", path, dstPath))
+			if err = CopyContents(dstPath, path); err != nil {
+				ui.Message(fmt.Sprintf("err in copying: %s to %s", path, dstPath))
+				return
+			}
 		}
+
 		ui.Message(fmt.Sprintf("Copyed %s to %s", path, dstPath))
 	}
 
