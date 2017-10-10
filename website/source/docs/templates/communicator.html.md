@@ -104,6 +104,15 @@ The SSH communicator has the following options:
 
 -   `ssh_username` (string) - The username to connect to SSH with. Required
     if using SSH.
+-   `ssh_proxy_host` (string) - A SOCKS proxy host to use for SSH connection
+
+-   `ssh_proxy_port` (Integer) - A port of the SOCKS proxy, defaults to 1080
+
+-   `ssh_proxy_username` (string) - The username to authenticate with the proxy
+    server. Optional.
+
+-   `ssh_proxy_password` (string) - The password to use to authenticate with
+    the proxy server. Optional.
 
 ## WinRM Communicator
 
