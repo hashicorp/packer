@@ -209,12 +209,12 @@ func TestLargeDownload(t *testing.T) {
 
 }
 
-// TestUploadOwner verifies that owner of uploaded files is the user the container is running as.
-func TestUploadOwner(t *testing.T) {
+// TestFixUploadOwner verifies that owner of uploaded files is the user the container is running as.
+func TestFixUploadOwner(t *testing.T) {
 	ui := packer.TestUi(t)
 	cache := &packer.FileCache{CacheDir: os.TempDir()}
 
-	tpl, err := template.Parse(strings.NewReader(testUploadOwnerTemplate))
+	tpl, err := template.Parse(strings.NewReader(testFixUploadOwnerTemplate))
 	if err != nil {
 		t.Fatalf("Unable to parse config: %s", err)
 	}
@@ -346,7 +346,7 @@ const dockerLargeBuilderConfig = `
 }
 `
 
-const testUploadOwnerTemplate = `
+const testFixUploadOwnerTemplate = `
 {
   "builders": [
     {
