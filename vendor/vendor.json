@@ -1218,6 +1218,12 @@
 			"revisionTime": "2017-08-04T00:04:37Z"
 		},
 		{
+			"checksumSHA1": "S4QRxs3K4notNO97Um4sA2IvHaM=",
+			"path": "golang.org/x/net/proxy",
+			"revision": "a04bdaca5b32abe1c069418fb7088ae607de5bd0",
+			"revisionTime": "2017-10-03T05:09:24Z"
+		},
+		{
 			"checksumSHA1": "mktBVED98G2vv+OKcSgtnFVZC1Y=",
 			"path": "golang.org/x/oauth2",
 			"revision": "8a57ed94ffd43444c0879fe75701732a38afc985"
