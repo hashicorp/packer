@@ -36,14 +36,14 @@ type bootCommandTemplateData struct {
 // Produces:
 //   <nothing>
 type StepTypeBootCommand struct {
+	VNCEnabled  bool
 	BootCommand []string
 	VMName      string
 	Ctx         interpolate.Context
-	Skip        bool
 }
 
 func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
-	if s.Skip {
+	if !s.VNCEnabled {
 		log.Println("Skipping boot command step...")
 		return multistep.ActionContinue
 	}
