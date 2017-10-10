@@ -33,6 +33,10 @@ type Config struct {
 	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
 	SSHBastionPrivateKey      string        `mapstructure:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
+	SSHProxyHost              string        `mapstructure:"ssh_proxy_host"`
+	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
+	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
+	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -138,6 +142,12 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKey != "" {
 			c.SSHBastionPrivateKey = c.SSHPrivateKey
+		}
+	}
+
+	if c.SSHProxyHost != "" {
+		if c.SSHProxyPort == 0 {
+			c.SSHProxyPort = 1080
 		}
 	}
 
