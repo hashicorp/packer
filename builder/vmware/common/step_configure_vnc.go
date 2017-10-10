@@ -21,7 +21,7 @@ import (
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
 type StepConfigureVNC struct {
-	Skip               bool
+	Enabled            bool
 	VNCBindAddress     string
 	VNCPortMin         uint
 	VNCPortMax         uint
@@ -77,7 +77,7 @@ func VNCPassword(skipPassword bool) string {
 }
 
 func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
-	if s.Skip {
+	if !s.Enabled {
 		log.Println("Skipping VNC configuration step...")
 		return multistep.ActionContinue
 	}

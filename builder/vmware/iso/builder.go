@@ -38,7 +38,6 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	BootCommand         []string `mapstructure:"boot_command"`
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
@@ -149,6 +148,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
+
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -177,6 +177,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
+
+	if b.config.Headless && b.config.DisableVNC {
+		warnings = append(warnings,
+			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+				"you won't be able to see any output.")
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -259,7 +265,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
-			Skip:               b.config.BootCommand == nil,
+			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
@@ -274,7 +280,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
-			Skip:        b.config.BootCommand == nil,
+			VNCEnabled:  !b.config.DisableVNC,
 			BootCommand: b.config.BootCommand,
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
@@ -305,7 +311,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
-			SkipVNCDisable:           b.config.BootCommand == nil,
+			SkipVNCDisable:           b.config.DisableVNC,
 		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,

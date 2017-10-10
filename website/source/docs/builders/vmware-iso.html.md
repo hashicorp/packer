@@ -114,6 +114,9 @@ builder.
     User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
+*   `disable_vnc` (bool) - Whether to create a VNC connection or not.
+    A `boot_command` cannot be used when this is `false`. Defaults to `false`.
+
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
     unattended Windows installs, which look for an `Autounattend.xml` file on
@@ -446,10 +449,11 @@ various files locally, and uploads these to the remote machine. Packer currently
 uses SSH to communicate to the ESXi machine rather than the vSphere API. At some
 point, the vSphere API may be used.
 
-Packer also requires VNC if issuing boot commands during a build, which may be
+Packer also requires VNC to issue boot commands during a build, which may be
 disabled on some remote VMware Hypervisors. Please consult the appropriate
 documentation on how to update VMware Hypervisor's firewall to allow these
-connections.
+connections. VNC can be disabled by not setting a `boot_command` and setting
+`disable_vnc` to `true`.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
 the required `remote_*` configurations:
@@ -481,8 +485,8 @@ modify as well:
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`. This option 
-	works currently only with option remote_type set to "esx5".
+    Before using this option, you need to install `ovftool`. This option
+    works currently only with option remote_type set to "esx5".
 
 ### VNC port discovery
 
