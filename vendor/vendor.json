@@ -769,10 +769,10 @@
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 		},
 		{
-			"checksumSHA1": "vnuMNXv3FJSg/I8ig04OTEHjk1c=",
+			"checksumSHA1": "D267IUMW2rcb+vNe3QU+xhfSrgY=",
 			"path": "github.com/hashicorp/go-checkpoint",
-			"revision": "a8d0786e7fa88adb6b3bcaa341a99af7f9740671",
-			"revisionTime": "2017-06-24T02:34:07Z"
+			"revision": "1545e56e46dec3bba264e41fde2c1e2aa65b5dd4",
+			"revisionTime": "2017-10-09T17:35:28Z"
 		},
 		{
 			"checksumSHA1": "fSe5y1UgTDeYlnFfUcDA1zzcw+U=",
