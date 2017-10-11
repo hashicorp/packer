@@ -1,0 +1,18 @@
+* @hashicorp/packer
+
+# builders
+
+builder/alicloud        dongxiao.zzh@alibaba-inc.com
+builder/azure           chrboum@microsoft.com
+builder/hyperv          taliesins@interxion.com
+builder/lxc             rampantdurandal@gmail.com
+builder/lxd             rampantdurandal@gmail.com
+builder/oneandone       jasmin@stackpointcloud.com
+builder/oracle          andrew.pryde@oracle.com @owainlewis
+builder/profitbricks    jasmin@stackpointcloud.com
+builder/triton          james@jen20.com sean@chittenden.org
+
+# provisioners
+
+provisioner/ansible     billie.cleek@idexpertscorp.com
+provisioner/converge    brian@brianthicks.com
