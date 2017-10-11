@@ -218,7 +218,7 @@ if ($harddrivePath){
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
-		
+
 		if err != nil {
 			return err
 		}
