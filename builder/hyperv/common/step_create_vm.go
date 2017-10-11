@@ -47,8 +47,8 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	} else {
 		log.Println("No existing virtual harddrive, not attaching.")
 	}
-    
-    vhdPath := state.Get("packerVhdTempDir").(string)
+
+	vhdPath := state.Get("packerVhdTempDir").(string)
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
