@@ -12,7 +12,8 @@ description: |-
 # Build an Image
 
 With Packer installed, let's just dive right into it and build our first image.
-Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) This is just an example. Packer can create images for [many platforms][platforms].
+Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) 
+This is just an example. Packer can create images for [many platforms][platforms].
 
 If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
 For the example, we'll use a "t2.micro" instance to build our image, which
@@ -159,8 +160,8 @@ typically represent an ID (such as in the case of an AMI) or a set of files
 (such as for a VMware virtual machine). In this example, we only have a single
 artifact: the AMI in us-east-1 that was created.
 
-This AMI is ready to use. If you wanted you could go and launch this AMI right now
-and it would work great.
+This AMI is ready to use. If you wanted you could go and launch this AMI right 
+now and it would work great.
 
 -> **Note:** Your AMI ID will surely be different than the one above. If you
 try to launch the one in the example output above, you will get an error. If you
@@ -212,7 +213,8 @@ Create a file named `example.sh` and add the following:
 echo "hello
 ```
 
-Set your access key and id as environment variables, so we don't need to pass them in through the command line:
+Set your access key and id as environment variables, so we don't need to pass 
+them in through the command line:
 ```
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
@@ -270,7 +272,8 @@ Now save the following text in a file named `firstrun.json`:
 
 and to build, run `packer build firstrun.json`
 
-Note that if you wanted to use a `source_ami` instead of a `source_ami_filter` it might look something like this: `"source_ami": "ami-fce3c696",`
+Note that if you wanted to use a `source_ami` instead of a `source_ami_filter` 
+it might look something like this: `"source_ami": "ami-fce3c696",`
 
 Your output will look like this: 
 
@@ -313,13 +316,14 @@ amazon-ebs output will be in this color.
 
 ### A windows example
 
-Note that this uses a larger instance.  You will be charged for it. Also keep in mind that using windows AMIs incurs a fee that you don't get when you use linux AMIs.
+Note that this uses a larger instance.  You will be charged for it. Also keep 
+in mind that using windows AMIs incurs a fee that you don't get when you use 
+linux AMIs.
 
-You'll need to have a boostrapping file to enable ssh or winrm; here's a basic example of that file.
+You'll need to have a boostrapping file to enable ssh or winrm; here's a basic 
+example of that file.
 
 ```
-<powershell>
-
 # set administrator password
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
@@ -346,17 +350,20 @@ set-service winrm -startupType automatic
 # Finally, allow WinRM connections and start the service
 netsh advfirewall firewall set rule name="WinRM" new action=allow
 net start winrm
-
-</powershell>
 ```
 
 
 Save the above code in a file named `bootstrap_win.txt`.  
 
-The example config below shows the two different ways of using the powershell provisioner: `inline` and `script`.  
-The first example, `inline`, allows you to provide short snippets of code, and will create the script file for you.  The second example allows you to run more complex code by providing the path to a script to run on the guest vm.  
+The example config below shows the two different ways of using the powershell 
+provisioner: `inline` and `script`.  
+The first example, `inline`, allows you to provide short snippets of code, and 
+will create the script file for you.  The second example allows you to run more 
+complex code by providing the path to a script to run on the guest vm.  
 
-Here's an example of a `sample_script.ps1` that will work with the environment variables we will set in our packer config; copy the contents into your own `sample_script.ps1` and provide the path to it in your packer config:
+Here's an example of a `sample_script.ps1` that will work with the environment 
+variables we will set in our packer config; copy the contents into your own 
+`sample_script.ps1` and provide the path to it in your packer config:
 
 ```
 Write-Output("PACKER_BUILD_NAME is automatically set for you,)
@@ -368,7 +375,9 @@ Write-Output("Likewise, VAR2 is " + $Env:VAR2 )
 Write-Output("and VAR3 is " + $Env:VAR3 )
 ```
 
-Next you need to create a packer config that will use this bootstrap file. See the example below, which contains examples of using source_ami_filter for windows in addition to the powershell and windows-restart provisioners:
+Next you need to create a packer config that will use this bootstrap file. See 
+the example below, which contains examples of using source_ami_filter for 
+windows in addition to the powershell and windows-restart provisioners:
 
 ```
 {
