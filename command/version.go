@@ -62,7 +62,7 @@ func (c *VersionCommand) Run(args []string) int {
 		if info.Outdated {
 			c.Ui.Say(fmt.Sprintf(
 				"\nYour version of Packer is out of date! The latest version\n"+
-					"is %s. You can update by downloading from www.packer.io",
+					"is %s. You can update by downloading from www.packer.io/downloads.html",
 				info.Latest))
 		}
 	}
