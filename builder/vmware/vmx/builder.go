@@ -123,7 +123,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
-			SkipVNCDisable:           b.config.DisableVNC,
+			VNCEnabled:               !b.config.DisableVNC,
 		},
 	}
 
