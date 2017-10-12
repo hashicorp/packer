@@ -95,6 +95,43 @@ single source of input to a template that a user can easily discover using
 that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
+## Using array values
+
+Some templates call for array values. You can use template variables for these,
+too. For example, the `amazon-ebs` builder has a configuration parameter called
+`ami_regions`, which takes an array of regions that it will copy the AMI to.
+You can parameterize this by using a variable that is a list of regions, joined
+by a `,`. For example:
+
+```json
+{
+ "variables": {
+        "destination_regions": "us-west-1,us-west-2"
+    },
+    "builders": [
+        {
+            "ami_name": "packer-qs-{{timestamp}}",
+            "instance_type": "t2.micro",
+            "region": "us-east-1",
+            "source_ami_filter": {
+                "filters": {
+                    "name": "*ubuntu-xenial-16.04-amd64-server-*",
+                    "root-device-type": "ebs",
+                    "virtualization-type": "hvm"
+                },
+                "most_recent": true,
+                "owners": [
+                    "099720109477"
+                ]
+            },
+            "ami_regions": "{{user `destination_regions`}}",
+            "ssh_username": "ubuntu",
+            "type": "amazon-ebs"
+        }
+    ]
+}
+```
+
 ## Setting Variables
 
 Now that we covered how to define and use user variables within a
