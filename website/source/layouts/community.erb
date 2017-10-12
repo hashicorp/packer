@@ -1,0 +1,19 @@
+<% wrap_layout :inner do %>
+  <% content_for :sidebar do %>
+    <div class="docs-sidebar hidden-print affix-top" role="complementary">
+      <ul class="nav docs-sidenav">
+        <li<%= sidebar_current("community-index") %>>
+          <a href="/community.html">Community</a>
+        </li>
+        <li<%= sidebar_current("community-tools") %>>
+          <a href="/community-tools.html">Community Tools</a>
+        </li>
+        <li<%= sidebar_current("community-plugins") %>>
+          <a href="/community-plugins.html">Community Maintained Plugins</a>
+        </li>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= yield %>
+<% end %>
