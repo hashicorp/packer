@@ -114,3 +114,15 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
   ]
 }
 ```
+
+## Slowness when transferring large files over WinRM.
+
+Because of the way our WinRM transfers works, it can take a very long time to
+upload and download even moderately sized files. If you're experiencing
+slowness using the file provisioner on Windows, it's suggested that you set up
+an SSH server and use the [ssh
+communicator](/docs/templates/communicator.html#ssh-communicator). If you only
+want to transfer files to your guest, and if your builder supports it, you may
+also use the `http_directory` directive. This will cause that directory to be
+available to the guest over http, and set the environment variable
+`PACKER_HTTP_ADDR` to the address.
