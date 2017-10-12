@@ -221,6 +221,8 @@ func (d *ESX5Driver) VNCAddress(_ string, portMin, portMax uint) (string, uint, 
 			if e, ok := err.(*net.OpError); ok {
 				if e.Timeout() {
 					log.Printf("Timeout connecting to: %s (check firewall rules)", address)
+				} else if strings.Contains(e.Error(), "connection refused") {
+					log.Printf("Connection refused when connecting to: %s (check firewall rules)", address)
 				} else {
 					vncPort = port
 					break
@@ -301,6 +303,9 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 			if e, ok := err.(*net.OpError); ok {
 				if e.Timeout() {
 					log.Printf("Timeout connecting to %s", record["IPAddress"])
+					continue
+				} else if strings.Contains(e.Error(), "connection refused") {
+					log.Printf("Connection refused when connecting to: %s", record["IPAddress"])
 					continue
 				}
 			}
