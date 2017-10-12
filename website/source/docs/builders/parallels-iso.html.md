@@ -326,6 +326,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/downloads-community.html#templates).
+
 ## prlctl Commands
 
 In order to perform extra customization of the virtual machine, a template can

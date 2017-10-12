@@ -269,3 +269,6 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/downloads-community.html#templates).

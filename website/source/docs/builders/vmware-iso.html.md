@@ -399,6 +399,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/downloads-community.html#templates).
+
 ## VMX Template
 
 The heart of a VMware machine is the "vmx" file. This contains all the virtual
