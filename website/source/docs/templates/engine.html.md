@@ -113,7 +113,7 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
       Numeric
     </th>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
       01
@@ -148,19 +148,19 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
       January (Jan)
     </td>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
-      -   
+      -
     </td>
     <td align="center">
       MST
