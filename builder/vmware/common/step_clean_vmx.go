@@ -21,7 +21,7 @@ import (
 //   <nothing>
 type StepCleanVMX struct {
 	RemoveEthernetInterfaces bool
-	SkipVNCDisable           bool
+	VNCEnabled               bool
 }
 
 func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
@@ -60,7 +60,7 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxData[ide+"clientdevice"] = "TRUE"
 	}
 
-	if !s.SkipVNCDisable {
+	if s.VNCEnabled {
 		ui.Message("Disabling VNC server...")
 		vmxData["remotedisplay.vnc.enabled"] = "FALSE"
 	}
