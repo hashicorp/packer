@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 // This step runs the created virtual machine.
