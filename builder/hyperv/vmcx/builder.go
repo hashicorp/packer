@@ -94,6 +94,8 @@ type Config struct {
 
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
+	SkipExport bool `mapstructure:"skip_export"`
+
 	ctx interpolate.Context
 }
 
@@ -469,6 +471,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepExportVm{
 			OutputDir:      b.config.OutputDir,
 			SkipCompaction: b.config.SkipCompaction,
+			SkipExport:     b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order
