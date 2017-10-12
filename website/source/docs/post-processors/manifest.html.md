@@ -41,3 +41,64 @@ You can simply add `{"type":"manifest"}` to your post-processor section. Below i
   ]
 }
 ```
+
+An example manifest file looks like:
+
+``` json
+{
+  "builds": [
+    {
+      "name": "docker",
+      "builder_type": "docker",
+      "build_time": 1507245986,
+      "files": [
+        {
+          "name": "packer_example",
+          "size": 102219776
+        }
+      ],
+      "artifact_id": "Container",
+      "packer_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
+    }
+  ],
+  "last_run_uuid": "6d5d3185-fa95-44e1-8775-9e64fe2e2d8f"
+}
+```
+
+If I run the build again, my new build will be added to the manifest file rather than replacing it, so you can always grab specific builds from the manifest by uuid.
+
+The mainfest above was generated from this packer.json:
+```
+{
+  "builders": [
+    {
+      "type":        "docker",
+      "image":       "ubuntu:latest",
+      "export_path": "packer_example",
+      "run_command": [ "-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}" ]
+    }
+  ],
+    "provisioners": [
+    {
+      "type": "shell",
+      "inline": "mkdir /Setup"
+    },
+    {
+      "type": "file",
+      "source": "../scripts/dummy_bash.sh",
+      "destination": "/Setup"
+    },
+    {
+      "type": "shell",
+      "inline":["ls -alh /Setup/"]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
+    }
+  ]
+}
+```
