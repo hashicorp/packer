@@ -367,6 +367,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/downloads-community.html#templates).
+
 ## Guest Additions
 
 Packer will automatically download the proper guest additions for the version of
