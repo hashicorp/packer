@@ -187,40 +187,49 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, switchName string, generation uint) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, switchName string, generation uint, diffDisks bool) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 if ($harddrivePath){
-	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing
+	} else {
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
 	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
 } else {
 	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 if ($harddrivePath){
-	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing
+	}
+	else{
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
 	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
 } else {
 	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
