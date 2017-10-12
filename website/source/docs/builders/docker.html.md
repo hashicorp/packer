@@ -211,6 +211,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `container_dir` (string) - The directory inside container to mount
      temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
      By default this is set to `/packer-files`.
+     
+-   `fix_upload_owner` (boolean) - If true, files uploaded to the container will
+    be owned by the user the container is running as. If false, the owner will depend
+    on the version of docker installed in the system. Defaults to true.
 
 ## Using the Artifact: Export
 
