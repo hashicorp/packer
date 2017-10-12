@@ -442,6 +442,9 @@ CentOS 6.4 installer:
 }
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/downloads-community.html#templates).
+
 ### Troubleshooting
 
 Some users have experienced errors complaining about invalid keymaps. This
