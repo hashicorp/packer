@@ -94,6 +94,8 @@ type Config struct {
 
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
+	SkipExport bool `mapstructure:"skip_export"`
+
 	// Use differencing disk
 	DifferencingDisk bool `mapstructure:"differencing_disk"`
 
@@ -357,6 +359,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
+			SkipExport:                     b.config.SkipExport,
+			OutputDir:                      b.config.OutputDir,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
@@ -422,6 +426,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepExportVm{
 			OutputDir:      b.config.OutputDir,
 			SkipCompaction: b.config.SkipCompaction,
+			SkipExport:     b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order
