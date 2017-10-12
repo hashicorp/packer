@@ -71,7 +71,7 @@ type Config struct {
 	// Whether to clean scripts up
 	SkipClean bool `mapstructure:"skip_clean"`
 
-	ExpectDisconnect *bool `mapstructure:"expect_disconnect"`
+	ExpectDisconnect bool `mapstructure:"expect_disconnect"`
 
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
@@ -102,11 +102,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
-	}
-
-	if p.config.ExpectDisconnect == nil {
-		t := false
-		p.config.ExpectDisconnect = &t
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -287,7 +282,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// If the exit code indicates a remote disconnect, fail unless
 		// we were expecting it.
 		if cmd.ExitStatus == packer.CmdDisconnect {
-			if !*p.config.ExpectDisconnect {
+			if !p.config.ExpectDisconnect {
 				return fmt.Errorf("Script disconnected unexpectedly.")
 			}
 		} else if cmd.ExitStatus != 0 {
