@@ -361,19 +361,6 @@ While Docker has many features, Packer views Docker simply as an container
 runner. To that end, Packer is able to repeatably build these containers
 using portable provisioning scripts.
 
-Dockerfiles have some additional features that Packer doesn't support which are
-able to be worked around. Many of these features will be automated by Packer in
-the future:
-
--   Dockerfiles will snapshot the container at each step, allowing you to go
-    back to any step in the history of building. Packer doesn't do this yet, but
-    inter-step snapshotting is on the way.
-
--   Dockerfiles can contain information such as exposed ports, shared volumes,
-    and other metadata. Packer builds a raw Docker container image that has none
-    of this metadata. You can pass in much of this metadata at runtime with
-    `docker run`.
-
 ## Overriding the host directory
 
 By default, Packer creates a temporary folder under your home directory, and
