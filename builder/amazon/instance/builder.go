@@ -69,6 +69,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"run_volume_tags",
 				"snapshot_tags",
 				"tags",
+				"spot_tags",
 			},
 		},
 	}, configs...)
@@ -219,6 +220,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			SubnetId:                 b.config.SubnetId,
 			Tags:                     b.config.RunTags,
+			SpotTags:                 b.config.SpotTags,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
 		}

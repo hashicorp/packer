@@ -43,6 +43,7 @@ type RunConfig struct {
 	SourceAmiFilter                   AmiFilterOptions  `mapstructure:"source_ami_filter"`
 	SpotPrice                         string            `mapstructure:"spot_price"`
 	SpotPriceAutoProduct              string            `mapstructure:"spot_price_auto_product"`
+	SpotTags                          map[string]string `mapstructure:"spot_tags"`
 	SubnetId                          string            `mapstructure:"subnet_id"`
 	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
 	TemporarySGSourceCidr             string            `mapstructure:"temporary_security_group_source_cidr"`
@@ -74,6 +75,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.RunTags == nil {
 		c.RunTags = make(map[string]string)
+	}
+
+	if c.SpotTags == nil {
+		c.SpotTags = make(map[string]string)
 	}
 
 	// Validation
