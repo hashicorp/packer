@@ -201,7 +201,7 @@ how to validate and build templates into machine images.
 
 ## Some more examples:
 
-### Another Linux Example, with provisioners:
+### Another GNU/Linux Example, with provisioners:
 Create a file named `welcome.txt` and add the following:
 
 ```
@@ -319,7 +319,7 @@ amazon-ebs output will be in this color.
 
 ### A Windows Example
 
-As with the Linux example above, should you decide to follow along and
+As with the GNU/Linux example above, should you decide to follow along and
 build an AMI from the example template, provided you qualify for free tier
 usage, you should not be charged for actually building the AMI.
 However, please note that you will be charged for storage of the snapshot
