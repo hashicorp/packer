@@ -334,19 +334,22 @@ example of that file.
 
 ```powershell
 <powershell>
-# set administrator password
+# Set administrator password
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
-# First, make sure WinRM doesn't run and can't be connected to
-netsh advfirewall firewall add rule name="WinRM" protocol=TCP dir=in localport=5985 action=block
-net stop winrm
-
-# turn off PowerShell execution policy restrictions
+# Turn off PowerShell execution policy restrictions
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine
 
-# configure WinRM
-winrm quickconfig -q
+# First, make sure WinRM can't be connected to
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=block
+
+# Delete any existing WinRM listeners
+winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
+winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Create a new WinRM listener and configure
+winrm create winrm/config/listener?Address=*+Transport=HTTP
 winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="0"}'
 winrm set winrm/config '@{MaxTimeoutms="7200000"}'
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
@@ -354,12 +357,16 @@ winrm set winrm/config/service '@{MaxConcurrentOperationsPerUser="12000"}'
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/client/auth '@{Basic="true"}'
 
-net stop winrm
-set-service winrm -startupType automatic
+# Configure UAC to allow privilege elevation in remote shells
+$Key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+$Setting = 'LocalAccountTokenFilterPolicy'
+Set-ItemProperty -Path $Key -Name $Setting -Value 1 -Force
 
-# Finally, allow WinRM connections and start the service
-netsh advfirewall firewall set rule name="WinRM" new action=allow
-net start winrm
+# Configure and restart the WinRM Service; Enable the required firewall exception
+Stop-Service -Name WinRM
+Set-Service -Name WinRM -StartupType Automatic
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new action=allow localip=any remoteip=any
+Start-Service -Name WinRM
 </powershell>
 ```
 
