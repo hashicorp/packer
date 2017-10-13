@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 	"log"
+	"path/filepath"
+	"strings"
 )
 
 type StepMountDvdDrive struct {
@@ -17,7 +19,21 @@ func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
 
 	errorMsg := "Error mounting dvd drive: %s"
 	vmName := state.Get("vmName").(string)
-	isoPath := state.Get("iso_path").(string)
+
+	// Determine if we even have a dvd disk to attach
+	var isoPath string
+	if isoPathRaw, ok := state.GetOk("iso_path"); ok {
+		isoPath = isoPathRaw.(string)
+	} else {
+		log.Println("No dvd disk, not attaching.")
+		return multistep.ActionContinue
+	}
+
+	// Determine if its a virtual hdd to mount
+	if strings.ToLower(filepath.Ext(isoPath)) == ".vhd" || strings.ToLower(filepath.Ext(isoPath)) == ".vhdx" {
+		log.Println("Its a hard disk, not attaching.")
+		return multistep.ActionContinue
+	}
 
 	// should be able to mount up to 60 additional iso images using SCSI
 	// but Windows would only allow a max of 22 due to available drive letters
