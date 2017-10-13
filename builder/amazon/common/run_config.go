@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"regexp"
 	"time"
@@ -40,7 +41,7 @@ type RunConfig struct {
 	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
 	SecurityGroupId                   string            `mapstructure:"security_group_id"`
 	SecurityGroupIds                  []string          `mapstructure:"security_group_ids"`
-	SecurityGroupSourceCidr           string            `mapstructure:"security_group_source_cidr"`
+	TemporarySGSourceCidr             string            `mapstructure:"temporary_security_group_source_cidr"`
 	SubnetId                          string            `mapstructure:"subnet_id"`
 	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
 	UserData                          string            `mapstructure:"user_data"`
@@ -116,8 +117,12 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SecurityGroupSourceCidr == "" {
-		c.SecurityGroupSourceCidr = "0.0.0.0/0"
+	if c.TemporarySGSourceCidr == "" {
+		c.TemporarySGSourceCidr = "0.0.0.0/0"
+	} else {
+		if _, _, err := net.ParseCIDR(c.TemporarySGSourceCidr); err != nil {
+			errs = append(errs, fmt.Errorf("Error parsing temporary_security_group_source_cidr: %s", err.Error()))
+		}
 	}
 
 	if c.InstanceInitiatedShutdownBehavior == "" {
