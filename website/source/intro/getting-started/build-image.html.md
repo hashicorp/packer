@@ -327,6 +327,7 @@ You'll need to have a boostrapping file to enable ssh or winrm; here's a basic
 example of that file.
 
 ```powershell
+<powershell>
 # set administrator password
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
@@ -353,6 +354,7 @@ set-service winrm -startupType automatic
 # Finally, allow WinRM connections and start the service
 netsh advfirewall firewall set rule name="WinRM" new action=allow
 net start winrm
+</powershell>
 ```
 
 
