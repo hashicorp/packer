@@ -2,6 +2,7 @@ package hyperv
 
 import (
 	"errors"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -443,6 +444,20 @@ Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, expPath, vhdDir)
+	return err
+}
+
+func CopySourceVirtualMachine(sourcePath string, vmName string, path string) error {
+
+	var script = `
+param([string]$srcPath, [string]$vmName, [string]$dstPath, [string]$ext)
+$vhdx = $vmName + $ext
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
+Copy-Item -Path $srcPath -Destination $vhdPath
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, sourcePath, vmName, path, filepath.Ext(sourcePath))
 	return err
 }
 

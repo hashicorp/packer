@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
@@ -42,29 +41,19 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig         `mapstructure:",squash"`
-	common.HTTPConfig           `mapstructure:",squash"`
-	common.ISOConfig            `mapstructure:",squash"`
-	common.FloppyConfig         `mapstructure:",squash"`
-	hypervcommon.OutputConfig   `mapstructure:",squash"`
-	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.RunConfig      `mapstructure:",squash"`
-	hypervcommon.ShutdownConfig `mapstructure:",squash"`
+	common.PackerConfig               `mapstructure:",squash"`
+	common.HTTPConfig                 `mapstructure:",squash"`
+	common.ISOConfig                  `mapstructure:",squash"`
+	common.FloppyConfig               `mapstructure:",squash"`
+	hypervcommon.OutputConfig         `mapstructure:",squash"`
+	hypervcommon.SSHConfig            `mapstructure:",squash"`
+	hypervcommon.RunConfig            `mapstructure:",squash"`
+	hypervcommon.ShutdownConfig       `mapstructure:",squash"`
+	hypervcommon.GuestAdditionsConfig `mapstructure:",squash"`
+	hypervcommon.SizeConfig           `mapstructure:",squash"`
 
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
-	// The size, in megabytes, of the computer memory in the VM.
-	// By default, this is 1024 (about 1 GB).
-	RamSize uint `mapstructure:"ram_size"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
-
-	// Should integration services iso be mounted
-	GuestAdditionsMode string `mapstructure:"guest_additions_mode"`
-
-	// The path to the integration services iso
-	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
@@ -123,16 +112,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-
-	err = b.checkDiskSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
-
-	err = b.checkRamSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.SizeConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.VMName == "" {
 		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
@@ -162,34 +142,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
 	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
-	// Errors
-	if b.config.GuestAdditionsMode == "" {
-		if b.config.GuestAdditionsPath != "" {
-			b.config.GuestAdditionsMode = "attach"
-		} else {
-			b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
-
-			if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-				if err != nil {
-					b.config.GuestAdditionsPath = ""
-					b.config.GuestAdditionsMode = "none"
-				} else {
-					b.config.GuestAdditionsMode = "attach"
-				}
-			}
-		}
-	}
-
-	if b.config.GuestAdditionsPath == "" && b.config.GuestAdditionsMode == "attach" {
-		b.config.GuestAdditionsPath = os.Getenv("WINDIR") + "\\system32\\vmguest.iso"
-
-		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-			if err != nil {
-				b.config.GuestAdditionsPath = ""
-			}
-		}
-	}
-
 	for _, isoPath := range b.config.SecondaryDvdImages {
 		if _, err := os.Stat(isoPath); os.IsNotExist(err) {
 			if err != nil {
@@ -199,32 +151,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	numberOfIsos := len(b.config.SecondaryDvdImages)
-
-	if b.config.GuestAdditionsMode == "attach" {
-		if _, err := os.Stat(b.config.GuestAdditionsPath); os.IsNotExist(err) {
-			if err != nil {
-				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("Guest additions iso does not exist: %s", err))
-			}
-		}
-
-		numberOfIsos = numberOfIsos + 1
-	}
-
-	if b.config.Generation < 2 && numberOfIsos > 2 {
-		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		}
-	} else if b.config.Generation > 1 && len(b.config.SecondaryDvdImages) > 16 {
-		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
-		}
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.GuestAdditionsConfig.Prepare(&b.config.ctx, b.config.SecondaryDvdImages, b.config.Generation)...)
 
 	if b.config.EnableVirtualizationExtensions {
 		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
@@ -451,38 +378,6 @@ func appendWarnings(slice []string, data ...string) []string {
 	slice = slice[0:n]
 	copy(slice[m:n], data)
 	return slice
-}
-
-func (b *Builder) checkDiskSize() error {
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = DefaultDiskSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
-
-	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
-	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
-	}
-
-	return nil
-}
-
-func (b *Builder) checkRamSize() error {
-	if b.config.RamSize == 0 {
-		b.config.RamSize = DefaultRamSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
-
-	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
-	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
-	}
-
-	return nil
 }
 
 func (b *Builder) checkHostAvailableMemory() string {

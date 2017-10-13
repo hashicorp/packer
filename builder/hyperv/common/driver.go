@@ -84,6 +84,8 @@ type Driver interface {
 
 	CompactDisks(string, string) error
 
+	CopySourceVirtualMachine(sourcePath string, vmName string, path string) error
+
 	CopyExportedVirtualMachine(string, string, string, string) error
 
 	RestartVirtualMachine(string) error
