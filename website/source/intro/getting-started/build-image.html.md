@@ -12,7 +12,7 @@ description: |-
 # Build an Image
 
 With Packer installed, let's just dive right into it and build our first image.
-Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) 
+Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/).
 This is just an example. Packer can create images for [many platforms][platforms].
 
 If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
@@ -160,7 +160,7 @@ typically represent an ID (such as in the case of an AMI) or a set of files
 (such as for a VMware virtual machine). In this example, we only have a single
 artifact: the AMI in us-east-1 that was created.
 
-This AMI is ready to use. If you wanted you could go and launch this AMI right 
+This AMI is ready to use. If you wanted you could go and launch this AMI right
 now and it would work great.
 
 -> **Note:** Your AMI ID will surely be different than the one above. If you
@@ -203,18 +203,21 @@ how to validate and build templates into machine images.
 
 ### Another Linux Example, with provisioners:
 Create a file named `welcome.txt` and add the following:
+
 ```
 WELCOME TO PACKER!
 ```
 
 Create a file named `example.sh` and add the following:
-```
+
+```bash
 #!/bin/bash
-echo "hello
+echo "hello"
 ```
 
-Set your access key and id as environment variables, so we don't need to pass 
+Set your access key and id as environment variables, so we don't need to pass
 them in through the command line:
+
 ```
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
@@ -222,7 +225,7 @@ export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
 
 Now save the following text in a file named `firstrun.json`:
 
-```
+```json
 {
     "variables": {
         "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
@@ -272,10 +275,10 @@ Now save the following text in a file named `firstrun.json`:
 
 and to build, run `packer build firstrun.json`
 
-Note that if you wanted to use a `source_ami` instead of a `source_ami_filter` 
+Note that if you wanted to use a `source_ami` instead of a `source_ami_filter`
 it might look something like this: `"source_ami": "ami-fce3c696",`
 
-Your output will look like this: 
+Your output will look like this:
 
 ```
 amazon-ebs output will be in this color.
@@ -314,16 +317,16 @@ amazon-ebs output will be in this color.
 ==> amazon-ebs: Waiting for AMI to become ready...
 ```
 
-### A windows example
+### A Windows Example
 
-Note that this uses a larger instance.  You will be charged for it. Also keep 
-in mind that using windows AMIs incurs a fee that you don't get when you use 
+Note that this uses a larger instance. You will be charged for it. Also keep
+in mind that using windows AMIs incurs a fee that you don't get when you use
 linux AMIs.
 
-You'll need to have a boostrapping file to enable ssh or winrm; here's a basic 
+You'll need to have a boostrapping file to enable ssh or winrm; here's a basic
 example of that file.
 
-```
+```powershell
 # set administrator password
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
@@ -353,16 +356,16 @@ net start winrm
 ```
 
 
-Save the above code in a file named `bootstrap_win.txt`.  
+Save the above code in a file named `bootstrap_win.txt`.
 
-The example config below shows the two different ways of using the powershell 
-provisioner: `inline` and `script`.  
-The first example, `inline`, allows you to provide short snippets of code, and 
-will create the script file for you.  The second example allows you to run more 
-complex code by providing the path to a script to run on the guest vm.  
+The example config below shows the two different ways of using the powershell
+provisioner: `inline` and `script`.
+The first example, `inline`, allows you to provide short snippets of code, and
+will create the script file for you.  The second example allows you to run more
+complex code by providing the path to a script to run on the guest vm.
 
-Here's an example of a `sample_script.ps1` that will work with the environment 
-variables we will set in our packer config; copy the contents into your own 
+Here's an example of a `sample_script.ps1` that will work with the environment
+variables we will set in our packer config; copy the contents into your own
 `sample_script.ps1` and provide the path to it in your packer config:
 
 ```
@@ -375,39 +378,40 @@ Write-Output("Likewise, VAR2 is " + $Env:VAR2 )
 Write-Output("and VAR3 is " + $Env:VAR3 )
 ```
 
-Next you need to create a packer config that will use this bootstrap file. See 
-the example below, which contains examples of using source_ami_filter for 
+Next you need to create a packer config that will use this bootstrap file. See
+the example below, which contains examples of using source_ami_filter for
 windows in addition to the powershell and windows-restart provisioners:
 
-```
+```json
 {
   "variables": {
-        "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
-        "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-        "region":         "us-east-1"
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region":         "us-east-1"
   },
   "builders": [
-  {
-    "type": "amazon-ebs",
-    "access_key": "{{ user `aws_access_key` }}",
-    "secret_key": "{{ user `aws_secret_key` }}",
-    "region": "us-east-1",
-    "instance_type": "m3.medium",
-    "source_ami_filter": {
-      "filters": {
-        "virtualization-type": "hvm",
-        "name": "*WindowsServer2012R2*",
-        "root-device-type": "ebs"
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{ user `aws_access_key` }}",
+      "secret_key": "{{ user `aws_secret_key` }}",
+      "region": "us-east-1",
+      "instance_type": "m3.medium",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*WindowsServer2012R2*",
+          "root-device-type": "ebs"
+        },
+        "most_recent": true,
+        "owners": "amazon"
       },
-      "most_recent": true,
-      "owners": "amazon"
-    },    
-    "ami_name": "packer-demo-{{timestamp}}",
-    "user_data_file": "./bootstrap_win.txt",
-    "communicator": "winrm",
-    "winrm_username": "Administrator",
-    "winrm_password": "SuperS3cr3t!"
-  }],
+      "ami_name": "packer-demo-{{timestamp}}",
+      "user_data_file": "./bootstrap_win.txt",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_password": "SuperS3cr3t!"
+    }
+  ],
   "provisioners": [
     {
       "type": "powershell",
