@@ -19,7 +19,7 @@ type BuildCommand struct {
 	Meta
 }
 
-func (c BuildCommand) Run(args []string) int {
+func (c *BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
@@ -279,7 +279,7 @@ func (c BuildCommand) Run(args []string) int {
 	return 0
 }
 
-func (BuildCommand) Help() string {
+func (*BuildCommand) Help() string {
 	helpText := `
 Usage: packer build [options] TEMPLATE
 
@@ -303,6 +303,6 @@ Options:
 	return strings.TrimSpace(helpText)
 }
 
-func (BuildCommand) Synopsis() string {
+func (*BuildCommand) Synopsis() string {
 	return "build image(s) from template"
 }
