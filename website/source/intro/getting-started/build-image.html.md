@@ -370,14 +370,15 @@ Here's an example of a `sample_script.ps1` that will work with the environment
 variables we will set in our packer config; copy the contents into your own
 `sample_script.ps1` and provide the path to it in your packer config:
 
-```
-Write-Output("PACKER_BUILD_NAME is automatically set for you,)
-Write-Output("or you can set it in your builder variables; )
-Write-Output("the default for this builder is: " + $Env:PACKER_BUILD_NAME )
-Write-Output("Remember that escaping variables in powershell requires backticks: )
-Write-Output("for example, VAR1 from our config is " + $Env:VAR1 )
-Write-Output("Likewise, VAR2 is " + $Env:VAR2 )
-Write-Output("and VAR3 is " + $Env:VAR3 )
+```powershell
+Write-Host "PACKER_BUILD_NAME is automatically set for you, " -NoNewline
+Write-Host "or you can set it in your builder variables; " -NoNewline
+Write-Host "The default for this builder is:" $Env:PACKER_BUILD_NAME
+
+Write-Host "Use backticks as the escape character when required in powershell:"
+Write-Host "For example, VAR1 from our config is:" $Env:VAR1
+Write-Host "Likewise, VAR2 is:" $Env:VAR2
+Write-Host "Finally, VAR3 is:" $Env:VAR3
 ```
 
 Next you need to create a packer config that will use this bootstrap file. See
@@ -418,7 +419,7 @@ windows in addition to the powershell and windows-restart provisioners:
     {
       "type": "powershell",
       "environment_vars": ["DEVOPS_LIFE_IMPROVER=PACKER"],
-      "inline": "Write-Output(\"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\")"
+      "inline": "Write-Host \"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\""
     },
     {
       "type": "windows-restart"
