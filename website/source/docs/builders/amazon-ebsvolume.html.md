@@ -147,6 +147,11 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
+
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     in case Packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
