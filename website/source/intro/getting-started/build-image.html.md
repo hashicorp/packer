@@ -319,11 +319,17 @@ amazon-ebs output will be in this color.
 
 ### A Windows Example
 
-Note that this uses a larger instance. You will be charged for it. Also keep
-in mind that using windows AMIs incurs a fee that you don't get when you use
-linux AMIs.
+As with the Linux example above, should you decide to follow along and
+build an AMI from the example template, provided you qualify for free tier
+usage, you should not be charged for actually building the AMI.
+However, please note that you will be charged for storage of the snapshot
+associated with any AMI that you create.
+If you wish to avoid further charges, follow the steps in the [Managing the
+Image](/intro/getting-started/build-image.html#managing-the-image) section
+above to deregister the created AMI and delete the associated snapshot once
+you're done.
 
-You'll need to have a boostrapping file to enable ssh or winrm; here's a basic
+You'll need to have a bootstrapping file to enable ssh or winrm; here's a basic
 example of that file.
 
 ```powershell
@@ -398,11 +404,11 @@ windows in addition to the powershell and windows-restart provisioners:
       "access_key": "{{ user `aws_access_key` }}",
       "secret_key": "{{ user `aws_secret_key` }}",
       "region": "us-east-1",
-      "instance_type": "m3.medium",
+      "instance_type": "t2.micro",
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
-          "name": "*WindowsServer2012R2*",
+          "name": "*Windows_Server-2012-R2*English-64Bit-Base*",
           "root-device-type": "ebs"
         },
         "most_recent": true,
