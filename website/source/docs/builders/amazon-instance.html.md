@@ -340,7 +340,7 @@ builder.
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
 
 -   `spot_tags` (object of key/value strings) - Requires `spot_price` to
-    be set. This tells Packer to aplly tags to the spot request that is
+    be set. This tells Packer to apply tags to the spot request that is
     issued.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
