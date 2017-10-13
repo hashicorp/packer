@@ -77,10 +77,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.RunTags = make(map[string]string)
 	}
 
-	if c.SpotTags == nil {
-		c.SpotTags = make(map[string]string)
-	}
-
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
@@ -120,6 +116,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		if c.SpotPrice != "auto" {
 			errs = append(errs, fmt.Errorf(
 				"spot_price should be set to auto when spot_price_auto_product is specified"))
+		}
+	}
+
+	if c.SpotTags != nil {
+		if c.SpotPrice == "" || c.SpotPrice == "0" {
+			errs = append(errs, fmt.Errorf(
+				"spot_tags should not be set when not requesting a spot instance"))
 		}
 	}
 
