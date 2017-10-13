@@ -894,10 +894,10 @@
 			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639"
 		},
 		{
-			"checksumSHA1": "UP+pXl+ic9y6qrpZA5MqDIAuGfw=",
+			"checksumSHA1": "UIqCj7qI0hhIMpAhS9YYqs2jD48=",
 			"path": "github.com/mitchellh/cli",
-			"revision": "ee8578a9c12a5bb9d55303b9665cc448772c81b8",
-			"revisionTime": "2017-03-28T05:23:52Z"
+			"revision": "65fcae5817c8600da98ada9d7edf26dd1a84837b",
+			"revisionTime": "2017-09-08T18:10:43Z"
 		},
 		{
 			"checksumSHA1": "mVqDwKcibat0IKAdzAhfGIHPwI8=",
@@ -1019,6 +1019,30 @@
 			"comment": "v1.0.0",
 			"path": "github.com/pmezard/go-difflib/difflib",
 			"revision": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"checksumSHA1": "rTNABfFJ9wtLQRH8uYNkEZGQOrY=",
+			"path": "github.com/posener/complete",
+			"revision": "88e59760adaddb8276c9b15511302890690e2dae",
+			"revisionTime": "2017-09-08T12:52:45Z"
+		},
+		{
+			"checksumSHA1": "NB7uVS0/BJDmNu68vPAlbrq4TME=",
+			"path": "github.com/posener/complete/cmd",
+			"revision": "88e59760adaddb8276c9b15511302890690e2dae",
+			"revisionTime": "2017-09-08T12:52:45Z"
+		},
+		{
+			"checksumSHA1": "Hwojin3GxRyKwPAiz5r7UszqkPc=",
+			"path": "github.com/posener/complete/cmd/install",
+			"revision": "88e59760adaddb8276c9b15511302890690e2dae",
+			"revisionTime": "2017-09-08T12:52:45Z"
+		},
+		{
+			"checksumSHA1": "DMo94FwJAm9ZCYCiYdJU2+bh4no=",
+			"path": "github.com/posener/complete/match",
+			"revision": "88e59760adaddb8276c9b15511302890690e2dae",
+			"revisionTime": "2017-09-08T12:52:45Z"
 		},
 		{
 			"checksumSHA1": "Kq0fF7R65dDcGReuhf47O3LQgrY=",
