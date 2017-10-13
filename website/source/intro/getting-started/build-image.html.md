@@ -457,38 +457,39 @@ You should see output like this:
 ```
 amazon-ebs output will be in this color.
 
-==> amazon-ebs: Prevalidating AMI Name: packer-demo-1507234504
-    amazon-ebs: Found Image ID: ami-d79776ad
-==> amazon-ebs: Creating temporary keypair: packer_59d692c8-81f9-6a15-2502-0ca730980bed
-==> amazon-ebs: Creating temporary security group for this instance: packer_59d692f0-dd01-6879-d8f8-7765327f5365
-==> amazon-ebs: Authorizing access to port 5985 on the temporary security group...
+==> amazon-ebs: Prevalidating AMI Name: packer-demo-1507933843
+    amazon-ebs: Found Image ID: ami-23d93c59
+==> amazon-ebs: Creating temporary keypair: packer_59e13e94-203a-1bca-5327-bebf0d5ad15a
+==> amazon-ebs: Creating temporary security group for this instance: packer_59e13ea9-3220-8dab-29c0-ed7f71e221a1
+==> amazon-ebs: Authorizing access to port 5985 from 0.0.0.0/0 in the temporary security group...
 ==> amazon-ebs: Launching a source AWS instance...
 ==> amazon-ebs: Adding tags to source instance
     amazon-ebs: Adding tag: "Name": "Packer Builder"
-    amazon-ebs: Instance ID: i-04467596029d0a2ff
-==> amazon-ebs: Waiting for instance (i-04467596029d0a2ff) to become ready...
+    amazon-ebs: Instance ID: i-0349406ac85f02166
+==> amazon-ebs: Waiting for instance (i-0349406ac85f02166) to become ready...
 ==> amazon-ebs: Skipping waiting for password since WinRM password set...
 ==> amazon-ebs: Waiting for WinRM to become available...
     amazon-ebs: WinRM connected.
 ==> amazon-ebs: Connected to WinRM!
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/8t/0yb5q0_x6mb2jldqq_vjn3lr0000gn/T/packer-powershell-provisioner079851514
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner175214995
     amazon-ebs: HELLO NEW USER; WELCOME TO PACKER
 ==> amazon-ebs: Restarting Machine
 ==> amazon-ebs: Waiting for machine to restart...
-    amazon-ebs: WIN-164614OO21O restarted.
+    amazon-ebs: WIN-TEM0TDL751M restarted.
 ==> amazon-ebs: Machine successfully restarted, moving on
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: ./scripts/sample_script.ps1
-    amazon-ebs: PACKER_BUILD_NAME is automatically set for you, or you can set it in your builder variables; the default for this builder is: amazon-ebs
-    amazon-ebs: Remember that escaping variables in powershell requires backticks; for example VAR1 from our config is A$Dollar
-    amazon-ebs: Likewise, VAR2 is A`Backtick
-    amazon-ebs: and VAR3 is A'SingleQuote
+==> amazon-ebs: Provisioning with powershell script: ./sample_script.ps1
+    amazon-ebs: PACKER_BUILD_NAME is automatically set for you, or you can set it in your builder variables; The default for this builder is: amazon-ebs
+    amazon-ebs: Use backticks as the escape character when required in powershell:
+    amazon-ebs: For example, VAR1 from our config is: A$Dollar
+    amazon-ebs: Likewise, VAR2 is: A`Backtick
+    amazon-ebs: Finally, VAR3 is: A'SingleQuote
 ==> amazon-ebs: Stopping the source instance...
     amazon-ebs: Stopping instance, attempt 1
 ==> amazon-ebs: Waiting for the instance to stop...
-==> amazon-ebs: Creating the AMI: packer-demo-1507234504
-    amazon-ebs: AMI: ami-2970b753
+==> amazon-ebs: Creating the AMI: packer-demo-1507933843
+    amazon-ebs: AMI: ami-100fc56a
 ==> amazon-ebs: Waiting for AMI to become ready...
 ==> amazon-ebs: Terminating the source AWS instance...
 ==> amazon-ebs: Cleaning up any extra volumes...
@@ -499,7 +500,7 @@ Build 'amazon-ebs' finished.
 
 ==> Builds finished. The artifacts of successful builds are:
 --> amazon-ebs: AMIs were created:
-us-east-1: ami-2970b753
+us-east-1: ami-100fc56a
 ```
 
 And if you navigate to your EC2 dashboard you should see your shiny new AMI.
