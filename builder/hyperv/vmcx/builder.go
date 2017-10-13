@@ -1,11 +1,10 @@
-package iso
+package vmcx
 
 import (
 	"errors"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
@@ -20,10 +19,6 @@ import (
 )
 
 const (
-	DefaultDiskSize = 40 * 1024        // ~40GB
-	MinDiskSize     = 256              // 256MB
-	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
-
 	DefaultRamSize                 = 1 * 1024  // 1GB
 	MinRamSize                     = 32        // 32MB
 	MaxRamSize                     = 32 * 1024 // 32GB
@@ -52,12 +47,10 @@ type Config struct {
 	hypervcommon.RunConfig      `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 
-	// The size, in megabytes, of the hard disk to create for the VM.
-	// By default, this is 130048 (about 127 GB).
-	DiskSize uint `mapstructure:"disk_size"`
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
 	RamSize uint `mapstructure:"ram_size"`
+
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -66,6 +59,18 @@ type Config struct {
 
 	// The path to the integration services iso
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
+
+	// This is the path to a directory containing an exported virtual machine.
+	CloneFromVMXCPath string `mapstructure:"clone_from_vmxc_path"`
+
+	// This is the name of the virtual machine to clone from.
+	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
+
+	// This is the name of the snapshot to clone from. A blank snapshot name will use the latest snapshot.
+	CloneFromSnapshotName string `mapstructure:"clone_from_snapshot_name"`
+
+	// This will clone all snapshots if true. It will clone latest snapshot if false.
+	CloneAllSnapshots bool `mapstructure:"clone_all_snapshots"`
 
 	// This is the name of the new virtual machine.
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
@@ -76,17 +81,11 @@ type Config struct {
 	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
 	VlanId                         string   `mapstructure:"vlan_id"`
 	Cpu                            uint     `mapstructure:"cpu"`
-	Generation                     uint     `mapstructure:"generation"`
-	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
-	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
-	TempPath                       string   `mapstructure:"temp_path"`
-
-	// A separate path can be used for storing the VM's disk image. The purpose is to enable
-	// reading and writing to take place on different physical disks (read from VHD temp path
-	// write to regular temp path while exporting the VM) to eliminate a single-disk bottleneck.
-	VhdTempPath string `mapstructure:"vhd_temp_path"`
+	Generation                     uint
+	EnableMacSpoofing              bool `mapstructure:"enable_mac_spoofing"`
+	EnableDynamicMemory            bool `mapstructure:"enable_dynamic_memory"`
+	EnableSecureBoot               bool `mapstructure:"enable_secure_boot"`
+	EnableVirtualizationExtensions bool `mapstructure:"enable_virtualization_extensions"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -98,8 +97,7 @@ type Config struct {
 // Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate:        true,
-		InterpolateContext: &b.config.ctx,
+		Interpolate: true,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -114,9 +112,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	warnings := make([]string, 0)
 
-	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
-	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
+	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
+		isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
+		warnings = append(warnings, isoWarnings...)
+		errs = packer.MultiErrorAppend(errs, isoErrs...)
+	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
@@ -124,14 +124,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-
-	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
-		//We only create a new hard drive if an existing one to copy from does not exist
-		err = b.checkDiskSize()
-		if err != nil {
-			errs = packer.MultiErrorAppend(errs, err)
-		}
-	}
 
 	err = b.checkRamSize()
 	if err != nil {
@@ -152,6 +144,62 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Cpu = 1
 	}
 
+	b.config.Generation = 1
+
+	if b.config.CloneFromVMName == "" {
+		if b.config.CloneFromVMXCPath == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if clone_from_vmxc_path is not specified."))
+		}
+	} else {
+		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone from exists: %s", err))
+		} else {
+			if !virtualMachineExists {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not exist.", b.config.CloneFromVMName))
+			} else {
+				b.config.Generation, err = powershell.GetVirtualMachineGeneration(b.config.CloneFromVMName)
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone from generation: %s", err))
+				}
+
+				if b.config.CloneFromSnapshotName != "" {
+					virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
+					if err != nil {
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine snapshot to clone from exists: %s", err))
+					} else {
+						if !virtualMachineSnapshotExists {
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on virtual machine '%s' to clone from does not exist.", b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
+						}
+					}
+				}
+
+				virtualMachineOn, err := powershell.IsVirtualMachineOn(b.config.CloneFromVMName)
+				if err != nil {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone is running: %s", err))
+				} else {
+					if virtualMachineOn {
+						warning := fmt.Sprintf("Cloning from a virtual machine that is running.")
+						warnings = appendWarnings(warnings, warning)
+					}
+				}
+			}
+		}
+	}
+
+	if b.config.CloneFromVMXCPath == "" {
+		if b.config.CloneFromVMName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmxc_path be specified if clone_from_vm_name must is not specified."))
+		}
+	} else {
+		if _, err := os.Stat(b.config.CloneFromVMXCPath); os.IsNotExist(err) {
+			if err != nil {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("CloneFromVMXCPath does not exist: %s", err))
+			}
+		}
+	}
+
 	if b.config.Generation < 1 || b.config.Generation > 2 {
 		b.config.Generation = 1
 	}
@@ -167,7 +215,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
 	// Errors
-
 	if b.config.GuestAdditionsMode == "" {
 		if b.config.GuestAdditionsPath != "" {
 			b.config.GuestAdditionsMode = "attach"
@@ -245,7 +292,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Warnings
 
 	if b.config.ShutdownCommand == "" {
-		warnings = append(warnings,
+		warnings = appendWarnings(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
@@ -305,25 +352,30 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{
-			TempPath:    b.config.TempPath,
-			VhdTempPath: b.config.VhdTempPath,
-		},
+		&hypervcommon.StepCreateTempDir{},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
 		},
-		&common.StepDownload{
-			Checksum:     b.config.ISOChecksum,
-			ChecksumType: b.config.ISOChecksumType,
-			Description:  "ISO",
-			ResultKey:    "iso_path",
-			Url:          b.config.ISOUrls,
-			Extension:    b.config.TargetExtension,
-			TargetPath:   b.config.TargetPath,
-		},
+	}
+
+	if b.config.RawSingleISOUrl != "" || len(b.config.ISOUrls) > 0 {
+		steps = append(steps,
+			&common.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				ResultKey:    "iso_path",
+				Url:          b.config.ISOUrls,
+				Extension:    b.config.TargetExtension,
+				TargetPath:   b.config.TargetPath,
+			},
+		)
+	}
+
+	steps = append(steps,
 		&common.StepCreateFloppy{
-			Files:       b.config.FloppyConfig.FloppyFiles,
+			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&common.StepHTTPServer{
@@ -334,18 +386,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepCreateSwitch{
 			SwitchName: b.config.SwitchName,
 		},
-		&hypervcommon.StepCreateVM{
+		&hypervcommon.StepCloneVM{
+			CloneFromVMXCPath:              b.config.CloneFromVMXCPath,
+			CloneFromVMName:                b.config.CloneFromVMName,
+			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
+			CloneAllSnapshots:              b.config.CloneAllSnapshots,
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
 			RamSize:                        b.config.RamSize,
-			DiskSize:                       b.config.DiskSize,
-			Generation:                     b.config.Generation,
 			Cpu:                            b.config.Cpu,
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 		},
+
 		&hypervcommon.StepEnableIntegrationService{},
 
 		&hypervcommon.StepMountDvdDrive{
@@ -413,7 +468,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 
 		// the clean up actions for each step will be executed reverse order
-	}
+	)
 
 	// Run the steps.
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
@@ -456,22 +511,6 @@ func appendWarnings(slice []string, data ...string) []string {
 	slice = slice[0:n]
 	copy(slice[m:n], data)
 	return slice
-}
-
-func (b *Builder) checkDiskSize() error {
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = DefaultDiskSize
-	}
-
-	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
-
-	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
-	} else if b.config.DiskSize > MaxDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
-	}
-
-	return nil
 }
 
 func (b *Builder) checkRamSize() error {

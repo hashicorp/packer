@@ -10,17 +10,18 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-// This step creates the actual virtual machine.
+// This step clones an existing virtual machine.
 //
 // Produces:
 //   VMName string - The name of the VM
-type StepCreateVM struct {
+type StepCloneVM struct {
+	CloneFromVMXCPath              string
+	CloneFromVMName                string
+	CloneFromSnapshotName          string
+	CloneAllSnapshots              bool
 	VMName                         string
 	SwitchName                     string
-	HarddrivePath                  string
 	RamSize                        uint
-	DiskSize                       uint
-	Generation                     uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
@@ -28,10 +29,10 @@ type StepCreateVM struct {
 	EnableVirtualizationExtensions bool
 }
 
-func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Creating virtual machine...")
+	ui.Say("Cloning virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
 
@@ -48,14 +49,12 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		log.Println("No existing virtual harddrive, not attaching.")
 	}
 
-	vhdPath := state.Get("packerVhdTempDir").(string)
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
-	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CloneVirtualMachine(s.CloneFromVMXCPath, s.CloneFromVMName, s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path, harddrivePath, ramSize, s.SwitchName)
 	if err != nil {
-		err := fmt.Errorf("Error creating virtual machine: %s", err)
+		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -63,31 +62,41 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 
 	err = driver.SetVirtualMachineCpuCount(s.VMName, s.Cpu)
 	if err != nil {
-		err := fmt.Errorf("Error setting virtual machine cpu count: %s", err)
+		err := fmt.Errorf("Error creating setting virtual machine cpu: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	err = driver.SetVirtualMachineDynamicMemory(s.VMName, s.EnableDynamicMemory)
-	if err != nil {
-		err := fmt.Errorf("Error setting virtual machine dynamic memory: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if s.EnableMacSpoofing {
-		err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
+	if s.EnableDynamicMemory {
+		err = driver.SetVirtualMachineDynamicMemory(s.VMName, s.EnableDynamicMemory)
 		if err != nil {
-			err := fmt.Errorf("Error setting virtual machine mac spoofing: %s", err)
+			err := fmt.Errorf("Error creating setting virtual machine dynamic memory: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 	}
 
-	if s.Generation == 2 {
+	if s.EnableMacSpoofing {
+		err = driver.SetVirtualMachineMacSpoofing(s.VMName, s.EnableMacSpoofing)
+		if err != nil {
+			err := fmt.Errorf("Error creating setting virtual machine mac spoofing: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	generation, err := driver.GetVirtualMachineGeneration(s.VMName)
+	if err != nil {
+		err := fmt.Errorf("Error detecting vm generation: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if generation == 2 {
 		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
@@ -101,7 +110,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		//This is only supported on Windows 10 and Windows Server 2016 onwards
 		err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
 		if err != nil {
-			err := fmt.Errorf("Error setting virtual machine virtualization extensions: %s", err)
+			err := fmt.Errorf("Error creating setting virtual machine virtualization extensions: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -114,7 +123,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
+func (s *StepCloneVM) Cleanup(state multistep.StateBag) {
 	if s.VMName == "" {
 		return
 	}
