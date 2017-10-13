@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type InspectCommand struct {
@@ -159,4 +161,14 @@ Options:
 
 func (c *InspectCommand) Synopsis() string {
 	return "see components of a template"
+}
+
+func (c *InspectCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (c *InspectCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-machine-readable": complete.PredictNothing,
+	}
 }
