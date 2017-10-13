@@ -450,6 +450,14 @@ windows in addition to the powershell and windows-restart provisioners:
 }
 ```
 
+Set your access key and id as environment variables, so we don't need to pass
+them in through the command line:
+
+```
+export AWS_ACCESS_KEY_ID=MYACCESSKEYID
+export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
+```
+
 Then `packer build firstrun.json`
 
 You should see output like this:
