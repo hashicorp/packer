@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type BuildCommand struct {
@@ -305,4 +307,23 @@ Options:
 
 func (*BuildCommand) Synopsis() string {
 	return "build image(s) from template"
+}
+
+func (*BuildCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (*BuildCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-color":            complete.PredictNothing,
+		"-debug":            complete.PredictNothing,
+		"-except":           complete.PredictNothing,
+		"-only":             complete.PredictNothing,
+		"-force":            complete.PredictNothing,
+		"-machine-readable": complete.PredictNothing,
+		"-on-error":         complete.PredictNothing,
+		"-parallel":         complete.PredictNothing,
+		"-var":              complete.PredictNothing,
+		"-var-file":         complete.PredictNothing,
+	}
 }
