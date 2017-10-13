@@ -9,6 +9,7 @@
 * builder/amazon: Output AMI Name during prevalidation. [GH-5389]
 * builder/docker: Add option to set `--user` flag when running `exec`. [GH-5406]
 * post-processor/vagrant: When building from a builder/hyper-v artifact, link instead of copy when available. [GH-5207]
+* builder/amazon: Add `temporary_security_group_source_cidr` option to control ingress to source instances. [GH-5384]
 * builder/vmware: Add `disable_vnc` option to prevent VNC connections from being made. [GH-5436]
 
 ### BUG FIXES:
