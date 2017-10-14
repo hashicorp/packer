@@ -46,7 +46,8 @@
 /docs/extending/developing-plugins.html         /docs/extending/plugins.html
 /docs/extend/builder.html                       /docs/extending/custom-builders.html
 /docs/getting-started/setup.html                /docs/getting-started/install.html
-/docs/other/community.html                      /downloads-community.html
+/docs/other/community.html                      /community-tools.html
+/downloads-community.html                       /community-tools.html
 /community                                      /community.html
 /community/index.html                           /community.html
 /docs/other/environmental-variables.html        /docs/other/environment-variables.html

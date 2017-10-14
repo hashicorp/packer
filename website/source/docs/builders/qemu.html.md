@@ -443,7 +443,7 @@ CentOS 6.4 installer:
 ```
 
 For more examples of various boot commands, see the sample projects from our
-[community templates page](/downloads-community.html#templates).
+[community templates page](/community-tools.html#templates).
 
 ### Troubleshooting
 
