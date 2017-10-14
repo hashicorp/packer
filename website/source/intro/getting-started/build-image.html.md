@@ -338,9 +338,6 @@ example of that file.
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
-# Turn off PowerShell execution policy restrictions
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine
-
 # First, make sure WinRM can't be connected to
 netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=block
 
