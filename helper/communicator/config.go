@@ -184,6 +184,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			c.SSHFileTransferMethod))
 	}
 
+	if c.SSHBastionHost != "" && c.SSHProxyHost != "" {
+		errs = append(errs, errors.New("please specify either ssh_bastion_host or ssh_proxy_host, not both"))
+	}
+
 	return errs
 }
 
