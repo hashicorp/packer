@@ -1,3 +1,5 @@
+## (UNRELEASED)
+
 ## 1.1.0 (October 13, 2017)
 
 ### IMPROVEMENTS:
@@ -26,7 +28,7 @@
 * builder/virtualbox-ovf: Add `keep_registered` option. [GH-5336]
 * builder/vmware: Add `disable_vnc` option to prevent VNC connections from
     being made. [GH-5436]
-* core: releases will now be build for ppc64le
+* core: Releases will now be built for ppc64le.
 * post-processor/vagrant: When building from a builder/hyper-v artifact, link
     instead of copy when available. [GH-5207]
 
