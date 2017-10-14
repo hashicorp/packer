@@ -2,21 +2,52 @@
 
 ### IMPROVEMENTS:
 
-* builder/googlecompute: Support setting labels on the resulting image. [GH-5356]
-* builder/amazon: Support template functions in tag keys. [GH-5381]
-* core: releases will now be build for ppc64le
-* builder/amazon-instance: Add `.Token` as a variable in the `BundleUploadCommand` template. [GH-5288]
+* **New builder:** `hyperv-vmcx` for building images from existing VMs.
+    [GH-4944] [GH-5444]
+* builder/amazon-instance: Add `.Token` as a variable in the
+    `BundleUploadCommand` template. [GH-5288]
+* builder/amazon: Add `temporary_security_group_source_cidr` option to control
+    ingress to source instances. [GH-5384]
 * builder/amazon: Output AMI Name during prevalidation. [GH-5389]
-* builder/docker: Add option to set `--user` flag when running `exec`. [GH-5406]
-* post-processor/vagrant: When building from a builder/hyper-v artifact, link instead of copy when available. [GH-5207]
-* builder/amazon: Add `temporary_security_group_source_cidr` option to control ingress to source instances. [GH-5384]
-* builder/vmware: Add `disable_vnc` option to prevent VNC connections from being made. [GH-5436]
+* builder/amazon: Support template functions in tag keys. [GH-5381]
+* builder/amazon: Tag volumes on creation instead of as a separate step.
+    [GH-5417]
+* builder/docker: Add option to set `--user` flag when running `exec`.
+    [GH-5406]
+* builder/docker: Set file owner to container user when uploading. Can be
+    disabled by setting `fix_upload_owner` to `false`. [GH-5422]
+* builder/googlecompute: Support setting labels on the resulting image.
+    [GH-5356]
+* builder/hyper-v: Add `vhd_temp_path` option to control where the VHD resides
+    while it's being provisioned. [GH-5206]
+* builder/hyper-v: Allow vhd or vhdx source images instead of just ISO.
+    [GH-4944] [GH-5444]
+* builder/hyper-v: Disable automatic checkpoints. [GH-5374]
+* builder/virtualbox-ovf: Add `keep_registered` option. [GH-5336]
+* builder/vmware: Add `disable_vnc` option to prevent VNC connections from
+    being made. [GH-5436]
+* core: releases will now be build for ppc64le
+* post-processor/vagrant: When building from a builder/hyper-v artifact, link
+    instead of copy when available. [GH-5207]
+
 
 ### BUG FIXES:
 
-* builder/puppet-masterless: Make sure directories created with sudo are writable by the packer user. [GH-5351]
 * builder/cloudstack: Fix panic if build is aborted. [GH-5388]
+* builder/hyper-v: Respect `enable_dynamic_memory` flag. [GH-5363]
+* builder/puppet-masterless: Make sure directories created with sudo are
+    writable by the packer user. [GH-5351]
+* provisioner/chef-solo: Fix issue installing chef-solo on Windows. [GH-5357]
+* provisioner/powershell: Fix issue setting environment variables by writing
+    them to a file, instead of the command line. [GH-5345]
+* provisioner/powershell: Fix issue where powershell scripts could hang.
+    [GH-5082]
+* provisioner/powershell: Fix Powershell progress stream leak to stderr for
+    normal and elevated commands. [GH-5365]
+* provisioner/puppet-masterless: Fix bug where `puppet_bin_dir` wasn't being
+    respected. [GH-5340]
 * provisioner/puppet: Fix setting facter vars on Windows. [GH-5341]
+
 
 ## 1.1.0 (September 12, 2017)
 
