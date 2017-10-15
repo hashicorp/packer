@@ -1,6 +1,6 @@
 ## (UNRELEASED)
 
-## 1.1.0 (October 13, 2017)
+## 1.1.1 (October 13, 2017)
 
 ### IMPROVEMENTS:
 
