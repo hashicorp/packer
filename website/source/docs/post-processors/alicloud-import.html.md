@@ -72,12 +72,12 @@ two categories: required and optional parameters.
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with <http://> or <https://>.
 
--   `image_force_delete` (bool) - If this value is true, when the target image
+-   `image_force_delete` (boolean) - If this value is true, when the target image
     name is duplicated with an existing image, it will delete the existing image
     and then create the target image, otherwise, the creation will fail. The
     default value is false.
 
--   `image_system_size` (int) - Size of the system disk, in GB, values range:
+-   `image_system_size` (number) - Size of the system disk, in GB, values range:
     -   cloud - 5 ~ 2000
     -   cloud\_efficiency - 20 ~ 2048
     -   cloud\_ssd - 20 ~ 2048

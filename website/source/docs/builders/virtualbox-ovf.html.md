@@ -187,7 +187,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -234,7 +234,7 @@ builder.
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+-   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
@@ -278,7 +278,7 @@ builder.
 -   `vrdp_bind_address` (string / IP address) - The IP address that should be
     binded to for VRDP. By default packer will use 127.0.0.1 for this.
 
--   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+-   `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.

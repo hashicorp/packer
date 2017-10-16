@@ -170,7 +170,7 @@ each category, the available configuration keys are alphabetized.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -185,7 +185,7 @@ each category, the available configuration keys are alphabetized.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
@@ -212,7 +212,7 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (integer) - The partition number containing the
+-   `mount_partition` (number) - The partition number containing the
     / partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
@@ -238,7 +238,7 @@ each category, the available configuration keys are alphabetized.
     mount and copy steps. The device and mount path are provided by
     `{{.Device}}` and `{{.MountPath}}`.
 
--   `root_volume_size` (integer) - The size of the root volume in GB for the
+-   `root_volume_size` (number) - The size of the root volume in GB for the
     chroot environment and the resulting AMI. Default size is the snapshot size
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
@@ -288,7 +288,7 @@ each category, the available configuration keys are alphabetized.
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
