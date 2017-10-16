@@ -34,7 +34,7 @@ permissions to the GCS `paths`.
 
 ### Optional
 
--   `keep_input_artifact` (bool) - If true, do not delete the Google Compute Engine
+-   `keep_input_artifact` (boolean) - If true, do not delete the Google Compute Engine
     (GCE) image being exported.
 
 ## Basic Example

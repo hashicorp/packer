@@ -71,7 +71,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
-*   `disable_vnc` (bool) - Whether to create a VNC connection or not.
+*   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
@@ -107,7 +107,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -174,7 +174,7 @@ builder.
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
     used to secure the VNC communication with the VM.
 
--   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
+-   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
