@@ -24,7 +24,7 @@ You can specify manifest more than once and write each build to its own file, or
 ### Optional:
 
 -   `output` (string) The manifest will be written to this file. This defaults to `packer-manifest.json`.
--   `strip_path` (bool) Write only filename without the path to the manifest file. This defaults to false.
+-   `strip_path` (boolean) Write only filename without the path to the manifest file. This defaults to false.
 
 ### Example Configuration
 

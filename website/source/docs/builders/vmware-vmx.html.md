@@ -71,7 +71,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
-*   `disable_vnc` (bool) - Whether to create a VNC connection or not.
+*   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy

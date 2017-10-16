@@ -91,16 +91,16 @@ can be configured for this builder.
 -   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 
--   `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual machine.
+-   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual machine.
     This defaults to false.
 
--   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual machine.
+-   `enable_mac_spoofing` (boolean) - If true enable mac spoofing for virtual machine.
     This defaults to false.
 
--   `enable_secure_boot` (bool) - If true enable secure boot for virtual machine.
+-   `enable_secure_boot` (boolean) - If true enable secure boot for virtual machine.
     This defaults to false.
 
--   `enable_virtualization_extensions` (bool) - If true enable virtualization extensions for virtual machine.
+-   `enable_virtualization_extensions` (boolean) - If true enable virtualization extensions for virtual machine.
     This defaults to false. For nested virtualization you need to enable mac spoofing, disable dynamic memory
     and have at least 4GB of RAM for virtual machine.
 
@@ -187,7 +187,7 @@ can be configured for this builder.
     If it doesn't shut down in this time, it is an error. By default, the timeout
     is "5m", or five minutes.
 
--   `skip_compaction` (bool) - If true skip compacting the hard disk for virtual machine when
+-   `skip_compaction` (boolean) - If true skip compacting the hard disk for virtual machine when
     exporting. This defaults to false.
 
 -   `switch_name` (string) - The name of the switch to connect the virtual machine to. Be defaulting
