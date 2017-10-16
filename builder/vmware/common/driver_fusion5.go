@@ -141,9 +141,20 @@ func (d *Fusion5Driver) Verify() error {
 		return err
 	}
 
-	// default paths
+	libpath := filepath.Join("Library", "Preferences", "VMware Fusion")
+
 	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
 		return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
+	}
+	d.VmwareDriver.DhcpConfPath = func(device string) string {
+		return filepath.Join(libpath, device, "dhcpd.conf")
+	}
+	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
+		return filepath.Join(libpath, device, "nat.conf")
+	}
+	d.VmwareDriver.NetmapConfPath = func() string {
+		// FIXME: Suggested by @phekmat. This will need another parser to be implemented.
+		return filepath.Join(libpath, "networking")
 	}
 
 	return nil
