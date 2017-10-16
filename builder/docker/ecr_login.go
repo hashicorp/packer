@@ -19,6 +19,7 @@ type AwsAccessConfig struct {
 	AccessKey string `mapstructure:"aws_access_key"`
 	SecretKey string `mapstructure:"aws_secret_key"`
 	Token     string `mapstructure:"aws_token"`
+	Profile   string `mapstructure:"aws_profile"`
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
@@ -38,7 +39,10 @@ func (c *AwsAccessConfig) config(region string) (*aws.Config, error) {
 			SessionToken:    c.Token,
 		}},
 		&credentials.EnvProvider{},
-		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
+		&credentials.SharedCredentialsProvider{
+			Filename: "",
+			Profile:  c.Profile,
+		},
 		&ec2rolecreds.EC2RoleProvider{
 			Client: ec2metadata.New(session),
 		},
