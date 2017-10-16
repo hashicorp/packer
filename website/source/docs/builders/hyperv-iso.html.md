@@ -85,10 +85,10 @@ can be configured for this builder.
     five seconds and one minute 30 seconds, respectively. If this isn't specified,
     the default is 10 seconds.
 
--   `cpu` (integer) - The number of cpus the virtual machine should use. If this isn't specified,
+-   `cpu` (number) - The number of cpus the virtual machine should use. If this isn't specified,
     the default is 1 cpu.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 
 -   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual machine.
@@ -122,7 +122,7 @@ can be configured for this builder.
     The maximum summary size of all files in the listed directories are the
     same as in `floppy_files`.
 
--   `generation` (integer) - The Hyper-V generation for the virtual machine. By
+-   `generation` (number) - The Hyper-V generation for the virtual machine. By
     default, this is 1. Generation 2 Hyper-V virtual machines do not support
     floppy drives. In this scenario use `secondary_iso_images` instead. Hard
     drives and dvd drives will also be scsi and not ide.
@@ -141,7 +141,7 @@ can be configured for this builder.
     available as variables in `boot_command`. This is covered in more detail
     below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the `http_directory`.
     Because Packer often runs in parallel, Packer will choose a randomly available
     port in this range to run the HTTP server. If you want to force the HTTP
@@ -168,7 +168,7 @@ can be configured for this builder.
     By default this is "output-BUILDNAME" where "BUILDNAME" is the name
     of the build.
 
--   `ram_size` (integer) - The size, in megabytes, of the ram to create
+-   `ram_size` (number) - The size, in megabytes, of the ram to create
     for the VM. By default, this is 1 GB.
 
 -   `secondary_iso_images` (array of strings) - A list of iso paths to attached to a
