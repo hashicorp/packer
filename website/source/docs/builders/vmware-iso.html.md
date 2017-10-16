@@ -108,11 +108,12 @@ builder.
     is full. By default this is set to 40,000 (about 40 GB).
 
 -   `disk_type_id` (string) - The type of VMware virtual disk to create. The
-    default is "1", which corresponds to a growable virtual disk split in
-    2GB files. For ESXi defaults to "zeroedthick". This option is for advanced usage, modify only if you know what
-    you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
-    VMware clients. For ESXi, refer to the proper ESXi documentation.
+    default is "1", which corresponds to a growable virtual disk split in 2GB
+    files. For ESXi, this defaults to "zeroedthick". This option is for
+    advanced usage. For more information, please consult the [Virtual Disk
+    Manager User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf)
+    for desktop VMware clients. For ESXi, refer to the proper ESXi
+    documentation.
 
 *   `disable_vnc` (bool) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
