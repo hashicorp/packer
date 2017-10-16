@@ -95,8 +95,7 @@ each category, the available configuration keys are alphabetized.
     depending on the size of the AMI, but will generally take many minutes.
 
 -   `ami_users` (array of strings) - A list of account IDs that have access to
-    launch the resulting AMI(s). By default no additional users other than the
-    user creating the AMI has permissions to launch it.
+    launch the resulting AMI(s). By default no additional users other than the user creating the AMI has permissions to launch it.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
@@ -120,9 +119,9 @@ each category, the available configuration keys are alphabetized.
     copying `/etc/resolv.conf`. You may need to do this if you're building
     an image that uses systemd.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
