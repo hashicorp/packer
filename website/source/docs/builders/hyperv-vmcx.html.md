@@ -96,16 +96,16 @@ can be configured for this builder.
 -   `cpu` (integer) - The number of cpus the virtual machine should use. If
     this isn't specified, the default is 1 cpu.
 
--   `enable_dynamic_memory` (bool) - If true enable dynamic memory for virtual
+-   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual
     machine. This defaults to false.
 
--   `enable_mac_spoofing` (bool) - If true enable mac spoofing for virtual
+-   `enable_mac_spoofing` (boolean) - If true enable mac spoofing for virtual
     machine. This defaults to false.
 
--   `enable_secure_boot` (bool) - If true enable secure boot for virtual
+-   `enable_secure_boot` (boolean) - If true enable secure boot for virtual
     machine. This defaults to false.
 
--   `enable_virtualization_extensions` (bool) - If true enable virtualization
+-   `enable_virtualization_extensions` (boolean) - If true enable virtualization
     extensions for virtual machine. This defaults to false. For nested
     virtualization you need to enable mac spoofing, disable dynamic memory and
     have at least 4GB of RAM for virtual machine.
@@ -208,7 +208,7 @@ can be configured for this builder.
     doesn't shut down in this time, it is an error. By default, the timeout is
     "5m", or five minutes.
 
--   `skip_compaction` (bool) - If true skip compacting the hard disk for
+-   `skip_compaction` (boolean) - If true skip compacting the hard disk for
     virtual machine when exporting. This defaults to false.
 
 -   `switch_name` (string) - The name of the switch to connect the virtual
