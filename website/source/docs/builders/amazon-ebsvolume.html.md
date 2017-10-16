@@ -96,9 +96,9 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
