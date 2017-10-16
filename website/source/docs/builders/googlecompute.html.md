@@ -174,7 +174,7 @@ builder.
     Not required if you run Packer on a GCE instance with a service account.
     Instructions for creating file or using service accounts are above.
 
--   `accelerator_count` (int) - Number of guest accelerator cards to add to the launched instance.
+-   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
 
 -   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
     `"on_host_maintenance": "TERMINATE"` option set.
@@ -186,7 +186,7 @@ builder.
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
--   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
+-   `disk_size` (number) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.

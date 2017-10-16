@@ -93,7 +93,7 @@ can be configured for this builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `cpu` (integer) - The number of cpus the virtual machine should use. If
+-   `cpu` (number) - The number of cpus the virtual machine should use. If
     this isn't specified, the default is 1 cpu.
 
 -   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual
@@ -143,7 +143,7 @@ can be configured for this builder.
     available as variables in `boot_command`. This is covered in more detail
     below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -187,7 +187,7 @@ can be configured for this builder.
     running the builder. By default this is "output-BUILDNAME" where
     "BUILDNAME" is the name of the build.
 
--   `ram_size` (integer) - The size, in megabytes, of the ram to create for the
+-   `ram_size` (number) - The size, in megabytes, of the ram to create for the
     VM. By default, this is 1 GB.
 
 *   `secondary_iso_images` (array of strings) - A list of iso paths to attached

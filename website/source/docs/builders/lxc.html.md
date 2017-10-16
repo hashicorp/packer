@@ -87,7 +87,7 @@ Below is a fully functioning example.
 
 ### Optional:
 
--  `target_runlevel` (int) - The minimum run level to wait for the container to
+-  `target_runlevel` (number) - The minimum run level to wait for the container to
    reach. Note some distributions (Ubuntu) simulate run levels and may report
    5 rather than 3.
 

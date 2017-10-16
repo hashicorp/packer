@@ -77,7 +77,7 @@ two categories: required and optional parameters.
     and then create the target image, otherwise, the creation will fail. The
     default value is false.
 
--   `image_system_size` (int) - Size of the system disk, in GB, values range:
+-   `image_system_size` (number) - Size of the system disk, in GB, values range:
     -   cloud - 5 ~ 2000
     -   cloud\_efficiency - 20 ~ 2048
     -   cloud\_ssd - 20 ~ 2048
