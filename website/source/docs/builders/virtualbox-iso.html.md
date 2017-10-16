@@ -92,7 +92,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `export_opts` (array of strings) - Additional options to pass to the
@@ -193,7 +193,7 @@ builder.
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
 
--   `sata_port_count` (integer) - The number of ports available on any SATA
+-   `sata_port_count` (number) - The number of ports available on any SATA
     controller created, defaults to 1. VirtualBox supports up to 30 ports on a
     maximum of 1 SATA controller. Increasing this value can be useful if you
     want to attach additional drives.
@@ -219,7 +219,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -275,7 +275,7 @@ builder.
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+-   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
@@ -315,7 +315,7 @@ builder.
     binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
     wish to bind to all interfaces use 0.0.0.0
 
--   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+-   `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.

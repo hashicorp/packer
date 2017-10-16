@@ -120,7 +120,7 @@ When creating a managed image the following two options are required.
     Windows; this variable is not used by non-Windows builds. See `Windows`
     behavior for `os_type`, below.
 
--   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
+-   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will

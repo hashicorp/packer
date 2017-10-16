@@ -87,7 +87,7 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -102,7 +102,7 @@ builder.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
