@@ -203,11 +203,13 @@ how to validate and build templates into machine images.
 
 ### Another Linux Example, with provisioners:
 Create a file named `welcome.txt` and add the following:
+
 ```
 WELCOME TO PACKER!
 ```
 
 Create a file named `example.sh` and add the following:
+
 ```
 #!/bin/bash
 echo "hello
@@ -215,6 +217,7 @@ echo "hello
 
 Set your access key and id as environment variables, so we don't need to pass 
 them in through the command line:
+
 ```
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
