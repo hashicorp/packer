@@ -50,7 +50,7 @@ builder.
 
 ### Optional:
 
--   `skip_region_validation` (bool) - The region validation can be skipped if this
+-   `skip_region_validation` (boolean) - The region validation can be skipped if this
     value is true, the default value is false.
 
 -   `image_description` (string) - The description of the image, with a length
@@ -71,12 +71,12 @@ builder.
     letter or a Chinese character, and may contain numbers, `_` or `-`. It cannot
     begin with `http://` or `https://`.
 
--   `image_force_delete` (bool) - If this value is true, when the target image name
+-   `image_force_delete` (boolean) - If this value is true, when the target image name
     is duplicated with an existing image, it will delete the existing image and
     then create the target image, otherwise, the creation will fail. The default
     value is false.
 
--   `image_force_delete_snapshots` (bool) - If this value is true, when delete the
+-   `image_force_delete_snapshots` (boolean) - If this value is true, when delete the
     duplicated existing image, the source snapshot of this image will be delete
     either.
 
@@ -116,11 +116,11 @@ builder.
 
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
 
--   `io_optimized` (bool) - I/O optimized.
+-   `io_optimized` (boolean) - I/O optimized.
 
     Default value: false for Generation I instances; true for other instances.
 
--   `force_stop_instance` (bool) - Whether to force shutdown upon device restart.
+-   `force_stop_instance` (boolean) - Whether to force shutdown upon device restart.
     The default value is `false`.
 
     If it is set to `false`, the system is shut down normally; if it is set to
