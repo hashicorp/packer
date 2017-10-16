@@ -210,6 +210,7 @@ WELCOME TO PACKER!
 
 Create a file named `example.sh` and add the following:
 
+
 ```bash
 #!/bin/bash
 echo "hello"
