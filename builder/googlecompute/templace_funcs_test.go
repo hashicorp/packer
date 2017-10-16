@@ -2,7 +2,7 @@ package googlecompute
 
 import "testing"
 
-func Test_templateCleanAMIName(t *testing.T) {
+func Test_templateCleanImageName(t *testing.T) {
 	vals := []struct {
 		origName string
 		expected string
@@ -26,7 +26,7 @@ func Test_templateCleanAMIName(t *testing.T) {
 	}
 
 	for _, v := range vals {
-		name := templateCleanAMIName(v.origName)
+		name := templateCleanImageName(v.origName)
 		if name != v.expected {
 			t.Fatalf("template names do not match: expected %s got %s\n", v.expected, name)
 		}

@@ -18,7 +18,7 @@ func isalphanumeric(b byte) bool {
 
 // Clean up image name by replacing invalid characters with "-"
 // truncate up to 63 length, convert to a lower case
-func templateCleanAMIName(s string) string {
+func templateCleanImageName(s string) string {
 	re := regexp.MustCompile(`^[a-z][-a-z0-9]{0,61}[a-z0-9]$`)
 	if re.MatchString(s) {
 		return s
@@ -40,5 +40,5 @@ func templateCleanAMIName(s string) string {
 }
 
 var TemplateFuncs = template.FuncMap{
-	"clean_ami_name": templateCleanAMIName,
+	"clean_image_name": templateCleanImageName,
 }
