@@ -109,7 +109,7 @@ builder.
 
 -   `disk_type_id` (string) - The type of VMware virtual disk to create. The
     default is "1", which corresponds to a growable virtual disk split in
-    2GB files. This option is for advanced usage, modify only if you know what
+    2GB files. For ESXi defaults to "zeroedthick". This option is for advanced usage, modify only if you know what
     you're doing. For more information, please consult the [Virtual Disk Manager
     User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
