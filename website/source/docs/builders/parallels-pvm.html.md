@@ -231,6 +231,9 @@ In addition to the special keys, each command to type is treated as a
 [template engine](/docs/templates/engine.html). The
 available variables are:
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
 ## prlctl Commands
 
 In order to perform extra customization of the virtual machine, a template can

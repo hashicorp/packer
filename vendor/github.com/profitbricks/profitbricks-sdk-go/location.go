@@ -6,14 +6,14 @@ import (
 )
 
 type Location struct {
-	Id         string                    `json:"id,omitempty"`
-	Type_      string                    `json:"type,omitempty"`
-	Href       string                    `json:"href,omitempty"`
-	Metadata   DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties Properties                `json:"properties,omitempty"`
-	Response   string                    `json:"Response,omitempty"`
-	Headers    *http.Header              `json:"headers,omitempty"`
-	StatusCode int                       `json:"headers,omitempty"`
+	Id         string             `json:"id,omitempty"`
+	Type_      string             `json:"type,omitempty"`
+	Href       string             `json:"href,omitempty"`
+	Metadata   Metadata           `json:"metadata,omitempty"`
+	Properties LocationProperties `json:"properties,omitempty"`
+	Response   string             `json:"Response,omitempty"`
+	Headers    *http.Header       `json:"headers,omitempty"`
+	StatusCode int                `json:"headers,omitempty"`
 }
 
 type Locations struct {
@@ -26,13 +26,23 @@ type Locations struct {
 	StatusCode int          `json:"headers,omitempty"`
 }
 
-type Properties struct {
-	Name string `json:"name,omitempty"`
+type LocationProperties struct {
+	Name         string   `json:"name,omitempty"`
+	Features     []string `json:"features,omitempty"`
+	ImageAliases []string `json:"imageAliases,omitempty"`
 }
 
 // ListLocations returns location collection data
 func ListLocations() Locations {
 	url := mk_url(location_col_path()) + `?depth=` + Depth
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("Content-Type", FullHeader)
+	return toLocations(do(req))
+}
+
+// GetRegionalLocations returns a list of available locations in a specific region
+func GetRegionalLocations(regid string) Locations {
+	url := mk_url(location_reg_path(regid)) + `?depth=` + Depth
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Content-Type", FullHeader)
 	return toLocations(do(req))

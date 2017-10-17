@@ -81,20 +81,38 @@ listed below:
     or `%PATH%` environment variable, but some builders (notably, the Docker one) do
     not run profile-setup scripts, therefore the path is usually empty.
 
--   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information. By default, Packer uses the following command:
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
 
-``` liquid
-{{.FacterVars}} {{if .Sudo}} sudo -E {{end}} \
-  {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent --onetime --no-daemonize \
-  {{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}} \
-  {{if ne .Options \"\"}}{{.Options}} {{end}} \
-  {{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}} \
-  {{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}} \
-  {{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' \
-  {{end}} --detailed-exitcodes
+-   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
+    various [configuration template variables](/docs/templates/engine.html) available. By default,
+    Packer uses the following command (broken across multiple lines for readability) to execute Puppet:
+
+```
+{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
+```
+
+The following command is used if guest OS type is windows:
+
+```
+{{.FacterVars}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
+--onetime --no-daemonize
+{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+{{if ne .Options ""}}{{.Options}} {{end}}
+{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
+{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+--detailed-exitcodes
 ```
 
 ## Default Facts

@@ -14,6 +14,7 @@
     "instance_type":"ecs.n1.medium",
     "io_optimized":"true",
     "image_force_delete":"true",
+    "internet_charge_type":"PayByTraffic",
     "ssh_password":"Test1234",
     "user_data_file":"examples/alicloud/chef/user_data.sh"
   }],

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/private/waiter"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -15,9 +15,10 @@ import (
 )
 
 type StepSecurityGroup struct {
-	CommConfig       *communicator.Config
-	SecurityGroupIds []string
-	VpcId            string
+	CommConfig            *communicator.Config
+	SecurityGroupIds      []string
+	VpcId                 string
+	TemporarySGSourceCidr string
 
 	createdGroupId string
 }
@@ -78,15 +79,15 @@ func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
 		IpProtocol: aws.String("tcp"),
 		FromPort:   aws.Int64(int64(port)),
 		ToPort:     aws.Int64(int64(port)),
-		CidrIp:     aws.String("0.0.0.0/0"),
+		CidrIp:     aws.String(s.TemporarySGSourceCidr),
 	}
 
 	// We loop and retry this a few times because sometimes the security
 	// group isn't available immediately because AWS resources are eventually
 	// consistent.
 	ui.Say(fmt.Sprintf(
-		"Authorizing access to port %d on the temporary security group...",
-		port))
+		"Authorizing access to port %d from %s in the temporary security group...",
+		port, s.TemporarySGSourceCidr))
 	for i := 0; i < 5; i++ {
 		_, err = ec2conn.AuthorizeSecurityGroupIngress(req)
 		if err == nil {
@@ -153,36 +154,42 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 }
 
 func waitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
-	waiterCfg := waiter.Config{
-		Operation:   "DescribeSecurityGroups",
-		Delay:       15,
+	ctx := aws.BackgroundContext()
+	w := request.Waiter{
+		Name:        "DescribeSecurityGroups",
 		MaxAttempts: 40,
-		Acceptors: []waiter.WaitAcceptor{
+		Acceptors: []request.WaiterAcceptor{
 			{
-				State:    "success",
-				Matcher:  "path",
+				State:    request.SuccessWaiterState,
+				Matcher:  request.PathWaiterMatch,
 				Argument: "length(SecurityGroups[]) > `0`",
 				Expected: true,
 			},
 			{
-				State:    "retry",
-				Matcher:  "error",
+				State:    request.RetryWaiterState,
+				Matcher:  request.ErrorWaiterMatch,
 				Argument: "",
 				Expected: "InvalidGroup.NotFound",
 			},
 			{
-				State:    "retry",
-				Matcher:  "error",
+				State:    request.RetryWaiterState,
+				Matcher:  request.ErrorWaiterMatch,
 				Argument: "",
 				Expected: "InvalidSecurityGroupID.NotFound",
 			},
 		},
+		Logger: c.Config.Logger,
+		NewRequest: func(opts []request.Option) (*request.Request, error) {
+			var inCpy *ec2.DescribeSecurityGroupsInput
+			if input != nil {
+				tmp := *input
+				inCpy = &tmp
+			}
+			req, _ := c.DescribeSecurityGroupsRequest(inCpy)
+			req.SetContext(ctx)
+			req.ApplyOptions(opts...)
+			return req, nil
+		},
 	}
-
-	w := waiter.Waiter{
-		Client: c,
-		Input:  input,
-		Config: waiterCfg,
-	}
-	return w.Wait()
+	return w.WaitWithContext(ctx)
 }

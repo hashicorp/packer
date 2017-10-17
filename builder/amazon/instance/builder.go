@@ -193,6 +193,48 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	var instanceStep multistep.Step
+
+	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
+		instanceStep = &awscommon.StepRunSourceInstance{
+			Debug:                    b.config.PackerDebug,
+			ExpectedRootDevice:       "ebs",
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	} else {
+		instanceStep = &awscommon.StepRunSpotInstance{
+			Debug:                    b.config.PackerDebug,
+			ExpectedRootDevice:       "ebs",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	}
+
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
@@ -200,9 +242,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceDeregister: b.config.AMIForceDeregister,
 		},
 		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-			AmiFilters:         b.config.SourceAmiFilter,
+			SourceAmi:                b.config.SourceAmi,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
+			AmiFilters:               b.config.SourceAmiFilter,
 		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
@@ -216,24 +259,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			VpcId:            b.config.VpcId,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
-		&awscommon.StepRunSourceInstance{
-			Debug:                    b.config.PackerDebug,
-			SpotPrice:                b.config.SpotPrice,
-			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
-			InstanceType:             b.config.InstanceType,
-			IamInstanceProfile:       b.config.IamInstanceProfile,
-			UserData:                 b.config.UserData,
-			UserDataFile:             b.config.UserDataFile,
-			SourceAMI:                b.config.SourceAmi,
-			SubnetId:                 b.config.SubnetId,
-			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			EbsOptimized:             b.config.EbsOptimized,
-			AvailabilityZone:         b.config.AvailabilityZone,
-			BlockDevices:             b.config.BlockDevices,
-			Tags:                     b.config.RunTags,
-			Ctx:                      b.config.ctx,
-		},
+		instanceStep,
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
@@ -258,11 +286,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug: b.config.PackerDebug,
 		},
 		&awscommon.StepDeregisterAMI{
+			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.AMIForceDeregister,
 			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
 			AMIName:             b.config.AMIName,
+			Regions:             b.config.AMIRegions,
 		},
-		&StepRegisterAMI{},
+		&StepRegisterAMI{
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
+		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
 			Regions:           b.config.AMIRegions,

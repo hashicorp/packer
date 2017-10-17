@@ -1,16 +1,156 @@
-## UNRELEASED
+## (UNRELEASED)
+
+## 1.1.1 (October 13, 2017)
+
+### IMPROVEMENTS:
+
+* **New builder:** `hyperv-vmcx` for building images from existing VMs.
+    [GH-4944] [GH-5444]
+* builder/amazon-instance: Add `.Token` as a variable in the
+    `BundleUploadCommand` template. [GH-5288]
+* builder/amazon: Add `temporary_security_group_source_cidr` option to control
+    ingress to source instances. [GH-5384]
+* builder/amazon: Output AMI Name during prevalidation. [GH-5389]
+* builder/amazon: Support template functions in tag keys. [GH-5381]
+* builder/amazon: Tag volumes on creation instead of as a separate step.
+    [GH-5417]
+* builder/docker: Add option to set `--user` flag when running `exec`.
+    [GH-5406]
+* builder/docker: Set file owner to container user when uploading. Can be
+    disabled by setting `fix_upload_owner` to `false`. [GH-5422]
+* builder/googlecompute: Support setting labels on the resulting image.
+    [GH-5356]
+* builder/hyper-v: Add `vhd_temp_path` option to control where the VHD resides
+    while it's being provisioned. [GH-5206]
+* builder/hyper-v: Allow vhd or vhdx source images instead of just ISO.
+    [GH-4944] [GH-5444]
+* builder/hyper-v: Disable automatic checkpoints. [GH-5374]
+* builder/virtualbox-ovf: Add `keep_registered` option. [GH-5336]
+* builder/vmware: Add `disable_vnc` option to prevent VNC connections from
+    being made. [GH-5436]
+* core: Releases will now be built for ppc64le.
+* post-processor/vagrant: When building from a builder/hyper-v artifact, link
+    instead of copy when available. [GH-5207]
+
+
+### BUG FIXES:
+
+* builder/cloudstack: Fix panic if build is aborted. [GH-5388]
+* builder/hyper-v: Respect `enable_dynamic_memory` flag. [GH-5363]
+* builder/puppet-masterless: Make sure directories created with sudo are
+    writable by the packer user. [GH-5351]
+* provisioner/chef-solo: Fix issue installing chef-solo on Windows. [GH-5357]
+* provisioner/powershell: Fix issue setting environment variables by writing
+    them to a file, instead of the command line. [GH-5345]
+* provisioner/powershell: Fix issue where powershell scripts could hang.
+    [GH-5082]
+* provisioner/powershell: Fix Powershell progress stream leak to stderr for
+    normal and elevated commands. [GH-5365]
+* provisioner/puppet-masterless: Fix bug where `puppet_bin_dir` wasn't being
+    respected. [GH-5340]
+* provisioner/puppet: Fix setting facter vars on Windows. [GH-5341]
+
+
+## 1.1.0 (September 12, 2017)
+
+### IMPROVEMENTS:
+
+* builder/alicloud: Update alicloud go sdk and enable multi sites support for
+    alicloud [GH-5219]
+* builder/amazon: Upgrade aws-sdk-go to 1.10.14, add tags at instance run time.
+    [GH-5196]
+* builder/azure: Add object_id to windows_custom_image.json. [GH-5285]
+* builder/azure: Add support for storage account for managed images. [GH-5244]
+* builder/azure: Update pkcs12 package. [GH-5301]
+* builder/cloudstack: Add support for Security Groups. [GH-5175]
+* builder/docker: Uploading files and directories now use docker cp. [GH-5273]
+    [GH-5333]
+* builder/googlecompute: Add `labels` option for labeling launched instances.
+    [GH-5308]
+* builder/googlecompute: Add support for accelerator api. [GH-5137]
+* builder/profitbricks: added support for Cloud API v4. [GH-5233]
+* builder/vmware-esxi: Remote builds now respect `output_directory` [GH-4592]
+* builder/vmware: Set artifact ID to `VMName`. [GH-5187]
+* core: Build solaris binary by default. [GH-5268] [GH-5248]
+* core: Remove LGPL dependencies. [GH-5262]
+* provisioner/puppet: Add `guest_os_type` option to add support for Windows.
+    [GH-5252]
+* provisioner/salt-masterless: Also use sudo to clean up if we used sudo to
+    install. [GH-5240]
+
+### BACKWARDS INCOMPATIBILITIES:
+
+* builder/amazon: Changes way that AMI artifacts are printed out after build,
+    aligning them to builder. Could affect output parsing. [GH-5281]
+* builder/amazon: Split `enhanced_networking` into `sriov_support` and
+    `ena_support` to support finer grained control. Use `packer fix
+    <template.json>` to automatically update your template to use `ena_support`
+    where previously there was only `enhanced_networking`. Make sure to also
+    add `sriov_support` if you need that feature, and to ensure `ena_support`
+    is what you intended to be in your template. [GH-5284]
+* builder/cloudstack: Setup temporary SSH keypair; backwards incompatible in
+    the uncommon case that the source image allowed SSH auth with password but
+    not with keypair. [GH-5174]
+* communicator/ssh: Renamed `ssh_disable_agent` to
+    `ssh_disable_agent_forwarding`. Need to run fixer on packer configs that
+    use `ssh_disable_agent`. [GH-5024]
+* communicator: Preserve left-sided white-space in remote command output. Make
+    sure any scripts that parse this output can handle the new whitespace
+    before upgrading. [GH-5167]
+* provisioner/shell: Set default for `ExpectDisconnect` to `false`. If your
+    script causes the connection to be reset, you should set this to `true` to
+    prevent errors. [GH-5283]
+
+### BUG FIXES:
+
+* builder/amazon: `force_deregister` works in all regions, not just original
+    region. [GH-5250]
+* builder/docker: Directory uploads now use the same semantics as the rest of
+    the communicators. [GH-5333]
+* builder/vmware: Fix timestamp in default VMName. [GH-5274]
+* builder/winrm: WinRM now waits to make sure commands can run successfully
+    before considering itself connected. [GH-5300]
+* core: Fix issue where some builders wouldn't respect `-on-error` behavior.
+    [GH-5297]
+* provisioner/windows-restart: The first powershell provisioner after a restart
+    now works. [GH-5272]
+
+### FEATURES:
+
+* **New builder**: Oracle Cloud Infrastructure (OCI) builder for creating
+    custom images. [GH-4554]
+* **New builder:** `lxc` for building lxc images. [GH-3523]
+* **New builder:** `lxd` for building lxd images. [GH-3625]
+* **New post-processor**: vSphere Template post-processor to be used with
+    vmware-iso builder enabling user to mark a VM as a template. [GH-5114]
+
+## 1.0.4 (August 11, 2017)
 
 ### IMPROVEMENTS:
 
 * builder/alicloud: Increase polling timeout. [GH-5148]
+* builder/azure: Add `private_virtual_network_with_public_ip` option to
+    optionally obtain a public IP. [GH-5222]
+* builder/googlecompute: use a more portable method of obtaining zone.
+    [GH-5192]
+* builder/hyperv: Properly interpolate user variables in template. [GH-5184]
 * builder/parallels: Remove soon to be removed --vmtype flag in createvm.
     [GH-5172]
 * contrib: add json files to zsh completion. [GH-5195]
 
 ### BUG FIXES:
+
+* builder/amazon: Don't delete snapshots we didn't create. [GH-5211]
 * builder/amazon: fix builds when using the null communicator. [GH-5217]
+* builder/docker: Correctly handle case when uploading an empty directory.
+    [GH-5234]
+* command/push: Don't push variables if they are unspecified. Reverts to
+    behavior in 1.0.1. [GH-5235]
+* command/push: fix handling of symlinks. [GH-5226]
 * core: Strip query parameters from ISO URLs when checking against a checksum
     file. [GH-5181]
+* provisioner/ansible-remote: Fix issue where packer could hang communicating
+    with ansible-remote. [GH-5146]
 
 ## 1.0.3 (July 17, 2017)
 
@@ -56,7 +196,7 @@
     provisioner stdout [GH-4719]
 * post-processor/checksum: Fix interpolation of "output". [GH-5112]
 * push: Push vars in packer config, not just those set from command line and in
-    var-file. [GH-4992]
+    var-file. [GH-5101]
 
 ## 1.0.2 (June 21, 2017)
 

@@ -1,7 +1,6 @@
 ---
 description: |
     The Qemu Packer builder is able to create KVM and Xen virtual machine images.
-    Support for Xen is experimental at this time.
 layout: docs
 page_title: 'QEMU - Builders'
 sidebar_current: 'docs-builders-qemu'
@@ -12,8 +11,7 @@ sidebar_current: 'docs-builders-qemu'
 Type: `qemu`
 
 The Qemu Packer builder is able to create [KVM](http://www.linux-kvm.org) and
-[Xen](http://www.xenproject.org) virtual machine images. Support for Xen is
-experimental at this time.
+[Xen](http://www.xenproject.org) virtual machine images.
 
 The builder builds a virtual machine by creating a new virtual machine from
 scratch, booting it, installing an OS, rebooting the machine with the boot media
@@ -158,7 +156,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     *must* choose one of the other listed interfaces. Using the "scsi"
     interface under these circumstances will cause the build to fail.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
@@ -198,7 +196,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -328,7 +326,7 @@ default port of `5985` or whatever value you have the service set to listen on.
 -   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
     Set this option to `true` to disable compacting. Defaults to `false`.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+-   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
@@ -343,7 +341,7 @@ default port of `5985` or whatever value you have the service set to listen on.
     to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
     to all interfaces use 0.0.0.0
 
--   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
+-   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
@@ -443,6 +441,9 @@ CentOS 6.4 installer:
   ]
 }
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ### Troubleshooting
 

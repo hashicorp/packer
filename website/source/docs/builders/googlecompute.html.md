@@ -174,13 +174,19 @@ builder.
     Not required if you run Packer on a GCE instance with a service account.
     Instructions for creating file or using service accounts are above.
 
+-   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
+
+-   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
+    `"on_host_maintenance": "TERMINATE"` option set.
+    Example: `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
+
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
--   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
+-   `disk_size` (number) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
@@ -192,11 +198,17 @@ builder.
     instead of a specific image name. The image family always returns its
     latest image that is not deprecated.
 
+-   `image_labels` (object of key/value strings) - Key/value pair labels to
+    apply to the created image.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
 -   `instance_name` (string) - A name to give the launched instance. Beware that
     this must be unique. Defaults to `"packer-{{uuid}}"`.
+
+-   `labels` (object of key/value strings) - Key/value pair labels to apply to
+    the launched instance.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 

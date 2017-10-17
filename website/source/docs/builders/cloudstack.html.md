@@ -52,11 +52,11 @@ builder.
     for the instance.
 
 -   `source_iso` (string) - The name or ID of an ISO that will be mounted before
-    booting the instance. This option is mutual exclusive with `source_template`.
+    booting the instance. This option is mutually exclusive with `source_template`.
     When using `source_iso`, both `disk_offering` and `hypervisor` are required.
 
 -   `source_template` (string) - The name or ID of the template used as base
-    template for the instance. This option is mutual explusive with `source_iso`.
+    template for the instance. This option is mutually exclusive with `source_iso`.
 
 -   `template_os` (string) - The name or ID of the template OS for the new
     template that will be created.
@@ -66,7 +66,7 @@ builder.
 
 ### Optional:
 
--   `async_timeout` (int) - The time duration to wait for async calls to
+-   `async_timeout` (number) - The time duration to wait for async calls to
     finish. Defaults to 30m.
 
 -   `cidr_list` (array) - List of CIDR's that will have access to the new
@@ -74,11 +74,16 @@ builder.
     connect to the instance. Defaults to `[ "0.0.0.0/0" ]`. Only required
     when `use_local_ip_address` is `false`.
 
+-   `create_security_group` (boolean) - If `true` a temporary security group
+    will be created which allows traffic towards the instance from the
+    `cidr_list`. This option will be ignored if `security_groups` is also
+    defined. Requires `expunge` set to `true`. Defaults to `false`.
+
 -   `disk_offering` (string) - The name or ID of the disk offering used for the
     instance. This option is only available (and also required) when using
     `source_iso`.
 
--   `disk_size` (int) - The size (in GB) of the root disk of the new instance.
+-   `disk_size` (number) - The size (in GB) of the root disk of the new instance.
     This option is only available when using `source_template`.
 
 -   `expunge` (boolean) - Set to `true` to expunge the instance when it is
@@ -95,7 +100,7 @@ builder.
     their CloudStack API. If using such a provider, you need to set this to `true`
     in order for the provider to only make GET calls and no POST calls.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -117,6 +122,9 @@ builder.
 -   `public_ip_address` (string) - The public IP address or it's ID used for
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
+
+-   `security_groups` (array of strings) - A list of security group IDs or names
+    to associate the instance with.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
     authenticate connections to the source instance. No temporary keypair will
@@ -148,6 +156,10 @@ builder.
 
 -   `template_scalable` (boolean) - Set to `true` to indicate that the template
     contains tools to support dynamic scaling of VM cpu/memory. Defaults to `false`.
+
+-   `temporary_keypair_name` (string) - The name of the temporary SSH key pair
+    to generate. By default, Packer generates a name that looks like
+    `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 -   `user_data` (string) - User data to launch with the instance. This is a
     [template engine](/docs/templates/engine.html) see _User Data_ bellow for more

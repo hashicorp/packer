@@ -7,46 +7,45 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree"
+	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
 	"github.com/masterzen/winrm/soap"
-	"github.com/masterzen/xmlpath"
 )
 
-func first(node *xmlpath.Node, xpath string) (string, error) {
-	path, err := xmlpath.CompileWithNamespace(xpath, soap.GetAllNamespaces())
+func first(node tree.Node, xpath string) (string, error) {
+	nodes, err := xPath(node, xpath)
 	if err != nil {
 		return "", err
 	}
-	content, _ := path.String(node)
-	return content, nil
+	if len(nodes) < 1 {
+		return "", err
+	}
+	return nodes[0].ResValue(), nil
 }
 
-func any(node *xmlpath.Node, xpath string) (bool, error) {
-	path, err := xmlpath.CompileWithNamespace(xpath, soap.GetAllNamespaces())
+func any(node tree.Node, xpath string) (bool, error) {
+	nodes, err := xPath(node, xpath)
 	if err != nil {
 		return false, err
 	}
-
-	return path.Exists(node), nil
-
+	if len(nodes) > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
-func xpath(node *xmlpath.Node, xpath string) ([]xmlpath.Node, error) {
-	path, err := xmlpath.CompileWithNamespace(xpath, soap.GetAllNamespaces())
+func xPath(node tree.Node, xpath string) (tree.NodeSet, error) {
+	xpExec := goxpath.MustParse(xpath)
+	nodes, err := xpExec.ExecNode(node, soap.GetAllXPathNamespaces())
 	if err != nil {
 		return nil, err
 	}
-
-	nodes := make([]xmlpath.Node, 0, 1)
-	iter := path.Iter(node)
-	for iter.Next() {
-		nodes = append(nodes, *(iter.Node()))
-	}
-
 	return nodes, nil
 }
 
 func ParseOpenShellResponse(response string) (string, error) {
-	doc, err := xmlpath.Parse(strings.NewReader(response))
+	doc, err := xmltree.ParseXML(strings.NewReader(response))
 	if err != nil {
 		return "", err
 	}
@@ -54,7 +53,7 @@ func ParseOpenShellResponse(response string) (string, error) {
 }
 
 func ParseExecuteCommandResponse(response string) (string, error) {
-	doc, err := xmlpath.Parse(strings.NewReader(response))
+	doc, err := xmltree.ParseXML(strings.NewReader(response))
 	if err != nil {
 		return "", err
 	}
@@ -67,16 +66,16 @@ func ParseSlurpOutputErrResponse(response string, stdout, stderr io.Writer) (boo
 		exitCode int
 	)
 
-	doc, err := xmlpath.Parse(strings.NewReader(response))
+	doc, err := xmltree.ParseXML(strings.NewReader(response))
 
-	stdouts, _ := xpath(doc, "//rsp:Stream[@Name='stdout']")
+	stdouts, _ := xPath(doc, "//rsp:Stream[@Name='stdout']")
 	for _, node := range stdouts {
-		content, _ := base64.StdEncoding.DecodeString(node.String())
+		content, _ := base64.StdEncoding.DecodeString(node.ResValue())
 		stdout.Write(content)
 	}
-	stderrs, _ := xpath(doc, "//rsp:Stream[@Name='stderr']")
+	stderrs, _ := xPath(doc, "//rsp:Stream[@Name='stderr']")
 	for _, node := range stderrs {
-		content, _ := base64.StdEncoding.DecodeString(node.String())
+		content, _ := base64.StdEncoding.DecodeString(node.ResValue())
 		stderr.Write(content)
 	}
 
@@ -101,11 +100,11 @@ func ParseSlurpOutputResponse(response string, stream io.Writer, streamType stri
 		exitCode int
 	)
 
-	doc, err := xmlpath.Parse(strings.NewReader(response))
+	doc, err := xmltree.ParseXML(strings.NewReader(response))
 
-	nodes, _ := xpath(doc, fmt.Sprintf("//rsp:Stream[@Name='%s']", streamType))
+	nodes, _ := xPath(doc, fmt.Sprintf("//rsp:Stream[@Name='%s']", streamType))
 	for _, node := range nodes {
-		content, _ := base64.StdEncoding.DecodeString(node.String())
+		content, _ := base64.StdEncoding.DecodeString(node.ResValue())
 		stream.Write(content)
 	}
 

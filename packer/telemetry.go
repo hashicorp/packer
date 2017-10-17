@@ -14,11 +14,7 @@ import (
 const TelemetryVersion string = "beta/packer/4"
 const TelemetryPanicVersion string = "beta/packer_panic/4"
 
-var CheckpointReporter CheckpointTelemetry
-
-func init() {
-	CheckpointReporter.startTime = time.Now().UTC()
-}
+var CheckpointReporter *CheckpointTelemetry
 
 type PackerReport struct {
 	Spans    []*TelemetrySpan `json:"spans"`
@@ -28,17 +24,20 @@ type PackerReport struct {
 }
 
 type CheckpointTelemetry struct {
-	enabled       bool
 	spans         []*TelemetrySpan
 	signatureFile string
 	startTime     time.Time
 }
 
-func (c *CheckpointTelemetry) Enable(disableSignature bool) {
+func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
+	if disabled := os.Getenv("CHECKPOINT_DISABLE"); disabled != "" {
+		return nil
+	}
+
 	configDir, err := ConfigDir()
 	if err != nil {
 		log.Printf("[WARN] (telemetry) setup error: %s", err)
-		return
+		return nil
 	}
 
 	signatureFile := ""
@@ -48,8 +47,10 @@ func (c *CheckpointTelemetry) Enable(disableSignature bool) {
 		signatureFile = filepath.Join(configDir, "checkpoint_signature")
 	}
 
-	c.signatureFile = signatureFile
-	c.enabled = true
+	return &CheckpointTelemetry{
+		signatureFile: signatureFile,
+		startTime:     time.Now().UTC(),
+	}
 }
 
 func (c *CheckpointTelemetry) baseParams(prefix string) *checkpoint.ReportParams {
@@ -69,7 +70,7 @@ func (c *CheckpointTelemetry) baseParams(prefix string) *checkpoint.ReportParams
 }
 
 func (c *CheckpointTelemetry) ReportPanic(m string) error {
-	if !c.enabled {
+	if c == nil {
 		return nil
 	}
 	panicParams := c.baseParams(TelemetryPanicVersion)
@@ -85,6 +86,9 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 }
 
 func (c *CheckpointTelemetry) AddSpan(name, pluginType string) *TelemetrySpan {
+	if c == nil {
+		return nil
+	}
 	log.Printf("[INFO] (telemetry) Starting %s %s", pluginType, name)
 	ts := &TelemetrySpan{
 		Name:      name,
@@ -96,7 +100,7 @@ func (c *CheckpointTelemetry) AddSpan(name, pluginType string) *TelemetrySpan {
 }
 
 func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) error {
-	if !c.enabled {
+	if c == nil {
 		return nil
 	}
 
@@ -113,9 +117,10 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	}
 	params.Payload = extra
 
-	ctx, cancel := context.WithTimeout(context.Background(), 550*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
 	defer cancel()
 
+	log.Printf("[INFO] (telemetry) Finalizing.")
 	return checkpoint.Report(ctx, params)
 }
 
@@ -128,6 +133,9 @@ type TelemetrySpan struct {
 }
 
 func (s *TelemetrySpan) End(err error) {
+	if s == nil {
+		return
+	}
 	s.EndTime = time.Now().UTC()
 	log.Printf("[INFO] (telemetry) ending %s", s.Name)
 	if err != nil {

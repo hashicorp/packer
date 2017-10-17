@@ -22,7 +22,8 @@ type userDataTemplateData struct {
 
 // stepCreateInstance represents a Packer build step that creates CloudStack instances.
 type stepCreateInstance struct {
-	Ctx interpolate.Context
+	Debug bool
+	Ctx   interpolate.Context
 }
 
 // Run executes the Packer build step that creates a CloudStack instance.
@@ -36,7 +37,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// Create a new parameter struct.
 	p := client.VirtualMachine.NewDeployVirtualMachineParams(
 		config.ServiceOffering,
-		config.instanceSource,
+		state.Get("source").(string),
 		config.Zone,
 	)
 
@@ -44,8 +45,12 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	p.SetName(config.InstanceName)
 	p.SetDisplayname("Created by Packer")
 
-	if config.Keypair != "" {
-		p.SetKeypair(config.Keypair)
+	if keypair, ok := state.GetOk("keypair"); ok {
+		p.SetKeypair(keypair.(string))
+	}
+
+	if securitygroups, ok := state.GetOk("security_groups"); ok {
+		p.SetSecuritygroupids(securitygroups.([]string))
 	}
 
 	// If we use an ISO, configure the disk offering.
@@ -115,6 +120,12 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Message("Instance has been created!")
 
+	// In debug-mode, we output the password
+	if s.Debug {
+		ui.Message(fmt.Sprintf(
+			"Password (since debug is enabled) \"%s\"", instance.Password))
+	}
+
 	// Set the auto generated password if a password was not explicitly configured.
 	switch config.Comm.Type {
 	case "ssh":
@@ -129,7 +140,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 
 	// Set the host address when using the local IP address to connect.
 	if config.UseLocalIPAddress {
-		config.hostAddress = instance.Nic[0].Ipaddress
+		state.Put("ipaddress", instance.Nic[0].Ipaddress)
 	}
 
 	// Store the instance ID so we can remove it later.

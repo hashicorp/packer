@@ -30,7 +30,7 @@ builder.
 -   `client_secret` (string) The password or secret for your service principal.
 
 -   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -50,10 +50,13 @@ builder.
     
 #### VHD or Managed Image
 
-The Azure builder can create either a VHD, or a managed image. When creating a VHD the following two options are required.
+The Azure builder can create either a VHD, or a managed image. If you
+are creating a VHD, you **must** start with a VHD.  Likewise, if you
+want to create a managed image you **must** start with a managed
+image.  When creating a VHD the following two options are required.
 
 -   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
-    organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+    organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
     
 -   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
     `PREFIX-vmTemplate.UUID`.
@@ -107,13 +110,17 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
+    
+-   `managed_image_storage_account_type` (string) Specify the storage
+    account type for a managed image.  Valid values are Standard_LRS
+    and Premium\_LRS.  The default is Standard\_LRS.
                 
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
     behavior for `os_type`, below.
 
--   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
+-   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
@@ -131,9 +138,12 @@ When creating a managed image the following two options are required.
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
 
+-   `private_virtual_network_with_public_ip` (boolean) This value allows you to set a `virtual_network_name` and obtain
+    a public IP. If this value is not set and `virtual_network_name` is defined Packer is only allowed to be executed
+    from a host on the same subnet / virtual network.
+
 -   `virtual_network_name` (string) Use a pre-existing virtual network for the VM. This option enables private
-    communication with the VM, no public IP address is **used** or **provisioned**. This value should only be set if
-    Packer is executed from a host on the same subnet / virtual network.
+    communication with the VM, no public IP address is **used** or **provisioned** (unless you set `private_virtual_network_with_public_ip`).
 
 -   `virtual_network_resource_group_name` (string) If virtual\_network\_name is set, this value **may** also be set. If
     virtual\_network\_name is set, and this value is not set the builder attempts to determine the resource group
@@ -204,6 +214,24 @@ The following provisioner snippet shows how to sysprep a Windows VM. Deprovision
     }
   ]
 }
+```
+
+In some circumstances the above isn't enough to reliably know that the sysprep is actually finished generalizing the image, the code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
+
+``` json
+{
+    "provisioners": [
+    {
+        "type": "powershell",
+        "inline": [
+            "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+            "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+        ]
+    }
+  ]
+}
+
+
 ```
 
 ### Linux
@@ -286,7 +314,7 @@ The Azure builder creates the following random values at runtime.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
--   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overriden by the user.
+-   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.

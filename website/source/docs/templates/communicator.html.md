@@ -67,7 +67,7 @@ The SSH communicator has the following options:
 -   `ssh_bastion_password` (string) - The password to use to authenticate
     with the bastion host.
 
--   `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to 1.  
+-   `ssh_bastion_port` (number) - The port of the bastion host. Defaults to 1.
 
 -   `ssh_bastion_private_key_file` (string) - A private key file to use
     to authenticate with the bastion host.
@@ -75,13 +75,13 @@ The SSH communicator has the following options:
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
 
--   `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
-    disabled. Defaults to false.
+-   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
+    will be disabled. Defaults to false.
 
 -   `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
     copy (default) or SSH File Transfer Protocol.
 
--   `ssh_handshake_attempts` (integer) - The number of handshakes to attempt
+-   `ssh_handshake_attempts` (number) - The number of handshakes to attempt
     with SSH once it can connect. This defaults to 10.
 
 -   `ssh_host` (string) - The address to SSH to. This usually is automatically
@@ -90,10 +90,10 @@ The SSH communicator has the following options:
 -   `ssh_password` (string) - A plaintext password to use to authenticate
     with SSH.
 
--   `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
+-   `ssh_port` (number) - The port to connect to SSH. This defaults to 22.
 
 -   `ssh_private_key_file` (string) - Path to a PEM encoded private key
-    file to use to authentiate with SSH.
+    file to use to authenticate with SSH.
 
 -   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
     connection. This defaults to false.
@@ -111,7 +111,7 @@ The WinRM communicator has the following options.
 
 -   `winrm_host` (string) - The address for WinRM to connect to.
 
--   `winrm_port` (integer) - The WinRM port to connect to. This defaults to
+-   `winrm_port` (number) - The WinRM port to connect to. This defaults to
     5985 for plain unencrypted connection and 5986 for SSL when `winrm_use_ssl` is set to true.
 
 -   `winrm_username` (string) - The username to use to connect to WinRM.
