@@ -63,8 +63,9 @@ type Config struct {
 	ctx                interpolate.Context
 }
 
-func NewConfig(raws ...interface{}) (*Config, []string, error) {
+func NewConfig(funcMap map[string]interface{}, raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
+	c.ctx.Funcs = funcMap
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
