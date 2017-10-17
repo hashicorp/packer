@@ -23,7 +23,7 @@ type Builder struct {
 
 // Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	c, warnings, errs := NewConfig(TemplateFuncs, raws...)
+	c, warnings, errs := NewConfig(raws...)
 	if errs != nil {
 		return warnings, errs
 	}
