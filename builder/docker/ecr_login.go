@@ -8,11 +8,8 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/hashicorp/packer/builder/amazon/common"
 )
 
 type AwsAccessConfig struct {
@@ -20,34 +17,7 @@ type AwsAccessConfig struct {
 	SecretKey string `mapstructure:"aws_secret_key"`
 	Token     string `mapstructure:"aws_token"`
 	Profile   string `mapstructure:"aws_profile"`
-}
-
-// Config returns a valid aws.Config object for access to AWS services, or
-// an error if the authentication and region couldn't be resolved
-func (c *AwsAccessConfig) config(region string) (*aws.Config, error) {
-	var creds *credentials.Credentials
-
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, err
-	}
-	creds = credentials.NewChainCredentials([]credentials.Provider{
-		&credentials.StaticProvider{Value: credentials.Value{
-			AccessKeyID:     c.AccessKey,
-			SecretAccessKey: c.SecretKey,
-			SessionToken:    c.Token,
-		}},
-		&credentials.EnvProvider{},
-		&credentials.SharedCredentialsProvider{
-			Filename: "",
-			Profile:  c.Profile,
-		},
-		&ec2rolecreds.EC2RoleProvider{
-			Client: ec2metadata.New(session),
-		},
-	})
-	return config.WithCredentials(creds), nil
+	cfg       *common.AccessConfig
 }
 
 // Get a login token for Amazon AWS ECR. Returns username and password
@@ -64,12 +34,15 @@ func (c *AwsAccessConfig) EcrGetLogin(ecrUrl string) (string, string, error) {
 
 	log.Println(fmt.Sprintf("Getting ECR token for account: %s in %s..", accountId, region))
 
-	awsConfig, err := c.config(region)
-	if err != nil {
-		return "", "", err
+	c.cfg = &common.AccessConfig{
+		AccessKey:   c.AccessKey,
+		ProfileName: c.Profile,
+		RawRegion:   region,
+		SecretKey:   c.SecretKey,
+		Token:       c.Token,
 	}
 
-	session, err := session.NewSession(awsConfig)
+	session, err := c.cfg.Session()
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create session: %s", err)
 	}
