@@ -50,8 +50,16 @@ listed below:
     contains the client private key for the node. This defaults to nothing, in
     which case a client private key won't be uploaded.
 
+-   `execute_command` (string) - The command used to execute Puppet. This has
+    various [configuration template variables](/docs/templates/engine.html) available.
+    See below for more information.
+
 -   `facter` (object of key/value strings) - Additional Facter facts to make
     available to the Puppet run.
+
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
 
 -   `ignore_exit_codes` (boolean) - If true, Packer will never consider the
     provisioner a failure.
@@ -62,6 +70,11 @@ listed below:
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to run Puppet are executed with `sudo`. If this is true, then the
     sudo will be omitted.
+
+-   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
+    binary for running `puppet agent`. Usually, this would be found via the `$PATH`
+    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
+    not run profile-setup scripts, therefore the path is usually empty.
 
 -   `puppet_node` (string) - The name of the node. If this isn't set, the fully
     qualified domain name will be used.
@@ -76,18 +89,10 @@ listed below:
     to create directories and write into this folder. If the permissions are not
     correct, use a shell provisioner prior to this to configure it properly.
 
--   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
-    binary for running `puppet agent`. Usually, this would be found via the `$PATH`
-    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
-    not run profile-setup scripts, therefore the path is usually empty.
+## Execute Command
 
--   `guest_os_type` (string) - The target guest OS type, either "unix" or
-    "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
-
--   `execute_command` (string) - This is optional. The command used to execute Puppet. This has
-    various [configuration template variables](/docs/templates/engine.html) available. By default,
-    Packer uses the following command (broken across multiple lines for readability) to execute Puppet:
+By default, Packer uses the following command (broken across multiple lines for
+readability) to execute Puppet:
 
 ```
 {{.FacterVars}} {{if .Sudo}}sudo -E {{end}}
