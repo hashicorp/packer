@@ -28,11 +28,17 @@ type Template struct {
 	RawContents []byte
 }
 
+type Tagged struct {
+	Tags []string
+}
+
 // Builder represents a builder configured in the template
 type Builder struct {
 	Name   string
 	Type   string
 	Config map[string]interface{}
+
+	Tagged `mapstructure:",squash"`
 }
 
 // PostProcessor represents a post-processor within the template.
@@ -42,6 +48,8 @@ type PostProcessor struct {
 	Type              string
 	KeepInputArtifact bool `mapstructure:"keep_input_artifact"`
 	Config            map[string]interface{}
+
+	Tagged `mapstructure:",squash"`
 }
 
 // Provisioner represents a provisioner within the template.
@@ -52,6 +60,8 @@ type Provisioner struct {
 	Config      map[string]interface{}
 	Override    map[string]interface{}
 	PauseBefore time.Duration `mapstructure:"pause_before"`
+
+	Tagged `mapstructure:",squash"`
 }
 
 // Push represents the configuration for pushing the template to Atlas.
@@ -178,6 +188,26 @@ func (o *OnlyExcept) Validate(t *Template) error {
 	}
 
 	return err
+}
+
+func (t *Tagged) Matches(tags []string) bool {
+	for _, assignedTag := range t.Tags {
+		for _, requestedTag := range tags {
+			if assignedTag == requestedTag {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (t *Tagged) Always() bool {
+	for _, tag := range t.Tags {
+		if tag == "always" {
+			return true
+		}
+	}
+	return false
 }
 
 //-------------------------------------------------------------------
