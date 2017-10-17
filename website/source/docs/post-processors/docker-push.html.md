@@ -30,6 +30,9 @@ This post-processor has only optional configuration:
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
+-   `aws_profile` (string) - The AWS shared credentials profile used to communicate with AWS.
+    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
 -   `ecr_login` (boolean) - Defaults to false. If true, the post-processor
     will login in order to push the image to
     [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
