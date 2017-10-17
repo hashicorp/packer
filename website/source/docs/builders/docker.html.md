@@ -162,6 +162,9 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
+-   `aws_profile` (string) - The AWS shared credentials profile used to communicate with AWS.
+    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
 -   `changes` (array of strings) - Dockerfile instructions to add to the commit.
     Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
     `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
