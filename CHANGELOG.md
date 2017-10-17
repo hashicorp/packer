@@ -1,5 +1,10 @@
 ## (UNRELEASED)
 
+### IMRPOVEMENTS:
+
+* post-processor/docker-push: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
+* builder/docker: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
+
 ## 1.1.1 (October 13, 2017)
 
 ### IMPROVEMENTS:
