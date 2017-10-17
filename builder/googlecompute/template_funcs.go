@@ -1,7 +1,6 @@
 package googlecompute
 
 import (
-	"regexp"
 	"strings"
 	"text/template"
 )
@@ -19,8 +18,7 @@ func isalphanumeric(b byte) bool {
 // Clean up image name by replacing invalid characters with "-"
 // truncate up to 63 length, convert to a lower case
 func templateCleanImageName(s string) string {
-	re := regexp.MustCompile(`^[a-z][-a-z0-9]{0,61}[a-z0-9]$`)
-	if re.MatchString(s) {
+	if reImageFamily.MatchString(s) {
 		return s
 	}
 	b := []byte(strings.ToLower(s))
