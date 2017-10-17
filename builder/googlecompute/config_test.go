@@ -181,7 +181,7 @@ func TestConfigPrepare(t *testing.T) {
 			raw[tc.Key] = tc.Value
 		}
 
-		_, warns, errs := NewConfig(raw)
+		_, warns, errs := NewConfig(TemplateFuncs, raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, tc.Key)
@@ -240,7 +240,7 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 			}
 		}
 
-		_, warns, errs := NewConfig(raw)
+		_, warns, errs := NewConfig(TemplateFuncs, raw)
 
 		if tc.Err {
 			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
@@ -269,7 +269,7 @@ func TestConfigDefaults(t *testing.T) {
 	for _, tc := range cases {
 		raw := testConfig(t)
 
-		c, warns, errs := NewConfig(raw)
+		c, warns, errs := NewConfig(TemplateFuncs, raw)
 		testConfigOk(t, warns, errs)
 
 		actual := tc.Read(c)
@@ -280,7 +280,7 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestImageName(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	c, _, _ := NewConfig(TemplateFuncs, testConfig(t))
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -290,7 +290,7 @@ func TestImageName(t *testing.T) {
 }
 
 func TestRegion(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	c, _, _ := NewConfig(TemplateFuncs, testConfig(t))
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
 	}
@@ -314,7 +314,7 @@ func testConfig(t *testing.T) map[string]interface{} {
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig(t))
+	c, warns, errs := NewConfig(TemplateFuncs, testConfig(t))
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
