@@ -1,0 +1,20 @@
+* @hashicorp/packer
+
+# builders
+
+/builder/alicloud/              dongxiao.zzh@alibaba-inc.com
+/builder/amazon/ebssurrogate/   @jen20
+/builder/amazon/ebsvolume/      @jen20
+/builder/azure/                 @boumenot
+/builder/hyperv/                @taliesins
+/builder/lxc/                   @ChrisLundquist
+/builder/lxd/                   @ChrisLundquist
+/builder/oneandone/             @jasmingacic
+/builder/oracle/                @prydie @owainlewis
+/builder/profitbricks/          @jasmingacic
+/builder/triton/                @jen20 @sean-
+
+# provisioners
+
+/provisioner/ansible/           @bhcleek
+/provisioner/converge/          @stevendborrelli
