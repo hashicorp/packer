@@ -82,7 +82,7 @@ func TestNewConfigDefaultsPopulated(t *testing.T) {
 	}
 
 	if adminConfig.Region != "us-ashburn-1" {
-		t.Errorf("Expected 'us-phoenix-1', got '%s'", adminConfig.Region)
+		t.Errorf("Expected 'us-ashburn-1', got '%s'", adminConfig.Region)
 	}
 }
 
