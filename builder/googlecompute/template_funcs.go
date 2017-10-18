@@ -34,6 +34,12 @@ func templateCleanImageName(s string) string {
 			newb[i] = '-'
 		}
 	}
+	if !('a' <= newb[0] && newb[0] <= 'z') {
+		newb[0] = 'a'
+	}
+	if newb[l-1] == '-' {
+		newb[l-1] = 'a'
+	}
 	return string(newb)
 }
 
