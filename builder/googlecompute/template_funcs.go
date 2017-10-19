@@ -16,29 +16,19 @@ func isalphanumeric(b byte) bool {
 }
 
 // Clean up image name by replacing invalid characters with "-"
-// truncate up to 63 length, convert to a lower case
+// and converting upper cases to lower cases
 func templateCleanImageName(s string) string {
 	if reImageFamily.MatchString(s) {
 		return s
 	}
 	b := []byte(strings.ToLower(s))
-	l := 63
-	if len(b) < 63 {
-		l = len(b)
-	}
-	newb := make([]byte, l)
+	newb := make([]byte, len(b))
 	for i := range newb {
 		if isalphanumeric(b[i]) {
 			newb[i] = b[i]
 		} else {
 			newb[i] = '-'
 		}
-	}
-	if !('a' <= newb[0] && newb[0] <= 'z') {
-		newb[0] = 'a'
-	}
-	if newb[l-1] == '-' {
-		newb[l-1] = 'a'
 	}
 	return string(newb)
 }
