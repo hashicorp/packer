@@ -855,6 +855,19 @@ Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $swi
 	return err
 }
 
+func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, controllerType string) error {
+
+	var script = `
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$controllerType)
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
+New-VHD $vhdPath -SizeBytes $vhdSizeInBytes
+Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, vhdRoot, vhdName, strconv.FormatInt(vhdSizeBytes, 10), controllerType)
+	return err
+}
+
 func UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) error {
 
 	var script = `
