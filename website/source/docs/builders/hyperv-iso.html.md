@@ -88,6 +88,12 @@ can be configured for this builder.
 -   `cpu` (number) - The number of cpus the virtual machine should use. If this isn't specified,
     the default is 1 cpu.
 
+-   `disk_additional_size` (array of integers) - The size(s) of any additional
+    hard disks for the VM in megabytes. If this is not specified then the VM
+    will only contain a primary hard disk. Additional drives will be attached to the SCSI
+    interface only.  The builder uses expandable, not fixed-size virtual hard disks,
+    so the actual file representing the disk will not use the full size unless it is full.
+
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 

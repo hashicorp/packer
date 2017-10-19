@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -18,6 +19,7 @@ func testConfig() map[string]interface{} {
 		"ram_size":                64,
 		"disk_size":               256,
 		"guest_additions_mode":    "none",
+		"disk_additional_size":    "50000,40000,30000",
 		packer.BuildNameConfigKey: "foo",
 	}
 }
@@ -391,6 +393,27 @@ func TestBuilderPrepare_SizeIsRequiredWhenNotUsingExistingHarddrive(t *testing.T
 	}
 }
 
+func TestBuilderPrepare_MaximumOfSixtyFourAdditionalDisks(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	disks := make([]string, 65)
+	for i := range disks {
+		disks[i] = strconv.Itoa(i)
+	}
+	config["disk_additional_size"] = disks
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+}
+
 func TestBuilderPrepare_CommConfig(t *testing.T) {
 	// Test Winrm
 	{
@@ -447,4 +470,5 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 			t.Errorf("bad host: %s", host)
 		}
 	}
+
 }
