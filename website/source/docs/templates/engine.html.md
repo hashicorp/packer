@@ -53,9 +53,12 @@ Here is a full list of the available functions for reference.
 #### Specific to Google Compute builders:
 
 -   `clean_image_name` - GCE image names can only contain certain characters and
-    the maximum length is 63. This function will replace illegal characters with a "-" character
-    and truncate a name which exceeds maximum length.
-    Example usage since ":" is not a legal image name is: `{{isotime | clean_image_name}}`.
+    the maximum length is 63. This function will convert upper cases to lower cases
+    and replace illegal characters with a "-" character.
+    Example usage since ":" is not a legal image name is: `"a-{{isotime | clean_image_name}}"` -> `a-2017-10-18t02-06-30z`.
+
+    Note that image name must be a match of regex `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+    but this function won't truncate and replace with valid character such as 'a' except '-'.
 
 ## Template variables
 
