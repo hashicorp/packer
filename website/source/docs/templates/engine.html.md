@@ -55,10 +55,22 @@ Here is a full list of the available functions for reference.
 -   `clean_image_name` - GCE image names can only contain certain characters and
     the maximum length is 63. This function will convert upper cases to lower cases
     and replace illegal characters with a "-" character.
-    Example usage since ":" is not a legal image name is: `"a-{{isotime | clean_image_name}}"` -> `a-2017-10-18t02-06-30z`.
+    Example:
 
-    Note that image name must be a match of regex `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
-    but this function won't truncate and replace with valid character such as 'a' except '-'.
+    `"mybuild-{{isotime | clean_image_name}}"`
+    will become
+    `mybuild-2017-10-18t02-06-30z`.
+
+    Note: Valid GCE image names must match the regex
+    `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+    This engine does not guarantee that the final image name will match the
+    regex; it will not truncate your name if it exceeds 63 characters, and it
+    will not valiate that the beginning and end of the engine's output are
+    valid. For example,
+    `"image_name": {{isotime | clean_image_name}}"` will cause your build to
+    fail because the image name will start with a number, which is why in the
+    above example we prepend the isotime with "mybuild".
 
 ## Template variables
 
