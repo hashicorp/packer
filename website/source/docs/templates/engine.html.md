@@ -50,6 +50,28 @@ Here is a full list of the available functions for reference.
     function will replace illegal characters with a '-" character. Example usage
     since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
 
+#### Specific to Google Compute builders:
+
+-   `clean_image_name` - GCE image names can only contain certain characters and
+    the maximum length is 63. This function will convert upper cases to lower cases
+    and replace illegal characters with a "-" character.
+    Example:
+
+    `"mybuild-{{isotime | clean_image_name}}"`
+    will become
+    `mybuild-2017-10-18t02-06-30z`.
+
+    Note: Valid GCE image names must match the regex
+    `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+    This engine does not guarantee that the final image name will match the
+    regex; it will not truncate your name if it exceeds 63 characters, and it
+    will not valiate that the beginning and end of the engine's output are
+    valid. For example,
+    `"image_name": {{isotime | clean_image_name}}"` will cause your build to
+    fail because the image name will start with a number, which is why in the
+    above example we prepend the isotime with "mybuild".
+
 ## Template variables
 
 Template variables are special variables automatically set by Packer at build time. Some builders, provisioners and other components have template variables that are available only for that component. Template variables are recognizable because they're prefixed by a period, such as `{{ .Name }}`. For example, when using the [`shell`](/docs/builders/vmware-iso.html) builder template variables are available to customize the [`execute_command`](/docs/provisioners/shell.html#execute_command) parameter used to determine how Packer will run the shell command.

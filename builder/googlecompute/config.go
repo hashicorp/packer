@@ -65,6 +65,7 @@ type Config struct {
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
+	c.ctx.Funcs = TemplateFuncs
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
