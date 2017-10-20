@@ -39,7 +39,7 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -50,7 +50,7 @@ func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
 
 	privateKey, err := ssh.ParseRawPrivateKey([]byte(state.Get("privateKey").(string)))
 	if err != nil {
-		err = fmt.Errorf("Error parsing private key: %s", err)
+		err = fmt.Errorf("Error parsing private key: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

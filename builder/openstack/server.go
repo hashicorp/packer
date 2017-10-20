@@ -42,7 +42,7 @@ func ServerStateRefreshFunc(
 				log.Printf("[INFO] 404 on ServerStateRefresh, returning DELETED")
 				return nil, "DELETED", 0, nil
 			}
-			log.Printf("[ERROR] Error on ServerStateRefresh: %s", err)
+			log.Printf("[ERROR] Error on ServerStateRefresh: %s", err.Error())
 			return nil, "", 0, err
 		}
 

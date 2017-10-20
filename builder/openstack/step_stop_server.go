@@ -26,14 +26,14 @@ func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 	// We need the v2 compute client
 	client, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
 	ui.Say(fmt.Sprintf("Stopping server: %s ...", server.ID))
 	if err := startstop.Stop(client, server.ID).ExtractErr(); err != nil {
-		err = fmt.Errorf("Error stopping server: %s", err)
+		err = fmt.Errorf("Error stopping server: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -46,7 +46,7 @@ func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
 		StepState: state,
 	}
 	if _, err := WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for server (%s) to stop: %s", server.ID, err)
+		err := fmt.Errorf("Error waiting for server (%s) to stop: %s", server.ID, err.Error())
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

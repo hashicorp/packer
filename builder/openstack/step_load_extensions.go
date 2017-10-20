@@ -22,7 +22,7 @@ func (s *StepLoadExtensions) Run(state multistep.StateBag) multistep.StepAction 
 	// We need the v2 compute client
 	client, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -45,7 +45,7 @@ func (s *StepLoadExtensions) Run(state multistep.StateBag) multistep.StepAction 
 		return true, nil
 	})
 	if err != nil {
-		err = fmt.Errorf("Error loading extensions: %s", err)
+		err = fmt.Errorf("Error loading extensions: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
