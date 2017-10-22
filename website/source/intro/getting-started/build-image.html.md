@@ -186,10 +186,10 @@ want to store and namespace images for quick reference, you can use [Atlas by
 HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
 storing images at the end of this getting started guide.
 
-After running the above example, your AWS account now has an AMI associated with
-it. AMIs are stored in S3 by Amazon, so unless you want to be charged about
-$0.01 per month, you'll probably want to remove it. Remove the AMI by first
-deregistering it on the [AWS AMI management
+After running the above example, your AWS account now has an AMI associated
+with it. AMIs are stored in S3 by Amazon, so unless you want to be charged
+about &#36;0.01 per month, you'll probably want to remove it. Remove the AMI by
+first deregistering it on the [AWS AMI management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Next,
 delete the associated snapshot on the [AWS snapshot management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Snapshots).
@@ -409,25 +409,25 @@ Start-Service -Name WinRM
 
 Save the above code in a file named `bootstrap_win.txt`.
 
--> **A quick aside/warning:**  
+-> **A quick aside/warning:**
 Windows administrators in the know might be wondering why we haven't simply
 used a `winrm quickconfig -q` command in the script above, as this would
 *automatically* set up all of the required elements necessary for connecting
-over WinRM. Why all the extra effort to configure things manually?  
+over WinRM. Why all the extra effort to configure things manually?
 Well, long and short, use of the `winrm quickconfig -q` command can sometimes
 cause the Packer build to fail shortly after the WinRM connection is
-established. How?  
+established. How?
 1. Among other things, as well as setting up the listener for WinRM, the
 quickconfig command also configures the firewall to allow management messages
-to be sent over HTTP.  
+to be sent over HTTP.
 2. This undoes the previous command in the script that configured the
-firewall to prevent this access.  
+firewall to prevent this access.
 3. The upshot is that the system is configured and ready to accept WinRM
-connections earlier than intended.    
+connections earlier than intended.
 4. If Packer establishes its WinRM connection immediately after execution of
 the 'winrm quickconfig -q' command, the later commands within the script that
 restart the WinRM service will unceremoniously pull the rug out from under
-the connection.  
+the connection.
 5. While Packer does *a lot* to ensure the stability of its connection in to
 your instance, this sort of abuse can prove to be too much and *may* cause
 your Packer build to stall irrecoverably or fail!
