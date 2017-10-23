@@ -1,10 +1,10 @@
 package vsphere
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -135,12 +135,15 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			password,
 			"<password>",
 			-1))
+
+	var out bytes.Buffer
 	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n", err)
+		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, out.String())
 	}
+
+	ui.Message(out.String())
 
 	return artifact, false, nil
 }
