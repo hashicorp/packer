@@ -124,11 +124,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	var instanceStep multistep.Step
+	isSpotInstance := b.config.SpotPrice != "" && b.config.SpotPrice != "0"
 
-	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
-		instanceStep = &awscommon.StepRunSourceInstance{
+	if isSpotInstance {
+		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -145,11 +148,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		}
 	} else {
-		instanceStep = &awscommon.StepRunSpotInstance{
+		instanceStep = &awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
-			SpotPrice:                b.config.SpotPrice,
-			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -211,7 +212,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&awscommon.StepStopEBSBackedInstance{
-			SpotPrice:           b.config.SpotPrice,
+			Skip:                isSpotInstance,
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
