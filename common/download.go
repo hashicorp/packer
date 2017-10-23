@@ -2,14 +2,9 @@ package common
 
 import (
 	"bytes"
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"hash"
 	"io"
 	"log"
 	"net/http"
@@ -53,23 +48,6 @@ type DownloadConfig struct {
 type DownloadClient struct {
 	config     *DownloadConfig
 	downloader Downloader
-}
-
-// HashForType returns the Hash implementation for the given string
-// type, or nil if the type is not supported.
-func HashForType(t string) hash.Hash {
-	switch t {
-	case "md5":
-		return md5.New()
-	case "sha1":
-		return sha1.New()
-	case "sha256":
-		return sha256.New()
-	case "sha512":
-		return sha512.New()
-	default:
-		return nil
-	}
 }
 
 // NewDownloadClient returns a new DownloadClient for the given
@@ -163,18 +141,7 @@ func (d *DownloadClient) Get() (string, error) {
 	}
 
 	if d.config.Hash != nil {
-		var verify bool
-		verify, err = d.VerifyChecksum(finalPath)
-		if err == nil && !verify {
-			// Only delete the file if we made a copy or downloaded it
-			if sourcePath != finalPath {
-				os.Remove(finalPath)
-			}
-
-			err = fmt.Errorf(
-				"checksums didn't match expected: %s",
-				hex.EncodeToString(d.config.Checksum))
-		}
+		// TODO: MEGAN: Add hashstring to end of URL
 	}
 
 	return finalPath, err
@@ -187,25 +154,6 @@ func (d *DownloadClient) PercentProgress() int {
 	}
 
 	return int((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
-}
-
-// VerifyChecksum tests that the path matches the checksum for the
-// download.
-func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
-	if d.config.Checksum == nil || d.config.Hash == nil {
-		return false, errors.New("Checksum or Hash isn't set on download.")
-	}
-
-	f, err := os.Open(path)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	log.Printf("Verifying checksum of %s", path)
-	d.config.Hash.Reset()
-	io.Copy(d.config.Hash, f)
-	return bytes.Equal(d.config.Hash.Sum(nil), d.config.Checksum), nil
 }
 
 // HTTPDownloader is an implementation of Downloader that downloads
