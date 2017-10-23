@@ -164,6 +164,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
 		instanceStep,
+		&stepTagEBSVolumes{
+			VolumeMapping: b.config.VolumeMappings,
+			Ctx:           b.config.ctx,
+		},
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
