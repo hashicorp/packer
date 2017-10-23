@@ -409,25 +409,25 @@ Start-Service -Name WinRM
 
 Save the above code in a file named `bootstrap_win.txt`.
 
--> **A quick aside/warning:**
+-> **A quick aside/warning:**  
 Windows administrators in the know might be wondering why we haven't simply
 used a `winrm quickconfig -q` command in the script above, as this would
 *automatically* set up all of the required elements necessary for connecting
-over WinRM. Why all the extra effort to configure things manually?
+over WinRM. Why all the extra effort to configure things manually?  
 Well, long and short, use of the `winrm quickconfig -q` command can sometimes
 cause the Packer build to fail shortly after the WinRM connection is
-established. How?
+established. How?  
 1. Among other things, as well as setting up the listener for WinRM, the
 quickconfig command also configures the firewall to allow management messages
-to be sent over HTTP.
+to be sent over HTTP.  
 2. This undoes the previous command in the script that configured the
-firewall to prevent this access.
+firewall to prevent this access.  
 3. The upshot is that the system is configured and ready to accept WinRM
-connections earlier than intended.
+connections earlier than intended.    
 4. If Packer establishes its WinRM connection immediately after execution of
 the 'winrm quickconfig -q' command, the later commands within the script that
 restart the WinRM service will unceremoniously pull the rug out from under
-the connection.
+the connection.  
 5. While Packer does *a lot* to ensure the stability of its connection in to
 your instance, this sort of abuse can prove to be too much and *may* cause
 your Packer build to stall irrecoverably or fail!
