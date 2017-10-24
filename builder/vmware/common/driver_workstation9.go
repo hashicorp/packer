@@ -157,8 +157,19 @@ func (d *Workstation9Driver) Verify() error {
 		return workstationVmnetnatConfPath(device)
 	}
 
-	d.VmwareDriver.NetmapConfPath = func() string {
-		return workstationNetmapConfPath()
+	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
+		pathNetmap := workstationNetmapConfPath()
+		if _, err := os.Stat(pathNetmap); err != nil {
+			return nil, fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
+		}
+
+		fd, err := os.Open(pathNetmap)
+		if err != nil {
+			return nil, err
+		}
+		defer fd.Close()
+
+		return ReadNetworkMap(fd)
 	}
 	return nil
 }

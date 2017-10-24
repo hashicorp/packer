@@ -78,9 +78,19 @@ func (d *Fusion6Driver) Verify() error {
 	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
 		return filepath.Join(libpath, device, "nat.conf")
 	}
-	d.VmwareDriver.NetmapConfPath = func() string {
-		// FIXME: Suggested by @phekmat. This will need another parser to be implemented.
-		return filepath.Join(libpath, "networking")
+	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
+		pathNetworking := filepath.Join(libpath, "networking")
+		if _, err := os.Stat(pathNetworking); err != nil {
+			return nil, fmt.Errorf("Could not find networking conf file: %s", pathNetworking)
+		}
+
+		fd, err := os.Open(pathNetworking)
+		if err != nil {
+			return nil, err
+		}
+		defer fd.Close()
+
+		return ReadNetworkingConfig(fd)
 	}
 
 	return compareVersions(matches[1], VMWARE_FUSION_VERSION, "Fusion Professional")
