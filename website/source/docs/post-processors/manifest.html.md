@@ -65,10 +65,11 @@ An example manifest file looks like:
 }
 ```
 
-If I run the build again, my new build will be added to the manifest file rather than replacing it, so you can always grab specific builds from the manifest by uuid.
+If the build is run again, the new build artifacts will be added to the manifest file rather than replacing it. It is possible to grab specific build artifacts from the manifest by using `packer_run_uuid`.
 
-The mainfest above was generated from this packer.json:
-```
+The above mainfest was generated with this packer.json:
+
+```json
 {
   "builders": [
     {
