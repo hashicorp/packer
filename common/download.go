@@ -86,12 +86,18 @@ func (d *DownloadClient) Get() (string, error) {
 	}
 
 	// Megan's code -- Get go-getter client
-	getter = getter.Client{
+	gc := getter.Client{
 		src:  d.config.Url,
 		dst:  d.config.TargetPath,
 		pwd:  os.Getwd(),
 		Mode: getter.ClientModeFile,
 		Dir:  false}
+
+	err := gc.Get()
+	if err != nil {
+		log.Printf("Error Getting URL: %s", err)
+		return "", err
+	}
 
 	//Megan's Code Ends Here
 
