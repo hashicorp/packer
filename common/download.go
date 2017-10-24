@@ -1,7 +1,12 @@
 package common
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
+	"hash"
 	"io"
 	"log"
 	"net/http"
@@ -61,6 +66,23 @@ func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 	return &DownloadClient{config: c}
 }
 
+// HashForType returns the Hash implementation for the given string
+// type, or nil if the type is not supported.
+func HashForType(t string) hash.Hash {
+	switch t {
+	case "md5":
+		return md5.New()
+	case "sha1":
+		return sha1.New()
+	case "sha256":
+		return sha256.New()
+	case "sha512":
+		return sha512.New()
+	default:
+		return nil
+	}
+}
+
 // A downloader is responsible for actually taking a remote URL and
 // downloading it.
 type Downloader interface {
@@ -75,10 +97,14 @@ func (d *DownloadClient) Cancel() {
 }
 
 func (d *DownloadClient) Get() (string, error) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
 	gc := getter.Client{
-		src:  d.config.Url,
-		dst:  d.config.TargetPath,
-		pwd:  os.Getwd(),
+		Src:  d.config.Url,
+		Dst:  d.config.TargetPath,
+		Pwd:  pwd,
 		Mode: getter.ClientModeFile,
 		Dir:  false}
 
