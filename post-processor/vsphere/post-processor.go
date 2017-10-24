@@ -129,23 +129,23 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s",
-		strings.Replace(
-			strings.Join(args, " "),
-			password,
-			"<password>",
-			-1))
+	log.Printf("Starting ovftool with parameters: %s", p.filterLog(strings.Join(args, " ")))
 
 	var out bytes.Buffer
 	cmd := exec.Command("ovftool", args...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, out.String())
+		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, p.filterLog(out.String()))
 	}
 
-	ui.Message(out.String())
+	ui.Message(p.filterLog(out.String()))
 
 	return artifact, false, nil
+}
+
+func (p *PostProcessor) filterLog(s string) string {
+	password := url.QueryEscape(p.config.Password)
+	return strings.Replace(s, password, "<password>", -1)
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
