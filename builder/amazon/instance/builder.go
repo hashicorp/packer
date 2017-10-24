@@ -198,7 +198,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "ebs",
 			InstanceType:             b.config.InstanceType,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
@@ -211,12 +210,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 			Ctx:                      b.config.ctx,
-			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		}
 	} else {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "ebs",
 			SpotPrice:                b.config.SpotPrice,
 			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
 			InstanceType:             b.config.InstanceType,
@@ -231,7 +228,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
 			Ctx:                      b.config.ctx,
-			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 		}
 	}
 
