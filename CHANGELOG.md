@@ -4,6 +4,7 @@
 
 * post-processor/docker-push: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
 * builder/docker: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
+* post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
 
 ## 1.1.1 (October 13, 2017)
 
