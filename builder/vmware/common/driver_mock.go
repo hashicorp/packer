@@ -92,6 +92,20 @@ type DriverMock struct {
 	VerifyErr    error
 }
 
+type NetworkMapperMock struct {
+	NameIntoDeviceCalled int
+	DeviceIntoNameCalled int
+}
+
+func (m NetworkMapperMock) NameIntoDevice(name string) (string, error) {
+	m.NameIntoDeviceCalled += 1
+	return "", nil
+}
+func (m NetworkMapperMock) DeviceIntoName(device string) (string, error) {
+	m.DeviceIntoNameCalled += 1
+	return "", nil
+}
+
 func (d *DriverMock) Clone(dst string, src string) error {
 	d.CloneCalled = true
 	d.CloneDst = dst
@@ -247,8 +261,8 @@ func (d *DriverMock) GetVmwareDriver() VmwareDriver {
 	state.VmnetnatConfPath = func(string) string {
 		return "/path/to/vmnetnat.conf"
 	}
-	state.NetmapConfPath = func() string {
-		return "/path/to/netmap.conf"
+	state.NetworkMapper = func() (NetworkNameMapper, error) {
+		return NetworkMapperMock{}, nil
 	}
 	return state
 }
