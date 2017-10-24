@@ -1,18 +1,14 @@
 package common
 
 import (
-	"bytes"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 
-	getter "github.com/hashicorp/go-getter/getter"
+	getter "github.com/hashicorp/go-getter"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -79,13 +75,6 @@ func (d *DownloadClient) Cancel() {
 }
 
 func (d *DownloadClient) Get() (string, error) {
-	// If we already have the file and it matches, then just return the target path.
-	if verify, _ := d.VerifyChecksum(d.config.TargetPath); verify {
-		log.Println("[DEBUG] Initial checksum matched, no download needed.")
-		return d.config.TargetPath, nil
-	}
-
-	// Megan's code -- Get go-getter client
 	gc := getter.Client{
 		src:  d.config.Url,
 		dst:  d.config.TargetPath,
@@ -99,70 +88,7 @@ func (d *DownloadClient) Get() (string, error) {
 		return "", err
 	}
 
-	//Megan's Code Ends Here
-
-	u, err := url.Parse(d.config.Url)
-	if err != nil {
-		return "", err
-	}
-
-	log.Printf("Parsed URL: %#v", u)
-
-	// Files when we don't copy the file are special cased.
-	var f *os.File
-	var finalPath string
-	sourcePath := ""
-	if u.Scheme == "file" && !d.config.CopyFile {
-		// This is special case for relative path in this case user specify
-		// file:../ and after parse destination goes to Opaque
-		if u.Path != "" {
-			// If url.Path is set just use this
-			finalPath = u.Path
-		} else if u.Opaque != "" {
-			// otherwise try url.Opaque
-			finalPath = u.Opaque
-		}
-		// This is a special case where we use a source file that already exists
-		// locally and we don't make a copy. Normally we would copy or download.
-		log.Printf("[DEBUG] Using local file: %s", finalPath)
-
-		// Remove forward slash on absolute Windows file URLs before processing
-		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
-			finalPath = finalPath[1:]
-		}
-		// Keep track of the source so we can make sure not to delete this later
-		sourcePath = finalPath
-		if _, err = os.Stat(finalPath); err != nil {
-			return "", err
-		}
-	} else {
-		finalPath = d.config.TargetPath
-
-		var ok bool
-		d.downloader, ok = d.config.DownloaderMap[u.Scheme]
-		if !ok {
-			return "", fmt.Errorf("No downloader for scheme: %s", u.Scheme)
-		}
-
-		// Otherwise, download using the downloader.
-		f, err = os.OpenFile(finalPath, os.O_RDWR|os.O_CREATE, os.FileMode(0666))
-		if err != nil {
-			return "", err
-		}
-
-		log.Printf("[DEBUG] Downloading: %s", u.String())
-		err = d.downloader.Download(f, u)
-		f.Close()
-		if err != nil {
-			return "", err
-		}
-	}
-
-	if d.config.Hash != nil {
-		// TODO: MEGAN: Add hashstring to end of URL
-	}
-
-	return finalPath, err
+	return d.config.TargetPath, err
 }
 
 // PercentProgress returns the download progress as a percentage.

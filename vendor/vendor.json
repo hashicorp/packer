@@ -545,6 +545,12 @@
 			"versionExact": "v1.10.23"
 		},
 		{
+			"checksumSHA1": "nqw2Qn5xUklssHTubS5HDvEL9L4=",
+			"path": "github.com/bgentry/go-netrc/netrc",
+			"revision": "9fd32a8b3d3d3f9d43c341bfe098430e07609480",
+			"revisionTime": "2014-04-22T17:41:19Z"
+		},
+		{
 			"checksumSHA1": "7SbTaY0kaYxgQrG3/9cjrI+BcyU=",
 			"path": "github.com/bgentry/speakeasy",
 			"revision": "36e9cfdd690967f4f690c6edcc9ffacd006014a0"
@@ -780,6 +786,14 @@
 			"revision": "875fb671b3ddc66f8e2f0acc33829c8cb989a38d"
 		},
 		{
+			"checksumSHA1": "9VcI9QGCShWIUIL187qRd4sxwb8=",
+			"path": "github.com/hashicorp/go-getter",
+			"revision": "a686900cb3753aa644dc4812be91ceaf9fdd3b98",
+			"revisionTime": "2017-09-22T19:29:48Z",
+			"version": "master",
+			"versionExact": "master"
+		},
+		{
 			"checksumSHA1": "lrSl49G23l6NhfilxPM0XFs5rZo=",
 			"path": "github.com/hashicorp/go-multierror",
 			"revision": "d30f09973e19c1dfcd120b2d9c4f168e68d6b5d5"
@@ -935,6 +949,12 @@
 			"revision": "d682a8f0cf139663a984ff12528da460ca963de9"
 		},
 		{
+			"checksumSHA1": "6TBW88DSxRHf4WvOC9K5ilBZx/8=",
+			"path": "github.com/mitchellh/go-testing-interface",
+			"revision": "9a441910b16872f7b8283682619b3761a9aa2222",
+			"revisionTime": "2017-07-30T05:09:07Z"
+		},
+		{
 			"checksumSHA1": "SJOpcDnBxxKHq146atZmumzST3A=",
 			"path": "github.com/mitchellh/go-vnc",
 			"revision": "723ed9867aed0f3209a81151e52ddc61681f0b01"
@@ -1076,6 +1096,30 @@
 			"checksumSHA1": "bEYlrTiz/7JbUiJgxEIkHynxO2s=",
 			"path": "github.com/ugorji/go/codec/codecgen",
 			"revision": "646ae4a518c1c3be0739df898118d9bccf993858"
+		},
+		{
+			"checksumSHA1": "qgMa75aMGbkFY0jIqqqgVnCUoNA=",
+			"path": "github.com/ulikunitz/xz",
+			"revision": "0c6b41e72360850ca4f98dc341fd999726ea007f",
+			"revisionTime": "2017-06-05T21:53:11Z"
+		},
+		{
+			"checksumSHA1": "vjnTkzNrMs5Xj6so/fq0mQ6dT1c=",
+			"path": "github.com/ulikunitz/xz/internal/hash",
+			"revision": "0c6b41e72360850ca4f98dc341fd999726ea007f",
+			"revisionTime": "2017-06-05T21:53:11Z"
+		},
+		{
+			"checksumSHA1": "m0pm57ASBK/CTdmC0ppRHO17mBs=",
+			"path": "github.com/ulikunitz/xz/internal/xlog",
+			"revision": "0c6b41e72360850ca4f98dc341fd999726ea007f",
+			"revisionTime": "2017-06-05T21:53:11Z"
+		},
+		{
+			"checksumSHA1": "2vZw6zc8xuNlyVz2QKvdlNSZQ1U=",
+			"path": "github.com/ulikunitz/xz/lzma",
+			"revision": "0c6b41e72360850ca4f98dc341fd999726ea007f",
+			"revisionTime": "2017-06-05T21:53:11Z"
 		},
 		{
 			"checksumSHA1": "AGBqaHqBx5wJdVRsQt4GeawjbXA=",
