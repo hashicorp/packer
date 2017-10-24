@@ -274,7 +274,10 @@ type VmwareDriver struct {
 	DhcpLeasesPath   func(string) string
 	DhcpConfPath     func(string) string
 	VmnetnatConfPath func(string) string
-	NetmapConfPath   func() string
+
+	/// This method returns an object with the NetworkNameMapper interface
+	/// that maps network to device and vice-versa.
+	NetworkMapper func() (NetworkNameMapper, error)
 }
 
 func (d *VmwareDriver) GuestAddress(state multistep.StateBag) (string, error) {
@@ -304,12 +307,8 @@ func (d *VmwareDriver) GuestAddress(state multistep.StateBag) (string, error) {
 
 func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 
-	// read netmap config
-	pathNetmap := d.NetmapConfPath()
-	if _, err := os.Stat(pathNetmap); err != nil {
-		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
-	}
-	netmap, err := ReadNetmapConfig(pathNetmap)
+	// grab network mapper
+	netmap, err := d.NetworkMapper()
 	if err != nil {
 		return "", err
 	}
@@ -401,12 +400,8 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 
 func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 
-	// parse network<->device mapping
-	pathNetmap := d.NetmapConfPath()
-	if _, err := os.Stat(pathNetmap); err != nil {
-		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
-	}
-	netmap, err := ReadNetmapConfig(pathNetmap)
+	// grab mapper for converting network<->device
+	netmap, err := d.NetworkMapper()
 	if err != nil {
 		return "", err
 	}
@@ -471,12 +466,8 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 
 func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 
-	// parse network<->device mapping
-	pathNetmap := d.NetmapConfPath()
-	if _, err := os.Stat(pathNetmap); err != nil {
-		return "", fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
-	}
-	netmap, err := ReadNetmapConfig(pathNetmap)
+	// grab mapper for converting network<->device
+	netmap, err := d.NetworkMapper()
 	if err != nil {
 		return "", err
 	}
