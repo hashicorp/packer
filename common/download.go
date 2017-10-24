@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+
+	getter "github.com/hashicorp/go-getter/getter"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -82,6 +84,16 @@ func (d *DownloadClient) Get() (string, error) {
 		log.Println("[DEBUG] Initial checksum matched, no download needed.")
 		return d.config.TargetPath, nil
 	}
+
+	// Megan's code -- Get go-getter client
+	getter = getter.Client{
+		src:  d.config.Url,
+		dst:  d.config.TargetPath,
+		pwd:  os.Getwd(),
+		Mode: getter.ClientModeFile,
+		Dir:  false}
+
+	//Megan's Code Ends Here
 
 	u, err := url.Parse(d.config.Url)
 	if err != nil {
