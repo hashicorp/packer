@@ -306,7 +306,7 @@ func (d *HypervPS4Driver) isCurrentUserAHyperVAdministrator() (bool, error) {
 	var script = `
 $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = new-object System.Security.Principal.WindowsPrincipal($identity)
-$hypervrole = [System.Security.Principal.SecurityIdentifier]"S-1-5-32-544"
+$hypervrole = [System.Security.Principal.SecurityIdentifier]"S-1-5-32-578"
 return $principal.IsInRole($hypervrole)
 `
 
