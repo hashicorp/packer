@@ -32,8 +32,11 @@ power of Packer templates.
 - [packer-baseboxes](https://github.com/taliesins/packer-baseboxes) - Templates
   for packer to build base boxes
 
-- [packer-ubuntu](https://github.com/cbednarski/packer-ubuntu) - Ubuntu LTS
-  Virtual Machines for Vagrant
+- [cbednarski/packer-ubuntu](https://github.com/cbednarski/packer-ubuntu) -
+  Ubuntu LTS Virtual Machines for Vagrant
+
+* [geerlingguy/packer-ubuntu-1604](https://github.com/geerlingguy/packer-ubuntu-1604) 
+  \- Ubuntu 16.04 minimal Vagrant Box using Ansible provisioner
 
 ## Wrappers
 
