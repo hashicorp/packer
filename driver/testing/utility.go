@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 	"time"
-	"github.com/vmware/govmomi/govc/pool"
 )
 
 func NewTestDriver(t *testing.T) *driver.Driver {
@@ -28,12 +27,12 @@ func NewVMName() string {
 	return fmt.Sprintf("test-%v", rand.Intn(1000))
 }
 
-func CheckDatastoreName(t *testing.T, ds *driver.Datastore, name string) {
+func CheckDatastoreName(t *testing.T, ds *driver.Datastore, datastore string) {
 	switch info, err := ds.Info("name"); {
 	case err != nil:
 		t.Errorf("Cannot read datastore properties: %v", err)
-	case info.Name != name:
-		t.Errorf("Wrong datastore. expected: %v, got: %v", name, info.Name)
+	case info.Name != datastore:
+		t.Errorf("Wrong datastore. expected: %v, got: %v", datastore, info.Name)
 	}
 }
 
@@ -43,6 +42,15 @@ func CheckResourcePoolPath(t *testing.T, p *driver.ResourcePool, pool string) {
 		t.Errorf("Cannot read resource pool name: %v", err)
 	case path != pool:
 		t.Errorf("Wrong folder. expected: %v, got: %v", pool, path)
+	}
+}
+
+func CheckFolderPath(t *testing.T, f *driver.Folder, folder string) {
+	switch path, err := f.Path(); {
+	case err != nil:
+		t.Fatalf("Cannot read folder name: %v", err)
+	case path != folder:
+		t.Errorf("Wrong folder. expected: %v, got: %v", folder, path)
 	}
 }
 

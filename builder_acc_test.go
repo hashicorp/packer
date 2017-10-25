@@ -91,13 +91,7 @@ func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
 		}
 
 		f := d.NewFolder(vmInfo.Parent)
-		path, err := f.Path()
-		if err != nil {
-			t.Fatalf("Cannot read folder name: %v", err)
-		}
-		if path != folder {
-			t.Errorf("Wrong folder. expected: %v, got: %v", folder, path)
-		}
+		driverT.CheckFolderPath(t, f, folder)
 
 		return nil
 	}
