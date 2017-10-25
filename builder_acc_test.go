@@ -17,7 +17,7 @@ func TestBuilderAcc_default(t *testing.T) {
 		Check: func(artifacts []packer.Artifact) error {
 			d := driverT.NewTestDriver(t)
 			driverT.VMCheckDefault(t, d, getVM(t, d, artifacts), config["vm_name"].(string),
-				config["host"].(string), driverT.DefaultDatastore)
+				config["host"].(string), driverT.TestDatastore)
 			return nil
 		},
 	})
@@ -25,13 +25,13 @@ func TestBuilderAcc_default(t *testing.T) {
 
 func defaultConfig() map[string]interface{} {
 	config := map[string]interface{}{
-		"vcenter_server":      driverT.DefaultVCenterServer,
-		"username":            driverT.DefaultVCenterUsername,
-		"password":            driverT.DefaultVCenterPassword,
+		"vcenter_server":      driverT.TestVCenterServer,
+		"username":            driverT.TestVCenterUsername,
+		"password":            driverT.TestVCenterPassword,
 		"insecure_connection": true,
 
-		"template": driverT.DefaultTemplate,
-		"host":     driverT.DefaultHost,
+		"template": driverT.TestTemplate,
+		"host":     driverT.TestHost,
 
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
@@ -69,13 +69,13 @@ func TestBuilderAcc_folder(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: folderConfig(),
-		Check:    checkFolder(t, "folder1/folder2"),
+		Check:    checkFolder(t, driverT.TestFolder),
 	})
 }
 
 func folderConfig() string {
 	config := defaultConfig()
-	config["folder"] = "folder1/folder2"
+	config["folder"] = driverT.TestFolder
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
@@ -107,13 +107,13 @@ func TestBuilderAcc_resourcePool(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: resourcePoolConfig(),
-		Check:    checkResourcePool(t, "pool1/pool2"),
+		Check:    checkResourcePool(t, driverT.TestResourcePool),
 	})
 }
 
 func resourcePoolConfig() string {
 	config := defaultConfig()
-	config["resource_pool"] = "pool1/pool2"
+	config["resource_pool"] = driverT.TestResourcePool
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
@@ -128,27 +128,18 @@ func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
 
-		p := d.NewResourcePool(vmInfo.ResourcePool)
-		path, err := p.Path()
-		if err != nil {
-			t.Fatalf("Cannot read resource pool name: %v", err)
-		}
-		if path != pool {
-			t.Errorf("Wrong folder. expected: %v, got: %v", pool, path)
-		}
-
+		driverT.CheckResourcePoolPath(t, d.NewResourcePool(vmInfo.ResourcePool), pool)
 		return nil
 	}
 }
 
-// FIXME: why do we need this??? Why don't perform these checks in checkDefault?
 func TestBuilderAcc_datastore(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: datastoreConfig(),
 		Check:    func(artifacts []packer.Artifact) error {
 			d := driverT.NewTestDriver(t)
-			driverT.VMCheckDatastore(t, d, getVM(t, d, artifacts), driverT.DefaultDatastore)
+			driverT.VMCheckDatastore(t, d, getVM(t, d, artifacts), driverT.TestDatastore)
 			return nil
 		},
 	})
@@ -221,11 +212,11 @@ func TestBuilderAcc_hardware(t *testing.T) {
 
 func hardwareConfig() string {
 	config := defaultConfig()
-	config["CPUs"] = driverT.DefaultCPUs
-	config["CPU_reservation"] = driverT.DefaultCPUReservation
-	config["CPU_limit"] = driverT.DefaultCPULimit
-	config["RAM"] = driverT.DefaultRAM
-	config["RAM_reservation"] = driverT.DefaultRAMReservation
+	config["CPUs"] = driverT.TestCPUs
+	config["CPU_reservation"] = driverT.TestCPUReservation
+	config["CPU_limit"] = driverT.TestCPULimit
+	config["RAM"] = driverT.TestRAM
+	config["RAM_reservation"] = driverT.TestRAMReservation
 	config["linked_clone"] = true // speed up
 
 	return renderConfig(config)

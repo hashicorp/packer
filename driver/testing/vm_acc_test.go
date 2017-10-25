@@ -12,19 +12,19 @@ func initVMAccTest(t *testing.T) (d *driver.Driver, vm *driver.VirtualMachine, v
 	initDriverAcceptanceTest(t)
 	d = NewTestDriver(t)
 
-	template, err := d.FindVM(DefaultTemplate) // Don't destroy this VM!
+	template, err := d.FindVM(TestTemplate) // Don't destroy this VM!
 	if err != nil {
-		t.Fatalf("Cannot find template vm '%v': %v", DefaultTemplate, err)
+		t.Fatalf("Cannot find template vm '%v': %v", TestTemplate, err)
 	}
 
 	log.Printf("[DEBUG] Clonning VM")
 	vmName = NewVMName()
 	vm, err = template.Clone(&driver.CloneConfig{
 		Name: vmName,
-		Host: DefaultHost,
+		Host: TestHost,
 	})
 	if err != nil {
-		t.Fatalf("Cannot clone vm '%v': %v", DefaultTemplate, err)
+		t.Fatalf("Cannot clone vm '%v': %v", TestTemplate, err)
 	}
 
 	vmDestructor = func() {
@@ -53,7 +53,7 @@ func TestVMAcc_default(t *testing.T) {
 
 	// Run checks
 	log.Printf("[DEBUG] Running check function")
-	VMCheckDefault(t, d, vm, vmName, DefaultHost, DefaultDatastore)
+	VMCheckDefault(t, d, vm, vmName, TestHost, TestDatastore)
 }
 
 func TestVMAcc_hardware(t *testing.T) {
@@ -62,11 +62,11 @@ func TestVMAcc_hardware(t *testing.T) {
 
 	log.Printf("[DEBUG] Configuring the vm")
 	vm.Configure(&driver.HardwareConfig{
-		CPUs:           DefaultCPUs,
-		CPUReservation: DefaultCPUReservation,
-		CPULimit:       DefaultCPULimit,
-		RAM:            DefaultRAM,
-		RAMReservation: DefaultRAMReservation,
+		CPUs:           TestCPUs,
+		CPUReservation: TestCPUReservation,
+		CPULimit:       TestCPULimit,
+		RAM:            TestRAM,
+		RAMReservation: TestRAMReservation,
 	})
 	log.Printf("[DEBUG] Running check function")
 	VMCheckHardware(t, d, vm)

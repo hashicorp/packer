@@ -4,16 +4,19 @@ package testing
 const TestEnvVar = "VSPHERE_DRIVER_ACC"
 
 // Describe the environment to run tests in
-const DefaultDatastore = "datastore1"
-const DefaultTemplate = "alpine"
-const DefaultHost = "esxi-1.vsphere55.test"
-const DefaultVCenterServer = "vcenter.vsphere55.test"
-const DefaultVCenterUsername = "root"
-const DefaultVCenterPassword = "jetbrains"
+const TestDatastore = "datastore1"
+const TestTemplate = "alpine"
+const TestHost = "esxi-1.vsphere55.test"
+const TestVCenterServer = "vcenter.vsphere55.test"
+const TestVCenterUsername = "root"
+const TestVCenterPassword = "jetbrains"
 
-// Default hardware settings for
-const DefaultCPUs = 2
-const DefaultCPUReservation = 1000
-const DefaultCPULimit = 1500
-const DefaultRAM = 2048
-const DefaultRAMReservation = 1024
+// For test of hardware settings
+const TestCPUs = 2
+const TestCPUReservation = 1000
+const TestCPULimit = 1500
+const TestRAM = 2048
+const TestRAMReservation = 1024
+
+const TestFolder = "folder1/folder2"
+const TestResourcePool = "pool1/pool2"

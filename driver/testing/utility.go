@@ -7,13 +7,14 @@ import (
 	"os"
 	"testing"
 	"time"
+	"github.com/vmware/govmomi/govc/pool"
 )
 
 func NewTestDriver(t *testing.T) *driver.Driver {
 	d, err := driver.NewDriver(&driver.ConnectConfig{
-		VCenterServer:      DefaultVCenterServer,
-		Username:           DefaultVCenterUsername,
-		Password:           DefaultVCenterPassword,
+		VCenterServer:      TestVCenterServer,
+		Username:           TestVCenterUsername,
+		Password:           TestVCenterPassword,
 		InsecureConnection: true,
 	})
 	if err != nil {
@@ -33,6 +34,15 @@ func CheckDatastoreName(t *testing.T, ds *driver.Datastore, name string) {
 		t.Errorf("Cannot read datastore properties: %v", err)
 	case info.Name != name:
 		t.Errorf("Wrong datastore. expected: %v, got: %v", name, info.Name)
+	}
+}
+
+func CheckResourcePoolPath(t *testing.T, p *driver.ResourcePool, pool string) {
+	switch path, err := p.Path(); {
+	case err != nil:
+		t.Errorf("Cannot read resource pool name: %v", err)
+	case path != pool:
+		t.Errorf("Wrong folder. expected: %v, got: %v", pool, path)
 	}
 }
 
@@ -168,3 +178,5 @@ func VMCheckSnapshor(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) 
 		t.Errorf("VM should have a single snapshot. expected 2 disk layers, got %v", layers)
 	}
 }
+
+
