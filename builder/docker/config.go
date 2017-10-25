@@ -42,7 +42,6 @@ type Config struct {
 	// This is used to login to dockerhub to pull a private base container. For
 	// pushing to dockerhub, see the docker post-processors
 	Login           bool
-	LoginEmail      string `mapstructure:"login_email"`
 	LoginPassword   string `mapstructure:"login_password"`
 	LoginServer     string `mapstructure:"login_server"`
 	LoginUsername   string `mapstructure:"login_username"`
