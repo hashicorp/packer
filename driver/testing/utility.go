@@ -17,7 +17,7 @@ func NewTestDriver(t *testing.T) *driver.Driver {
 		InsecureConnection: true,
 	})
 	if err != nil {
-		t.Fatal("Cannot connect: ", err)
+		t.Fatalf("Cannot connect: %v", err)
 	}
 	return d
 }
@@ -28,11 +28,10 @@ func NewVMName() string {
 }
 
 func CheckDatastoreName(t *testing.T, ds *driver.Datastore, name string) {
-	info, err := ds.Info("name")
-	if err != nil {
-		t.Fatalf("Cannot read datastore properties: %v", err)
-	}
-	if info.Name != name {
+	switch info, err := ds.Info("name"); {
+	case err != nil:
+		t.Errorf("Cannot read datastore properties: %v", err)
+	case info.Name != name:
 		t.Errorf("Wrong datastore. expected: %v, got: %v", name, info.Name)
 	}
 }
@@ -53,7 +52,7 @@ func initDriverAcceptanceTest(t *testing.T) {
 }
 
 func VMCheckDefault(t *testing.T, d *driver.Driver, vm *driver.VirtualMachine,
-					name string, host string, datastore string) error {
+					name string, host string, datastore string) {
 	vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk")
 	if err != nil {
 		t.Fatalf("Cannot read VM properties: %v", err)
@@ -64,50 +63,45 @@ func VMCheckDefault(t *testing.T, d *driver.Driver, vm *driver.VirtualMachine,
 	}
 
 	f := d.NewFolder(vmInfo.Parent)
-	folderPath, err := f.Path()
-	if err != nil {
-		t.Fatalf("Cannot read folder name: %v", err)
-	}
-	if folderPath != "" {
+	switch folderPath, err := f.Path(); {
+	case err != nil:
+		t.Errorf("Cannot read folder name: %v", err)
+	case folderPath != "":
 		t.Errorf("Invalid folder: expected '/', got '%v'", folderPath)
 	}
 
 	h := d.NewHost(vmInfo.Runtime.Host)
-	hostInfo, err := h.Info("name")
-	if err != nil {
-		t.Fatal("Cannot read host properties: ", err)
-	}
-	if hostInfo.Name != host {
+	switch hostInfo, err := h.Info("name"); {
+	case err != nil:
+		t.Errorf("Cannot read host properties: %v", err)
+	case hostInfo.Name != host:
 		t.Errorf("Invalid host name: expected '%v', got '%v'", host, hostInfo.Name)
 	}
 
 	p := d.NewResourcePool(vmInfo.ResourcePool)
-	poolPath, err := p.Path()
-	if err != nil {
-		t.Fatalf("Cannot read resource pool name: %v", err)
-	}
-	if poolPath != "" {
+	switch poolPath, err := p.Path(); {
+	case err != nil:
+		t.Errorf("Cannot read resource pool name: %v", err)
+	case poolPath != "":
 		t.Error("Invalid resource pool: expected '/', got '%v'", poolPath)
 	}
 
+
 	dsr := vmInfo.Datastore[0].Reference()
 	ds := d.NewDatastore(&dsr)
-	dsInfo, err := ds.Info("name")
-	if err != nil {
-		t.Fatal("Cannot read datastore properties: ", err)
-	}
-	if dsInfo.Name != datastore {
+	switch dsInfo, err := ds.Info("name"); {
+	case err != nil:
+		t.Errorf("Cannot read datastore properties: %v", err)
+	case dsInfo.Name != datastore:
 		t.Errorf("Invalid datastore name: expected '%v', got '%v'", datastore, dsInfo.Name)
 	}
 
 	if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
 		t.Error("Not a full clone")
 	}
-
-	return nil
 }
 
-func VMCheckHardware(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) error {
+func VMCheckHardware(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) {
 	vmInfo, err := vm.Info("config")
 	if err != nil {
 		t.Fatalf("Cannot read VM properties: %v", err)
@@ -137,6 +131,40 @@ func VMCheckHardware(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) 
 	if ramReservation != 1024 {
 		t.Errorf("VM should have RAM reservation for 1024 MB, got %v", ramReservation)
 	}
+}
 
-	return nil
+func VMCheckTemplate(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) {
+	switch vmInfo, err := vm.Info("config.template"); {
+	case err != nil:
+		t.Errorf("Cannot read VM properties: %v", err)
+	case !vmInfo.Config.Template:
+		t.Error("Not a template")
+	}
+}
+
+func VMCheckDatastore(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine, name string) {
+	vmInfo, err := vm.Info("datastore")
+	if err != nil {
+		t.Fatalf("Cannot read VM properties: %v", err)
+	}
+
+	n := len(vmInfo.Datastore)
+	if n != 1 {
+		t.Fatalf("VM should have 1 datastore, got %v", n)
+	}
+
+	ds := d.NewDatastore(&vmInfo.Datastore[0])
+	CheckDatastoreName(t, ds, name)
+}
+
+func VMCheckSnapshor(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) {
+	vmInfo, err := vm.Info("layoutEx.disk")
+	if err != nil {
+		t.Fatalf("Cannot read VM properties: %v", err)
+	}
+
+	layers := len(vmInfo.LayoutEx.Disk[0].Chain)
+	if layers != 2 {
+		t.Errorf("VM should have a single snapshot. expected 2 disk layers, got %v", layers)
+	}
 }

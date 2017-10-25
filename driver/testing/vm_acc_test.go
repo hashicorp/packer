@@ -107,25 +107,20 @@ func TestVMAcc_running(t *testing.T) {
 }
 
 func TestVMAcc_running_snapshot(t *testing.T) {
-	_ /*d*/, vm, vmName, vmDestructor := initVMAccTest(t)
+	d, vm, vmName, vmDestructor := initVMAccTest(t)
 	defer vmDestructor()
 
 	stopper := startVM(t, vm, vmName)
 	defer stopper()
 
 	vm.CreateSnapshot("test-snapshot")
-	// TODO: check
+	VMCheckSnapshor(t, d, vm)
 }
 
 func TestVMAcc_template(t *testing.T) {
-	_ /*d*/, vm, vmName, vmDestructor := initVMAccTest(t)
+	d, vm, _ /*vmName*/, vmDestructor := initVMAccTest(t)
 	defer vmDestructor()
 
 	vm.ConvertToTemplate()
-	switch info, err := vm.Info("config"); {
-	case err != nil:
-		t.Fatalf("Cannot read VM properties for '%v': %v", vmName, err)
-	case !info.Config.Template:
-		t.Fatalf("'%v' seems not to be a template", vmName)
-	}
+	VMCheckTemplate(t, d, vm)
 }

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"testing"
+	"encoding/json"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"github.com/hashicorp/packer/packer"
-	"encoding/json"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	driverT "github.com/jetbrains-infra/packer-builder-vsphere/driver/testing"
+	"testing"
 )
 
 func TestBuilderAcc_default(t *testing.T) {
@@ -14,7 +14,12 @@ func TestBuilderAcc_default(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: renderConfig(config),
-		Check:    checkDefault(t, config["vm_name"].(string), config["host"].(string), "datastore1"),
+		Check: func(artifacts []packer.Artifact) error {
+			d := driverT.NewTestDriver(t)
+			driverT.VMCheckDefault(t, d, getVM(t, d, artifacts), config["vm_name"].(string),
+				config["host"].(string), driverT.DefaultDatastore)
+			return nil
+		},
 	})
 }
 
@@ -33,14 +38,6 @@ func defaultConfig() map[string]interface{} {
 	}
 	config["vm_name"] = driverT.NewVMName()
 	return config
-}
-
-func checkDefault(t *testing.T, name string, host string, datastore string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := driverT.NewTestDriver(t)
-		vm := getVM(t, d, artifacts)
-		return driverT.VMCheckDefault(t, d, vm, name, host, datastore)
-	}
 }
 
 func TestBuilderAcc_artifact(t *testing.T) {
@@ -149,7 +146,11 @@ func TestBuilderAcc_datastore(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: datastoreConfig(),
-		Check:    checkDatastore(t, "datastore1"), // on esxi-1.vsphere55.test
+		Check:    func(artifacts []packer.Artifact) error {
+			d := driverT.NewTestDriver(t)
+			driverT.VMCheckDatastore(t, d, getVM(t, d, artifacts), driverT.DefaultDatastore)
+			return nil
+		},
 	})
 }
 
@@ -159,30 +160,8 @@ func datastoreConfig() string {
 	return renderConfig(config)
 }
 
-func checkDatastore(t *testing.T, name string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := driverT.NewTestDriver(t)
-		vm := getVM(t, d, artifacts)
-
-		vmInfo, err := vm.Info("datastore")
-		if err != nil {
-			t.Fatalf("Cannot read VM properties: %v", err)
-		}
-
-		n := len(vmInfo.Datastore)
-		if n != 1 {
-			t.Fatalf("VM should have 1 datastore, got %v", n)
-		}
-
-		ds := d.NewDatastore(&vmInfo.Datastore[0])
-		driverT.CheckDatastoreName(t, ds, name)
-
-		return nil
-	}
-}
-
 func TestBuilderAcc_multipleDatastores(t *testing.T) {
-	t.Skip("test must fail") // FIXME
+	t.Skip("test must fail")
 
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -232,7 +211,11 @@ func TestBuilderAcc_hardware(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: hardwareConfig(),
-		Check:    checkHardware(t),
+		Check:    func(artifacts []packer.Artifact) error {
+			d := driverT.NewTestDriver(t)
+			driverT.VMCheckHardware(t, d, getVM(t, d, artifacts))
+			return nil
+		},
 	})
 }
 
@@ -246,14 +229,6 @@ func hardwareConfig() string {
 	config["linked_clone"] = true // speed up
 
 	return renderConfig(config)
-}
-
-func checkHardware(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := driverT.NewTestDriver(t)
-		vm := getVM(t, d, artifacts)
-		return driverT.VMCheckHardware(t, d, vm)
-	}
 }
 
 func TestBuilderAcc_RAMReservation(t *testing.T) {
@@ -309,7 +284,11 @@ func TestBuilderAcc_snapshot(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: snapshotConfig(),
-		Check:    checkSnapshot(t),
+		Check:    func(artifacts []packer.Artifact) error {
+			d := driverT.NewTestDriver(t)
+			driverT.VMCheckSnapshor(t, d, getVM(t, d, artifacts))
+			return nil
+		},
 	})
 }
 
@@ -319,30 +298,15 @@ func snapshotConfig() string {
 	return renderConfig(config)
 }
 
-func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := driverT.NewTestDriver(t)
-
-		vm := getVM(t, d, artifacts)
-		vmInfo, err := vm.Info("layoutEx.disk")
-		if err != nil {
-			t.Fatalf("Cannot read VM properties: %v", err)
-		}
-
-		layers := len(vmInfo.LayoutEx.Disk[0].Chain)
-		if layers != 2 {
-			t.Errorf("VM should have a single snapshot. expected 2 disk layers, got %v", layers)
-		}
-
-		return nil
-	}
-}
-
 func TestBuilderAcc_template(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: templateConfig(),
-		Check:    checkTemplate(t),
+		Check: func(artifacts []packer.Artifact) error {
+			d := driverT.NewTestDriver(t)
+			driverT.VMCheckTemplate(t, d, getVM(t, d, artifacts))
+			return nil
+		},
 	})
 }
 
@@ -351,24 +315,6 @@ func templateConfig() string {
 	config["convert_to_template"] = true
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
-}
-
-func checkTemplate(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := driverT.NewTestDriver(t)
-
-		vm := getVM(t, d, artifacts)
-		vmInfo, err := vm.Info("config.template")
-		if err != nil {
-			t.Fatalf("Cannot read VM properties: %v", err)
-		}
-
-		if vmInfo.Config.Template != true {
-			t.Error("Not a template")
-		}
-
-		return nil
-	}
 }
 
 func renderConfig(config map[string]interface{}) string {
