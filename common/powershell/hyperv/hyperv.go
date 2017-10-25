@@ -202,8 +202,11 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
-		return err
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10)); err != nil {
+			return err
+		}
+		
+		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
 param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
@@ -217,15 +220,11 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
-
-		if err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName); err != nil {
 			return err
 		}
 
-		err = DisableAutomaticCheckpoints(vmName)
-
-		if err != nil {
+		if err := DisableAutomaticCheckpoints(vmName); err != nil {
 			return err
 		}
 
@@ -368,21 +367,18 @@ if ($vm) {
 
 func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
 	if cloneFromVmName != "" {
-		err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots)
-		if err != nil {
+		if err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots); err != nil {
 			return err
 		}
 	}
 
 	if cloneFromVmxcPath != "" {
-		err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath)
-		if err != nil {
+		if err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath); err != nil {
 			return err
 		}
 	}
 
-	err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName)
-	if err != nil {
+	if err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
 		return err
 	}
 
