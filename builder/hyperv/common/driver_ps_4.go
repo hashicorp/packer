@@ -291,9 +291,7 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 		return err
 	}
 
-	res := strings.TrimSpace(cmdOut)
-
-	if res == "False" {
+	if powershell.IsFalse(cmdOut) {
 		err := fmt.Errorf("%s", "PS Hyper-V module is not loaded. Make sure Hyper-V feature is on.")
 		return err
 	}
@@ -318,8 +316,7 @@ return $principal.IsInRole($hypervrole)
 		return false, err
 	}
 
-	res := strings.TrimSpace(cmdOut)
-	return powershell.IsTrue(res), nil
+	return powershell.IsTrue(cmdOut), nil
 }
 
 func (d *HypervPS4Driver) verifyHypervPermissions() error {
