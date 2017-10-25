@@ -2,6 +2,7 @@ package ovf
 
 import (
 	"fmt"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
@@ -49,7 +50,7 @@ func (s *StepImport) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Say("Unregistering and deleting imported VM...")
+	ui.Say("Deregistering and deleting imported VM...")
 	if err := driver.Delete(s.vmName); err != nil {
 		ui.Error(fmt.Sprintf("Error deleting VM: %s", err))
 	}
