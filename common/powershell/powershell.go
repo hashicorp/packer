@@ -18,11 +18,11 @@ const (
 )
 
 func IsTrue(s string) bool {
-	return s == powerShellTrue
+	return strings.TrimSpace(s) == powerShellTrue
 }
 
 func IsFalse(s string) bool {
-	return s == powerShellFalse
+	return strings.TrimSpace(s) == powerShellFalse
 }
 
 type PowerShellCmd struct {
