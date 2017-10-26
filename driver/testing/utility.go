@@ -32,25 +32,25 @@ func CheckDatastoreName(t *testing.T, ds *driver.Datastore, datastore string) {
 	case err != nil:
 		t.Errorf("Cannot read datastore properties: %v", err)
 	case info.Name != datastore:
-		t.Errorf("Wrong datastore. expected: %v, got: %v", datastore, info.Name)
+		t.Errorf("Wrong name: expected '%v', got: '%v'", datastore, info.Name)
 	}
 }
 
 func CheckResourcePoolPath(t *testing.T, p *driver.ResourcePool, pool string) {
 	switch path, err := p.Path(); {
 	case err != nil:
-		t.Errorf("Cannot read resource pool name: %v", err)
+		t.Errorf("Cannot read resource pool path: %v", err)
 	case path != pool:
-		t.Errorf("Wrong folder. expected: %v, got: %v", pool, path)
+		t.Errorf("Wrong name: expected '%v', got: '%v'", pool, path)
 	}
 }
 
 func CheckFolderPath(t *testing.T, f *driver.Folder, folder string) {
 	switch path, err := f.Path(); {
 	case err != nil:
-		t.Fatalf("Cannot read folder name: %v", err)
+		t.Fatalf("Cannot read folder path: %v", err)
 	case path != folder:
-		t.Errorf("Wrong folder. expected: %v, got: %v", folder, path)
+		t.Errorf("Wrong path: expected '%v', got: '%v'", folder, path)
 	}
 }
 

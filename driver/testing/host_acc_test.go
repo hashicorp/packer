@@ -10,12 +10,12 @@ func TestHostAcc(t *testing.T) {
 	d := NewTestDriver(t)
 	host, err := d.FindHost(TestHost)
 	if err != nil {
-		t.Fatalf("Cannot find the default datastore '%v': %v", TestDatastore, err)
+		t.Fatalf("Cannot find the default host '%v': %v", TestDatastore, err)
 	}
 	switch info, err := host.Info("name"); {
 	case err != nil:
-		t.Errorf("Cannot read datastore properties: %v", err)
+		t.Errorf("Cannot read host properties: %v", err)
 	case info.Name != TestHost:
-		t.Errorf("Wrong datastore. expected: %v, got: %v", TestHost, info.Name)
+		t.Errorf("Wrong host name: expected '%v', got: '%v'", TestHost, info.Name)
 	}
 }
