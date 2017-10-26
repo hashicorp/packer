@@ -10,6 +10,8 @@ import (
 	"os"
 	"runtime"
 	"testing"
+
+	getter "github.com/hashicorp/go-getter"
 )
 
 func TestDownloadClientVerifyChecksum(t *testing.T) {
@@ -89,7 +91,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
-		Hash:       HashForType("md5"),
+		Hash:       getter.HashForType("md5"),
 		Checksum:   checksum,
 	})
 	if _, err := client.Get(); err == nil {
@@ -113,7 +115,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
-		Hash:       HashForType("md5"),
+		Hash:       getter.HashForType("md5"),
 		Checksum:   checksum,
 	})
 	path, err := client.Get()
@@ -143,7 +145,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: "./test-fixtures/root/another.txt",
-		Hash:       HashForType("md5"),
+		Hash:       getter.HashForType("md5"),
 		Checksum:   checksum,
 	})
 	path, err := client.Get()
@@ -284,64 +286,6 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 	}
 }
 
-func TestHashForType(t *testing.T) {
-	if h := HashForType("md5"); h == nil {
-		t.Fatalf("md5 hash is nil")
-	} else {
-		h.Write([]byte("foo"))
-		result := h.Sum(nil)
-
-		expected := "acbd18db4cc2f85cedef654fccc4a4d8"
-		actual := hex.EncodeToString(result)
-		if actual != expected {
-			t.Fatalf("bad hash: %s", actual)
-		}
-	}
-
-	if h := HashForType("sha1"); h == nil {
-		t.Fatalf("sha1 hash is nil")
-	} else {
-		h.Write([]byte("foo"))
-		result := h.Sum(nil)
-
-		expected := "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"
-		actual := hex.EncodeToString(result)
-		if actual != expected {
-			t.Fatalf("bad hash: %s", actual)
-		}
-	}
-
-	if h := HashForType("sha256"); h == nil {
-		t.Fatalf("sha256 hash is nil")
-	} else {
-		h.Write([]byte("foo"))
-		result := h.Sum(nil)
-
-		expected := "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"
-		actual := hex.EncodeToString(result)
-		if actual != expected {
-			t.Fatalf("bad hash: %s", actual)
-		}
-	}
-
-	if h := HashForType("sha512"); h == nil {
-		t.Fatalf("sha512 hash is nil")
-	} else {
-		h.Write([]byte("foo"))
-		result := h.Sum(nil)
-
-		expected := "f7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7"
-		actual := hex.EncodeToString(result)
-		if actual != expected {
-			t.Fatalf("bad hash: %s", actual)
-		}
-	}
-
-	if HashForType("fake") != nil {
-		t.Fatalf("fake hash is not nil")
-	}
-}
-
 // TestDownloadFileUrl tests a special case where we use a local file for
 // iso_url. In this case we can still verify the checksum but we should not
 // delete the file if the checksum fails. Instead we'll just error and let the
@@ -367,7 +311,7 @@ func TestDownloadFileUrl(t *testing.T) {
 		Url: source,
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
-		Hash:     HashForType("sha256"),
+		Hash:     getter.HashForType("sha256"),
 		CopyFile: false,
 	}
 

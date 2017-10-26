@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -49,7 +50,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 					errs, errors.New("Due to large file sizes, an iso_checksum is required"))
 				return warnings, errs
 			} else {
-				if h := HashForType(c.ISOChecksumType); h == nil {
+				if h := getter.HashForType(c.ISOChecksumType); h == nil {
 					errs = append(
 						errs, fmt.Errorf("Unsupported checksum type: %s", c.ISOChecksumType))
 					return warnings, errs

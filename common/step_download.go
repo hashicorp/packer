@@ -86,7 +86,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			Url:        url,
 			TargetPath: targetPath,
 			CopyFile:   false,
-			Hash:       HashForType(s.ChecksumType),
+			Hash:       getter.HashForType(s.ChecksumType),
 			Checksum:   checksum,
 			UserAgent:  "Packer",
 		}

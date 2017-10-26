@@ -66,23 +66,6 @@ func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 	return &DownloadClient{config: c}
 }
 
-// HashForType returns the Hash implementation for the given string
-// type, or nil if the type is not supported.
-func HashForType(t string) hash.Hash {
-	switch t {
-	case "md5":
-		return md5.New()
-	case "sha1":
-		return sha1.New()
-	case "sha256":
-		return sha256.New()
-	case "sha512":
-		return sha512.New()
-	default:
-		return nil
-	}
-}
-
 // A downloader is responsible for actually taking a remote URL and
 // downloading it.
 type Downloader interface {
@@ -108,7 +91,7 @@ func (d *DownloadClient) Get() (string, error) {
 		Mode: getter.ClientModeFile,
 		Dir:  false}
 
-	err := gc.Get()
+	err = gc.Get()
 	if err != nil {
 		log.Printf("Error Getting URL: %s", err)
 		return "", err
