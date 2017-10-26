@@ -283,7 +283,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// we were expecting it.
 		if cmd.ExitStatus == packer.CmdDisconnect {
 			if !p.config.ExpectDisconnect {
-				return fmt.Errorf("Script disconnected unexpectedly.")
+				return fmt.Errorf("Script disconnected unexpectedly. " +
+					"Try adding \"expect_disconnect\": true in the shell provisioner parameters.")
 			}
 		} else if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)
