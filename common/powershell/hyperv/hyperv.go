@@ -205,7 +205,7 @@ if ($harddrivePath){
 		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10)); err != nil {
 			return err
 		}
-		
+
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
