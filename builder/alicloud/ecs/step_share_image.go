@@ -19,11 +19,11 @@ func (s *setpShareAlicloudImage) Run(state multistep.StateBag) multistep.StepAct
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	alicloudImages := state.Get("alicloudimages").(map[string]string)
-	for copyedRegion, copyedImageId := range alicloudImages {
+	for copiedRegion, copiedImageId := range alicloudImages {
 		err := client.ModifyImageSharePermission(
 			&ecs.ModifyImageSharePermissionArgs{
-				RegionId:      common.Region(copyedRegion),
-				ImageId:       copyedImageId,
+				RegionId:      common.Region(copiedRegion),
+				ImageId:       copiedImageId,
 				AddAccount:    s.AlicloudImageShareAccounts,
 				RemoveAccount: s.AlicloudImageUNShareAccounts,
 			})
@@ -44,11 +44,11 @@ func (s *setpShareAlicloudImage) Cleanup(state multistep.StateBag) {
 		client := state.Get("client").(*ecs.Client)
 		alicloudImages := state.Get("alicloudimages").(map[string]string)
 		ui.Say("Restoring image share permission because cancellations or error...")
-		for copyedRegion, copyedImageId := range alicloudImages {
+		for copiedRegion, copiedImageId := range alicloudImages {
 			err := client.ModifyImageSharePermission(
 				&ecs.ModifyImageSharePermissionArgs{
-					RegionId:      common.Region(copyedRegion),
-					ImageId:       copyedImageId,
+					RegionId:      common.Region(copiedRegion),
+					ImageId:       copiedImageId,
 					AddAccount:    s.AlicloudImageUNShareAccounts,
 					RemoveAccount: s.AlicloudImageShareAccounts,
 				})
