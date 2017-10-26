@@ -68,7 +68,7 @@ func (p *HypervProvider) Process(ui packer.Ui, artifact packer.Artifact, dir str
 			}
 		}
 
-		ui.Message(fmt.Sprintf("Copyed %s to %s", path, dstPath))
+		ui.Message(fmt.Sprintf("Copied %s to %s", path, dstPath))
 	}
 
 	return
