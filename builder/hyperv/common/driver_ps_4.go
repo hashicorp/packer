@@ -291,9 +291,7 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 		return err
 	}
 
-	res := strings.TrimSpace(cmdOut)
-
-	if res == "False" {
+	if powershell.IsFalse(cmdOut) {
 		err := fmt.Errorf("%s", "PS Hyper-V module is not loaded. Make sure Hyper-V feature is on.")
 		return err
 	}
@@ -301,23 +299,36 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 	return nil
 }
 
+func (d *HypervPS4Driver) isCurrentUserAHyperVAdministrator() (bool, error) {
+	//SID:S-1-5-32-578 = 'BUILTIN\Hyper-V Administrators'
+	//https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
+
+	var script = `
+$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = new-object System.Security.Principal.WindowsPrincipal($identity)
+$hypervrole = [System.Security.Principal.SecurityIdentifier]"S-1-5-32-578"
+return $principal.IsInRole($hypervrole)
+`
+
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script)
+	if err != nil {
+		return false, err
+	}
+
+	return powershell.IsTrue(cmdOut), nil
+}
+
 func (d *HypervPS4Driver) verifyHypervPermissions() error {
 
 	log.Printf("Enter method: %s", "verifyHypervPermissions")
 
-	//SID:S-1-5-32-578 = 'BUILTIN\Hyper-V Administrators'
-	//https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
-	hypervAdminCmd := "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('S-1-5-32-578')"
-
-	var ps powershell.PowerShellCmd
-	cmdOut, err := ps.Output(hypervAdminCmd)
+	hyperVAdmin, err := d.isCurrentUserAHyperVAdministrator()
 	if err != nil {
-		return err
+		log.Printf("Error discovering if current is is a Hyper-V Admin: %s", err)
 	}
+	if !hyperVAdmin {
 
-	res := strings.TrimSpace(cmdOut)
-
-	if res == "False" {
 		isAdmin, _ := powershell.IsCurrentUserAnAdministrator()
 
 		if !isAdmin {
