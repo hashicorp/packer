@@ -77,7 +77,7 @@ func (d *DownloadClient) Get() (string, error) {
 	checksumMatches := getter.CompareChecksum(d.config.TargetPath,
 		d.config.Hash, d.config.Checksum)
 	if checksumMatches {
-		log.Printf("No need to download anew; given checksum matches the" +
+		log.Printf("No need to download anew; given checksum matches the " +
 			"file currently at dst.")
 		return d.config.TargetPath, nil
 	}
@@ -87,7 +87,7 @@ func (d *DownloadClient) Get() (string, error) {
 	srcPlusChecksum := fmt.Sprintf("%s?checksum=%s:%s", d.config.Url,
 		d.config.HashType, hex.EncodeToString(d.config.Checksum))
 
-	// Download file
+	// Download fi
 	gc := getter.Client{
 		Src:  srcPlusChecksum,
 		Dst:  d.config.TargetPath,
