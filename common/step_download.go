@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -86,7 +87,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			Url:        url,
 			TargetPath: targetPath,
 			CopyFile:   false,
-			Hash:       getter.HashForType(s.ChecksumType),
+			Hash:       getter.Client.HashForType(s.ChecksumType),
 			Checksum:   checksum,
 			UserAgent:  "Packer",
 		}
@@ -131,9 +132,6 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 		downloadCompleteCh <- err
 	}()
 
-	progressTicker := time.NewTicker(5 * time.Second)
-	defer progressTicker.Stop()
-
 	for {
 		select {
 		case err := <-downloadCompleteCh:
@@ -142,11 +140,6 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 			}
 
 			return path, nil, true
-		case <-progressTicker.C:
-			progress := download.PercentProgress()
-			if progress >= 0 {
-				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
-			}
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				ui.Say("Interrupt received. Cancelling download...")
