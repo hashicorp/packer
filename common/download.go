@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/hex"
 	"hash"
 	"log"
 	"net/url"
@@ -68,6 +69,17 @@ func (d *DownloadClient) Get() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Printf("Megan checksum is %s", hex.EncodeToString(d.config.Checksum))
+	log.Printf("Megan path is %s", d.config.TargetPath)
+	log.Printf("Megan hash is %s", d.config.Hash)
+	// checksumMatches := getter.CompareChecksum(d.config.TargetPath)
+	// if checksumMatches {
+	// 	// don't bother re-downloading;
+	// 	// file already exists and checksum is good.
+	// 	log.Printf("No need to download; checksum matches.")
+	// 	return d.config.TargetPath, nil
+	// }
+	// srcPlusChecksum := fmt.Sprintf("%s?checksum="d.config.Url)
 	gc := getter.Client{
 		Src:  d.config.Url,
 		Dst:  d.config.TargetPath,
