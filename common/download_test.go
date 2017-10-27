@@ -33,6 +33,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 
 	config := &DownloadConfig{
 		Hash:     md5.New(),
+		HashType: "md5",
 		Checksum: checksum,
 	}
 
@@ -92,6 +93,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
 		Hash:       getter.HashForType("md5"),
+		HashType:   "md5",
 		Checksum:   checksum,
 	})
 	if _, err := client.Get(); err == nil {
@@ -116,6 +118,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
 		Hash:       getter.HashForType("md5"),
+		HashType:   "md5",
 		Checksum:   checksum,
 	})
 	path, err := client.Get()
@@ -146,6 +149,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: "./test-fixtures/root/another.txt",
 		Hash:       getter.HashForType("md5"),
+		HashType:   "md5",
 		Checksum:   checksum,
 	})
 	path, err := client.Get()
@@ -312,6 +316,7 @@ func TestDownloadFileUrl(t *testing.T) {
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
 		Hash:     getter.HashForType("sha256"),
+		HashType: "sha256",
 		CopyFile: false,
 	}
 

@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/hex"
+	"fmt"
 	"hash"
 	"log"
 	"net/url"
@@ -27,6 +28,9 @@ type DownloadConfig struct {
 
 	// The hashing implementation to use to checksum the downloaded file.
 	Hash hash.Hash
+
+	// The type of hashing implementation to use; e.g. "md5"
+	HashType string
 
 	// The checksum for the downloaded file. The hash implementation configuration
 	// for the downloader will be used to verify with this checksum after
@@ -69,19 +73,23 @@ func (d *DownloadClient) Get() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Printf("Megan checksum is %s", hex.EncodeToString(d.config.Checksum))
-	log.Printf("Megan path is %s", d.config.TargetPath)
-	log.Printf("Megan hash is %s", d.config.Hash)
-	// checksumMatches := getter.CompareChecksum(d.config.TargetPath)
-	// if checksumMatches {
-	// 	// don't bother re-downloading;
-	// 	// file already exists and checksum is good.
-	// 	log.Printf("No need to download; checksum matches.")
-	// 	return d.config.TargetPath, nil
-	// }
-	// srcPlusChecksum := fmt.Sprintf("%s?checksum="d.config.Url)
+	// Check that the fild hasn't already been downloaded
+	checksumMatches := getter.CompareChecksum(d.config.TargetPath,
+		d.config.Hash, d.config.Checksum)
+	if checksumMatches {
+		log.Printf("No need to download anew; given checksum matches the" +
+			"file currently at dst.")
+		return d.config.TargetPath, nil
+	}
+	d.config.Hash.Reset()
+
+	// Format src string with checksum for go-getter
+	srcPlusChecksum := fmt.Sprintf("%s?checksum=%s:%s", d.config.Url,
+		d.config.HashType, hex.EncodeToString(d.config.Checksum))
+
+	// Download file
 	gc := getter.Client{
-		Src:  d.config.Url,
+		Src:  srcPlusChecksum,
 		Dst:  d.config.TargetPath,
 		Pwd:  pwd,
 		Mode: getter.ClientModeFile,
