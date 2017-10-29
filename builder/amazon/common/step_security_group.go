@@ -92,11 +92,19 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Authorize the SSH access for the security group
 	groupRules := &ec2.AuthorizeSecurityGroupIngressInput{
-		GroupId:    groupResp.GroupId,
-		IpProtocol: aws.String("tcp"),
-		FromPort:   aws.Int64(int64(port)),
-		ToPort:     aws.Int64(int64(port)),
-		CidrIp:     aws.String(s.TemporarySGSourceCidr),
+		GroupId: groupResp.GroupId,
+		IpPermissions: []*ec2.IpPermission{
+			{
+				FromPort: aws.Int64(int64(port)),
+				ToPort:   aws.Int64(int64(port)),
+				IpRanges: []*ec2.IpRange{
+					{
+						CidrIp: aws.String(s.TemporarySGSourceCidr),
+					},
+				},
+				IpProtocol: aws.String("tcp"),
+			},
+		},
 	}
 
 	ui.Say(fmt.Sprintf(
