@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/digitalocean/godo"
@@ -12,25 +13,25 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-type stepSnapshot struct{}
+type stepSnapshotDroplet struct{}
 
-func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshotDroplet) Run(state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	dropletId := state.Get("droplet_id").(int)
 
-	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
+	ui.Say(fmt.Sprintf("Creating droplet snapshot: %v", c.SnapshotName))
 	action, _, err := client.DropletActions.Snapshot(context.TODO(), dropletId, c.SnapshotName)
 	if err != nil {
-		err := fmt.Errorf("Error creating snapshot: %s", err)
+		err := fmt.Errorf("Error creating droplet snapshot: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// With the pending state over, verify that we're in the active state
-	ui.Say("Waiting for snapshot to complete...")
+	ui.Say("Waiting for droplet snapshot to complete...")
 	if err := waitForActionState(godo.ActionCompleted, dropletId, action.ID,
 		client, 20*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
@@ -45,13 +46,13 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	// 20 minutes.
 	if err := waitForDropletUnlocked(client, dropletId, 20*time.Minute); err != nil {
 		// If we get an error the first time, actually report it
-		err := fmt.Errorf("Error shutting down droplet: %s", err)
+		err := fmt.Errorf("Error waiting for droplet to unlock: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	log.Printf("Looking up snapshot ID for snapshot: %s", c.SnapshotName)
+	log.Printf("Looking up snapshot ID for droplet snapshot: %s", c.SnapshotName)
 	images, _, err := client.Droplets.Snapshots(context.TODO(), dropletId, nil)
 	if err != nil {
 		err := fmt.Errorf("Error looking up snapshot ID: %s", err)
@@ -104,13 +105,15 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	log.Printf("Snapshot image ID: %d", imageId)
-	state.Put("snapshot_image_id", imageId)
-	state.Put("snapshot_name", c.SnapshotName)
-	state.Put("regions", snapshotRegions)
+	state.Put("droplet_snapshot", snapshot{
+		id:      strconv.Itoa(imageId),
+		name:    c.SnapshotName,
+		regions: snapshotRegions,
+	})
 
 	return multistep.ActionContinue
 }
 
-func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
+func (s *stepSnapshotDroplet) Cleanup(state multistep.StateBag) {
 	// no cleanup
 }

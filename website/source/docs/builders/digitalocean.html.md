@@ -86,6 +86,41 @@ builder.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
 
+-   `volumes` (array of objects) - Block storage volumes to attach to the
+    droplet and to snapshot after the build.
+    Example:
+
+    ```json
+    {
+        "volumes": [
+            {
+                "size": 10
+            },
+            {
+                "size": 20,
+                "volume_name": "packer-vol",
+                "snapshot_name": "vol-{{timestamp}}"
+            }
+        ]
+    }
+    ```
+
+    -   `size` (number) - The size of the volume in GiB. Required.
+
+    -   `snapshot_name` (string) - The name of the resulting snapshot that will
+        appear in your account. This must be unique. The default is to append
+        `-volN` to the droplet snapshot name, where `N` is the index of the
+        volume in the array.
+
+    -   `base_snapshot_id` (string) - The ID of an existing volume snapshot to
+        create the volume from. If left empty, DigitalOcean creates a blank,
+        unformatted volume.
+
+    -   `volume_name` (string) - The name assigned to the volume during the
+        build process. This affects the name of the device in the `/dev/disk`
+        directory. See DigitalOcean's [How To Use Block Storage](https://www.digitalocean.com/community/tutorials/how-to-use-block-storage-on-digitalocean)
+        tutorial for details.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own

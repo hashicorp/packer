@@ -15,6 +15,10 @@ func testConfig() map[string]interface{} {
 		"size":         "512mb",
 		"ssh_username": "root",
 		"image":        "foo",
+		"volumes": []map[string]interface{}{
+			{"size": 20},
+			{"size": 40},
+		},
 	}
 }
 
@@ -322,4 +326,19 @@ func TestBuilderPrepare_DropletName(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
+}
+
+func TestBuilderPrepare_Volumes(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	delete(config["volumes"].([]map[string]interface{})[0], "size")
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatalf("should error")
+	}
 }
