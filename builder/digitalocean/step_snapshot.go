@@ -61,6 +61,16 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	var imageId int
+	if len(images) == 1 {
+		imageId = images[0].ID
+	} else {
+		err := errors.New("Couldn't find snapshot to get the image ID. Bug?")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
 	if len(c.SnapshotRegions) > 0 {
 		regionSet := make(map[string]struct{})
 		regions := make([]string, 0, len(c.SnapshotRegions))
@@ -83,7 +93,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 				"type":   "transfer",
 				"region": snapshotRegions[transfer],
 			}
-			imageTransfer, _, err := client.ImageActions.Transfer(context.TODO(), images[0].ID, transferRequest)
+			imageTransfer, _, err := client.ImageActions.Transfer(context.TODO(), imageId, transferRequest)
 			if err != nil {
 				err := fmt.Errorf("Error transferring snapshot: %s", err)
 				state.Put("error", err)
@@ -100,16 +110,6 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 				return multistep.ActionHalt
 			}
 		}
-	}
-
-	var imageId int
-	if len(images) == 1 {
-		imageId = images[0].ID
-	} else {
-		err := errors.New("Couldn't find snapshot to get the image ID. Bug?")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
 	}
 
 	log.Printf("Snapshot image ID: %d", imageId)
