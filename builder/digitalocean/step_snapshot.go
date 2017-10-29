@@ -19,7 +19,6 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
 	dropletId := state.Get("droplet_id").(int)
-	var snapshotRegions []string
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
 	action, _, err := client.DropletActions.Snapshot(context.TODO(), dropletId, c.SnapshotName)
@@ -71,27 +70,19 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	snapshotRegions := []string{c.Region}
 	if len(c.SnapshotRegions) > 0 {
-		regionSet := make(map[string]struct{})
-		regions := make([]string, 0, len(c.SnapshotRegions))
-		regionSet[c.Region] = struct{}{}
+		seenRegions := map[string]struct{}{c.Region: {}}
 		for _, region := range c.SnapshotRegions {
-			// If we already saw the region, then don't look again
-			if _, ok := regionSet[region]; ok {
+			if _, ok := seenRegions[region]; ok {
 				continue
 			}
+			seenRegions[region] = struct{}{}
+			snapshotRegions = append(snapshotRegions, region)
 
-			// Mark that we saw the region
-			regionSet[region] = struct{}{}
-
-			regions = append(regions, region)
-		}
-		snapshotRegions = regions
-
-		for transfer := range snapshotRegions {
 			transferRequest := &godo.ActionRequest{
 				"type":   "transfer",
-				"region": snapshotRegions[transfer],
+				"region": region,
 			}
 			imageTransfer, _, err := client.ImageActions.Transfer(context.TODO(), imageId, transferRequest)
 			if err != nil {
