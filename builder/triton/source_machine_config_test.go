@@ -24,13 +24,6 @@ func TestSourceMachineConfig_Prepare(t *testing.T) {
 	if errs == nil {
 		t.Fatalf("should error: %#v", sc)
 	}
-
-	sc = testSourceMachineConfig(t)
-	sc.MachineImage = ""
-	errs = sc.Prepare(nil)
-	if errs == nil {
-		t.Fatalf("should error: %#v", sc)
-	}
 }
 
 func testSourceMachineConfig(t *testing.T) SourceMachineConfig {
