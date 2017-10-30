@@ -41,18 +41,19 @@ func stringInSlice(s []string, searchstr string) bool {
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
 
-	session, err := accessConfig.Session()
-	if err != nil {
-		errs = append(errs, err)
+	if accessConfig != nil {
+		session, err := accessConfig.Session()
+		if err != nil {
+			errs = append(errs, err)
+		}
+		region := *session.Config.Region
+		if stringInSlice(c.AMIRegions, region) {
+			errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
+		}
 	}
-	region := *session.Config.Region
 
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
-	}
-
-	if stringInSlice(c.AMIRegions, region) {
-		errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
 	}
 
 	if len(c.AMIRegions) > 0 {
