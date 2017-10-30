@@ -32,7 +32,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		return c.session, nil
 	}
 
-	region, err := c.Region()
+	region, err := c.region()
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 // Region returns the aws.Region object for access to AWS services, requesting
 // the region from the instance metadata if possible.
-func (c *AccessConfig) Region() (string, error) {
+func (c *AccessConfig) region() (string, error) {
 	if c.RawRegion != "" {
 		if !c.SkipValidation {
 			if valid := ValidateRegion(c.RawRegion); !valid {

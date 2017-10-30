@@ -29,17 +29,10 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	manifestPath := state.Get("manifest_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	region, err := config.Region()
-	if err != nil {
-		err := fmt.Errorf("Error retrieving region: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	accessKey := config.AccessKey
 	secretKey := config.SecretKey
 	session, err := config.AccessConfig.Session()
+	region := *session.Config.Region
 	accessConfig := session.Config
 	var token string
 	if err == nil && accessKey == "" && secretKey == "" {

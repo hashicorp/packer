@@ -121,7 +121,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var warns []string
 
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 
 	for _, mounts := range b.config.ChrootMounts {
 		if len(mounts) != 3 {
