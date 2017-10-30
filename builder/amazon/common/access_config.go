@@ -32,18 +32,17 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		return c.session, nil
 	}
 
-	region, err := c.region()
-	if err != nil {
-		return nil, err
-	}
-
 	if c.ProfileName != "" {
 		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
 			log.Printf("Set env error: %s", err)
 		}
 	}
 
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+
+	if region := c.region(); region != "" {
+		config = config.WithRegion(region)
+	}
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -72,6 +71,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 			return c.MFACode, nil
 		}
 	}
+	var err error
 	c.session, err = session.NewSessionWithOptions(opts)
 	if err != nil {
 		return nil, err
@@ -81,25 +81,20 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 }
 
 // region returns either the region from config or region from metadata service
-func (c *AccessConfig) region() (string, error) {
+func (c *AccessConfig) region() string {
 	if c.RawRegion != "" {
-		if !c.SkipValidation {
-			if valid := ValidateRegion(c.RawRegion); !valid {
-				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
-			}
-		}
-		return c.RawRegion, nil
+		return c.RawRegion
 	}
 
 	sess := session.New()
 	ec2meta := ec2metadata.New(sess)
-	identity, err := ec2meta.GetInstanceIdentityDocument()
+	region, err := ec2meta.Region()
 	if err != nil {
 		log.Println("Error getting region from metadata service, "+
 			"probably because we're not running on AWS.", err)
-		return "", nil
+		return ""
 	}
-	return identity.Region, nil
+	return region
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
