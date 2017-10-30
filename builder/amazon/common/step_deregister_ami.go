@@ -25,10 +25,8 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui := state.Get("ui").(packer.Ui)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	regions := s.Regions
-	if len(regions) == 0 {
-		regions = append(regions, *ec2conn.Config.Region)
-	}
+	// Add the session region to list of regions will will deregister AMIs in
+	regions := append(s.Regions, *ec2conn.Config.Region)
 
 	for _, region := range regions {
 		// get new connection for each region in which we need to deregister vms
