@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -86,8 +88,13 @@ func (c *AccessConfig) region() string {
 		return c.RawRegion
 	}
 
-	sess := session.New()
-	ec2meta := ec2metadata.New(sess)
+	client := cleanhttp.DefaultClient()
+
+	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
+	client.Timeout = 100 * time.Millisecond
+	ec2meta := ec2metadata.New(session.New(), &aws.Config{
+		HTTPClient: client,
+	})
 	region, err := ec2meta.Region()
 	if err != nil {
 		log.Println("Error getting region from metadata service, "+
