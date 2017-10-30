@@ -80,8 +80,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	return c.session, nil
 }
 
-// Region returns the aws.Region object for access to AWS services, requesting
-// the region from the instance metadata if possible.
+// region returns either the region from config or region from metadata service
 func (c *AccessConfig) region() (string, error) {
 	if c.RawRegion != "" {
 		if !c.SkipValidation {
