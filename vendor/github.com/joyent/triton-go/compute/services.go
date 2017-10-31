@@ -1,4 +1,4 @@
-package triton
+package compute
 
 import (
 	"context"
@@ -8,16 +8,11 @@ import (
 	"sort"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/joyent/triton-go/client"
 )
 
 type ServicesClient struct {
-	*Client
-}
-
-// Services returns a c used for accessing functions pertaining
-// to Services functionality in the Triton API.
-func (c *Client) Services() *ServicesClient {
-	return &ServicesClient{c}
+	client *client.Client
 }
 
 type Service struct {
@@ -27,20 +22,24 @@ type Service struct {
 
 type ListServicesInput struct{}
 
-func (client *ServicesClient) ListServices(ctx context.Context, _ *ListServicesInput) ([]*Service, error) {
-	path := fmt.Sprintf("/%s/services", client.accountName)
-	respReader, err := client.executeRequest(ctx, http.MethodGet, path, nil)
+func (c *ServicesClient) List(ctx context.Context, _ *ListServicesInput) ([]*Service, error) {
+	path := fmt.Sprintf("/%s/services", c.client.AccountName)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+	}
+	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListServices request: {{err}}", err)
+		return nil, errwrap.Wrapf("Error executing List request: {{err}}", err)
 	}
 
 	var intermediate map[string]string
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&intermediate); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListServices response: {{err}}", err)
+		return nil, errwrap.Wrapf("Error decoding List response: {{err}}", err)
 	}
 
 	keys := make([]string, len(intermediate))
