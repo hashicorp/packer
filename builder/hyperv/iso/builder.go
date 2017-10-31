@@ -90,6 +90,8 @@ type Config struct {
 
 	Communicator string `mapstructure:"communicator"`
 
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
 	ctx interpolate.Context
@@ -161,6 +163,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if len(b.config.AdditionalDiskSize) > 64 {
+		err = errors.New("VM's currently support a maximun of 64 additional SCSI attached disks.")
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
@@ -345,6 +352,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
