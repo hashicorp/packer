@@ -16,6 +16,7 @@ import (
 type LxcAttachCommunicator struct {
 	RootFs        string
 	ContainerName string
+	AttachOptions []string
 	CmdWrapper    CommandWrapper
 }
 
@@ -110,8 +111,13 @@ func (c *LxcAttachCommunicator) DownloadDir(src string, dst string, exclude []st
 
 func (c *LxcAttachCommunicator) Execute(commandString string) (*exec.Cmd, error) {
 	log.Printf("Executing with lxc-attach in container: %s %s %s", c.ContainerName, c.RootFs, commandString)
+
+	attachCommand := []string{"sudo", "lxc-attach"}
+	attachCommand = append(attachCommand, c.AttachOptions...)
+	attachCommand = append(attachCommand, []string{"--name", "%s", "--", "/bin/sh -c \"%s\""}...)
+
 	command, err := c.CmdWrapper(
-		fmt.Sprintf("sudo lxc-attach --name %s -- /bin/sh -c \"%s\"", c.ContainerName, commandString))
+		fmt.Sprintf(strings.Join(attachCommand, " "), c.ContainerName, commandString))
 	if err != nil {
 		return nil, err
 	}
