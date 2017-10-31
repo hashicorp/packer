@@ -6,6 +6,7 @@
 * builder/docker: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
 * post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
 * builder/hyper-v: Also disable automatic checkpoints for gen 2 VMs. [GH-5517]
+* builder/hyper-v: Add `disk_additional_size` option to allow for up to 64 additional disks. [GH-5491]
 
 ## 1.1.1 (October 13, 2017)
 
