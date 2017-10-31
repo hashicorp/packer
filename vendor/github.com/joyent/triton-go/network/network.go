@@ -1,23 +1,14 @@
-package triton
+package network
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"context"
 	"github.com/hashicorp/errwrap"
+	"github.com/joyent/triton-go/client"
 )
-
-type NetworksClient struct {
-	*Client
-}
-
-// Networks returns a c used for accessing functions pertaining to
-// Network functionality in the Triton API.
-func (c *Client) Networks() *NetworksClient {
-	return &NetworksClient{c}
-}
 
 type Network struct {
 	Id                  string            `json:"id"`
@@ -34,11 +25,15 @@ type Network struct {
 	InternetNAT         bool              `json:"internet_nat"`
 }
 
-type ListNetworksInput struct{}
+type ListInput struct{}
 
-func (client *NetworksClient) ListNetworks(ctx context.Context, _ *ListNetworksInput) ([]*Network, error) {
-	path := fmt.Sprintf("/%s/networks", client.accountName)
-	respReader, err := client.executeRequest(ctx, http.MethodGet, path, nil)
+func (c *NetworkClient) List(ctx context.Context, _ *ListInput) ([]*Network, error) {
+	path := fmt.Sprintf("/%s/networks", c.Client.AccountName)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+	}
+	respReader, err := c.Client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
@@ -55,13 +50,17 @@ func (client *NetworksClient) ListNetworks(ctx context.Context, _ *ListNetworksI
 	return result, nil
 }
 
-type GetNetworkInput struct {
+type GetInput struct {
 	ID string
 }
 
-func (client *NetworksClient) GetNetwork(ctx context.Context, input *GetNetworkInput) (*Network, error) {
-	path := fmt.Sprintf("/%s/networks/%s", client.accountName, input.ID)
-	respReader, err := client.executeRequest(ctx, http.MethodGet, path, nil)
+func (c *NetworkClient) Get(ctx context.Context, input *GetInput) (*Network, error) {
+	path := fmt.Sprintf("/%s/networks/%s", c.Client.AccountName, input.ID)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+	}
+	respReader, err := c.Client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
