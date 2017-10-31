@@ -66,6 +66,8 @@ type Driver interface {
 
 	CreateVirtualMachine(string, string, string, string, int64, int64, string, uint) error
 
+	AddVirtualMachineHardDrive(string, string, string, int64, string) error
+
 	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
 
 	DeleteVirtualMachine(string) error

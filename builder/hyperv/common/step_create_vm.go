@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
@@ -26,6 +27,7 @@ type StepCreateVM struct {
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
+	AdditionalDiskSize             []uint
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -105,6 +107,19 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
+		}
+	}
+
+	if len(s.AdditionalDiskSize) > 0 {
+		for index, size := range s.AdditionalDiskSize {
+			var diskSize = size * 1024 * 1024
+			err = driver.AddVirtualMachineHardDrive(s.VMName, vhdPath, s.VMName+"-"+strconv.Itoa(int(index))+".vhdx", int64(diskSize), "SCSI")
+			if err != nil {
+				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 
