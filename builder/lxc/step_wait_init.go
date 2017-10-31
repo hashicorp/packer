@@ -76,6 +76,7 @@ func (s *StepWaitInit) waitForInit(state multistep.StateBag, cancel <-chan struc
 
 		comm := &LxcAttachCommunicator{
 			ContainerName: config.ContainerName,
+			AttachOptions: config.AttachOptions,
 			RootFs:        mountPath,
 			CmdWrapper:    wrappedCommand,
 		}
