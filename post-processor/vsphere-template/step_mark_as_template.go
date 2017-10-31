@@ -4,17 +4,15 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"strings"
-
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type stepMarkAsTemplate struct {
 	VMName string
-	Source string
 }
 
 func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
@@ -23,8 +21,14 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	folder := state.Get("folder").(*object.Folder)
 	dcPath := state.Get("dcPath").(string)
 
-	ui.Message("Marking as a template...")
+	ui.Message(fmt.Sprintf("Unregistering template %s/%s", folder, s.VMName))
+	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
+	ui.Message(fmt.Sprintf("Finding vm %s", s.VMName))
 	vm, err := findRuntimeVM(cli, dcPath, s.VMName)
 	if err != nil {
 		state.Put("error", err)
@@ -32,34 +36,16 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	host, err := vm.HostSystem(context.Background())
+	ui.Message(fmt.Sprintf("Marking as template %s", s.VMName))
+	err = vm.MarkAsTemplate(context.Background())
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if err := vm.Unregister(context.Background()); err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	source := strings.Split(s.Source, "/vmfs/volumes/")[1]
-	i := strings.Index(source, "/")
-
-	path := (&object.DatastorePath{
-		Datastore: source[:i],
-		Path:      source[i:],
-	}).String()
-
-	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	task, err := folder.RegisterVM(context.Background(), path, s.VMName, true, nil, host)
+	ui.Message(fmt.Sprintf("Moving %s to %s", s.VMName, folder))
+	task, err := folder.MoveInto(context.Background(), []types.ManagedObjectReference{vm.Reference()})
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
