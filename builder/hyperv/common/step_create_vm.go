@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
@@ -112,8 +111,9 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 
 	if len(s.AdditionalDiskSize) > 0 {
 		for index, size := range s.AdditionalDiskSize {
-			var diskSize = size * 1024 * 1024
-			err = driver.AddVirtualMachineHardDrive(s.VMName, vhdPath, s.VMName+"-"+strconv.Itoa(int(index))+".vhdx", int64(diskSize), "SCSI")
+			diskSize := int64(size * 1024 * 1024)
+			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
+			err = driver.AddVirtualMachineHardDrive(s.VMName, vhdPath, diskFile, diskSize, "SCSI")
 			if err != nil {
 				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
 				state.Put("error", err)
