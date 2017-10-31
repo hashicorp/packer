@@ -85,6 +85,9 @@ Optional:
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
+    the AWS EC2 endpoint. The default is `false`.
+
 -   `license_type` (string) - The license type to be used for the Amazon
     Machine Image (AMI) after importing. Valid values: `AWS` or `BYOL`
     (default). For more details regarding licensing, see
