@@ -21,7 +21,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	folder := state.Get("folder").(*object.Folder)
 	dcPath := state.Get("dcPath").(string)
 
-	ui.Message(fmt.Sprintf("Unregistering template %s/%s", folder, s.VMName))
+	ui.Message(fmt.Sprintf("Unregistering template %s/%s", folder.InventoryPath, s.VMName))
 	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
