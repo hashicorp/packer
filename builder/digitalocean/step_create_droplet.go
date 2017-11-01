@@ -47,6 +47,7 @@ func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
 		},
 		PrivateNetworking: c.PrivateNetworking,
 		Monitoring:        c.Monitoring,
+		IPv6:              c.IPv6,
 		UserData:          userData,
 	})
 	if err != nil {
