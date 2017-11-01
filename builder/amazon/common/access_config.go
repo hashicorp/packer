@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -32,18 +34,17 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		return c.session, nil
 	}
 
-	region, err := c.Region()
-	if err != nil {
-		return nil, err
-	}
-
 	if c.ProfileName != "" {
 		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
 			log.Printf("Set env error: %s", err)
 		}
 	}
 
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+
+	if region := c.region(); region != "" {
+		config = config.WithRegion(region)
+	}
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -72,6 +73,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 			return c.MFACode, nil
 		}
 	}
+	var err error
 	c.session, err = session.NewSessionWithOptions(opts)
 	if err != nil {
 		return nil, err
@@ -80,27 +82,26 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	return c.session, nil
 }
 
-// Region returns the aws.Region object for access to AWS services, requesting
-// the region from the instance metadata if possible.
-func (c *AccessConfig) Region() (string, error) {
+// region returns either the region from config or region from metadata service
+func (c *AccessConfig) region() string {
 	if c.RawRegion != "" {
-		if !c.SkipValidation {
-			if valid := ValidateRegion(c.RawRegion); !valid {
-				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
-			}
-		}
-		return c.RawRegion, nil
+		return c.RawRegion
 	}
 
-	sess := session.New()
-	ec2meta := ec2metadata.New(sess)
-	identity, err := ec2meta.GetInstanceIdentityDocument()
+	client := cleanhttp.DefaultClient()
+
+	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
+	client.Timeout = 100 * time.Millisecond
+	ec2meta := ec2metadata.New(session.New(), &aws.Config{
+		HTTPClient: client,
+	})
+	region, err := ec2meta.Region()
 	if err != nil {
 		log.Println("Error getting region from metadata service, "+
 			"probably because we're not running on AWS.", err)
-		return "", nil
+		return ""
 	}
-	return identity.Region, nil
+	return region
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
