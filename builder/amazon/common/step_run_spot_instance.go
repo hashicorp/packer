@@ -278,7 +278,7 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 		}
 	}
 
-	if len(volumeIds) > 0 {
+	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
 		ui.Say("Adding tags to source EBS Volumes")
 		tags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
 		if err != nil {
