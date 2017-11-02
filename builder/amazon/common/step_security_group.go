@@ -158,6 +158,7 @@ func waitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsI
 	w := request.Waiter{
 		Name:        "DescribeSecurityGroups",
 		MaxAttempts: 40,
+		Delay:       request.ConstantWaiterDelay(5 * time.Second),
 		Acceptors: []request.WaiterAcceptor{
 			{
 				State:    request.SuccessWaiterState,
