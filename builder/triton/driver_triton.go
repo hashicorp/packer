@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"sort"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/joyent/triton-go/client"
 	"github.com/joyent/triton-go/compute"
@@ -26,6 +28,36 @@ func NewDriverTriton(ui packer.Ui, config Config) (Driver, error) {
 		client: client,
 		ui:     ui,
 	}, nil
+}
+
+func (d *driverTriton) GetImage(config Config) (string, error) {
+	computeClient, _ := d.client.Compute()
+	images, err := computeClient.Images().List(context.Background(), &compute.ListImagesInput{
+		Name:    config.MachineImageFilters.Name,
+		OS:      config.MachineImageFilters.OS,
+		Version: config.MachineImageFilters.Version,
+		Public:  config.MachineImageFilters.Public,
+		Type:    config.MachineImageFilters.Type,
+		State:   config.MachineImageFilters.State,
+		Owner:   config.MachineImageFilters.Owner,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if len(images) == 0 {
+		return "", errors.New("No images found in your search. Please refine your search criteria")
+	}
+
+	if len(images) > 1 {
+		if !config.MachineImageFilters.MostRecent {
+			return "", errors.New("More than 1 machine image was found in your search. Please refine your search criteria")
+		} else {
+			return mostRecentImages(images).ID, nil
+		}
+	} else {
+		return images[0].ID, nil
+	}
 }
 
 func (d *driverTriton) CreateImageFromMachine(machineId string, config Config) (string, error) {
@@ -192,4 +224,30 @@ func waitFor(f func() (bool, error), every, timeout time.Duration) error {
 	}
 
 	return errors.New("Timed out while waiting for resource change")
+}
+
+func mostRecentImages(images []*compute.Image) *compute.Image {
+	return sortImages(images)[0]
+}
+
+type imageSort []*compute.Image
+
+func sortImages(images []*compute.Image) []*compute.Image {
+	sortedImages := images
+	sort.Sort(sort.Reverse(imageSort(sortedImages)))
+	return sortedImages
+}
+
+func (a imageSort) Len() int {
+	return len(a)
+}
+
+func (a imageSort) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a imageSort) Less(i, j int) bool {
+	itime := a[i].PublishedAt
+	jtime := a[j].PublishedAt
+	return itime.Unix() < jtime.Unix()
 }

@@ -17,7 +17,16 @@ func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAc
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Creating source machine...")
+	if !config.MachineImageFilters.Empty() {
+		ui.Say("Selecting an image based on search criteria")
+		imageId, err := driver.GetImage(config)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Problem selecting an image based on an search criteria: %s", err))
+			return multistep.ActionHalt
+		}
+		ui.Say(fmt.Sprintf("Based, on given search criteria, Machine ID is: %q", imageId))
+		config.MachineImage = imageId
+	}
 
 	machineId, err := driver.CreateMachine(config)
 	if err != nil {
@@ -33,7 +42,6 @@ func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAc
 	}
 
 	state.Put("machine", machineId)
-
 	return multistep.ActionContinue
 }
 
