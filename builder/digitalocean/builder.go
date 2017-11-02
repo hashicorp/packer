@@ -82,6 +82,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("do_%s.pem", b.config.PackerBuildName),
 		},
+		new(stepCreateVolumes),
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
 		&communicator.StepConnect{
@@ -92,7 +93,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		new(common.StepProvision),
 		new(stepShutdown),
 		new(stepPowerOff),
-		new(stepSnapshot),
+		new(stepSnapshotDroplet),
+		new(stepSnapshotVolumes),
 	}
 
 	// Run the steps
@@ -104,16 +106,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	if _, ok := state.GetOk("snapshot_name"); !ok {
-		log.Println("Failed to find snapshot_name in state. Bug?")
+	if _, ok := state.GetOk("droplet_snapshot"); !ok {
+		log.Println("Failed to find droplet_snapshot in state. Bug?")
+		return nil, nil
+	}
+
+	if _, ok := state.GetOk("volume_snapshots"); !ok {
+		log.Println("Failed to find volume_snapshots in state. Bug?")
 		return nil, nil
 	}
 
 	artifact := &Artifact{
-		snapshotName: state.Get("snapshot_name").(string),
-		snapshotId:   state.Get("snapshot_image_id").(int),
-		regionNames:  state.Get("regions").([]string),
-		client:       client,
+		droplet: state.Get("droplet_snapshot").(snapshot),
+		volumes: state.Get("volume_snapshots").([]snapshot),
+		client:  client,
 	}
 
 	return artifact, nil

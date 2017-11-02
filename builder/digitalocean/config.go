@@ -26,16 +26,24 @@ type Config struct {
 	Size   string `mapstructure:"size"`
 	Image  string `mapstructure:"image"`
 
-	PrivateNetworking bool          `mapstructure:"private_networking"`
-	Monitoring        bool          `mapstructure:"monitoring"`
-	SnapshotName      string        `mapstructure:"snapshot_name"`
-	SnapshotRegions   []string      `mapstructure:"snapshot_regions"`
-	StateTimeout      time.Duration `mapstructure:"state_timeout"`
-	DropletName       string        `mapstructure:"droplet_name"`
-	UserData          string        `mapstructure:"user_data"`
-	UserDataFile      string        `mapstructure:"user_data_file"`
+	PrivateNetworking bool           `mapstructure:"private_networking"`
+	Monitoring        bool           `mapstructure:"monitoring"`
+	SnapshotName      string         `mapstructure:"snapshot_name"`
+	SnapshotRegions   []string       `mapstructure:"snapshot_regions"`
+	StateTimeout      time.Duration  `mapstructure:"state_timeout"`
+	DropletName       string         `mapstructure:"droplet_name"`
+	UserData          string         `mapstructure:"user_data"`
+	UserDataFile      string         `mapstructure:"user_data_file"`
+	Volumes           []VolumeConfig `mapstructure:"volumes"`
 
 	ctx interpolate.Context
+}
+
+type VolumeConfig struct {
+	VolumeName     string `mapstructure:"volume_name"`
+	Size           int64  `mapstructure:"size"`
+	BaseSnapshotID string `mapstructure:"base_snapshot_id"`
+	SnapshotName   string `mapstructure:"snapshot_name"`
 }
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
@@ -117,6 +125,21 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
+		}
+	}
+
+	for i := 0; i < len(c.Volumes); i++ {
+		if c.Volumes[i].VolumeName == "" {
+			c.Volumes[i].VolumeName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+		}
+
+		if c.Volumes[i].SnapshotName == "" {
+			c.Volumes[i].SnapshotName = fmt.Sprintf("%s-vol%d", c.SnapshotName, i)
+		}
+
+		if c.Volumes[i].Size == 0 {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("volume %d: size is required", i))
 		}
 	}
 
