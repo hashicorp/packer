@@ -9,6 +9,7 @@
 * builder/hyper-v: Add `disk_additional_size` option to allow for up to 64 additional disks. [GH-5491]
 * builder/amazon: correctly deregister AMIs when `force_deregister` is set. [GH-5525]
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
+* builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
 
 ## 1.1.1 (October 13, 2017)
 
