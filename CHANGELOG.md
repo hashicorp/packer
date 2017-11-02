@@ -8,6 +8,7 @@
 * builder/hyper-v: Also disable automatic checkpoints for gen 2 VMs. [GH-5517]
 * builder/hyper-v: Add `disk_additional_size` option to allow for up to 64 additional disks. [GH-5491]
 * builder/amazon: correctly deregister AMIs when `force_deregister` is set. [GH-5525]
+* builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 
 ## 1.1.1 (October 13, 2017)
 
