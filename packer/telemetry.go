@@ -121,7 +121,7 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	// b, _ := json.MarshalIndent(params, "", "    ")
 	// log.Println(string(b))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	log.Printf("[INFO] (telemetry) Finalizing.")
