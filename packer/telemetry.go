@@ -91,16 +91,11 @@ func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options interface
 	}
 	log.Printf("[INFO] (telemetry) Starting %s %s", pluginType, name)
 
-	//strOpts := []string{}
-	if m, ok := options.(map[string]interface{}); ok {
-		for k, _ := range m {
-			log.Println("AddSpan options:", k)
-		}
-	}
 	ts := &TelemetrySpan{
 		Name:      name,
-		Type:      pluginType,
+		Options:   flattenConfigKeys(options),
 		StartTime: time.Now().UTC(),
+		Type:      pluginType,
 	}
 	c.spans = append(c.spans, ts)
 	return ts
@@ -123,6 +118,8 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 		extra.Error = err.Error()
 	}
 	params.Payload = extra
+	// b, _ := json.MarshalIndent(params, "", "    ")
+	// log.Println(string(b))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
 	defer cancel()
@@ -132,12 +129,12 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 }
 
 type TelemetrySpan struct {
-	Name      string    `json:"name"`
-	Type      string    `json:"type"`
-	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	Error     string    `json:"error"`
+	Name      string    `json:"name"`
 	Options   []string  `json:"options"`
+	StartTime time.Time `json:"start_time"`
+	Type      string    `json:"type"`
 }
 
 func (s *TelemetrySpan) End(err error) {
@@ -150,4 +147,26 @@ func (s *TelemetrySpan) End(err error) {
 		s.Error = err.Error()
 		log.Printf("[INFO] (telemetry) found error: %s", err.Error())
 	}
+}
+
+func flattenConfigKeys(options interface{}) []string {
+	var flatten func(string, interface{}) []string
+
+	flatten = func(prefix string, options interface{}) (strOpts []string) {
+		if m, ok := options.(map[string]interface{}); ok {
+			for k, v := range m {
+				if prefix != "" {
+					k = prefix + "/" + k
+				}
+				if n, ok := v.(map[string]interface{}); ok {
+					strOpts = append(strOpts, flatten(k, n)...)
+				} else {
+					strOpts = append(strOpts, k)
+				}
+			}
+		}
+		return
+	}
+
+	return flatten("", options)
 }
