@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"hash"
 	"log"
-	"net/url"
 	"os"
 
 	getter "github.com/hashicorp/go-getter"
@@ -44,8 +43,8 @@ type DownloadConfig struct {
 
 // A DownloadClient helps download, verify checksums, etc.
 type DownloadClient struct {
-	config     *DownloadConfig
-	downloader Downloader
+	config       *DownloadConfig
+	getterClient *getter.Client
 }
 
 // NewDownloadClient returns a new DownloadClient for the given
@@ -53,15 +52,6 @@ type DownloadClient struct {
 func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 
 	return &DownloadClient{config: c}
-}
-
-// A downloader is responsible for actually taking a remote URL and
-// downloading it.
-type Downloader interface {
-	Cancel()
-	Download(*os.File, *url.URL) error
-	Progress() uint
-	Total() uint
 }
 
 func (d *DownloadClient) Cancel() {
@@ -88,18 +78,22 @@ func (d *DownloadClient) Get() (string, error) {
 		d.config.HashType, hex.EncodeToString(d.config.Checksum))
 
 	// Download fi
-	gc := getter.Client{
+	d.getterClient = &getter.Client{
 		Src:  srcPlusChecksum,
 		Dst:  d.config.TargetPath,
 		Pwd:  pwd,
 		Mode: getter.ClientModeFile,
 		Dir:  false}
 
-	err = gc.Get()
+	err = d.getterClient.Get()
 	if err != nil {
 		log.Printf("Error Getting URL: %s", err)
 		return "", err
 	}
 
 	return d.config.TargetPath, err
+}
+
+func (d *DownloadClient) GetDownloadProgress() int {
+	return d.getterClient.PercentComplete
 }

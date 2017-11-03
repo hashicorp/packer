@@ -145,7 +145,7 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 
 			return path, nil, true
 		case <-progressTicker.C:
-			progress := download.PercentProgress()
+			progress := download.GetDownloadProgress()
 			if progress >= 0 {
 				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
 			}
