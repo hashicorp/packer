@@ -11,7 +11,7 @@ import (
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
-const TelemetryVersion string = "beta/packer/4"
+const TelemetryVersion string = "beta/packer/5"
 const TelemetryPanicVersion string = "beta/packer_panic/4"
 
 var CheckpointReporter *CheckpointTelemetry
@@ -85,11 +85,18 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 	return checkpoint.Report(ctx, panicParams)
 }
 
-func (c *CheckpointTelemetry) AddSpan(name, pluginType string) *TelemetrySpan {
+func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options interface{}) *TelemetrySpan {
 	if c == nil {
 		return nil
 	}
 	log.Printf("[INFO] (telemetry) Starting %s %s", pluginType, name)
+
+	//strOpts := []string{}
+	if m, ok := options.(map[string]interface{}); ok {
+		for k, _ := range m {
+			log.Println("AddSpan options:", k)
+		}
+	}
 	ts := &TelemetrySpan{
 		Name:      name,
 		Type:      pluginType,
@@ -130,6 +137,7 @@ type TelemetrySpan struct {
 	StartTime time.Time `json:"start_time"`
 	EndTime   time.Time `json:"end_time"`
 	Error     string    `json:"error"`
+	Options   []string  `json:"options"`
 }
 
 func (s *TelemetrySpan) End(err error) {
