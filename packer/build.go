@@ -221,7 +221,7 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 	}
 
 	log.Printf("Running builder: %s", b.builderType)
-	ts := CheckpointReporter.AddSpan(b.builderType, "builder")
+	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
 	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
 	ts.End(err)
 	if err != nil {
@@ -248,7 +248,7 @@ PostProcessorRunSeqLoop:
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
-			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor")
+			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
 			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {
