@@ -63,7 +63,7 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 		h.runningProvisioner = p
 		h.lock.Unlock()
 
-		ts := CheckpointReporter.AddSpan(h.ProvisionerTypes[i], "provisioner")
+		ts := CheckpointReporter.AddSpan(h.ProvisionerTypes[i], "provisioner", p)
 		err := p.Provision(ui, comm)
 		ts.End(err)
 		if err != nil {
