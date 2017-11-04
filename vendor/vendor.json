@@ -1057,10 +1057,11 @@
 			"revisionTime": "2017-03-21T23:07:31Z"
 		},
 		{
-			"checksumSHA1": "Q2V7Zs3diLmLfmfbiuLpSxETSuY=",
+			"checksumSHA1": "iydUphwYqZRq3WhstEdGsbvBAKs=",
 			"comment": "v1.1.4-4-g976c720",
 			"path": "github.com/stretchr/testify/assert",
-			"revision": "976c720a22c8eb4eb6a0b4348ad85ad12491a506"
+			"revision": "d77da356e56a7428ad25149ca77381849a6a5232",
+			"revisionTime": "2016-06-15T09:26:46Z"
 		},
 		{
 			"checksumSHA1": "GQ9bu6PuydK3Yor1JgtVKUfEJm8=",
