@@ -23,9 +23,9 @@ func TestProvisionHook(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners: []coreBuildProvisioner{
-			{"", pA, nil},
-			{"", pB, nil},
+		Provisioners: []*HookedProvisioner{
+			{pA, nil, ""},
+			{pB, nil, ""},
 		},
 	}
 
@@ -49,9 +49,9 @@ func TestProvisionHook_nilComm(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners: []coreBuildProvisioner{
-			{"", pA, nil},
-			{"", pB, nil},
+		Provisioners: []*HookedProvisioner{
+			{pA, nil, ""},
+			{pB, nil, ""},
 		},
 	}
 
@@ -78,8 +78,8 @@ func TestProvisionHook_cancel(t *testing.T) {
 	}
 
 	hook := &ProvisionHook{
-		Provisioners: []coreBuildProvisioner{
-			{"", p, nil},
+		Provisioners: []*HookedProvisioner{
+			{p, nil, ""},
 		},
 	}
 
