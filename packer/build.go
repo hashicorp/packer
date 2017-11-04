@@ -194,12 +194,25 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 
 	// Add a hook for the provisioners if we have provisioners
 	if len(b.provisioners) > 0 {
+		hookedProvisioners := make([]*HookedProvisioner, len(b.provisioners))
+		for i, p := range b.provisioners {
+			var pConfig interface{}
+			if len(p.config) > 0 {
+				pConfig = p.config[0]
+			}
+			hookedProvisioners[i] = &HookedProvisioner{
+				p.provisioner,
+				pConfig,
+				p.pType,
+			}
+		}
+
 		if _, ok := hooks[HookProvision]; !ok {
 			hooks[HookProvision] = make([]Hook, 0, 1)
 		}
 
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
-			Provisioners: b.provisioners,
+			Provisioners: hookedProvisioners,
 		})
 	}
 

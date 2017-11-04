@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	checkpoint "github.com/hashicorp/go-checkpoint"
@@ -168,5 +169,7 @@ func flattenConfigKeys(options interface{}) []string {
 		return
 	}
 
-	return flatten("", options)
+	flattened := flatten("", options)
+	sort.Strings(flattened)
+	return flattened
 }
