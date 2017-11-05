@@ -6,7 +6,10 @@ import (
 	"strconv"
 	"testing"
 
+	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+	"os"
 )
 
 func testConfig() map[string]interface{} {
@@ -471,4 +474,46 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		}
 	}
 
+}
+
+func TestUserVariablesInBootCommand(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
+	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	hook := &packer.MockHook{}
+	driver := &hypervcommon.DriverMock{}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
+	state.Put("config", &b.config)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("http_port", uint(0))
+	state.Put("ui", ui)
+	state.Put("vmName", "packer-foo")
+
+	step := &hypervcommon.StepTypeBootCommand{
+		BootCommand: b.config.BootCommand,
+		SwitchName:  b.config.SwitchName,
+		Ctx:         b.config.ctx,
+	}
+
+	ret := step.Run(state)
+	if ret != multistep.ActionContinue {
+	    t.Fatalf("should not have error: %s", ret)
+	}
 }
