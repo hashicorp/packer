@@ -514,6 +514,6 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 
 	ret := step.Run(state)
 	if ret != multistep.ActionContinue {
-	    t.Fatalf("should not have error: %s", ret)
+		t.Fatalf("should not have error: %s", ret)
 	}
 }

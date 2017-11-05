@@ -121,17 +121,17 @@ type DriverMock struct {
 	CreateVirtualMachine_Generation    uint
 	CreateVirtualMachine_Err           error
 
-	CloneVirtualMachine_Called                 bool
-	CloneVirtualMachine_CloneFromVmxcPath      string
-	CloneVirtualMachine_CloneFromVmName        string
-	CloneVirtualMachine_CloneFromSnapshotName  string
-	CloneVirtualMachine_CloneAllSnapshots      bool
-	CloneVirtualMachine_VmName                 string
-	CloneVirtualMachine_Path                   string
-	CloneVirtualMachine_HarddrivePath          string
-	CloneVirtualMachine_Ram                    int64
-	CloneVirtualMachine_SwitchName             string
-	CloneVirtualMachine_Err                    error
+	CloneVirtualMachine_Called                bool
+	CloneVirtualMachine_CloneFromVmxcPath     string
+	CloneVirtualMachine_CloneFromVmName       string
+	CloneVirtualMachine_CloneFromSnapshotName string
+	CloneVirtualMachine_CloneAllSnapshots     bool
+	CloneVirtualMachine_VmName                string
+	CloneVirtualMachine_Path                  string
+	CloneVirtualMachine_HarddrivePath         string
+	CloneVirtualMachine_Ram                   int64
+	CloneVirtualMachine_SwitchName            string
+	CloneVirtualMachine_Err                   error
 
 	DeleteVirtualMachine_Called bool
 	DeleteVirtualMachine_VmName string
