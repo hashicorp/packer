@@ -11,6 +11,10 @@
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 * builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
 
+### BUG FIXES:
+
+* builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
+
 ## 1.1.1 (October 13, 2017)
 
 ### IMPROVEMENTS:
