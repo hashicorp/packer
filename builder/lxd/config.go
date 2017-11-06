@@ -12,10 +12,11 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	OutputImage         string `mapstructure:"output_image"`
-	ContainerName       string `mapstructure:"container_name"`
-	CommandWrapper      string `mapstructure:"command_wrapper"`
-	Image               string `mapstructure:"image"`
+	OutputImage         string            `mapstructure:"output_image"`
+	ContainerName       string            `mapstructure:"container_name"`
+	CommandWrapper      string            `mapstructure:"command_wrapper"`
+	Image               string            `mapstructure:"image"`
+	PublishProperties   map[string]string `mapstructure:"publish_properties"`
 	InitTimeout         time.Duration
 
 	ctx interpolate.Context
