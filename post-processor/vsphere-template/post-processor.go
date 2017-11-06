@@ -88,13 +88,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
-	source := ""
-	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") {
-			source = path
-			break
-		}
-	}
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
 	// (after the ESXi creates it) it will fail. If vSphere is given a few seconds this behavior doesn't reappear.
 	ui.Message("Waiting 10s for VMware vSphere to start")
@@ -119,12 +112,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		},
 		&stepMarkAsTemplate{
 			VMName: artifact.Id(),
-			Source: source,
 		},
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)
-
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, rawErr.(error)
 	}
