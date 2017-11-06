@@ -52,11 +52,15 @@ configuration parameters for that communicator. These are documented below.
 
 ## SSH Communicator
 
-The SSH communicator connects to the host via SSH. If you have an SSH
-agent enabled on the machine running Packer, it will automatically forward
-the SSH agent to the remote host.
+The SSH communicator connects to the host via SSH. If you have an SSH agent
+configured on the host running Packer, and SSH agent authentication is enabled
+in the communicator config, Packer will automatically forward the SSH agent
+to the remote host.
 
 The SSH communicator has the following options:
+
+-   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
+    authenticate connections to the remote host. Defaults to false.
 
 -   `ssh_bastion_agent_auth` (boolean) - If true, the local SSH agent will
     be used to authenticate with the bastion host. Defaults to false.
