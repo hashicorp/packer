@@ -2,9 +2,10 @@ package docker
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 type StepPull struct{}
@@ -40,7 +41,6 @@ func (s *StepPull) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Message("Logging in...")
 		err := driver.Login(
 			config.LoginServer,
-			config.LoginEmail,
 			config.LoginUsername,
 			config.LoginPassword)
 		if err != nil {

@@ -185,8 +185,6 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     order to pull the image. The builder only logs in for the duration of
     the pull. It always logs out afterwards. For log into ECR see `ecr_login`.
 
--   `login_email` (string) - The email to use to authenticate to login.
-
 -   `login_username` (string) - The username to use to authenticate to login.
 
 -   `login_password` (string) - The password to use to authenticate to login.
