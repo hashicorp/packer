@@ -13,6 +13,7 @@ func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -32,6 +33,7 @@ func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 		create: func(string, string, *map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -58,8 +60,9 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 			actualTags = tags
 			return nil
 		},
-		say:   func(message string) {},
-		error: func(e error) {},
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -91,6 +94,44 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	}
 }
 
+func TestStepCreateResourceGroupMarkAsNonExistingIfDoesntExist(t *testing.T) {
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
+	}
+
+	stateBag := createTestStateBagStepCreateResourceGroup()
+
+	if _, ok := stateBag.GetOk(constants.ArmIsExistingResourceGroup); ok == true {
+		t.Fatalf("Expected 'constants.ArmIsExistingResourceGroup' not to be set, but it was")
+	}
+	testSubject.Run(stateBag)
+	if stateBag.Get(constants.ArmIsExistingResourceGroup).(bool) == true {
+		t.Fatalf("Expected 'constants.ArmIsExistingResourceGroup' to be set to false, but it wasn't.")
+	}
+}
+
+func TestStepCreateResourceGroupMarkAsExistingIfExists(t *testing.T) {
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return true, nil },
+	}
+
+	stateBag := createTestStateBagStepCreateResourceGroup()
+
+	if _, ok := stateBag.GetOk(constants.ArmIsExistingResourceGroup); ok == true {
+		t.Fatalf("Expected 'constants.ArmIsExistingResourceGroup' not to be set, but it was")
+	}
+	testSubject.Run(stateBag)
+	if stateBag.Get(constants.ArmIsExistingResourceGroup).(bool) == false {
+		t.Fatalf("Expected 'constants.ArmIsExistingResourceGroup' to be set to true, but it wasn't.")
+	}
+}
+
 func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
@@ -103,6 +144,5 @@ func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 	}
 
 	stateBag.Put(constants.ArmTags, &tags)
-
 	return stateBag
 }

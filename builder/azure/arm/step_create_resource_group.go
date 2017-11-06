@@ -14,6 +14,7 @@ type StepCreateResourceGroup struct {
 	create func(resourceGroupName string, location string, tags *map[string]*string) error
 	say    func(message string)
 	error  func(e error)
+	exists func(resourceGroupName string) (bool, error)
 }
 
 func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateResourceGroup {
@@ -24,6 +25,7 @@ func NewStepCreateResourceGroup(client *AzureClient, ui packer.Ui) *StepCreateRe
 	}
 
 	step.create = step.createResourceGroup
+	step.exists = step.doesResourceGroupExist
 	return step
 }
 
@@ -37,6 +39,15 @@ func (s *StepCreateResourceGroup) createResourceGroup(resourceGroupName string, 
 		s.say(s.client.LastError.Error())
 	}
 	return err
+}
+
+func (s *StepCreateResourceGroup) doesResourceGroupExist(resourceGroupName string) (bool, error) {
+	exists, err := s.client.GroupsClient.CheckExistence(resourceGroupName)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+
+	return exists.Response.StatusCode != 404, err
 }
 
 func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAction {
@@ -53,8 +64,19 @@ func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAc
 		s.say(fmt.Sprintf(" ->> %s : %s", k, *v))
 	}
 
-	err := s.create(resourceGroupName, location, tags)
-	if err == nil {
+	exists, err := s.exists(resourceGroupName)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+	state.Put(constants.ArmIsExistingResourceGroup, exists)
+	// If the resource group exists, we may not have permissions to update it so we don't.
+	if !exists {
+		err = s.create(resourceGroupName, location, tags)
+		if err == nil {
+			state.Put(constants.ArmIsResourceGroupCreated, true)
+		}
+	} else {
+		// Mark the resource group as created to deal with later checks
 		state.Put(constants.ArmIsResourceGroupCreated, true)
 	}
 
@@ -68,17 +90,22 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("\nCleanup requested, deleting resource group ...")
+	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
+		ui.Say("\nThe resource group was not created by Packer, not deleting ...")
+		return
+	} else {
+		ui.Say("\nCleanup requested, deleting resource group ...")
 
-	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	_, errChan := s.client.GroupsClient.Delete(resourceGroupName, nil)
-	err := <-errChan
+		var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
+		_, errChan := s.client.GroupsClient.Delete(resourceGroupName, nil)
+		err := <-errChan
 
-	if err != nil {
-		ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
-			"Name: %s\n"+
-			"Error: %s", resourceGroupName, err))
+		if err != nil {
+			ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
+				"Name: %s\n"+
+				"Error: %s", resourceGroupName, err))
+		}
+
+		ui.Say("Resource group has been deleted.")
 	}
-
-	ui.Say("Resource group has been deleted.")
 }
