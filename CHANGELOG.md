@@ -12,6 +12,7 @@
 * builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
 * communicator/ssh: Add socks 5 proxy support. [GH-5439]
 * builder/lxc: Add new `publish_properties` field to set image properties. [GH-5475]
+* builder/virtualbox-ovf: Retry while removing VM to solve for transient errors. [GH-5512]
 
 ### BUG FIXES:
 
