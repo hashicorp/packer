@@ -32,6 +32,10 @@ func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 		"publish", name, "--alias", config.OutputImage,
 	}
 
+	for k, v := range config.PublishProperties {
+		publish_args = append(publish_args, fmt.Sprintf("%s=%s", k, v))
+	}
+
 	ui.Say("Publishing container...")
 	stdoutString, err := LXDCommand(publish_args...)
 	if err != nil {
