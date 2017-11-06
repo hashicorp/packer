@@ -18,6 +18,12 @@
 			"versionExact": "v10.0.3-beta"
 		},
 		{
+			"checksumSHA1": "Kr6/gY3LrNiOxMfDBCfBvBvenYw=",
+			"path": "github.com/Azure/azure-sdk-for-go/arm/disk",
+			"revision": "26132835cbefa2669a306b777f34b929b56aa0a2",
+			"revisionTime": "2017-05-18T20:34:07Z"
+		},
+		{
 			"checksumSHA1": "HMu0WrEHVs+wqyjsTzXxRsEJimI=",
 			"comment": "v3.1.0-beta",
 			"path": "github.com/Azure/azure-sdk-for-go/arm/network",

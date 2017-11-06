@@ -26,6 +26,7 @@ const (
 	ArmStorageAccountName              string = "arm.StorageAccountName"
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
+	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
 
 	ArmIsManagedImage                string = "arm.IsManagedImage"
 	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
