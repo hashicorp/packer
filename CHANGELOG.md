@@ -10,6 +10,7 @@
 * builder/amazon: correctly deregister AMIs when `force_deregister` is set. [GH-5525]
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 * builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
+* communicator/ssh: Add socks 5 proxy support. [GH-5439]
 
 ### BUG FIXES:
 
