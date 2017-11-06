@@ -11,6 +11,7 @@
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 * builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
 * communicator/ssh: Add socks 5 proxy support. [GH-5439]
+* builder/lxc: Add new `publish_properties` field to set image properties. [GH-5475]
 
 ### BUG FIXES:
 
