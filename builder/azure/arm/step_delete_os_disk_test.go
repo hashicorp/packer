@@ -10,9 +10,10 @@ import (
 
 func TestStepDeleteOSDiskShouldFailIfGetFails(t *testing.T) {
 	var testSubject = &StepDeleteOSDisk{
-		delete: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
-		say:    func(message string) {},
-		error:  func(e error) {},
+		delete:        func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		deleteManaged: func(string, string) error { return nil },
+		say:           func(message string) {},
+		error:         func(e error) {},
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://storage.blob.core.windows.net/images/pkrvm_os.vhd")
@@ -106,6 +107,8 @@ func DeleteTestStateBagStepDeleteOSDisk(osDiskVhd string) multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 	stateBag.Put(constants.ArmOSDiskVhd, osDiskVhd)
 	stateBag.Put(constants.ArmIsManagedImage, false)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
+	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
 
 	return stateBag
 }
