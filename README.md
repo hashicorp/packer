@@ -7,8 +7,8 @@ This a plugin for [HashiCorp Packer](https://www.packer.io/). It uses native vSp
 - Official vCenter API is used, no ESXi host [modification](https://www.packer.io/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor) is required 
 
 ## Usage
-* Download the plugin from [Releases](https://github.com/jetbrains-infra/packer-builder-vsphere/releases) page
-* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugin, or simply put it into the same directory with configuration files
+* Download the plugin from [Releases](https://github.com/jetbrains-infra/packer-builder-vsphere/releases) page.
+* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugin, or simply put it into the same directory with configuration files. On Linux and macOS run `chmod +x` on the plugin binary.
 
 ## Minimal Example
 
