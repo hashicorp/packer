@@ -786,10 +786,10 @@
 			"revision": "875fb671b3ddc66f8e2f0acc33829c8cb989a38d"
 		},
 		{
-			"checksumSHA1": "hmCY8x12f+JJRMmtzDjjPHJjGsw=",
+			"checksumSHA1": "ORlMSI9ShdWtDetPw883GvMdfic=",
 			"path": "github.com/hashicorp/go-getter",
-			"revision": "1a58d4ce55de8281d4995260a8227fe0a9b2bdf1",
-			"revisionTime": "2017-11-03T22:13:00Z",
+			"revision": "c017aa762c3ed115fe966bda2e4e443c8c8a66cb",
+			"revisionTime": "2017-11-03T23:38:13Z",
 			"version": "master",
 			"versionExact": "master"
 		},

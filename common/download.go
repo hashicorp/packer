@@ -76,7 +76,6 @@ func (d *DownloadClient) Get() (string, error) {
 	// Format src string with checksum for go-getter
 	srcPlusChecksum := fmt.Sprintf("%s?checksum=%s:%s", d.config.Url,
 		d.config.HashType, hex.EncodeToString(d.config.Checksum))
-
 	// Download fi
 	d.getterClient = &getter.Client{
 		Src:  srcPlusChecksum,
