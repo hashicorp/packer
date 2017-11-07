@@ -88,6 +88,11 @@ func (c *AccessConfig) region() string {
 		return c.RawRegion
 	}
 
+	// Read the region from the profile
+	if c.ProfileName != "" {
+		return ""
+	}
+
 	client := cleanhttp.DefaultClient()
 
 	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
