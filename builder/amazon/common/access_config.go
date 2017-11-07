@@ -34,15 +34,15 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		return c.session, nil
 	}
 
+	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+
 	if c.ProfileName != "" {
 		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
 			return nil, fmt.Errorf("Set env error: %s", err)
 		}
-	}
-
-	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
-
-	if region := c.region(); region != "" {
+	} else if c.RawRegion != "" {
+		config = config.WithRegion(c.RawRegion)
+	} else if region := c.metadataRegion(); region != "" {
 		config = config.WithRegion(region)
 	}
 
@@ -68,25 +68,26 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		SharedConfigState: session.SharedConfigEnable,
 		Config:            *config,
 	}
+
 	if c.MFACode != "" {
 		opts.AssumeRoleTokenProvider = func() (string, error) {
 			return c.MFACode, nil
 		}
 	}
-	var err error
-	c.session, err = session.NewSessionWithOptions(opts)
-	if err != nil {
+
+	if session, err := session.NewSessionWithOptions(opts); err != nil {
 		return nil, err
+	} else if *session.Config.Region == "" {
+		return nil, fmt.Errorf("Could not find AWS region, make sure it's set.")
+	} else {
+		c.session = session
 	}
 
 	return c.session, nil
 }
 
-// region returns either the region from config or region from metadata service
-func (c *AccessConfig) region() string {
-	if c.RawRegion != "" {
-		return c.RawRegion
-	}
+// metadataRegion returns the region from the metadata service
+func (c *AccessConfig) metadataRegion() string {
 
 	client := cleanhttp.DefaultClient()
 
@@ -112,9 +113,5 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
+	return errs
 }
