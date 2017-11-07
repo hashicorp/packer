@@ -17,7 +17,7 @@ import (
 )
 
 var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
-var DefaultRestartCheckCommand = winrm.Powershell(`if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; echo "${env:COMPUTERNAME} restarted."`)
+var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
 var TryCheckReboot = "shutdown.exe -f -r -t 60"
 var AbortReboot = "shutdown.exe -a"
@@ -174,28 +174,40 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(p *Provisioner) error {
+	runCustomRestartCheck := true
 	for {
-		cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-		var buf, buf2 bytes.Buffer
-		cmd.Stdout = &buf
-		cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
 		select {
 		case <-p.cancel:
 			log.Println("Communicator wait canceled, exiting loop")
 			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
+		if runCustomRestartCheck == true {
+			if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
+				runCustomRestartCheck = false
+			}
+			// this is the user configurable command
+			cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+			log.Printf("Checking that communicator is connected with: '%s'",
+				cmdRestartCheck.Command)
+			// run user-configured restart check
+			err := cmdRestartCheck.StartWithUi(p.comm, p.ui)
 
-		log.Printf("Checking that communicator is connected with: '%s'", cmd.Command)
-
-		err := cmd.StartWithUi(p.comm, p.ui)
-
-		if err != nil {
-			log.Printf("Communication connection err: %s", err)
-			continue
+			if err != nil {
+				log.Printf("Communication connection err: %s", err)
+				continue
+			}
+			log.Printf("Connected to machine")
+			runCustomRestartCheck = false
 		}
+		// this is the non-user-configurable check that powershell
+		// modules have loaded
+		cmdModuleLoad := &packer.RemoteCmd{Command: DefaultRestartCheckCommand}
+		var buf, buf2 bytes.Buffer
+		cmdModuleLoad.Stdout = &buf
+		cmdModuleLoad.Stdout = io.MultiWriter(cmdModuleLoad.Stdout, &buf2)
 
-		log.Printf("Connected to machine")
+		cmdModuleLoad.StartWithUi(p.comm, p.ui)
 		stdoutToRead := buf2.String()
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
