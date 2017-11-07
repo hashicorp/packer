@@ -80,6 +80,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	} else if *session.Config.Region == "" {
 		return nil, fmt.Errorf("Could not find AWS region, make sure it's set.")
 	} else {
+		log.Printf("Found region %s", *session.Config.Region)
 		c.session = session
 	}
 
