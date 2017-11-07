@@ -36,7 +36,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	if c.ProfileName != "" {
 		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
-			log.Printf("Set env error: %s", err)
+			return nil, fmt.Errorf("Set env error: %s", err)
 		}
 	}
 
