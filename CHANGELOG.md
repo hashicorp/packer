@@ -17,6 +17,7 @@
 ### BUG FIXES:
 
 * builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
+* builder/triton: Fix a bug where partially created images can be reported as complete. [GH-5566]
 
 ## 1.1.1 (October 13, 2017)
 
