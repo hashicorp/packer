@@ -18,6 +18,9 @@ type Config struct {
 	ContainerName       string   `mapstructure:"container_name"`
 	CommandWrapper      string   `mapstructure:"command_wrapper"`
 	RawInitTimeout      string   `mapstructure:"init_timeout"`
+	CreateOptions       []string `mapstructure:"create_options"`
+	StartOptions        []string `mapstructure:"start_options"`
+	AttachOptions       []string `mapstructure:"attach_options"`
 	Name                string   `mapstructure:"template_name"`
 	Parameters          []string `mapstructure:"template_parameters"`
 	EnvVars             []string `mapstructure:"template_environment_vars"`
