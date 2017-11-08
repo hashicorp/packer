@@ -42,7 +42,14 @@ Optional parameters:
     detect it is rebooting.
 
 -   `restart_check_command` (string) - A command to execute to check if the
-    restart succeeded. This will be done in a loop.
+    restart succeeded. This will be done in a loop. Example usage:
+
+``` json
+    {
+      "type": "windows-restart",
+      "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
+    },
+```
 
 -   `restart_timeout` (string) - The timeout to wait for the restart. By
     default this is 5 minutes. Example value: `5m`. If you are installing
