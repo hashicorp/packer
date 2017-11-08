@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
-
 	"sort"
+	"time"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/joyent/triton-go/client"
@@ -200,7 +199,7 @@ func (d *driverTriton) WaitForImageCreation(imageId string, timeout time.Duratio
 			if image == nil {
 				return false, err
 			}
-			return image.OS != "", err
+			return image.State == "active", err
 		},
 		3*time.Second,
 		timeout,
