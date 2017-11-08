@@ -17,7 +17,7 @@ func TestBuilderAcc_default(t *testing.T) {
 		Check: func(artifacts []packer.Artifact) error {
 			d := driverT.NewTestDriver(t)
 			driverT.VMCheckDefault(t, d, getVM(t, d, artifacts), config["vm_name"].(string),
-				config["host"].(string), driverT.TestDatastore)
+				config["host"].(string), "datastore1")
 			return nil
 		},
 	})
@@ -25,13 +25,13 @@ func TestBuilderAcc_default(t *testing.T) {
 
 func defaultConfig() map[string]interface{} {
 	config := map[string]interface{}{
-		"vcenter_server":      driverT.TestVCenterServer,
-		"username":            driverT.TestVCenterUsername,
-		"password":            driverT.TestVCenterPassword,
+		"vcenter_server":      "vcenter.vsphere55.test",
+		"username":            "root",
+		"password":            "jetbrains",
 		"insecure_connection": true,
 
-		"template": driverT.TestTemplate,
-		"host":     driverT.TestHost,
+		"template": "alpine",
+		"host":     "esxi-1.vsphere55.test",
 
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
@@ -69,13 +69,13 @@ func TestBuilderAcc_folder(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: folderConfig(),
-		Check:    checkFolder(t, driverT.TestFolder),
+		Check:    checkFolder(t, "folder1/folder2"),
 	})
 }
 
 func folderConfig() string {
 	config := defaultConfig()
-	config["folder"] = driverT.TestFolder
+	config["folder"] = "folder1/folder2"
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
@@ -101,13 +101,13 @@ func TestBuilderAcc_resourcePool(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: resourcePoolConfig(),
-		Check:    checkResourcePool(t, driverT.TestResourcePool),
+		Check:    checkResourcePool(t, "pool1/pool2"),
 	})
 }
 
 func resourcePoolConfig() string {
 	config := defaultConfig()
-	config["resource_pool"] = driverT.TestResourcePool
+	config["resource_pool"] = "pool1/pool2"
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
@@ -133,7 +133,7 @@ func TestBuilderAcc_datastore(t *testing.T) {
 		Template: datastoreConfig(),
 		Check:    func(artifacts []packer.Artifact) error {
 			d := driverT.NewTestDriver(t)
-			driverT.VMCheckDatastore(t, d, getVM(t, d, artifacts), driverT.TestDatastore)
+			driverT.VMCheckDatastore(t, d, getVM(t, d, artifacts), "datastore1")
 			return nil
 		},
 	})
@@ -206,11 +206,11 @@ func TestBuilderAcc_hardware(t *testing.T) {
 
 func hardwareConfig() string {
 	config := defaultConfig()
-	config["CPUs"] = driverT.TestCPUs
-	config["CPU_reservation"] = driverT.TestCPUReservation
-	config["CPU_limit"] = driverT.TestCPULimit
-	config["RAM"] = driverT.TestRAM
-	config["RAM_reservation"] = driverT.TestRAMReservation
+	config["CPUs"] = 2
+	config["CPU_reservation"] = 1000
+	config["CPU_limit"] = 1500
+	config["RAM"] = 2048
+	config["RAM_reservation"] = 1024
 	config["linked_clone"] = true // speed up
 
 	return renderConfig(config)

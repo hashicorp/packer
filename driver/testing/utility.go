@@ -152,7 +152,8 @@ func VMCheckHardware(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) 
 }
 
 func VMCheckTemplate(t* testing.T, d *driver.Driver, vm *driver.VirtualMachine) {
-	switch vmInfo, err := vm.Info("config.template"); {
+	vmInfo, err := vm.Info("config.template")
+	switch {
 	case err != nil:
 		t.Errorf("Cannot read VM properties: %v", err)
 	case !vmInfo.Config.Template:
