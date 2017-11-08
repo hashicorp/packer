@@ -75,13 +75,13 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		}
 	}
 
-	if session, err := session.NewSessionWithOptions(opts); err != nil {
+	if sess, err := session.NewSessionWithOptions(opts); err != nil {
 		return nil, err
-	} else if *session.Config.Region == "" {
+	} else if *sess.Config.Region == "" {
 		return nil, fmt.Errorf("Could not find AWS region, make sure it's set.")
 	} else {
-		log.Printf("Found region %s", *session.Config.Region)
-		c.session = session
+		log.Printf("Found region %s", *sess.Config.Region)
+		c.session = sess
 	}
 
 	return c.session, nil
