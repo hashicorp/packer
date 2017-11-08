@@ -39,7 +39,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	path, err := datastorePath(vm, s.VMName)
+	dsPath, err := datastorePath(vm)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -59,7 +59,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	task, err := folder.RegisterVM(context.Background(), path.String(), s.VMName, true, nil, host)
+	task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -75,7 +75,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	return multistep.ActionContinue
 }
 
-func datastorePath(vm *object.VirtualMachine, name string) (*object.DatastorePath, error) {
+func datastorePath(vm *object.VirtualMachine) (*object.DatastorePath, error) {
 	devices, err := vm.Device(context.Background())
 	if err != nil {
 		return nil, err
@@ -92,15 +92,15 @@ func datastorePath(vm *object.VirtualMachine, name string) (*object.DatastorePat
 	}
 
 	if disk == "" {
-		return nil, fmt.Errorf("disk not found in '%v'", name)
+		return nil, fmt.Errorf("disk not found in '%v'", vm.Name())
 	}
 
 	re := regexp.MustCompile("\\[(.*?)\\]")
 
 	datastore := re.FindStringSubmatch(disk)[1]
-	vmx := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), name+".vmx")
+	vmxPath := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), vm.Name()+".vmx")
 
-	return &object.DatastorePath{datastore, vmx}, nil
+	return &object.DatastorePath{datastore, vmxPath}, nil
 }
 
 // We will use the virtual machine created by vmware-iso builder
@@ -117,7 +117,12 @@ func findRuntimeVM(cli *govmomi.Client, dcPath, name string) (*object.VirtualMac
 		return nil, fmt.Errorf("VM at path %s not found", fullPath)
 	}
 
-	return ref.(*object.VirtualMachine), nil
+	vm := ref.(*object.VirtualMachine)
+	if vm.InventoryPath == "" {
+		vm.SetInventoryPath(fullPath)
+	}
+
+	return vm, nil
 }
 
 // If in the target folder a virtual machine or template already exists
