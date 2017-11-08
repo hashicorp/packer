@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -343,7 +344,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" && !b.config.SkipExport {
 		dir = new(vmwcommon.LocalOutputDir)
 		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
@@ -360,11 +361,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		builderId = BuilderIdESX
 	}
 
+	config := make(map[string]string)
+	config[ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
+	config[ArtifactConfFormat] = b.config.Format
+	config[ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
+
 	return &Artifact{
 		builderId: builderId,
 		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
+		config:    config,
 	}, nil
 }
 
