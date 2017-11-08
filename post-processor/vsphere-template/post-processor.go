@@ -2,11 +2,13 @@ package vsphere_template
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/builder/vmware/iso"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -86,6 +88,14 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+	}
+
+	f := artifact.State(iso.ArtifactConfFormat)
+	k := artifact.State(iso.ArtifactConfKeepRegistered)
+	s := artifact.State(iso.ArtifactConfSkipExport)
+
+	if f != "" && k != "true" && s == "false" {
+		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
 	}
 
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
