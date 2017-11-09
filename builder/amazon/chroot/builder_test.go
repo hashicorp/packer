@@ -10,6 +10,7 @@ func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"ami_name":   "foo",
 		"source_ami": "foo",
+		"region":     "us-east-1",
 	}
 }
 
