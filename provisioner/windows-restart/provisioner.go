@@ -192,7 +192,7 @@ var waitForCommunicator = func(p *Provisioner) error {
 			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
-		if runCustomRestartCheck == true {
+		if runCustomRestartCheck {
 			// run user-configured restart check
 			err := cmdRestartCheck.StartWithUi(p.comm, p.ui)
 			if err != nil {
