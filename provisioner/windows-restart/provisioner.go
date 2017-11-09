@@ -212,16 +212,17 @@ var waitForCommunicator = func(p *Provisioner) error {
 		// provisioning before powershell is actually ready.
 		// In this next check, we parse stdout to make sure that the command is
 		// actually running as expected.
-		var buf bytes.Buffer
+		var stdout, stderr bytes.Buffer
 		cmdModuleLoad := &packer.RemoteCmd{
 			Command: DefaultRestartCheckCommand,
 			Stdin:   nil,
-			Stdout:  &buf}
+			Stdout:  &stdout,
+			Stderr:  &stderr}
 
 		p.comm.Start(cmdModuleLoad)
 		cmdModuleLoad.Wait()
 
-		stdoutToRead := buf.String()
+		stdoutToRead := stdout.String()
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
