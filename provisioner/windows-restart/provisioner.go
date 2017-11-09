@@ -3,7 +3,7 @@ package restart
 import (
 	"bytes"
 	"fmt"
-	"io"
+
 	"log"
 	"strings"
 	"sync"
@@ -201,13 +201,18 @@ var waitForCommunicator = func(p *Provisioner) error {
 		}
 		// this is the non-user-configurable check that powershell
 		// modules have loaded
-		cmdModuleLoad := &packer.RemoteCmd{Command: DefaultRestartCheckCommand}
-		var buf, buf2 bytes.Buffer
-		cmdModuleLoad.Stdout = &buf
-		cmdModuleLoad.Stdout = io.MultiWriter(cmdModuleLoad.Stdout, &buf2)
+		var buf bytes.Buffer
+		cmdModuleLoad := &packer.RemoteCmd{
+			Command: DefaultRestartCheckCommand,
+			Stdin:   nil,
+			Stdout:  &buf,
+			Stderr:  &buf}
 
-		cmdModuleLoad.StartWithUi(p.comm, p.ui)
-		stdoutToRead := buf2.String()
+		// cmdModuleLoad.StartWithUi(p.comm, p.ui)
+		p.comm.Start(cmdModuleLoad)
+		cmdModuleLoad.Wait()
+
+		stdoutToRead := buf.String()
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
