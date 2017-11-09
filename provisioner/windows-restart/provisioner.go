@@ -216,10 +216,8 @@ var waitForCommunicator = func(p *Provisioner) error {
 		cmdModuleLoad := &packer.RemoteCmd{
 			Command: DefaultRestartCheckCommand,
 			Stdin:   nil,
-			Stdout:  &buf,
-			Stderr:  &buf}
+			Stdout:  &buf}
 
-		// cmdModuleLoad.StartWithUi(p.comm, p.ui)
 		p.comm.Start(cmdModuleLoad)
 		cmdModuleLoad.Wait()
 
