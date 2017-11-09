@@ -82,8 +82,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	var errs *packer.MultiError
 
 	// Set defaults.
-	if c.Network == "" {
+	if c.Network == "" && c.Subnetwork == "" {
 		c.Network = "default"
+	}
+
+	if c.NetworkProjectId == "" {
+		c.NetworkProjectId = c.ProjectId
 	}
 
 	if c.DiskSizeGb == 0 {
