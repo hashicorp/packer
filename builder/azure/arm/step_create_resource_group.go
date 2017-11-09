@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
@@ -51,32 +52,48 @@ func (s *StepCreateResourceGroup) doesResourceGroupExist(resourceGroupName strin
 }
 
 func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAction {
-	s.say("Creating resource group ...")
+	var doubleResource, ok = state.GetOk(constants.ArmDoubleResourceGroupNameSet)
+	if ok && doubleResource.(bool) {
+		err := errors.New("You have filled in both temp_resource_group_name and build_resource_group_name. Please choose one.")
+		return processStepResult(err, s.error, state)
+	}
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var location = state.Get(constants.ArmLocation).(string)
 	var tags = state.Get(constants.ArmTags).(*map[string]*string)
 
-	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
-	s.say(fmt.Sprintf(" -> Location          : '%s'", location))
-	s.say(fmt.Sprintf(" -> Tags              :"))
-	for k, v := range *tags {
-		s.say(fmt.Sprintf(" ->> %s : %s", k, *v))
-	}
-
 	exists, err := s.exists(resourceGroupName)
 	if err != nil {
-		s.say(s.client.LastError.Error())
+		return processStepResult(err, s.error, state)
 	}
-	state.Put(constants.ArmIsExistingResourceGroup, exists)
+	configThinksExists := state.Get(constants.ArmIsExistingResourceGroup).(bool)
+	if exists != configThinksExists {
+		if configThinksExists {
+			err = errors.New("The resource group you want to use does not exist yet. Please use temp_resource_group_name to create a temporary resource group.")
+		} else {
+			err = errors.New("A resource group with that name already exists. Please use build_resource_group_name to use an existing resource group.")
+		}
+		return processStepResult(err, s.error, state)
+	}
+
 	// If the resource group exists, we may not have permissions to update it so we don't.
 	if !exists {
+		s.say("Creating resource group ...")
+
+		s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
+		s.say(fmt.Sprintf(" -> Location          : '%s'", location))
+		s.say(fmt.Sprintf(" -> Tags              :"))
+		for k, v := range *tags {
+			s.say(fmt.Sprintf(" ->> %s : %s", k, *v))
+		}
 		err = s.create(resourceGroupName, location, tags)
 		if err == nil {
 			state.Put(constants.ArmIsResourceGroupCreated, true)
 		}
 	} else {
-		// Mark the resource group as created to deal with later checks
+		s.say("Using existing resource group ...")
+		s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
+		s.say(fmt.Sprintf(" -> Location          : '%s'", location))
 		state.Put(constants.ArmIsResourceGroupCreated, true)
 	}
 
