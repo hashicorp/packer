@@ -18,6 +18,7 @@
 
 * builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
 * builder/triton: Fix a bug where partially created images can be reported as complete. [GH-5566]
+* builder/amazon: region is set from profile, if profile is set, rather than being overridden by metadata [GH-5562]
 
 ## 1.1.1 (October 13, 2017)
 
