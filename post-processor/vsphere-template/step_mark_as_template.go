@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type stepMarkAsTemplate struct {
 	VMName string
-	Source string
 }
 
 func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
@@ -26,6 +27,19 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Message("Marking as a template...")
 
 	vm, err := findRuntimeVM(cli, dcPath, s.VMName)
+	if err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	dsPath, err := datastorePath(vm)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -45,21 +59,7 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	source := strings.Split(s.Source, "/vmfs/volumes/")[1]
-	i := strings.Index(source, "/")
-
-	path := (&object.DatastorePath{
-		Datastore: source[:i],
-		Path:      source[i:],
-	}).String()
-
-	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	task, err := folder.RegisterVM(context.Background(), path, s.VMName, true, nil, host)
+	task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -73,6 +73,34 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	return multistep.ActionContinue
+}
+
+func datastorePath(vm *object.VirtualMachine) (*object.DatastorePath, error) {
+	devices, err := vm.Device(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	disk := ""
+	for _, device := range devices {
+		if d, ok := device.(*types.VirtualDisk); ok {
+			if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
+				disk = b.GetVirtualDeviceFileBackingInfo().FileName
+			}
+			break
+		}
+	}
+
+	if disk == "" {
+		return nil, fmt.Errorf("disk not found in '%v'", vm.Name())
+	}
+
+	re := regexp.MustCompile("\\[(.*?)\\]")
+
+	datastore := re.FindStringSubmatch(disk)[1]
+	vmxPath := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), vm.Name()+".vmx")
+
+	return &object.DatastorePath{datastore, vmxPath}, nil
 }
 
 // We will use the virtual machine created by vmware-iso builder
@@ -89,7 +117,12 @@ func findRuntimeVM(cli *govmomi.Client, dcPath, name string) (*object.VirtualMac
 		return nil, fmt.Errorf("VM at path %s not found", fullPath)
 	}
 
-	return ref.(*object.VirtualMachine), nil
+	vm := ref.(*object.VirtualMachine)
+	if vm.InventoryPath == "" {
+		vm.SetInventoryPath(fullPath)
+	}
+
+	return vm, nil
 }
 
 // If in the target folder a virtual machine or template already exists
