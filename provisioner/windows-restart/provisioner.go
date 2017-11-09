@@ -223,7 +223,9 @@ var waitForCommunicator = func(p *Provisioner) error {
 		cmdModuleLoad.Wait()
 
 		stdoutToRead := stdout.String()
+		stderrToRead := stderr.String()
 		if !strings.Contains(stdoutToRead, "restarted.") {
+			log.Printf("Stderr is %s", stderrToRead)
 			log.Printf("echo didn't succeed; retrying...")
 			continue
 		}
