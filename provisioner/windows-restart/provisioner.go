@@ -178,7 +178,10 @@ var waitForCommunicator = func(p *Provisioner) error {
 	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
 		runCustomRestartCheck = false
 	}
-	// this is the user configurable command
+	// This command is configurable by the user to make sure that the
+	// vm has met their necessary criteria for having restarted. If the
+	// user doesn't set a special restart command, we just run the
+	// default as cmdModuleLoad below.
 	cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
 	log.Printf("Checking that communicator is connected with: '%s'",
 		cmdRestartCheck.Command)
@@ -199,8 +202,16 @@ var waitForCommunicator = func(p *Provisioner) error {
 			log.Printf("Connected to machine")
 			runCustomRestartCheck = false
 		}
-		// this is the non-user-configurable check that powershell
-		// modules have loaded
+
+		// This is the non-user-configurable check that powershell
+		// modules have loaded.
+
+		// If we catch the restart in just the right place, we will be able
+		// to run the restart check but the output will be an error message
+		// about how it needs powershell modules to load, and we will start
+		// provisioning before powershell is actually ready.
+		// In this next check, we parse stdout to make sure that the command is
+		// actually running as expected.
 		var buf bytes.Buffer
 		cmdModuleLoad := &packer.RemoteCmd{
 			Command: DefaultRestartCheckCommand,
