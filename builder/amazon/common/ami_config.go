@@ -45,10 +45,11 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		session, err := accessConfig.Session()
 		if err != nil {
 			errs = append(errs, err)
-		}
-		region := *session.Config.Region
-		if stringInSlice(c.AMIRegions, region) {
-			errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
+		} else {
+			region := *session.Config.Region
+			if stringInSlice(c.AMIRegions, region) {
+				errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
+			}
 		}
 	}
 
