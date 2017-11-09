@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -100,6 +101,77 @@ func TestStepDeleteOSDiskShouldHandleComplexStorageContainerNames(t *testing.T) 
 
 	if actualBlobName != "def/pkrvm_os.vhd" {
 		t.Fatalf("Expected the blob name to be 'pkrvm_os.vhd', but found '%s'.", actualBlobName)
+	}
+}
+
+func TestStepDeleteOSDiskShouldPassIfManagedDiskInTempResourceGroup(t *testing.T) {
+	var testSubject = &StepDeleteOSDisk{
+		delete: func(string, string) error { return nil },
+		say:    func(message string) {},
+		error:  func(e error) {},
+	}
+
+	stateBag := new(multistep.BasicStateBag)
+	stateBag.Put(constants.ArmOSDiskVhd, "subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/osdisk")
+	stateBag.Put(constants.ArmIsManagedImage, true)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
+	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
+
+	var result = testSubject.Run(stateBag)
+	if result != multistep.ActionContinue {
+		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == true {
+		t.Fatalf("Expected the step to not set stateBag['%s'], but it was.", constants.Error)
+	}
+}
+
+func TestStepDeleteOSDiskShouldFailIfManagedDiskInExistingResourceGroupFailsToDelete(t *testing.T) {
+	var testSubject = &StepDeleteOSDisk{
+		delete:        func(string, string) error { return nil },
+		say:           func(message string) {},
+		error:         func(e error) {},
+		deleteManaged: func(string, string) error { return errors.New("UNIT TEST FAIL!") },
+	}
+
+	stateBag := new(multistep.BasicStateBag)
+	stateBag.Put(constants.ArmOSDiskVhd, "subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/osdisk")
+	stateBag.Put(constants.ArmIsManagedImage, true)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
+
+	var result = testSubject.Run(stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to not stateBag['%s'], but it was.", constants.Error)
+	}
+}
+
+func TestStepDeleteOSDiskShouldFailIfManagedDiskInExistingResourceGroupIsDeleted(t *testing.T) {
+	var testSubject = &StepDeleteOSDisk{
+		delete:        func(string, string) error { return nil },
+		say:           func(message string) {},
+		error:         func(e error) {},
+		deleteManaged: func(string, string) error { return nil },
+	}
+
+	stateBag := new(multistep.BasicStateBag)
+	stateBag.Put(constants.ArmOSDiskVhd, "subscriptions/123-456-789/resourceGroups/existingresourcegroup/providers/Microsoft.Compute/disks/osdisk")
+	stateBag.Put(constants.ArmIsManagedImage, true)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
+
+	var result = testSubject.Run(stateBag)
+	if result != multistep.ActionContinue {
+		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == true {
+		t.Fatalf("Expected the step to not set stateBag['%s'], but it was.", constants.Error)
 	}
 }
 

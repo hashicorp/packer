@@ -42,7 +42,6 @@ func (s *StepDeleteOSDisk) deleteBlob(storageContainerName string, blobName stri
 }
 
 func (s *StepDeleteOSDisk) deleteManagedDisk(resourceGroupName string, imageName string) error {
-	s.say("In the deleting part")
 	xs := strings.Split(imageName, "/")
 	diskName := xs[len(xs)-1]
 	_, errChan := s.client.DisksClient.Delete(resourceGroupName, diskName, nil)
@@ -70,15 +69,14 @@ func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 		err = s.deleteManaged(resourceGroupName, osDisk)
 		if err != nil {
 			s.say("Failed to delete the managed OS Disk!")
-			return multistep.ActionHalt
+			return processStepResult(err, s.error, state)
 		}
-		s.say("After deleting")
 		return multistep.ActionContinue
 	}
 	u, err := url.Parse(osDisk)
 	if err != nil {
 		s.say("Failed to parse the OS Disk's VHD URI!")
-		return multistep.ActionHalt
+		return processStepResult(err, s.error, state)
 	}
 
 	xs := strings.Split(u.Path, "/")

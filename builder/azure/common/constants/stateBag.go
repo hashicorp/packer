@@ -23,6 +23,7 @@ const (
 	ArmPublicIPAddressName             string = "arm.PublicIPAddressName"
 	ArmResourceGroupName               string = "arm.ResourceGroupName"
 	ArmIsResourceGroupCreated          string = "arm.IsResourceGroupCreated"
+	ArmDoubleResourceGroupNameSet      string = "arm.DoubleResourceGroupNameSet"
 	ArmStorageAccountName              string = "arm.StorageAccountName"
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"

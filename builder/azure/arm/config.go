@@ -83,6 +83,7 @@ type Config struct {
 	StorageAccount                    string             `mapstructure:"storage_account"`
 	TempComputeName                   string             `mapstructure:"temp_compute_name"`
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
+	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
 	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                  *azure.Environment
@@ -129,7 +130,13 @@ type keyVaultCertificate struct {
 }
 
 func (c *Config) toVMID() string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, c.tmpResourceGroupName, c.tmpComputeName)
+	var resourceGroupName string
+	if c.tmpResourceGroupName != "" {
+		resourceGroupName = c.tmpResourceGroupName
+	} else {
+		resourceGroupName = c.BuildResourceGroupName
+	}
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, resourceGroupName, c.tmpComputeName)
 }
 
 func (c *Config) isManagedImage() bool {
@@ -328,9 +335,10 @@ func setRuntimeValues(c *Config) {
 		c.tmpComputeName = c.TempComputeName
 	}
 	c.tmpDeploymentName = tempName.DeploymentName
-	if c.TempResourceGroupName == "" {
+	// Only set tmpResourceGroupName if no name has been specified
+	if c.TempResourceGroupName == "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = tempName.ResourceGroupName
-	} else {
+	} else if c.TempResourceGroupName != "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
 	c.tmpOSDiskName = tempName.OSDiskName
