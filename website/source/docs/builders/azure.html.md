@@ -47,7 +47,7 @@ builder.
 -   `location` (string) Azure datacenter in which your VM will build.
 
     CLI example `azure location list`
-    
+
 #### VHD or Managed Image
 
 The Azure builder can create either a VHD, or a managed image. If you
@@ -55,10 +55,10 @@ are creating a VHD, you **must** start with a VHD.  Likewise, if you
 want to create a managed image you **must** start with a managed
 image.  When creating a VHD the following two options are required.
 
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be
     organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
-    
--   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
+
+-   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and
     `PREFIX-vmTemplate.UUID`.
 
 -   `resource_group_name` (string) Resource group under which the final artifact will be stored.
@@ -68,13 +68,13 @@ image.  When creating a VHD the following two options are required.
 When creating a managed image the following two options are required.
 
 -   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
-     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
-     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
+     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value
+     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
      to learn more about managed images.
-     
--   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
-     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
-     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
+
+-   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be
+     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be
+     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to
      learn more about managed images.
 
 ### Optional:
@@ -83,12 +83,14 @@ When creating a managed image the following two options are required.
     characters, and tag values cannot exceed 256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
 
+-   `build_resource_group_name` (string) - Specify an existing resource group to run the build in. Cannot be used together with `temp_resource_group_name` and requires less permissions due to not creating or destroying a resource group.
+
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
-    
+
 -   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
-    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
+    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to
     cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
     to learn more about custom data, and how it can be used to influence the provisioning process.
 
@@ -110,11 +112,11 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
-    
+
 -   `managed_image_storage_account_type` (string) Specify the storage
     account type for a managed image.  Valid values are Standard_LRS
     and Premium\_LRS.  The default is Standard\_LRS.
-                
+
 -   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
     created at runtime. This variable is required when creating images based on
     Windows; this variable is not used by non-Windows builds. See `Windows`
@@ -128,12 +130,12 @@ When creating a managed image the following two options are required.
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
--   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be 
-    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer 
+-   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
+    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.
 
--   `temp_resource_group_name` (string) temporary name assigned to the resource group.  If this value is not set, a random
-    value will be assigned.
+-   `temp_resource_group_name` (string) name assigned to the temporary resource group created during the build.  If this value is not set, a random
+    value will be assigned. Cannot be used together with `build_resource_group_name`.
 
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
@@ -270,6 +272,7 @@ The Azure builder attempts to pick default values that provide for a just works 
 -   The default user name is packer not root as in other builders. Most distros on Azure do not allow root to SSH to a VM hence the need for a non-root default user. Set the ssh\_username option to override the default value.
 -   The default VM size is Standard\_A1. Set the vm\_size option to override the default value.
 -   The default image version is latest. Set the image\_version option to override the default value.
+-   By default a temporary resource group will be created and destroyed as part of the build. If you do not have permissions to do so, use `build_resource_group_name` to specify an existing resource group to run the build in.
 
 ## Implementation
 
