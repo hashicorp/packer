@@ -312,7 +312,7 @@ func (p *Provisioner) sudo(cmd string) string {
 }
 
 func validateDirConfig(path string, name string, required bool) error {
-	if required == true && path == "" {
+	if required && path == "" {
 		return fmt.Errorf("%s cannot be empty", name)
 	} else if required == false && path == "" {
 		return nil
