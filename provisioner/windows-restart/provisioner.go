@@ -175,6 +175,13 @@ WaitLoop:
 
 var waitForCommunicator = func(p *Provisioner) error {
 	runCustomRestartCheck := true
+	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
+		runCustomRestartCheck = false
+	}
+	// this is the user configurable command
+	cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+	log.Printf("Checking that communicator is connected with: '%s'",
+		cmdRestartCheck.Command)
 	for {
 		select {
 		case <-p.cancel:
@@ -183,16 +190,8 @@ var waitForCommunicator = func(p *Provisioner) error {
 		case <-time.After(retryableSleep):
 		}
 		if runCustomRestartCheck == true {
-			if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
-				runCustomRestartCheck = false
-			}
-			// this is the user configurable command
-			cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-			log.Printf("Checking that communicator is connected with: '%s'",
-				cmdRestartCheck.Command)
 			// run user-configured restart check
 			err := cmdRestartCheck.StartWithUi(p.comm, p.ui)
-
 			if err != nil {
 				log.Printf("Communication connection err: %s", err)
 				continue
