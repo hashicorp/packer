@@ -1,8 +1,75 @@
-## UNRELEASED
+## (UNRELEASED)
+
+### IMRPOVEMENTS:
+
+* post-processor/docker-push: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
+* builder/docker: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
+* post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
+* builder/hyper-v: Also disable automatic checkpoints for gen 2 VMs. [GH-5517]
+* builder/hyper-v: Add `disk_additional_size` option to allow for up to 64 additional disks. [GH-5491]
+* builder/amazon: correctly deregister AMIs when `force_deregister` is set. [GH-5525]
+* builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
+* builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
+* communicator/ssh: Add socks 5 proxy support. [GH-5439]
+* builder/lxc: Add new `publish_properties` field to set image properties. [GH-5475]
+* builder/virtualbox-ovf: Retry while removing VM to solve for transient errors. [GH-5512]
 
 ### BUG FIXES:
 
-* builder/puppet-masterless: Make sure directories created with sudo are writable by the packer user. [GH-5351]
+* builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
+* builder/triton: Fix a bug where partially created images can be reported as complete. [GH-5566]
+* builder/amazon: region is set from profile, if profile is set, rather than being overridden by metadata [GH-5562]
+
+## 1.1.1 (October 13, 2017)
+
+### IMPROVEMENTS:
+
+* **New builder:** `hyperv-vmcx` for building images from existing VMs.
+    [GH-4944] [GH-5444]
+* builder/amazon-instance: Add `.Token` as a variable in the
+    `BundleUploadCommand` template. [GH-5288]
+* builder/amazon: Add `temporary_security_group_source_cidr` option to control
+    ingress to source instances. [GH-5384]
+* builder/amazon: Output AMI Name during prevalidation. [GH-5389]
+* builder/amazon: Support template functions in tag keys. [GH-5381]
+* builder/amazon: Tag volumes on creation instead of as a separate step.
+    [GH-5417]
+* builder/docker: Add option to set `--user` flag when running `exec`.
+    [GH-5406]
+* builder/docker: Set file owner to container user when uploading. Can be
+    disabled by setting `fix_upload_owner` to `false`. [GH-5422]
+* builder/googlecompute: Support setting labels on the resulting image.
+    [GH-5356]
+* builder/hyper-v: Add `vhd_temp_path` option to control where the VHD resides
+    while it's being provisioned. [GH-5206]
+* builder/hyper-v: Allow vhd or vhdx source images instead of just ISO.
+    [GH-4944] [GH-5444]
+* builder/hyper-v: Disable automatic checkpoints. [GH-5374]
+* builder/virtualbox-ovf: Add `keep_registered` option. [GH-5336]
+* builder/vmware: Add `disable_vnc` option to prevent VNC connections from
+    being made. [GH-5436]
+* core: Releases will now be built for ppc64le.
+* post-processor/vagrant: When building from a builder/hyper-v artifact, link
+    instead of copy when available. [GH-5207]
+
+
+### BUG FIXES:
+
+* builder/cloudstack: Fix panic if build is aborted. [GH-5388]
+* builder/hyper-v: Respect `enable_dynamic_memory` flag. [GH-5363]
+* builder/puppet-masterless: Make sure directories created with sudo are
+    writable by the packer user. [GH-5351]
+* provisioner/chef-solo: Fix issue installing chef-solo on Windows. [GH-5357]
+* provisioner/powershell: Fix issue setting environment variables by writing
+    them to a file, instead of the command line. [GH-5345]
+* provisioner/powershell: Fix issue where powershell scripts could hang.
+    [GH-5082]
+* provisioner/powershell: Fix Powershell progress stream leak to stderr for
+    normal and elevated commands. [GH-5365]
+* provisioner/puppet-masterless: Fix bug where `puppet_bin_dir` wasn't being
+    respected. [GH-5340]
+* provisioner/puppet: Fix setting facter vars on Windows. [GH-5341]
+
 
 ## 1.1.0 (September 12, 2017)
 

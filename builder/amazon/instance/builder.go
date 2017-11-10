@@ -127,7 +127,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.AccountId == "" {
@@ -193,6 +194,44 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	var instanceStep multistep.Step
+
+	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
+		instanceStep = &awscommon.StepRunSourceInstance{
+			Debug:                    b.config.PackerDebug,
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+		}
+	} else {
+		instanceStep = &awscommon.StepRunSpotInstance{
+			Debug:                    b.config.PackerDebug,
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+		}
+	}
+
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
@@ -217,24 +256,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CommConfig:       &b.config.RunConfig.Comm,
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			VpcId:            b.config.VpcId,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
-		&awscommon.StepRunSourceInstance{
-			Debug:                    b.config.PackerDebug,
-			SpotPrice:                b.config.SpotPrice,
-			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
-			InstanceType:             b.config.InstanceType,
-			IamInstanceProfile:       b.config.IamInstanceProfile,
-			UserData:                 b.config.UserData,
-			UserDataFile:             b.config.UserDataFile,
-			SourceAMI:                b.config.SourceAmi,
-			SubnetId:                 b.config.SubnetId,
-			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			EbsOptimized:             b.config.EbsOptimized,
-			AvailabilityZone:         b.config.AvailabilityZone,
-			BlockDevices:             b.config.BlockDevices,
-			Tags:                     b.config.RunTags,
-			Ctx:                      b.config.ctx,
-		},
+		instanceStep,
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,

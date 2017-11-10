@@ -28,12 +28,15 @@ func (s *stepLxcCreate) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	commands := make([][]string, 3)
-	commands[0] = append(config.EnvVars, []string{"lxc-create", "-n", name, "-t", config.Name, "--"}...)
+	commands[0] = append(config.EnvVars, "lxc-create")
+	commands[0] = append(commands[0], config.CreateOptions...)
+	commands[0] = append(commands[0], []string{"-n", name, "-t", config.Name, "--"}...)
 	commands[0] = append(commands[0], config.Parameters...)
 	// prevent tmp from being cleaned on boot, we put provisioning scripts there
 	// todo: wait for init to finish before moving on to provisioning instead of this
 	commands[1] = []string{"touch", filepath.Join(rootfs, "tmp", ".tmpfs")}
-	commands[2] = []string{"lxc-start", "-d", "--name", name}
+	commands[2] = append([]string{"lxc-start"}, config.StartOptions...)
+	commands[2] = append(commands[2], []string{"-d", "--name", name}...)
 
 	ui.Say("Creating container...")
 	for _, command := range commands {

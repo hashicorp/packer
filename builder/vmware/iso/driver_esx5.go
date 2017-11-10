@@ -165,10 +165,10 @@ func (d *ESX5Driver) Verify() error {
 
 func (d *ESX5Driver) HostIP() (string, error) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", d.Host, d.Port))
-	defer conn.Close()
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	host, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	return host, err

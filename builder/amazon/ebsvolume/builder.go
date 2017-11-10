@@ -101,6 +101,50 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
+	var instanceStep multistep.Step
+
+	isSpotInstance := b.config.SpotPrice != "" && b.config.SpotPrice != "0"
+
+	if isSpotInstance {
+		instanceStep = &awscommon.StepRunSpotInstance{
+			Debug:                    b.config.PackerDebug,
+			ExpectedRootDevice:       "ebs",
+			SpotPrice:                b.config.SpotPrice,
+			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.launchBlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	} else {
+		instanceStep = &awscommon.StepRunSourceInstance{
+			Debug:                    b.config.PackerDebug,
+			ExpectedRootDevice:       "ebs",
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.launchBlockDevices,
+			Tags:                     b.config.RunTags,
+			Ctx:                      b.config.ctx,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	}
+
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepSourceAMIInfo{
@@ -121,26 +165,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			CommConfig:       &b.config.RunConfig.Comm,
 			VpcId:            b.config.VpcId,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
-		&awscommon.StepRunSourceInstance{
-			Debug:                    b.config.PackerDebug,
-			ExpectedRootDevice:       "ebs",
-			SpotPrice:                b.config.SpotPrice,
-			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
-			InstanceType:             b.config.InstanceType,
-			UserData:                 b.config.UserData,
-			UserDataFile:             b.config.UserDataFile,
-			SourceAMI:                b.config.SourceAmi,
-			IamInstanceProfile:       b.config.IamInstanceProfile,
-			SubnetId:                 b.config.SubnetId,
-			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			EbsOptimized:             b.config.EbsOptimized,
-			AvailabilityZone:         b.config.AvailabilityZone,
-			BlockDevices:             b.config.launchBlockDevices,
-			Tags:                     b.config.RunTags,
-			Ctx:                      b.config.ctx,
-			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
-		},
+		instanceStep,
 		&stepTagEBSVolumes{
 			VolumeMapping: b.config.VolumeMappings,
 			Ctx:           b.config.ctx,
@@ -162,7 +189,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&awscommon.StepStopEBSBackedInstance{
-			SpotPrice:           b.config.SpotPrice,
+			Skip:                isSpotInstance,
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{

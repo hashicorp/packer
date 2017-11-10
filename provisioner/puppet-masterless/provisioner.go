@@ -71,6 +71,7 @@ type guestOSTypeConfig struct {
 	stagingDir       string
 	executeCommand   string
 	facterVarsFmt    string
+	facterVarsJoiner string
 	modulePathJoiner string
 }
 
@@ -78,27 +79,32 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} {{if .Sudo}} sudo -E {{end}}" +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
+			"{{if .Sudo}}sudo -E {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
 			"--detailed-exitcodes " +
-			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
+		facterVarsJoiner: " ",
 		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
 		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} && " +
-			"puppet apply --verbose --modulepath='{{.ModulePath}}' " +
-			"{{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}}" +
-			"{{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
 			"--detailed-exitcodes " +
-			"{{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}}" +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\" &",
+		facterVarsFmt:    `SET "FACTER_%s=%s"`,
+		facterVarsJoiner: " & ",
 		modulePathJoiner: ";",
 	},
 }
@@ -282,7 +288,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:      strings.Join(facterVars, " "),
+		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,

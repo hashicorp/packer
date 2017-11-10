@@ -59,11 +59,11 @@ func (s *setpRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 		client := state.Get("client").(*ecs.Client)
 		alicloudImages := state.Get("alicloudimages").(map[string]string)
 		ui.Say(fmt.Sprintf("Stopping copy image because cancellation or error..."))
-		for copyedRegionId, copyedImageId := range alicloudImages {
-			if copyedRegionId == s.RegionId {
+		for copiedRegionId, copiedImageId := range alicloudImages {
+			if copiedRegionId == s.RegionId {
 				continue
 			}
-			if err := client.CancelCopyImage(common.Region(copyedRegionId), copyedImageId); err != nil {
+			if err := client.CancelCopyImage(common.Region(copiedRegionId), copiedImageId); err != nil {
 				ui.Say(fmt.Sprintf("Error cancelling copy image: %v", err))
 			}
 		}

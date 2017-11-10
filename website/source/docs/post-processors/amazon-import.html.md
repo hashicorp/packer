@@ -49,7 +49,7 @@ Optional:
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the imported AMI. By default no groups have permission to launch the
-    AMI. `all` will make the AMI publically accessible. AWS currently doesn't
+    AMI. `all` will make the AMI publicly accessible. AWS currently doesn't
     accept any value other than "all".
 
 -   `ami_name` (string) - The name of the ami within the console. If not

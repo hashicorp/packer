@@ -100,7 +100,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `disk_type` (string) - The type for image file based virtual disk drives,
@@ -151,7 +151,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -325,6 +325,9 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>;"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## prlctl Commands
 

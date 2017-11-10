@@ -33,6 +33,7 @@ func init() {
 		"manifest-filename":          new(FixerManifestFilename),
 		"amazon-shutdown_behavior":   new(FixerAmazonShutdownBehavior),
 		"amazon-enhanced-networking": new(FixerAmazonEnhancedNetworking),
+		"docker-email":               new(FixerDockerEmail),
 	}
 
 	FixerOrder = []string{
@@ -49,5 +50,6 @@ func init() {
 		"manifest-filename",
 		"amazon-shutdown_behavior",
 		"amazon-enhanced-networking",
+		"docker-email",
 	}
 }

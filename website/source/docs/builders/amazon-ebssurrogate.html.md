@@ -80,7 +80,7 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -95,7 +95,7 @@ builder.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
@@ -136,9 +136,9 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `disable_stop_instance` (boolean) - Packer normally stops the build instance
     after all provisioners have run. For Windows instances, it is sometimes
@@ -228,6 +228,11 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
+
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     incase packer exits ungracefully. Possible values are "stop" and "terminate",
     default is `stop`.
@@ -278,7 +283,7 @@ builder.
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
