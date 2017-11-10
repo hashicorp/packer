@@ -5,6 +5,7 @@ import (
 )
 
 type Driver interface {
+	GetImage(config Config) (string, error)
 	CreateImageFromMachine(machineId string, config Config) (string, error)
 	CreateMachine(config Config) (string, error)
 	DeleteImage(imageId string) error

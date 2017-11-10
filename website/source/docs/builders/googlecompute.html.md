@@ -174,7 +174,7 @@ builder.
     Not required if you run Packer on a GCE instance with a service account.
     Instructions for creating file or using service accounts are above.
 
--   `accelerator_count` (int) - Number of guest accelerator cards to add to the launched instance.
+-   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
 
 -   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
     `"on_host_maintenance": "TERMINATE"` option set.
@@ -186,7 +186,7 @@ builder.
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
--   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
+-   `disk_size` (number) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
@@ -197,6 +197,9 @@ builder.
     resulting image belongs. You can create disks by specifying an image family
     instead of a specific image name. The image family always returns its
     latest image that is not deprecated.
+
+-   `image_labels` (object of key/value strings) - Key/value pair labels to
+    apply to the created image.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
@@ -213,7 +216,10 @@ builder.
     instance.
 
 -   `network` (string) - The Google Compute network id or URL to use for the
-    launched instance. Defaults to `"default"`.
+    launched instance. Defaults to `"default"`. If the value is not a URL, it
+    will be interpolated to `projects/((network_project_id))/global/networks/((network))`.
+    This value is not required if a `subnet` is specified.
+
 
 -   `network_project_id` (string) - The project ID for the network and subnetwork
     to use for launched instance. Defaults to `project_id`.
@@ -256,7 +262,9 @@ builder.
 -   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
     the launched instance. Only required if the `network` has been created with
     custom subnetting. Note, the region of the subnetwork must match the `region`
-    or `zone` in which the VM is launched.
+    or `zone` in which the VM is launched. If the value is not a URL, it
+    will be interpolated to `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
+
 
 -   `tags` (array of strings)
 

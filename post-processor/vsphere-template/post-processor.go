@@ -2,6 +2,7 @@ package vsphere_template
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -91,16 +92,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
 	}
 
-	source := ""
-	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".vmx") || strings.HasSuffix(path, ".ovf") || strings.HasSuffix(path, ".ova") {
-			source = path
-			break
-		}
-	}
+	f := artifact.State(iso.ArtifactConfFormat)
+	k := artifact.State(iso.ArtifactConfKeepRegistered)
+	s := artifact.State(iso.ArtifactConfSkipExport)
 
-	if source == "" {
-		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
+	if f != "" && k != "true" && s == "false" {
+		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
 	}
 
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
@@ -125,11 +122,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		NewStepMarkAsTemplate(artifact, source),
+		NewStepMarkAsTemplate(artifact),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)
-
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, false, rawErr.(error)
 	}

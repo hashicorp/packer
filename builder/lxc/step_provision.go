@@ -19,6 +19,7 @@ func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
 	// Create our communicator
 	comm := &LxcAttachCommunicator{
 		ContainerName: config.ContainerName,
+		AttachOptions: config.AttachOptions,
 		RootFs:        mountPath,
 		CmdWrapper:    wrappedCommand,
 	}

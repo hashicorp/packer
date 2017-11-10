@@ -11,7 +11,7 @@ import (
 )
 
 type StepStopEBSBackedInstance struct {
-	SpotPrice           string
+	Skip                bool
 	DisableStopInstance bool
 }
 
@@ -21,7 +21,7 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip when it is a spot instance
-	if s.SpotPrice != "" && s.SpotPrice != "0" {
+	if s.Skip {
 		return multistep.ActionContinue
 	}
 

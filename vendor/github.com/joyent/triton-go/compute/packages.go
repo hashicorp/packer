@@ -1,4 +1,4 @@
-package triton
+package compute
 
 import (
 	"context"
@@ -7,16 +7,11 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/joyent/triton-go/client"
 )
 
 type PackagesClient struct {
-	*Client
-}
-
-// Packages returns a c used for accessing functions pertaining
-// to Packages functionality in the Triton API.
-func (c *Client) Packages() *PackagesClient {
-	return &PackagesClient{c}
+	client *client.Client
 }
 
 type Package struct {
@@ -44,20 +39,25 @@ type ListPackagesInput struct {
 	Group   string `json:"group"`
 }
 
-func (client *PackagesClient) ListPackages(ctx context.Context, input *ListPackagesInput) ([]*Package, error) {
-	path := fmt.Sprintf("/%s/packages", client.accountName)
-	respReader, err := client.executeRequest(ctx, http.MethodGet, path, input)
+func (c *PackagesClient) List(ctx context.Context, input *ListPackagesInput) ([]*Package, error) {
+	path := fmt.Sprintf("/%s/packages", c.client.AccountName)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+		Body:   input,
+	}
+	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListPackages request: {{err}}", err)
+		return nil, errwrap.Wrapf("Error executing List request: {{err}}", err)
 	}
 
 	var result []*Package
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListPackages response: {{err}}", err)
+		return nil, errwrap.Wrapf("Error decoding List response: {{err}}", err)
 	}
 
 	return result, nil
@@ -67,20 +67,24 @@ type GetPackageInput struct {
 	ID string
 }
 
-func (client *PackagesClient) GetPackage(ctx context.Context, input *GetPackageInput) (*Package, error) {
-	path := fmt.Sprintf("/%s/packages/%s", client.accountName, input.ID)
-	respReader, err := client.executeRequest(ctx, http.MethodGet, path, nil)
+func (c *PackagesClient) Get(ctx context.Context, input *GetPackageInput) (*Package, error) {
+	path := fmt.Sprintf("/%s/packages/%s", c.client.AccountName, input.ID)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+	}
+	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing GetPackage request: {{err}}", err)
+		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
 	}
 
 	var result *Package
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding GetPackage response: {{err}}", err)
+		return nil, errwrap.Wrapf("Error decoding Get response: {{err}}", err)
 	}
 
 	return result, nil

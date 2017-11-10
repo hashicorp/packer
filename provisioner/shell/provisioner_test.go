@@ -1,12 +1,13 @@
 package shell
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -32,7 +33,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if *p.config.ExpectDisconnect != false {
+	if p.config.ExpectDisconnect != false {
 		t.Errorf("expected ExpectDisconnect to default to false")
 	}
 
@@ -51,7 +52,7 @@ func TestProvisionerPrepare_ExpectDisconnect(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if *p.config.ExpectDisconnect != false {
+	if p.config.ExpectDisconnect != false {
 		t.Errorf("expected ExpectDisconnect to be false")
 	}
 
@@ -62,10 +63,9 @@ func TestProvisionerPrepare_ExpectDisconnect(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if *p.config.ExpectDisconnect != true {
+	if p.config.ExpectDisconnect != true {
 		t.Errorf("expected ExpectDisconnect to be true")
 	}
-
 }
 
 func TestProvisionerPrepare_InlineShebang(t *testing.T) {

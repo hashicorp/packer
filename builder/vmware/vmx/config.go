@@ -24,11 +24,10 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	BootCommand    []string `mapstructure:"boot_command"`
-	RemoteType     string   `mapstructure:"remote_type"`
-	SkipCompaction bool     `mapstructure:"skip_compaction"`
-	SourcePath     string   `mapstructure:"source_path"`
-	VMName         string   `mapstructure:"vm_name"`
+	RemoteType     string `mapstructure:"remote_type"`
+	SkipCompaction bool   `mapstructure:"skip_compaction"`
+	SourcePath     string `mapstructure:"source_path"`
+	VMName         string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
@@ -82,6 +81,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
+
+	if c.Headless && c.DisableVNC {
+		warnings = append(warnings,
+			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+				"you won't be able to see any output.")
 	}
 
 	// Check for any errors.

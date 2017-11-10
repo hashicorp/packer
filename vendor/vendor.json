@@ -769,10 +769,10 @@
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 		},
 		{
-			"checksumSHA1": "vnuMNXv3FJSg/I8ig04OTEHjk1c=",
+			"checksumSHA1": "D267IUMW2rcb+vNe3QU+xhfSrgY=",
 			"path": "github.com/hashicorp/go-checkpoint",
-			"revision": "a8d0786e7fa88adb6b3bcaa341a99af7f9740671",
-			"revisionTime": "2017-06-24T02:34:07Z"
+			"revision": "1545e56e46dec3bba264e41fde2c1e2aa65b5dd4",
+			"revisionTime": "2017-10-09T17:35:28Z"
 		},
 		{
 			"checksumSHA1": "fSe5y1UgTDeYlnFfUcDA1zzcw+U=",
@@ -817,16 +817,34 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "o8jaSD36Zq42PMnmUaiB+vq+QNA=",
+			"checksumSHA1": "EqvUu0Ku0Ec5Tk6yhGNOuOr8yeA=",
 			"path": "github.com/joyent/triton-go",
-			"revision": "97ccd9f6c0c0652cf87997bcb01955e0329cd37e",
-			"revisionTime": "2017-05-09T20:29:43Z"
+			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
+			"revisionTime": "2017-10-17T16:55:58Z"
 		},
 		{
-			"checksumSHA1": "QzUqkCSn/ZHyIK346xb9V6EBw9U=",
+			"checksumSHA1": "JKf97EAAAZFQ6Wf8qN9X7TWqNBY=",
 			"path": "github.com/joyent/triton-go/authentication",
-			"revision": "16cef4c2d78ba1d3bf89af75e93ae2dec6e56634",
-			"revisionTime": "2017-05-04T20:45:05Z"
+			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
+			"revisionTime": "2017-10-17T16:55:58Z"
+		},
+		{
+			"checksumSHA1": "dlO1or0cyVMAmZzyLcBuoy+M0xU=",
+			"path": "github.com/joyent/triton-go/client",
+			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
+			"revisionTime": "2017-10-17T16:55:58Z"
+		},
+		{
+			"checksumSHA1": "O/y7BfKJFUf3A8TCRMXgo9HSb1w=",
+			"path": "github.com/joyent/triton-go/compute",
+			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
+			"revisionTime": "2017-10-17T16:55:58Z"
+		},
+		{
+			"checksumSHA1": "gyLtPyKlcumRSkrAH+SsDQo1GnY=",
+			"path": "github.com/joyent/triton-go/network",
+			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
+			"revisionTime": "2017-10-17T16:55:58Z"
 		},
 		{
 			"checksumSHA1": "gEjGS03N1eysvpQ+FCHTxPcbxXc=",
@@ -959,10 +977,10 @@
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
-			"checksumSHA1": "iApv8tX8vuAvzyY6VkOvW+IzJF8=",
+			"checksumSHA1": "XXmfaQ8fEupEgaGd6PptrLnrE54=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "078cc0a785c9da54158c0775f06f505fc1e867f8",
-			"revisionTime": "2017-06-07T14:21:56Z"
+			"revision": "e1b7d6e6b1b1a27984270784190f1d06ad91888b",
+			"revisionTime": "2017-09-29T21:51:32Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",
@@ -1216,6 +1234,12 @@
 			"path": "golang.org/x/net/html/charset",
 			"revision": "1c05540f6879653db88113bc4a2b70aec4bd491f",
 			"revisionTime": "2017-08-04T00:04:37Z"
+		},
+		{
+			"checksumSHA1": "S4QRxs3K4notNO97Um4sA2IvHaM=",
+			"path": "golang.org/x/net/proxy",
+			"revision": "a04bdaca5b32abe1c069418fb7088ae607de5bd0",
+			"revisionTime": "2017-10-03T05:09:24Z"
 		},
 		{
 			"checksumSHA1": "mktBVED98G2vv+OKcSgtnFVZC1Y=",

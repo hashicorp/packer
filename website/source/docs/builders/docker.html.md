@@ -162,6 +162,9 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
+-   `aws_profile` (string) - The AWS shared credentials profile used to communicate with AWS.
+    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
 -   `changes` (array of strings) - Dockerfile instructions to add to the commit.
     Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
     `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
@@ -174,11 +177,13 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     `login_password` will be ignored. For more information see the
     [section on ECR](#amazon-ec2-container-registry).
 
+*   `exec_user` (string) - Username or UID (format: <name|uid>[:<group|gid>])
+    to run remote commands with. You may need this if you get permission errors
+    trying to run the `shell` or other  provisioners.
+
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
     order to pull the image. The builder only logs in for the duration of
     the pull. It always logs out afterwards. For log into ECR see `ecr_login`.
-
--   `login_email` (string) - The email to use to authenticate to login.
 
 -   `login_username` (string) - The username to use to authenticate to login.
 
@@ -207,6 +212,10 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `container_dir` (string) - The directory inside container to mount
      temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
      By default this is set to `/packer-files`.
+     
+-   `fix_upload_owner` (boolean) - If true, files uploaded to the container will
+    be owned by the user the container is running as. If false, the owner will depend
+    on the version of docker installed in the system. Defaults to true.
 
 ## Using the Artifact: Export
 
@@ -356,19 +365,6 @@ virtualized or dedicated machine.
 While Docker has many features, Packer views Docker simply as an container
 runner. To that end, Packer is able to repeatably build these containers
 using portable provisioning scripts.
-
-Dockerfiles have some additional features that Packer doesn't support which are
-able to be worked around. Many of these features will be automated by Packer in
-the future:
-
--   Dockerfiles will snapshot the container at each step, allowing you to go
-    back to any step in the history of building. Packer doesn't do this yet, but
-    inter-step snapshotting is on the way.
-
--   Dockerfiles can contain information such as exposed ports, shared volumes,
-    and other metadata. Packer builds a raw Docker container image that has none
-    of this metadata. You can pass in much of this metadata at runtime with
-    `docker run`.
 
 ## Overriding the host directory
 

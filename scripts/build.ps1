@@ -47,7 +47,7 @@ $GIT_COMMIT = $(git.exe rev-parse HEAD)
 git.exe status --porcelain | Out-Null
 if ($LastExitCode -eq 0) {
     $GIT_DIRTY = "+CHANGES"
-} 
+}
 
 # If its dev mode, only build for ourself
 if (Test-Path env:PACKER_DEV) {
@@ -55,8 +55,8 @@ if (Test-Path env:PACKER_DEV) {
     $XC_ARCH=$(go.exe env GOARCH)
 }
 elseif (-not (Test-Path env:XC_ARCH)) {
-    $XC_ARCH="386 amd64 arm"
-    $XC_OS="linux darwin windows freebsd openbsd"
+    $XC_ARCH="386 amd64 arm arm64 ppc64le"
+    $XC_OS="linux darwin windows freebsd openbsd solaris"
 }
 
 # Delete the old dir

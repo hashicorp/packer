@@ -35,6 +35,7 @@ type Config struct {
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
 	ImageFamily          string            `mapstructure:"image_family"`
+	ImageLabels          map[string]string `mapstructure:"image_labels"`
 	InstanceName         string            `mapstructure:"instance_name"`
 	Labels               map[string]string `mapstructure:"labels"`
 	MachineType          string            `mapstructure:"machine_type"`
@@ -64,6 +65,7 @@ type Config struct {
 
 func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c := new(Config)
+	c.ctx.Funcs = TemplateFuncs
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -80,8 +82,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	var errs *packer.MultiError
 
 	// Set defaults.
-	if c.Network == "" {
+	if c.Network == "" && c.Subnetwork == "" {
 		c.Network = "default"
+	}
+
+	if c.NetworkProjectId == "" {
+		c.NetworkProjectId = c.ProjectId
 	}
 
 	if c.DiskSizeGb == 0 {

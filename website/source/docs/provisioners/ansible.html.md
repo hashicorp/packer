@@ -103,7 +103,7 @@ Optional Parameters:
     files. The command should read and write on stdin and stdout, respectively.
     Defaults to `/usr/lib/sftp-server -e`.
 
--   `skip_version_check` (bool) - Check if ansible is installed prior to running.
+-   `skip_version_check` (boolean) - Check if ansible is installed prior to running.
     Set this to `true`, for example, if you're going to install ansible during
     the packer run.
 

@@ -109,7 +109,7 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -124,7 +124,7 @@ builder.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
@@ -181,9 +181,9 @@ builder.
 -   `bundle_vol_command` (string) - The command to use to bundle the volume. See
     the "custom bundle commands" section below for more information.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -243,6 +243,11 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Defaults to `false`.
 
@@ -283,7 +288,7 @@ builder.
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
@@ -462,3 +467,6 @@ sudo -i -n ec2-upload-bundle \
 
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-upload-bundle` command.
+Additionally, `{{.Token}}` is available when overriding this command. You must
+create your own bundle command with the addition of `-t {{.Token}} ` if you are
+assuming a role.
