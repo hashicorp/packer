@@ -13,12 +13,23 @@
 * communicator/ssh: Add socks 5 proxy support. [GH-5439]
 * builder/lxc: Add new `publish_properties` field to set image properties. [GH-5475]
 * builder/virtualbox-ovf: Retry while removing VM to solve for transient errors. [GH-5512]
+* builder/google: Interpolate network and subnetwork values, rather than relying on an API call that packer may not have permission for. [GH-5343]
+* builder/lxc: Add three new configuration option categories to LXC builder: create_options, start_options, and attach_options. [GH-5530]
+* core: Rewrite vagrantfile code to make cross-platform development easier. [5539]
+* builder/triton: Update triton-go sdk. [GH-5531]
+* builder/google: Add clean_image_name template engine. [GH-5463]
 
 ### BUG FIXES:
 
 * builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
 * builder/triton: Fix a bug where partially created images can be reported as complete. [GH-5566]
-* builder/amazon: region is set from profile, if profile is set, rather than being overridden by metadata [GH-5562]
+* builder/amazon: region is set from profile, if profile is set, rather than being overridden by metadata. [GH-5562]
+* provisioner/windows-restart: Wait for restart no longer endlessly loops if user specifies a custom restart check command. [GH-5563]
+* post-processor/vsphere: Use the vm disk path information to re-create the vmx datastore path. [GH-5567]
+* builder/amazon: Add a delay option to security group waiter. [GH-5536]
+* builder/amazon: Fix regressions relating to spot instances and EBS volumes. [GH-5495]
+* builder/hyperv: Fix admin check that was causing powershell failures. [GH-5510]
+* builder/oracle: Defaulting of OCI builder region will first check the packer template and the OCI config file. [GH-5407]
 
 ## 1.1.1 (October 13, 2017)
 
