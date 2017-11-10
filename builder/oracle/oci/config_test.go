@@ -122,6 +122,20 @@ func TestConfig(t *testing.T) {
 
 	})
 
+	t.Run("RegionNotDefaultedToPHXWhenSetInOCISettings", func(t *testing.T) {
+		raw := testConfig(cfgFile)
+		c, errs := NewConfig(raw)
+		if errs != nil {
+			t.Fatalf("err: %+v", errs)
+		}
+
+		expected := "us-ashburn-1"
+		if c.AccessCfg.Region != expected {
+			t.Errorf("Expected region: %s, got %s.", expected, c.AccessCfg.Region)
+		}
+
+	})
+
 	// Test the correct errors are produced when required template keys are
 	// omitted.
 	requiredKeys := []string{"availability_domain", "base_image_ocid", "shape", "subnet_ocid"}

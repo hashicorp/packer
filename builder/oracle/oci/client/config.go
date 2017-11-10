@@ -182,7 +182,7 @@ func BaseTestConfig() (*ini.File, *os.File, error) {
 	// Build ini
 	cfg := ini.Empty()
 	section, _ := cfg.NewSection("DEFAULT")
-	section.NewKey("region", "us-phoenix-1")
+	section.NewKey("region", "us-ashburn-1")
 	section.NewKey("tenancy", "ocid1.tenancy.oc1..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	section.NewKey("user", "ocid1.user.oc1..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	section.NewKey("fingerprint", "3c:b6:44:d7:49:1a:ac:bf:de:7d:76:22:a7:f5:df:55")

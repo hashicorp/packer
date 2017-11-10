@@ -30,7 +30,7 @@ builder.
 -   `client_secret` (string) The password or secret for your service principal.
 
 -   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -56,7 +56,7 @@ want to create a managed image you **must** start with a managed
 image.  When creating a VHD the following two options are required.
 
 -   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
-    organized in Azure.  The captured VHD's URL will be https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd.
+    organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
     
 -   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
     `PREFIX-vmTemplate.UUID`.
@@ -120,7 +120,7 @@ When creating a managed image the following two options are required.
     Windows; this variable is not used by non-Windows builds. See `Windows`
     behavior for `os_type`, below.
 
--   `os_disk_size_gb` (int32) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
+-   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
@@ -216,6 +216,24 @@ The following provisioner snippet shows how to sysprep a Windows VM. Deprovision
 }
 ```
 
+In some circumstances the above isn't enough to reliably know that the sysprep is actually finished generalizing the image, the code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
+
+``` json
+{
+    "provisioners": [
+    {
+        "type": "powershell",
+        "inline": [
+            "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+            "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+        ]
+    }
+  ]
+}
+
+
+```
+
 ### Linux
 
 The following provisioner snippet shows how to deprovision a Linux VM. Deprovision should be the last operation executed by a build.
@@ -296,7 +314,7 @@ The Azure builder creates the following random values at runtime.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
--   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overriden by the user.
+-   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.

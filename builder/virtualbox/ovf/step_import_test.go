@@ -12,7 +12,10 @@ func TestStepImport_impl(t *testing.T) {
 
 func TestStepImport(t *testing.T) {
 	state := testState(t)
+	c := testConfig(t)
+	config, _, _ := NewConfig(c)
 	state.Put("vm_path", "foo")
+	state.Put("config", config)
 	step := new(StepImport)
 	step.Name = "bar"
 
@@ -42,6 +45,14 @@ func TestStepImport(t *testing.T) {
 	}
 
 	// Test cleanup
+	config.KeepRegistered = true
+	step.Cleanup(state)
+
+	if driver.DeleteCalled {
+		t.Fatal("delete should not be called")
+	}
+
+	config.KeepRegistered = false
 	step.Cleanup(state)
 	if !driver.DeleteCalled {
 		t.Fatal("delete should be called")

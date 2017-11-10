@@ -38,8 +38,21 @@ func stringInSlice(s []string, searchstr string) bool {
 	return false
 }
 
-func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
+func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
+
+	if accessConfig != nil {
+		session, err := accessConfig.Session()
+		if err != nil {
+			errs = append(errs, err)
+		} else {
+			region := *session.Config.Region
+			if stringInSlice(c.AMIRegions, region) {
+				errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
+			}
+		}
+	}
+
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
 	}
@@ -61,7 +74,6 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 				// Verify the region is real
 				if valid := ValidateRegion(region); !valid {
 					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-					continue
 				}
 			}
 

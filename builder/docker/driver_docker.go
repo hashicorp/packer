@@ -147,13 +147,10 @@ func (d *DockerDriver) IPAddress(id string) (string, error) {
 	return strings.TrimSpace(stdout.String()), nil
 }
 
-func (d *DockerDriver) Login(repo, email, user, pass string) error {
+func (d *DockerDriver) Login(repo, user, pass string) error {
 	d.l.Lock()
 
 	args := []string{"login"}
-	if email != "" {
-		args = append(args, "-e", email)
-	}
 	if user != "" {
 		args = append(args, "-u", user)
 	}

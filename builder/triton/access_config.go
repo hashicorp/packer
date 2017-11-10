@@ -6,10 +6,13 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/joyent/triton-go"
+	tgo "github.com/joyent/triton-go"
 	"github.com/joyent/triton-go/authentication"
+	"github.com/joyent/triton-go/compute"
+	"github.com/joyent/triton-go/network"
 )
 
 // AccessConfig is for common configuration related to Triton access
@@ -106,8 +109,39 @@ func (c *AccessConfig) createPrivateKeySigner() (authentication.Signer, error) {
 	return signer, nil
 }
 
-func (c *AccessConfig) CreateTritonClient() (*triton.Client, error) {
-	return triton.NewClient(c.Endpoint, c.Account, c.signer)
+func (c *AccessConfig) CreateTritonClient() (*Client, error) {
+
+	config := &tgo.ClientConfig{
+		AccountName: c.Account,
+		TritonURL:   c.Endpoint,
+		Signers:     []authentication.Signer{c.signer},
+	}
+
+	return &Client{
+		config: config,
+	}, nil
+}
+
+type Client struct {
+	config *tgo.ClientConfig
+}
+
+func (c *Client) Compute() (*compute.ComputeClient, error) {
+	computeClient, err := compute.NewClient(c.config)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error Creating Triton Compute Client: {{err}}", err)
+	}
+
+	return computeClient, nil
+}
+
+func (c *Client) Network() (*network.NetworkClient, error) {
+	networkClient, err := network.NewClient(c.config)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error Creating Triton Network Client: {{err}}", err)
+	}
+
+	return networkClient, nil
 }
 
 func (c *AccessConfig) Comm() communicator.Config {

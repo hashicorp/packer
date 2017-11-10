@@ -15,9 +15,10 @@ import (
 )
 
 type guestOSTypeConfig struct {
-	executeCommand string
-	facterVarsFmt  string
-	stagingDir     string
+	executeCommand   string
+	facterVarsFmt    string
+	facterVarsJoiner string
+	stagingDir       string
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
@@ -31,8 +32,9 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
 			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
 			"--detailed-exitcodes",
-		facterVarsFmt: "FACTER_%s='%s'",
-		stagingDir:    "/tmp/packer-puppet-server",
+		facterVarsFmt:    "FACTER_%s='%s'",
+		facterVarsJoiner: " ",
+		stagingDir:       "/tmp/packer-puppet-server",
 	},
 	provisioner.WindowsOSType: {
 		executeCommand: "{{.FacterVars}} " +
@@ -44,8 +46,9 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
 			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
 			"--detailed-exitcodes",
-		facterVarsFmt: "SET \"FACTER_%s=%s\" &",
-		stagingDir:    "C:/Windows/Temp/packer-puppet-server",
+		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
+		facterVarsJoiner: " & ",
+		stagingDir:       "C:/Windows/Temp/packer-puppet-server",
 	},
 }
 
@@ -222,7 +225,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	// Execute Puppet
 	p.config.ctx.Data = &ExecuteTemplate{
-		FacterVars:           strings.Join(facterVars, " "),
+		FacterVars:           strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		ClientCertPath:       remoteClientCertPath,
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
 		PuppetNode:           p.config.PuppetNode,
