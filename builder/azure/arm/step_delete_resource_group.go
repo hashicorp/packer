@@ -83,7 +83,6 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, 
 		return err
 	} else {
 		_, errChan := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
-		s.say(state.Get(constants.ArmIsExistingResourceGroup).(string))
 		err = <-errChan
 
 		if err != nil {
