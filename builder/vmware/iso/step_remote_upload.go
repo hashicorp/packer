@@ -14,18 +14,11 @@ import (
 type stepRemoteUpload struct {
 	Key     string
 	Message string
-
-	// Set this to true for skip
-	Skip bool
 }
 
 func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
-
-	if s.Skip {
-		return multistep.ActionContinue
-	}
 
 	remote, ok := driver.(RemoteDriver)
 	if !ok {
