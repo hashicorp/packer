@@ -69,6 +69,9 @@ builder.
 -   `monitoring` (boolean) - Set to `true` to enable monitoring
     for the droplet being created. This defaults to `false`, or not enabled.
 
+-   `ipv6` (boolean) - Set to `true` to enable ipv6
+    for the droplet being created. This defaults to `false`, or not enabled.
+
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. This must be unique. To help make this unique, use a
     function like `timestamp` (see [configuration
@@ -82,6 +85,7 @@ builder.
     default state timeout is "6m".
 
 -   `user_data` (string) - User data to launch with the Droplet.
+
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
 

@@ -46,8 +46,8 @@ type Config struct {
 	// Pty, if true, will request a pty from the remote end.
 	Pty bool
 
-	// DisableAgent, if true, will not forward the SSH agent.
-	DisableAgent bool
+	// DisableAgentForwarding, if true, will not forward the SSH agent.
+	DisableAgentForwarding bool
 
 	// HandshakeTimeout limits the amount of time we'll wait to handshake before
 	// saying the connection failed.
@@ -327,7 +327,7 @@ func (c *comm) connectToAgent() {
 		return
 	}
 
-	if c.config.DisableAgent {
+	if c.config.DisableAgentForwarding {
 		log.Printf("[INFO] SSH agent forwarding is disabled.")
 		return
 	}
@@ -693,6 +693,11 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 			// Otherwise, we have an ExitErorr, meaning we can just read
 			// the exit status
 			log.Printf("non-zero exit status: %d", exitErr.ExitStatus())
+			stdoutB, err := ioutil.ReadAll(stdoutR)
+			if err != nil {
+				return err
+			}
+			log.Printf("scp output: %s", stdoutB)
 
 			// If we exited with status 127, it means SCP isn't available.
 			// Return a more descriptive error for that.

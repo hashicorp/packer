@@ -5,6 +5,7 @@ package ecs
 import (
 	"log"
 
+	"fmt"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -98,8 +99,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			//DebugKeyPath:          b.config.Com
-			RegionId: b.config.AlicloudRegion,
+			DebugKeyPath:         fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
+			RegionId:             b.config.AlicloudRegion,
 		},
 	}
 	if b.chooseNetworkType() == VpcNet {

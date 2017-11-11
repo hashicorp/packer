@@ -72,9 +72,9 @@ Optional parameters:
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
--   `expect_disconnect` (bool) - Defaults to true. Whether to error if the
+-   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if the
     server disconnects us. A disconnect might happen if you restart the ssh
-    server or reboot the host. May default to false in the future.
+    server or reboot the host.
 
 -   `inline_shebang` (string) - The
     [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
@@ -122,6 +122,12 @@ Some operating systems default to a non-root user. For example if you login as
 
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
 is being piped in with the value of `packer`.
+
+The above example won't work if your environment vars contain spaces or single quotes; in these cases try removing the single quotes:
+
+``` text
+"echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}"
+```
 
 By setting the `execute_command` to this, your script(s) can run with root
 privileges without worrying about password prompts.

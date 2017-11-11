@@ -12,8 +12,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 cd $DIR
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm arm64"}
-XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+XC_ARCH=${XC_ARCH:-"386 amd64 arm arm64 ppc64le"}
+XC_OS=${XC_OS:-linux darwin windows freebsd openbsd solaris}
 
 # Delete the old dir
 echo "==> Removing old directory..."

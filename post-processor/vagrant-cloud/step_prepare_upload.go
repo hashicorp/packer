@@ -30,9 +30,13 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 	resp, err := client.Get(path)
 
 	if err != nil || (resp.StatusCode != 200) {
-		cloudErrors := &VagrantCloudErrors{}
-		err = decodeBody(resp, cloudErrors)
-		state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
+		if resp == nil || resp.Body == nil {
+			state.Put("error", "No response from server.")
+		} else {
+			cloudErrors := &VagrantCloudErrors{}
+			err = decodeBody(resp, cloudErrors)
+			state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
+		}
 		return multistep.ActionHalt
 	}
 

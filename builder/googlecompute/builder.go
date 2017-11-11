@@ -28,7 +28,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return warnings, errs
 	}
 	b.config = c
-
 	return warnings, nil
 }
 

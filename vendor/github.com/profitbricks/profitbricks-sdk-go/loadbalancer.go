@@ -7,15 +7,15 @@ import (
 )
 
 type Loadbalancer struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties LoadbalancerProperties     `json:"properties,omitempty"`
-	Entities   LoadbalancerEntities       `json:"entities,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+	Id         string                 `json:"id,omitempty"`
+	Type_      string                 `json:"type,omitempty"`
+	Href       string                 `json:"href,omitempty"`
+	Metadata   *Metadata              `json:"metadata,omitempty"`
+	Properties LoadbalancerProperties `json:"properties,omitempty"`
+	Entities   LoadbalancerEntities   `json:"entities,omitempty"`
+	Response   string                 `json:"Response,omitempty"`
+	Headers    *http.Header           `json:"headers,omitempty"`
+	StatusCode int                    `json:"headers,omitempty"`
 }
 
 type LoadbalancerProperties struct {

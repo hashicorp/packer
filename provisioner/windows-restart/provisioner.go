@@ -1,8 +1,11 @@
 package restart
 
 import (
+	"bytes"
 	"fmt"
+
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -119,6 +122,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
+
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
@@ -170,8 +174,17 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(p *Provisioner) error {
-	cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-
+	runCustomRestartCheck := true
+	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
+		runCustomRestartCheck = false
+	}
+	// This command is configurable by the user to make sure that the
+	// vm has met their necessary criteria for having restarted. If the
+	// user doesn't set a special restart command, we just run the
+	// default as cmdModuleLoad below.
+	cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+	log.Printf("Checking that communicator is connected with: '%s'",
+		cmdRestartCheck.Command)
 	for {
 		select {
 		case <-p.cancel:
@@ -179,16 +192,43 @@ var waitForCommunicator = func(p *Provisioner) error {
 			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
-
-		log.Printf("Checking that communicator is connected with: '%s'", cmd.Command)
-
-		err := cmd.StartWithUi(p.comm, p.ui)
-		if err != nil {
-			log.Printf("Communication connection err: %s", err)
-			continue
+		if runCustomRestartCheck {
+			// run user-configured restart check
+			err := cmdRestartCheck.StartWithUi(p.comm, p.ui)
+			if err != nil {
+				log.Printf("Communication connection err: %s", err)
+				continue
+			}
+			log.Printf("Connected to machine")
+			runCustomRestartCheck = false
 		}
 
-		log.Printf("Connected to machine")
+		// This is the non-user-configurable check that powershell
+		// modules have loaded.
+
+		// If we catch the restart in just the right place, we will be able
+		// to run the restart check but the output will be an error message
+		// about how it needs powershell modules to load, and we will start
+		// provisioning before powershell is actually ready.
+		// In this next check, we parse stdout to make sure that the command is
+		// actually running as expected.
+		var stdout, stderr bytes.Buffer
+		cmdModuleLoad := &packer.RemoteCmd{
+			Command: DefaultRestartCheckCommand,
+			Stdin:   nil,
+			Stdout:  &stdout,
+			Stderr:  &stderr}
+
+		p.comm.Start(cmdModuleLoad)
+		cmdModuleLoad.Wait()
+
+		stdoutToRead := stdout.String()
+		stderrToRead := stderr.String()
+		if !strings.Contains(stdoutToRead, "restarted.") {
+			log.Printf("Stderr is %s", stderrToRead)
+			log.Printf("echo didn't succeed; retrying...")
+			continue
+		}
 		break
 	}
 

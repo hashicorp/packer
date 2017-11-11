@@ -39,12 +39,21 @@ type User struct {
 }
 
 type LoginProfile struct {
+	UserName              string
+	PasswordResetRequired bool
+	MFABindRequired       bool
 }
 
 type MFADevice struct {
+	SerialNumber string
 }
 
 type VirtualMFADevice struct {
+	SerialNumber     string
+	Base32StringSeed string
+	QRCodePNG        string
+	ActivateDate     string
+	User             User
 }
 
 type AccessKey struct {
@@ -55,6 +64,8 @@ type AccessKey struct {
 }
 
 type Group struct {
+	GroupName string
+	Comments  string
 }
 
 type Role struct {
@@ -75,6 +86,13 @@ type Policy struct {
 	CreateDate      string
 	UpdateDate      string
 	AttachmentCount int64
+}
+
+type PolicyVersion struct {
+	VersionId        string
+	IsDefaultVersion bool
+	CreateDate       string
+	PolicyDocument   string
 }
 
 type PolicyDocument struct {

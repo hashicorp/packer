@@ -6,25 +6,48 @@ import (
 	"net/http"
 )
 
-type Lan struct {
-	Id         string                     `json:"id,omitempty"`
-	Type_      string                     `json:"type,omitempty"`
-	Href       string                     `json:"href,omitempty"`
-	Metadata   *DatacenterElementMetadata `json:"metadata,omitempty"`
-	Properties LanProperties              `json:"properties,omitempty"`
-	Entities   *LanEntities               `json:"entities,omitempty"`
-	Response   string                     `json:"Response,omitempty"`
-	Headers    *http.Header               `json:"headers,omitempty"`
-	StatusCode int                        `json:"headers,omitempty"`
+type CreateLanRequest struct {
+	Id         string              `json:"id,omitempty"`
+	Type_      string              `json:"type,omitempty"`
+	Href       string              `json:"href,omitempty"`
+	Metadata   *Metadata           `json:"metadata,omitempty"`
+	Properties CreateLanProperties `json:"properties,omitempty"`
+	Entities   *LanEntities        `json:"entities,omitempty"`
+	Response   string              `json:"Response,omitempty"`
+	Headers    *http.Header        `json:"headers,omitempty"`
+	StatusCode int                 `json:"headers,omitempty"`
 }
 
-type LanProperties struct {
+type CreateLanProperties struct {
 	Name   string `json:"name,omitempty"`
 	Public bool   `json:"public,omitempty"`
 }
 
+type Lan struct {
+	Id         string        `json:"id,omitempty"`
+	Type_      string        `json:"type,omitempty"`
+	Href       string        `json:"href,omitempty"`
+	Metadata   *Metadata     `json:"metadata,omitempty"`
+	Properties LanProperties `json:"properties,omitempty"`
+	Entities   *LanEntities  `json:"entities,omitempty"`
+	Response   string        `json:"Response,omitempty"`
+	Headers    *http.Header  `json:"headers,omitempty"`
+	StatusCode int           `json:"headers,omitempty"`
+}
+
+type LanProperties struct {
+	Name       string       `json:"name,omitempty"`
+	Public     bool         `json:"public,omitempty"`
+	IpFailover []IpFailover `json:"ipFailover"`
+}
+
 type LanEntities struct {
 	Nics *LanNics `json:"nics,omitempty"`
+}
+
+type IpFailover struct {
+	NicUuid string `json:"nicUuid,omitempty"`
+	Ip      string `json:"ip,omitempty"`
 }
 
 type LanNics struct {
@@ -55,7 +78,7 @@ func ListLans(dcid string) Lans {
 
 // CreateLan creates a lan in the datacenter
 // from a jason []byte and returns a Instance struct
-func CreateLan(dcid string, request Lan) Lan {
+func CreateLan(dcid string, request CreateLanRequest) Lan {
 	obj, _ := json.Marshal(request)
 	path := lan_col_path(dcid)
 	url := mk_url(path)

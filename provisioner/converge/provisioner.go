@@ -144,12 +144,12 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 		return fmt.Errorf("Could not interpolate bootstrap command: %s", err)
 	}
 
-	var out bytes.Buffer
+	var out, outErr bytes.Buffer
 	cmd := &packer.RemoteCmd{
 		Command: command,
 		Stdin:   nil,
 		Stdout:  &out,
-		Stderr:  &out,
+		Stderr:  &outErr,
 	}
 
 	if err = comm.Start(cmd); err != nil {
@@ -159,6 +159,7 @@ func (p *Provisioner) maybeBootstrap(ui packer.Ui, comm packer.Communicator) err
 	cmd.Wait()
 	if cmd.ExitStatus != 0 {
 		ui.Error(out.String())
+		ui.Error(outErr.String())
 		return errors.New("Error bootstrapping converge")
 	}
 
@@ -199,12 +200,12 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 	}
 
 	// run Converge in the specified directory
-	var runOut bytes.Buffer
+	var runOut, runErr bytes.Buffer
 	cmd := &packer.RemoteCmd{
 		Command: command,
 		Stdin:   nil,
 		Stdout:  &runOut,
-		Stderr:  &runOut,
+		Stderr:  &runErr,
 	}
 	if err := comm.Start(cmd); err != nil {
 		return fmt.Errorf("Error applying %q: %s", p.config.Module, err)
@@ -221,7 +222,8 @@ func (p *Provisioner) applyModules(ui packer.Ui, comm packer.Communicator) error
 
 	} else if cmd.ExitStatus != 0 {
 		ui.Error(strings.TrimSpace(runOut.String()))
-		ui.Error(fmt.Sprintf("exited with error code %d", cmd.ExitStatus))
+		ui.Error(strings.TrimSpace(runErr.String()))
+		ui.Error(fmt.Sprintf("Exited with error code %d.", cmd.ExitStatus))
 		return fmt.Errorf("Error applying %q", p.config.Module)
 	}
 

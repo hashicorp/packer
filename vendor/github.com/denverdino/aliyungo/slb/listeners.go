@@ -100,6 +100,7 @@ type HTTPListenerType struct {
 	HealthCheckTimeout     int
 	HealthCheckInterval    int
 	HealthCheckHttpCode    HealthCheckHttpCodeType
+	VServerGroup           FlagType
 	VServerGroupId         string
 	Gzip                   FlagType
 }
@@ -144,6 +145,7 @@ type TCPListenerType struct {
 	Bandwidth                 int
 	Scheduler                 SchedulerType
 	PersistenceTimeout        int
+	HealthCheck               FlagType
 	HealthCheckType           HealthCheckType
 	HealthCheckDomain         string
 	HealthCheckURI            string
@@ -153,6 +155,7 @@ type TCPListenerType struct {
 	HealthCheckConnectTimeout int
 	HealthCheckInterval       int
 	HealthCheckHttpCode       HealthCheckHttpCodeType
+	VServerGroup              FlagType
 	VServerGroupId            string
 }
 
@@ -174,11 +177,13 @@ type UDPListenerType struct {
 	Bandwidth                 int
 	Scheduler                 SchedulerType
 	PersistenceTimeout        int
+	HealthCheck               FlagType
 	HealthCheckConnectPort    int
 	HealthyThreshold          int
 	UnhealthyThreshold        int
 	HealthCheckConnectTimeout int
 	HealthCheckInterval       int
+	VServerGroup              FlagType
 	VServerGroupId            string
 }
 type CreateLoadBalancerUDPListenerArgs UDPListenerType

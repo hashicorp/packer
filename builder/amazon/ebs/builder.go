@@ -64,8 +64,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs,
+		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.AMIConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -108,34 +109,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	// Build the steps
-	steps := []multistep.Step{
-		&awscommon.StepPreValidate{
-			DestAmiName:     b.config.AMIName,
-			ForceDeregister: b.config.AMIForceDeregister,
-		},
-		&awscommon.StepSourceAMIInfo{
-			SourceAmi:          b.config.SourceAmi,
-			EnhancedNetworking: b.config.AMIEnhancedNetworking,
-			AmiFilters:         b.config.SourceAmiFilter,
-		},
-		&awscommon.StepKeyPair{
-			Debug:                b.config.PackerDebug,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:          b.config.SSHKeyPairName,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
-		},
-		&awscommon.StepSecurityGroup{
-			SecurityGroupIds: b.config.SecurityGroupIds,
-			CommConfig:       &b.config.RunConfig.Comm,
-			VpcId:            b.config.VpcId,
-		},
-		&stepCleanupVolumes{
-			BlockDevices: b.config.BlockDevices,
-		},
-		&awscommon.StepRunSourceInstance{
+	var instanceStep multistep.Step
+	isSpotInstance := b.config.SpotPrice != "" && b.config.SpotPrice != "0"
+
+	if isSpotInstance {
+		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
 			SpotPrice:                b.config.SpotPrice,
@@ -151,13 +129,61 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
 			Tags:                     b.config.RunTags,
+			VolumeTags:               b.config.VolumeRunTags,
 			Ctx:                      b.config.ctx,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	} else {
+		instanceStep = &awscommon.StepRunSourceInstance{
+			Debug:                    b.config.PackerDebug,
+			ExpectedRootDevice:       "ebs",
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			SourceAMI:                b.config.SourceAmi,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			SubnetId:                 b.config.SubnetId,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+			EbsOptimized:             b.config.EbsOptimized,
+			AvailabilityZone:         b.config.AvailabilityZone,
+			BlockDevices:             b.config.BlockDevices,
+			Tags:                     b.config.RunTags,
+			VolumeTags:               b.config.VolumeRunTags,
+			Ctx:                      b.config.ctx,
+			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
+		}
+	}
+
+	// Build the steps
+	steps := []multistep.Step{
+		&awscommon.StepPreValidate{
+			DestAmiName:     b.config.AMIName,
+			ForceDeregister: b.config.AMIForceDeregister,
 		},
-		&awscommon.StepTagEBSVolumes{
-			VolumeRunTags: b.config.VolumeRunTags,
-			Ctx:           b.config.ctx,
+		&awscommon.StepSourceAMIInfo{
+			SourceAmi:                b.config.SourceAmi,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
+			AmiFilters:               b.config.SourceAmiFilter,
 		},
+		&awscommon.StepKeyPair{
+			Debug:                b.config.PackerDebug,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
+			KeyPairName:          b.config.SSHKeyPairName,
+			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
+			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+		},
+		&awscommon.StepSecurityGroup{
+			SecurityGroupIds: b.config.SecurityGroupIds,
+			CommConfig:       &b.config.RunConfig.Comm,
+			VpcId:            b.config.VpcId,
+			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
+		},
+		&stepCleanupVolumes{
+			BlockDevices: b.config.BlockDevices,
+		},
+		instanceStep,
 		&awscommon.StepGetPassword{
 			Debug:   b.config.PackerDebug,
 			Comm:    &b.config.RunConfig.Comm,
@@ -175,22 +201,26 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&awscommon.StepStopEBSBackedInstance{
-			SpotPrice:           b.config.SpotPrice,
+			Skip:                isSpotInstance,
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
-			EnableEnhancedNetworking: b.config.AMIEnhancedNetworking,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&awscommon.StepDeregisterAMI{
+			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.AMIForceDeregister,
 			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
 			AMIName:             b.config.AMIName,
+			Regions:             b.config.AMIRegions,
 		},
 		&stepCreateAMI{},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
 			Name:              b.config.AMIName,
+			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
