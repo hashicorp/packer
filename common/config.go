@@ -96,6 +96,8 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
+		} else {
+			return "", err
 		}
 
 		if runtime.GOOS == "windows" {
@@ -108,14 +110,6 @@ func DownloadableURL(original string) (string, error) {
 
 	// Make sure it is lowercased
 	url.Scheme = strings.ToLower(url.Scheme)
-
-	// This is to work around issue #5927. This can safely be removed once
-	// we distribute with a version of Go that fixes that bug.
-	//
-	// See: https://code.google.com/p/go/issues/detail?id=5927
-	if url.Path != "" && url.Path[0] != '/' {
-		url.Path = "/" + url.Path
-	}
 
 	// Verify that the scheme is something we support in our common downloader.
 	supported := []string{"file", "http", "https"}
@@ -131,12 +125,5 @@ func DownloadableURL(original string) (string, error) {
 		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
 	}
 
-	// if cleaned filepath does not exist, error out now.
-	if url.Scheme == "file" {
-		if _, err := os.Stat(url.Path); err != nil {
-			return "", fmt.Errorf("The filepath doesn't exist either as a "+
-				"relative or an absolute path: %s", err)
-		}
-	}
 	return url.String(), nil
 }
