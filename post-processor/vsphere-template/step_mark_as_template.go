@@ -27,6 +27,7 @@ func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
 	if artifact.BuilderId() == vsphere.BuilderId {
 		id := strings.Split(artifact.Id(), "::")
 		remoteFolder = id[1]
+		vmname = id[2]
 	}
 
 	return &stepMarkAsTemplate{
@@ -50,12 +51,6 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 		return multistep.ActionHalt
 	}
 
-	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	dsPath, err := datastorePath(vm)
 	if err != nil {
 		state.Put("error", err)
@@ -71,6 +66,12 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	if err := vm.Unregister(context.Background()); err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
