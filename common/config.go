@@ -131,5 +131,12 @@ func DownloadableURL(original string) (string, error) {
 		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
 	}
 
+	// if cleaned filepath does not exist, error out now.
+	if url.Scheme == "file" {
+		if _, err := os.Stat(url.Path); err != nil {
+			return "", fmt.Errorf("The filepath doesn't exist either as a "+
+				"relative or an absolute path: %s", err)
+		}
+	}
 	return url.String(), nil
 }
