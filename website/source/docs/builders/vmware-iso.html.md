@@ -42,6 +42,7 @@ self-install. Still, the example serves to show the basic configuration:
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
+  "ssh_password": "packer",
   "shutdown_command": "shutdown -P now"
 }
 ```
@@ -80,9 +81,6 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -104,17 +102,21 @@ builder.
     fixed-size virtual hard disks, so the actual file representing the disk will
     not use the full size unless it is full.
 
--   `disk_size` (integer) - The size of the hard disk for the VM in megabytes.
+-   `disk_size` (number) - The size of the hard disk for the VM in megabytes.
     The builder uses expandable, not fixed-size virtual hard disks, so the
     actual file representing the disk will not use the full size unless it
     is full. By default this is set to 40,000 (about 40 GB).
 
 -   `disk_type_id` (string) - The type of VMware virtual disk to create. The
-    default is "1", which corresponds to a growable virtual disk split in
-    2GB files. This option is for advanced usage, modify only if you know what
-    you're doing. For more information, please consult the [Virtual Disk Manager
-    User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
-    VMware clients. For ESXi, refer to the proper ESXi documentation.
+    default is "1", which corresponds to a growable virtual disk split in 2GB
+    files. For ESXi, this defaults to "zeroedthick". This option is for
+    advanced usage. For more information, please consult the [Virtual Disk
+    Manager User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf)
+    for desktop VMware clients. For ESXi, refer to the proper ESXi
+    documentation.
+
+*   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
+    A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -155,7 +157,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -297,7 +299,7 @@ builder.
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
     used to secure the VNC communication with the VM.
 
--   `vnc_port_min` and `vnc_port_max` (integer) - The minimum and maximum port
+-   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
@@ -401,6 +403,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
 ## VMX Template
 
 The heart of a VMware machine is the "vmx" file. This contains all the virtual
@@ -448,7 +453,8 @@ point, the vSphere API may be used.
 Packer also requires VNC to issue boot commands during a build, which may be
 disabled on some remote VMware Hypervisors. Please consult the appropriate
 documentation on how to update VMware Hypervisor's firewall to allow these
-connections.
+connections. VNC can be disabled by not setting a `boot_command` and setting
+`disable_vnc` to `true`.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
 the required `remote_*` configurations:
@@ -480,7 +486,8 @@ modify as well:
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`.
+    Before using this option, you need to install `ovftool`. This option
+    works currently only with option remote_type set to "esx5".
 
 ### VNC port discovery
 
@@ -516,7 +523,9 @@ file by attaching a floppy disk. An example below, based on RHEL:
 }
 ```
 
-It's also worth noting that `ks=floppy` has been deprecated. Later versions of the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require a different syntax to source a kickstart file from a mounted floppy image.
+It's also worth noting that `ks=floppy` has been deprecated. Later versions of
+the Anaconda installer (used in RHEL/CentOS 7 and Fedora) may require
+a different syntax to source a kickstart file from a mounted floppy image.
 
 ``` json
 {

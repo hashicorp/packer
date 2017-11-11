@@ -4,12 +4,20 @@ import (
 	"fmt"
 )
 
+const (
+	ArtifactConfFormat         = "artifact.conf.format"
+	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
+	ArtifactConfSkipExport     = "artifact.conf.skip_export"
+)
+
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
 type Artifact struct {
 	builderId string
+	id        string
 	dir       OutputDir
 	f         []string
+	config    map[string]string
 }
 
 func (a *Artifact) BuilderId() string {
@@ -20,8 +28,8 @@ func (a *Artifact) Files() []string {
 	return a.f
 }
 
-func (*Artifact) Id() string {
-	return "VM"
+func (a *Artifact) Id() string {
+	return a.id
 }
 
 func (a *Artifact) String() string {
@@ -29,7 +37,7 @@ func (a *Artifact) String() string {
 }
 
 func (a *Artifact) State(name string) interface{} {
-	return nil
+	return a.config[name]
 }
 
 func (a *Artifact) Destroy() error {

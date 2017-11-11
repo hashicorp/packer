@@ -32,7 +32,7 @@ func CopyContents(dst, src string) error {
 
 	dstDir, _ := filepath.Split(dst)
 	if dstDir != "" {
-		err := os.MkdirAll(dstDir, os.ModePerm)
+		err := os.MkdirAll(dstDir, 0755)
 		if err != nil {
 			return err
 		}
@@ -45,6 +45,23 @@ func CopyContents(dst, src string) error {
 	defer dstF.Close()
 
 	if _, err := io.Copy(dstF, srcF); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Creates a (hard) link to a file, ensuring that all parent directories also exist.
+func LinkFile(dst, src string) error {
+	dstDir, _ := filepath.Split(dst)
+	if dstDir != "" {
+		err := os.MkdirAll(dstDir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := os.Link(src, dst); err != nil {
 		return err
 	}
 

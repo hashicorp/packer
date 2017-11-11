@@ -76,7 +76,7 @@ Optional:
     remote machine.
 
 When using an inventory file, it's also required to `--limit` the hosts to the
-specified host you're buiding. The `--limit` argument can be provided in the
+specified host you're building. The `--limit` argument can be provided in the
 `extra_arguments` option.
 
 An example inventory file may look like:
@@ -113,6 +113,9 @@ chi-appservers
     roles with the [ansible-galaxy
     cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
     on the remote machine. By default, this is empty.
+
+-   `galaxycommand` (string) - The command to invoke ansible-galaxy. 
+    By default, this is ansible-galaxy.
 
 -   `group_vars` (string) - a path to the directory containing ansible group
     variables on your local system to be copied to the remote machine. By

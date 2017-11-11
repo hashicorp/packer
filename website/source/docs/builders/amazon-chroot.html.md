@@ -95,8 +95,7 @@ each category, the available configuration keys are alphabetized.
     depending on the size of the AMI, but will generally take many minutes.
 
 -   `ami_users` (array of strings) - A list of account IDs that have access to
-    launch the resulting AMI(s). By default no additional users other than the
-    user creating the AMI has permissions to launch it.
+    launch the resulting AMI(s). By default no additional users other than the user creating the AMI has permissions to launch it.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
@@ -120,19 +119,18 @@ each category, the available configuration keys are alphabetized.
     copying `/etc/resolv.conf`. You may need to do this if you're building
     an image that uses systemd.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
     forces Packer to find an open device automatically.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
-    sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -172,7 +170,7 @@ each category, the available configuration keys are alphabetized.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -187,7 +185,7 @@ each category, the available configuration keys are alphabetized.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
@@ -214,13 +212,13 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (integer) - The partition number containing the
+-   `mount_partition` (number) - The partition number containing the
     / partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
     to the `mount` command ran by Packer. Because this command is ran in a
-    shell, user discrestion is advised. See [this manual page for the mount
+    shell, user discretion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
 
@@ -240,7 +238,7 @@ each category, the available configuration keys are alphabetized.
     mount and copy steps. The device and mount path are provided by
     `{{.Device}}` and `{{.MountPath}}`.
 
--   `root_volume_size` (integer) - The size of the root volume in GB for the
+-   `root_volume_size` (number) - The size of the root volume in GB for the
     chroot environment and the resulting AMI. Default size is the snapshot size
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
@@ -270,7 +268,7 @@ each category, the available configuration keys are alphabetized.
     "source_ami_filter": {
       "filters": {
         "virtualization-type": "hvm",
-        "name": "*ubuntu-xenial-16.04-amd64-server-*",
+        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
         "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
@@ -290,8 +288,14 @@ each category, the available configuration keys are alphabetized.
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
     [template engine](/docs/templates/engine.html)

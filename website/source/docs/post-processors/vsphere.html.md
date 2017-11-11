@@ -36,9 +36,6 @@ Required:
 -   `password` (string) - Password to use to authenticate to the
     vSphere endpoint.
 
--   `resource_pool` (string) - The resource pool to upload the VM to. This is
-    *not required*.
-
 -   `username` (string) - The username to use to authenticate to the
     vSphere endpoint.
 
@@ -51,6 +48,8 @@ Optional:
 
 -   `insecure` (boolean) - Whether or not the connection to vSphere can be done
     over an insecure connection. By default this is false.
+
+-   `resource_pool` (string) - The resource pool to upload the VM to.
 
 -   `vm_folder` (string) - The folder within the datastore to store the VM.
 

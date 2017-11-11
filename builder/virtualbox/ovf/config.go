@@ -38,6 +38,7 @@ type Config struct {
 	SourcePath           string   `mapstructure:"source_path"`
 	TargetPath           string   `mapstructure:"target_path"`
 	VMName               string   `mapstructure:"vm_name"`
+	KeepRegistered       bool     `mapstructure:"keep_registered"`
 	SkipExport           bool     `mapstructure:"skip_export"`
 
 	ctx interpolate.Context
