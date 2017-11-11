@@ -174,13 +174,19 @@ builder.
     Not required if you run Packer on a GCE instance with a service account.
     Instructions for creating file or using service accounts are above.
 
+-   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
+
+-   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
+    `"on_host_maintenance": "TERMINATE"` option set.
+    Example: `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
+
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
--   `disk_size` (integer) - The size of the disk in GB. This defaults to `10`,
+-   `disk_size` (number) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
 -   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
@@ -192,11 +198,17 @@ builder.
     instead of a specific image name. The image family always returns its
     latest image that is not deprecated.
 
+-   `image_labels` (object of key/value strings) - Key/value pair labels to
+    apply to the created image.
+
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
 -   `instance_name` (string) - A name to give the launched instance. Beware that
     this must be unique. Defaults to `"packer-{{uuid}}"`.
+
+-   `labels` (object of key/value strings) - Key/value pair labels to apply to
+    the launched instance.
 
 -   `machine_type` (string) - The machine type. Defaults to `"n1-standard-1"`.
 
@@ -204,7 +216,10 @@ builder.
     instance.
 
 -   `network` (string) - The Google Compute network id or URL to use for the
-    launched instance. Defaults to `"default"`.
+    launched instance. Defaults to `"default"`. If the value is not a URL, it
+    will be interpolated to `projects/((network_project_id))/global/networks/((network))`.
+    This value is not required if a `subnet` is specified.
+
 
 -   `network_project_id` (string) - The project ID for the network and subnetwork
     to use for launched instance. Defaults to `project_id`.
@@ -247,7 +262,9 @@ builder.
 -   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
     the launched instance. Only required if the `network` has been created with
     custom subnetting. Note, the region of the subnetwork must match the `region`
-    or `zone` in which the VM is launched.
+    or `zone` in which the VM is launched. If the value is not a URL, it
+    will be interpolated to `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
+
 
 -   `tags` (array of strings)
 
@@ -281,7 +298,7 @@ the credentials provided in the builder config's `account_file`.
 
 ## Gotchas
 
-Centos and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
+CentOS and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
 any user, which will be created by packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an

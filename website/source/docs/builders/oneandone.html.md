@@ -35,7 +35,7 @@ builder.
 
 -   `image_name` (string) - Resulting image. If "image\_name" is not provided Packer will generate it
 
--   `retries` (int) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
+-   `retries` (number) - Number of retries Packer will make status requests while waiting for the build to complete. Default value "600".
 
 -   `url` (string) - Endpoint for the 1&1 REST API. Default URL "<https://cloudpanel-api.1and1.com/v1>"
 

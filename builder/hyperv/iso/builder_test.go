@@ -3,6 +3,7 @@ package iso
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -18,6 +19,7 @@ func testConfig() map[string]interface{} {
 		"ram_size":                64,
 		"disk_size":               256,
 		"guest_additions_mode":    "none",
+		"disk_additional_size":    "50000,40000,30000",
 		packer.BuildNameConfigKey: "foo",
 	}
 }
@@ -235,7 +237,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	delete(config, "iso_url")
 	delete(config, "iso_urls")
 
-	// Test both epty
+	// Test both empty
 	config["iso_url"] = ""
 	b = Builder{}
 	warns, err := b.Prepare(config)
@@ -297,4 +299,176 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
 		t.Fatalf("bad: %#v", b.config.ISOUrls)
 	}
+}
+
+func TestBuilderPrepare_SizeNotRequiredWhenUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected := []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+
+	// Test just iso_urls set but with vhd
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_SizeIsRequiredWhenNotUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	expected := []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_MaximumOfSixtyFourAdditionalDisks(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	disks := make([]string, 65)
+	for i := range disks {
+		disks[i] = strconv.Itoa(i)
+	}
+	config["disk_additional_size"] = disks
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+}
+
+func TestBuilderPrepare_CommConfig(t *testing.T) {
+	// Test Winrm
+	{
+		config := testConfig()
+		config["communicator"] = "winrm"
+		config["winrm_username"] = "username"
+		config["winrm_password"] = "password"
+		config["winrm_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.Comm.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.Comm.WinRMUser)
+		}
+		if b.config.Comm.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.Comm.WinRMPassword)
+		}
+		if host := b.config.Comm.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
+	// Test SSH
+	{
+		config := testConfig()
+		config["communicator"] = "ssh"
+		config["ssh_username"] = "username"
+		config["ssh_password"] = "password"
+		config["ssh_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.Comm.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.Comm.SSHUsername)
+		}
+		if b.config.Comm.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.Comm.SSHPassword)
+		}
+		if host := b.config.Comm.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
 }

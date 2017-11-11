@@ -69,6 +69,10 @@ Optional parameters:
     [facts](https://puppetlabs.com/facter) to make
     available when Puppet is running.
 
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
+
 -   `hiera_config_path` (string) - The path to a local file with hiera
     configuration to be uploaded to the remote machine. Hiera data directories
     must be uploaded using the file provisioner separately.
@@ -86,11 +90,6 @@ Optional parameters:
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
--   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
-    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
-    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
-    not run profile-setup scripts, therefore the path is usually empty.
-
 -   `module_paths` (array of strings) - This is an array of paths to module
     directories on your local filesystem. These will be uploaded to the
     remote machine. By default, this is empty.
@@ -99,12 +98,18 @@ multiple manifests you should use `manifest_file` instead.
     executed to run Puppet are executed with `sudo`. If this is true, then the
     sudo will be omitted.
 
--   `staging_directory` (string) - This is the directory where all the
-    configuration of Puppet by Packer will be placed. By default this
-    is "/tmp/packer-puppet-masterless". This directory doesn't need to exist but
-    must have proper permissions so that the SSH user that Packer uses is able
-    to create directories and write into this folder. If the permissions are not
-    correct, use a shell provisioner prior to this to configure it properly.
+-   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
+    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
+    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
+    not run profile-setup scripts, therefore the path is usually empty.
+
+-   `staging_directory` (string) - This is the directory where all the configuration
+    of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-masterless"
+    when guest OS type is unix and "C:/Windows/Temp/packer-puppet-masterless" when windows.
+    This directory doesn't need to exist but must have proper permissions so that the SSH
+    user that Packer uses is able to create directories and write into this folder.
+    If the permissions are not correct, use a shell provisioner prior to this to configure
+    it properly.
 
 -   `working_directory` (string) - This is the directory from which the puppet
     command will be run. When using hiera with a relative path, this option
@@ -117,17 +122,31 @@ multiple manifests you should use `manifest_file` instead.
 By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Puppet:
 
-``` liquid
-cd {{.WorkingDir}} && \
-{{.FacterVars}}{{if .Sudo}} sudo -E {{end}} \
-{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}{{end}}puppet apply \
-  --verbose \
-  --modulepath='{{.ModulePath}}' \
-  {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}} \
-  {{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}} \
-  --detailed-exitcodes \
-  {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}} \
-  {{.ManifestFile}}
+```
+cd {{.WorkingDir}} &&
+ {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+{{if .Sudo}}sudo -E {{end}}
+{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+puppet apply --verbose --modulepath='{{.ModulePath}}'
+ {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+--detailed-exitcodes
+ {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+{{.ManifestFile}}
+```
+
+The following command is used if guest OS type is windows:
+
+```
+cd {{.WorkingDir}} &&
+ {{.FacterVars}} &&
+ {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+puppet apply --verbose --modulepath='{{.ModulePath}}'
+ {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+--detailed-exitcodes
+ {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
+{{.ManifestFile}}
 ```
 
 This command can be customized using the `execute_command` configuration. As you

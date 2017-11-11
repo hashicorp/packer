@@ -103,7 +103,7 @@ Optional Parameters:
     files. The command should read and write on stdin and stdout, respectively.
     Defaults to `/usr/lib/sftp-server -e`.
 
--   `skip_version_check` (bool) - Check if ansible is installed prior to running.
+-   `skip_version_check` (boolean) - Check if ansible is installed prior to running.
     Set this to `true`, for example, if you're going to install ansible during
     the packer run.
 
@@ -135,6 +135,16 @@ commonly useful Ansible variables:
 -   `packer_builder_type` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the playbook on systems built with certain builders.
+
+## Debugging
+
+To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"` to enable verbose logging.
+
+``` json
+{
+  "extra_arguments": [ "-vvvv" ]
+}
+```
 
 ## Limitations
 
@@ -230,4 +240,18 @@ This template should build a Windows Server 2012 image on Google Cloud Platform:
     }
   ]
 }
+```
+
+### Too many SSH keys
+
+SSH servers only allow you to attempt to authenticate a certain number of times. All of your loaded keys will be tried before the dynamically generated key. If you have too many SSH keys loaded in your `ssh-agent`, the Ansible provisioner may fail authentication with a message similar to this:
+
+```console
+    googlecompute: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Warning: Permanently added '[127.0.0.1]:62684' (RSA) to the list of known hosts.\r\nReceived disconnect from 127.0.0.1 port 62684:2: too many authentication failures\r\nAuthentication failed.\r\n", "unreachable": true}
+```
+
+To unload all keys from your `ssh-agent`, run: 
+
+```console
+$ ssh-add -D
 ```

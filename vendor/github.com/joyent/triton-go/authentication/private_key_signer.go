@@ -18,6 +18,7 @@ import (
 type PrivateKeySigner struct {
 	formattedKeyFingerprint string
 	keyFingerprint          string
+	algorithm               string
 	accountName             string
 	hashFunc                crypto.Hash
 
@@ -48,14 +49,22 @@ func NewPrivateKeySigner(keyFingerprint string, privateKeyMaterial []byte, accou
 		return nil, errors.New("Private key file does not match public key fingerprint")
 	}
 
-	return &PrivateKeySigner{
+	signer := &PrivateKeySigner{
 		formattedKeyFingerprint: displayKeyFingerprint,
 		keyFingerprint:          keyFingerprint,
 		accountName:             accountName,
 
 		hashFunc:   crypto.SHA1,
 		privateKey: rsakey,
-	}, nil
+	}
+
+	_, algorithm, err := signer.SignRaw("HelloWorld")
+	if err != nil {
+		return nil, fmt.Errorf("Cannot sign using ssh agent: %s", err)
+	}
+	signer.algorithm = algorithm
+
+	return signer, nil
 }
 
 func (s *PrivateKeySigner) Sign(dateHeader string) (string, error) {
@@ -73,4 +82,25 @@ func (s *PrivateKeySigner) Sign(dateHeader string) (string, error) {
 
 	keyID := fmt.Sprintf("/%s/keys/%s", s.accountName, s.formattedKeyFingerprint)
 	return fmt.Sprintf(authorizationHeaderFormat, keyID, "rsa-sha1", headerName, signedBase64), nil
+}
+
+func (s *PrivateKeySigner) SignRaw(toSign string) (string, string, error) {
+	hash := s.hashFunc.New()
+	hash.Write([]byte(toSign))
+	digest := hash.Sum(nil)
+
+	signed, err := rsa.SignPKCS1v15(rand.Reader, s.privateKey, s.hashFunc, digest)
+	if err != nil {
+		return "", "", errwrap.Wrapf("Error signing date header: {{err}}", err)
+	}
+	signedBase64 := base64.StdEncoding.EncodeToString(signed)
+	return signedBase64, "rsa-sha1", nil
+}
+
+func (s *PrivateKeySigner) KeyFingerprint() string {
+	return s.formattedKeyFingerprint
+}
+
+func (s *PrivateKeySigner) DefaultAlgorithm() string {
+	return s.algorithm
 }

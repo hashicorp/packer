@@ -1,6 +1,8 @@
 package cloudstack
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
@@ -61,40 +63,48 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
+		&stepKeypair{
+			Debug:                b.config.PackerDebug,
+			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
+			KeyPair:              b.config.Keypair,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
+			TemporaryKeyPairName: b.config.TemporaryKeypairName,
+		},
+		&stepCreateSecurityGroup{},
 		&stepCreateInstance{
-			Ctx: b.config.ctx,
+			Ctx:   b.config.ctx,
+			Debug: b.config.PackerDebug,
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
 			Host:   commHost,
-			SSHConfig: SSHConfig(
+			SSHConfig: sshConfig(
 				b.config.Comm.SSHAgentAuth,
 				b.config.Comm.SSHUsername,
 				b.config.Comm.SSHPassword),
+			SSHPort:   commPort,
+			WinRMPort: commPort,
 		},
 		&common.StepProvision{},
 		&stepShutdownInstance{},
 		&stepCreateTemplate{},
 	}
 
-	// Configure the runner.
-	if b.config.PackerDebug {
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: common.MultistepDebugFn(ui),
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
-	// Run the steps.
+	// Configure the runner and run the steps.
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		ui.Error(rawErr.(error).Error())
 		return nil, rawErr.(error)
+	}
+
+	// If there was no template created, just return
+	if _, ok := state.GetOk("template"); !ok {
+		return nil, nil
 	}
 
 	// Build the artifact and return it

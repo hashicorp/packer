@@ -121,7 +121,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 func runAndLog(cmd *exec.Cmd) (string, string, error) {
 	var stdout, stderr bytes.Buffer
 
-	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	log.Printf("Executing: %s %s", cmd.Path, strings.Join(cmd.Args[1:], " "))
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()

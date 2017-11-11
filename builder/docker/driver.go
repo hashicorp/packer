@@ -28,7 +28,7 @@ type Driver interface {
 
 	// Login. This will lock the driver from performing another Login
 	// until Logout is called. Therefore, any users MUST call Logout.
-	Login(repo, email, username, password string) error
+	Login(repo, username, password string) error
 
 	// Logout. This can only be called if Login succeeded.
 	Logout(repo string) error

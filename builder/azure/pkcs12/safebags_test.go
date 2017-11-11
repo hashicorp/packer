@@ -1,38 +1,14 @@
+// Copyright 2016 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package pkcs12
 
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
 	"encoding/asn1"
-	"fmt"
 	"testing"
 )
-
-func decodePkcs8ShroudedKeyBag(asn1Data, password []byte) (privateKey interface{}, err error) {
-	pkinfo := new(encryptedPrivateKeyInfo)
-	if _, err = asn1.Unmarshal(asn1Data, pkinfo); err != nil {
-		err = fmt.Errorf("error decoding PKCS8 shrouded key bag: %v", err)
-		return nil, err
-	}
-
-	pkData, err := pbDecrypt(pkinfo, password)
-	if err != nil {
-		err = fmt.Errorf("error decrypting PKCS8 shrouded key bag: %v", err)
-		return
-	}
-
-	rv := new(asn1.RawValue)
-	if _, err = asn1.Unmarshal(pkData, rv); err != nil {
-		err = fmt.Errorf("could not decode decrypted private key data")
-	}
-
-	if privateKey, err = x509.ParsePKCS8PrivateKey(pkData); err != nil {
-		err = fmt.Errorf("error parsing PKCS8 private key: %v", err)
-		return nil, err
-	}
-	return
-}
 
 // Assert the default algorithm parameters are in the correct order,
 // and default to the correct value.  Defaults are based on OpenSSL.
@@ -61,7 +37,7 @@ func TestDefaultAlgorithmParametersPkcs8ShroudedKeyBag(t *testing.T) {
 	}
 
 	var params pbeParams
-	rest, err = asn1.Unmarshal(pkinfo.GetAlgorithm().Parameters.FullBytes, &params)
+	rest, err = asn1.Unmarshal(pkinfo.Algorithm().Parameters.FullBytes, &params)
 	if err != nil {
 		t.Fatalf("failed to unmarshal encryptedPrivateKeyInfo %s", err)
 	}
@@ -97,6 +73,6 @@ func TestRoundTripPkcs8ShroudedKeyBag(t *testing.T) {
 
 	actualPrivateKey := key.(*rsa.PrivateKey)
 	if actualPrivateKey.D.Cmp(privateKey.D) != 0 {
-		t.Fatal("failed to round-trip rsa.PrivateKey.D")
+		t.Fatalf("failed to round-trip rsa.PrivateKey.D")
 	}
 }

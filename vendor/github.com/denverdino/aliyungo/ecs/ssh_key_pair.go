@@ -77,15 +77,24 @@ type DescribeKeyPairsResponse struct {
 //
 // You can read doc at https://help.aliyun.com/document_detail/51773.html?spm=5176.doc51774.6.912.lyE0iX
 func (client *Client) DescribeKeyPairs(args *DescribeKeyPairsArgs) (KeyPairs   []KeyPairItemType, pagination *common.PaginationResult, err error) {
-	response := DescribeKeyPairsResponse{}
-
-	err = client.Invoke("DescribeKeyPairs", args, &response)
-
+	response, err := client.DescribeKeyPairsWithRaw(args)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return response.KeyPairs.KeyPair, &response.PaginationResult, err
+}
+
+func (client *Client) DescribeKeyPairsWithRaw(args *DescribeKeyPairsArgs) (response *DescribeKeyPairsResponse, err error) {
+	response = &DescribeKeyPairsResponse{}
+
+	err = client.Invoke("DescribeKeyPairs", args, response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, err
 }
 
 type AttachKeyPairArgs struct {
