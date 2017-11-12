@@ -18,6 +18,7 @@
 * core: Rewrite vagrantfile code to make cross-platform development easier. [5539]
 * builder/triton: Update triton-go sdk. [GH-5531]
 * builder/google: Add clean_image_name template engine. [GH-5463]
+* builder/google: Allow Selecting Container Optimized Images. [GH-5576]
 
 ### BUG FIXES:
 
