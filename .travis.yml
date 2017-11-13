@@ -10,6 +10,9 @@ go:
   - 1.8.3
   - 1.9
 
+before_script:
+    - make vet
+
 install:
   - make deps
 

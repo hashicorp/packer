@@ -77,7 +77,7 @@ generate: deps ## Generate dynamically generated code
 vet:
 	go vet ./...
 
-test: deps fmt-check vet ## Run unit tests
+test: deps fmt-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 
 # testacc runs acceptance tests
