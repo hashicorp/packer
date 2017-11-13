@@ -65,15 +65,15 @@ func TestNewConfig_sourcePath(t *testing.T) {
 		t.Fatalf("should error with empty `source_path`")
 	}
 
-	// Okay, because it gets caught during download
+	// Want this to fail on validation
 	c = testConfig(t)
 	c["source_path"] = "/i/dont/exist"
 	_, warns, err = NewConfig(c)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
 	}
-	if err != nil {
-		t.Fatalf("bad: %s", err)
+	if err == nil {
+		t.Fatalf("Nonexistant file should throw a validation error!")
 	}
 
 	// Bad
