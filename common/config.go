@@ -96,8 +96,6 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
-		} else {
-			return "", err
 		}
 
 		if runtime.GOOS == "windows" {
