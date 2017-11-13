@@ -84,7 +84,7 @@ func TestNewConfig_sourcePath(t *testing.T) {
 		t.Fatalf("bad: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("Nonexistent source file should be caught in validation")
+		t.Fatal("should error")
 	}
 
 	// Good
