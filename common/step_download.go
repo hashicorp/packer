@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	getter "github.com/hashicorp/go-getter"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -86,7 +87,8 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			Url:        url,
 			TargetPath: targetPath,
 			CopyFile:   false,
-			Hash:       HashForType(s.ChecksumType),
+			Hash:       getter.HashForType(s.ChecksumType),
+			HashType:   s.ChecksumType,
 			Checksum:   checksum,
 			UserAgent:  "Packer",
 		}
@@ -143,7 +145,7 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 
 			return path, nil, true
 		case <-progressTicker.C:
-			progress := download.PercentProgress()
+			progress := download.GetDownloadProgress()
 			if progress >= 0 {
 				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
 			}
