@@ -6,9 +6,11 @@ sudo: false
 language: go
 
 go:
-  - 1.7.4
-  - 1.8.3
   - 1.9
+
+before_script:
+  - make vet
+  - go tool vet post-processor/vsphere-template/step_mark_as_template.go
 
 install:
   - make deps
