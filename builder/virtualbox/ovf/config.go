@@ -2,6 +2,7 @@ package ovf
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -103,8 +104,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 		}
 		// file must exist now.
-		if (len(c.SourcePath) > 7) && (c.SourcePath[:7] == "file://") {
-			if _, err := os.Stat(c.SourcePath[7:]); err != nil {
+		fileURL, _ := url.Parse(c.SourcePath)
+		if fileURL.Scheme == "file" {
+			if _, err := os.Stat(fileURL.Path); err != nil {
 				errs = packer.MultiErrorAppend(errs,
 					fmt.Errorf("source file needs to exist at time of config validation: %s", err))
 			}
