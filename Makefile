@@ -1,5 +1,4 @@
 TEST?=$(shell go list ./... | grep -v vendor)
-VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 # Get the current full sha from git
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
@@ -76,7 +75,7 @@ generate: deps ## Generate dynamically generated code
 	gofmt -w command/plugin.go
 
 vet:
-	bash -c "go list -f $$(echo $$GOPATH)/src/{{.ImportPath}} ./... | grep -v vendor | grep -v '/Users/mwhooker/go/src/github.com/hashicorp/packer$$' | xargs go tool vet"
+	go vet ./...
 
 test: deps fmt-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m

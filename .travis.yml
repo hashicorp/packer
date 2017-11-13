@@ -9,7 +9,8 @@ go:
   - 1.9
 
 before_script:
-    - make vet
+  - make vet
+  - go tool vet post-processor/vsphere-template/step_mark_as_template.go
 
 install:
   - make deps
