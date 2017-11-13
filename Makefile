@@ -76,7 +76,7 @@ generate: deps ## Generate dynamically generated code
 	gofmt -w command/plugin.go
 
 vet:
-	go tool vet $(go list -f "$(echo $GOPATH)/src/{{.ImportPath}}" ./... | grep -v vendor | grep -v "/Users/mwhooker/go/src/github.com/hashicorp/packer$")
+	bash -c "go list -f $$(echo $$GOPATH)/src/{{.ImportPath}} ./... | grep -v vendor | grep -v '/Users/mwhooker/go/src/github.com/hashicorp/packer$$' | xargs go tool vet"
 
 test: deps fmt-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
