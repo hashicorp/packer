@@ -100,7 +100,10 @@ func datastorePath(vm *object.VirtualMachine) (*object.DatastorePath, error) {
 	datastore := re.FindStringSubmatch(disk)[1]
 	vmxPath := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), vm.Name()+".vmx")
 
-	return &object.DatastorePath{datastore, vmxPath}, nil
+	return &object.DatastorePath{
+		Datastore: datastore,
+		Path:      vmxPath,
+	}, nil
 }
 
 // We will use the virtual machine created by vmware-iso builder
