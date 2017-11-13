@@ -9,6 +9,8 @@ import (
 	"github.com/vmware/govmomi/object"
 	"time"
 	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25"
 )
 
 type Driver struct {
@@ -33,13 +35,25 @@ func NewDriver(config *ConnectConfig) (*Driver, error) {
 	if err != nil {
 		return nil, err
 	}
-	vcenter_url.User = url.UserPassword(config.Username, config.Password)
+	credentials := url.UserPassword(config.Username, config.Password)
+	vcenter_url.User = credentials
 
-	client, err := govmomi.NewClient(ctx, vcenter_url, config.InsecureConnection)
+	soapClient := soap.NewClient(vcenter_url, config.InsecureConnection)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
 	if err != nil {
 		return nil, err
 	}
-	client.RoundTripper = session.KeepAlive(client.RoundTripper, 10*time.Minute)
+
+	vimClient.RoundTripper = session.KeepAlive(vimClient.RoundTripper, 10*time.Minute)
+	client := &govmomi.Client{
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
+	}
+
+	err = client.SessionManager.Login(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
 
 	finder := find.NewFinder(client.Client, false)
 	datacenter, err := finder.DatacenterOrDefault(ctx, config.Datacenter)
