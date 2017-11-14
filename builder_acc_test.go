@@ -1,13 +1,13 @@
 package main
 
 import (
-	"testing"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"encoding/json"
-	"math/rand"
+	"fmt"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"math/rand"
+	"testing"
 )
 
 func TestBuilderAcc_default(t *testing.T) {
@@ -74,7 +74,7 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 			t.Fatalf("Cannot read resource pool name: %v", err)
 		}
 		if poolPath != "" {
-			t.Error("Invalid resource pool: expected '/', got '%v'", poolPath)
+			t.Errorf("Invalid resource pool: expected '/', got '%v'", poolPath)
 		}
 
 		dsr := vmInfo.Datastore[0].Reference()
@@ -133,6 +133,29 @@ func folderConfig() string {
 	config["folder"] = "folder1/folder2"
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
+}
+
+func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := testConn(t)
+		vm := getVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("parent")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		f := d.NewFolder(vmInfo.Parent)
+		path, err := f.Path()
+		if err != nil {
+			t.Fatalf("Cannot read folder name: %v", err)
+		}
+		if path != folder {
+			t.Errorf("Wrong folder. expected: %v, got: %v", folder, path)
+		}
+
+		return nil
+	}
 }
 
 func TestBuilderAcc_resourcePool(t *testing.T) {

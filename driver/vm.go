@@ -1,12 +1,12 @@
 package driver
 
 import (
+	"errors"
+	"fmt"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"errors"
 	"time"
-	"fmt"
 )
 
 type VirtualMachine struct {
@@ -88,7 +88,7 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 
 		info, err := host.Info("datastore")
 		if err != nil {
-			return nil, err
+		return nil, err
 		}
 
 		if len(info.Datastore) > 1 {
