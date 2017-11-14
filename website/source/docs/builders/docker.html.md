@@ -303,7 +303,7 @@ nearly-identical sequence definitions, as demonstrated by the example below:
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer",
+        "repository": "hashicorp/packer1",
         "tag": "0.7"
       },
       "docker-push"
@@ -311,7 +311,7 @@ nearly-identical sequence definitions, as demonstrated by the example below:
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer",
+        "repository": "hashicorp/packer2",
         "tag": "0.7"
       },
       "docker-push"
