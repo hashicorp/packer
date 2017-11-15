@@ -70,7 +70,7 @@ straightforwarded, it is documented here.
 
 4.  Create new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
 
-5.  Chose `JSON` as Key type and click "Create".
+5.  Choose `JSON` as Key type and click "Create".
     A JSON file will be downloaded automatically. This is your *account file*.
 
 ### Precedence of Authentication Methods
