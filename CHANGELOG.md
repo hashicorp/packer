@@ -2,35 +2,55 @@
 
 ### IMRPOVEMENTS:
 
-* post-processor/docker-push: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
-* builder/docker: Add `aws_profile` option to control the aws profile for ECR. [GH-5470]
-* post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
-* builder/hyper-v: Also disable automatic checkpoints for gen 2 VMs. [GH-5517]
-* builder/hyper-v: Add `disk_additional_size` option to allow for up to 64 additional disks. [GH-5491]
-* builder/amazon: correctly deregister AMIs when `force_deregister` is set. [GH-5525]
+* builder/amazon: correctly deregister AMIs when `force_deregister` is set.
+    [GH-5525]
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
-* builder/triton: Add `source_machine_image_filter` option to select an image ID based on a variety of parameters. [GH-5538]
-* communicator/ssh: Add socks 5 proxy support. [GH-5439]
-* builder/lxc: Add new `publish_properties` field to set image properties. [GH-5475]
-* builder/virtualbox-ovf: Retry while removing VM to solve for transient errors. [GH-5512]
-* builder/google: Interpolate network and subnetwork values, rather than relying on an API call that packer may not have permission for. [GH-5343]
-* builder/lxc: Add three new configuration option categories to LXC builder: create_options, start_options, and attach_options. [GH-5530]
-* core: Rewrite vagrantfile code to make cross-platform development easier. [5539]
-* builder/triton: Update triton-go sdk. [GH-5531]
+* builder/docker: Add `aws_profile` option to control the aws profile for ECR.
+    [GH-5470]
 * builder/google: Add clean_image_name template engine. [GH-5463]
 * builder/google: Allow Selecting Container Optimized Images. [GH-5576]
+* builder/google: Interpolate network and subnetwork values, rather than
+    relying on an API call that packer may not have permission for. [GH-5343]
+* builder/hyper-v: Add `disk_additional_size` option to allow for up to 64
+    additional disks. [GH-5491]
+* builder/hyper-v: Also disable automatic checkpoints for gen 2 VMs. [GH-5517]
+* builder/lxc: Add new `publish_properties` field to set image properties.
+    [GH-5475]
+* builder/lxc: Add three new configuration option categories to LXC builder:
+    create_options, start_options, and attach_options. [GH-5530]
+* builder/triton: Add `source_machine_image_filter` option to select an image
+    ID based on a variety of parameters. [GH-5538]
+* builder/triton: Update triton-go sdk. [GH-5531]
+* builder/virtualbox-ovf: Error during prepare if source path doesn't exist.
+    [GH-5573]
+* builder/virtualbox-ovf: Retry while removing VM to solve for transient
+    errors. [GH-5512]
+* communicator/ssh: Add socks 5 proxy support. [GH-5439]
+* core: Rewrite vagrantfile code to make cross-platform development easier.
+    [GH-5539]
+* post-processor/docker-push: Add `aws_profile` option to control the aws
+    profile for ECR. [GH-5470]
+* post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
 
 ### BUG FIXES:
 
-* builder/docker: Remove `login_email`, which no longer exists in the docker client. [GH-5511]
-* builder/triton: Fix a bug where partially created images can be reported as complete. [GH-5566]
-* builder/amazon: region is set from profile, if profile is set, rather than being overridden by metadata. [GH-5562]
-* provisioner/windows-restart: Wait for restart no longer endlessly loops if user specifies a custom restart check command. [GH-5563]
-* post-processor/vsphere: Use the vm disk path information to re-create the vmx datastore path. [GH-5567]
 * builder/amazon: Add a delay option to security group waiter. [GH-5536]
-* builder/amazon: Fix regressions relating to spot instances and EBS volumes. [GH-5495]
-* builder/hyperv: Fix admin check that was causing powershell failures. [GH-5510]
-* builder/oracle: Defaulting of OCI builder region will first check the packer template and the OCI config file. [GH-5407]
+* builder/amazon: Fix regressions relating to spot instances and EBS volumes.
+    [GH-5495]
+* builder/amazon: region is set from profile, if profile is set, rather than
+    being overridden by metadata. [GH-5562]
+* builder/docker: Remove `login_email`, which no longer exists in the docker
+    client. [GH-5511]
+* builder/hyperv: Fix admin check that was causing powershell failures.
+    [GH-5510]
+* builder/oracle: Defaulting of OCI builder region will first check the packer
+    template and the OCI config file. [GH-5407]
+* builder/triton: Fix a bug where partially created images can be reported as
+    complete. [GH-5566]
+* post-processor/vsphere: Use the vm disk path information to re-create the vmx
+    datastore path. [GH-5567]
+* provisioner/windows-restart: Wait for restart no longer endlessly loops if
+    user specifies a custom restart check command. [GH-5563]
 
 ## 1.1.1 (October 13, 2017)
 
