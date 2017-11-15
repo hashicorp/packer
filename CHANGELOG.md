@@ -1,3 +1,11 @@
+## (UNRELEASED)
+
+### IMPROVEMENTS:
+
+### BUG FIXES:
+
+* builder/qemu: Set default disk size to 40960 MB to prevent boot failures. [GH-5588]
+
 ## 1.1.2 (November 15, 2017)
 
 ### IMRPOVEMENTS:
