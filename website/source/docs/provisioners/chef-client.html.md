@@ -212,7 +212,7 @@ readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
 ``` text
-curl -L https://www.chef.io/chef/install.sh | \
+curl -L https:///omnitruck.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
