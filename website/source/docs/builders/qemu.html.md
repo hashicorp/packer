@@ -157,7 +157,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     interface under these circumstances will cause the build to fail.
 
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is 40000 (about 40 GB).
+    for the VM. By default, this is 40960 (40 GB).
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
