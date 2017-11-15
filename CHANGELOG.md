@@ -2,13 +2,13 @@
 
 ### IMRPOVEMENTS:
 
-* builder/amazon: correctly deregister AMIs when `force_deregister` is set.
+* builder/amazon: Correctly deregister AMIs when `force_deregister` is set.
     [GH-5525]
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 * builder/docker: Add `aws_profile` option to control the aws profile for ECR.
     [GH-5470]
-* builder/google: Add clean_image_name template engine. [GH-5463]
-* builder/google: Allow Selecting Container Optimized Images. [GH-5576]
+* builder/google: Add `clean_image_name` template engine. [GH-5463]
+* builder/google: Allow selecting container optimized images. [GH-5576]
 * builder/google: Interpolate network and subnetwork values, rather than
     relying on an API call that packer may not have permission for. [GH-5343]
 * builder/hyper-v: Add `disk_additional_size` option to allow for up to 64
@@ -17,15 +17,15 @@
 * builder/lxc: Add new `publish_properties` field to set image properties.
     [GH-5475]
 * builder/lxc: Add three new configuration option categories to LXC builder:
-    create_options, start_options, and attach_options. [GH-5530]
+    `create_options`, `start_options`, and `attach_options`. [GH-5530]
 * builder/triton: Add `source_machine_image_filter` option to select an image
     ID based on a variety of parameters. [GH-5538]
-* builder/triton: Update triton-go sdk. [GH-5531]
 * builder/virtualbox-ovf: Error during prepare if source path doesn't exist.
     [GH-5573]
 * builder/virtualbox-ovf: Retry while removing VM to solve for transient
     errors. [GH-5512]
 * communicator/ssh: Add socks 5 proxy support. [GH-5439]
+* core/iso_config: Support relative paths in checksum file. [GH-5578]
 * core: Rewrite vagrantfile code to make cross-platform development easier.
     [GH-5539]
 * post-processor/docker-push: Add `aws_profile` option to control the aws
@@ -37,8 +37,8 @@
 * builder/amazon: Add a delay option to security group waiter. [GH-5536]
 * builder/amazon: Fix regressions relating to spot instances and EBS volumes.
     [GH-5495]
-* builder/amazon: region is set from profile, if profile is set, rather than
-    being overridden by metadata. [GH-5562]
+* builder/amazon: Set region from profile, if profile is set, rather than being
+    overridden by metadata. [GH-5562]
 * builder/docker: Remove `login_email`, which no longer exists in the docker
     client. [GH-5511]
 * builder/hyperv: Fix admin check that was causing powershell failures.
