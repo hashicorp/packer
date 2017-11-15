@@ -144,7 +144,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
-		b.config.DiskSize = 40000
+		b.config.DiskSize = 40960
 	}
 
 	if b.config.DiskCache == "" {
