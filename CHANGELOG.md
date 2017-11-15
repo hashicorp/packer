@@ -8,7 +8,7 @@
 
 ## 1.1.2 (November 15, 2017)
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
 * builder/amazon: Correctly deregister AMIs when `force_deregister` is set.
     [GH-5525]
@@ -267,7 +267,7 @@
 * core: Remove logging that shouldn't be there when running commands. [GH-5042]
 * provisioner/shell: Fix bug where scripts were being run under `sh`. [GH-5043]
 
-### IMRPOVEMENTS:
+### IMPROVEMENTS:
 
 * provisioner/windows-restart: make it clear that timeouts come from the
     provisioner, not winrm. [GH-5040]
