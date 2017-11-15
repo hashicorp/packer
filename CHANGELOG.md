@@ -1,4 +1,4 @@
-## (UNRELEASED)
+## 1.1.2 (November 15, 2017)
 
 ### IMRPOVEMENTS:
 
