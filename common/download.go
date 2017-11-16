@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -130,10 +129,6 @@ func (d *DownloadClient) Get() (string, error) {
 		// locally and we don't make a copy. Normally we would copy or download.
 		log.Printf("[DEBUG] Using local file: %s", finalPath)
 
-		// Remove forward slash on absolute Windows file URLs before processing
-		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
-			finalPath = finalPath[1:]
-		}
 		// Keep track of the source so we can make sure not to delete this later
 		sourcePath = finalPath
 		if _, err = os.Stat(finalPath); err != nil {
