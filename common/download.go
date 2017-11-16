@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
