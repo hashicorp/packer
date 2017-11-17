@@ -134,8 +134,9 @@ When creating a managed image the following two options are required.
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.
 
--   `temp_resource_group_name` (string) name assigned to the temporary resource group created during the build.  If this value is not set, a random
-    value will be assigned. Cannot be used together with `build_resource_group_name`.
+-   `temp_resource_group_name` (string) name assigned to the temporary resource group created during the build.  If this 
+    value is not set, a random value will be assigned. This resource group is deleted at the end of the build. Cannot be
+    used together with `build_resource_group_name`.
 
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
