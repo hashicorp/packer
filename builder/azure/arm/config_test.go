@@ -913,7 +913,7 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 		"communicator":           "none",
 
 		// custom may define one or the other, but not both
-		"temp_resource_group_name": "rgn00",
+		"temp_resource_group_name":  "rgn00",
 		"build_resource_group_name": "rgn00",
 	}
 
@@ -922,7 +922,6 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 		t.Fatal("expected config to reject the use of both temp_resource_group_name and build_resource_group_name")
 	}
 }
-
 
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)

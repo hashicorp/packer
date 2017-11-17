@@ -86,7 +86,7 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, 
 		}
 		return err
 	} else {
-        s.say("\nThe resource group was created by Packer, deleting ...")
+		s.say("\nThe resource group was created by Packer, deleting ...")
 		_, errChan := s.client.GroupsClient.Delete(resourceGroupName, cancelCh)
 		err = <-errChan
 
