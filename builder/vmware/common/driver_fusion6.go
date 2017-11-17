@@ -66,7 +66,7 @@ func (d *Fusion6Driver) Verify() error {
 	}
 	log.Printf("Detected VMware version: %s", matches[1])
 
-	libpath := filepath.Join("Library", "Preferences", "VMware Fusion")
+	libpath := filepath.Join("/", "Library", "Preferences", "VMware Fusion")
 
 	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
 		return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
