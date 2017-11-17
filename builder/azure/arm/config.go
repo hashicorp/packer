@@ -38,9 +38,23 @@ const (
 	DefaultVMSize                            = "Standard_A1"
 )
 
+const (
+	// https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions#naming-rules-and-restrictions
+	// Regular expressions in Go are not expressive enough, such that the regular expression returned by Azure
+	// can be used (no backtracking).
+	//
+	//  -> ^[^_\W][\w-._]{0,79}(?<![-.])$
+	//
+	// This is not an exhaustive match, but it should be extremely close.
+	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,63}$"
+	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+)
+
 var (
 	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
+	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
+	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 )
 
 type Config struct {
@@ -599,6 +613,30 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.TempResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.TempResourceGroupName, "temp_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.BuildResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.BuildResourceGroupName, "build_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.ManagedImageResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.ManagedImageResourceGroupName, "managed_image_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.ManagedImageName != "" {
+		if ok, err := assertManagedImageName(c.ManagedImageName, "managed_image_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}
@@ -626,4 +664,24 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
+}
+
+func assertManagedImageName(name, setting string) (bool, error) {
+	if !isValidAzureName(reManagedDiskName, name) {
+		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validManagedDiskName)
+	}
+	return true, nil
+}
+
+func assertResourceGroupName(rgn, setting string) (bool, error) {
+	if !isValidAzureName(reResourceGroupName, rgn) {
+		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validResourceGroupNameRe)
+	}
+	return true, nil
+}
+
+func isValidAzureName(re *regexp.Regexp, rgn string) bool {
+	return re.Match([]byte(rgn)) &&
+		!strings.HasSuffix(rgn, ".") &&
+		!strings.HasSuffix(rgn, "-")
 }
