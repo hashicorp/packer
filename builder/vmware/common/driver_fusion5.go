@@ -141,7 +141,7 @@ func (d *Fusion5Driver) Verify() error {
 		return err
 	}
 
-	libpath := filepath.Join("Library", "Preferences", "VMware Fusion")
+	libpath := filepath.Join("/", "Library", "Preferences", "VMware Fusion")
 
 	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
 		return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
