@@ -10,7 +10,7 @@ import (
 
 func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -29,7 +29,7 @@ func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return nil },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -48,7 +48,7 @@ func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(resourceGroupName string, cancelCh <-chan struct{}) error {
+		delete: func(s multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error {
 			return nil
 		},
 		say:   func(message string) {},

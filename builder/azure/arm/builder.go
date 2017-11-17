@@ -287,7 +287,16 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmLocation, b.config.Location)
 	stateBag.Put(constants.ArmNicName, DefaultNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
-	stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
+	if b.config.TempResourceGroupName != "" && b.config.BuildResourceGroupName != "" {
+		stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
+	}
+	if b.config.tmpResourceGroupName != "" {
+		stateBag.Put(constants.ArmResourceGroupName, b.config.tmpResourceGroupName)
+		stateBag.Put(constants.ArmIsExistingResourceGroup, false)
+	} else {
+		stateBag.Put(constants.ArmResourceGroupName, b.config.BuildResourceGroupName)
+		stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+	}
 	stateBag.Put(constants.ArmStorageAccountName, b.config.StorageAccount)
 
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())

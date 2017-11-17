@@ -23,9 +23,11 @@ const (
 	ArmPublicIPAddressName             string = "arm.PublicIPAddressName"
 	ArmResourceGroupName               string = "arm.ResourceGroupName"
 	ArmIsResourceGroupCreated          string = "arm.IsResourceGroupCreated"
+	ArmDoubleResourceGroupNameSet      string = "arm.DoubleResourceGroupNameSet"
 	ArmStorageAccountName              string = "arm.StorageAccountName"
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
+	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
 
 	ArmIsManagedImage                string = "arm.IsManagedImage"
 	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
