@@ -899,6 +899,31 @@ func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 	}
 }
 
+func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+
+		// custom may define one or the other, but not both
+		"temp_resource_group_name": "rgn00",
+		"build_resource_group_name": "rgn00",
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject the use of both temp_resource_group_name and build_resource_group_name")
+	}
+}
+
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {

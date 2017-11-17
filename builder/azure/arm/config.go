@@ -519,6 +519,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.TempResourceGroupName != "" && c.BuildResourceGroupName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The settings temp_resource_group_name and build_resource_group_name cannot both be defined.  Please define one or neither."))
+	}
+
 	/////////////////////////////////////////////
 	// Compute
 	toInt := func(b bool) int {
