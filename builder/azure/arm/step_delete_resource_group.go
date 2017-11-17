@@ -10,6 +10,10 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
+const (
+	maxResourcesToDelete = 50
+)
+
 type StepDeleteResourceGroup struct {
 	client *AzureClient
 	delete func(state multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error
@@ -34,7 +38,7 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(state multistep.StateBag, 
 		s.say("\nThe resource group was not created by Packer, only deleting individual resources ...")
 		var deploymentName = state.Get(constants.ArmDeploymentName).(string)
 		if deploymentName != "" {
-			maxResources := int32(50)
+			maxResources := int32(maxResourcesToDelete)
 			deploymentOperations, err := s.client.DeploymentOperationsClient.List(resourceGroupName, deploymentName, &maxResources)
 			if err != nil {
 				s.say(fmt.Sprintf("Error deleting resources.  Please delete them manually.\n\n"+
