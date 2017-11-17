@@ -923,6 +923,139 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 	}
 }
 
+func TestConfigShouldRejectInvalidResourceGroupNames(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"communicator":           "none",
+		"os_type":                "linux",
+	}
+
+	tests := []struct {
+		name string
+		ok   bool
+	}{
+		// The Good
+		{"packer-Resource-Group-jt2j3fc", true},
+		{"My", true},
+		{"My-(with-parens)-Resource-Group", true},
+
+		// The Bad
+		{"My Resource Group", false},
+		{"My-Resource-Group-", false},
+		{"My.Resource.Group.", false},
+
+		// The Ugly
+		{"My!@#!@#%$%yM", false},
+		{"   ", false},
+		{"My10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", false},
+	}
+
+	settings := []string{"temp_resource_group_name", "build_resource_group_name"}
+
+	for _, x := range settings {
+		for _, y := range tests {
+			config[x] = y.name
+
+			_, _, err := newConfig(config, getPackerConfiguration())
+			if !y.ok && err == nil {
+				t.Errorf("expected config to reject %q for setting %q", y.name, x)
+			} else if y.ok && err != nil {
+				t.Errorf("expected config to accept %q for setting %q", y.name, x)
+			}
+		}
+
+		delete(config, x)
+	}
+}
+
+func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+	}
+
+	testsResourceGroupNames := []struct {
+		name string
+		ok   bool
+	}{
+		// The Good
+		{"packer-Resource-Group-jt2j3fc", true},
+		{"My", true},
+		{"My-(with-parens)-Resource-Group", true},
+
+		// The Bad
+		{"My Resource Group", false},
+		{"My-Resource-Group-", false},
+		{"My.Resource.Group.", false},
+
+		// The Ugly
+		{"My!@#!@#%$%yM", false},
+		{"   ", false},
+		{"My10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", false},
+	}
+
+	settingUnderTest := "managed_image_resource_group_name"
+	for _, y := range testsResourceGroupNames {
+		config[settingUnderTest] = y.name
+
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if !y.ok && err == nil {
+			t.Errorf("expected config to reject %q for setting %q", y.name, settingUnderTest)
+		} else if y.ok && err != nil {
+			t.Errorf("expected config to accept %q for setting %q", y.name, settingUnderTest)
+		}
+	}
+
+	config["managed_image_resource_group_name"] = "ignored"
+
+	testNames := []struct {
+		name string
+		ok   bool
+	}{
+		// The Good
+		{"ManagedDiskName", true},
+		{"Managed-Disk-Name", true},
+		{"My33", true},
+
+		// The Bad
+		{"Managed Disk Name", false},
+		{"Managed-Disk-Name-", false},
+		{"Managed.Disk.Name.", false},
+
+		// The Ugly
+		{"My!@#!@#%$%yM", false},
+		{"   ", false},
+		{"My10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", false},
+	}
+
+	settingUnderTest = "managed_image_name"
+	for _, y := range testNames {
+		config[settingUnderTest] = y.name
+
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if !y.ok && err == nil {
+			t.Logf("expected config to reject %q for setting %q", y.name, settingUnderTest)
+		} else if y.ok && err != nil {
+			t.Logf("expected config to accept %q for setting %q", y.name, settingUnderTest)
+		}
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
