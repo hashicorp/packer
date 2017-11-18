@@ -246,17 +246,28 @@ $ azure role list --json \
 
 Now (finally) everything has been setup in Azure. Let's get our configuration keys together:
 
+Python:
+
+```shell
+$ cat <<EOF
+> {
+>   "subscription_id": $(az account show | jq '.id'),
+>   "client_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .appId'),
+>   "client_secret": "$password",
+>   "location": "$location",
+>   "tenant_id": $(az account show | jq '.tenantId')
+>   "object_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .objectId')
+> }
+> EOF
+```
+
+node.js:
+
 Get `subscription_id`:
 
 ``` shell
 $ azure account show --json \
   | jq ".[] | .id"
-```
-
-Python:
-
-```shell
-$ az account show | jq -r '.id'
 ```
 
 Get `client_id`
@@ -266,11 +277,6 @@ $ azure ad app list --json \
   | jq '.[] | select(.displayName | contains("APPNAME")) | .appId'
 ```
 
-Python
-
-```shell
-$ az ad app list | jq '.[] | select(.displayName | contains("APPNAME")) | .appId'
-```
 
 Get `client_secret`
 
@@ -282,32 +288,14 @@ Get `object_id` (OSTYpe=Windows only)
 azure ad sp show -n CLIENT_ID
 ```
 
-Python:
-
-```shell
-$ az ad sp show -n CLIENT_ID
-```
-
 Get `resource_group_name`
 
 ``` shell
 $ azure group list
 ```
 
-Python:
-
-```shell
-$ az group list | jq '.[] | select(.name=="GROUPNAME") | .id'
-```
-
 Get `storage_account`
 
 ``` shell
 $ azure storage account list
-```
-
-Python:
-
-```shell
-$ az storage account list | jq '.[] | select(.name=="GROUPNAME") | .id'
 ```
