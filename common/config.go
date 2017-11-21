@@ -52,7 +52,7 @@ func DownloadableURL(original string) (string, error) {
 		// we're dealing with a drive letter and thus a file path.
 		if strings.Contains(original, "/cygdrive/") {
 			original := strings.Replace(original, "/cygdrive/", "", 1)
-			original = strings.Replace(original, "/", ":", 1)
+			original = strings.Replace(original, "/", ":/", 1)
 		}
 		idx := strings.Index(original, ":")
 		if idx == 1 {
