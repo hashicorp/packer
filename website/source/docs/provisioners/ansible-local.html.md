@@ -140,6 +140,10 @@ chi-appservers
     are not correct, use a shell provisioner prior to this to configure it
     properly.
 
+-   `clean_staging_directory` (boolean) - If set to `true`, the content of
+     the `staging_directory` will be removed after executing ansible. By
+     default, this is set to `false`.
+
 ## Default Extra Variables
 
 In addition to being able to specify extra arguments using the
