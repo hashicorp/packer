@@ -50,6 +50,10 @@ func DownloadableURL(original string) (string, error) {
 	if runtime.GOOS == "windows" {
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
+		if strings.Contains(original, "/cygdrive/") {
+			original := strings.Replace(original, "/cygdrive/", "", 1)
+			original = strings.Replace(original, "/", ":", 1)
+		}
 		idx := strings.Index(original, ":")
 		if idx == 1 {
 			original = "file:///" + original
