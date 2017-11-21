@@ -43,6 +43,7 @@ Here is a full list of the available functions for reference.
 -   `uuid` - Returns a random UUID.
 -   `upper` - Uppercases the string.
 -   `user` - Specifies a user variable.
+-   `packer_version` - Returns Packer version.
 
 #### Specific to Amazon builders:
 
