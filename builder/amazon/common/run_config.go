@@ -54,6 +54,7 @@ type RunConfig struct {
 	Comm           communicator.Config `mapstructure:",squash"`
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
 	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
+	SSHInterface   string              `mapstructure:"ssh_interface`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -73,6 +74,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.RunTags == nil {
 		c.RunTags = make(map[string]string)
+	}
+
+	// Legacy configurable
+	if c.SSHPrivateIp {
+		c.SSHInterface = "private_ip"
 	}
 
 	// Validation
