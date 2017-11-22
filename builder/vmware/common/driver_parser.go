@@ -17,8 +17,9 @@ type sentinelSignaller chan struct{}
 
 /** low-level parsing */
 // strip the comments and extraneous newlines from a byte channel
-func uncomment(eof sentinelSignaller, in <-chan byte) chan byte {
+func uncomment(eof sentinelSignaller, in <-chan byte) (chan byte, sentinelSignaller) {
 	out := make(chan byte)
+	eoc := make(sentinelSignaller)
 
 	go func(in <-chan byte, out chan byte) {
 		var endofline bool
@@ -40,15 +41,18 @@ func uncomment(eof sentinelSignaller, in <-chan byte) chan byte {
 				}
 			}
 		}
+		close(eoc)
 	}(in, out)
-	return out
+	return out, eoc
 }
 
 // convert a byte channel into a channel of pseudo-tokens
-func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) chan string {
+func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
 	var ch byte
 	var state string
 	var quote bool
+
+	eot := make(sentinelSignaller)
 
 	out := make(chan string)
 	go func(out chan string) {
@@ -106,8 +110,9 @@ func tokenizeDhcpConfig(eof sentinelSignaller, in chan byte) chan string {
 		if len(state) > 0 {
 			out <- state
 		}
+		close(eot)
 	}(out)
-	return out
+	return out, eot
 }
 
 /** mid-level parsing */
@@ -220,11 +225,13 @@ func parseDhcpConfig(eof sentinelSignaller, in chan string) (tkGroup, error) {
 	return result, nil
 }
 
-func tokenizeNetworkMapConfig(eof sentinelSignaller, in chan byte) chan string {
+func tokenizeNetworkMapConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
 	var ch byte
 	var state string
 	var quote bool
 	var lastnewline bool
+
+	eot := make(sentinelSignaller)
 
 	out := make(chan string)
 	go func(out chan string) {
@@ -291,8 +298,9 @@ func tokenizeNetworkMapConfig(eof sentinelSignaller, in chan byte) chan string {
 		if len(state) > 0 {
 			out <- state
 		}
+		close(eot)
 	}(out)
-	return out
+	return out, eot
 }
 
 func parseNetworkMapConfig(eof sentinelSignaller, in chan string) (NetworkMap, error) {
@@ -966,9 +974,9 @@ type DhcpConfiguration []configDeclaration
 
 func ReadDhcpConfiguration(fd *os.File) (DhcpConfiguration, error) {
 	fromfile, eof := consumeFile(fd)
-	uncommented := uncomment(eof, fromfile)
-	tokenized := tokenizeDhcpConfig(eof, uncommented)
-	parsetree, err := parseDhcpConfig(eof, tokenized)
+	uncommented, eoc := uncomment(eof, fromfile)
+	tokenized, eot := tokenizeDhcpConfig(eoc, uncommented)
+	parsetree, err := parseDhcpConfig(eot, tokenized)
 	if err != nil {
 		return nil, err
 	}
@@ -1064,10 +1072,10 @@ type NetworkNameMapper interface {
 func ReadNetworkMap(fd *os.File) (NetworkMap, error) {
 
 	fromfile, eof := consumeFile(fd)
-	uncommented := uncomment(eof, fromfile)
-	tokenized := tokenizeNetworkMapConfig(eof, uncommented)
+	uncommented, eoc := uncomment(eof, fromfile)
+	tokenized, eot := tokenizeNetworkMapConfig(eoc, uncommented)
 
-	result, err := parseNetworkMapConfig(eof, tokenized)
+	result, err := parseNetworkMapConfig(eot, tokenized)
 	if err != nil {
 		return nil, err
 	}
@@ -1100,10 +1108,12 @@ func (e *NetworkMap) repr() string {
 }
 
 /*** parser for VMware Fusion's networking file */
-func tokenizeNetworkingConfig(eof sentinelSignaller, in chan byte) chan string {
+func tokenizeNetworkingConfig(eof sentinelSignaller, in chan byte) (chan string, sentinelSignaller) {
 	var ch byte
 	var state string
 	var repeat_newline bool
+
+	eot := make(sentinelSignaller)
 
 	out := make(chan string)
 	go func(out chan string) {
@@ -1144,12 +1154,15 @@ func tokenizeNetworkingConfig(eof sentinelSignaller, in chan byte) chan string {
 		if len(state) > 0 {
 			out <- state
 		}
+		close(eot)
 	}(out)
-	return out
+	return out, eot
 }
 
-func splitNetworkingConfig(eof sentinelSignaller, in chan string) chan []string {
+func splitNetworkingConfig(eof sentinelSignaller, in chan string) (chan []string, sentinelSignaller) {
 	var out chan []string
+
+	eos := make(sentinelSignaller)
 
 	out = make(chan []string)
 	go func(out chan []string) {
@@ -1174,8 +1187,9 @@ func splitNetworkingConfig(eof sentinelSignaller, in chan string) chan []string 
 		if len(row) > 0 {
 			out <- row
 		}
+		close(eos)
 	}(out)
-	return out
+	return out, eos
 }
 
 /// All token types in networking file.
@@ -1642,8 +1656,10 @@ func NetworkingParserByCommand(command string) *func([]string) (*networkingComma
 	return nil
 }
 
-func parseNetworkingConfig(eof sentinelSignaller, rows chan []string) chan networkingCommandEntry {
+func parseNetworkingConfig(eof sentinelSignaller, rows chan []string) (chan networkingCommandEntry, sentinelSignaller) {
 	var out chan networkingCommandEntry
+
+	eop := make(sentinelSignaller)
 
 	out = make(chan networkingCommandEntry)
 	go func(in chan []string, out chan networkingCommandEntry) {
@@ -1668,8 +1684,9 @@ func parseNetworkingConfig(eof sentinelSignaller, rows chan []string) chan netwo
 				}
 			}
 		}
+		close(eop)
 	}(rows, out)
-	return out
+	return out, eop
 }
 
 type NetworkingConfig struct {
@@ -1795,9 +1812,9 @@ func flattenNetworkingConfig(eof sentinelSignaller, in chan networkingCommandEnt
 func ReadNetworkingConfig(fd *os.File) (NetworkingConfig, error) {
 	// start piecing together different parts of the file
 	fromfile, eof := consumeFile(fd)
-	tokenized := tokenizeNetworkingConfig(eof, fromfile)
-	rows := splitNetworkingConfig(eof, tokenized)
-	entries := parseNetworkingConfig(eof, rows)
+	tokenized, eot := tokenizeNetworkingConfig(eof, fromfile)
+	rows, eos := splitNetworkingConfig(eot, tokenized)
+	entries, eop := parseNetworkingConfig(eos, rows)
 
 	// parse the version
 	parsed_version, err := networkingReadVersion(<-rows)
@@ -1812,7 +1829,7 @@ func ReadNetworkingConfig(fd *os.File) (NetworkingConfig, error) {
 	}
 
 	// convert to a configuration
-	result := flattenNetworkingConfig(eof, entries)
+	result := flattenNetworkingConfig(eop, entries)
 	return result, nil
 }
 
