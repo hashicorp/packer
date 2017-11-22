@@ -226,7 +226,14 @@ builder.
     must be specified with this.
 
 -   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
-    IP if available. Also works for WinRM.
+    IP if available. Also works for WinRM. Overrides `ssh_interface`.
+
+-   `ssh_interface` (string) - One of `PublicIpAddress`, `PrivateIpAddress`,
+    `PublicDnsName` or `PrivateDnsName`. If set, either the public IP address,
+    private IP address, public DNS name or private DNS name will used as the host for SSH.
+    The default behaviour if inside a VPC is to use the public IP address if available,
+    otherwise the private IP address will be used. If not in a VPC the public DNS name
+    will be used.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
