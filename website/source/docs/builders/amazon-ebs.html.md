@@ -237,7 +237,7 @@ builder.
 
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used 
+    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
@@ -328,8 +328,15 @@ builder.
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
 
--   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
-    IP if available. Also works for WinRM.
+-   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
+    IP if available. Also works for WinRM. Overrides `ssh_interface`.
+
+-   `ssh_interface` (string) - One of `PublicIpAddress`, `PrivateIpAddress`,
+    `PublicDnsName` or `PrivateDnsName`. If set, either the public IP address,
+    private IP address, public DNS name or private DNS name will used as the host for SSH.
+    The default behaviour if inside a VPC is to use the public IP address if available,
+    otherwise the private IP address will be used. If not in a VPC the public DNS name
+    will be used.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
