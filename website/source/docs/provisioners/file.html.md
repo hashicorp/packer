@@ -47,6 +47,9 @@ The available configuration options are listed below. All elements are required.
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
+    
+The source file must exist before running Packer, this means that creating the 
+file with a provisioner does not work.
 
 ## Directory Uploads
 
@@ -90,6 +93,9 @@ drwxr-xr-x  3 mwhooker  staff  102 Jan 27 17:10 a
 lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
 -rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 file1
 lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
+$ ls -l toupload
+total 0
+-rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 files.tar
 ```
 
 ``` json
@@ -97,7 +103,7 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
   "provisioners": [
     {
       "type": "shell-local",
-      "command": "mkdir -p toupload; tar cf toupload/files.tar files"
+      "command": "tar cf toupload/files.tar files"
     },
     {
       "destination": "/tmp/",
