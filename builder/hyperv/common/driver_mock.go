@@ -110,16 +110,17 @@ type DriverMock struct {
 	AddVirtualMachineHardDrive_ControllerType string
 	AddVirtualMachineHardDrive_Err            error
 
-	CreateVirtualMachine_Called        bool
-	CreateVirtualMachine_VmName        string
-	CreateVirtualMachine_Path          string
-	CreateVirtualMachine_HarddrivePath string
-	CreateVirtualMachine_VhdPath       string
-	CreateVirtualMachine_Ram           int64
-	CreateVirtualMachine_DiskSize      int64
-	CreateVirtualMachine_SwitchName    string
-	CreateVirtualMachine_Generation    uint
-	CreateVirtualMachine_Err           error
+	CreateVirtualMachine_Called           bool
+	CreateVirtualMachine_VmName           string
+	CreateVirtualMachine_Path             string
+	CreateVirtualMachine_HarddrivePath    string
+	CreateVirtualMachine_VhdPath          string
+	CreateVirtualMachine_Ram              int64
+	CreateVirtualMachine_DiskSize         int64
+	CreateVirtualMachine_SwitchName       string
+	CreateVirtualMachine_Generation       uint
+	CreateVirtualMachine_DifferentialDisk bool
+	CreateVirtualMachine_Err              error
 
 	CloneVirtualMachine_Called                bool
 	CloneVirtualMachine_CloneFromVmxcPath     string
@@ -374,7 +375,7 @@ func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, v
 	return d.AddVirtualMachineHardDrive_Err
 }
 
-func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint) error {
+func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint, diffDisks bool) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
 	d.CreateVirtualMachine_Path = path
@@ -384,6 +385,7 @@ func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddriveP
 	d.CreateVirtualMachine_DiskSize = diskSize
 	d.CreateVirtualMachine_SwitchName = switchName
 	d.CreateVirtualMachine_Generation = generation
+	d.CreateVirtualMachine_DifferentialDisk = diffDisks
 	return d.CreateVirtualMachine_Err
 }
 

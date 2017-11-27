@@ -76,6 +76,9 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
+	// Use differencing disk
+	DifferencingDisk bool `mapstructure:"differencing_disk"`
+
 	BootCommand                    []string `mapstructure:"boot_command"`
 	SwitchName                     string   `mapstructure:"switch_name"`
 	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`

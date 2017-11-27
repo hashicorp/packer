@@ -94,6 +94,9 @@ type Config struct {
 
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
+	// Use differencing disk
+	DifferencingDisk bool `mapstructure:"differencing_disk"`
+
 	ctx interpolate.Context
 }
 
@@ -353,6 +356,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
+			DifferencingDisk:               b.config.DifferencingDisk,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
