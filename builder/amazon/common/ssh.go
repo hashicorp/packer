@@ -51,7 +51,7 @@ func SSHHost(e ec2Describer, sshInterface string) func(multistep.StateBag) (stri
 						host = *i.PrivateDnsName
 					}
 				default:
-					return "", fmt.Errorf("unknown interface type: %s", sshInterface)
+					panic(fmt.Sprintf("Unknown interface type: %s", sshInterface))
 				}
 			} else if i.VpcId != nil && *i.VpcId != "" {
 				if i.PublicIpAddress != nil && *i.PublicIpAddress != "" {
