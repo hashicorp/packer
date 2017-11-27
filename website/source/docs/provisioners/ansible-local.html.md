@@ -1,10 +1,10 @@
 ---
 description: |
-    The ansible-local Packer provisioner will run ansible "locally" on the 
-    remote/guest VM using Playbook and Role files that exist on the guest VM. 
-    This means ansible must be installed on the remote/guest VM. Playbooks and 
-    Roles can be uploaded from your local machine (the one running Packer) to 
-    the vm.
+    The ansible-local Packer provisioner will run ansible in ansible's "local" 
+    mode on the remote/guest VM using Playbook and Role files that exist on the 
+    guest VM. This means ansible must be installed on the remote/guest VM. 
+    Playbooks and Roles can be uploaded from your build machine 
+    (the one running Packer) to the vm. 
 layout: docs
 page_title: 'Ansible Local - Provisioners'
 sidebar_current: 'docs-provisioners-ansible-local'
