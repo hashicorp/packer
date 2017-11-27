@@ -27,6 +27,7 @@ type StepCreateVM struct {
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
+	DifferencingDisk               bool
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -54,7 +55,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation, s.DifferencingDisk)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
