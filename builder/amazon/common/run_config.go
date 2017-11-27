@@ -76,9 +76,22 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.RunTags = make(map[string]string)
 	}
 
+	if c.SSHPrivateIp && c.SSHInterface {
+		errs = append(errs, errors.New("ssh_interface and ssh_private_ip should not both be specified"))
+	}
+
 	// Legacy configurable
 	if c.SSHPrivateIp {
 		c.SSHInterface = "private_ip"
+	}
+
+	// Valadating ssh_interface
+	if c.SSHInterface != "public_ip" ||
+		c.SSHInterface != "private_ip" ||
+		c.SSHInterface != "public_dns" ||
+		c.SSHInterface != "private_dns" ||
+		c.SSHInterface != "" {
+		errs = append(errs, errors.New("Unknown interface type: %s", SSHInterface))
 	}
 
 	// Validation
