@@ -76,7 +76,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.RunTags = make(map[string]string)
 	}
 
-	if c.SSHPrivateIp && c.SSHInterface {
+	// Validation
+	errs := c.Comm.Prepare(ctx)
+	if c.SSHPrivateIp && c.SSHInterface != "" {
 		errs = append(errs, errors.New("ssh_interface and ssh_private_ip should not both be specified"))
 	}
 
@@ -86,16 +88,14 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	// Valadating ssh_interface
-	if c.SSHInterface != "public_ip" ||
-		c.SSHInterface != "private_ip" ||
-		c.SSHInterface != "public_dns" ||
-		c.SSHInterface != "private_dns" ||
+	if c.SSHInterface != "public_ip" &&
+		c.SSHInterface != "private_ip" &&
+		c.SSHInterface != "public_dns" &&
+		c.SSHInterface != "private_dns" &&
 		c.SSHInterface != "" {
-		errs = append(errs, errors.New("Unknown interface type: %s", SSHInterface))
+		errs = append(errs, errors.New(fmt.Sprintf("Unknown interface type: %s", c.SSHInterface)))
 	}
 
-	// Validation
-	errs := c.Comm.Prepare(ctx)
 	if c.SSHKeyPairName != "" {
 		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
 			errs = append(errs, errors.New("A private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
