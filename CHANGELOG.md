@@ -1,6 +1,8 @@
 ## (UNRELEASED)
 
 ### IMPROVEMENTS:
+* builder/alicloud-ecs: Add security token support and set tls handshake timeout 
+  through environment variable. [GH-5641]
 
 ### BUG FIXES:
 
