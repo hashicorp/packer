@@ -183,6 +183,12 @@ builder.
     generate. By default, Packer generates a name that looks like `packer_<UUID>`,
     where `<UUID>` is a 36 character unique identifier.
 
+-   `security_token` (string) - STS access token, can be set through template or by exporting
+     as environment vairalbe such "export SecurityToken=value".
+
+-   `TLSHandshakeTimeout` (int) - When happen "net/http: TLS handshake timeout" problem, set this environment variable
+     to a bigger such as "export TLSHandshakeTimeout=30", it will set the TLS handshake timeout value to 30s.
+
 ## Basic Example
 
 Here is a basic example for Alicloud.
