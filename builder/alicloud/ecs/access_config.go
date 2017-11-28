@@ -15,6 +15,7 @@ type AlicloudAccessConfig struct {
 	AlicloudSecretKey      string `mapstructure:"secret_key"`
 	AlicloudRegion         string `mapstructure:"region"`
 	AlicloudSkipValidation bool   `mapstructure:"skip_region_validation"`
+	SecurityToken          string `mapstructure:"security_token"`
 }
 
 // Client for AlicloudClient
@@ -22,7 +23,12 @@ func (c *AlicloudAccessConfig) Client() (*ecs.Client, error) {
 	if err := c.loadAndValidate(); err != nil {
 		return nil, err
 	}
-	client := ecs.NewECSClient(c.AlicloudAccessKey, c.AlicloudSecretKey, common.Region(c.AlicloudRegion))
+	if c.SecurityToken == "" {
+		c.SecurityToken = os.Getenv("SECURITY_TOKEN")
+	}
+	client := ecs.NewECSClientWithSecurityToken(c.AlicloudAccessKey, c.AlicloudSecretKey,
+		c.SecurityToken, common.Region(c.AlicloudRegion))
+
 	client.SetBusinessInfo("Packer")
 	if _, err := client.DescribeRegions(); err != nil {
 		return nil, err
