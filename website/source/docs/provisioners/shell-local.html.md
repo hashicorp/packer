@@ -1,8 +1,8 @@
 ---
 description: |
-    shell-local will run a shell script of your choosing on the machine where Packer 
-    is being run - in other words, it shell-local will run the shell script on your 
-    build server, or your desktop, etc., rather than the remote/guest machine being 
+    shell-local will run a shell script of your choosing on the machine where Packer
+    is being run - in other words, it shell-local will run the shell script on your
+    build server, or your desktop, etc., rather than the remote/guest machine being
     provisioned by Packer.
 layout: docs
 page_title: 'Shell (Local) - Provisioners'
@@ -13,9 +13,9 @@ sidebar_current: 'docs-provisioners-shell-local'
 
 Type: `shell-local`
 
-shell-local will run a shell script of your choosing on the machine where Packer 
-is being run - in other words, it shell-local will run the shell script on your 
-build server, or your desktop, etc., rather than the remote/guest machine being 
+shell-local will run a shell script of your choosing on the machine where Packer
+is being run - in other words, it shell-local will run the shell script on your
+build server, or your desktop, etc., rather than the remote/guest machine being
 provisioned by Packer.
 
 The [remote shell](/docs/provisioners/shell.html) provisioner executes
