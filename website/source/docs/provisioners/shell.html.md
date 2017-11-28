@@ -83,6 +83,9 @@ Optional parameters:
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
+-   `pause_before` (string) - The amount of time Packer will wait before executing
+    the next script.
+
 -   `remote_folder` (string) - The folder where the uploaded script will reside on
     the machine. This defaults to '/tmp'.
 
