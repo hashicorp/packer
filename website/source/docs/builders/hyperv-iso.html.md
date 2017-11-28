@@ -54,20 +54,20 @@ can be configured for this builder.
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file or virtual
-    harddrive file. Because these files are so large, this is required and 
-    Packer will verify it prior to booting a virtual machine with the ISO or 
-    virtual harddrive attached. The type of the checksum is specified with 
+    harddrive file. Because these files are so large, this is required and
+    Packer will verify it prior to booting a virtual machine with the ISO or
+    virtual harddrive attached. The type of the checksum is specified with
     `iso_checksum_type`, documented below.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
-    recommended since ISO files and virtual harddrive files are	generally large 
+    recommended since ISO files and virtual harddrive files are generally large
     and corruption does happen from time to time.
 
 -   `iso_url` (string) - A URL to the ISO containing the installation image or
     virtual harddrive vhd or vhdx file to clone. This URL can be either an HTTP
-    URL or a file URL (or path to a file). If this is an HTTP URL, Packer will 
+    URL or a file URL (or path to a file). If this is an HTTP URL, Packer will
     download the file and cache it between runs.
 
 ### Optional:
