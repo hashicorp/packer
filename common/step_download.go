@@ -61,10 +61,12 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
-	var finalPath string
-	for _, url := range s.Url {
-		ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
+	// First try to use any already downloaded file
+	// If it fails, proceed to regualar download logic
 
+	var downloadConfigs = make([]*DownloadConfig, len(s.Url))
+	var finalPath string
+	for i, url := range s.Url {
 		targetPath := s.TargetPath
 		if targetPath == "" {
 			// Determine a cache key. This is normally just the URL but
@@ -90,19 +92,34 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			Checksum:   checksum,
 			UserAgent:  "Packer",
 		}
+		downloadConfigs[i] = config
 
-		path, err, retry := s.download(config, state)
-		if err != nil {
-			ui.Message(fmt.Sprintf("Error downloading: %s", err))
-		}
-
-		if !retry {
-			return multistep.ActionHalt
-		}
-
-		if err == nil {
-			finalPath = path
+		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
+			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
+			finalPath = config.TargetPath
 			break
+		}
+	}
+
+	if finalPath == "" {
+		for i, url := range s.Url {
+			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
+
+			config := downloadConfigs[i]
+
+			path, err, retry := s.download(config, state)
+			if err != nil {
+				ui.Message(fmt.Sprintf("Error downloading: %s", err))
+			}
+
+			if !retry {
+				return multistep.ActionHalt
+			}
+
+			if err == nil {
+				finalPath = path
+				break
+			}
 		}
 	}
 
