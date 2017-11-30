@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/mitchellh/mapstructure"
+	"log"
 )
 
 // rawTemplate is the direct JSON document format of the template file.
@@ -34,7 +35,7 @@ type rawTemplate struct {
 
 // Template returns the actual Template object built from this raw
 // structure.
-func (r *rawTemplate) Template() (*Template, error) {
+func (r *rawTemplate) Template(tags, skippedTags []string) (*Template, error) {
 	var result Template
 	var errs error
 
@@ -75,10 +76,16 @@ func (r *rawTemplate) Template() (*Template, error) {
 			continue
 		}
 
+		if shouldSkipTagged(&b.Tagged, tags, skippedTags) {
+			log.Printf("Skipping builder %s by tags", b.Name)
+			continue
+		}
+
 		// Set the raw configuration and delete any special keys
 		b.Config = rawB
 		delete(b.Config, "name")
 		delete(b.Config, "type")
+		delete(b.Config, "tags")
 		if len(b.Config) == 0 {
 			b.Config = nil
 		}
@@ -137,11 +144,17 @@ func (r *rawTemplate) Template() (*Template, error) {
 				continue
 			}
 
+			if shouldSkipTagged(&pp.Tagged, tags, skippedTags) {
+				log.Printf("Skipping post-processor %s by tags", pp.Type)
+				continue
+			}
+
 			// Set the configuration
 			delete(c, "except")
 			delete(c, "only")
 			delete(c, "keep_input_artifact")
 			delete(c, "type")
+			delete(c, "tags")
 			if len(c) > 0 {
 				pp.Config = c
 			}
@@ -171,12 +184,18 @@ func (r *rawTemplate) Template() (*Template, error) {
 			continue
 		}
 
+		if shouldSkipTagged(&p.Tagged, tags, skippedTags) {
+			log.Printf("Skipping provisioner %s by tags", p.Type)
+			continue
+		}
+
 		// Copy the configuration
 		delete(v, "except")
 		delete(v, "only")
 		delete(v, "override")
 		delete(v, "pause_before")
 		delete(v, "type")
+		delete(v, "tags")
 		if len(v) > 0 {
 			p.Config = v
 		}
@@ -260,8 +279,7 @@ func (r *rawTemplate) parsePostProcessor(
 	}
 }
 
-// Parse takes the given io.Reader and parses a Template object out of it.
-func Parse(r io.Reader) (*Template, error) {
+func ParseWithTags(r io.Reader, tags, skippedTags []string) (*Template, error) {
 	// Create a buffer to copy what we read
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r); err != nil {
@@ -311,12 +329,15 @@ func Parse(r io.Reader) (*Template, error) {
 	}
 
 	// Return the template parsed from the raw structure
-	return rawTpl.Template()
+	return rawTpl.Template(tags, skippedTags)
 }
 
-// ParseFile is the same as Parse but is a helper to automatically open
-// a file for parsing.
-func ParseFile(path string) (*Template, error) {
+// Parse takes the given io.Reader and parses a Template object out of it.
+func Parse(r io.Reader) (*Template, error) {
+	return ParseWithTags(r, []string{}, []string{})
+}
+
+func ParseFileWithTags(path string, tags, skippedTags []string) (*Template, error) {
 	var f *os.File
 	var err error
 	if path == "-" {
@@ -336,7 +357,7 @@ func ParseFile(path string) (*Template, error) {
 		}
 		defer f.Close()
 	}
-	tpl, err := Parse(f)
+	tpl, err := ParseWithTags(f, tags, skippedTags)
 	if err != nil {
 		syntaxErr, ok := err.(*json.SyntaxError)
 		if !ok {
@@ -359,6 +380,12 @@ func ParseFile(path string) (*Template, error) {
 
 	tpl.Path = path
 	return tpl, nil
+}
+
+// ParseFile is the same as Parse but is a helper to automatically open
+// a file for parsing.
+func ParseFile(path string) (*Template, error) {
+	return ParseFileWithTags(path, []string{}, []string{})
 }
 
 // Takes a file and the location in bytes of a parse error
@@ -402,4 +429,16 @@ func highlightPosition(f *os.File, pos int64) (line, col int, highlight string) 
 	highlight += fmt.Sprintf("%5d: %s\n", line, thisLine.String())
 	highlight += fmt.Sprintf("%s^\n", strings.Repeat(" ", col+5))
 	return
+}
+
+func shouldSkipTagged(t *Tagged, tags, skippedTags []string) bool {
+	if len(tags) != 0 && !t.Always() && !t.Matches(tags) {
+		return true
+	}
+
+	if len(skippedTags) != 0 && !t.Always() && t.Matches(skippedTags) {
+		return true
+	}
+
+	return false
 }

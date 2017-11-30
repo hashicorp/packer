@@ -21,7 +21,7 @@ type BuildCommand struct {
 
 func (c BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
-	var cfgOnError string
+	var cfgTags, cfgSkippedTags, cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
@@ -30,6 +30,8 @@ func (c BuildCommand) Run(args []string) int {
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
+	flags.StringVar(&cfgTags, "tags", "", "")
+	flags.StringVar(&cfgSkippedTags, "skip-tags", "", "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -43,7 +45,7 @@ func (c BuildCommand) Run(args []string) int {
 	// Parse the template
 	var tpl *template.Template
 	var err error
-	tpl, err = template.ParseFile(args[0])
+	tpl, err = template.ParseFileWithTags(args[0], splitTags(cfgTags), splitTags(cfgSkippedTags))
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
 		return 1
@@ -305,4 +307,12 @@ Options:
 
 func (BuildCommand) Synopsis() string {
 	return "build image(s) from template"
+}
+
+func splitTags(tags string) []string {
+	tags = strings.TrimSpace(tags)
+	if len(tags) == 0 {
+		return []string{}
+	}
+	return strings.Split(tags, ",")
 }
