@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/version"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -24,15 +25,16 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
-	"build_name":   funcGenBuildName,
-	"build_type":   funcGenBuildType,
-	"env":          funcGenEnv,
-	"isotime":      funcGenIsotime,
-	"pwd":          funcGenPwd,
-	"template_dir": funcGenTemplateDir,
-	"timestamp":    funcGenTimestamp,
-	"uuid":         funcGenUuid,
-	"user":         funcGenUser,
+	"build_name":     funcGenBuildName,
+	"build_type":     funcGenBuildType,
+	"env":            funcGenEnv,
+	"isotime":        funcGenIsotime,
+	"pwd":            funcGenPwd,
+	"template_dir":   funcGenTemplateDir,
+	"timestamp":      funcGenTimestamp,
+	"uuid":           funcGenUuid,
+	"user":           funcGenUser,
+	"packer_version": funcGenPackerVersion,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -150,5 +152,11 @@ func funcGenUser(ctx *Context) interface{} {
 func funcGenUuid(ctx *Context) interface{} {
 	return func() string {
 		return uuid.TimeOrderedUUID()
+	}
+}
+
+func funcGenPackerVersion(ctx *Context) interface{} {
+	return func() string {
+		return version.FormattedVersion()
 	}
 }
