@@ -22,15 +22,17 @@ type StepDeployTemplate struct {
 	error      func(e error)
 	config     *Config
 	factory    templateFactoryFunc
+	name       string
 }
 
-func NewStepDeployTemplate(client *AzureClient, ui packer.Ui, config *Config, factory templateFactoryFunc) *StepDeployTemplate {
+func NewStepDeployTemplate(client *AzureClient, ui packer.Ui, config *Config, deploymentName string, factory templateFactoryFunc) *StepDeployTemplate {
 	var step = &StepDeployTemplate{
 		client:  client,
 		say:     func(message string) { ui.Say(message) },
 		error:   func(e error) { ui.Error(e.Error()) },
 		config:  config,
 		factory: factory,
+		name:    deploymentName,
 	}
 
 	step.deploy = step.deployTemplate
@@ -59,15 +61,14 @@ func (s *StepDeployTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	s.say("Deploying deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
-	var deploymentName = state.Get(constants.ArmDeploymentName).(string)
 
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
-	s.say(fmt.Sprintf(" -> DeploymentName    : '%s'", deploymentName))
+	s.say(fmt.Sprintf(" -> DeploymentName    : '%s'", s.name))
 
 	result := common.StartInterruptibleTask(
 		func() bool { return common.IsStateCancelled(state) },
 		func(cancelCh <-chan struct{}) error {
-			return s.deploy(resourceGroupName, deploymentName, cancelCh)
+			return s.deploy(resourceGroupName, s.name, cancelCh)
 		},
 	)
 
@@ -104,6 +105,9 @@ func (s *StepDeployTemplate) deleteOperationResource(resourceType string, resour
 			return err
 
 		}
+	case "Microsoft.KeyVault/vaults":
+		_, err := s.client.VaultClientDelete.Delete(resourceGroupName, resourceName)
+		return err
 	case "Microsoft.Network/networkInterfaces":
 		networkDeleteFunction = s.client.InterfacesClient.Delete
 	case "Microsoft.Network/virtualNetworks":
@@ -142,7 +146,6 @@ func (s *StepDeployTemplate) deleteImage(imageType string, imageName string, res
 	blob := s.client.BlobStorageClient.GetContainerReference(storageAccountName).GetBlobReference(blobName)
 	err = blob.Delete(nil)
 	return err
-
 }
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
@@ -158,7 +161,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var computeName = state.Get(constants.ArmComputeName).(string)
-	var deploymentName = state.Get(constants.ArmDeploymentName).(string)
+	var deploymentName = s.name
 	imageType, imageName, err := s.disk(resourceGroupName, computeName)
 	if err != nil {
 		ui.Error("Could not retrieve OS Image details")
