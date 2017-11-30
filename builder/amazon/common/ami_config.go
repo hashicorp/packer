@@ -41,20 +41,18 @@ func stringInSlice(s []string, searchstr string) bool {
 func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
 
-	if accessConfig != nil {
-		session, err := accessConfig.Session()
-		if err != nil {
-			errs = append(errs, err)
-		} else {
-			region := *session.Config.Region
-			if stringInSlice(c.AMIRegions, region) {
-				errs = append(errs, fmt.Errorf("Cannot copy AMI to AWS session region '%s', please remove it from `ami_regions`.", region))
-			}
-		}
-	}
-
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
+	}
+
+	// Make sure that if we have region_kms_key_ids defined,
+	//  the regions in region_kms_key_ids are also in ami_regions
+	if len(c.AMIRegionKMSKeyIDs) > 0 {
+		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
+			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
+				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
+			}
+		}
 	}
 
 	if len(c.AMIRegions) > 0 {
@@ -84,20 +82,16 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
 				}
 			}
-
+			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
+				// make sure we don't try to copy to the region we originally
+				// create the AMI in.
+				fmt.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
+				continue
+			}
 			regions = append(regions, region)
 		}
 
 		c.AMIRegions = regions
-	}
-	// Make sure that if we have region_kms_key_ids defined,
-	//  the regions in region_kms_key_ids are also in ami_regions
-	if len(c.AMIRegionKMSKeyIDs) > 0 {
-		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
-			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
-				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
-			}
-		}
 	}
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
