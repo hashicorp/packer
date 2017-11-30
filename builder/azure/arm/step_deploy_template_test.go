@@ -61,6 +61,7 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 		},
 		say:   func(message string) {},
 		error: func(e error) {},
+		name:  "--deployment-name--",
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
@@ -70,10 +71,9 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	var expectedDeploymentName = stateBag.Get(constants.ArmDeploymentName).(string)
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 
-	if actualDeploymentName != expectedDeploymentName {
+	if actualDeploymentName != "--deployment-name--" {
 		t.Fatal("Expected StepValidateTemplate to source 'constants.ArmDeploymentName' from the state bag, but it did not.")
 	}
 
