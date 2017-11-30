@@ -127,11 +127,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.setImageParameters(b.stateBag)
 	var steps []multistep.Step
 
+	deploymentName := b.stateBag.Get(constants.ArmDeploymentName).(string)
+
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
@@ -146,14 +148,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteOSDisk(azureClient, ui),
 		}
 	} else if b.config.OSType == constants.Target_Windows {
+		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
 			NewStepGetCertificate(azureClient, ui),
 			NewStepSetCertificate(b.config, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
@@ -283,6 +286,9 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmTags, &b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
+	if b.config.OSType == constants.Target_Windows {
+		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
+	}
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
 	stateBag.Put(constants.ArmLocation, b.config.Location)
 	stateBag.Put(constants.ArmNicName, DefaultNicName)
