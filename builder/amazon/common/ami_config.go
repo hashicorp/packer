@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -85,7 +86,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
 				// make sure we don't try to copy to the region we originally
 				// create the AMI in.
-				fmt.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
+				log.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
 				continue
 			}
 			regions = append(regions, region)
