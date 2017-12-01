@@ -14,6 +14,7 @@ type HardwareConfig struct {
 	RAM            int64 `mapstructure:"RAM"`
 	RAMReservation int64 `mapstructure:"RAM_reservation"`
 	RAMReserveAll  bool  `mapstructure:"RAM_reserve_all"`
+	DiskSize       int64 `mapstructure:"disk_size"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -44,6 +45,7 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 			RAM:            s.config.RAM,
 			RAMReservation: s.config.RAMReservation,
 			RAMReserveAll:  s.config.RAMReserveAll,
+			DiskSize:       s.config.DiskSize,
 		})
 		if err != nil {
 			state.Put("error", err)
