@@ -67,7 +67,7 @@ func TestProvisionHook_cancel(t *testing.T) {
 
 	p := &MockProvisioner{
 		ProvFunc: func() error {
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 
 			lock.Lock()
 			defer lock.Unlock()
