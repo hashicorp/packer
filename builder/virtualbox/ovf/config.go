@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
@@ -104,6 +105,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 		}
 		// file must exist now.
+		if runtime.GOOS == "windows" {
+			// If the distance to the first ":" is just one character, assume
+			// we're dealing with a drive letter and thus a file path.
+			idx := strings.Index(c.SourcePath, ":")
+			if idx == 1 {
+				c.SourcePath = "file:///" + c.SourcePath
+			}
+		}
 		fileURL, _ := url.Parse(c.SourcePath)
 		if fileURL.Scheme == "file" {
 			if _, err := os.Stat(fileURL.Path); err != nil {
