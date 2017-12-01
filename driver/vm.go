@@ -30,6 +30,7 @@ type HardwareConfig struct {
 	RAM            int64
 	RAMReservation int64
 	RAMReserveAll  bool
+	DiskSize       int64
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -165,12 +166,51 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 
 	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
 
+	if config.DiskSize > 0 {
+		devices, err := vm.vm.Device(vm.driver.ctx)
+		if err != nil {
+			return err
+		}
+
+		disk, err := findDisk(devices)
+		if err != nil {
+			return err
+		}
+
+		disk.CapacityInKB = config.DiskSize * 1024 * 1024 // Gb
+
+		confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
+			&types.VirtualDeviceConfigSpec{
+				Device:    disk,
+				Operation: types.VirtualDeviceConfigSpecOperationEdit,
+			},
+		}
+	}
+
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {
 		return err
 	}
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
+}
+
+func findDisk(devices object.VirtualDeviceList) (*types.VirtualDisk, error) {
+	var disks []*types.VirtualDisk
+	for _, device := range devices {
+		switch d := device.(type) {
+		case *types.VirtualDisk:
+			disks = append(disks, d)
+		}
+	}
+
+	switch len(disks) {
+	case 0:
+		return nil, errors.New("VM has no disks")
+	case 1:
+		return disks[0], nil
+	}
+	return nil, errors.New("VM has multiple disks")
 }
 
 func (vm *VirtualMachine) PowerOn() error {
