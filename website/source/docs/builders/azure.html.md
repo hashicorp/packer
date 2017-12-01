@@ -44,10 +44,6 @@ builder.
 
     CLI example `azure vm image list-skus -l westus -p Canonical -o UbuntuServer`
 
--   `location` (string) Azure datacenter in which your VM will build.
-
-    CLI example `azure location list`
-
 #### VHD or Managed Image
 
 The Azure builder can create either a VHD, or a managed image. If you
@@ -77,13 +73,41 @@ When creating a managed image the following two options are required.
      set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to
      learn more about managed images.
 
+#### Resource Group Usage
+
+The Azure builder can either provision resources into a new resource group that
+it controls (default) or an existing one.  The advantage of using a packer
+defined resource group is that failed resource cleanup is easier because you
+can simply remove the entire resource group, however this means that the
+provided credentials must have permission to create and remove resource groups.
+By using an existing resource group you can scope the provided credentials to
+just this group, however failed builds are more likely to leave unused
+artifacts.
+
+To have packer create a resource group you **must** provide:
+
+-   `location` (string) Azure datacenter in which your VM will build.
+
+    CLI example `azure location list`
+
+and optionally:
+
+-   `temp_resource_group_name` (string) name assigned to the temporary resource
+    group created during the build.  If this value is not set, a random value will
+    be assigned. This resource group is deleted at the end of the build.
+
+To use an existing resource group you **must** provide:
+
+-   `build_resource_group_name` (string) - Specify an existing resource group
+    to run the build in.
+
+Providing `temp_resource_group_name` or `location` in combination with `build_resource_group_name` is not allowed.
+
 ### Optional:
 
 -   `azure_tags` (object of name/value strings) - the user can define up to 15 tags. Tag names cannot exceed 512
     characters, and tag values cannot exceed 256 characters. Tags are applied to every resource deployed by a Packer
     build, i.e. Resource Group, VM, NIC, VNET, Public IP, KeyVault, etc.
-
--   `build_resource_group_name` (string) - Specify an existing resource group to run the build in. Cannot be used together with `temp_resource_group_name` and requires less permissions due to not creating or destroying a resource group.
 
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
@@ -133,10 +157,6 @@ When creating a managed image the following two options are required.
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.
-
--   `temp_resource_group_name` (string) name assigned to the temporary resource group created during the build.  If this
-    value is not set, a random value will be assigned. This resource group is deleted at the end of the build. Cannot be
-    used together with `build_resource_group_name`.
 
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
