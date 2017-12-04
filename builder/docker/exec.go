@@ -19,7 +19,18 @@ func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {
 	defer stdout_w.Close()
 	defer stderr_w.Close()
 
-	log.Printf("Executing: %s %v", cmd.Path, cmd.Args[1:])
+	args := make([]string, len(cmd.Args)-1)
+	copy(args, cmd.Args[1:])
+
+	// Scrub password from the log output.
+	for i, v := range args {
+		if v == "-p" || v == "--password" {
+			args[i+1] = "<Filtered>"
+			break
+		}
+	}
+
+	log.Printf("Executing: %s %v", cmd.Path, args)
 	cmd.Stdout = stdout_w
 	cmd.Stderr = stderr_w
 	if err := cmd.Start(); err != nil {
