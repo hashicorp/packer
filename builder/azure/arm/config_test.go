@@ -972,6 +972,7 @@ func TestConfigShouldRejectInvalidResourceGroupNames(t *testing.T) {
 			}
 		}
 
+		delete(config, "location") // not valid for build_resource_group_name
 		delete(config, x)
 	}
 }
