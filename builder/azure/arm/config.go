@@ -590,10 +590,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
-	if c.Location == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A location must be specified"))
-	}
-
 	/////////////////////////////////////////////
 	// Deployment
 	xor := func(a, b bool) bool {
@@ -602,6 +598,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	if !xor((c.StorageAccount != "" || c.ResourceGroupName != ""), (c.ManagedImageName != "" || c.ManagedImageResourceGroupName != "")) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (storage_account and resource_group_name) or Managed Image (managed_image_resource_group_name and managed_image_name) output"))
+	}
+
+	if !xor(c.Location != "", c.BuildResourceGroupName != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Must specify either a location to create the resource group in or an existing build_resource_group_name."))
 	}
 
 	if c.ManagedImageName == "" && c.ManagedImageResourceGroupName == "" {
