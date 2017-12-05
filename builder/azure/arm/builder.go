@@ -103,6 +103,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		}
 	}
 
+	if b.config.BuildResourceGroupName != "" {
+		group, err := azureClient.GroupsClient.Get(b.config.BuildResourceGroupName)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot locate the existing build resource resource group %s.", b.config.BuildResourceGroupName)
+		}
+
+		b.config.Location = *group.Location
+	}
+
 	if b.config.StorageAccount != "" {
 		account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
 		if err != nil {
@@ -290,7 +299,6 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
-	stateBag.Put(constants.ArmLocation, b.config.Location)
 	stateBag.Put(constants.ArmNicName, DefaultNicName)
 	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
 	if b.config.TempResourceGroupName != "" && b.config.BuildResourceGroupName != "" {
@@ -312,6 +320,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 
 // Parameters that are only known at runtime after querying Azure.
 func (b *Builder) setRuntimeParameters(stateBag multistep.StateBag) {
+	stateBag.Put(constants.ArmLocation, b.config.Location)
 	stateBag.Put(constants.ArmManagedImageLocation, b.config.manageImageLocation)
 }
 
