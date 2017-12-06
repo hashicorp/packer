@@ -9,6 +9,8 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
+
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -139,7 +141,23 @@ func (s *StepDownload) Cleanup(multistep.StateBag) {}
 func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
 	var path string
 	ui := state.Get("ui").(packer.Ui)
-	download := NewDownloadClient(config)
+
+	// design the appearance of the progress bar
+	bar := pb.New64(0)
+	bar.ShowPercent = true
+	bar.ShowCounters = true
+	bar.ShowSpeed = false
+	bar.ShowBar = true
+	bar.ShowTimeLeft = false
+	bar.ShowFinalTime = false
+	bar.SetUnits(pb.U_BYTES)
+	bar.Format("[=>-]")
+	bar.SetRefreshRate(1 * time.Second)
+	bar.SetWidth(25)
+	bar.Callback = ui.Message
+
+	// create download client with config and progress bar
+	download := NewDownloadClient(config, bar)
 
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
@@ -148,24 +166,19 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 		downloadCompleteCh <- err
 	}()
 
-	progressTicker := time.NewTicker(5 * time.Second)
-	defer progressTicker.Stop()
-
 	for {
 		select {
 		case err := <-downloadCompleteCh:
+			bar.Finish()
+
 			if err != nil {
 				return "", err, true
 			}
-
 			return path, nil, true
-		case <-progressTicker.C:
-			progress := download.PercentProgress()
-			if progress >= 0 {
-				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
-			}
+
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
+				bar.Finish()
 				ui.Say("Interrupt received. Cancelling download...")
 				return "", nil, false
 			}
