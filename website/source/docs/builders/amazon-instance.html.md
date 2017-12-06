@@ -329,8 +329,8 @@ builder.
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
 
--   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
-    IP if available. Also works for WinRM. Overrides `ssh_interface`.
+-   `ssh_private_ip` (boolean) - *Deprecated* use `ssh_interface` instead. If `true`, 
+    then SSH will always use the private IP if available. Also works for WinRM.
 
 -   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
     `public_dns` or `private_dns`. If set, either the public IP address,
@@ -338,6 +338,9 @@ builder.
     The default behaviour if inside a VPC is to use the public IP address if available,
     otherwise the private IP address will be used. If not in a VPC the public DNS name
     will be used.
+
+    If packer is configured for an outbound proxy. To configure WinRM traffic to bypass the proxy
+   `ssh_interface` can be set to `private_dns`.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
