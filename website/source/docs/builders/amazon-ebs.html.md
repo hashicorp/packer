@@ -338,8 +338,9 @@ builder.
     otherwise the private IP address will be used. If not in a VPC the public DNS name
     will be used.
 
-    If packer is configured for an outbound proxy. To configure WinRM traffic to bypass the proxy
-   `ssh_interface` can be set to `private_dns`.
+    Where Packer is configured for an outbound proxy but WinRM traffic should be direct
+    `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included
+    in the `NO_PROXY` environment variable.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
