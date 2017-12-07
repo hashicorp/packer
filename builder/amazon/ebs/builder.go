@@ -34,8 +34,9 @@ type Config struct {
 }
 
 type Builder struct {
-	config Config
-	runner multistep.Runner
+	config         Config
+	runner         multistep.Runner
+	isSpotInstance bool
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -60,6 +61,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.PackerConfig.PackerForce {
 		b.config.AMIForceDeregister = true
 	}
+	b.isSpotInstance = b.config.SpotPrice != "" && b.config.SpotPrice != "0"
 
 	// Accumulate any errors
 	var errs *packer.MultiError
@@ -68,6 +70,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.BlockDevices.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+
+	if b.isSpotInstance && (b.config.AMIENASupport || b.config.AMISriovNetSupport) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Spot instances do not support modification. Please ensure you use an AMI that supports either SR-IOV or ENA."))
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
@@ -110,9 +116,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	var instanceStep multistep.Step
-	isSpotInstance := b.config.SpotPrice != "" && b.config.SpotPrice != "0"
 
-	if isSpotInstance {
+	if b.isSpotInstance {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
 			ExpectedRootDevice:       "ebs",
@@ -201,7 +206,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&awscommon.StepStopEBSBackedInstance{
-			Skip:                isSpotInstance,
+			Skip:                b.isSpotInstance,
 			DisableStopInstance: b.config.DisableStopInstance,
 		},
 		&awscommon.StepModifyEBSBackedInstance{
