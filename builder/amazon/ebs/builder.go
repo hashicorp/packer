@@ -193,7 +193,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.SSHPrivateIp),
+				b.config.SSHInterface),
 			SSHConfig: awscommon.SSHConfig(
 				b.config.RunConfig.Comm.SSHAgentAuth,
 				b.config.RunConfig.Comm.SSHUsername,

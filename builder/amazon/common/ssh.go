@@ -25,21 +25,40 @@ var (
 
 // SSHHost returns a function that can be given to the SSH communicator
 // for determining the SSH address based on the instance DNS name.
-func SSHHost(e ec2Describer, private bool) func(multistep.StateBag) (string, error) {
+func SSHHost(e ec2Describer, sshInterface string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		const tries = 2
 		// <= with current structure to check result of describing `tries` times
 		for j := 0; j <= tries; j++ {
 			var host string
 			i := state.Get("instance").(*ec2.Instance)
-			if i.VpcId != nil && *i.VpcId != "" {
-				if i.PublicIpAddress != nil && *i.PublicIpAddress != "" && !private {
+			if sshInterface != "" {
+				switch sshInterface {
+				case "public_ip":
+					if i.PublicIpAddress != nil {
+						host = *i.PublicIpAddress
+					}
+				case "private_ip":
+					if i.PrivateIpAddress != nil {
+						host = *i.PrivateIpAddress
+					}
+				case "public_dns":
+					if i.PublicDnsName != nil {
+						host = *i.PublicDnsName
+					}
+				case "private_dns":
+					if i.PrivateDnsName != nil {
+						host = *i.PrivateDnsName
+					}
+				default:
+					panic(fmt.Sprintf("Unknown interface type: %s", sshInterface))
+				}
+			} else if i.VpcId != nil && *i.VpcId != "" {
+				if i.PublicIpAddress != nil && *i.PublicIpAddress != "" {
 					host = *i.PublicIpAddress
 				} else if i.PrivateIpAddress != nil && *i.PrivateIpAddress != "" {
 					host = *i.PrivateIpAddress
 				}
-			} else if private && i.PrivateIpAddress != nil && *i.PrivateIpAddress != "" {
-				host = *i.PrivateIpAddress
 			} else if i.PublicDnsName != nil && *i.PublicDnsName != "" {
 				host = *i.PublicDnsName
 			}
@@ -63,7 +82,7 @@ func SSHHost(e ec2Describer, private bool) func(multistep.StateBag) (string, err
 			time.Sleep(sshHostSleepDuration)
 		}
 
-		return "", errors.New("couldn't determine IP address for instance")
+		return "", errors.New("couldn't determine address for instance")
 	}
 }
 
