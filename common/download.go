@@ -86,8 +86,13 @@ func HashForType(t string) hash.Hash {
 func NewDownloadClient(c *DownloadConfig, bar *pb.ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
 
+	// If no custom progress-bar was specified, then create a default one.
+	if bar == nil {
+		bar = pb.New64(0)
+	}
+
+	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
-		// Create downloader map
 		c.DownloaderMap = map[string]Downloader{
 			"file":  &FileDownloader{progress: bar, bufferSize: nil},
 			"ftp":   &FTPDownloader{progress: bar, userInfo: url.UserPassword("anonymous", "anonymous@"), mtu: mtu},
