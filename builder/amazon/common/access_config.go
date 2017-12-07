@@ -40,7 +40,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
 			return nil, fmt.Errorf("Set env error: %s", err)
 		}
-	} else if c.RawRegion != "" {
+	}
+
+	if c.RawRegion != "" {
 		config = config.WithRegion(c.RawRegion)
 	} else if region := c.metadataRegion(); region != "" {
 		config = config.WithRegion(region)
