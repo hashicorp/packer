@@ -75,15 +75,12 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 		ui.Say("Automatic instance stop disabled. Please stop instance manually.")
 	}
 
-	// Wait for the instance to actual stop
+	// Wait for the instance to actually stop
 	ui.Say("Waiting for the instance to stop...")
-	stateChange := StateChangeConf{
-		Pending:   []string{"running", "pending", "stopping"},
-		Target:    "stopped",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
-		StepState: state,
-	}
-	_, err = WaitForState(&stateChange)
+	err = ec2conn.WaitUntilInstanceStopped(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{instance.InstanceId},
+	})
+
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
 		state.Put("error", err)
