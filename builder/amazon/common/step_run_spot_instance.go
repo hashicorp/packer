@@ -231,21 +231,26 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
-	stateChangeSpot := StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "running",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, instanceId),
-		StepState: state,
+	describeInstanceStatus := &ec2.DescribeInstanceStatusInput{
+		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	latestInstance, err := WaitForState(&stateChangeSpot)
-	if err != nil {
+	if err := ec2conn.WaitUntilInstanceStatusOk(describeInstanceStatus); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	instance := latestInstance.(*ec2.Instance)
+	r, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{aws.String(instanceId)},
+	})
+	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
+		err := fmt.Errorf("Error finding source instance.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	instance := r.Reservations[0].Instances[0]
 
 	// Retry creating tags for about 2.5 minutes
 	err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
