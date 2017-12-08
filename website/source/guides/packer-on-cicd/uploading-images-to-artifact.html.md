@@ -14,7 +14,7 @@ The following example uses TeamCity and Amazon S3.
 
 ## Example: Uploading to S3 in a TeamCity Build
 
-On the agent machine responsible for building images, install the [AWS Command Line Tool](https://aws.amazon.com/cli/). Since this is a one-time operation, this can be incorporated into the initial agent provisioning step when installing other dependencies.
+On the agent machine responsible for building images, install the [AWS Command Line Tool](https://aws.amazon.com/cli/). Since this is a one-time operation, this can be incorporated into the initial agent provisioning step when installing other dependencies. The AWS Command Line tool may require installing additional [dependencies](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) prior.
 
 ```shell
 pip install awscli
