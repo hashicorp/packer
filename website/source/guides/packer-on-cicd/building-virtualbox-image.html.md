@@ -76,7 +76,7 @@ In TeamCity Server create a new build and configure the Version Control Settings
 
 Add one **Build Step: Command Line** to the build.
 
-![TeamCity screenshot: New Build](./images/teamcity_new_build.png)
+![TeamCity screenshot: New Build](/assets/images/guides/teamcity_new_build.png)
 
 In the **Script content** field add the following:
 
@@ -93,8 +93,8 @@ The entire configuration is ready for a new build. Start a new run in TeamCity b
 
 The new run should be triggered and the virtual box image will be built.
 
-![TeamCity screenshot: Build log](./images/teamcity_build_log.png)
+![TeamCity screenshot: Build log](/assets/images/guides/teamcity_build_log.png)
 
 Once complete, the build status should be updated to complete and successful.
 
-![TeamCity screenshot: Build log complete](./images/teamcity_build_log_complete.png)
+![TeamCity screenshot: Build log complete](/assets/images/guides/teamcity_build_log_complete.png)
