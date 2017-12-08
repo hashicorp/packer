@@ -14,6 +14,8 @@
 
 * builder/amazon: Correctly deregister AMIs when `force_deregister` is set.
     [GH-5525]
+* builder/amazon: Add a new parameter `ssh_interface`. Valid values include 
+`public_ip`, `private_ip`, `public_dns` or `private_dns`. [GH-5630]
 * builder/digitalocean: Add `ipv6` option to enable on droplet. [GH-5534]
 * builder/docker: Add `aws_profile` option to control the aws profile for ECR.
     [GH-5470]
@@ -41,9 +43,30 @@
 * post-processor/docker-push: Add `aws_profile` option to control the aws
     profile for ECR. [GH-5470]
 * post-processor/vsphere: Properly capture `ovftool` output. [GH-5499]
+* builder/vmware-iso: Improve logging of network errors. [GH-5456]
+* provisioner/ansible-local: Add ability to clean staging directory. [GH-5618]
+* core: Add new `packer_version` template engine. [GH-5619]
+* core: Improve logic checking for downloaded isos in case where user has 
+provided 2+ `iso_urls` [GH-5632]
+* builder/hyper-v: Add support for differencing disk. [GH-5458]
+* builder/azure: Add sanity checks for resource group names [GH-5599]
 
 ### BUG FIXES:
 
+* builder/hyper-v: Fix interpolation context for user variables in 
+`boot_command` [GH-5547]
+* core: Fix windows pathing regression when downloading isos. [GH-5591]
+* builder/azure: Only destroy temporary resource groups if they were created by 
+Packer. [GH-5593]
+* provisioner/chef: Fix chef installs on Windows. [GH-5649]
+* builder/azure: Clean up KeyVaults when deploying Windows images that used an 
+existing resource group. [GH-5656]
+* builder/azure: 'build_resource_group_name' is mutually exclusive with 
+'location' [GH-5661]
+* builder/amazon: Correctly set AWS region if given in template along with a 
+profile. [GH-5676]
+* builder/vmware: Correctly detect Windows boot on vmware workstation. [GH-5672]
+* builder/amazon: Builds on new C5 instances are now possible. [GH-5678]
 * builder/amazon: Add a delay option to security group waiter. [GH-5536]
 * builder/amazon: Fix regressions relating to spot instances and EBS volumes.
     [GH-5495]
