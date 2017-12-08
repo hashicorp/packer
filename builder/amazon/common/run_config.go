@@ -152,3 +152,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	return errs
 }
+
+func (c *RunConfig) IsSpotInstance() bool {
+	return c.SpotPrice != "" && c.SpotPrice != "0"
+}
