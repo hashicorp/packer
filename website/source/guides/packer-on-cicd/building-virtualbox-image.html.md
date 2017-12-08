@@ -8,7 +8,7 @@ page_title: Building a VirtualBox Image with Packer in TeamCity
 
 This guide walks through the process of building a VirtualBox image using Packer on a new TeamCity Agent. Before getting started you should have access to a TeamCity Server.
 
-The Packer VirtualBox builder requires access to VirtualBox. VirtualBox should run on a bare-metal machine, as virtual machines should not run inside other virtual machines. This is also true for the [VMWare](https://www.packer.io/docs/builders/vmware.html) and the [QEMU](https://www.packer.io/docs/builders/qemu.html) Packer builders.
+The Packer VirtualBox builder requires access to VirtualBox, which needs to run on a bare-metal machine as virtualization is generally not supported on cloud instances. This is also true for the [VMWare](https://www.packer.io/docs/builders/vmware.html) and the [QEMU](https://www.packer.io/docs/builders/qemu.html) Packer builders.
 
 ## 1. Provision a Bare-metal Machine
 
@@ -33,7 +33,7 @@ resource "packet_device" "agent" {
 }
 ```
 
-## 2. Install VirtualBox and TeamCity Dependencies
+## 2. Install VirtualBox and TeamCity dependencies
 
 VirtualBox must be installed on the new instance, and TeamCity requires the JDK prior to installation. This guide uses Ubuntu as the Linux distribution, so you may need to adjust these commands for your distribution of choice.
 
