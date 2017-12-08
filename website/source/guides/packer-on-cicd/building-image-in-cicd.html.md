@@ -6,11 +6,11 @@ page_title: Building Images in CI/CD
 
 # Building Images in CI/CD
 
-The following guides from our amazing partners show how to use their service to build images with Packer.
+The following guides from our partners show how to use their services to build images with Packer.
 
 - [How to Build Immutable Infrastructure with Packer and CircleCI Workflows](#)
-- [Using Packer and Ansible to Build Immutable Infrastructure [in CodeShip]](https://blog.codeship.com/packer-ansible/)
+- [Using Packer and Ansible to Build Immutable Infrastructure in CodeShip](https://blog.codeship.com/packer-ansible/)
 
-For the majority of the [Packer Builders](https://www.packer.io/docs/builders/index.html) can run in a container or VM, a common model used by most CI/CD services. However, the [QEMU builder](https://www.packer.io/docs/builders/qemu.html) for [KVM](https://www.linux-kvm.org/page/Main_Page) and [Xen](https://www.xenproject.org/) virtual machine images, [VirtualBox builder](https://www.packer.io/docs/builders/virtualbox.html) for OVA or OVF virtual machines and [VMWare builder](https://www.packer.io/docs/builders/vmware.html) for use with VMware products require running on a bare-metal machine.
+The majority of the [Packer Builders](https://www.packer.io/docs/builders/index.html) can run in a container or VM, a common model used by most CI/CD services. However, the [QEMU builder](https://www.packer.io/docs/builders/qemu.html) for [KVM](https://www.linux-kvm.org/page/Main_Page) and [Xen](https://www.xenproject.org/) virtual machine images, [VirtualBox builder](https://www.packer.io/docs/builders/virtualbox.html) for OVA or OVF virtual machines and [VMWare builder](https://www.packer.io/docs/builders/vmware.html) for use with VMware products require running on a bare-metal machine.
 
-The [Building a VirtualBox Image with Packer in TeamCity](./building-virtualbox-image.html) guide walks through creating a VirtualBox image, which requires a bare-metal machine, running in TeamCity which also supports running the scripts directly on the machine.
+The [Building a VirtualBox Image with Packer in TeamCity](./building-virtualbox-image.html) guide shows how to create a VirtualBox image using TeamCity's support for running scripts on bare-metal machines.
