@@ -1,12 +1,41 @@
 ## (UNRELEASED)
 
 ### IMPROVEMENTS:
-* builder/alicloud-ecs: Add security token support and set tls handshake timeout 
-  through environment variable. [GH-5641]
+
+* builder/alicloud-ecs: Add security token support and set TLS handshake
+    timeout through environment variable. [GH-5641]
+* builder/amazon: Add a new parameter `ssh_interface`. Valid values include
+    `public_ip`, `private_ip`, `public_dns` or `private_dns`. [GH-5630]
+* builder/azure: Add sanity checks for resource group names [GH-5599]
+* builder/hyper-v: Add support for differencing disk. [GH-5458]
+* builder/vmware-iso: Improve logging of network errors. [GH-5456]
+* core: Add new `packer_version` template engine. [GH-5619]
+* core: Improve logic checking for downloaded ISOs in case where user has
+    provided more than one URL in `iso_urls` [GH-5632]
+* provisioner/ansible-local: Add ability to clean staging directory. [GH-5618]
 
 ### BUG FIXES:
 
-* builder/qemu: Set default disk size to 40960 MB to prevent boot failures. [GH-5588]
+* builder/amazon: Allow `region` to appear in `ami_regions`. [GH-5660]
+* builder/amazon: `C5` instance types now build more reliably. [GH-5678]
+* builder/amazon: Correctly set AWS region if given in template along with a
+    profile. [GH-5676]
+* builder/amazon: Prevent `sriov_support` and `ena_support` from being used
+    with spot instances, which would cause a build failure. [GH-5679]
+* builder/azure: `build_resource_group_name` is mutually exclusive with
+    `location` [GH-5661]
+* builder/azure: Clean up KeyVaults when deploying Windows images that used an
+    existing resource group. [GH-5656]
+* builder/azure: Only destroy temporary resource groups if they were created by
+    Packer. [GH-5593]
+* builder/hyper-v: Fix interpolation context for user variables in
+    `boot_command` [GH-5547]
+* builder/qemu: Set default disk size to 40960 MB to prevent boot failures.
+    [GH-5588]
+* builder/vmware: Correctly detect Windows boot on vmware workstation.
+    [GH-5672]
+* core: Fix windows path regression when downloading ISOs. [GH-5591]
+* provisioner/chef: Fix chef installs on Windows. [GH-5649]
 
 ## 1.1.2 (November 15, 2017)
 
