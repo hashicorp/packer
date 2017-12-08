@@ -183,6 +183,8 @@ func vncSendString(c *vnc.ClientConn, original string) {
 	special["<rightAlt>"] = 0xFFEA
 	special["<rightCtrl>"] = 0xFFE4
 	special["<rightShift>"] = 0xFFE2
+	special["<leftSuper>"] = 0xFFEB
+	special["<rightSuper>"] = 0xFFEC
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
@@ -231,6 +233,17 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			continue
 		}
 
+		if strings.HasPrefix(original, "<leftSuperOn>") {
+			keyCode = special["<leftSuper>"]
+			original = original[len("<leftSuperOn>"):]
+			log.Printf("Special code '<leftSuperOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
 		if strings.HasPrefix(original, "<leftAltOff>") {
 			keyCode = special["<leftAlt>"]
 			original = original[len("<leftAltOff>"):]
@@ -257,6 +270,17 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			keyCode = special["<leftShift>"]
 			original = original[len("<leftShiftOff>"):]
 			log.Printf("Special code '<leftShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<leftSuperOff>") {
+			keyCode = special["<leftSuper>"]
+			original = original[len("<leftSuperOff>"):]
+			log.Printf("Special code '<leftSuperOff>' found, replacing with: %d", keyCode)
 
 			c.KeyEvent(keyCode, false)
 			time.Sleep(keyInterval)
@@ -297,6 +321,17 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			continue
 		}
 
+		if strings.HasPrefix(original, "<rightSuperOn>") {
+			keyCode = special["<rightSuper>"]
+			original = original[len("<rightSuperOn>"):]
+			log.Printf("Special code '<rightSuperOn>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
 		if strings.HasPrefix(original, "<rightAltOff>") {
 			keyCode = special["<rightAlt>"]
 			original = original[len("<rightAltOff>"):]
@@ -323,6 +358,17 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			keyCode = special["<rightShift>"]
 			original = original[len("<rightShiftOff>"):]
 			log.Printf("Special code '<rightShiftOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
+		if strings.HasPrefix(original, "<rightSuperOff>") {
+			keyCode = special["<rightSuper>"]
+			original = original[len("<rightSuperOff>"):]
+			log.Printf("Special code '<rightSuperOff>' found, replacing with: %d", keyCode)
 
 			c.KeyEvent(keyCode, false)
 			time.Sleep(keyInterval)
