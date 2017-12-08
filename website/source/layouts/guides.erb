@@ -4,6 +4,23 @@
       <li<%= sidebar_current("guides-veewee-to-packer") %>>
         <a href="/guides/veewee-to-packer.html">Veewee to Packer</a>
       </li>
+      <li<%= sidebar_current("guides-packer-on-cicd") %>>
+        <a href="/guides/packer-on-cicd/index.html">Building Immutable Infrastructure with Packer in CI/CD</a>
+        <ul class="nav">
+          <li<%= sidebar_current("guides-packer-on-cicd-build-image") %>>
+            <a href="/guides/packer-on-cicd/building-image-in-cicd.html">Building Images in CI/CD</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-build-virtualbox") %>>
+            <a href="/guides/packer-on-cicd/building-virtualbox-image.html">Building a VirtualBox Image with Packer in TeamCity</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-upload-image-to-artifact-store") %>>
+            <a href="/guides/packer-on-cicd/uploading-images-to-artifact.html">Uploading Images to Artifact Store</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-triggering-tfe-run") %>>
+            <a href="/guides/packer-on-cicd/triggering-tfe.html">Triggering Terraform Enterprise runs</a>
+          </li>
+        </li>
+      </li>
     </ul>
   <% end %>
 
