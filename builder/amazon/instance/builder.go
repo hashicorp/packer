@@ -155,6 +155,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, fmt.Errorf("x509_key_path points to bad file: %s", err))
 	}
 
+	if b.config.IsSpotInstance() && (b.config.AMIENASupport || b.config.AMISriovNetSupport) {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("Spot instances do not support modification, which is required "+
+				"when either `ena_support` or `sriov_support` are set. Please ensure "+
+				"you use an AMI that already has either SR-IOV or ENA enabled."))
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
 	}
@@ -196,39 +203,39 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var instanceStep multistep.Step
 
-	if b.config.SpotPrice == "" || b.config.SpotPrice == "0" {
-		instanceStep = &awscommon.StepRunSourceInstance{
-			Debug:                    b.config.PackerDebug,
-			InstanceType:             b.config.InstanceType,
-			UserData:                 b.config.UserData,
-			UserDataFile:             b.config.UserDataFile,
-			SourceAMI:                b.config.SourceAmi,
-			IamInstanceProfile:       b.config.IamInstanceProfile,
-			SubnetId:                 b.config.SubnetId,
+	if b.config.IsSpotInstance() {
+		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			EbsOptimized:             b.config.EbsOptimized,
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
-			Tags:                     b.config.RunTags,
 			Ctx:                      b.config.ctx,
-		}
-	} else {
-		instanceStep = &awscommon.StepRunSpotInstance{
 			Debug:                    b.config.PackerDebug,
+			EbsOptimized:             b.config.EbsOptimized,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			InstanceType:             b.config.InstanceType,
+			SourceAMI:                b.config.SourceAmi,
 			SpotPrice:                b.config.SpotPrice,
 			SpotPriceProduct:         b.config.SpotPriceAutoProduct,
-			InstanceType:             b.config.InstanceType,
+			SubnetId:                 b.config.SubnetId,
+			Tags:                     b.config.RunTags,
 			UserData:                 b.config.UserData,
 			UserDataFile:             b.config.UserDataFile,
-			SourceAMI:                b.config.SourceAmi,
-			IamInstanceProfile:       b.config.IamInstanceProfile,
-			SubnetId:                 b.config.SubnetId,
+		}
+	} else {
+		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
-			EbsOptimized:             b.config.EbsOptimized,
 			AvailabilityZone:         b.config.AvailabilityZone,
 			BlockDevices:             b.config.BlockDevices,
-			Tags:                     b.config.RunTags,
 			Ctx:                      b.config.ctx,
+			Debug:                    b.config.PackerDebug,
+			EbsOptimized:             b.config.EbsOptimized,
+			IamInstanceProfile:       b.config.IamInstanceProfile,
+			InstanceType:             b.config.InstanceType,
+			SourceAMI:                b.config.SourceAmi,
+			SubnetId:                 b.config.SubnetId,
+			Tags:                     b.config.RunTags,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
 		}
 	}
 
