@@ -1,10 +1,10 @@
 ---
 layout: guides
 sidebar_current: guides-packer-on-cicd-upload-image-to-artifact-store
-page_title: Uploading Images to Artifact Stores
+page_title: Uploading VirtualBox Image to S3
 ---
 
-# Uploading Images to Artifact Stores
+# Uploading VirtualBox Image to S3
 
 Once the image is generated it will be used by other parts of your operations workflow. For example, it is common to build VirtualBox images with Packer to be used as base boxes in Vagrant.
 
