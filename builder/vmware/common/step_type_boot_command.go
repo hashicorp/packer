@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -195,6 +196,9 @@ func vncSendString(c *vnc.ClientConn, original string) {
 		keyInterval = delay
 	}
 
+	azOnRegex := regexp.MustCompile("^<(?P<ordinary>[a-zA-Z])On>")
+	azOffRegex := regexp.MustCompile("^<(?P<ordinary>[a-zA-Z])Off>")
+
 	// TODO(mitchellh): Ripe for optimizations of some point, perhaps.
 	for len(original) > 0 {
 		var keyCode uint32
@@ -244,6 +248,25 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			continue
 		}
 
+		if azOnRegex.MatchString(original) {
+			m := azOnRegex.FindStringSubmatch(original)
+			r, _ := utf8.DecodeRuneInString(m[1])
+			original = original[len("<aOn>"):]
+			keyCode = uint32(r)
+			keyShift = unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
+
+			log.Printf("Special code '%s' found, replacing with %d, shift %v", m[0], keyCode, keyShift)
+
+			if keyShift {
+				c.KeyEvent(KeyLeftShift, true)
+			}
+
+			c.KeyEvent(keyCode, true)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
 		if strings.HasPrefix(original, "<leftAltOff>") {
 			keyCode = special["<leftAlt>"]
 			original = original[len("<leftAltOff>"):]
@@ -281,6 +304,25 @@ func vncSendString(c *vnc.ClientConn, original string) {
 			keyCode = special["<leftSuper>"]
 			original = original[len("<leftSuperOff>"):]
 			log.Printf("Special code '<leftSuperOff>' found, replacing with: %d", keyCode)
+
+			c.KeyEvent(keyCode, false)
+			time.Sleep(keyInterval)
+
+			continue
+		}
+
+		if azOffRegex.MatchString(original) {
+			m := azOffRegex.FindStringSubmatch(original)
+			r, _ := utf8.DecodeRuneInString(m[1])
+			original = original[len("<aOff>"):]
+			keyCode = uint32(r)
+			keyShift = unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
+
+			log.Printf("Special code '%s' found, replacing with %d, shift %v", m[0], keyCode, keyShift)
+
+			if keyShift {
+				c.KeyEvent(KeyLeftShift, false)
+			}
 
 			c.KeyEvent(keyCode, false)
 			time.Sleep(keyInterval)
