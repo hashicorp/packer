@@ -10,6 +10,8 @@
 * builder/amazon: Add a new parameter `ssh_interface`. Valid values include
     `public_ip`, `private_ip`, `public_dns` or `private_dns`. [GH-5630]
 * builder/azure: Add sanity checks for resource group names [GH-5599]
+* builder/azure: Allow users to specify an existing resource group to use,
+    instead of creating a new one for every run. [GH-5548]
 * builder/hyper-v: Add support for differencing disk. [GH-5458]
 * builder/vmware-iso: Improve logging of network errors. [GH-5456]
 * core: Add new `packer_version` template engine. [GH-5619]
@@ -25,12 +27,6 @@
     profile. [GH-5676]
 * builder/amazon: Prevent `sriov_support` and `ena_support` from being used
     with spot instances, which would cause a build failure. [GH-5679]
-* builder/azure: `build_resource_group_name` is mutually exclusive with
-    `location` [GH-5661]
-* builder/azure: Clean up KeyVaults when deploying Windows images that used an
-    existing resource group. [GH-5656]
-* builder/azure: Only destroy temporary resource groups if they were created by
-    Packer. [GH-5593]
 * builder/hyper-v: Fix interpolation context for user variables in
     `boot_command` [GH-5547]
 * builder/qemu: Set default disk size to 40960 MB to prevent boot failures.
