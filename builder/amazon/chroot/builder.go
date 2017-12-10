@@ -173,7 +173,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return warns, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey))
+	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
 	return warns, nil
 }
 
