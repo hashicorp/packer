@@ -91,7 +91,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey))
+	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey, p.config.Token))
 	return nil
 }
 
