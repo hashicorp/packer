@@ -8,7 +8,7 @@ page_title: Building a VirtualBox Image with Packer in TeamCity
 
 This guide walks through the process of building a VirtualBox image using Packer on a new TeamCity Agent. Before getting started you should have access to a TeamCity Server.
 
-The Packer VirtualBox builder requires access to VirtualBox, which needs to run on a bare-metal machine as virtualization is generally not supported on cloud instances. This is also true for the [VMWare](https://www.packer.io/docs/builders/vmware.html) and the [QEMU](https://www.packer.io/docs/builders/qemu.html) Packer builders.
+The Packer VirtualBox builder requires access to VirtualBox, which needs to run on a bare-metal machine as virtualization is generally not supported on cloud instances. This is also true for the [VMWare](../../docs/builders/vmware.html) and the [QEMU](../../docs/builders/qemu.html) Packer builders.
 
 ## 1. Provision a Bare-metal Machine
 
@@ -85,7 +85,7 @@ In the **Script content** field add the following:
 /root/packer build -only=virtualbox-iso -var "headless=true" ./packer.json
 ```
 
-This will use the `build` command in Packer to build the image defined in `./packer.json`. It assumes that `packer.json` is the Packer build configuration file in the root path of the VCS repository. Packer defaults to building VirtualBox virtual machines by launching a GUI that shows the console, since this will run in CI/CD, the the [`headless` variable](https://www.packer.io/docs/builders/virtualbox-iso.html#headless) instructs Packer to start the machine without the console. Packer can build multiple image types, so the [`-only=virtualbox-iso` option] instructs Packer to only build the builds with the name `virtualbox-iso`.
+This will use the `build` command in Packer to build the image defined in `./packer.json`. It assumes that `packer.json` is the Packer build configuration file in the root path of the VCS repository. Packer defaults to building VirtualBox virtual machines by launching a GUI that shows the console, since this will run in CI/CD, the the [`headless` variable](../../docs/builders/virtualbox-iso.html#headless) instructs Packer to start the machine without the console. Packer can build multiple image types, so the [`-only=virtualbox-iso` option](../../docs/commands/build.html#only-foo-bar-baz) instructs Packer to only build the builds with the name `virtualbox-iso`.
 
 ## 6. Run a build in TeamCity
 
