@@ -1,10 +1,10 @@
 ---
 layout: guides
 sidebar_current: guides-packer-on-cicd-build-virtualbox
-page_title: Building a VirtualBox Image with Packer in TeamCity
+page_title: Build a VirtualBox Image with Packer in TeamCity
 ---
 
-# Building a VirtualBox Image with Packer in TeamCity
+# Build a VirtualBox Image with Packer in TeamCity
 
 This guide walks through the process of building a VirtualBox image using Packer on a new TeamCity Agent. Before getting started you should have access to a TeamCity Server.
 

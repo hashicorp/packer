@@ -1,10 +1,10 @@
 ---
 layout: guides
-sidebar_current: guides-packer-on-cicd-triggering-tfe-run
-page_title: Triggering Terraform Enterprise runs
+sidebar_current: guides-packer-on-cicd-trigger-tfe-run
+page_title: Trigger Terraform Enterprise runs
 ---
 
-# Creating Terraform Enterprise Runs
+# Create Terraform Enterprise Runs
 
 Once an image is built and uploaded to an artifact store, the next step is to use this new image. In some cases the image will be downloaded by the dev team and used locally in development, like is often done with VirtualBox images with Vagrant. In most other cases, the new image will be used to provision new infrastructure.
 
