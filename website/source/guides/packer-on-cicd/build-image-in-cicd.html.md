@@ -1,10 +1,10 @@
 ---
 layout: guides
 sidebar_current: guides-packer-on-cicd-build-image
-page_title: Building Images in CI/CD
+page_title: Build Images in CI/CD
 ---
 
-# Building Images in CI/CD
+# Build Images in CI/CD
 
 The following guides from our partners show how to use their services to build images with Packer.
 
