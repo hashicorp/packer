@@ -85,7 +85,7 @@ In the **Script content** field add the following:
 /root/packer build -only=virtualbox-iso -var "headless=true" ./packer.json
 ```
 
-This assumes that `packer.json` is the Packer build configuration file in the root path of the VCS repository.
+This will use the `build` command in Packer to build the image defined in `./packer.json`. It assumes that `packer.json` is the Packer build configuration file in the root path of the VCS repository. Packer defaults to building VirtualBox virtual machines by launching a GUI that shows the console, since this will run in CI/CD, the the [`headless` variable](https://www.packer.io/docs/builders/virtualbox-iso.html#headless) instructs Packer to start the machine without the console. Packer can build multiple image types, so the [`-only=virtualbox-iso` option] instructs Packer to only build the builds with the name `virtualbox-iso`.
 
 ## 6. Run a build in TeamCity
 
