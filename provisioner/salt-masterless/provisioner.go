@@ -412,7 +412,9 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 
 func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
-	cmd := &packer.RemoteCmd{Command: fmt.Sprintf(p.sudo("mv %s %s"), src, dst)}
+	cmd := &packer.RemoteCmd{
+		Command: p.guestCommands.MovePath(src, dst),
+	}
 	if err := cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
 			err = fmt.Errorf("Bad exit status: %d", cmd.ExitStatus)
