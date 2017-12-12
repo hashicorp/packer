@@ -22,6 +22,6 @@ builder](/docs/builders/virtualbox.html) for OVA or OVF virtual machines and
 require running on a bare-metal machine.
 
 The [Building a VirtualBox Image with Packer in
-TeamCity](/guides/packer-on-cicd/building-virtualbox-image.html) guide shows
+TeamCity](/guides/packer-on-cicd/build-virtualbox-image.html) guide shows
 how to create a VirtualBox image using TeamCity's support for running scripts
 on bare-metal machines.
