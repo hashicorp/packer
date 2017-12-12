@@ -17,10 +17,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-const DefaultTempConfigDir = "/tmp/salt"
-const DefaultStateTreeDir = "/srv/salt"
-const DefaultPillarRootDir = "/srv/pillar"
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -102,9 +98,9 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.WindowsOSType: {
 		configDir:         "C:/salt/conf",
 		tempDir:           "C:/Windows/Temp/salt/",
-		stateRoot:         "C:/srv/salt/",
-		pillarRoot:        "C:/srv/pillar/",
-		bootstrapFetchCmd: "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.ps1' -OutFile 'C:/Windows/Temp/bootstrap-salt.ps1'",
+		stateRoot:         "C:/salt/state",
+		pillarRoot:        "C:/salt/pillar/",
+		bootstrapFetchCmd: "powershell Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.ps1' -OutFile 'C:/Windows/Temp/bootstrap-salt.ps1'",
 		bootstrapRunCmd:   "Powershell C:/Windows/Temp/bootstrap-salt.ps1",
 	},
 }
@@ -305,9 +301,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	} else {
 		dst = p.guestOSTypeConfig.stateRoot
 	}
-	if err = p.removeDir(ui, comm, dst); err != nil {
-		return fmt.Errorf("Unable to clear salt tree: %s", err)
+
+	// only remove state tree if it exists or windows throws a fit
+	if err = p.statPath(ui, comm, dst); err == nil {
+		if err = p.removeDir(ui, comm, dst); err != nil {
+			return fmt.Errorf("Unable to clear salt tree: %s", err)
+		}
 	}
+
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Unable to move %s/states to %s: %s", p.config.TempConfigDir, dst, err)
 	}
@@ -327,8 +328,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		} else {
 			dst = p.guestOSTypeConfig.pillarRoot
 		}
-		if err = p.removeDir(ui, comm, dst); err != nil {
-			return fmt.Errorf("Unable to clear pillar root: %s", err)
+		// only remove path if it exists or windows throws a fit
+		if err = p.statPath(ui, comm, dst); err == nil {
+			if err = p.removeDir(ui, comm, dst); err != nil {
+				return fmt.Errorf("Unable to clear pillar root: %s", err)
+			}
 		}
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Unable to move %s/pillar to %s: %s", p.config.TempConfigDir, dst, err)
@@ -423,6 +427,20 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: p.guestCommands.CreateDir(dir),
+	}
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status.")
+	}
+	return nil
+}
+
+func (p *Provisioner) statPath(ui packer.Ui, comm packer.Communicator, path string) error {
+	ui.Message(fmt.Sprintf("Verifying Path: %s", path))
+	cmd := &packer.RemoteCmd{
+		Command: p.guestCommands.StatPath(path),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
