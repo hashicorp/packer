@@ -234,7 +234,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Unable to download Salt: %s", err)
 		}
 		cmd = &packer.RemoteCmd{
-			Command: fmt.Sprintf(p.sudo(p.guestOSTypeConfig.bootstrapRunCmd), p.config.BootstrapArgs),
+			Command: fmt.Sprintf("%s %s", p.sudo(p.guestOSTypeConfig.bootstrapRunCmd), p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd.Command))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
