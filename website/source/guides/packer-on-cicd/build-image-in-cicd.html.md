@@ -9,7 +9,7 @@ page_title: Build Images in CI/CD
 The following guides from our partners show how to use their services to build
 images with Packer.
 
-- How to Build Immutable Infrastructure with Packer and CircleCI Workflows (coming soon)
+- [How to Build Immutable Infrastructure with Packer and CircleCI Workflows](https://circleci.com/blog/how-to-build-immutable-infrastructure-with-packer-and-circleci-workflows/)
 - [Using Packer and Ansible to Build Immutable Infrastructure in CodeShip](https://blog.codeship.com/packer-ansible/)
 
 The majority of the [Packer Builders](/docs/builders/index.html) can run in
