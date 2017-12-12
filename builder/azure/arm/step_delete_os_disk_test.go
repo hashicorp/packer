@@ -104,6 +104,46 @@ func TestStepDeleteOSDiskShouldHandleComplexStorageContainerNames(t *testing.T) 
 	}
 }
 
+func TestStepDeleteOSDiskShouldFailIfVHDNameCannotBeURLParsed(t *testing.T) {
+	var testSubject = &StepDeleteOSDisk{
+		delete:        func(string, string) error { return nil },
+		say:           func(message string) {},
+		error:         func(e error) {},
+		deleteManaged: func(string, string) error { return nil },
+	}
+
+	// Invalid URL per https://golang.org/src/net/url/url_test.go
+	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://[fe80::1%en0]/")
+
+	var result = testSubject.Run(stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%v'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to not stateBag['%s'], but it was.", constants.Error)
+	}
+}
+func TestStepDeleteOSDiskShouldFailIfVHDNameIsTooShort(t *testing.T) {
+	var testSubject = &StepDeleteOSDisk{
+		delete:        func(string, string) error { return nil },
+		say:           func(message string) {},
+		error:         func(e error) {},
+		deleteManaged: func(string, string) error { return nil },
+	}
+
+	stateBag := DeleteTestStateBagStepDeleteOSDisk("storage.blob.core.windows.net/abc")
+
+	var result = testSubject.Run(stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to not stateBag['%s'], but it was.", constants.Error)
+	}
+}
+
 func TestStepDeleteOSDiskShouldPassIfManagedDiskInTempResourceGroup(t *testing.T) {
 	var testSubject = &StepDeleteOSDisk{
 		delete: func(string, string) error { return nil },
