@@ -14,7 +14,7 @@ type guestOSTypeCommand struct {
 	mkdir     string
 	removeDir string
 	statPath  string
-	mv    		string
+	mv        string
 }
 
 var guestOSTypeCommands = map[string]guestOSTypeCommand{
@@ -23,14 +23,14 @@ var guestOSTypeCommands = map[string]guestOSTypeCommand{
 		mkdir:     "mkdir -p '%s'",
 		removeDir: "rm -rf '%s'",
 		statPath:  "stat '%s'",
-		mv:    		 "mv '%s' '%s'",
+		mv:        "mv '%s' '%s'",
 	},
 	WindowsOSType: {
 		chmod:     "echo 'skipping chmod %s %s'", // no-op
 		mkdir:     "powershell.exe -Command \"New-Item -ItemType directory -Force -ErrorAction SilentlyContinue -Path %s\"",
-		removeDir: "powershell.exe -Command \"rm %s -recurse -force\"",
+		removeDir: "powershell.exe -Command \"rm %s -recurse -force -ErrorAction SilentlyContinue\"",
 		statPath:  "powershell.exe -Command \"test-path %s\"",
-		mv:    		 "powershell.exe -Command \"mv %s %s\"",
+		mv:        "powershell.exe -Command \"mv %s %s\"",
 	},
 }
 
@@ -74,7 +74,7 @@ func (g *GuestCommands) StatPath(path string) string {
 	return g.sudo(fmt.Sprintf(g.commands().statPath, g.escapePath(path)))
 }
 
-func (g *GuestCommands) MovePath(srcPath string, dstPath) string {
+func (g *GuestCommands) MovePath(srcPath string, dstPath string) string {
 	return g.sudo(fmt.Sprintf(g.commands().mv, g.escapePath(srcPath), g.escapePath(dstPath)))
 }
 
