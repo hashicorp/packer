@@ -302,11 +302,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		dst = p.guestOSTypeConfig.stateRoot
 	}
 
-	// only remove state tree if it exists or windows throws a fit
-	if err = p.statPath(ui, comm, dst); err == nil {
-		if err = p.removeDir(ui, comm, dst); err != nil {
-			return fmt.Errorf("Unable to clear salt tree: %s", err)
-		}
+	if err = p.removeDir(ui, comm, dst); err != nil {
+		return fmt.Errorf("Unable to clear salt tree: %s", err)
 	}
 
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
@@ -328,12 +325,12 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		} else {
 			dst = p.guestOSTypeConfig.pillarRoot
 		}
+
 		// only remove path if it exists or windows throws a fit
-		if err = p.statPath(ui, comm, dst); err == nil {
-			if err = p.removeDir(ui, comm, dst); err != nil {
-				return fmt.Errorf("Unable to clear pillar root: %s", err)
-			}
+		if err = p.removeDir(ui, comm, dst); err != nil {
+			return fmt.Errorf("Unable to clear pillar root: %s", err)
 		}
+
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Unable to move %s/pillar to %s: %s", p.config.TempConfigDir, dst, err)
 		}
@@ -410,7 +407,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 	return nil
 }
 
-func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src string) error {
+func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
 	cmd := &packer.RemoteCmd{
 		Command: p.guestCommands.MovePath(src, dst),
