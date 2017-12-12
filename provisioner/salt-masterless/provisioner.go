@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -67,11 +69,44 @@ type Config struct {
 	// Command line args passed onto salt-call
 	CmdArgs string ""
 
+	// The Guest OS Type (unix or windows)
+	GuestOSType string `mapstructure:"guest_os_type"`
+
 	ctx interpolate.Context
 }
 
 type Provisioner struct {
-	config Config
+	config            Config
+	guestOSTypeConfig guestOSTypeConfig
+	guestCommands     *provisioner.GuestCommands
+}
+
+type guestOSTypeConfig struct {
+	tempDir           string
+	stateRoot         string
+	pillarRoot        string
+	configDir         string
+	bootstrapFetchCmd string
+	bootstrapRunCmd   string
+}
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: {
+		configDir:         "/etc/salt",
+		tempDir:           "/tmp/salt/",
+		stateRoot:         "/srv/salt/",
+		pillarRoot:        "/srv/pillar/",
+		bootstrapFetchCmd: "curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com",
+		bootstrapRunCmd:   "sh /tmp/install_salt.sh",
+	},
+	provisioner.WindowsOSType: {
+		configDir:         "C:/salt/conf",
+		tempDir:           "C:/Windows/Temp/salt/",
+		stateRoot:         "C:/srv/salt/",
+		pillarRoot:        "C:/srv/pillar/",
+		bootstrapFetchCmd: "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.ps1' -OutFile 'C:/Windows/Temp/bootstrap-salt.ps1'",
+		bootstrapRunCmd:   "Powershell C:/Windows/Temp/bootstrap-salt.ps1",
+	},
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -86,8 +121,25 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	if p.config.GuestOSType == "" {
+		p.config.GuestOSType = provisioner.DefaultOSType
+	} else {
+		p.config.GuestOSType = strings.ToLower(p.config.GuestOSType)
+	}
+
+	var ok bool
+	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
+	if !ok {
+		return fmt.Errorf("Invalid guest_os_type: \"$\"", p.config.GuestOSType)
+	}
+
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
+	if err != nil {
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
+	}
+
 	if p.config.TempConfigDir == "" {
-		p.config.TempConfigDir = DefaultTempConfigDir
+		p.config.TempConfigDir = p.guestOSTypeConfig.tempDir
 	}
 
 	var errs *packer.MultiError
@@ -135,14 +187,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			cmd_args.WriteString(p.config.RemoteStateTree)
 		} else {
 			cmd_args.WriteString(" --file-root=")
-			cmd_args.WriteString(DefaultStateTreeDir)
+			cmd_args.WriteString(p.guestOSTypeConfig.stateRoot)
 		}
 		if p.config.RemotePillarRoots != "" {
 			cmd_args.WriteString(" --pillar-root=")
 			cmd_args.WriteString(p.config.RemotePillarRoots)
 		} else {
 			cmd_args.WriteString(" --pillar-root=")
-			cmd_args.WriteString(DefaultPillarRootDir)
+			cmd_args.WriteString(p.guestOSTypeConfig.pillarRoot)
 		}
 	}
 
@@ -179,14 +231,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !p.config.SkipBootstrap {
 		cmd := &packer.RemoteCmd{
 			// Fallback on wget if curl failed for any reason (such as not being installed)
-			Command: fmt.Sprintf("curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com"),
+			Command: fmt.Sprintf(p.guestOSTypeConfig.bootstrapFetchCmd),
 		}
 		ui.Message(fmt.Sprintf("Downloading saltstack bootstrap to /tmp/install_salt.sh"))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Unable to download Salt: %s", err)
 		}
 		cmd = &packer.RemoteCmd{
-			Command: fmt.Sprintf("%s /tmp/install_salt.sh %s", p.sudo("sh"), p.config.BootstrapArgs),
+			Command: fmt.Sprintf(p.sudo(p.guestOSTypeConfig.bootstrapRunCmd), p.config.BootstrapArgs),
 		}
 		ui.Message(fmt.Sprintf("Installing Salt with command %s", cmd.Command))
 		if err = cmd.StartWithUi(comm, ui); err != nil {
@@ -208,14 +260,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		// move minion config into /etc/salt
-		ui.Message(fmt.Sprintf("Make sure directory %s exists", "/etc/salt"))
-		if err := p.createDir(ui, comm, "/etc/salt"); err != nil {
+		ui.Message(fmt.Sprintf("Make sure directory %s exists", p.guestOSTypeConfig.configDir))
+		if err := p.createDir(ui, comm, p.guestOSTypeConfig.configDir); err != nil {
 			return fmt.Errorf("Error creating remote salt configuration directory: %s", err)
 		}
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "minion"))
-		dst = "/etc/salt/minion"
+		dst = filepath.ToSlash(filepath.Join(p.guestOSTypeConfig.configDir, "minion"))
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Unable to move %s/minion to /etc/salt/minion: %s", p.config.TempConfigDir, err)
+			return fmt.Errorf("Unable to move %s/minion to %s/minion: %s", p.config.TempConfigDir, p.guestOSTypeConfig.configDir, err)
 		}
 	}
 
@@ -228,14 +280,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 
 		// move grains file into /etc/salt
-		ui.Message(fmt.Sprintf("Make sure directory %s exists", "/etc/salt"))
-		if err := p.createDir(ui, comm, "/etc/salt"); err != nil {
+		ui.Message(fmt.Sprintf("Make sure directory %s exists", p.guestOSTypeConfig.configDir))
+		if err := p.createDir(ui, comm, p.guestOSTypeConfig.configDir); err != nil {
 			return fmt.Errorf("Error creating remote salt configuration directory: %s", err)
 		}
 		src = filepath.ToSlash(filepath.Join(p.config.TempConfigDir, "grains"))
-		dst = "/etc/salt/grains"
+		dst = filepath.ToSlash(filepath.Join(p.guestOSTypeConfig.configDir, "grains"))
 		if err = p.moveFile(ui, comm, dst, src); err != nil {
-			return fmt.Errorf("Unable to move %s/grains to /etc/salt/grains: %s", p.config.TempConfigDir, err)
+			return fmt.Errorf("Unable to move %s/grains to %s/grains: %s", p.config.TempConfigDir, p.guestOSTypeConfig.configDir, err)
 		}
 	}
 
@@ -251,7 +303,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if p.config.RemoteStateTree != "" {
 		dst = p.config.RemoteStateTree
 	} else {
-		dst = DefaultStateTreeDir
+		dst = p.guestOSTypeConfig.stateRoot
 	}
 	if err = p.removeDir(ui, comm, dst); err != nil {
 		return fmt.Errorf("Unable to clear salt tree: %s", err)
@@ -273,7 +325,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		if p.config.RemotePillarRoots != "" {
 			dst = p.config.RemotePillarRoots
 		} else {
-			dst = DefaultPillarRootDir
+			dst = p.guestOSTypeConfig.pillarRoot
 		}
 		if err = p.removeDir(ui, comm, dst); err != nil {
 			return fmt.Errorf("Unable to clear pillar root: %s", err)
@@ -304,7 +356,7 @@ func (p *Provisioner) Cancel() {
 
 // Prepends sudo to supplied command if config says to
 func (p *Provisioner) sudo(cmd string) string {
-	if p.config.DisableSudo {
+	if p.config.DisableSudo || p.config.GuestOSType != provisioner.WindowsOSType {
 		return cmd
 	}
 
@@ -370,7 +422,7 @@ func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst, src 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("mkdir -p '%s'", dir),
+		Command: p.guestCommands.CreateDir(dir),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
@@ -384,7 +436,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf(p.sudo("rm -rf '%s'"), dir),
+		Command: p.guestCommands.RemoveDir(dir),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
