@@ -1,11 +1,12 @@
 package saltmasterless
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -31,7 +32,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.TempConfigDir != DefaultTempConfigDir {
+	if p.config.TempConfigDir != p.guestOSTypeConfig.tempDir {
 		t.Errorf("unexpected temp config dir: %s", p.config.TempConfigDir)
 	}
 }
