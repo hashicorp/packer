@@ -82,6 +82,31 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 }
 
+func TestStepDeployTemplateDeleteImageShouldFailWhenImageUrlCannotBeParsed(t *testing.T) {
+	var testSubject = &StepDeployTemplate{
+		say:   func(message string) {},
+		error: func(e error) {},
+		name:  "--deployment-name--",
+	}
+	// Invalid URL per https://golang.org/src/net/url/url_test.go
+	err := testSubject.deleteImage("image", "http://[fe80::1%en0]/", "Unit Test: ResourceGroupName")
+	if err == nil {
+		t.Fatal("Expected a failure because of the failed image name")
+	}
+}
+
+func TestStepDeployTemplateDeleteImageShouldFailWithInvalidImage(t *testing.T) {
+	var testSubject = &StepDeployTemplate{
+		say:   func(message string) {},
+		error: func(e error) {},
+		name:  "--deployment-name--",
+	}
+	err := testSubject.deleteImage("image", "storage.blob.core.windows.net/abc", "Unit Test: ResourceGroupName")
+	if err == nil {
+		t.Fatal("Expected a failure because of the failed image name")
+	}
+}
+
 func createTestStateBagStepDeployTemplate() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 

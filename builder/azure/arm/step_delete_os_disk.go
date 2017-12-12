@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -80,11 +81,14 @@ func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	xs := strings.Split(u.Path, "/")
+	if len(xs) < 3 {
+		err = errors.New("Failed to parse OS Disk's VHD URI!")
+	} else {
+		var storageAccountName = xs[1]
+		var blobName = strings.Join(xs[2:], "/")
 
-	var storageAccountName = xs[1]
-	var blobName = strings.Join(xs[2:], "/")
-
-	err = s.delete(storageAccountName, blobName)
+		err = s.delete(storageAccountName, blobName)
+	}
 	return processStepResult(err, s.error, state)
 }
 
