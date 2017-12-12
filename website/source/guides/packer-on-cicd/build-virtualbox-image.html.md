@@ -16,8 +16,8 @@ instances. This is also true for the [VMWare](/docs/builders/vmware.html) and
 the [QEMU](/docs/builders/qemu.html) Packer builders.
 
 We will use Chef's [Bento boxes](https://github.com/chef/bento) to provision an
-Ubuntu image on VirtualBox. We will use a fork of this repository as the
-project we will build.
+Ubuntu image on VirtualBox. For this example, we will use the repository
+directly, but you may also fork it for the same results.
 
 ## 1. Provision a Bare-metal Machine
 
@@ -103,19 +103,25 @@ assign the new Agent to it.
 
 ## 5. Create a New Build in TeamCity
 
-In TeamCity Server, create a new build, and configure the Version Control
-Settings to download the Packer build configuration from the VCS repository.
+In TeamCity Server, create a new build. To use the upstream Bento repository,
+we'll choose *From a repository URL*, and enter
+`https://github.com/chef/bento.git` as the **Repository URL**.
 
-Add one **Build Step: Command Line** to the build.
+![TeamCity screenshot: New Build](/assets/images/guides/teamcity_create_project_from_url-1.png)
 
-![TeamCity screenshot: New Build](/assets/images/guides/teamcity_new_build.png)
+Click **Proceed**.
 
-In the **Script content** field add the following:
+![TeamCity screenshot: New Build](/assets/images/guides/teamcity_create_project_from_url-2.png)
 
-```shell
-#!/usr/bin/env bash
-/root/packer build -only=virtualbox-iso -var "headless=true" ubuntu/ubuntu-16.04-amd64.json
-```
+And **Proceed** again.
+
+We won't use the *Auto-detected Build Steps*. Instead, click *configure build
+steps manually*. For the *runner type*, pick **Command Line**, and enter the
+following values. Make sure to click *Show advanced options*, as we need to set
+the working directory.
+
+![TeamCity screenshot: Build Step](/assets/images/guides/teamcity_build_configuration.png)
+
 
 This will use the `build` command in Packer to build the image defined in
 `ubuntu/ubuntu-16.04-amd64.json`. It assumes that the VCS repository you're
