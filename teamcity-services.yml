@@ -1,0 +1,13 @@
+version: '2'
+services:
+  vpn:
+    container_name: vpn
+    image: jetbrainsinfra/openvpn
+    volumes:
+      - ./vpn:/vpn:ro
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    dns: 10.0.0.1
+    command: --config /vpn/jetbrains-vsphere-lab.ovpn --script-security 2 --auth-user-pass /vpn/creds.txt
