@@ -12,7 +12,8 @@ sidebar_current: 'docs-commands-push'
 !&gt; The Packer and Artifact Registry features of Atlas will no longer be
 actively developed or maintained and will be fully decommissioned on Friday,
 March 30, 2018. Please see our [guide on building immutable infrastructure with
-Packer on CI/CD](/guides/packer-on-cicd/).
+Packer on CI/CD](/guides/packer-on-cicd/) for ideas on implementing these
+features yourself.
 
 The `packer push` command uploads a template and other required files to the
 Atlas service, which will run your packer build for you. [Learn more about
