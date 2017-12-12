@@ -1,6 +1,16 @@
-build:
+version: '2'
+services:
+  build:
     image: jetbrainsinfra/golang:1.9.4
     volumes:
-        - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
+      - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
     working_dir: /go/src/github.com/jetbrains-infra/packer-builder-vsphere
     command: ./build.sh
+
+  test:
+    image: jetbrainsinfra/golang:1.9.4
+    volumes:
+      - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
+    working_dir: /go/src/github.com/jetbrains-infra/packer-builder-vsphere
+#    network_mode: "container:vpn"
+    command: ./test.sh

@@ -5,3 +5,4 @@ packer-builder-vsphere*
 bin/
 test*.json
 crash.log
+vpn/
