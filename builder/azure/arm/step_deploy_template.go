@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -140,6 +141,9 @@ func (s *StepDeployTemplate) deleteImage(imageType string, imageName string, res
 		return err
 	}
 	xs := strings.Split(u.Path, "/")
+	if len(xs) < 3 {
+		return errors.New("Unable to parse path of image " + imageName)
+	}
 	var storageAccountName = xs[1]
 	var blobName = strings.Join(xs[2:], "/")
 
