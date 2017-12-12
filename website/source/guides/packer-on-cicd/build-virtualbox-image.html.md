@@ -117,9 +117,10 @@ And **Proceed** again.
 
 We won't use the *Auto-detected Build Steps*. Instead, click *configure build
 steps manually*. For the *runner type*, pick **Command Line**, and enter the
-following values.
+following values. Make sure to click *Show advanced options*, as we need to set
+the working directory.
 
-![TeamCity screenshot: New Build](/assets/images/guides/teamcity_build_configuration.png)
+![TeamCity screenshot: Build Step](/assets/images/guides/teamcity_build_configuration.png)
 
 
 This will use the `build` command in Packer to build the image defined in
