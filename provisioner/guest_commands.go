@@ -14,7 +14,7 @@ type guestOSTypeCommand struct {
 	mkdir     string
 	removeDir string
 	statPath  string
-	mvPath    string
+	mv    		string
 }
 
 var guestOSTypeCommands = map[string]guestOSTypeCommand{
