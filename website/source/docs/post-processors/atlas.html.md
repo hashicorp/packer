@@ -13,7 +13,8 @@ sidebar_current: 'docs-post-processors-atlas'
 !&gt; The Packer and Artifact Registry features of Atlas will no longer be
 actively developed or maintained and will be fully decommissioned on Friday,
 March 30, 2018. Please see our [guide on building immutable infrastructure with
-Packer on CI/CD](/guides/packer-on-cicd/).
+Packer on CI/CD](/guides/packer-on-cicd/) for ideas on implementing these
+features yourself.
 
 Type: `atlas`
 
