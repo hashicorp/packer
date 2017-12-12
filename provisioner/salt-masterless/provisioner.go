@@ -130,7 +130,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	var ok bool
 	p.guestOSTypeConfig, ok = guestOSTypeConfigs[p.config.GuestOSType]
 	if !ok {
-		return fmt.Errorf("Invalid guest_os_type: \"$\"", p.config.GuestOSType)
+		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
 	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
@@ -356,7 +356,7 @@ func (p *Provisioner) Cancel() {
 
 // Prepends sudo to supplied command if config says to
 func (p *Provisioner) sudo(cmd string) string {
-	if p.config.DisableSudo || p.config.GuestOSType != provisioner.WindowsOSType {
+	if p.config.DisableSudo || (p.config.GuestOSType == provisioner.WindowsOSType) {
 		return cmd
 	}
 
