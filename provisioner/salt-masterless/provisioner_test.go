@@ -309,3 +309,19 @@ func TestProvisionerPrepare_LogLevel(t *testing.T) {
 		t.Fatal("-l debug should be set in CmdArgs")
 	}
 }
+
+func TestProvisionerPrepare_GuestOSType(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["guest_os_type"] = "Windows"
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.GuestOSType != "windows" {
+		t.Fatalf("GuestOSType should be 'windows'")
+	}
+}
