@@ -10,10 +10,12 @@ This guide walks through the process of building a VirtualBox image using
 Packer on a new TeamCity Agent. Before getting started you should have access
 to a TeamCity Server.
 
-The Packer VirtualBox builder requires access to VirtualBox, which needs to run
-on a bare-metal machine, as virtualization is generally not supported on cloud
-instances. This is also true for the [VMWare](/docs/builders/vmware.html) and
-the [QEMU](/docs/builders/qemu.html) Packer builders.
+The Packer VirtualBox builder requires access to VirtualBox. Virtualization is
+not universally available on cloud instances, so we recommend you run these
+builds on either a bare metal server, or cloud instances which support nested
+virtualization, such as Azure or GCP. This is also true for the
+[VMWare](/docs/builders/vmware.html) and the [QEMU](/docs/builders/qemu.html)
+Packer builders.
 
 We will use Chef's [Bento boxes](https://github.com/chef/bento) to provision an
 Ubuntu image on VirtualBox. For this example, we will use the repository
@@ -21,13 +23,12 @@ directly, but you may also fork it for the same results.
 
 ## 1. Provision a Bare-metal Machine
 
-The Packer VirtualBox builder requires running on bare-metal (hardware). If you
-do not have access to a bare-metal machine, we recommend using
-[Packet.net](https://www.packet.net/) to obtain a new machine. If you are
-a first time user of Packet.net, the Packet.net team has provided HashiCorp the
-coupon code `hash25` which you can use for &#x24;25 off to test out this guide. You
-can use a `baremetal_0` server type for testing, but for regular use, the
-`baremetal_1` instance may be a better option.
+For the purposes of this example, we will run on a bare-metal instance from
+[Packet.net](https://www.packet.net/). If you are a first time user of
+Packet.net, the Packet.net team has provided HashiCorp the coupon code `hash25`
+which you can use for &#x24;25 off to test out this guide. You can use
+a `baremetal_0` server type for testing, but for regular use, the `baremetal_1`
+instance may be a better option.
 
 There is also a [Packet
 Provider](https://www.terraform.io/docs/providers/packet/index.html) in
