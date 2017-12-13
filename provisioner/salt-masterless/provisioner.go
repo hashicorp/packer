@@ -302,8 +302,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		dst = p.guestOSTypeConfig.stateRoot
 	}
 
-	if err = p.removeDir(ui, comm, dst); err != nil {
-		return fmt.Errorf("Unable to clear salt tree: %s", err)
+	if err = p.statPath(ui, comm, dst); err != nil {
+		if err = p.removeDir(ui, comm, dst); err != nil {
+			return fmt.Errorf("Unable to clear salt tree: %s", err)
+		}
 	}
 
 	if err = p.moveFile(ui, comm, dst, src); err != nil {
@@ -326,9 +328,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			dst = p.guestOSTypeConfig.pillarRoot
 		}
 
-		// only remove path if it exists or windows throws a fit
-		if err = p.removeDir(ui, comm, dst); err != nil {
-			return fmt.Errorf("Unable to clear pillar root: %s", err)
+		if err = p.statPath(ui, comm, dst); err != nil {
+			if err = p.removeDir(ui, comm, dst); err != nil {
+				return fmt.Errorf("Unable to clear pillar root: %s", err)
+			}
 		}
 
 		if err = p.moveFile(ui, comm, dst, src); err != nil {

@@ -29,7 +29,7 @@ var guestOSTypeCommands = map[string]guestOSTypeCommand{
 		chmod:     "echo 'skipping chmod %s %s'", // no-op
 		mkdir:     "powershell.exe -Command \"New-Item -ItemType directory -Force -ErrorAction SilentlyContinue -Path %s\"",
 		removeDir: "powershell.exe -Command \"rm %s -recurse -force -ErrorAction SilentlyContinue\"",
-		statPath:  "powershell.exe -Command \"test-path %s\"",
+		statPath:  "powershell.exe -Command { if (test-path %s) { exit 0 } else { exit 1 } }",
 		mv:        "powershell.exe -Command \"mv %s %s\"",
 	},
 }
