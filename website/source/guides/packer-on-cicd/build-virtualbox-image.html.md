@@ -11,7 +11,7 @@ Packer on a new TeamCity Agent. Before getting started you should have access
 to a TeamCity Server.
 
 The Packer VirtualBox builder requires access to VirtualBox. Virtualization is
-not universally available on cloud instances, so we recommend you run these
+not universally supported on cloud instances, so we recommend you run these
 builds on either a bare metal server, or cloud instances which support nested
 virtualization, such as Azure or GCP. This is also true for the
 [VMWare](/docs/builders/vmware.html) and the [QEMU](/docs/builders/qemu.html)
