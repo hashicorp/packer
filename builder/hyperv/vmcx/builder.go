@@ -82,6 +82,7 @@ type Config struct {
 	BootCommand                    []string `mapstructure:"boot_command"`
 	SwitchName                     string   `mapstructure:"switch_name"`
 	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
+	MacAddress                     string   `mapstructure:"mac_address"`
 	VlanId                         string   `mapstructure:"vlan_id"`
 	Cpu                            uint     `mapstructure:"cpu"`
 	Generation                     uint
@@ -403,6 +404,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			MacAddress:                     b.config.MacAddress,
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},

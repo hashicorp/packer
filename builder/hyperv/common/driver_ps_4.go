@@ -146,6 +146,10 @@ func (d *HypervPS4Driver) SetVirtualMachineVlanId(vmName string, vlanId string) 
 	return hyperv.SetVirtualMachineVlanId(vmName, vlanId)
 }
 
+func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
+}
+
 func (d *HypervPS4Driver) UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) error {
 	return hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 }

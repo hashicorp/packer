@@ -67,6 +67,11 @@ type DriverMock struct {
 	SetNetworkAdapterVlanId_VlanId     string
 	SetNetworkAdapterVlanId_Err        error
 
+	SetVmNetworkAdapterMacAddress_Called bool
+	SetVmNetworkAdapterMacAddress_VmName string
+	SetVmNetworkAdapterMacAddress_Mac    string
+	SetVmNetworkAdapterMacAddress_Err    error
+
 	SetVirtualMachineVlanId_Called bool
 	SetVirtualMachineVlanId_VmName string
 	SetVirtualMachineVlanId_VlanId string
@@ -316,6 +321,13 @@ func (d *DriverMock) SetNetworkAdapterVlanId(switchName string, vlanId string) e
 	d.SetNetworkAdapterVlanId_SwitchName = switchName
 	d.SetNetworkAdapterVlanId_VlanId = vlanId
 	return d.SetNetworkAdapterVlanId_Err
+}
+
+func (d *DriverMock) SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	d.SetVmNetworkAdapterMacAddress_Called = true
+	d.SetVmNetworkAdapterMacAddress_VmName = vmName
+	d.SetVmNetworkAdapterMacAddress_Mac = mac
+	return d.SetVmNetworkAdapterMacAddress_Err
 }
 
 func (d *DriverMock) SetVirtualMachineVlanId(vmName string, vlanId string) error {
