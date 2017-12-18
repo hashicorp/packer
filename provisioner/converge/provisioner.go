@@ -34,7 +34,7 @@ type Config struct {
 	// Execution
 	Module           string            `mapstructure:"module"`
 	WorkingDirectory string            `mapstructure:"working_directory"`
-	Params           map[string]string `mapstucture:"params"`
+	Params           map[string]string `mapstructure:"params"`
 	ExecuteCommand   string            `mapstructure:"execute_command"`
 	PreventSudo      bool              `mapstructure:"prevent_sudo"`
 
