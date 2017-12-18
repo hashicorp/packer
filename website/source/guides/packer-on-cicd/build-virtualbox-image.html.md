@@ -24,8 +24,8 @@ directly, but you may also fork it for the same results.
 ## 1. Provision a Bare-metal Machine
 
 For the purposes of this example, we will run on a bare-metal instance from
-[Packet.net](https://www.packet.net/). If you are a first time user of
-Packet.net, the Packet.net team has provided HashiCorp the coupon code `hashi25`
+[Packet](https://www.packet.net/). If you are a first time user of
+Packet, the Packet team has provided HashiCorp the coupon code `hashi25`
 which you can use for &#x24;25 off to test out this guide. You can use
 a `baremetal_0` server type for testing, but for regular use, the `baremetal_1`
 instance may be a better option.
