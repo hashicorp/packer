@@ -365,6 +365,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Add the reported AMI ID to the artifact list
 	log.Printf("Adding created AMI ID %s in region %s to output artifacts", createdami, *config.Region)
 	artifact = &awscommon.Artifact{
+		AccessConfig: &p.config.AccessConfig,
 		Amis: map[string]string{
 			*config.Region: createdami,
 		},

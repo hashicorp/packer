@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	retry "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
@@ -14,6 +13,7 @@ import (
 )
 
 type StepCreateTags struct {
+	AccessConfig *AccessConfig
 	Tags         map[string]string
 	SnapshotTags map[string]string
 	Ctx          interpolate.Context
@@ -36,15 +36,11 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Adds tags to AMIs and snapshots
-	for region, ami := range amis {
+	for ami := range amis {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
 
 		// Declare list of resources to tag
-		awsConfig := aws.Config{
-			Credentials: ec2conn.Config.Credentials,
-			Region:      aws.String(region),
-		}
-		session, err := session.NewSession(&awsConfig)
+		session, err := s.AccessConfig.Session()
 		if err != nil {
 			err := fmt.Errorf("Error creating AWS session: %s", err)
 			state.Put("error", err)
