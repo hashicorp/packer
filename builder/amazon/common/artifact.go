@@ -6,14 +6,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/packer"
 )
 
 // Artifact is an artifact implementation that contains built AMIs.
 type Artifact struct {
+	AccessConfig *AccessConfig
+
 	// A map of regions to AMI IDs.
 	Amis map[string]string
 
@@ -69,11 +69,7 @@ func (a *Artifact) Destroy() error {
 	for region, imageId := range a.Amis {
 		log.Printf("Deregistering image ID (%s) from region (%s)", imageId, region)
 
-		regionConfig := &aws.Config{
-			Credentials: a.Conn.Config.Credentials,
-			Region:      aws.String(region),
-		}
-		session, err := session.NewSession(regionConfig)
+		session, err := a.AccessConfig.Session()
 		if err != nil {
 			return err
 		}
