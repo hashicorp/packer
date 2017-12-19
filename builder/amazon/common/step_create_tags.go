@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	retry "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
@@ -13,7 +14,6 @@ import (
 )
 
 type StepCreateTags struct {
-	AccessConfig *AccessConfig
 	Tags         map[string]string
 	SnapshotTags map[string]string
 	Ctx          interpolate.Context
@@ -21,6 +21,7 @@ type StepCreateTags struct {
 
 func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
 
@@ -36,22 +37,16 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	// Adds tags to AMIs and snapshots
-	for ami := range amis {
+	for region, ami := range amis {
 		ui.Say(fmt.Sprintf("Adding tags to AMI (%s)...", ami))
 
-		// Declare list of resources to tag
-		session, err := s.AccessConfig.Session()
-		if err != nil {
-			err := fmt.Errorf("Error creating AWS session: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		regionconn := ec2.New(session)
+		regionConn := ec2.New(session, &aws.Config{
+			Region: aws.String(region),
+		})
 
 		// Retrieve image list for given AMI
 		resourceIds := []*string{&ami}
-		imageResp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
+		imageResp, err := regionConn.DescribeImages(&ec2.DescribeImagesInput{
 			ImageIds: resourceIds,
 		})
 
@@ -103,7 +98,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 		// Retry creating tags for about 2.5 minutes
 		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
 			// Tag images and snapshots
-			_, err := regionconn.CreateTags(&ec2.CreateTagsInput{
+			_, err := regionConn.CreateTags(&ec2.CreateTagsInput{
 				Resources: resourceIds,
 				Tags:      amiTags,
 			})
@@ -116,7 +111,7 @@ func (s *StepCreateTags) Run(state multistep.StateBag) multistep.StepAction {
 
 			// Override tags on snapshots
 			if len(snapshotTags) > 0 {
-				_, err = regionconn.CreateTags(&ec2.CreateTagsInput{
+				_, err = regionConn.CreateTags(&ec2.CreateTagsInput{
 					Resources: snapshotIds,
 					Tags:      snapshotTags,
 				})
