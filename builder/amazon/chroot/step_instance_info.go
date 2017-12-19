@@ -16,13 +16,13 @@ type StepInstanceInfo struct{}
 
 func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Get our own instance ID
 	ui.Say("Gathering information about this EC2 instance...")
 
-	sess := session.New()
-	ec2meta := ec2metadata.New(sess)
+	ec2meta := ec2metadata.New(session)
 	identity, err := ec2meta.GetInstanceIdentityDocument()
 	if err != nil {
 		err := fmt.Errorf(
