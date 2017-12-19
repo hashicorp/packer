@@ -245,7 +245,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:            b.config.ctx,
 		},
 		&awscommon.StepCreateTags{
-			AccessConfig: &b.config.AccessConfig,
 			Tags:         b.config.AMITags,
 			SnapshotTags: b.config.SnapshotTags,
 			Ctx:          b.config.ctx,
@@ -268,7 +267,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the artifact and return it
 	artifact := &awscommon.Artifact{
-		AccessConfig:   &b.config.AccessConfig,
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
 		Conn:           ec2conn,
