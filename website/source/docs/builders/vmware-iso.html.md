@@ -110,10 +110,16 @@ builder.
 -   `disk_type_id` (string) - The type of VMware virtual disk to create. The
     default is "1", which corresponds to a growable virtual disk split in 2GB
     files. For ESXi, this defaults to "zeroedthick". This option is for
-    advanced usage. For more information, please consult the [Virtual Disk
-    Manager User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf)
-    for desktop VMware clients. For ESXi, refer to the proper ESXi
-    documentation.
+    advanced usage. For ESXi the available options are: `zeroedthick`, `eagerzeroedthick`, `thin`, `rdm:dev`, `rdmp:dev`, `2gbsparse`. For desktop VMware clients:
+
+    Type ID | Description
+    --- | ---
+    `0` | Growable virtual disk contained in a single file (monolithic sparse).
+    `1` | Growable virtual disk split into 2GB files (split sparse).
+    `2` | Preallocated virtual disk contained in a single file (monolithic flat).
+    `3` | Preallocated virtual disk split into 2GB files (split flat).
+    `4` | Preallocated virtual disk compatible with ESX server (VMFS flat).
+    `5` | Compressed disk optimized for streaming.
 
 *   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
