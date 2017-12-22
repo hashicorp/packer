@@ -25,6 +25,11 @@ type DriverMock struct {
 	StopMachineId  string
 	StopMachineErr error
 
+	CreateFirewalRuleId   string
+	CreateFirewallRuleErr error
+
+	DeleteFirewallRuleErr error
+
 	WaitForImageCreationErr error
 
 	WaitForMachineDeletionErr error
@@ -92,6 +97,18 @@ func (d *DriverMock) StopMachine(machineId string) error {
 	d.StopMachineId = machineId
 
 	return d.StopMachineErr
+}
+
+func (d *DriverMock) CreateFirewallRule(rule string) (string, error) {
+	if d.CreateFirewallRuleErr != nil {
+		return "", d.CreateFirewallRuleErr
+	}
+
+	return "ruleId", nil
+}
+
+func (d *DriverMock) DeleteFirewallRule(ruleId string) error {
+	return d.CreateFirewallRuleErr
 }
 
 func (d *DriverMock) WaitForImageCreation(machineId string, timeout time.Duration) error {

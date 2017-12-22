@@ -100,6 +100,24 @@ builder.
     firewall rules. Unless you have a global rule defined in Triton which allows
     SSH traffic enabling the firewall will interfere with the SSH provisioner.
     The default is `false`.
+    
+-   `source_machine_firewall_detail` (object) - Gives the ability to create a temporary
+    firewall rule that allows access to the source machine when `source_machine_firewall_enabled`
+    is enabled. Example:
+    
+    ```json
+    {
+      "source_machine_firewall_detail": {
+        "port": 22,
+        "source": "any"
+      }
+    }
+    ```
+    The source can either be `any` or an IP address. It will create a corresponding
+    firewall rule that looks as follows:
+    `FROM any TO vm <machine UUID> ALLOW tcp PORT 22` that will
+    get deployed to Triton. The lifecycle of this firewall rule is only for the
+    duration of the packer run.
 -   `source_machine_metadata` (object of key/value strings) - Triton metadata
     applied to the VM used to create the image. Metadata can be used to pass
     configuration information to the VM without the need for networking. See

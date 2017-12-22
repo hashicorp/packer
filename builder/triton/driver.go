@@ -12,6 +12,8 @@ type Driver interface {
 	DeleteMachine(machineId string) error
 	GetMachineIP(machineId string) (string, error)
 	StopMachine(machineId string) error
+	CreateFirewallRule(rule string) (string, error)
+	DeleteFirewallRule(ruleId string) error
 	WaitForImageCreation(imageId string, timeout time.Duration) error
 	WaitForMachineDeletion(machineId string, timeout time.Duration) error
 	WaitForMachineState(machineId string, state string, timeout time.Duration) error
