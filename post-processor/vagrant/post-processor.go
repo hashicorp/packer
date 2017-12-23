@@ -25,6 +25,7 @@ var builtins = map[string]string{
 	"mitchellh.vmware":          "vmware",
 	"mitchellh.vmware-esx":      "vmware",
 	"pearkes.digitalocean":      "digitalocean",
+	"packer.googlecompute":      "google",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
 	"transcend.qemu":            "libvirt",
@@ -232,6 +233,8 @@ func providerForName(name string) Provider {
 		return new(HypervProvider)
 	case "libvirt":
 		return new(LibVirtProvider)
+	case "google":
+		return new(GoogleProvider)
 	default:
 		return nil
 	}
