@@ -40,6 +40,7 @@ type Config struct {
 
 	// disk drives
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+	DiskAdapterType    string `mapstructure:"disk_adapter_type"`
 	DiskName           string `mapstructure:"vmdk_name"`
 	DiskSize           uint   `mapstructure:"disk_size"`
 	DiskTypeId         string `mapstructure:"disk_type_id"`
@@ -124,6 +125,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskAdapterType == "" {
+		// Default is lsilogic
+		b.config.DiskAdapterType = "lsilogic"
 	}
 
 	if b.config.DiskTypeId == "" {
