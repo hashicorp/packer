@@ -131,7 +131,16 @@ builder.
     Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
-*   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
+-   `disk_adapter_type` (string) - The adapter type of the VMware virtual disk
+    to create. This option is for advanced usage, modify only if you know what
+    you're doing. Some of the options you can specify are "ide", "sata", "nvme"
+    or "scsi" (which uses the "lsilogic" scsi interface by default). If you
+    specify another option, Packer will assume that you're specifying a "scsi"
+    interface of that specified type. For more information, please consult the
+    <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager User's Guide</a> for desktop VMware clients.
+    For ESXi, refer to the proper ESXi documentation.
+
+-   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
