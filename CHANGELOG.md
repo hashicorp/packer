@@ -12,12 +12,14 @@
 * builder/azure: Add sanity checks for resource group names [GH-5599]
 * builder/azure: Allow users to specify an existing resource group to use,
     instead of creating a new one for every run. [GH-5548]
+* builder/docker: Remove credentials from being shown in the log. [GH-5666]
 * builder/hyper-v: Add support for differencing disk. [GH-5458]
 * builder/vmware-iso: Improve logging of network errors. [GH-5456]
 * core: Add new `packer_version` template engine. [GH-5619]
 * core: Improve logic checking for downloaded ISOs in case where user has
     provided more than one URL in `iso_urls` [GH-5632]
 * provisioner/ansible-local: Add ability to clean staging directory. [GH-5618]
+* post-processor/docker: Remove credentials from being shown in the log. [GH-5666]
 
 ### BUG FIXES:
 
