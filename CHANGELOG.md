@@ -3,6 +3,7 @@
 ### IMPROVEMENTS:
 
 * builder/docker: Remove credentials from being shown in the log. [GH-5666]
+* builder/triton: Triton RBAC is now supported. [GH-5741]
 * post-processor/docker: Remove credentials from being shown in the log. [GH-5666]
 
 ### BUG FIXES:
