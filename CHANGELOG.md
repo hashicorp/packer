@@ -5,6 +5,9 @@
 * builder/docker: Remove credentials from being shown in the log. [GH-5666]
 * post-processor/docker: Remove credentials from being shown in the log. [GH-5666]
 
+### BUG FIXES:
+* builder/alicloud-ecs: Attach keypair before starting instance in alicloud builder [GH-5739]
+
 ## 1.1.3 (December 8, 2017)
 
 ### IMPROVEMENTS:
