@@ -110,7 +110,7 @@ func DownloadableURL(original string) (string, error) {
 	url.Scheme = strings.ToLower(url.Scheme)
 
 	// Verify that the scheme is something we support in our common downloader.
-	supported := []string{"file", "http", "https"}
+	supported := []string{"file", "http", "https", "s3"}
 	found := false
 	for _, s := range supported {
 		if url.Scheme == s {
