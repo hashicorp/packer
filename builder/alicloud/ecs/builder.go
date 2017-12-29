@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"fmt"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
@@ -146,9 +147,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		})
 	}
 	steps = append(steps,
+		&stepAttachKeyPar{},
 		&stepRunAlicloudInstance{},
 		&stepMountAlicloudDisk{},
-		&stepAttachKeyPar{},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: SSHHost(
