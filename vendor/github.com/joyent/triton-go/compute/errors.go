@@ -94,6 +94,12 @@ func IsUnknownError(err error) bool {
 	return isSpecificError(err, "UnknownError")
 }
 
+// IsEmptyResponse tests whether err wraps a client.TritonError with code
+// EmptyResponse
+func IsEmptyResponse(err error) bool {
+	return isSpecificError(err, "EmptyResponse")
+}
+
 // isSpecificError checks whether the error represented by err wraps
 // an underlying client.TritonError with code errorCode.
 func isSpecificError(err error, errorCode string) bool {
