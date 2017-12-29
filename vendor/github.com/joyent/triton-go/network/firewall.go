@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"time"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
 )
@@ -227,7 +229,7 @@ type ListMachineRulesInput struct {
 }
 
 func (c *FirewallClient) ListMachineRules(ctx context.Context, input *ListMachineRulesInput) ([]*FirewallRule, error) {
-	path := fmt.Sprintf("/%s/machines/%s/firewallrules", c.client.AccountName, input.MachineID)
+	path := fmt.Sprintf("/%s/machines/%s/fwrules", c.client.AccountName, input.MachineID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
 		Path:   path,
@@ -243,7 +245,56 @@ func (c *FirewallClient) ListMachineRules(ctx context.Context, input *ListMachin
 	var result []*FirewallRule
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListRules response: {{err}}", err)
+		return nil, errwrap.Wrapf("Error decoding ListMachineRules response: {{err}}", err)
+	}
+
+	return result, nil
+}
+
+type ListRuleMachinesInput struct {
+	ID string
+}
+
+type Machine struct {
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Type            string                 `json:"type"`
+	Brand           string                 `json:"brand"`
+	State           string                 `json:"state"`
+	Image           string                 `json:"image"`
+	Memory          int                    `json:"memory"`
+	Disk            int                    `json:"disk"`
+	Metadata        map[string]string      `json:"metadata"`
+	Tags            map[string]interface{} `json:"tags"`
+	Created         time.Time              `json:"created"`
+	Updated         time.Time              `json:"updated"`
+	Docker          bool                   `json:"docker"`
+	IPs             []string               `json:"ips"`
+	Networks        []string               `json:"networks"`
+	PrimaryIP       string                 `json:"primaryIp"`
+	FirewallEnabled bool                   `json:"firewall_enabled"`
+	ComputeNode     string                 `json:"compute_node"`
+	Package         string                 `json:"package"`
+}
+
+func (c *FirewallClient) ListRuleMachines(ctx context.Context, input *ListRuleMachinesInput) ([]*Machine, error) {
+	path := fmt.Sprintf("/%s/fwrules/%s/machines", c.client.AccountName, input.ID)
+	reqInputs := client.RequestInput{
+		Method: http.MethodGet,
+		Path:   path,
+	}
+	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
+	if respReader != nil {
+		defer respReader.Close()
+	}
+	if err != nil {
+		return nil, errwrap.Wrapf("Error executing ListRuleMachines request: {{err}}", err)
+	}
+
+	var result []*Machine
+	decoder := json.NewDecoder(respReader)
+	if err = decoder.Decode(&result); err != nil {
+		return nil, errwrap.Wrapf("Error decoding ListRuleMachines response: {{err}}", err)
 	}
 
 	return result, nil

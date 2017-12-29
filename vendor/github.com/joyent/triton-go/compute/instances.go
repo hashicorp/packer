@@ -97,10 +97,13 @@ func (c *InstancesClient) Get(ctx context.Context, input *GetInstanceInput) (*In
 		Path:   path,
 	}
 	response, err := c.client.ExecuteRequestRaw(ctx, reqInputs)
-	if response != nil {
+	if response == nil {
+		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
+	}
+	if response.Body != nil {
 		defer response.Body.Close()
 	}
-	if response == nil || response.StatusCode == http.StatusNotFound || response.StatusCode == http.StatusGone {
+	if response.StatusCode == http.StatusNotFound || response.StatusCode == http.StatusGone {
 		return nil, &client.TritonError{
 			StatusCode: response.StatusCode,
 			Code:       "ResourceNotFound",
@@ -945,6 +948,32 @@ func (c *InstancesClient) Start(ctx context.Context, input *StartInstanceInput) 
 
 	params := &url.Values{}
 	params.Set("action", "start")
+
+	reqInputs := client.RequestInput{
+		Method: http.MethodPost,
+		Path:   path,
+		Query:  params,
+	}
+	respReader, err := c.client.ExecuteRequestURIParams(ctx, reqInputs)
+	if respReader != nil {
+		defer respReader.Close()
+	}
+	if err != nil {
+		return errwrap.Wrapf("Error executing Start request: {{err}}", err)
+	}
+
+	return nil
+}
+
+type RebootInstanceInput struct {
+	InstanceID string
+}
+
+func (c *InstancesClient) Reboot(ctx context.Context, input *RebootInstanceInput) error {
+	path := fmt.Sprintf("/%s/machines/%s", c.client.AccountName, input.InstanceID)
+
+	params := &url.Values{}
+	params.Set("action", "reboot")
 
 	reqInputs := client.RequestInput{
 		Method: http.MethodPost,
