@@ -81,7 +81,7 @@ func (c *DataCentersClient) Get(ctx context.Context, input *GetDataCenterInput) 
 	}
 
 	if resp.StatusCode != http.StatusFound {
-		return nil, fmt.Errorf("Error executing Get request: expected status code 302, got %s",
+		return nil, fmt.Errorf("Error executing Get request: expected status code 302, got %d",
 			resp.StatusCode)
 	}
 
