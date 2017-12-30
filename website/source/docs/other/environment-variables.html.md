@@ -44,7 +44,7 @@ each can be found below:
 -   `PACKER_TMP_DIR` - The directory used for temporary files during marshalling.
     If unset, appends 'packer' to environment variables TEMP, TMP, or LOCALAPPDATA 
     (Windows) before falling back to the value of `configDir()/tmp` which resolves
-    to `$HOME/.packer.d/` (Unix) or `%APPDAT%\packer.d` (Windows).
+    to `$HOME/.packer.d/` (Unix) or `%APPDATA%\packer.d` (Windows).
     This is not to be confused with the provisionee's temporary directory which
-    is often defined (hard-coded) as '/tmp' or '%SYSTEMROOT%\Temp' per each 
-    provisioner module.
+    is often defined as '/tmp' or '%SYSTEMROOT%\Temp' (Windows) suffixed by the
+    name of the module.
