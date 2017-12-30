@@ -17,32 +17,30 @@
     "subscription_id": "{{user `subscription_id`}}",
     "object_id": "{{user `object_id`}}",
 
+    "capture_container_name": "images",
+    "capture_name_prefix": "packer",
 
-            "capture_container_name": "images",
-            "capture_name_prefix": "packer",
+    "os_type": "Windows",
+    "image_publisher": "MicrosoftWindowsServer",
+    "image_offer": "WindowsServer",
+    "image_sku": "2012-R2-Datacenter",
 
-            "os_type": "Windows",
-            "image_publisher": "MicrosoftWindowsServer",
-            "image_offer": "WindowsServer",
-            "image_sku": "2012-R2-Datacenter",
+    "communicator": "winrm",
+    "winrm_use_ssl": "true",
+    "winrm_insecure": "true",
+    "winrm_timeout": "3m",
+    "winrm_username": "packer",
 
-            "communicator": "winrm",
-            "winrm_use_ssl": "true",
-            "winrm_insecure": "true",
-            "winrm_timeout": "3m",
-            "winrm_username": "packer",
-
-            "location": "West US",
-            "vm_size": "Standard_A2"
-        }
-    ],
-    "provisioners": [
-        {
-            "type": "powershell",
-            "inline": [
-                "dir c:\\"
-            ]
-        }
+    "location": "West US",
+    "vm_size": "Standard_DS2_v2"
+  }],
+  "provisioners": [{
+    "type": "powershell",
+    "inline": [
+      "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
+      "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+      "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
     ]
+  }]
 }
 

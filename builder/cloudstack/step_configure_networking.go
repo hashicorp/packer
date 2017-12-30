@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -25,6 +25,7 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 	if config.UseLocalIPAddress {
 		ui.Message("Using the local IP address...")
+		state.Put("commPort", config.Comm.Port())
 		ui.Message("Networking has been setup!")
 		return multistep.ActionContinue
 	}
@@ -32,22 +33,17 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	// Generate a random public port used to configure our port forward.
 	rand.Seed(time.Now().UnixNano())
 	s.publicPort = 50000 + rand.Intn(10000)
+	state.Put("commPort", s.publicPort)
 
 	// Set the currently configured port to be the private port.
 	s.privatePort = config.Comm.Port()
 
-	// Set the SSH or WinRM port to be the randomly generated public port.
-	switch config.Comm.Type {
-	case "ssh":
-		config.Comm.SSHPort = s.publicPort
-	case "winrm":
-		config.Comm.WinRMPort = s.publicPort
-	}
-
 	// Retrieve the instance ID from the previously saved state.
 	instanceID, ok := state.Get("instance_id").(string)
 	if !ok || instanceID == "" {
-		ui.Error("Could not retrieve instance_id from state!")
+		err := fmt.Errorf("Could not retrieve instance_id from state!")
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -56,7 +52,9 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		cloudstack.WithProject(config.Project),
 	)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Failed to retrieve the network object: %s", err))
+		err := fmt.Errorf("Failed to retrieve the network object: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -74,16 +72,20 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 			p.SetNetworkid(network.Id)
 		}
 
+		p.SetZoneid(config.Zone)
+
 		// Associate a new public IP address.
 		ipAddr, err := client.Address.AssociateIpAddress(p)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to associate public IP address: %s", err))
+			err := fmt.Errorf("Failed to associate public IP address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
 		// Set the IP address and it's ID.
 		config.PublicIPAddress = ipAddr.Id
-		config.hostAddress = ipAddr.Ipaddress
+		state.Put("ipaddress", ipAddr.Ipaddress)
 
 		// Store the IP address ID.
 		state.Put("ip_address_id", ipAddr.Id)
@@ -105,7 +107,10 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	// Create the port forward.
 	forward, err := client.Firewall.CreatePortForwardingRule(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Failed to create port forward: %s", err))
+		err := fmt.Errorf("Failed to create port forward: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	// Store the port forward ID.
@@ -115,7 +120,9 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		ui.Message("Creating network ACL rule...")
 
 		if network.Aclid == "" {
-			ui.Error("Failed to configure the firewall: no ACL connected to the VPC network")
+			err := fmt.Errorf("Failed to configure the firewall: no ACL connected to the VPC network")
+			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -133,7 +140,9 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 		// Create the network ACL rule.
 		aclRule, err := client.NetworkACL.CreateNetworkACL(p)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to create network ACL rule: %s", err))
+			err := fmt.Errorf("Failed to create network ACL rule: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -152,7 +161,9 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 
 		fwRule, err := client.Firewall.CreateFirewallRule(p)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to create firewall rule: %s", err))
+			err := fmt.Errorf("Failed to create firewall rule: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
 
@@ -161,7 +172,6 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	}
 
 	ui.Message("Networking has been setup!")
-
 	return multistep.ActionContinue
 }
 
@@ -233,6 +243,5 @@ func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Message("Networking has been cleaned!")
-
 	return
 }

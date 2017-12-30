@@ -21,7 +21,7 @@ GetMetadata () {
   echo "$(curl -f -H "Metadata-Flavor: Google" ${BASEMETADATAURL}/${1} 2> /dev/null)"
 }
 
-ZONE=$(GetMetadata zone | grep -oP "[^/]*$")
+ZONE=$(basename $(GetMetadata zone))
 
 SetMetadata () {
   gcloud compute instances add-metadata ${HOSTNAME} --metadata ${1}=${2} --zone ${ZONE}

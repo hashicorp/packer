@@ -163,7 +163,7 @@ func WaitForState(conf *StateChangeConf) (i interface{}, err error) {
 	log.Printf("Waiting for state to become: %s", conf.Target)
 
 	sleepSeconds := SleepSeconds()
-	maxTicks := int(TimeoutSeconds()/sleepSeconds) + 1
+	maxTicks := TimeoutSeconds()/sleepSeconds + 1
 	notfoundTick := 0
 
 	for {

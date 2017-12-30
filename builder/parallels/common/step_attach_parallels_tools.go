@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepAttachParallelsTools is a step that attaches Parallels Tools ISO image
@@ -36,7 +36,7 @@ func (s *StepAttachParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionContinue
 	}
 
-	// Get the Paralells Tools path on the host machine
+	// Get the Parallels Tools path on the host machine
 	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
 	// Attach the guest additions to the computer

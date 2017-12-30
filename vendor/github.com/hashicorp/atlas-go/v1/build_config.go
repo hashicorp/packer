@@ -15,8 +15,9 @@ type bcWrapper struct {
 
 // Atlas expects a list of key/value vars
 type BuildVar struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	Sensitive bool   `json:"sensitive"`
 }
 type BuildVars []BuildVar
 

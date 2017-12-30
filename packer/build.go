@@ -56,7 +56,7 @@ type Build interface {
 	Run(Ui, Cache) ([]Artifact, error)
 
 	// Cancel will cancel a running build. This will block until the build
-	// is actually completely cancelled.
+	// is actually completely canceled.
 	Cancel()
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
@@ -115,6 +115,7 @@ type coreBuildPostProcessor struct {
 // Keeps track of the provisioner and the configuration of the provisioner
 // within the build.
 type coreBuildProvisioner struct {
+	pType       string
 	provisioner Provisioner
 	config      []interface{}
 }
@@ -193,9 +194,17 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 
 	// Add a hook for the provisioners if we have provisioners
 	if len(b.provisioners) > 0 {
-		provisioners := make([]Provisioner, len(b.provisioners))
+		hookedProvisioners := make([]*HookedProvisioner, len(b.provisioners))
 		for i, p := range b.provisioners {
-			provisioners[i] = p.provisioner
+			var pConfig interface{}
+			if len(p.config) > 0 {
+				pConfig = p.config[0]
+			}
+			hookedProvisioners[i] = &HookedProvisioner{
+				p.provisioner,
+				pConfig,
+				p.pType,
+			}
 		}
 
 		if _, ok := hooks[HookProvision]; !ok {
@@ -203,21 +212,23 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 		}
 
 		hooks[HookProvision] = append(hooks[HookProvision], &ProvisionHook{
-			Provisioners: provisioners,
+			Provisioners: hookedProvisioners,
 		})
 	}
 
 	hook := &DispatchHook{Mapping: hooks}
 	artifacts := make([]Artifact, 0, 1)
 
-	// The builder just has a normal Ui, but targetted
-	builderUi := &TargettedUi{
+	// The builder just has a normal Ui, but targeted
+	builderUi := &TargetedUI{
 		Target: b.Name(),
 		Ui:     originalUi,
 	}
 
 	log.Printf("Running builder: %s", b.builderType)
+	ts := CheckpointReporter.AddSpan(b.builderType, "builder", b.builderConfig)
 	builderArtifact, err := b.builder.Run(builderUi, hook, cache)
+	ts.End(err)
 	if err != nil {
 		return nil, err
 	}
@@ -236,13 +247,15 @@ PostProcessorRunSeqLoop:
 	for _, ppSeq := range b.postProcessors {
 		priorArtifact := builderArtifact
 		for i, corePP := range ppSeq {
-			ppUi := &TargettedUi{
+			ppUi := &TargetedUI{
 				Target: fmt.Sprintf("%s (%s)", b.Name(), corePP.processorType),
 				Ui:     originalUi,
 			}
 
 			builderUi.Say(fmt.Sprintf("Running post-processor: %s", corePP.processorType))
+			ts := CheckpointReporter.AddSpan(corePP.processorType, "post-processor", corePP.config)
 			artifact, keep, err := corePP.processor.PostProcess(ppUi, priorArtifact)
+			ts.End(err)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("Post-processor failed: %s", err))
 				continue PostProcessorRunSeqLoop

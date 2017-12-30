@@ -1,15 +1,22 @@
 ---
 description: |
-    Within the template, the push section configures how a template can be pushed to
-    a remote build service.
+    Within the template, the push section configures how a template can be pushed
+    to a remote build service.
 layout: docs
-page_title: 'Templates: Push'
-...
+page_title: 'Push - Templates'
+sidebar_current: 'docs-templates-push'
+---
 
-# Templates: Push
+# Template Push
+
+!&gt; The Packer and Artifact Registry features of Atlas will no longer be
+actively developed or maintained and will be fully decommissioned on Friday,
+March 30, 2018. Please see our [guide on building immutable infrastructure with
+Packer on CI/CD](/guides/packer-on-cicd/) for ideas on implementing these
+features yourself.
 
 Within the template, the push section configures how a template can be
-[pushed](/docs/command-line/push.html) to a remote build service.
+[pushed](/docs/commands/push.html) to a remote build service.
 
 Push configuration is responsible for defining what files are required to build
 this template, what the name of build configuration is in the build service,
@@ -21,7 +28,7 @@ services will come in the form of plugins in the future.
 
 Within a template, a push configuration section looks like this:
 
-``` {.javascript}
+``` json
 {
   "push": {
     // ... push configuration here
@@ -68,7 +75,7 @@ each category, the available configuration keys are alphabetized.
 
 A push configuration section with minimal options:
 
-``` {.javascript}
+``` json
 {
   "push": {
     "name": "hashicorp/precise64"
@@ -79,7 +86,7 @@ A push configuration section with minimal options:
 A push configuration specifying Packer to inspect the VCS and list individual
 files to include:
 
-``` {.javascript}
+``` json
 {
   "push": {
     "name": "hashicorp/precise64",

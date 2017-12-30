@@ -1,0 +1,28 @@
+<% wrap_layout :inner do %>
+  <% content_for :sidebar do %>
+    <ul class="nav docs-sidenav">
+      <li<%= sidebar_current("guides-veewee-to-packer") %>>
+        <a href="/guides/veewee-to-packer.html">Veewee to Packer</a>
+      </li>
+      <li<%= sidebar_current("guides-packer-on-cicd") %>>
+        <a href="/guides/packer-on-cicd/index.html">Build Immutable Infrastructure with Packer in CI/CD</a>
+        <ul class="nav">
+          <li<%= sidebar_current("guides-packer-on-cicd-build-image") %>>
+            <a href="/guides/packer-on-cicd/build-image-in-cicd.html">Build Images in CI/CD</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-build-virtualbox") %>>
+            <a href="/guides/packer-on-cicd/build-virtualbox-image.html">Build a VirtualBox Image with Packer in TeamCity</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-upload-image-to-artifact-store") %>>
+            <a href="/guides/packer-on-cicd/upload-images-to-artifact.html">Upload a VirtualBox Image to S3</a>
+          </li>
+          <li<%= sidebar_current("guides-packer-on-cicd-trigger-tfe-run") %>>
+            <a href="/guides/packer-on-cicd/trigger-tfe.html">Trigger Terraform Enterprise runs</a>
+          </li>
+        </li>
+      </li>
+    </ul>
+  <% end %>
+
+  <%= yield %>
+<% end %>

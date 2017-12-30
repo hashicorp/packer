@@ -1,7 +1,7 @@
 package profitbricks
 
-// Endpoint is the base url for REST requests .
-var Endpoint = "https://api.profitbricks.com/rest/v2"
+// Endpoint is the base url for REST requests.
+var Endpoint = "https://api.profitbricks.com/cloudapi/v4"
 
 //  Username for authentication .
 var Username string
@@ -11,7 +11,9 @@ var Passwd string
 
 // SetEndpoint is used to set the REST Endpoint. Endpoint is declared in config.go
 func SetEndpoint(newendpoint string) string {
-	Endpoint = newendpoint
+	if newendpoint != "" {
+		Endpoint = newendpoint
+	}
 	return Endpoint
 }
 
@@ -20,4 +22,8 @@ func SetEndpoint(newendpoint string) string {
 func SetAuth(u, p string) {
 	Username = u
 	Passwd = p
+}
+
+func SetUserAgent(userAgent string) {
+	AgentHeader = userAgent
 }

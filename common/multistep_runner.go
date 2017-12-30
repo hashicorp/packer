@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
@@ -61,6 +61,10 @@ type abortStep struct {
 	ui   packer.Ui
 }
 
+func (s abortStep) InnerStepName() string {
+	return typeName(s.step)
+}
+
 func (s abortStep) Run(state multistep.StateBag) multistep.StepAction {
 	return s.step.Run(state)
 }
@@ -80,6 +84,10 @@ func (s abortStep) Cleanup(state multistep.StateBag) {
 type askStep struct {
 	step multistep.Step
 	ui   packer.Ui
+}
+
+func (s askStep) InnerStepName() string {
+	return typeName(s.step)
 }
 
 func (s askStep) Run(state multistep.StateBag) (action multistep.StepAction) {

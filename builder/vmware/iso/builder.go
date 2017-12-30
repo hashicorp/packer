@@ -6,15 +6,16 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const BuilderIdESX = "mitchellh.vmware-esx"
@@ -43,14 +44,14 @@ type Config struct {
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
 	Format              string   `mapstructure:"format"`
 	GuestOSType         string   `mapstructure:"guest_os_type"`
-	Version             string   `mapstructure:"version"`
-	VMName              string   `mapstructure:"vm_name"`
-	BootCommand         []string `mapstructure:"boot_command"`
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
+	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	SkipExport          bool     `mapstructure:"skip_export"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
+	Version             string   `mapstructure:"version"`
 
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`
@@ -148,6 +149,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
+
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -178,6 +180,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
+	if b.config.Headless && b.config.DisableVNC {
+		warnings = append(warnings,
+			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+				"you won't be able to see any output.")
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return warnings, errs
 	}
@@ -199,6 +207,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+
+	exportOutputPath := b.config.OutputDir
+
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		b.config.OutputDir = b.config.VMName
 	}
@@ -255,6 +266,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
+			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
@@ -269,6 +281,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
+			VNCEnabled:  !b.config.DisableVNC,
 			BootCommand: b.config.BootCommand,
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
@@ -297,13 +310,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
 		},
-		&vmwcommon.StepCleanVMX{},
+		&vmwcommon.StepCleanVMX{
+			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+			VNCEnabled:               !b.config.DisableVNC,
+		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
 		&StepExport{
 			Format:     b.config.Format,
 			SkipExport: b.config.SkipExport,
+			OutputDir:  exportOutputPath,
 		},
 	}
 
@@ -327,9 +344,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" && !b.config.SkipExport {
 		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
+		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
@@ -344,10 +361,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		builderId = BuilderIdESX
 	}
 
+	config := make(map[string]string)
+	config[ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
+	config[ArtifactConfFormat] = b.config.Format
+	config[ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
+
 	return &Artifact{
 		builderId: builderId,
+		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
+		config:    config,
 	}, nil
 }
 

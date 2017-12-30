@@ -1,9 +1,9 @@
 ---
-description: |
-    The ProfitBricks builder is able to create images for ProfitBricks cloud.
+description: 'The ProfitBricks builder is able to create images for ProfitBricks cloud.'
 layout: docs
-page_title: ProfitBricks Builder
-...
+page_title: 'ProfitBricks - Builders'
+sidebar_current: 'docs-builders-profitbricks'
+---
 
 # ProfitBricks Builder
 
@@ -23,16 +23,15 @@ builder.
 
 ### Required
 
--   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image). 
+-   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image).
 
--   `password` (string) - ProfitBricks password. This can be specified via environment variable `PROFITBRICKS_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
+-   `password` (string) - ProfitBricks password. This can be specified via environment variable \`PROFITBRICKS\_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
 
--   `username` (string) - ProfitBricks username. This can be specified via environment variable `PROFITBRICKS_USERNAME', if provided. The value definded in the config has precedence over environemnt variable. 
-
+-   `username` (string) - ProfitBricks username. This can be specified via environment variable \`PROFITBRICKS\_USERNAME', if provided. The value definded in the config has precedence over environemnt variable.
 
 ### Optional
 
--   `cores` (integer) - Amount of CPU cores to use for this build. Defaults to "4".
+-   `cores` (number) - Amount of CPU cores to use for this build. Defaults to "4".
 
 -   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
@@ -40,7 +39,7 @@ builder.
 
 -   `location` (string) - Defaults to "us/las".
 
--   `ram` (integer) - Amount of RAM to use for this image. Defalts to "2048".
+-   `ram` (number) - Amount of RAM to use for this image. Defaults to "2048".
 
 -   `retries` (string) - Number of retries Packer will make status requests while waiting for the build to complete. Default value 120 seconds.
 
@@ -48,14 +47,13 @@ builder.
 
 -   `snapshot_password` (string) - Password for the snapshot.
 
--   `url` (string) - Endpoint for the ProfitBricks REST API. Default URL "https://api.profitbricks.com/rest/v2"
-
+-   `url` (string) - Endpoint for the ProfitBricks REST API. Default URL "<https://api.profitbricks.com/rest/v2>"
 
 ## Example
 
 Here is a basic example:
 
-```json
+``` json
 {
   "builders": [
     {
@@ -63,7 +61,6 @@ Here is a basic example:
       "type": "profitbricks",
       "disk_size": "5",
       "snapshot_name": "double",
-      "ssh_key_path": "/path/to/private/key",
       "snapshot_password": "test1234",
       "ssh_username" :"root",
       "timeout": 100

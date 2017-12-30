@@ -2,9 +2,9 @@ package iso
 
 import (
 	"fmt"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
 	"log"
 )
 

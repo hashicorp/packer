@@ -1,25 +1,31 @@
 ---
 description: |
-    The shell Packer provisioner provisions machines built by Packer using shell
-    scripts. Shell provisioning is the easiest way to get software installed and
-    configured on a machine.
+    shell-local will run a shell script of your choosing on the machine where Packer
+    is being run - in other words, it shell-local will run the shell script on your
+    build server, or your desktop, etc., rather than the remote/guest machine being
+    provisioned by Packer.
 layout: docs
-page_title: Local Shell Provisioner
-...
+page_title: 'Shell (Local) - Provisioners'
+sidebar_current: 'docs-provisioners-shell-local'
+---
 
 # Local Shell Provisioner
 
 Type: `shell-local`
 
-The local shell provisioner executes a local shell script on the machine running
-Packer. The [remote shell](/docs/provisioners/shell.html) provisioner executes
+shell-local will run a shell script of your choosing on the machine where Packer
+is being run - in other words, it shell-local will run the shell script on your
+build server, or your desktop, etc., rather than the remote/guest machine being
+provisioned by Packer.
+
+The [remote shell](/docs/provisioners/shell.html) provisioner executes
 shell scripts on a remote machine.
 
 ## Basic Example
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "shell-local",
   "command": "echo foo"
@@ -42,5 +48,5 @@ Optional parameters:
     the script. By default this is `["/bin/sh", "-c", "{{.Command}}"]`. The value
     is an array of arguments executed directly by the OS. The value of this is
     treated as [configuration
-    template](/docs/templates/configuration-templates.html). The only available
+    template](/docs/templates/engine.html). The only available
     variable is `Command` which is the command to execute.

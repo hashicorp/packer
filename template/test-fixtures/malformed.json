@@ -1,0 +1,25 @@
+{
+  "variables": {
+    "access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `access_key`}}",
+    "secret_key": "{{user `secret_key`}}",
+    "region": "us-east-1",
+    "source_ami": "ami-fce3c696,",
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-example {{timestamp}}"
+  }]
+}]
+
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 15",
+      "sudo yum update -y"
+    ]
+  }]
+}

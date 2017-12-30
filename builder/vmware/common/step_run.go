@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // This step runs the created virtual machine.
@@ -48,7 +49,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
 					"view the screen of the VM, connect via VNC with the password \"%s\" to\n"+
-					"%s:%d", vncPassword, vncIp, vncPort))
+					"vnc://%s:%d", vncPassword, vncIp, vncPort))
 		} else {
 			ui.Message("The VM will be run headless, without a GUI, as configured.\n" +
 				"If the run isn't succeeding as you expect, please enable the GUI\n" +

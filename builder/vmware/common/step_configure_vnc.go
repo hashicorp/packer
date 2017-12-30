@@ -8,8 +8,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -21,6 +21,7 @@ import (
 // Produces:
 //   vnc_port uint - The port that VNC is configured to listen on.
 type StepConfigureVNC struct {
+	Enabled            bool
 	VNCBindAddress     string
 	VNCPortMin         uint
 	VNCPortMax         uint
@@ -63,7 +64,7 @@ func VNCPassword(skipPassword bool) string {
 	}
 	length := int(8)
 
-	charSet := []byte("1234567890-=qwertyuiop[]asdfghjkl;zxcvbnm,./!@#%^*()_+QWERTYUIOP{}|ASDFGHJKL:XCVBNM<>?")
+	charSet := []byte("012345689abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	charSetLength := len(charSet)
 
 	password := make([]byte, length)
@@ -76,6 +77,11 @@ func VNCPassword(skipPassword bool) string {
 }
 
 func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+	if !s.Enabled {
+		log.Println("Skipping VNC configuration step...")
+		return multistep.ActionContinue
+	}
+
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

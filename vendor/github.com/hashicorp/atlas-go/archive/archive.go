@@ -372,6 +372,8 @@ func copyDirWalkFn(
 				return filepath.Walk(target, copyDirWalkFn(
 					tarW, target, subpath, opts, vcsInclude))
 			}
+			// return now so that we don't try to copy twice
+			return nil
 		}
 
 		return copyConcreteEntry(tarW, subpath, path, info)
@@ -418,7 +420,7 @@ func copyConcreteEntry(
 
 	if _, err = io.Copy(tarW, f); err != nil {
 		return fmt.Errorf(
-			"failed copying file to archive: %s", path)
+			"failed copying file to archive: %s, %s", path, err)
 	}
 
 	return nil
@@ -474,35 +476,22 @@ func copyExtras(w *tar.Writer, extra map[string]string) error {
 }
 
 func readLinkFull(path string, info os.FileInfo) (string, os.FileInfo, error) {
-	// Read the symlink continously until we reach a concrete file.
-	target := path
-	tries := 0
-	for info.Mode()&os.ModeSymlink != 0 {
-		var err error
-		target, err = os.Readlink(target)
-		if err != nil {
-			return "", nil, err
-		}
-		if !filepath.IsAbs(target) {
-			target, err = filepath.Abs(target)
-			if err != nil {
-				return "", nil, err
-			}
-		}
-		info, err = os.Lstat(target)
-		if err != nil {
-			return "", nil, err
-		}
-
-		tries++
-		if tries > 100 {
-			return "", nil, fmt.Errorf(
-				"Symlink for %s is too deep, over 100 levels deep",
-				path)
-		}
+	target, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		return "", nil, err
 	}
 
-	return target, info, nil
+	target, err = filepath.Abs(target)
+	if err != nil {
+		return "", nil, err
+	}
+
+	fi, err := os.Lstat(target)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return target, fi, nil
 }
 
 // readCloseRemover is an io.ReadCloser implementation that will remove

@@ -17,6 +17,13 @@ const (
 	DebugLocationBeforeCleanup
 )
 
+// StepWrapper is an interface that wrapped steps can implement to expose their
+// inner step names to the debug runner.
+type StepWrapper interface {
+	// InnerStepName should return the human readable name of the wrapped step.
+	InnerStepName() string
+}
+
 // DebugPauseFn is the type signature for the function that is called
 // whenever the DebugRunner pauses. It allows the caller time to
 // inspect the state of the multi-step sequence at a given step.
@@ -56,8 +63,14 @@ func (r *DebugRunner) Run(state StateBag) {
 	steps := make([]Step, len(r.Steps)*2)
 	for i, step := range r.Steps {
 		steps[i*2] = step
+		name := ""
+		if wrapped, ok := step.(StepWrapper); ok {
+			name = wrapped.InnerStepName()
+		} else {
+			name = reflect.Indirect(reflect.ValueOf(step)).Type().Name()
+		}
 		steps[(i*2)+1] = &debugStepPause{
-			reflect.Indirect(reflect.ValueOf(step)).Type().Name(),
+			name,
 			pauseFn,
 		}
 	}

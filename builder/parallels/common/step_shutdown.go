@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepShutdown is a step that shuts down the machine. It first attempts to do

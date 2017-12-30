@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
+	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 )
 
 // Builder implements packer.Builder and builds the actual Parallels
@@ -36,7 +36,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// Create the driver that we'll use to communicate with Parallels
 	driver, err := parallelscommon.NewDriver()
 	if err != nil {
-		return nil, fmt.Errorf("Failed creating Paralles driver: %s", err)
+		return nil, fmt.Errorf("Failed creating Parallels driver: %s", err)
 	}
 
 	// Set up the state.

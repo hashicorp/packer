@@ -2,11 +2,12 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 type StepConfigureIp struct {
@@ -35,7 +36,7 @@ func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
 			return multistep.ActionHalt
 		}
 
-		ip = strings.TrimSpace(string(cmdOut))
+		ip = strings.TrimSpace(cmdOut)
 
 		if ip != "False" {
 			break

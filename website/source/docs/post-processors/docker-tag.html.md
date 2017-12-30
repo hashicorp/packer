@@ -5,8 +5,9 @@ description: |
     other Docker post-processors such as docker-push to push the image to a
     registry.
 layout: docs
-page_title: 'docker-tag Post-Processor'
-...
+page_title: 'Docker Tag - Post-Processors'
+sidebar_current: 'docs-post-processors-docker-tag'
+---
 
 # Docker Tag Post-Processor
 
@@ -24,8 +25,8 @@ that this works with committed resources, rather than exported.
 
 ## Configuration
 
-The configuration for this post-processor is extremely simple. At least a
-repository is required.
+The configuration for this post-processor requires `repository`, all other settings
+are optional.
 
 -   `repository` (string) - The repository of the image.
 
@@ -33,21 +34,23 @@ repository is required.
 
 -   `force` (boolean) - If true, this post-processor forcibly tag the image even
     if tag name is collided. Default to `false`.
+    But it will be ignored if Docker &gt;= 1.12.0 was detected,
+    since the `force` option was removed after 1.12.0. [reference](https://docs.docker.com/engine/deprecated/#/f-flag-on-docker-tag)
 
 ## Example
 
 An example is shown below, showing only the post-processor configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "docker-tag",
-  "repository": "mitchellh/packer",
+  "repository": "hashicorp/packer",
   "tag": "0.7"
 }
 ```
 
 This example would take the image created by the Docker builder and tag it into
-the local Docker process with a name of `mitchellh/packer:0.7`.
+the local Docker process with a name of `hashicorp/packer:0.7`.
 
 Following this, you can use the
 [docker-push](/docs/post-processors/docker-push.html) post-processor to push it

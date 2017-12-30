@@ -3,8 +3,8 @@ package chroot
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"os"
 	"os/exec"
 	"syscall"

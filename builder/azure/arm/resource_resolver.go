@@ -10,6 +10,7 @@ package arm
 
 import (
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"strings"
 )
 
@@ -43,6 +44,15 @@ func (s *resourceResolver) Resolve(c *Config) error {
 		c.VirtualNetworkSubnetName = subnetName
 	}
 
+	if s.shouldResolveManagedImageName(c) {
+		image, err := findManagedImageByName(s.client, c.CustomManagedImageName, c.CustomManagedImageResourceGroupName)
+		if err != nil {
+			return err
+		}
+
+		c.customManagedImageID = *image.ID
+	}
+
 	return nil
 }
 
@@ -50,10 +60,29 @@ func (s *resourceResolver) shouldResolveResourceGroup(c *Config) bool {
 	return c.VirtualNetworkName != "" && c.VirtualNetworkResourceGroupName == ""
 }
 
+func (s *resourceResolver) shouldResolveManagedImageName(c *Config) bool {
+	return c.CustomManagedImageName != ""
+}
+
 func getResourceGroupNameFromId(id string) string {
 	// "/subscriptions/3f499422-dd76-4114-8859-86d526c9deb6/resourceGroups/packer-Resource-Group-yylnwsl30j/providers/...
 	xs := strings.Split(id, "/")
 	return xs[4]
+}
+
+func findManagedImageByName(client *AzureClient, name, resourceGroupName string) (*compute.Image, error) {
+	images, err := client.ImagesClient.ListByResourceGroup(resourceGroupName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, image := range *images.Value {
+		if strings.EqualFold(name, *image.Name) {
+			return &image, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Cannot find an image named '%s' in the resource group '%s'", name, resourceGroupName)
 }
 
 func findVirtualNetworkResourceGroup(client *AzureClient, name string) (string, error) {

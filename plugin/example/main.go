@@ -15,10 +15,10 @@
 package main
 
 import (
-	"github.com/mitchellh/packer/builder/amazon/chroot"
-	"github.com/mitchellh/packer/packer/plugin"
-	"github.com/mitchellh/packer/post-processor/docker-push"
-	"github.com/mitchellh/packer/provisioner/powershell"
+	"github.com/hashicorp/packer/builder/amazon/chroot"
+	"github.com/hashicorp/packer/packer/plugin"
+	"github.com/hashicorp/packer/post-processor/docker-push"
+	"github.com/hashicorp/packer/provisioner/powershell"
 )
 
 func main() {

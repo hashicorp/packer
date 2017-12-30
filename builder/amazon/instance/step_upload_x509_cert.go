@@ -2,8 +2,8 @@ package instance
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"os"
 )
 

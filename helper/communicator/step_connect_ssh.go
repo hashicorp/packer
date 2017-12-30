@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"strings"
 	"time"
 
+	commonssh "github.com/hashicorp/packer/common/ssh"
+	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	commonssh "github.com/mitchellh/packer/common/ssh"
-	"github.com/mitchellh/packer/communicator/ssh"
-	"github.com/mitchellh/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
+	"golang.org/x/net/proxy"
 )
 
 // StepConnectSSH is a step that only connects to SSH.
@@ -86,6 +89,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	// do this one before entering the retry loop.
 	var bProto, bAddr string
 	var bConf *gossh.ClientConfig
+	var pAddr string
+	var pAuth *proxy.Auth
 	if s.Config.SSHBastionHost != "" {
 		// The protocol is hardcoded for now, but may be configurable one day
 		bProto = "tcp"
@@ -97,6 +102,16 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			return nil, fmt.Errorf("Error configuring bastion: %s", err)
 		}
 		bConf = conf
+	}
+
+	if s.Config.SSHProxyHost != "" {
+		pAddr = fmt.Sprintf("%s:%d", s.Config.SSHProxyHost, s.Config.SSHProxyPort)
+		if s.Config.SSHProxyUsername != "" {
+			pAuth = new(proxy.Auth)
+			pAuth.User = s.Config.SSHBastionUsername
+			pAuth.Password = s.Config.SSHBastionPassword
+		}
+
 	}
 
 	handshakeAttempts := 0
@@ -144,6 +159,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			// We're using a bastion host, so use the bastion connfunc
 			connFunc = ssh.BastionConnectFunc(
 				bProto, bAddr, bConf, "tcp", address)
+		} else if pAddr != "" {
+			// Connect via SOCKS5 proxy
+			connFunc = ssh.ProxyConnectFunc(pAddr, pAuth, "tcp", address)
 		} else {
 			// No bastion host, connect directly
 			connFunc = ssh.ConnectFunc("tcp", address)
@@ -158,11 +176,11 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
-			Connection:   connFunc,
-			SSHConfig:    sshConfig,
-			Pty:          s.Config.SSHPty,
-			DisableAgent: s.Config.SSHDisableAgent,
-			UseSftp:      s.Config.SSHFileTransferMethod == "sftp",
+			Connection: connFunc,
+			SSHConfig:  sshConfig,
+			Pty:        s.Config.SSHPty,
+			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
+			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")
@@ -213,8 +231,23 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 		auth = append(auth, gossh.PublicKeys(signer))
 	}
 
+	if config.SSHBastionAgentAuth {
+		authSock := os.Getenv("SSH_AUTH_SOCK")
+		if authSock == "" {
+			return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+		}
+
+		sshAgent, err := net.Dial("unix", authSock)
+		if err != nil {
+			return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+		}
+
+		auth = append(auth, gossh.PublicKeysCallback(agent.NewClient(sshAgent).Signers))
+	}
+
 	return &gossh.ClientConfig{
-		User: config.SSHBastionUsername,
-		Auth: auth,
+		User:            config.SSHBastionUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }

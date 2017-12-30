@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 type mountPathData struct {
@@ -82,7 +82,7 @@ func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Mounting the root device...")
 	stderr := new(bytes.Buffer)
 
-	// build mount options from mount_options config, usefull for nouuid options
+	// build mount options from mount_options config, useful for nouuid options
 	// or other specific device type settings for mount
 	opts := ""
 	if len(s.MountOptions) > 0 {

@@ -2,118 +2,119 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-	"unicode"
+	"log"
+	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey      string `mapstructure:"access_key"`
-	SecretKey      string `mapstructure:"secret_key"`
-	RawRegion      string `mapstructure:"region"`
-	SkipValidation bool   `mapstructure:"skip_region_validation"`
-	Token          string `mapstructure:"token"`
-	ProfileName    string `mapstructure:"profile"`
+	AccessKey         string `mapstructure:"access_key"`
+	CustomEndpointEc2 string `mapstructure:"custom_endpoint_ec2"`
+	MFACode           string `mapstructure:"mfa_code"`
+	ProfileName       string `mapstructure:"profile"`
+	RawRegion         string `mapstructure:"region"`
+	SecretKey         string `mapstructure:"secret_key"`
+	SkipValidation    bool   `mapstructure:"skip_region_validation"`
+	Token             string `mapstructure:"token"`
+	session           *session.Session
 }
 
 // Config returns a valid aws.Config object for access to AWS services, or
 // an error if the authentication and region couldn't be resolved
-func (c *AccessConfig) Config() (*aws.Config, error) {
-	var creds *credentials.Credentials
+func (c *AccessConfig) Session() (*session.Session, error) {
+	if c.session != nil {
+		return c.session, nil
+	}
 
-	region, err := c.Region()
-	if err != nil {
-		return nil, err
-	}
-	config := aws.NewConfig().WithRegion(region).WithMaxRetries(11)
+	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+
 	if c.ProfileName != "" {
-		profile, err := NewFromProfile(c.ProfileName)
-		if err != nil {
-			return nil, err
+		if err := os.Setenv("AWS_PROFILE", c.ProfileName); err != nil {
+			return nil, fmt.Errorf("Set env error: %s", err)
 		}
-		creds, err = profile.CredentialsFromProfile(config)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		creds = credentials.NewChainCredentials([]credentials.Provider{
-			&credentials.StaticProvider{Value: credentials.Value{
-				AccessKeyID:     c.AccessKey,
-				SecretAccessKey: c.SecretKey,
-				SessionToken:    c.Token,
-			}},
-			&credentials.EnvProvider{},
-			&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-			&ec2rolecreds.EC2RoleProvider{
-				Client: ec2metadata.New(session.New(config)),
-			},
-		})
 	}
-	return config.WithCredentials(creds), nil
+
+	if c.RawRegion != "" {
+		config = config.WithRegion(c.RawRegion)
+	} else if region := c.metadataRegion(); region != "" {
+		config = config.WithRegion(region)
+	}
+
+	if c.CustomEndpointEc2 != "" {
+		config = config.WithEndpoint(c.CustomEndpointEc2)
+	}
+
+	if c.AccessKey != "" {
+		creds := credentials.NewChainCredentials(
+			[]credentials.Provider{
+				&credentials.StaticProvider{
+					Value: credentials.Value{
+						AccessKeyID:     c.AccessKey,
+						SecretAccessKey: c.SecretKey,
+						SessionToken:    c.Token,
+					},
+				},
+			})
+		config = config.WithCredentials(creds)
+	}
+
+	opts := session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Config:            *config,
+	}
+
+	if c.MFACode != "" {
+		opts.AssumeRoleTokenProvider = func() (string, error) {
+			return c.MFACode, nil
+		}
+	}
+
+	if sess, err := session.NewSessionWithOptions(opts); err != nil {
+		return nil, err
+	} else if *sess.Config.Region == "" {
+		return nil, fmt.Errorf("Could not find AWS region, make sure it's set.")
+	} else {
+		log.Printf("Found region %s", *sess.Config.Region)
+		c.session = sess
+	}
+
+	return c.session, nil
 }
 
-// Region returns the aws.Region object for access to AWS services, requesting
-// the region from the instance metadata if possible.
-func (c *AccessConfig) Region() (string, error) {
-	if c.RawRegion != "" {
-		if !c.SkipValidation {
-			if valid := ValidateRegion(c.RawRegion); valid == false {
-				return "", fmt.Errorf("Not a valid region: %s", c.RawRegion)
-			}
-		}
-		return c.RawRegion, nil
-	}
+// metadataRegion returns the region from the metadata service
+func (c *AccessConfig) metadataRegion() string {
 
-	md, err := GetInstanceMetaData("placement/availability-zone")
+	client := cleanhttp.DefaultClient()
+
+	// Keep the default timeout (100ms) low as we don't want to wait in non-EC2 environments
+	client.Timeout = 100 * time.Millisecond
+	ec2meta := ec2metadata.New(session.New(), &aws.Config{
+		HTTPClient: client,
+	})
+	region, err := ec2meta.Region()
 	if err != nil {
-		return "", err
+		log.Println("Error getting region from metadata service, "+
+			"probably because we're not running on AWS.", err)
+		return ""
 	}
-
-	region := strings.TrimRightFunc(string(md), unicode.IsLetter)
-	return region, nil
+	return region
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if c.RawRegion != "" && !c.SkipValidation {
-		if valid := ValidateRegion(c.RawRegion); valid == false {
+		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
 
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
-}
-
-func GetInstanceMetaData(path string) (contents []byte, err error) {
-	url := "http://169.254.169.254/latest/meta-data/" + path
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("Code %d returned for url %s", resp.StatusCode, url)
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	return []byte(body), err
+	return errs
 }

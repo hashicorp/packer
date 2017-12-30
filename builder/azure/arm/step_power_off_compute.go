@@ -1,15 +1,12 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepPowerOffCompute struct {
@@ -31,12 +28,13 @@ func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui) *StepPowerOffComp
 }
 
 func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
-	_, err := s.client.PowerOff(resourceGroupName, computeName, cancelCh)
-	if err != nil {
-		return err
-	}
+	_, errChan := s.client.PowerOff(resourceGroupName, computeName, cancelCh)
 
-	return nil
+	err := <-errChan
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+	return err
 }
 
 func (s *StepPowerOffCompute) Run(state multistep.StateBag) multistep.StepAction {

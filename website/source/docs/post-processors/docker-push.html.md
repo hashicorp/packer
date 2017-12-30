@@ -3,8 +3,9 @@ description: |
     The Packer Docker push post-processor takes an artifact from the docker-import
     post-processor and pushes it to a Docker registry.
 layout: docs
-page_title: 'Docker Push Post-Processor'
-...
+page_title: 'Docker Push - Post-Processors'
+sidebar_current: 'docs-post-processors-docker-push'
+---
 
 # Docker Push Post-Processor
 
@@ -29,6 +30,9 @@ This post-processor has only optional configuration:
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
+-   `aws_profile` (string) - The AWS shared credentials profile used to communicate with AWS.
+    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+
 -   `ecr_login` (boolean) - Defaults to false. If true, the post-processor
     will login in order to push the image to
     [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
@@ -39,16 +43,14 @@ This post-processor has only optional configuration:
 -   `login` (boolean) - Defaults to false. If true, the post-processor will
     login prior to pushing. For log into ECR see `ecr_login`.
 
--   `login_email` (string) - The email to use to authenticate to login.
-
 -   `login_username` (string) - The username to use to authenticate to login.
 
 -   `login_password` (string) - The password to use to authenticate to login.
 
 -   `login_server` (string) - The server address to login to.
 
-Note: When using _Docker Hub_ or _Quay_ registry servers, `login` must to be
-set to `true` and `login_email`, `login_username`, **and** `login_password`
+-&gt; **Note:** When using *Docker Hub* or *Quay* registry servers, `login` must to be
+set to `true` and `login_username`, **and** `login_password`
 must to be set to your registry credentials. When using Docker Hub,
 `login_server` can be omitted.
 

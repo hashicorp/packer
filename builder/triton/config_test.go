@@ -6,7 +6,7 @@ import (
 
 func testConfig(t *testing.T) Config {
 	return Config{
-		AccessConfig:        testAccessConfig(t),
+		AccessConfig:        testAccessConfig(),
 		SourceMachineConfig: testSourceMachineConfig(t),
 		TargetImageConfig:   testTargetImageConfig(t),
 	}

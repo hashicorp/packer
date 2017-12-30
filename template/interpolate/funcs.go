@@ -10,7 +10,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mitchellh/packer/common/uuid"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/version"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -24,15 +25,16 @@ func init() {
 
 // Funcs are the interpolation funcs that are available within interpolations.
 var FuncGens = map[string]FuncGenerator{
-	"build_name":   funcGenBuildName,
-	"build_type":   funcGenBuildType,
-	"env":          funcGenEnv,
-	"isotime":      funcGenIsotime,
-	"pwd":          funcGenPwd,
-	"template_dir": funcGenTemplateDir,
-	"timestamp":    funcGenTimestamp,
-	"uuid":         funcGenUuid,
-	"user":         funcGenUser,
+	"build_name":     funcGenBuildName,
+	"build_type":     funcGenBuildType,
+	"env":            funcGenEnv,
+	"isotime":        funcGenIsotime,
+	"pwd":            funcGenPwd,
+	"template_dir":   funcGenTemplateDir,
+	"timestamp":      funcGenTimestamp,
+	"uuid":           funcGenUuid,
+	"user":           funcGenUser,
+	"packer_version": funcGenPackerVersion,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -138,17 +140,23 @@ func funcGenTimestamp(ctx *Context) interface{} {
 }
 
 func funcGenUser(ctx *Context) interface{} {
-	return func(k string) string {
+	return func(k string) (string, error) {
 		if ctx == nil || ctx.UserVariables == nil {
-			return ""
+			return "", errors.New("test")
 		}
 
-		return ctx.UserVariables[k]
+		return ctx.UserVariables[k], nil
 	}
 }
 
 func funcGenUuid(ctx *Context) interface{} {
 	return func() string {
 		return uuid.TimeOrderedUUID()
+	}
+}
+
+func funcGenPackerVersion(ctx *Context) interface{} {
+	return func() string {
+		return version.FormattedVersion()
 	}
 }

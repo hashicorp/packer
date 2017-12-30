@@ -1,11 +1,12 @@
 ---
 description: |
-    The `amazon-chroot` Packer builder is able to create Amazon AMIs backed by an
+    The amazon-chroot Packer builder is able to create Amazon AMIs backed by an
     EBS volume as the root device. For more information on the difference between
     instance storage and EBS-backed instances, storage for the root device section
     in the EC2 documentation.
 layout: docs
-page_title: 'Amazon AMI Builder (chroot)'
+page_title: 'Amazon chroot - Builders'
+sidebar_current: 'docs-builders-amazon-chroot'
 ---
 
 # AMI Builder (chroot)
@@ -23,7 +24,7 @@ builder is able to build an EBS-backed AMI without launching a new EC2 instance.
 This can dramatically speed up AMI builds for organizations who need the extra
 fast build.
 
-\~&gt; **This is an advanced builder** If you're just getting started with
+~&gt; **This is an advanced builder** If you're just getting started with
 Packer, we recommend starting with the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 
@@ -61,22 +62,22 @@ each category, the available configuration keys are alphabetized.
 
 -   `ami_name` (string) - The name of the resulting AMI that will appear when
     managing AMIs in the AWS console or via APIs. This must be unique. To help
-    make this unique, use a function like `timestamp` (see [configuration
-    templates](/docs/templates/configuration-templates.html) for more info)
+    make this unique, use a function like `timestamp` (see [template
+    engine](/docs/templates/engine.html) for more info)
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
     how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `source_ami` (string) - The source AMI whose root volume will be copied and
-    provisioned on the currently running instance. This must be an EBS-backed
-    AMI with a root volume snapshot that you have access to. Note: this is not
-    used when `from_scratch` is set to true.
+    provisioned on the currently running instance. This must be an EBS-backed AMI
+    with a root volume snapshot that you have access to. Note: this is not used
+    when `from_scratch` is set to true.
 
 ### Optional:
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.
@@ -94,8 +95,7 @@ each category, the available configuration keys are alphabetized.
     depending on the size of the AMI, but will generally take many minutes.
 
 -   `ami_users` (array of strings) - A list of account IDs that have access to
-    launch the resulting AMI(s). By default no additional users other than the
-    user creating the AMI has permissions to launch it.
+    launch the resulting AMI(s). By default no additional users other than the user creating the AMI has permissions to launch it.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
@@ -115,21 +115,37 @@ each category, the available configuration keys are alphabetized.
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
     that will be copied into the chroot environment prior to provisioning. Defaults
-    to `/etc/resolv.conf` so that DNS lookups work.
+    to `/etc/resolv.conf` so that DNS lookups work. Pass an empty list to skip
+    copying `/etc/resolv.conf`. You may need to do this if you're building
+    an image that uses systemd.
+
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
     forces Packer to find an open device automatically.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
 -   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
     AMIs, which have been deregistered by `force_deregister`. Default `false`.
+
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Packer will always run this operation, even if the base
+    AMI has an encrypted boot volume to start with. Default `false`.
+
+-   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+    This only applies to the main `region`, other regions where the AMI will be copied
+    will be encrypted by the default EBS KMS key.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
@@ -150,11 +166,11 @@ each category, the available configuration keys are alphabetized.
         every build.
 
     -   `device_name` (string) - The device name exposed to the instance (for
-         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+        example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -169,14 +185,26 @@ each category, the available configuration keys are alphabetized.
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
 
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
     -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
         volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
         volumes
 
-    -   `root_device_name` (string) - The root device name. For example, `xvda`.
+-   `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
+    along with the custom kms key id to use for encryption for that region.
+    Keys must match the regions provided in `ami_regions`. If you just want to
+    encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
+    If you want a region to be encrypted with that region's default key ID, you can
+    use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
+    However, you cannot use default key IDs if you are using this in conjunction with
+    `snapshot_users` -- in that situation you must use custom keys.
+
+-   `root_device_name` (string) - The root device name. For example, `xvda`.
+
+-   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
+    code. This should probably be a user variable since it changes all the time.
 
 -   `mount_path` (string) - The path where the volume will be mounted. This is
     where the chroot environment will be. This defaults to
@@ -184,13 +212,13 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (integer) - The partition number containing the
+-   `mount_partition` (number) - The partition number containing the
     / partition. By default this is the first partition of the volume.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
     to the `mount` command ran by Packer. Because this command is ran in a
-    shell, user discrestion is advised. See [this manual page for the mount
+    shell, user discretion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
 
@@ -200,12 +228,17 @@ each category, the available configuration keys are alphabetized.
     partitioning and filesystem creation commands. The path to the device is
     provided by `{{.Device}}`.
 
+-   `profile` (string) - The profile to use in the shared credentials file for
+    AWS. See Amazon's documentation on [specifying
+    profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+    for more details.
+
 -   `post_mount_commands` (array of strings) - As `pre_mount_commands`, but the
     commands are executed after mounting the root device and before the extra
     mount and copy steps. The device and mount path are provided by
     `{{.Device}}` and `{{.MountPath}}`.
 
--   `root_volume_size` (integer) - The size of the root volume in GB for the
+-   `root_volume_size` (number) - The size of the root volume in GB for the
     chroot environment and the resulting AMI. Default size is the snapshot size
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
@@ -215,14 +248,14 @@ each category, the available configuration keys are alphabetized.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -231,15 +264,15 @@ each category, the available configuration keys are alphabetized.
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
 
-    ``` {.javascript}
+    ``` json
     "source_ami_filter": {
-        "filters": {
-          "virtualization-type": "hvm",
-          "name": "*ubuntu-xenial-16.04-amd64-server-*",
-          "root-device-type": "ebs"
-        },
-        "owners": ["099720109477"],
-        "most_recent": true
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
     }
     ```
 
@@ -248,28 +281,33 @@ each category, the available configuration keys are alphabetized.
     example, `most_recent` will cause this to succeed by selecting the newest image.
 
     -   `filters` (map of strings) - filters used to select a `source_ami`.
-         NOTE: This will fail unless *exactly* one AMI is returned.
-         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
-         is valid.
+        NOTE: This will fail unless *exactly* one AMI is returned.
+        Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
+        is valid.
 
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-         This is helpful to limit the AMIs to a trusted third party, or to your own account.
+        This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
-         This is most useful for selecting a daily distro build.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
+        This is most useful for selecting a daily distro build.
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
-    [configuration template](/docs/templates/configuration-templates.html)
+    [template engine](/docs/templates/engine.html)
     where the `SourceAMI` variable is replaced with the source AMI ID and
     `BuildRegion` variable is replaced with name of the region where this
     is built.
-
 
 ## Basic Example
 
 Here is a basic example. It is completely valid except for the access keys:
 
-``` {.javascript}
+``` json
 {
   "type": "amazon-chroot",
   "access_key": "YOUR KEY HERE",
@@ -296,7 +334,7 @@ However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
 mounts `/prod` and `/dev`:
 
-``` {.javascript}
+``` json
 {
   "chroot_mounts": [
     ["proc", "proc", "/proc"],
@@ -336,7 +374,7 @@ For debian based distributions you can setup a
 file which will prevent packages installed by your provisioners from starting
 services:
 
-``` {.javascript}
+``` json
 {
   "type": "shell",
   "inline": [
@@ -364,13 +402,13 @@ The device setup commands partition the device with one partition for use as an
 HVM image and format it ext4. This builder block should be followed by
 provisioning commands to install the os and bootloader.
 
-``` {.javascript}
+``` json
 {
   "type": "amazon-chroot",
-  "ami_name": "packer-from-scratch {{timestamp}}"
+  "ami_name": "packer-from-scratch {{timestamp}}",
   "from_scratch": true,
   "ami_virtualization_type": "hvm",
-  "device_setup_commands": [
+  "pre_mount_commands": [
     "parted {{.Device}} mklabel msdos mkpart primary 1M 100% set 1 boot on print",
     "mkfs.ext4 {{.Device}}1"
   ],

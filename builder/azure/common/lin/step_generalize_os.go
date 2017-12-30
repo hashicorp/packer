@@ -1,13 +1,10 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package lin
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 )
 

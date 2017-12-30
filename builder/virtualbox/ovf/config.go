@@ -2,13 +2,15 @@ package ovf
 
 import (
 	"fmt"
+	"net/url"
+	"os"
 	"strings"
 
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
@@ -38,6 +40,7 @@ type Config struct {
 	SourcePath           string   `mapstructure:"source_path"`
 	TargetPath           string   `mapstructure:"target_path"`
 	VMName               string   `mapstructure:"vm_name"`
+	KeepRegistered       bool     `mapstructure:"keep_registered"`
 	SkipExport           bool     `mapstructure:"skip_export"`
 
 	ctx interpolate.Context
@@ -99,6 +102,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.SourcePath, err = common.DownloadableURL(c.SourcePath)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
+		}
+		// file must exist now.
+		fileURL, _ := url.Parse(c.SourcePath)
+		if fileURL.Scheme == "file" {
+			if _, err := os.Stat(fileURL.Path); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("source file needs to exist at time of config validation: %s", err))
+			}
 		}
 	}
 

@@ -17,6 +17,9 @@ type DriverMock struct {
 	DeleteMachineId  string
 	DeleteMachineErr error
 
+	GetImageId  string
+	GetImageErr error
+
 	GetMachineErr error
 
 	StopMachineId  string
@@ -27,6 +30,14 @@ type DriverMock struct {
 	WaitForMachineDeletionErr error
 
 	WaitForMachineStateErr error
+}
+
+func (d *DriverMock) GetImage(config Config) (string, error) {
+	if d.GetImageErr != nil {
+		return "", d.GetImageErr
+	}
+
+	return config.MachineImage, nil
 }
 
 func (d *DriverMock) CreateImageFromMachine(machineId string, config Config) (string, error) {
@@ -69,7 +80,7 @@ func (d *DriverMock) DeleteMachine(machineId string) error {
 	return nil
 }
 
-func (d *DriverMock) GetMachine(machineId string) (string, error) {
+func (d *DriverMock) GetMachineIP(machineId string) (string, error) {
 	if d.GetMachineErr != nil {
 		return "", d.GetMachineErr
 	}

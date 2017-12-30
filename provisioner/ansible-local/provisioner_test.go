@@ -1,10 +1,13 @@
 package ansiblelocal
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
@@ -36,7 +39,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.StagingDir != DefaultStagingDir {
+	if !strings.HasPrefix(filepath.ToSlash(p.config.StagingDir), DefaultStagingDir) {
 		t.Fatalf("unexpected staging dir %s, expected %s",
 			p.config.StagingDir, DefaultStagingDir)
 	}
@@ -183,5 +186,28 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_CleanStagingDir(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	playbook_file, err := ioutil.TempFile("", "playbook")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	defer os.Remove(playbook_file.Name())
+
+	config["playbook_file"] = playbook_file.Name()
+	config["clean_staging_directory"] = true
+
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if !p.config.CleanStagingDir {
+		t.Fatalf("expected clean_staging_directory to be set")
 	}
 }

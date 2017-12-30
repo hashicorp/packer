@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {
@@ -48,9 +48,9 @@ func TestArtifactState_atlasMetadata(t *testing.T) {
 
 func TestArtifactString(t *testing.T) {
 	expected := `AMIs were created:
-
 east: foo
-west: bar`
+west: bar
+`
 
 	amis := make(map[string]string)
 	amis["east"] = "foo"

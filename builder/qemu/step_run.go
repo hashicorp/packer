@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // stepRun runs the virtual machine
@@ -116,7 +116,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 			ui.Message(fmt.Sprintf(
 				"The VM will be run headless, without a GUI. If you want to\n"+
 					"view the screen of the VM, connect via VNC without a password to\n"+
-					"%s:%d", vncIp, vncPort))
+					"vnc://%s:%d", vncIp, vncPort))
 		} else {
 			ui.Message("The VM will be run headless, without a GUI, as configured.\n" +
 				"If the run isn't succeeding as you expect, please enable the GUI\n" +

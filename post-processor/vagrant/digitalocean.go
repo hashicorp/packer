@@ -3,7 +3,7 @@ package vagrant
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 	"strings"
 	"text/template"
 )

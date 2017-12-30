@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package common
 
 // removes overlap between the end of a and the start of b and
@@ -18,5 +15,5 @@ func GlueStrings(a, b string) string {
 		shift++
 	}
 
-	return string(a[:shift]) + b
+	return a[:shift] + b
 }

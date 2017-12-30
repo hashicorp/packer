@@ -11,7 +11,7 @@ import (
 type Driver interface {
 	// CreateImage creates an image from the given disk in Google Compute
 	// Engine.
-	CreateImage(name, description, family, zone, disk string) (<-chan *Image, <-chan error)
+	CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error)
 
 	// DeleteImage deletes the image with the given name.
 	DeleteImage(name string) <-chan error
@@ -58,24 +58,27 @@ type Driver interface {
 }
 
 type InstanceConfig struct {
-	Address             string
-	Description         string
-	DiskSizeGb          int64
-	DiskType            string
-	Image               *Image
-	MachineType         string
-	Metadata            map[string]string
-	Name                string
-	Network             string
-	NetworkProjectId    string
-	OmitExternalIP      bool
-	Preemptible         bool
-	Region              string
-	Scopes              []string
-	ServiceAccountEmail string
-	Subnetwork          string
-	Tags                []string
-	Zone                string
+	AcceleratorType   string
+	AcceleratorCount  int64
+	Address           string
+	Description       string
+	DiskSizeGb        int64
+	DiskType          string
+	Image             *Image
+	Labels            map[string]string
+	MachineType       string
+	Metadata          map[string]string
+	Name              string
+	Network           string
+	NetworkProjectId  string
+	OmitExternalIP    bool
+	OnHostMaintenance string
+	Preemptible       bool
+	Region            string
+	Scopes            []string
+	Subnetwork        string
+	Tags              []string
+	Zone              string
 }
 
 // WindowsPasswordConfig is the data structue that GCE needs to encrypt the created

@@ -1,14 +1,18 @@
 package winrm
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/packer"
 	"github.com/packer-community/winrmcp/winrmcp"
 )
 
@@ -129,6 +133,9 @@ func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) erro
 
 // UploadDir implementation of communicator.Communicator interface
 func (c *Communicator) UploadDir(dst string, src string, exclude []string) error {
+	if !strings.HasSuffix(src, "/") {
+		dst = fmt.Sprintf("%s\\%s", dst, filepath.Base(src))
+	}
 	log.Printf("Uploading dir '%s' to '%s'", src, dst)
 	wcp, err := c.newCopyClient()
 	if err != nil {
@@ -138,7 +145,20 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 }
 
 func (c *Communicator) Download(src string, dst io.Writer) error {
-	return fmt.Errorf("WinRM doesn't support download.")
+	endpoint := winrm.NewEndpoint(c.endpoint.Host, c.endpoint.Port, c.config.Https, c.config.Insecure, nil, nil, nil, c.config.Timeout)
+	client, err := winrm.NewClient(endpoint, c.config.Username, c.config.Password)
+	if err != nil {
+		return err
+	}
+
+	encodeScript := `$file=[System.IO.File]::ReadAllBytes("%s"); Write-Output $([System.Convert]::ToBase64String($file))`
+
+	base64DecodePipe := &Base64Pipe{w: dst}
+
+	cmd := winrm.Powershell(fmt.Sprintf(encodeScript, src))
+	_, err = client.Run(cmd, base64DecodePipe, ioutil.Discard)
+
+	return err
 }
 
 func (c *Communicator) DownloadDir(src string, dst string, exclude []string) error {
@@ -158,4 +178,35 @@ func (c *Communicator) newCopyClient() (*winrmcp.Winrmcp, error) {
 		MaxOperationsPerShell: 15, // lowest common denominator
 		TransportDecorator:    c.config.TransportDecorator,
 	})
+}
+
+type Base64Pipe struct {
+	w io.Writer // underlying writer (file, buffer)
+}
+
+func (d *Base64Pipe) ReadFrom(r io.Reader) (int64, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return 0, err
+	}
+
+	var i int
+	i, err = d.Write(b)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return int64(i), err
+}
+
+func (d *Base64Pipe) Write(p []byte) (int, error) {
+	dst := make([]byte, base64.StdEncoding.DecodedLen(len(p)))
+
+	decodedBytes, err := base64.StdEncoding.Decode(dst, p)
+	if err != nil {
+		return 0, err
+	}
+
+	return d.w.Write(dst[0:decodedBytes])
 }

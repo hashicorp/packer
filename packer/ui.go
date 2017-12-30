@@ -46,12 +46,12 @@ type ColoredUi struct {
 	Ui         Ui
 }
 
-// TargettedUi is a UI that wraps another UI implementation and modifies
+// TargetedUI is a UI that wraps another UI implementation and modifies
 // the output to indicate a specific target. Specifically, all Say output
 // is prefixed with the target name. Message output is not prefixed but
 // is offset by the length of the target so that output is lined up properly
 // with Say output. Machine-readable output has the proper target set.
-type TargettedUi struct {
+type TargetedUI struct {
 	Target string
 	Ui     Ui
 }
@@ -132,28 +132,28 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
-func (u *TargettedUi) Ask(query string) (string, error) {
+func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
 
-func (u *TargettedUi) Say(message string) {
+func (u *TargetedUI) Say(message string) {
 	u.Ui.Say(u.prefixLines(true, message))
 }
 
-func (u *TargettedUi) Message(message string) {
+func (u *TargetedUI) Message(message string) {
 	u.Ui.Message(u.prefixLines(false, message))
 }
 
-func (u *TargettedUi) Error(message string) {
+func (u *TargetedUI) Error(message string) {
 	u.Ui.Error(u.prefixLines(true, message))
 }
 
-func (u *TargettedUi) Machine(t string, args ...string) {
+func (u *TargetedUI) Machine(t string, args ...string) {
 	// Prefix in the target, then pass through
 	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
 }
 
-func (u *TargettedUi) prefixLines(arrow bool, message string) string {
+func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	arrowText := "==>"
 	if !arrow {
 		arrowText = strings.Repeat(" ", len(arrowText))

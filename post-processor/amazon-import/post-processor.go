@@ -7,15 +7,14 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const BuilderId = "packer.post-processor.amazon-import"
@@ -26,11 +25,15 @@ type Config struct {
 	awscommon.AccessConfig `mapstructure:",squash"`
 
 	// Variables specific to this post processor
-	S3Bucket  string            `mapstructure:"s3_bucket_name"`
-	S3Key     string            `mapstructure:"s3_key_name"`
-	SkipClean bool              `mapstructure:"skip_clean"`
-	Tags      map[string]string `mapstructure:"tags"`
-	Name      string            `mapstructure:"ami_name"`
+	S3Bucket    string            `mapstructure:"s3_bucket_name"`
+	S3Key       string            `mapstructure:"s3_key_name"`
+	SkipClean   bool              `mapstructure:"skip_clean"`
+	Tags        map[string]string `mapstructure:"tags"`
+	Name        string            `mapstructure:"ami_name"`
+	Description string            `mapstructure:"ami_description"`
+	Users       []string          `mapstructure:"ami_users"`
+	Groups      []string          `mapstructure:"ami_groups"`
+	LicenseType string            `mapstructure:"license_type"`
 
 	ctx interpolate.Context
 }
@@ -39,7 +42,7 @@ type PostProcessor struct {
 	config Config
 }
 
-// Entry point for configuration parisng when we've defined
+// Entry point for configuration parsing when we've defined
 func (p *PostProcessor) Configure(raws ...interface{}) error {
 	p.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -71,7 +74,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Check we have AWS access variables defined somewhere
 	errs = packer.MultiErrorAppend(errs, p.config.AccessConfig.Prepare(&p.config.ctx)...)
 
-	// define all our required paramaters
+	// define all our required parameters
 	templates := map[string]*string{
 		"s3_bucket_name": &p.config.S3Bucket,
 	}
@@ -88,17 +91,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey))
+	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey, p.config.Token))
 	return nil
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
-	config, err := p.config.Config()
+	session, err := p.config.Session()
 	if err != nil {
 		return nil, false, err
 	}
+	config := session.Config
 
 	// Render this key since we didn't in the configure phase
 	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
@@ -120,13 +124,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Hope we found something useful
 	if source == "" {
 		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
-	}
-
-	// Set up the AWS session
-	log.Println("Creating AWS session")
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, false, err
 	}
 
 	// open the source file
@@ -158,7 +155,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -167,7 +164,14 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-	})
+	}
+
+	if p.config.LicenseType != "" {
+		ui.Message(fmt.Sprintf("Setting license type to '%s'", p.config.LicenseType))
+		params.LicenseType = &p.config.LicenseType
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
@@ -175,7 +179,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Started import of s3://%s/%s, task id %s", p.config.S3Bucket, p.config.S3Key, *import_start.ImportTaskId))
 
-	// Wait for import process to complete, this takess a while
+	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 
 	stateChange := awscommon.StateChangeConf{
@@ -236,7 +240,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			return nil, false, fmt.Errorf("Error waiting for AMI (%s): %s", *resp.ImageId, err)
 		}
 
-		ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+		_, err = ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
 			ImageId: &createdami,
 		})
 
@@ -304,6 +308,60 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	}
 
+	// Apply attributes for AMI specified in config
+	// (duped from builder/amazon/common/step_modify_ami_attributes.go)
+	options := make(map[string]*ec2.ModifyImageAttributeInput)
+	if p.config.Description != "" {
+		options["description"] = &ec2.ModifyImageAttributeInput{
+			Description: &ec2.AttributeValue{Value: &p.config.Description},
+		}
+	}
+
+	if len(p.config.Groups) > 0 {
+		groups := make([]*string, len(p.config.Groups))
+		adds := make([]*ec2.LaunchPermission, len(p.config.Groups))
+		addGroups := &ec2.ModifyImageAttributeInput{
+			LaunchPermission: &ec2.LaunchPermissionModifications{},
+		}
+
+		for i, g := range p.config.Groups {
+			groups[i] = aws.String(g)
+			adds[i] = &ec2.LaunchPermission{
+				Group: aws.String(g),
+			}
+		}
+		addGroups.UserGroups = groups
+		addGroups.LaunchPermission.Add = adds
+
+		options["groups"] = addGroups
+	}
+
+	if len(p.config.Users) > 0 {
+		users := make([]*string, len(p.config.Users))
+		adds := make([]*ec2.LaunchPermission, len(p.config.Users))
+		for i, u := range p.config.Users {
+			users[i] = aws.String(u)
+			adds[i] = &ec2.LaunchPermission{UserId: aws.String(u)}
+		}
+		options["users"] = &ec2.ModifyImageAttributeInput{
+			UserIds: users,
+			LaunchPermission: &ec2.LaunchPermissionModifications{
+				Add: adds,
+			},
+		}
+	}
+
+	if len(options) > 0 {
+		for name, input := range options {
+			ui.Message(fmt.Sprintf("Modifying: %s", name))
+			input.ImageId = &createdami
+			_, err := ec2conn.ModifyImageAttribute(input)
+			if err != nil {
+				return nil, false, fmt.Errorf("Error modifying AMI attributes: %s", err)
+			}
+		}
+	}
+
 	// Add the reported AMI ID to the artifact list
 	log.Printf("Adding created AMI ID %s in region %s to output artifacts", createdami, *config.Region)
 	artifact = &awscommon.Artifact{
@@ -311,7 +369,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			*config.Region: createdami,
 		},
 		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+		Session:        session,
 	}
 
 	if !p.config.SkipClean {

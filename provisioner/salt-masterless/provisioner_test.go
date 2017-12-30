@@ -1,7 +1,7 @@
 package saltmasterless
 
 import (
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -116,6 +116,29 @@ func TestProvisionerPrepare_MinionConfig_RemotePillarRoots(t *testing.T) {
 	err := p.Prepare(config)
 	if err == nil {
 		t.Fatal("minion_config and remote_pillar_roots should cause error")
+	}
+}
+
+func TestProvisionerPrepare_GrainsFile(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["grains_file"] = "/i/dont/exist/i/think"
+	err := p.Prepare(config)
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	tf, err := ioutil.TempFile("", "grains")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	config["grains_file"] = tf.Name()
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }
 

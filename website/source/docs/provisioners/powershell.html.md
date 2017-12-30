@@ -4,8 +4,9 @@ description: |
     scripts. Shell provisioning is the easiest way to get software installed and
     configured on a machine.
 layout: docs
-page_title: PowerShell Provisioner
-...
+page_title: 'PowerShell - Provisioners'
+sidebar_current: 'docs-provisioners-powershell'
+---
 
 # PowerShell Provisioner
 
@@ -18,7 +19,7 @@ It assumes that the communicator in use is WinRM.
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "powershell",
   "inline": ["dir c:\\"]
@@ -54,15 +55,32 @@ Optional parameters:
     and Packer should therefore not convert Windows line endings to Unix line
     endings (if there are any). By default this is false.
 
+-   `elevated_execute_command` (string) - The command to use to execute the elevated
+    script. By default this is as follows:
+
+    ``` powershell
+    powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+    ```
+
+    The value of this is treated as [configuration
+    template](/docs/templates/engine.html). There are two
+    available variables: `Path`, which is the path to the script to run, and
+    `Vars`, which is the location of a temp file containing the list of `environment_vars`, if configured.
+
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
 -   `execute_command` (string) - The command to use to execute the script. By
-    default this is `powershell "& { {{.Vars}}{{.Path}}; exit $LastExitCode}"`.
+    default this is as follows:
+
+    ``` powershell
+    powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"
+    ```
+
     The value of this is treated as [configuration
-    template](/docs/templates/configuration-templates.html). There are two
+    template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
@@ -82,7 +100,6 @@ Optional parameters:
 
 -   `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
     default this is just 0.
-
 
 ## Default Environmental Variables
 

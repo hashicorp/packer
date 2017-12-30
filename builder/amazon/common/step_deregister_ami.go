@@ -5,23 +5,41 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepDeregisterAMI struct {
+	AccessConfig        *AccessConfig
 	ForceDeregister     bool
 	ForceDeleteSnapshot bool
 	AMIName             string
+	Regions             []string
 }
 
 func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
-	ec2conn := state.Get("ec2").(*ec2.EC2)
-	ui := state.Get("ui").(packer.Ui)
-
 	// Check for force deregister
-	if s.ForceDeregister {
-		resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
+	if !s.ForceDeregister {
+		return multistep.ActionContinue
+	}
+
+	ui := state.Get("ui").(packer.Ui)
+	ec2conn := state.Get("ec2").(*ec2.EC2)
+	// Add the session region to list of regions will will deregister AMIs in
+	regions := append(s.Regions, *ec2conn.Config.Region)
+
+	for _, region := range regions {
+		// get new connection for each region in which we need to deregister vms
+		session, err := s.AccessConfig.Session()
+		if err != nil {
+			return multistep.ActionHalt
+		}
+
+		regionconn := ec2.New(session.Copy(&aws.Config{
+			Region: aws.String(region)},
+		))
+
+		resp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
 			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
@@ -36,7 +54,7 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 		// Deregister image(s) by name
 		for _, i := range resp.Images {
-			_, err := ec2conn.DeregisterImage(&ec2.DeregisterImageInput{
+			_, err := regionconn.DeregisterImage(&ec2.DeregisterImageInput{
 				ImageId: i.ImageId,
 			})
 
@@ -51,8 +69,8 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 			// Delete snapshot(s) by image
 			if s.ForceDeleteSnapshot {
 				for _, b := range i.BlockDeviceMappings {
-					if b.Ebs != nil {
-						_, err := ec2conn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
+					if b.Ebs != nil && aws.StringValue(b.Ebs.SnapshotId) != "" {
+						_, err := regionconn.DeleteSnapshot(&ec2.DeleteSnapshotInput{
 							SnapshotId: b.Ebs.SnapshotId,
 						})
 
