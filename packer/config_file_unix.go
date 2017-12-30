@@ -18,7 +18,7 @@ func configFile() (string, error) {
 		return "", err
 	}
 
-	return filepath.Join(dir, ".packerconfig"), nil
+	return filepath.Join(dir, "packer.config"), nil
 }
 
 func configDir() (string, error) {
