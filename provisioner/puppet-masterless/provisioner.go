@@ -77,18 +77,18 @@ type guestOSTypeConfig struct {
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
-	tempDir: "/tmp",
-	stagingDir: "/tmp/packer-puppet-masterless",
-	executeCommand: "cd {{.WorkingDir}} && " +
-		"{{.FacterVars}}" +
-		"{{if .Sudo}}sudo -E {{end}}" +
-		`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-		"puppet apply --detailed-exitcodes {{.Options}} " +
-		"{{if .Debug}}--debug {{end}}" +
-		`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}'  {{end}}` +
-		`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
-		`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-		"{{.ManifestFile}}",
+		tempDir: "/tmp",
+		stagingDir: "/tmp/packer-puppet-masterless",
+		executeCommand: "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}}" +
+			"{{if .Sudo}}sudo -E {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet apply --detailed-exitcodes {{.Options}} " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}'  {{end}}` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
+			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
 	},
@@ -96,14 +96,14 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
 		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
-		"{{.FacterVars}} && " +
-		`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-		"puppet apply --detailed-exitcodes {{.Options}} " +
-		"{{if .Debug}}--debug {{end}}" +
-		`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}'  {{end}}` +
-		`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
-		`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-		"{{.ManifestFile}}",
+			"{{.FacterVars}} && " +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet apply --detailed-exitcodes {{.Options}} " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}'  {{end}}` +
+			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
+			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
+			"{{.ManifestFile}}",
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
 	},
