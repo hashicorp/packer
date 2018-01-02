@@ -7,10 +7,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-
-	"gopkg.in/cheggaaa/pb.v1"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -63,6 +62,10 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
+	// Get a default-looking progress bar and connect it to the ui.
+	bar := GetDefaultProgressBar()
+	bar.Callback = ui.Message
+
 	// First try to use any already downloaded file
 	// If it fails, proceed to regualar download logic
 
@@ -96,7 +99,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		downloadConfigs[i] = config
 
-		if match, _ := NewDownloadClient(config, nil).VerifyChecksum(config.TargetPath); match {
+		if match, _ := NewDownloadClient(config, bar).VerifyChecksum(config.TargetPath); match {
 			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
 			finalPath = config.TargetPath
 			break
@@ -138,11 +141,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepDownload) Cleanup(multistep.StateBag) {}
 
-func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
-	var path string
-	ui := state.Get("ui").(packer.Ui)
-
-	// design the appearance of the progress bar
+func GetDefaultProgressBar() pb.ProgressBar {
 	bar := pb.New64(0)
 	bar.ShowPercent = true
 	bar.ShowCounters = true
@@ -154,9 +153,19 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	bar.Format("[=>-]")
 	bar.SetRefreshRate(1 * time.Second)
 	bar.SetWidth(25)
+
+	return *bar
+}
+
+func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
+	var path string
+	ui := state.Get("ui").(packer.Ui)
+
+	// Get a default looking progress bar and connect it to the ui.
+	bar := GetDefaultProgressBar()
 	bar.Callback = ui.Message
 
-	// create download client with config and progress bar
+	// Create download client with config and progress bar
 	download := NewDownloadClient(config, bar)
 
 	downloadCompleteCh := make(chan error, 1)

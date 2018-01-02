@@ -20,8 +20,8 @@ import (
 
 // imports related to each Downloader implementation
 import (
+	"github.com/cheggaaa/pb"
 	"github.com/jlaffaye/ftp"
-	"gopkg.in/cheggaaa/pb.v1"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -83,22 +83,17 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar *pb.ProgressBar) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig, bar pb.ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
-
-	// If no custom progress-bar was specified, then create a default one.
-	if bar == nil {
-		bar = pb.New64(0)
-	}
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
 		c.DownloaderMap = map[string]Downloader{
-			"file":  &FileDownloader{progress: bar, bufferSize: nil},
-			"ftp":   &FTPDownloader{progress: bar, userInfo: url.UserPassword("anonymous", "anonymous@"), mtu: mtu},
-			"http":  &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
-			"https": &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
-			"smb":   &SMBDownloader{progress: bar, bufferSize: nil},
+			"file":  &FileDownloader{progress: &bar, bufferSize: nil},
+			"ftp":   &FTPDownloader{progress: &bar, userInfo: url.UserPassword("anonymous", "anonymous@"), mtu: mtu},
+			"http":  &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
+			"https": &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
+			"smb":   &SMBDownloader{progress: &bar, bufferSize: nil},
 		}
 	}
 	return &DownloadClient{config: c}
