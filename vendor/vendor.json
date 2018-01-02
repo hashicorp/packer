@@ -566,6 +566,12 @@
 			"revision": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
+			"checksumSHA1": "ymc5+iJ+1ipls3ihqPdzMjFYCqo=",
+			"path": "github.com/cheggaaa/pb",
+			"revision": "18d384da9bdc1e5a08fc2a62a494c321d9ae74ea",
+			"revisionTime": "2017-12-14T13:20:59Z"
+		},
+		{
 			"checksumSHA1": "Lf3uUXTkKK5DJ37BxQvxO1Fq+K8=",
 			"comment": "v1.0.0-3-g6d21280",
 			"path": "github.com/davecgh/go-spew/spew",
@@ -1492,12 +1498,6 @@
 			"checksumSHA1": "U7dGDNwEHORvJFMoNSXErKE7ITg=",
 			"path": "google.golang.org/cloud/internal",
 			"revision": "5a3b06f8b5da3b7c3a93da43163b872c86c509ef"
-		},
-		{
-			"checksumSHA1": "w3z2xM4+RT/OWvVusDgNXZZEEkE=",
-			"path": "gopkg.in/cheggaaa/pb.v1",
-			"revision": "d7e6ca3010b6f084d8056847f55d7f572f180678",
-			"revisionTime": "2016-11-21T09:29:06Z"
 		},
 		{
 			"checksumSHA1": "gY2M/3SCxqgrPz+P/N6JQ+m/wnA=",
