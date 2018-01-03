@@ -74,12 +74,6 @@ func DownloadableURL(original string) (string, error) {
 				url.Path = url.Host
 				url.Host = ""
 			}
-
-			// For Windows absolute file paths, remove leading / prior to processing
-			// since net/url turns "C:/" into "/C:/"
-			if len(url.Path) > 0 && url.Path[0] == '/' {
-				url.Path = url.Path[1:len(url.Path)]
-			}
 		}
 
 		// Only do the filepath transformations if the file appears
