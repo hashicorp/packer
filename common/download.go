@@ -516,9 +516,20 @@ func (d *FileDownloader) toPath(base string, uri url.URL) (string, error) {
 		result = path.Join(uri.Host, uri.Path)
 
 		// semi-absolute path (current drive letter)
-		//	-- file:///absolute/path -> /absolute/path
+		//	-- file:///absolute/path -> drive:/absolute/path
 	} else if uri.Host == "" && strings.HasPrefix(uri.Path, "/") {
-		result = path.Join(filepath.VolumeName(base), uri.Path)
+		apath := uri.Path
+		components := strings.Split(apath, "/")
+		volume := filepath.VolumeName(base)
+
+		// semi-absolute absolute path (includes volume letter)
+		// -- file://drive:/path -> drive:/absolute/path
+		if len(components) > 1 && strings.HasSuffix(components[1], ":") {
+			volume = components[1]
+			apath = path.Join(components[2:]...)
+		}
+
+		result = path.Join(volume, apath)
 
 		// relative path -- file://./relative/path -> ./relative/path
 	} else if uri.Host == "." {

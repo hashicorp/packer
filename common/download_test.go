@@ -12,6 +12,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/cheggaaa/pb"
 )
 
 func TestDownloadClientVerifyChecksum(t *testing.T) {
@@ -36,7 +38,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 		Checksum: checksum,
 	}
 
-	d := NewDownloadClient(config, nil)
+	d := NewDownloadClient(config, *pb.New64(0))
 	result, err := d.VerifyChecksum(tf.Name())
 	if err != nil {
 		t.Fatalf("Verify err: %s", err)
@@ -59,7 +61,7 @@ func TestDownloadClient_basic(t *testing.T) {
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
 		CopyFile:   true,
-	}, nil)
+	}, *pb.New64(0))
 
 	path, err := client.Get()
 	if err != nil {
@@ -95,7 +97,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
 		CopyFile:   true,
-	}, nil)
+	}, *pb.New64(0))
 	if _, err := client.Get(); err == nil {
 		t.Fatal("should error")
 	}
@@ -120,7 +122,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
 		CopyFile:   true,
-	}, nil)
+	}, *pb.New64(0))
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -151,7 +153,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
 		CopyFile:   true,
-	}, nil)
+	}, *pb.New64(0))
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -190,7 +192,7 @@ func TestDownloadClient_resume(t *testing.T) {
 		Url:        ts.URL,
 		TargetPath: tf.Name(),
 		CopyFile:   true,
-	}, nil)
+	}, *pb.New64(0))
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -250,7 +252,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 		CopyFile:   true,
 	}
 
-	client := NewDownloadClient(config, nil)
+	client := NewDownloadClient(config, *pb.New64(0))
 	_, err = client.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -282,7 +284,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		CopyFile:   true,
 	}
 
-	client := NewDownloadClient(config, nil)
+	client := NewDownloadClient(config, *pb.New64(0))
 	_, err = client.Get()
 	if err != nil {
 		t.Fatal(err)
@@ -381,12 +383,12 @@ func TestDownloadFileUrl(t *testing.T) {
 		CopyFile: false,
 	}
 
-	client := NewDownloadClient(config, nil)
+	client := NewDownloadClient(config, *pb.New64(0))
 
 	// Verify that we fail to match the checksum
 	_, err = client.Get()
 	if err.Error() != "checksums didn't match expected: 6e6f7065" {
-		t.Fatalf("Unexpected failure; expected checksum not to match")
+		t.Fatalf("Unexpected failure; expected checksum not to match. Error was \"%v\"", err)
 	}
 
 	if _, err = os.Stat(sourcePath); err != nil {
@@ -412,7 +414,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 	}
 
 	// go go go
-	client := NewDownloadClient(config, nil)
+	client := NewDownloadClient(config, *pb.New64(0))
 	path, err := client.Get()
 
 	// ignore any non-important checksum errors if it's not a unc path
