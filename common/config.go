@@ -119,3 +119,37 @@ func DownloadableURL(original string) (string, error) {
 
 	return url.String(), nil
 }
+
+// FileExistsLocally takes the URL output from DownloadableURL, and determines
+// whether it is present on the file system.
+// example usage:
+//
+// myFile, err = common.DownloadableURL(c.SourcePath)
+// ...
+// fileExists, err := common.StatURL(myFile)
+// possible output:
+// true, nil -- should occur if the file is present
+// false, nil -- should occur if the file is not present, but is not supposed to
+// be (e.g. the schema is http://, not file://)
+// true, error -- shouldn't occur ever
+// false, error -- should occur if there was an error stating the file, so the
+// file is not present when it should be.
+
+func FileExistsLocally(original string) (bool, error) {
+	fileURL, _ := url.Parse(original)
+	fileExists := false
+	err := nil
+
+	if fileURL.Scheme == "file" {
+		// Remove forward slash on absolute Windows file URLs before processing
+		if runtime.GOOS == "windows" && len(fileURL.Path) > 0 && fileURL.Path[0] == '/' {
+			filePath := fileURL.Path[1:]
+		}
+		if _, err := os.Stat(filePath); err != nil {
+			err = fmt.Errorf("source file needs to exist at time of config validation: %s", err)
+		} else {
+			fileExists = true
+		}
+	}
+	return fileExists, err
+}
