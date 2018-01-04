@@ -66,21 +66,25 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	checksumType := "sha256"
 
-	// Use the provided source (URL or file path) or generate it
+	// Grab the guest_additions_url as specified by the user.
 	url := s.GuestAdditionsURL
-	if url != "" {
-		s.Ctx.Data = &guestAdditionsUrlTemplate{
-			Version: version,
-		}
 
-		url, err = interpolate.Render(url, &s.Ctx)
-		if err != nil {
-			err := fmt.Errorf("Error preparing guest additions url: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	} else {
+	// Initialize the template context so we can interpolate some variables..
+	s.Ctx.Data = &guestAdditionsUrlTemplate{
+		Version: version,
+	}
+
+	// Interpolate any user-variables specified within the guest_additions_url
+	url, err = interpolate.Render(s.GuestAdditionsURL, &s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error preparing guest additions url: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// If this resulted in an empty url, then ask the driver about it.
+	if url == "" {
 		url, err = driver.Iso()
 
 		if err == nil {
@@ -93,6 +97,8 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 				additionsName)
 		}
 	}
+
+	// The driver couldn't even figure it out, so fail hard.
 	if url == "" {
 		err := fmt.Errorf("Couldn't detect guest additions URL.\n" +
 			"Please specify `guest_additions_url` manually.")
@@ -101,6 +107,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 
+	// Figure out a default checksum here
 	if checksumType != "none" {
 		if s.GuestAdditionsSHA256 != "" {
 			checksum = s.GuestAdditionsSHA256
@@ -112,6 +119,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 		}
 	}
 
+	// Convert the file/url to an actual URL for step_download to process.
 	url, err = common.DownloadableURL(url)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions url: %s", err)
@@ -122,6 +130,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	log.Printf("Guest additions URL: %s", url)
 
+	// We're good, so let's go ahead and download this thing..
 	downStep := &common.StepDownload{
 		Checksum:     checksum,
 		ChecksumType: checksumType,
