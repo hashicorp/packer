@@ -53,17 +53,8 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	if c.AccessKey != "" {
-		creds := credentials.NewChainCredentials(
-			[]credentials.Provider{
-				&credentials.StaticProvider{
-					Value: credentials.Value{
-						AccessKeyID:     c.AccessKey,
-						SecretAccessKey: c.SecretKey,
-						SessionToken:    c.Token,
-					},
-				},
-			})
-		config = config.WithCredentials(creds)
+		config = config.WithCredentials(
+			credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token))
 	}
 
 	opts := session.Options{
@@ -110,6 +101,14 @@ func (c *AccessConfig) metadataRegion() string {
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+
+	// Either both access and secret key must be set or neither of them should
+	// be.
+	if (len(c.AccessKey) > 0) != (len(c.SecretKey) > 0) {
+		errs = append(errs,
+			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
+	}
+
 	if c.RawRegion != "" && !c.SkipValidation {
 		if valid := ValidateRegion(c.RawRegion); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
