@@ -47,6 +47,7 @@ func ChooseString(vals ...string) string {
 // a completely valid URL. For example, the original URL might be "local/file.iso"
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
+	fmt.Printf("Swampy: user input was %s\n", original)
 	if runtime.GOOS == "windows" {
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
@@ -89,7 +90,7 @@ func DownloadableURL(original string) (string, error) {
 				return "", err
 			}
 
-			url.Path = filepath.Clean(url.Path)
+			// url.Path = filepath.Clean(url.Path)
 		}
 
 		if runtime.GOOS == "windows" {
@@ -116,7 +117,7 @@ func DownloadableURL(original string) (string, error) {
 	if !found {
 		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
 	}
-
+	fmt.Printf("Swampy: parsed string after DownloadableURL is %s\n", url.String())
 	return url.String(), nil
 }
 
@@ -136,20 +137,21 @@ func DownloadableURL(original string) (string, error) {
 // file is not present when it should be.
 
 func FileExistsLocally(original string) (bool, error) {
-	fileURL, _ := url.Parse(original)
-	fileExists := false
-	err := nil
+	// original should be something like file://C:/my/path.iso
+	// on windows, c drive will be parsed as host if it's file://c instead of file:///c
+	prefix = "file://"
+	filePath = strings.Replace(original, prefix, "", 1)
+	fmt.Printf("Swampy: original is %s\n", original)
+	fmt.Printf("Swampy: filePath is %#v\n", filePath)
 
 	if fileURL.Scheme == "file" {
-		// Remove forward slash on absolute Windows file URLs before processing
-		if runtime.GOOS == "windows" && len(fileURL.Path) > 0 && fileURL.Path[0] == '/' {
-			filePath := fileURL.Path[1:]
-		}
-		if _, err := os.Stat(filePath); err != nil {
-			err = fmt.Errorf("source file needs to exist at time of config validation: %s", err)
+		_, err := os.Stat(filePath)
+		if err != nil {
+			err = fmt.Errorf("could not stat file: %s\n", err)
+			return fileExists, err
 		} else {
 			fileExists = true
 		}
 	}
-	return fileExists, err
+	return fileExists, nil
 }

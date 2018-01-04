@@ -101,7 +101,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 		}
-		fileExists, err := common.FileExistsLocally(c.SourcePath)
+		_, err := common.FileExistsLocally(c.SourcePath)
 		if err != nil {
 			packer.MultiErrorAppend(errs,
 				fmt.Errorf("Source file needs to exist at time of config validation: %s", err))
