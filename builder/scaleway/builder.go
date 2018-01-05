@@ -37,6 +37,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	client, err := api.NewScalewayAPI(b.config.Organization, b.config.Token, b.config.UserAgent, b.config.Region)
 
 	if err != nil {
+		ui.Error(err.Error())
 		return nil, err
 	}
 
