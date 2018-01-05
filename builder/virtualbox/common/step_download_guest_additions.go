@@ -85,6 +85,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	// If this resulted in an empty url, then ask the driver about it.
 	if url == "" {
+		log.Printf("guest_additions_url is blank; querying driver for iso.")
 		url, err = driver.Iso()
 
 		if err == nil {
