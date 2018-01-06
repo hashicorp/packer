@@ -4,10 +4,12 @@
 
 * builder/docker: Remove credentials from being shown in the log. [GH-5666]
 * builder/triton: Triton RBAC is now supported. [GH-5741]
+* provisioner/ansible: Improve user retrieval. [GH-5758]
 * post-processor/docker: Remove credentials from being shown in the log. [GH-5666]
 * builder/amazon: Warn during prepare if we didn't get both an access key and a secret key when we were expecting one. [GH-5762]
 
 ### BUG FIXES:
+
 * builder/alicloud-ecs: Attach keypair before starting instance in alicloud builder [GH-5739]
 
 ## 1.1.3 (December 8, 2017)
