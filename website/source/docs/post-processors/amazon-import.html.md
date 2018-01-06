@@ -106,7 +106,7 @@ Here is a basic example. This assumes that the builder has produced an OVA artif
 
 ## VMWare Example
 
-This is an example that uses `vmware-iso` builder and export the `.ova` file using ovftool.
+This is an example that uses `vmware-iso` builder and exports the `.ova` file using ovftool.
 
 ``` json
 "post-processors" : [
