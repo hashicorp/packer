@@ -43,12 +43,6 @@ func TestDownloadableURL(t *testing.T) {
 		t.Fatalf("expected err : %s", err)
 	}
 
-	// Invalid: unsupported scheme
-	_, err = DownloadableURL("nonexistent-protocol://host.com/path")
-	if err == nil {
-		t.Fatalf("expected err : %s", err)
-	}
-
 	// Valid: http
 	u, err := DownloadableURL("HTTP://packer.io/path")
 	if err != nil {
