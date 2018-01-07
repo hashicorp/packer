@@ -20,8 +20,6 @@ import (
 
 // imports related to each Downloader implementation
 import (
-	"github.com/cheggaaa/pb"
-	"github.com/jlaffaye/ftp"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -83,24 +81,24 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar pb.ProgressBar) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
+		// XXX: Make sure you add any new protocols you implement
+		//      to the DownloadableURL implementation in config.go!
 		c.DownloaderMap = map[string]Downloader{
-			"file":  &FileDownloader{progress: &bar, bufferSize: nil},
-			"ftp":   &FTPDownloader{progress: &bar, userInfo: url.UserPassword("anonymous", "anonymous@"), mtu: mtu},
-			"http":  &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
-			"https": &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
-			"smb":   &SMBDownloader{progress: &bar, bufferSize: nil},
+			"file":  &FileDownloader{bufferSize: nil},
+			"http":  &HTTPDownloader{userAgent: c.UserAgent},
+			"https": &HTTPDownloader{userAgent: c.UserAgent},
+			"smb":   &SMBDownloader{bufferSize: nil},
 		}
 	}
 	return &DownloadClient{config: c}
 }
 
-// A downloader implements the ability to transfer a file, and cancel or resume
-//	it.
+// A downloader implements the ability to transfer, cancel, or resume a file.
 type Downloader interface {
 	Resume()
 	Cancel()
@@ -209,6 +207,14 @@ func (d *DownloadClient) Get() (string, error) {
 	return finalPath, err
 }
 
+func (d *DownloadClient) PercentProgress() int {
+	if (d.downloader == nil) {
+		return -1
+	}
+
+	return int((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
+}
+
 // VerifyChecksum tests that the path matches the checksum for the
 // download.
 func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
@@ -234,8 +240,6 @@ type HTTPDownloader struct {
 	current   uint64
 	total     uint64
 	userAgent string
-
-	progress *pb.ProgressBar
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -300,10 +304,6 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	d.total = d.current + uint64(resp.ContentLength)
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
-	progressBar.Set64(int64(d.current))
-
 	var buffer [4096]byte
 	for {
 		n, err := resp.Body.Read(buffer[:])
@@ -312,7 +312,6 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		}
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
 
 		if _, werr := dst.Write(buffer[:n]); werr != nil {
 			return werr
@@ -322,7 +321,6 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			break
 		}
 	}
-	progressBar.Finish()
 	return nil
 }
 
@@ -334,152 +332,6 @@ func (d *HTTPDownloader) Total() uint64 {
 	return d.total
 }
 
-// FTPDownloader is an implementation of Downloader that downloads
-// files over FTP.
-type FTPDownloader struct {
-	userInfo *url.Userinfo
-	mtu      uint
-
-	active  bool
-	current uint64
-	total   uint64
-
-	progress *pb.ProgressBar
-}
-
-func (d *FTPDownloader) Progress() uint64 {
-	return d.current
-}
-
-func (d *FTPDownloader) Total() uint64 {
-	return d.total
-}
-
-func (d *FTPDownloader) Cancel() {
-	d.active = false
-}
-
-func (d *FTPDownloader) Resume() {
-	// TODO: Implement
-}
-
-func (d *FTPDownloader) Download(dst *os.File, src *url.URL) error {
-	var userinfo *url.Userinfo
-
-	userinfo = d.userInfo
-	d.active = false
-
-	// check the uri is correct
-	if src == nil || src.Scheme != "ftp" {
-		return fmt.Errorf("Unexpected uri scheme: %s", src.Scheme)
-	}
-	uri := src
-
-	// connect to ftp server
-	var cli *ftp.ServerConn
-
-	log.Printf("Starting download over FTP: %s : %s\n", uri.Host, uri.Path)
-	cli, err := ftp.Dial(uri.Host)
-	if err != nil {
-		return nil
-	}
-	defer cli.Quit()
-
-	// handle authentication
-	if uri.User != nil {
-		userinfo = uri.User
-	}
-
-	pass, ok := userinfo.Password()
-	if !ok {
-		pass = "ftp@"
-	}
-
-	log.Printf("Authenticating to FTP server: %s : %s\n", userinfo.Username(), pass)
-	err = cli.Login(userinfo.Username(), pass)
-	if err != nil {
-		return err
-	}
-
-	// locate specified path
-	p := path.Dir(uri.Path)
-
-	log.Printf("Changing to FTP directory : %s\n", p)
-	err = cli.ChangeDir(p)
-	if err != nil {
-		return nil
-	}
-
-	curpath, err := cli.CurrentDir()
-	if err != nil {
-		return err
-	}
-	log.Printf("Current FTP directory : %s\n", curpath)
-
-	// collect stats about the specified file
-	var name string
-	var entry *ftp.Entry
-
-	_, name = path.Split(uri.Path)
-	entry = nil
-
-	entries, err := cli.List(curpath)
-	for _, e := range entries {
-		if e.Type == ftp.EntryTypeFile && e.Name == name {
-			entry = e
-			break
-		}
-	}
-
-	if entry == nil {
-		return fmt.Errorf("Unable to find file: %s", uri.Path)
-	}
-	log.Printf("Found file : %s : %v bytes\n", entry.Name, entry.Size)
-
-	d.current = 0
-	d.total = entry.Size
-
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
-
-	// download specified file
-	d.active = true
-	reader, err := cli.RetrFrom(uri.Path, d.current)
-	if err != nil {
-		return nil
-	}
-
-	// do it in a goro so that if someone wants to cancel it, they can
-	errch := make(chan error)
-	go func(d *FTPDownloader, r io.Reader, w io.Writer, e chan error) {
-		for d.active {
-			n, err := io.CopyN(w, r, int64(d.mtu))
-			if err != nil {
-				break
-			}
-
-			d.current += uint64(n)
-			progressBar.Set64(int64(d.current))
-		}
-		d.active = false
-		e <- err
-	}(d, reader, dst, errch)
-
-	// spin until it's done
-	err = <-errch
-
-	progressBar.Finish()
-	reader.Close()
-
-	if err == nil && d.current != d.total {
-		err = fmt.Errorf("FTP total transfer size was %d when %d was expected", d.current, d.total)
-	}
-
-	// log out
-	cli.Logout()
-	return err
-}
-
 // FileDownloader is an implementation of Downloader that downloads
 // files using the regular filesystem.
 type FileDownloader struct {
@@ -488,8 +340,6 @@ type FileDownloader struct {
 	active  bool
 	current uint64
 	total   uint64
-
-	progress *pb.ProgressBar
 }
 
 func (d *FileDownloader) Progress() uint64 {
@@ -580,9 +430,6 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
-
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
@@ -590,7 +437,6 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -603,7 +449,6 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
-				progressBar.Set64(int64(d.current))
 			}
 			d.active = false
 			e <- err
@@ -612,7 +457,6 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and we spin until it's done
 		err = <-errch
 	}
-	progressBar.Finish()
 	f.Close()
 	return err
 }
@@ -625,8 +469,6 @@ type SMBDownloader struct {
 	active  bool
 	current uint64
 	total   uint64
-
-	progress *pb.ProgressBar
 }
 
 func (d *SMBDownloader) Progress() uint64 {
@@ -699,9 +541,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
-
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
@@ -709,7 +548,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -722,7 +560,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
-				progressBar.Set64(int64(d.current))
 			}
 			d.active = false
 			e <- err
@@ -731,7 +568,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and as usual we spin until it's done
 		err = <-errch
 	}
-	progressBar.Finish()
 	f.Close()
 	return err
 }
