@@ -208,7 +208,7 @@ func (d *DownloadClient) Get() (string, error) {
 }
 
 func (d *DownloadClient) PercentProgress() int {
-	if (d.downloader == nil) {
+	if d.downloader == nil {
 		return -1
 	}
 
