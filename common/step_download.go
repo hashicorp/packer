@@ -7,7 +7,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/cheggaaa/pb"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -62,10 +61,6 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
-	// Get a default-looking progress bar and connect it to the ui.
-	bar := GetDefaultProgressBar()
-	bar.Callback = ui.Message
-
 	// First try to use any already downloaded file
 	// If it fails, proceed to regualar download logic
 
@@ -99,7 +94,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 		}
 		downloadConfigs[i] = config
 
-		if match, _ := NewDownloadClient(config, bar).VerifyChecksum(config.TargetPath); match {
+		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
 			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
 			finalPath = config.TargetPath
 			break
@@ -141,32 +136,10 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 func (s *StepDownload) Cleanup(multistep.StateBag) {}
 
-func GetDefaultProgressBar() pb.ProgressBar {
-	bar := pb.New64(0)
-	bar.ShowPercent = true
-	bar.ShowCounters = true
-	bar.ShowSpeed = false
-	bar.ShowBar = true
-	bar.ShowTimeLeft = false
-	bar.ShowFinalTime = false
-	bar.SetUnits(pb.U_BYTES)
-	bar.Format("[=>-]")
-	bar.SetRefreshRate(1 * time.Second)
-	bar.SetWidth(25)
-
-	return *bar
-}
-
 func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
 	var path string
 	ui := state.Get("ui").(packer.Ui)
-
-	// Get a default looking progress bar and connect it to the ui.
-	bar := GetDefaultProgressBar()
-	bar.Callback = ui.Message
-
-	// Create download client with config and progress bar
-	download := NewDownloadClient(config, bar)
+	download := NewDownloadClient(config)
 
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
@@ -175,19 +148,24 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 		downloadCompleteCh <- err
 	}()
 
+	progressTicker := time.NewTicker(5 * time.Second)
+	defer progressTicker.Stop()
+
 	for {
 		select {
 		case err := <-downloadCompleteCh:
-			bar.Finish()
-
 			if err != nil {
 				return "", err, true
 			}
-			return path, nil, true
 
+			return path, nil, true
+		case <-progressTicker.C:
+			progress := download.PercentProgress()
+			if progress >= 0 {
+				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
+			}
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				bar.Finish()
 				ui.Say("Interrupt received. Cancelling download...")
 				return "", nil, false
 			}
