@@ -566,12 +566,6 @@
 			"revision": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
-			"checksumSHA1": "ymc5+iJ+1ipls3ihqPdzMjFYCqo=",
-			"path": "github.com/cheggaaa/pb",
-			"revision": "18d384da9bdc1e5a08fc2a62a494c321d9ae74ea",
-			"revisionTime": "2017-12-14T13:20:59Z"
-		},
-		{
 			"checksumSHA1": "Lf3uUXTkKK5DJ37BxQvxO1Fq+K8=",
 			"comment": "v1.0.0-3-g6d21280",
 			"path": "github.com/davecgh/go-spew/spew",
@@ -823,12 +817,6 @@
 			"revision": "df949784da9ed028ee76df44652e42d37a09d7e4"
 		},
 		{
-			"checksumSHA1": "28nznojcl6Ejtm6I1tKozgy0isg=",
-			"path": "github.com/jlaffaye/ftp",
-			"revision": "025815df64030c144b86e368fedf80ee195fe464",
-			"revisionTime": "2016-02-29T21:52:38Z"
-		},
-		{
 			"checksumSHA1": "3/Bhy+ua/DCv2ElMD5GzOYSGN6g=",
 			"comment": "0.2.2-2-gc01cf91",
 			"path": "github.com/jmespath/go-jmespath",
@@ -928,12 +916,6 @@
 			"checksumSHA1": "NkbetqlpWBi3gP08JDneC+axTKw=",
 			"path": "github.com/mattn/go-isatty",
 			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639"
-		},
-		{
-			"checksumSHA1": "MNkKJyk2TazKMJYbal5wFHybpyA=",
-			"path": "github.com/mattn/go-runewidth",
-			"revision": "14207d285c6c197daabb5c9793d63e7af9ab2d50",
-			"revisionTime": "2017-02-01T02:35:40Z"
 		},
 		{
 			"checksumSHA1": "UP+pXl+ic9y6qrpZA5MqDIAuGfw=",
@@ -1498,16 +1480,6 @@
 			"checksumSHA1": "U7dGDNwEHORvJFMoNSXErKE7ITg=",
 			"path": "google.golang.org/cloud/internal",
 			"revision": "5a3b06f8b5da3b7c3a93da43163b872c86c509ef"
-		},
-		{
-			"checksumSHA1": "gY2M/3SCxqgrPz+P/N6JQ+m/wnA=",
-			"path": "gopkg.in/xmlpath.v2",
-			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
-		},
-		{
-			"checksumSHA1": "0dDWcU08d0FS4d99NCgCkGLjjqw=",
-			"path": "gopkg.in/xmlpath.v2/cmd/webpath",
-			"revision": "860cbeca3ebcc600db0b213c0e83ad6ce91f5739"
 		}
 	],
 	"rootPath": "github.com/hashicorp/packer"

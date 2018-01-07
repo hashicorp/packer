@@ -48,7 +48,7 @@ func ChooseString(vals ...string) string {
 func DownloadableURL(original string) (string, error) {
 
 	// Verify that the scheme is something we support in our common downloader.
-	supported := []string{"file", "http", "https", "ftp", "smb"}
+	supported := []string{"file", "http", "https", "smb"}
 	found := false
 	for _, s := range supported {
 		if strings.HasPrefix(strings.ToLower(original), s+"://") {
