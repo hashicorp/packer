@@ -21,8 +21,10 @@ import (
 // imports related to each Downloader implementation
 import (
 	"io"
+	"net"
 	"net/http"
 	"path/filepath"
+	"github.com/jlaffaye/ftp"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -91,6 +93,7 @@ func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 			"http":  &HTTPDownloader{userAgent: c.UserAgent},
 			"https": &HTTPDownloader{userAgent: c.UserAgent},
 			"smb":   &SMBDownloader{bufferSize: nil},
+			"ftp":   &FTPDownloader{userInfo: url.UserPassword("anonymous", "anonymous@"), mtu: mtu},
 		}
 	}
 	return &DownloadClient{config: c}
@@ -440,7 +443,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	} else {
 		errch := make(chan error)
 		go func(d *FileDownloader, r io.Reader, w io.Writer, e chan error) {
-			for d.active {
+			for d.active && d.current < d.total {
 				n, err := io.CopyN(w, r, int64(*d.bufferSize))
 				if err != nil {
 					break
@@ -551,7 +554,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	} else {
 		errch := make(chan error)
 		go func(d *SMBDownloader, r io.Reader, w io.Writer, e chan error) {
-			for d.active {
+			for d.active && d.current < d.total {
 				n, err := io.CopyN(w, r, int64(*d.bufferSize))
 				if err != nil {
 					break
@@ -567,5 +570,162 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		err = <-errch
 	}
 	f.Close()
+	return err
+}
+
+// FTPDownloader is an implementation of Downloader that downloads
+// files over FTP.
+type FTPDownloader struct {
+	userInfo *url.Userinfo
+	mtu      uint
+
+	active  bool
+	current uint64
+	total   uint64
+}
+
+func (d *FTPDownloader) Progress() uint64 {
+	return d.current
+}
+
+func (d *FTPDownloader) Total() uint64 {
+	return d.total
+}
+
+func (d *FTPDownloader) Cancel() {
+	d.active = false
+}
+
+func (d *FTPDownloader) Resume() {
+	// TODO: Implement
+}
+
+func (d *FTPDownloader) Download(dst *os.File, src *url.URL) error {
+	var userinfo *url.Userinfo
+
+	userinfo = d.userInfo
+	d.active = false
+
+	// check the uri is correct
+	if src == nil || strings.ToLower(src.Scheme) != "ftp" {
+		return fmt.Errorf("Unexpected uri scheme: %s", src.Scheme)
+	}
+	uri := src
+
+	// add the default ftp port
+	if uri.Port() == "" {
+		port, err := net.LookupPort("ip4", "ftp")
+		if err != nil {
+			port = 21
+		}
+		uri.Host = fmt.Sprintf("%s:%d", uri.Hostname(), port)
+	}
+
+	// connect to ftp server
+	var cli *ftp.ServerConn
+
+	log.Printf("Starting download over FTP: %s(:%s) -> %s\n", uri.Hostname(), uri.Port(), uri.Path)
+	cli, err := ftp.Dial(fmt.Sprintf("%s:%s", uri.Hostname(), uri.Port()))
+	if err != nil {
+		return err
+	}
+	defer cli.Quit()
+
+	// handle authentication
+	if uri.User != nil {
+		userinfo = uri.User
+	}
+
+	pass, ok := userinfo.Password()
+	if !ok {
+		pass = "ftp@"
+	}
+
+	log.Printf("Authenticating to FTP server: %s : %s\n", userinfo.Username(), pass)
+	err = cli.Login(userinfo.Username(), pass)
+	if err != nil {
+		return err
+	}
+
+	// locate specified path
+	p := path.Dir(uri.Path)
+
+	log.Printf("Changing to FTP directory : %s\n", p)
+	err = cli.ChangeDir(p)
+	if err != nil {
+		return err
+	}
+
+	curpath, err := cli.CurrentDir()
+	if err != nil {
+		return err
+	}
+	log.Printf("Current FTP directory : %s\n", curpath)
+
+	// collect stats about the specified file
+	var name string
+	var entry *ftp.Entry
+
+	_, name = path.Split(uri.Path)
+	entry = nil
+
+	log.Printf("Enumerating files in current directory : %s\n", curpath)
+	entries, err := cli.List(".")
+	if err != nil {
+		return fmt.Errorf("Unable to list files in directory \"%s\". (%s)", curpath, err)
+	}
+	if len(entries) == 0 {
+		return fmt.Errorf("Unable to find any files in directory \"%s\".", curpath)
+	}
+
+	for _, e := range entries {
+		log.Printf("Checking file name: %v\n", e)
+		if e.Type == ftp.EntryTypeFile && e.Name == name {
+			log.Printf("Found matching name: %v\n", e)
+			entry = e
+			break
+		}
+	}
+
+	if entry == nil {
+		return fmt.Errorf("Unable to find file \"%s\".", uri.Path)
+	}
+	log.Printf("Found file: %s (%d bytes).\n", entry.Name, entry.Size)
+
+	d.current = 0
+	d.total = entry.Size
+
+	// download specified file
+	d.active = true
+	reader, err := cli.RetrFrom(uri.Path, d.current)
+	if err != nil {
+		return err
+	}
+
+	// do it in a goro so that if someone wants to cancel it, they can
+	errch := make(chan error)
+	go func(d *FTPDownloader, r io.Reader, w io.Writer, e chan error) {
+		for d.active && d.current < d.total {
+			n, err := io.CopyN(w, r, int64(d.mtu))
+			if err != nil {
+				break
+			}
+			d.current += uint64(n)
+		}
+		d.active = false
+		e <- err
+	}(d, reader, dst, errch)
+
+	// spin until it's done
+	err = <-errch
+
+	reader.Close()
+
+	if err == nil && d.current != d.total {
+		err = fmt.Errorf("FTP total transfer size was %d when %d was expected.", d.current, d.total)
+	}
+
+	// log out
+	cli.Logout()
 	return err
 }
