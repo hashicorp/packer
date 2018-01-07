@@ -197,8 +197,8 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 		}
 
 		expected := fmt.Sprintf("%s%s",
-				filePrefix,
-				strings.Replace(tfPath, `\`, `/`, -1))
+			filePrefix,
+			strings.Replace(tfPath, `\`, `/`, -1))
 		if u != expected {
 			t.Fatalf("unexpected: %#v != %#v", u, expected)
 		}
