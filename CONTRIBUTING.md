@@ -153,6 +153,12 @@ specific package / folder. The `TESTARGS` variable is recommended to filter
 down to a specific resource to test, since testing all of them at once can
 sometimes take a very long time.
 
+To run only a specific test, use the `-run` argument:
+
+```
+make testacc TEST=./builder/amazon/ebs TESTARGS="-run TestBuilderAcc_forceDeleteSnapshot"
+```
+
 Acceptance tests typically require other environment variables to be set for
 things such as API tokens and keys. Each test should error and tell you which
 credentials are missing, so those are not documented here.
