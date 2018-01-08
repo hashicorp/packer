@@ -104,6 +104,38 @@ Here is a basic example. This assumes that the builder has produced an OVA artif
 }
 ```
 
+## VMWare Example
+
+This is an example that uses `vmware-iso` builder and exports the `.ova` file using ovftool.
+
+``` json
+"post-processors" : [
+     [
+     {
+      "type": "shell-local",
+      "inline": [ "/usr/bin/ovftool <packer-output-directory>/<vmware-name>.vmx <packer-output-directory>/<vmware-name>.ova" ]
+     },
+     {
+         "files": [
+           "<packer-output-directory>/<vmware-name>.ova"
+         ],
+         "type": "artifice"
+     },
+     {
+      "type": "amazon-import",
+      "access_key": "YOUR KEY HERE",
+      "secret_key": "YOUR SECRET KEY HERE",
+      "region": "us-east-1",
+      "s3_bucket_name": "importbucket",
+      "license_type": "BYOL",
+      "tags": {
+        "Description": "packer amazon-import {{timestamp}}"
+      }
+     }
+    ]
+  ]
+```
+
 -&gt; **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above
 for more information on what environmental variables Packer will look for.
