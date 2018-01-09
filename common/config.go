@@ -47,78 +47,87 @@ func ChooseString(vals ...string) string {
 // a completely valid URL. For example, the original URL might be "local/file.iso"
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
-	fmt.Printf("Swampy: user input was %s\n", original)
 	if runtime.GOOS == "windows" {
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
+		// prepend with "file:///"" now so that url.Parse won't accidentally
+		// parse the drive letter into the url scheme.
+		// See https://blogs.msdn.microsoft.com/ie/2006/12/06/file-uris-in-windows/
+		// for more info about valid windows URIs
 		idx := strings.Index(original, ":")
 		if idx == 1 {
 			original = "file:///" + original
 		}
 	}
-
-	url, err := url.Parse(original)
+	u, err := url.Parse(original)
 	if err != nil {
 		return "", err
 	}
 
-	if url.Scheme == "" {
-		url.Scheme = "file"
+	if u.Scheme == "" {
+		u.Scheme = "file"
 	}
 
-	if url.Scheme == "file" {
+	if u.Scheme == "file" {
 		// Windows file handling is all sorts of tricky...
 		if runtime.GOOS == "windows" {
 			// If the path is using Windows-style slashes, URL parses
 			// it into the host field.
-			if url.Path == "" && strings.Contains(url.Host, `\`) {
-				url.Path = url.Host
-				url.Host = ""
+			if u.Path == "" && strings.Contains(u.Host, `\`) {
+				u.Path = u.Host
+				u.Host = ""
 			}
 		}
 
 		// Only do the filepath transformations if the file appears
 		// to actually exist.
-		if _, err := os.Stat(url.Path); err == nil {
-			url.Path, err = filepath.Abs(url.Path)
+		if _, err := os.Stat(u.Path); err == nil {
+			u.Path, err = filepath.Abs(u.Path)
 			if err != nil {
 				return "", err
 			}
 
-			url.Path, err = filepath.EvalSymlinks(url.Path)
+			u.Path, err = filepath.EvalSymlinks(u.Path)
 			if err != nil {
 				return "", err
 			}
 
-			// url.Path = filepath.Clean(url.Path)
+			u.Path = filepath.Clean(u.Path)
 		}
 
 		if runtime.GOOS == "windows" {
 			// Also replace all backslashes with forwardslashes since Windows
 			// users are likely to do this but the URL should actually only
 			// contain forward slashes.
-			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
+			u.Path = strings.Replace(u.Path, `\`, `/`, -1)
+			// prepend absolute windows paths with "/" so that when we
+			// compose u.String() below the outcome will be correct
+			// file:///c/blah syntax; otherwise u.String() will only add
+			// file:// which is not technically a correct windows URI
+			if filepath.IsAbs(u.Path) && !strings.HasPrefix(u.Path, "/") {
+				u.Path = "/" + u.Path
+			}
+
 		}
 	}
 
 	// Make sure it is lowercased
-	url.Scheme = strings.ToLower(url.Scheme)
+	u.Scheme = strings.ToLower(u.Scheme)
 
 	// Verify that the scheme is something we support in our common downloader.
 	supported := []string{"file", "http", "https"}
 	found := false
 	for _, s := range supported {
-		if url.Scheme == s {
+		if u.Scheme == s {
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
+		return "", fmt.Errorf("Unsupported URL scheme: %s", u.Scheme)
 	}
-	fmt.Printf("Swampy: parsed string after DownloadableURL is %s\n", url.String())
-	return url.String(), nil
+	return u.String(), nil
 }
 
 // FileExistsLocally takes the URL output from DownloadableURL, and determines
@@ -138,13 +147,21 @@ func DownloadableURL(original string) (string, error) {
 
 func FileExistsLocally(original string) (bool, error) {
 	// original should be something like file://C:/my/path.iso
-	// on windows, c drive will be parsed as host if it's file://c instead of file:///c
-	prefix = "file://"
-	filePath = strings.Replace(original, prefix, "", 1)
-	fmt.Printf("Swampy: original is %s\n", original)
-	fmt.Printf("Swampy: filePath is %#v\n", filePath)
+
+	fileURL, _ := url.Parse(original)
+	fileExists := false
 
 	if fileURL.Scheme == "file" {
+		// on windows, correct URI is file:///c:/blah/blah.iso.
+		// url.Parse will pull out the scheme "file://" and leave the path as
+		// "/c:/blah/blah/iso".  Here we remove this forward slash on absolute
+		// Windows file URLs before processing
+		// see https://blogs.msdn.microsoft.com/ie/2006/12/06/file-uris-in-windows/
+		// for more info about valid windows URIs
+		filePath := fileURL.Path
+		if runtime.GOOS == "windows" && len(filePath) > 0 && filePath[0] == '/' {
+			filePath = filePath[1:]
+		}
 		_, err := os.Stat(filePath)
 		if err != nil {
 			err = fmt.Errorf("could not stat file: %s\n", err)
