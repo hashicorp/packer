@@ -47,6 +47,7 @@ func ChooseString(vals ...string) string {
 // a completely valid URL. For example, the original URL might be "local/file.iso"
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
+	fmt.Printf("Swampy: original url string is %s\n", original)
 	if runtime.GOOS == "windows" {
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
