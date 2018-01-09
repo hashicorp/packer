@@ -19,6 +19,7 @@ type BlockDevice struct {
 	VirtualName         string `mapstructure:"virtual_name"`
 	VolumeType          string `mapstructure:"volume_type"`
 	VolumeSize          int64  `mapstructure:"volume_size"`
+	KmsKeyId            string `mapstructure:"kms_key_id"`
 }
 
 type BlockDevices struct {
@@ -71,6 +72,10 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 				ebsBlockDevice.SnapshotId = aws.String(blockDevice.SnapshotId)
 			} else if blockDevice.Encrypted {
 				ebsBlockDevice.Encrypted = aws.Bool(blockDevice.Encrypted)
+			}
+
+			if blockDevice.KmsKeyId != "" {
+				ebsBlockDevice.KmsKeyId = aws.String(blockDevice.KmsKeyId)
 			}
 
 			mapping.Ebs = ebsBlockDevice
