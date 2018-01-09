@@ -122,6 +122,6 @@ func DownloadableURL(original string) (string, error) {
 	if !found {
 		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
 	}
-
+	fmt.Printf("Swampy: url string here is %s\n", url.String())
 	return url.String(), nil
 }
