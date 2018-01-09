@@ -38,36 +38,39 @@ func TestChooseString(t *testing.T) {
 }
 
 func TestDownloadableURL(t *testing.T) {
-	// Invalid URL: has hex code in host
-	_, err := DownloadableURL("http://what%20.com")
-	if err == nil {
-		t.Fatal("expected err")
+
+	cases := []struct {
+		InputString string
+		OutputURL   string
+		ErrExpected bool
+	}{
+		// Invalid URL: has hex code in host
+		{"http://what%20.com", "", true},
+		// Valid: http
+		{"HTTP://packer.io/path", "http://packer.io/path", false},
+		// No path
+		{"HTTP://packer.io", "http://packer.io", false},
+		// Invalid: unsupported scheme
+		{"ftp://host.com/path", "", true},
 	}
 
-	// Invalid: unsupported scheme
-	_, err = DownloadableURL("ftp://host.com/path")
-	if err == nil {
-		t.Fatal("expected err")
-	}
-
-	// Valid: http
-	u, err := DownloadableURL("HTTP://packer.io/path")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if u != "http://packer.io/path" {
-		t.Fatalf("bad: %s", u)
-	}
-
-	// No path
-	u, err = DownloadableURL("HTTP://packer.io")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if u != "http://packer.io" {
-		t.Fatalf("bad: %s", u)
+	for _, tc := range cases {
+		u, err := DownloadableURL(tc.InputString)
+		if u != tc.OutputURL {
+			t.Fatal(fmt.Sprintf("Error with URL %s: got %s but expected %s",
+				tc.InputString, tc.OutputURL, u))
+		}
+		if (err != nil) != tc.ErrExpected {
+			if tc.ErrExpected == true {
+				t.Fatal(fmt.Sprintf("Error with URL %s: we expected "+
+					"DownloadableURL to return an error but didn't get one.",
+					tc.InputString))
+			} else {
+				t.Fatal(fmt.Sprintf("Error with URL %s: we did not expect an "+
+					" error from DownloadableURL but we got: %s",
+					tc.InputString, err))
+			}
+		}
 	}
 }
 
