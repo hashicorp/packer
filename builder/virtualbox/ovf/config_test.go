@@ -35,7 +35,7 @@ func TestNewConfig_FloppyFiles(t *testing.T) {
 	floppies_path := "../../../common/test-fixtures/floppies"
 	c["floppy_files"] = []string{fmt.Sprintf("%s/bar.bat", floppies_path), fmt.Sprintf("%s/foo.ps1", floppies_path)}
 	_, _, err := NewConfig(c)
-	if err != nil {
+	if err == nil {
 		t.Fatalf("should not have error: %s", err)
 	}
 }
