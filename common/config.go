@@ -81,6 +81,8 @@ func DownloadableURL(original string) (string, error) {
 			if len(url.Path) > 0 && url.Path[0] == '/' {
 				url.Path = url.Path[1:len(url.Path)]
 			}
+			// replace "C:\\windows\\is\\fun.iso" with "C:/windows/is/fun.iso"
+			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 
 		// Only do the filepath transformations if the file appears
@@ -97,13 +99,6 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
-		}
-
-		if runtime.GOOS == "windows" {
-			// Also replace all backslashes with forwardslashes since Windows
-			// users are likely to do this but the URL should actually only
-			// contain forward slashes.
-			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 	}
 
