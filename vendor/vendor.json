@@ -497,13 +497,13 @@
 			"versionExact": "v1.10.23"
 		},
 		{
-			"checksumSHA1": "1mbCBXbu6m8bfRAq1+7Cul4VXkU=",
+			"checksumSHA1": "INaeHZ2L5x6RlrcQBm4q1hFqNRM=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/service/ec2",
-			"revision": "dd3acff9dc16f9a6fd87f6b4501590a532e7206a",
-			"revisionTime": "2017-08-10T20:40:06Z",
-			"version": "v1.10.23",
-			"versionExact": "v1.10.23"
+			"revision": "5177d71d80f123f6d82aaf762387e39b88c5ba23",
+			"revisionTime": "2018-01-09T00:04:15Z",
+			"version": "v1.12.57",
+			"versionExact": "v1.12.57"
 		},
 		{
 			"checksumSHA1": "YNq7YhasHn9ceelWX2aG0Cg0Ga0=",
