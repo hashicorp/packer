@@ -74,6 +74,66 @@ func TestDownloadableURL(t *testing.T) {
 	}
 }
 
+func TestDownloadableURL_WindowsFile(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		dirCases := []struct {
+			InputString string
+			OutputURL   string
+			ErrExpected bool
+		}{ // TODO: add different directories
+			{
+				"C:\\Temp\\SomeDir\\myfile.txt",
+				"file:///C:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+			{ // need windows drive
+				"\\Temp\\SomeDir\\myfile.txt",
+				"",
+				true,
+			},
+			{ // need windows drive
+				"/Temp/SomeDir/myfile.txt",
+				"",
+				true,
+			},
+			{
+				"file:///C:\\Temp\\SomeDir\\myfile.txt",
+				"file:///C:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+			{
+				"file:///c:/Temp/Somedir/myfile.txt",
+				"file:///c:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+		}
+		// create tempfile to play with
+		err := os.Mkdir("C:\\Temp\\SomeDir")
+		if err != nil {
+			t.Fatalf("err creating test dir: %s", err)
+		}
+		err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
+		if err != nil {
+			t.Fatalf("err creating test file: %s", err)
+		}
+		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
+		defer os.Remove("C:\\Temp\\SomeDir")
+
+		// Run through test cases to make sure they all parse correctly
+		for _, tc := range dirCases {
+			u, err := DownloadableURL(tc.InputString)
+			if (err != nil) != ErrExpected {
+				t.Fatalf("Test Case failed: Expected err = %s, err = %s, input = %s",
+					tc.ErrExpected, err, tc.InputString)
+			}
+			if u != tc.OutputURL {
+				t.Fatalf("Test Case failed: Expected %s but received %s from input %s",
+					tc.OutputURL, u, tc.InputString)
+			}
+		}
+	}
+}
+
 func TestDownloadableURL_FilePaths(t *testing.T) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {

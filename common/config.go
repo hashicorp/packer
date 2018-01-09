@@ -47,6 +47,7 @@ func ChooseString(vals ...string) string {
 // a completely valid URL. For example, the original URL might be "local/file.iso"
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
+	fmt.Printf("Swampy: original url string is %s\n", original)
 	if runtime.GOOS == "windows" {
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
@@ -80,6 +81,8 @@ func DownloadableURL(original string) (string, error) {
 			if len(url.Path) > 0 && url.Path[0] == '/' {
 				url.Path = url.Path[1:len(url.Path)]
 			}
+			// replace "C:\\windows\\is\\fun.iso" with "C:/windows/is/fun.iso"
+			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 
 		// Only do the filepath transformations if the file appears
@@ -96,13 +99,6 @@ func DownloadableURL(original string) (string, error) {
 			}
 
 			url.Path = filepath.Clean(url.Path)
-		}
-
-		if runtime.GOOS == "windows" {
-			// Also replace all backslashes with forwardslashes since Windows
-			// users are likely to do this but the URL should actually only
-			// contain forward slashes.
-			url.Path = strings.Replace(url.Path, `\`, `/`, -1)
 		}
 	}
 
@@ -122,6 +118,6 @@ func DownloadableURL(original string) (string, error) {
 	if !found {
 		return "", fmt.Errorf("Unsupported URL scheme: %s", url.Scheme)
 	}
-
+	fmt.Printf("Swampy: url string here is %s\n", url.String())
 	return url.String(), nil
 }
