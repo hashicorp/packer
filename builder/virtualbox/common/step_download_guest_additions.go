@@ -121,7 +121,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 	}
 
 	// Convert the file/url to an actual URL for step_download to process.
-	url, err = common.DownloadableURL(url)
+	url, err = common.ValidatedURL(url)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions url: %s", err)
 		state.Put("error", err)
