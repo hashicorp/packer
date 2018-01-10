@@ -73,9 +73,9 @@ func DownloadableURL(original string) (string, error) {
 		if runtime.GOOS == "windows" {
 			// If the path is using Windows-style slashes, URL parses
 			// it into the host field.
-			if url.Path == "" && strings.Contains(url.Host, `\`) {
-				url.Path = url.Host
-				url.Host = ""
+			if u.Path == "" && strings.Contains(u.Host, `\`) {
+				u.Path = u.Host
+				u.Host = ""
 			}
 		}
 		// Only do the filepath transformations if the file appears
