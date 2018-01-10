@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -42,58 +43,98 @@ func ChooseString(vals ...string) string {
 	return ""
 }
 
+// SupportedURL verifies that the url passed is actually supported or not
+// This will also validate that the protocol is one that's actually implemented.
+func SupportedURL(u *url.URL) bool {
+	// url.Parse shouldn't return nil except on error....but it can.
+	if u == nil {
+		return false
+	}
+
+	// build a dummy NewDownloadClient since this is the only place that valid
+	// protocols are actually exposed.
+	cli := NewDownloadClient(&DownloadConfig{})
+
+	// Iterate through each downloader to see if a protocol was found.
+	ok := false
+	for scheme, _ := range cli.config.DownloaderMap {
+		if strings.ToLower(u.Scheme) == strings.ToLower(scheme) {
+			ok = true
+		}
+	}
+	return ok
+}
+
 // DownloadableURL processes a URL that may also be a file path and returns
-// a completely valid URL. For example, the original URL might be "local/file.iso"
-// which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
+// a completely valid URL representing the requested file. For example,
+// the original URL might be "local/file.iso" which isn't a valid URL,
+// and so DownloadableURL will return "file://local/file.iso"
+// No other transformations are done to the path.
 func DownloadableURL(original string) (string, error) {
+	var result string
 
-	// Verify that the scheme is something we support in our common downloader.
-	supported := []string{"file", "http", "https", "smb"}
-	found := false
-	for _, s := range supported {
-		if strings.HasPrefix(strings.ToLower(original), s+"://") {
-			found = true
-			break
-		}
+	// Fix the url if it's using bad characters commonly mistaken with a path.
+	original = filepath.ToSlash(original)
+
+	// Check to see that this is a parseable URL with a scheme. If so, then just pass it through.
+	if u, err := url.Parse(original); err == nil && u.Scheme != "" && u.Host != "" {
+		return filepath.ToSlash(original), nil
 	}
 
-	// If it's properly prefixed with something we support, then we don't need
-	//	to make it a uri.
-	if found {
-		original = filepath.ToSlash(original)
-
-		// make sure that it can be parsed though..
-		uri, err := url.Parse(original)
+	// Since it's not a url, this might be a path. So, check that the file exists,
+	// then make it an absolute path so we can make a proper uri.
+	if _, err := os.Stat(original); err == nil {
+		result, err = filepath.Abs(filepath.FromSlash(original))
 		if err != nil {
 			return "", err
 		}
 
-		uri.Scheme = strings.ToLower(uri.Scheme)
-
-		return uri.String(), nil
-	}
-
-	// If the file exists, then make it an absolute path
-	_, err := os.Stat(original)
-	if err == nil {
-		original, err = filepath.Abs(filepath.FromSlash(original))
+		result, err = filepath.EvalSymlinks(result)
 		if err != nil {
 			return "", err
 		}
 
-		original, err = filepath.EvalSymlinks(original)
-		if err != nil {
-			return "", err
-		}
+		result = filepath.Clean(result)
+		result = filepath.ToSlash(result)
 
-		original = filepath.Clean(original)
-		original = filepath.ToSlash(original)
+		// We have no idea what this might be, so we'll leave it as is.
+	} else {
+		result = filepath.ToSlash(original)
 	}
 
-	// Since it wasn't properly prefixed, let's make it into a well-formed
-	//	file:// uri.
+	// We should have a path that can just turn into a file:// scheme'd url.
+	return fmt.Sprintf("file://%s", result), nil
+}
 
-	return "file://" + original, nil
+// Force the parameter into a url. This will transform the parameter into
+// a proper url, removing slashes, adding the proper prefix, etc.
+func ValidatedURL(original string) (string, error) {
+
+	// See if the user failed to give a url
+	if ok, _ := regexp.MatchString("(?m)^[^[:punct:]]+://", original); !ok {
+
+		// So since no magic was found, this must be a path.
+		result, err := DownloadableURL(original)
+		if err == nil {
+			return ValidatedURL(result)
+		}
+
+		return "", err
+	}
+
+	// Verify that the url is parseable...just in case.
+	u, err := url.Parse(original)
+	if err != nil {
+		return "", err
+	}
+
+	// We should now have a url, so verify that it's a protocol we support.
+	if !SupportedURL(u) {
+		return "", fmt.Errorf("Unsupported protocol scheme! (%#v)", u)
+	}
+
+	// We should now have a properly formatted and supported url
+	return u.String(), nil
 }
 
 // FileExistsLocally takes the URL output from DownloadableURL, and determines
