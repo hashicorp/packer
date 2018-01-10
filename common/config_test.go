@@ -93,6 +93,11 @@ func TestDownloadableURL_WindowsFiles(t *testing.T) {
 				"",
 				true,
 			},
+			{ // UNC paths; why not?
+				"\\\\?\\c:\\Temp\\SomeDir\\myfile.txt",
+				"",
+				true,
+			},
 			{
 				"file:///C:\\Temp\\SomeDir\\myfile.txt",
 				"file:///c:/Temp/SomeDir/myfile.txt",
