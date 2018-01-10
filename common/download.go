@@ -15,6 +15,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -78,6 +83,7 @@ func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 		c.DownloaderMap = map[string]Downloader{
 			"http":  &HTTPDownloader{userAgent: c.UserAgent},
 			"https": &HTTPDownloader{userAgent: c.UserAgent},
+			"s3": &S3Downloader{},
 		}
 	}
 
@@ -293,5 +299,52 @@ func (d *HTTPDownloader) Progress() uint {
 }
 
 func (d *HTTPDownloader) Total() uint {
+	return d.total
+}
+
+// S3Downloader is an implementation of Downloader that downloads
+// files from S3 buckets using s3 URIs.
+type S3Downloader struct {
+	progress  uint
+	total     uint
+}
+
+func (*S3Downloader) Cancel() {
+}
+
+func (d *S3Downloader) Download(dst *os.File, src *url.URL) error {
+	log.Printf("Starting download: %s", src.String())
+
+	// Seek to the beginning by default
+	if _, err := dst.Seek(0, 0); err != nil {
+		return err
+	}
+
+	// Reset our progress
+	d.progress = 0
+
+	u, _ := url.Parse(src.String())
+
+	sess := session.Must(session.NewSession())
+	downloader := s3manager.NewDownloader(sess)
+	numBytes, err := downloader.Download(dst,
+		&s3.GetObjectInput{
+			Bucket: aws.String(u.Host),
+			Key:    aws.String(u.Path),
+		})
+	if err != nil {
+		return err
+	}
+	// s3 downloader doesn't provide progress yet
+	d.progress = uint(numBytes)
+	d.total = d.progress
+	return nil
+}
+
+func (d *S3Downloader) Progress() uint {
+	return d.progress
+}
+
+func (d *S3Downloader) Total() uint {
 	return d.total
 }
