@@ -86,8 +86,6 @@ func NewDownloadClient(c *DownloadConfig) *DownloadClient {
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
-		// XXX: Make sure you add any new protocols you implement
-		//      to the DownloadableURL implementation in config.go!
 		c.DownloaderMap = map[string]Downloader{
 			"file":  &FileDownloader{bufferSize: nil},
 			"http":  &HTTPDownloader{userAgent: c.UserAgent},

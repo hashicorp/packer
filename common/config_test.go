@@ -36,15 +36,21 @@ func TestChooseString(t *testing.T) {
 	}
 }
 
-func TestDownloadableURL(t *testing.T) {
+func TestValidatedURL(t *testing.T) {
 	// Invalid URL: has hex code in host
-	_, err := DownloadableURL("http://what%20.com")
+	_, err := ValidatedURL("http://what%20.com")
+	if err == nil {
+		t.Fatalf("expected err : %s", err)
+	}
+
+	// Invalid: unsupported scheme
+	_, err = ValidatedURL("ftp://host.com/path")
 	if err == nil {
 		t.Fatalf("expected err : %s", err)
 	}
 
 	// Valid: http
-	u, err := DownloadableURL("HTTP://packer.io/path")
+	u, err := ValidatedURL("HTTP://packer.io/path")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -69,7 +75,7 @@ func TestDownloadableURL(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		u, err := DownloadableURL(tc.InputString)
+		u, err := ValidatedURL(tc.InputString)
 		if u != tc.OutputURL {
 			t.Fatal(fmt.Sprintf("Error with URL %s: got %s but expected %s",
 				tc.InputString, tc.OutputURL, u))
@@ -77,11 +83,11 @@ func TestDownloadableURL(t *testing.T) {
 		if (err != nil) != tc.ErrExpected {
 			if tc.ErrExpected == true {
 				t.Fatal(fmt.Sprintf("Error with URL %s: we expected "+
-					"DownloadableURL to return an error but didn't get one.",
+					"ValidatedURL to return an error but didn't get one.",
 					tc.InputString))
 			} else {
 				t.Fatal(fmt.Sprintf("Error with URL %s: we did not expect an "+
-					" error from DownloadableURL but we got: %s",
+					" error from ValidatedURL but we got: %s",
 					tc.InputString, err))
 			}
 		}
