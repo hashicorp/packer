@@ -24,6 +24,10 @@ Linux. It can also build machines directly on [VMware vSphere
 Hypervisor](https://www.vmware.com/products/vsphere-hypervisor/) using SSH as
 opposed to the vSphere API.
 
+-> When using VMWare Player on Linux, you may need to install [VIX API
+libraries](https://www.vmware.com/support/developer/vix-api/) to use the
+`vmrun` utility, which is required by the builder.
+
 The builder builds a virtual machine by creating a new virtual machine from
 scratch, booting it, installing an OS, provisioning software within the OS, then
 shutting it down. The result of the VMware builder is a directory containing all
