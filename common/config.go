@@ -135,16 +135,14 @@ func DownloadableURL(original string) (string, error) {
 //
 // myFile, err = common.DownloadableURL(c.SourcePath)
 // ...
-// fileExists, err := common.StatURL(myFile)
+// fileExists := common.StatURL(myFile)
 // possible output:
-// true, nil -- should occur if the file is present
-// false, nil -- should occur if the file is not present, but is not supposed to
-// be (e.g. the schema is http://, not file://)
-// true, error -- shouldn't occur ever
-// false, error -- should occur if there was an error stating the file, so the
+// true -- should occur if the file is present, or if the file is not present,
+// but is not supposed to be (e.g. the schema is http://, not file://)
+// false -- should occur if there was an error stating the file, so the
 // file is not present when it should be.
 
-func FileExistsLocally(original string) (bool, error) {
+func FileExistsLocally(original string) bool {
 	// original should be something like file://C:/my/path.iso
 
 	fileURL, _ := url.Parse(original)
@@ -163,11 +161,10 @@ func FileExistsLocally(original string) (bool, error) {
 		}
 		_, err := os.Stat(filePath)
 		if err != nil {
-			err = fmt.Errorf("could not stat file: %s\n", err)
-			return fileExists, err
+			return fileExists
 		} else {
 			fileExists = true
 		}
 	}
-	return fileExists, nil
+	return fileExists
 }
