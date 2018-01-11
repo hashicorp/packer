@@ -208,6 +208,43 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	}
 }
 
+func test_FileExistsLocally(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		dirCases := []struct {
+			Input  string
+			Output bool
+		}{
+			// file exists locally
+			{"file:///C:/Temp/SomeDir/myfile.txt", true},
+			// file is not supposed to exist locally
+			{"https://myfile.iso", true},
+			// file does not exist locally
+			{"file:///C/i/dont/exist", false},
+		}
+		// create absolute-pathed tempfile to play with
+		err := os.Mkdir("C:\\Temp\\SomeDir", 0755)
+		if err != nil {
+			t.Fatalf("err creating test dir: %s", err)
+		}
+		fi, err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
+		if err != nil {
+			t.Fatalf("err creating test file: %s", err)
+		}
+		fi.Close()
+		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
+		defer os.Remove("C:\\Temp\\SomeDir")
+
+		// Run through test cases to make sure they all parse correctly
+		for _, tc := range dirCases {
+			fileOK := FileExistsLocally(tc.Input)
+			if !fileOK {
+				t.Fatalf("Test Case failed: Expected %#v, received = %#v, input = %s",
+					tc.Output, fileOK, tc.Input)
+			}
+		}
+	}
+}
+
 func TestScrubConfig(t *testing.T) {
 	type Inner struct {
 		Baz string
