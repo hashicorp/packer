@@ -231,10 +231,10 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
-	describeInstanceStatus := &ec2.DescribeInstanceStatusInput{
+	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	if err := ec2conn.WaitUntilInstanceStatusOk(describeInstanceStatus); err != nil {
+	if err := ec2conn.WaitUntilInstanceRunning(describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
