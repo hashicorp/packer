@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -86,8 +87,27 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 	return blockDevices
 }
 
-func (b *BlockDevices) Prepare(ctx *interpolate.Context) []error {
+func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
+	// Warn that encrypted must be true when setting kms_key_id
+	if b.KmsKeyId != "" && b.Encrypted == false {
+		return fmt.Errorf("The device %v, must also have `encrypted: "+
+			"true` when setting a kms_key_id.", b.DeviceName)
+	}
 	return nil
+}
+
+func (b *BlockDevices) Prepare(ctx *interpolate.Context) (errs []error) {
+	for _, d := range b.AMIMappings {
+		if err := d.Prepare(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
+		}
+	}
+	for _, d := range b.LaunchMappings {
+		if err := d.Prepare(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("LaunchMapping: %s", err.Error()))
+		}
+	}
+	return errs
 }
 
 func (b *AMIBlockDevices) BuildAMIDevices() []*ec2.BlockDeviceMapping {
