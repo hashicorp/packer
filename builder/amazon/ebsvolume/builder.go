@@ -60,7 +60,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	// Warn that encrypted must be true when setting kms_key_id
 	for _, device := range b.config.VolumeMappings {
 		if device.KmsKeyId != "" && device.Encrypted == false {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The device %v, must also have `encrytped: "+
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The device %v, must also have `encrypted: "+
 				"true` when setting a kms_key_id.", device.DeviceName))
 		}
 	}
