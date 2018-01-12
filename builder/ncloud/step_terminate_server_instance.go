@@ -2,7 +2,6 @@ package ncloud
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
@@ -33,7 +32,7 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 	reqParams := new(ncloud.RequestTerminateServerInstances)
 	reqParams.ServerInstanceNoList = []string{serverInstanceNo}
 
-	serverInstanceList, err := s.Conn.TerminateServerInstances(reqParams)
+	_, err := s.Conn.TerminateServerInstances(reqParams)
 	if err != nil {
 		return err
 	}

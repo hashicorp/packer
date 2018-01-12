@@ -44,7 +44,7 @@ func (s *StepCreateServerImage) createServerImage(serverInstanceNo string) (*ncl
 
 	memberServerImageList, err := s.Conn.CreateMemberServerImage(reqParams)
 	if err != nil {
-		return nil, fmt.Errorf("error code: %d , error message: %s", memberServerImageList.ReturnCode, memberServerImageList.ReturnMessage)
+		return nil, err
 	}
 
 	serverImage := memberServerImageList.MemberServerImageList[0]

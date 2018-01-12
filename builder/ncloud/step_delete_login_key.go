@@ -28,7 +28,7 @@ func NewStepDeleteLoginKey(conn *ncloud.Conn, ui packer.Ui) *StepDeleteLoginKey 
 }
 
 func (s *StepDeleteLoginKey) deleteLoginKey(keyName string) error {
-	resp, err := s.Conn.DeleteLoginKey(keyName)
+	_, err := s.Conn.DeleteLoginKey(keyName)
 	if err != nil {
 		return err
 	}
