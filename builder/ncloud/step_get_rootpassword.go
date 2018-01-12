@@ -1,8 +1,6 @@
 package ncloud
 
 import (
-	"fmt"
-
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
