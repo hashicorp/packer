@@ -55,7 +55,7 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 
 	serverInstanceList, err := s.Conn.CreateServerInstances(reqParams)
 	if err != nil {
-		return "", fmt.Errorf("error code: %d, error message: %s", serverInstanceList.ReturnCode, serverInstanceList.ReturnMessage)
+		return "", err
 	}
 
 	s.serverInstanceNo = serverInstanceList.ServerInstanceList[0].ServerInstanceNo

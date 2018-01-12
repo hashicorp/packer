@@ -63,7 +63,7 @@ func (s *StepDeleteBlockStorageInstance) deleteBlockStorageInstance(serverInstan
 		return nil
 	}
 
-	result, err := s.Conn.DeleteBlockStorageInstances(blockStorageInstanceList)
+	_, err := s.Conn.DeleteBlockStorageInstances(blockStorageInstanceList)
 	if err != nil {
 		return err
 	}
