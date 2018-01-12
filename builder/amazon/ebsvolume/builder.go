@@ -57,6 +57,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 
+	// Warn that encrypted must be true when setting kms_key_id
+	for _, device := range b.config.VolumeMappings {
+		if device.KmsKeyId != "" && device.Encrypted == false {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The device %v, must also have `encrytped: "+
+				"true` when setting a kms_key_id.", device.DeviceName))
+		}
+	}
+
 	b.config.launchBlockDevices, err = commonBlockDevices(b.config.VolumeMappings, &b.config.ctx)
 	if err != nil {
 		errs = packer.MultiErrorAppend(errs, err)
