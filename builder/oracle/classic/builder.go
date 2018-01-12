@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	ocommon "github.com/hashicorp/packer/builder/oracle/common"
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/go-oracle-terraform/compute"
+	"github.com/hashicorp/go-oracle-terraform/opc"
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -31,14 +32,33 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+
+	httpClient := cleanhttp.DefaultClient()
+	config := &opc.Config{
+		Username:       opc.String(b.config.Username),
+		Password:       opc.String(b.config.Password),
+		IdentityDomain: opc.String(b.config.IdentityDomain),
+		APIEndpoint:    b.config.apiEndpointURL,
+		LogLevel:       opc.LogDebug,
+		// Logger: # Leave blank to use the default logger, or provide your own
+		HTTPClient: httpClient,
+	}
+	// Create the Compute Client
+	client, err := compute.NewComputeClient(config)
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OPC Compute Client: %s", err)
+	}
+
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("client", client)
 
 	// Build the steps
 	steps := []multistep.Step{
+	/*
 		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
@@ -55,6 +75,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepSnapshot{},
+	*/
 	}
 
 	// Run the steps
