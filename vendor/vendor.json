@@ -791,6 +791,12 @@
 			"revision": "d30f09973e19c1dfcd120b2d9c4f168e68d6b5d5"
 		},
 		{
+			"checksumSHA1": "Nf2Gdn9M1KlUS3sovKfymO1VJF4=",
+			"path": "github.com/hashicorp/go-oracle-terraform",
+			"revision": "5a9a298c54339d2296d2f1135eae55a3a8f5e8c2",
+			"revisionTime": "2018-01-11T20:31:13Z"
+		},
+		{
 			"checksumSHA1": "ErJHGU6AVPZM9yoY/xV11TwSjQs=",
 			"path": "github.com/hashicorp/go-retryablehttp",
 			"revision": "2d5f5dbd904dbad432492c3ca2c12c72c9e3045a",

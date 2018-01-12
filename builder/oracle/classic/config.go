@@ -2,6 +2,7 @@ package classic
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -20,6 +21,7 @@ type Config struct {
 	Password       string `mapstructure:"password"`
 	IdentityDomain string `mapstructure:"identity_domain"`
 	APIEndpoint    string `mapstructure:"api_endpoint"`
+	apiEndpointURL *url.URL
 
 	// Image
 	Shape     string `mapstructure:"shape"`
@@ -38,6 +40,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	}, raws...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to mapstructure Config: %+v", err)
+	}
+
+	c.apiEndpointURL, err = url.Parse(c.APIEndpoint)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing API Endpoint: %s", err)
 	}
 
 	return c, nil
