@@ -38,7 +38,7 @@ func (s *StepCreateLoginKey) createLoginKey() (*LoginKey, error) {
 
 	privateKey, err := s.Conn.CreateLoginKey(KeyName)
 	if err != nil {
-		return nil, fmt.Errorf("error code: %d , error message: %s", privateKey.ReturnCode, privateKey.ReturnMessage)
+		return nil, err
 	}
 
 	return &LoginKey{KeyName, privateKey.PrivateKey}, nil

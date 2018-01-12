@@ -42,7 +42,7 @@ func (s *StepCreateBlockStorageInstance) createBlockStorageInstance(serverInstan
 
 	blockStorageInstanceList, err := s.Conn.CreateBlockStorageInstance(reqParams)
 	if err != nil {
-		return "", fmt.Errorf("error code: %d, error message: %s", blockStorageInstanceList.ReturnCode, blockStorageInstanceList.ReturnMessage)
+		return "", err
 	}
 
 	log.Println("Block Storage Instance information : ", blockStorageInstanceList.BlockStorageInstance[0])
