@@ -35,7 +35,7 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 
 	serverInstanceList, err := s.Conn.TerminateServerInstances(reqParams)
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", serverInstanceList.ReturnCode, serverInstanceList.ReturnMessage)
+		return err
 	}
 
 	c1 := make(chan error, 1)
@@ -48,7 +48,7 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 
 			serverInstanceList, err := s.Conn.GetServerInstanceList(reqParams)
 			if err != nil {
-				c1 <- fmt.Errorf("error code: %d , error message: %s", serverInstanceList.ReturnCode, serverInstanceList.ReturnMessage)
+				c1 <- err
 				return
 			} else if serverInstanceList.TotalRows == 0 {
 				c1 <- nil

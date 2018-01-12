@@ -65,7 +65,7 @@ func (s *StepDeleteBlockStorageInstance) deleteBlockStorageInstance(serverInstan
 
 	result, err := s.Conn.DeleteBlockStorageInstances(blockStorageInstanceList)
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", result.ReturnCode, result.ReturnMessage)
+		return err
 	}
 
 	s.Say(fmt.Sprintf("Block Storage Instance is deleted. Block Storage InstanceNo is %s", blockStorageInstanceList))

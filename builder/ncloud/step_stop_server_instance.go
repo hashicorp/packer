@@ -35,7 +35,7 @@ func (s *StepStopServerInstance) stopServerInstance(serverInstanceNo string) err
 
 	serverInstanceList, err := s.Conn.StopServerInstances(reqParams)
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", serverInstanceList.ReturnCode, serverInstanceList.ReturnMessage)
+		return err
 	}
 
 	s.Say(fmt.Sprintf("Server Instance is stopping. Server InstanceNo is %s", serverInstanceList.ServerInstanceList[0].ServerInstanceNo))
