@@ -21,10 +21,6 @@ Professional](https://www.vmware.com/products/fusion-professional/) for OS X,
 for Linux and Windows, and [VMware
 Player](https://www.vmware.com/products/player/) on Linux.
 
--> When using VMWare Player on Linux, you may need to install [VIX API
-libraries](https://www.vmware.com/support/developer/vix-api/) to use the
-`vmrun` utility, which is required by the builder.
-
 The builder builds a virtual machine by cloning the VMX file using the clone
 capabilities introduced in VMware Fusion Professional 6, Workstation 10, and
 Player 6. After cloning the VM, it provisions software within the new machine,
