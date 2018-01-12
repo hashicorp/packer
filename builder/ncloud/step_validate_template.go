@@ -45,7 +45,7 @@ func (s *StepValidateTemplate) getZoneNo() error {
 
 	regionList, err := s.Conn.GetRegionList()
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", regionList.ReturnCode, regionList.ReturnMessage)
+		return err
 	}
 
 	var regionNo string
@@ -64,7 +64,7 @@ func (s *StepValidateTemplate) getZoneNo() error {
 	// Get ZoneNo
 	ZoneList, err := s.Conn.GetZoneList(regionNo)
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", ZoneList.ReturnCode, ZoneList.ReturnMessage)
+		return err
 	}
 
 	if len(ZoneList.Zone) > 0 {

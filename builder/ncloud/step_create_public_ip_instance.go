@@ -72,7 +72,7 @@ func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo str
 
 	publicIPInstanceList, err := s.Conn.CreatePublicIPInstance(reqParams)
 	if err != nil {
-		return nil, fmt.Errorf("error code: %d, error message: %s", publicIPInstanceList.ReturnCode, publicIPInstanceList.ReturnMessage)
+		return nil, err
 	}
 
 	publicIPInstance := publicIPInstanceList.PublicIPInstanceList[0]
@@ -143,7 +143,7 @@ func (s *StepCreatePublicIPInstance) waitPublicIPInstanceStatus(publicIPInstance
 		for {
 			resp, err := s.Conn.GetPublicIPInstanceList(reqParams)
 			if err != nil {
-				log.Printf("error code: %d, error message: %s", resp.ReturnCode, resp.ReturnMessage)
+				log.Printf(err.Error())
 				c1 <- err
 				return
 			}

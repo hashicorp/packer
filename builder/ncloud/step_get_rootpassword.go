@@ -34,7 +34,7 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 
 	rootPassword, err := s.Conn.GetRootPassword(reqParams)
 	if err != nil {
-		return "", fmt.Errorf("error code: %d, error message: %s", rootPassword.ReturnCode, rootPassword.ReturnMessage)
+		return "", err
 	}
 
 	return rootPassword.RootPassword, nil

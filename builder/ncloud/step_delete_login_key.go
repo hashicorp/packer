@@ -30,7 +30,7 @@ func NewStepDeleteLoginKey(conn *ncloud.Conn, ui packer.Ui) *StepDeleteLoginKey 
 func (s *StepDeleteLoginKey) deleteLoginKey(keyName string) error {
 	resp, err := s.Conn.DeleteLoginKey(keyName)
 	if err != nil {
-		return fmt.Errorf("error code: %d , error message: %s", resp.ReturnCode, resp.ReturnMessage)
+		return err
 	}
 
 	return nil
