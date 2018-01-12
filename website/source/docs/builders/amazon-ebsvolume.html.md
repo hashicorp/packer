@@ -67,6 +67,7 @@ builder.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When specifying kms_key_id, encrypted needs to be set to true.
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
