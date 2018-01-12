@@ -56,12 +56,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AccessConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.launchBlockDevices.Prepare(&b.config.ctx)...)
 
-	// Warn that encrypted must be true when setting kms_key_id
-	for _, device := range b.config.VolumeMappings {
-		if device.KmsKeyId != "" && device.Encrypted == false {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The device %v, must also have `encrypted: "+
-				"true` when setting a kms_key_id.", device.DeviceName))
+	for _, d := range b.config.VolumeMappings {
+		if err := d.Prepare(&b.config.ctx); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("AMIMapping: %s", err.Error()))
 		}
 	}
 
