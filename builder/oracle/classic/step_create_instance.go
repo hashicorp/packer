@@ -51,6 +51,10 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 		Shape:          config.Shape,
 		ImageList:      config.ImageList,
 	})
+	if err != nil {
+		fmt.Printf("Error creating launch plan definition: %s", err)
+		return "", err
+	}
 	// command line call
 	// $ opc compute launch-plans add --request-body=./master-instance.json
 	// ...
