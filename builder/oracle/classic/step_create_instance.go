@@ -2,34 +2,55 @@ package classic
 
 import (
 	"fmt"
+	"text/template"
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
 
+type instanceOptions struct {
+	Username       string
+	IdentityDomain string
+	SshKey         string
+	Shape          string
+	ImageList      string
+	InstanceIP     string
+}
+
+var instanceTemplate = template.Must(template.New("instanceRequestBody").Parse(`
+{
+  "instances": [{
+      "shape": "{{.Shape}}",
+      "sshkeys": ["/Compute-{{.IdentityDomain}}/{{Username}}/{{.SshKey}}"],
+      "name": "Compute-{{.IdentityDomain}}/{{Username}}/packer-instance",
+      "label": "packer-instance",
+      "imagelist": "/Compute-{{.IdentityDomain}}/{{Username}}/{{.ImageList}}",
+      "networking": {
+        "eth0": {
+          "nat": "ipreservation:/Compute-{{.IdentityDomain}}/{{Username}}/{{.InstanceIP}}"
+        }
+      }
+  }]
+}
+`))
+
 type stepCreateInstance struct{}
 
 func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Creating Instance...")
+	config := state.Get("config").(Config)
 	const endpoint_path = "/launchplan/" // POST
-	// master-instance.json
-	`
-	{
-	  "instances": [{
-	      "shape": "oc3",
-	      "sshkeys": ["/Compute-mydomain/user@example.com/my_sshkey"],
-	      "name": "Compute-mydomain/user@example.com/master-instance",
-	      "label": "master-instance",
-	      "imagelist": "/Compute-mydomain/user@example.com/Ubuntu.16.04-LTS.amd64.20170330",
-	      "networking": {
-	        "eth0": {
-	          "nat": "ipreservation:/Compute-mydomain/user@example.com/master-instance-ip"
-	        }
-	      }
-	  }]
-	}
-	`
+
+	ui.Say("Creating Instance...")
+
+	// generate launch plan definition for this instance
+	err = instanceTemplate.Execute(&buffer, instanceOptions{
+		Username:       config.Username,
+		IdentityDomain: config.IdentityDomain,
+		SshKey:         config.SshKey,
+		Shape:          config.Shape,
+		ImageList:      config.ImageList,
+	})
 	// command line call
 	// $ opc compute launch-plans add --request-body=./master-instance.json
 	// ...
