@@ -5,20 +5,14 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-type stepCreateIPReservation struct{}
+type stepInstanceInfo struct{}
 
 func (s *stepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
-	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Getting Instance Info...")
-	endpoint_path := "/instance/%s", instanceName // GET
+	ui := state.Get("ui").(packer.Ui)
+	instanceID := state.Get("instance_id").(string)
+	endpoint_path := "/instance/%s", instanceID // GET
 
-	// $ opc compute ip-reservations add \
-	//     /Compute-mydomain/user@example.com/master-instance-ip \
-	//     /oracle/public/ippool
-
-	// account /Compute-mydomain/default
-	// ip      129.144.27.172
-	// name    /Compute-mydomain/user@example.com/master-instance-ip
-	// ...
+	// https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsa/op-instance-%7Bname%7D-get.html
 
 }
