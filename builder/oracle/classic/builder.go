@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )
@@ -58,7 +59,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-	/*
 		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
@@ -75,7 +75,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&stepSnapshot{},
-	*/
 	}
 
 	// Run the steps
