@@ -31,6 +31,7 @@ type HardwareConfig struct {
 	RAMReservation int64
 	RAMReserveAll  bool
 	DiskSize       int64
+	NestedHV       bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -165,6 +166,7 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 	confSpec.MemoryAllocation = &ramSpec
 
 	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
+	confSpec.NestedHVEnabled = &config.NestedHV
 
 	if config.DiskSize > 0 {
 		devices, err := vm.vm.Device(vm.driver.ctx)
