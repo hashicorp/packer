@@ -31,7 +31,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	steps := []multistep.Step{
+	var steps []multistep.Step
+
+	steps = append(steps,
 		&StepConnect{
 			config: &b.config.ConnectConfig,
 		},
@@ -41,23 +43,31 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepConfigureHardware{
 			config: &b.config.HardwareConfig,
 		},
-		&StepRun{},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      commHost,
-			SSHConfig: sshConfig,
-		},
-		&common.StepProvision{},
-		&StepShutdown{
-			config: &b.config.ShutdownConfig,
-		},
+	)
+
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			&StepRun{},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      commHost,
+				SSHConfig: sshConfig,
+			},
+			&common.StepProvision{},
+			&StepShutdown{
+				config: &b.config.ShutdownConfig,
+			},
+		)
+	}
+
+	steps = append(steps,
 		&StepCreateSnapshot{
 			createSnapshot: b.config.CreateSnapshot,
 		},
 		&StepConvertToTemplate{
 			ConvertToTemplate: b.config.ConvertToTemplate,
 		},
-	}
+	)
 
 	// Run!
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
