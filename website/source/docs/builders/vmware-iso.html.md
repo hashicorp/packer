@@ -140,6 +140,12 @@ builder.
     <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager User's Guide</a> for desktop VMware clients.
     For ESXi, refer to the proper ESXi documentation.
 
+-   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
+    by the cdrom device. This is chosen by default based on the disk adapter
+    type. VMware tends to lean towards "ide" for the cdrom device unless
+    "sata" is chosen for the disk adapter and so Packer attempts to mirror
+    this logic. This field can be specified as either "ide", "sata", or "scsi".
+
 -   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
@@ -206,6 +212,12 @@ builder.
     be created with. This can be one of the generic values that map to a device
     such as "hostonly", "nat", or "bridged". If the network is not one of these
     values, then it is assumed to be a VMware network device. (VMnet0..x)
+
+-   `network_adapter_type` (string) - This is the ethernet adapter type the the
+    virtual machine will be created with. By default the "e1000" network adapter
+    type will be used by Packer. For more information, please consult the
+    <a href="https://kb.vmware.com/s/article/1001805" target="_blank">Choosing a network adapter for your virtual machine</a> for desktop VMware
+    clients. For ESXi, refer to the proper ESXi documentation.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
