@@ -31,8 +31,9 @@ type vmxTemplateData struct {
 	CDROMType             string
 	CDROMType_MasterSlave string
 
-	Network_Type   string
-	Network_Device string
+	Network_Type    string
+	Network_Device  string
+	Network_Adapter string
 
 	Sound_Present string
 	Usb_Present   string
@@ -384,6 +385,8 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		CDROMType:             "ide",
 		CDROMType_MasterSlave: "0",
 
+		Network_Adapter: "e1000",
+
 		Sound_Present: map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.Sound)],
 		Usb_Present:   map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.USB)],
 
@@ -419,6 +422,38 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "scsi"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_MasterSlave = "0"
+	}
+
+	/// Handle the cdrom adapter type. If the disk adapter type and the
+	//  cdrom adapter type are the same, then ensure that the cdrom is the
+	//  slave device on whatever bus the disk adapter is on.
+	cdromAdapterType := strings.ToLower(config.CdromAdapterType)
+	if cdromAdapterType == diskAdapterType {
+		templateData.CDROMType_MasterSlave = "1"
+	} else {
+		templateData.CDROMType_MasterSlave = "0"
+	}
+
+	switch cdromAdapterType {
+	case "ide":
+		templateData.CDROMType = "ide"
+	case "sata":
+		templateData.SATA_Present = "TRUE"
+		templateData.CDROMType = "sata"
+	case "scsi":
+		templateData.SCSI_Present = "TRUE"
+		templateData.CDROMType = "scsi"
+	default:
+		err := fmt.Errorf("Error procesing VMX template: %s", cdromAdapterType)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	/// Assign the network adapter type into the template if one was specified.
+	network_adapter := strings.ToLower(config.NetworkAdapterType)
+	if network_adapter != "" {
+		templateData.Network_Adapter = network_adapter
 	}
 
 	/// Check the network type that the user specified
@@ -600,7 +635,7 @@ ethernet0.displayName = "Ethernet"
 ethernet0.linkStatePropagation.enable = "FALSE"
 ethernet0.pciSlotNumber = "33"
 ethernet0.present = "TRUE"
-ethernet0.virtualDev = "e1000"
+ethernet0.virtualDev = "{{ .Network_Adapter }}"
 ethernet0.wakeOnPcktRcv = "FALSE"
 extendedConfigFile = "{{ .Name }}.vmxf"
 floppy0.present = "FALSE"

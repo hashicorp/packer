@@ -46,13 +46,17 @@ type Config struct {
 	DiskTypeId         string `mapstructure:"disk_type_id"`
 	Format             string `mapstructure:"format"`
 
+	// cdrom drive
+	CdromAdapterType string `mapstructure:"cdrom_adapter_type"`
+
 	// platform information
 	GuestOSType string `mapstructure:"guest_os_type"`
 	Version     string `mapstructure:"version"`
 	VMName      string `mapstructure:"vm_name"`
 
-	// Network type
-	Network string `mapstructure:"network"`
+	// Network adapter and type
+	NetworkAdapterType string `mapstructure:"network_adapter_type"`
+	Network            string `mapstructure:"network"`
 
 	// device presence
 	Sound bool `mapstructure:"sound"`
