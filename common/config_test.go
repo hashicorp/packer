@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"runtime"
 )
 
 func TestChooseString(t *testing.T) {
