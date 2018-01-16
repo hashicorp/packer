@@ -1,6 +1,7 @@
 package classic
 
 import (
+	"bytes"
 	"fmt"
 	"text/template"
 
@@ -44,6 +45,7 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 	ui.Say("Creating Instance...")
 
 	// generate launch plan definition for this instance
+	var buffer bytes.Buffer
 	err = instanceTemplate.Execute(&buffer, instanceOptions{
 		Username:       config.Username,
 		IdentityDomain: config.IdentityDomain,
@@ -55,10 +57,8 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 		fmt.Printf("Error creating launch plan definition: %s", err)
 		return "", err
 	}
-	// command line call
-	// $ opc compute launch-plans add --request-body=./master-instance.json
-	// ...
-
+	// for API docs see
+	// https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsa/op-launchplan--post.html
 	instanceID, err := client.CreateInstance(publicKey)
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
