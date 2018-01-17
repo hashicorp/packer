@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/go-oracle-terraform/opc"
+	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
@@ -68,8 +69,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateInstance{},
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: SSHConfig(
+			Host:   ocommon.CommHost,
+			SSHConfig: ocommon.SSHConfig(
 				b.config.Comm.SSHUsername,
 				b.config.Comm.SSHPassword),
 		},

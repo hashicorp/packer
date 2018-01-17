@@ -24,6 +24,7 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
+	ImageName string `mapstructure:"image_name"`
 	Shape     string `mapstructure:"shape"`
 	ImageList string `json:"image_list"`
 
