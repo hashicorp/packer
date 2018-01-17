@@ -19,15 +19,15 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	instanceID := state.Get("instance_id").(string)
 
 	// get instances client
-	snapshotClient := client.SnapshotsClient()
+	snapshotClient := client.Snapshots()
 
 	// Instances Input
-	createSnapshotInput := &CreateSnapshotInput{
+	snapshotInput := &compute.CreateSnapshotInput{
 		Instance:     instanceID,
 		MachineImage: config.ImageName,
 	}
 
-	snap, err := snapshotClient.CreateSnapshot(input)
+	snap, err := snapshotClient.CreateSnapshot(snapshotInput)
 	if err != nil {
 		err = fmt.Errorf("Problem creating snapshot: %s", err)
 		ui.Error(err.Error())
@@ -36,4 +36,9 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say(fmt.Sprintf("Created snapshot (%s).", snap.Name))
+	return multistep.ActionContinue
+}
+
+func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
+	// Nothing to do
 }
