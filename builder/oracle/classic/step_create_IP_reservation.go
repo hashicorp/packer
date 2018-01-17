@@ -29,6 +29,7 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 		log.Printf("Error creating IP Reservation: %s", err)
 		return multistep.ActionHalt
 	}
+	state.Put("instance_ip", ipRes.IP)
 	log.Printf("debug: ipRes is %#v", ipRes)
 	return multistep.ActionContinue
 }
