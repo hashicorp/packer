@@ -14,7 +14,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Snapshot...")
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 	instanceID := state.Get("instance_id").(string)
 
