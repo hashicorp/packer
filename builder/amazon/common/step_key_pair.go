@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -36,7 +37,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		}
 
 		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		state.Put("privateKey", strings.TrimSpace(string(privateKeyBytes)))
 
 		return multistep.ActionContinue
 	}
