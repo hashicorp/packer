@@ -3,6 +3,7 @@ package classic
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-oracle-terraform/compute"
@@ -63,7 +64,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
-			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
+			PrivateKeyFile: strings.TrimSpace(b.config.Comm.SSHPrivateKey),
 		},
 		&stepCreateIPReservation{},
 		&stepCreateInstance{},

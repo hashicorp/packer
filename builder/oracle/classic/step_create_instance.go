@@ -2,6 +2,7 @@ package classic
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/packer"
@@ -16,18 +17,44 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Say("Creating Instance...")
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
-	sshPublicKey := state.Get("publicKey").(string)
+	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
+
+	// Load the dynamically-generated SSH key into the Oracle Compute cloud.
+	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_dynamic_key", config.IdentityDomain, config.Username)
+
+	sshKeysClient := client.SSHKeys()
+	sshKeysInput := compute.CreateSSHKeyInput{
+		Name:    sshKeyName,
+		Key:     sshPublicKey,
+		Enabled: true,
+	}
+	keyInfo, err := sshKeysClient.CreateSSHKey(&sshKeysInput)
+	if err != nil {
+		// Key already exists; update key instead
+		if strings.Contains(err.Error(), "packer_dynamic_key already exists") {
+			updateKeysInput := compute.UpdateSSHKeyInput{
+				Name:    sshKeyName,
+				Key:     sshPublicKey,
+				Enabled: true,
+			}
+			keyInfo, err = sshKeysClient.UpdateSSHKey(&updateKeysInput)
+		} else {
+			err = fmt.Errorf("Problem adding Public SSH key through Oracle's API: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	}
 
 	// get instances client
 	instanceClient := client.Instances()
 
 	// Instances Input
 	input := &compute.CreateInstanceInput{
-		Name:       config.ImageName,
-		Shape:      config.Shape,
-		ImageList:  config.ImageList,
-		SSHKeys:    []string{sshPublicKey},
-		Attributes: map[string]interface{}{},
+		Name:      config.ImageName,
+		Shape:     config.Shape,
+		ImageList: config.ImageList,
+		SSHKeys:   []string{keyInfo.Name},
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)

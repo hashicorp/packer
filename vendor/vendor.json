@@ -786,6 +786,12 @@
 			"revision": "875fb671b3ddc66f8e2f0acc33829c8cb989a38d"
 		},
 		{
+			"checksumSHA1": "1hPCerVn1bWA+9vaAGqnIkRtSFc=",
+			"path": "github.com/hashicorp/go-getter",
+			"revision": "cb2c2774e9771bd9568d843be4e59298786550fd",
+			"revisionTime": "2017-12-20T21:10:09Z"
+		},
+		{
 			"checksumSHA1": "lrSl49G23l6NhfilxPM0XFs5rZo=",
 			"path": "github.com/hashicorp/go-multierror",
 			"revision": "d30f09973e19c1dfcd120b2d9c4f168e68d6b5d5"
