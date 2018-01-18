@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -46,6 +47,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	c.apiEndpointURL, err = url.Parse(c.APIEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing API Endpoint: %s", err)
+	}
+
+	var errs *packer.MultiError
+	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
 	}
 
 	return c, nil
