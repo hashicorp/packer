@@ -962,12 +962,6 @@
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
-			"checksumSHA1": "5x1RX5m8SCkCRLyLL8wBc0qJpV8=",
-			"path": "github.com/mitchellh/multistep",
-			"revision": "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d",
-			"revisionTime": "2017-03-16T18:53:39Z"
-		},
-		{
 			"checksumSHA1": "m2L8ohfZiFRsMW3iynaH/TWgnSY=",
 			"path": "github.com/mitchellh/panicwrap",
 			"revision": "fce601fe55579125e1b3cb0b992287e7290f7b83",
