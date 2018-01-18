@@ -14,7 +14,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Instance...")
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 	sshPublicKey := state.Get("publicKey").(string)
 
