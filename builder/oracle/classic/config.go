@@ -26,7 +26,7 @@ type Config struct {
 	// Image
 	ImageName string `mapstructure:"image_name"`
 	Shape     string `mapstructure:"shape"`
-	ImageList string `json:"image_list"`
+	ImageList string `mapstructure:"image_list"`
 
 	ctx interpolate.Context
 }
