@@ -18,9 +18,9 @@ it raises the chances we can quickly merge or address your contributions.
 * Make sure you test against the latest released version. It is possible
   we already fixed the bug you're experiencing.
 
-* Run the command with debug ouput with the environment variable
+* Run the command with debug output with the environment variable
   `PACKER_LOG`. For example: `PACKER_LOG=1 packer build template.json`. Take
-  the *entire* output and create a [gist](https://gist.github.com) for linking
+  the _entire_ output and create a [gist](https://gist.github.com) for linking
   to in your issue. Packer should strip sensitive keys from the output,
   but take a look through just in case.
 
@@ -59,13 +59,12 @@ following steps in order to be able to compile and test Packer. These instructio
 2. Set and export the `GOPATH` environment variable and update your `PATH`. For
    example, you can add to your `.bash_profile`.
 
-    ```
-    export GOPATH=$HOME/go
-    export PATH=$PATH:$GOPATH/bin
-    ```
+   ```
+   export GOPATH=$HOME/go
+   export PATH=$PATH:$GOPATH/bin
+   ```
 
-3. Download the Packer source (and its dependencies) by running `go get
-   github.com/hashicorp/packer`. This will download the Packer source to
+3. Download the Packer source (and its dependencies) by running `go get github.com/hashicorp/packer`. This will download the Packer source to
    `$GOPATH/src/github.com/hashicorp/packer`.
 
 4. When working on packer `cd $GOPATH/src/github.com/hashicorp/packer` so you
@@ -114,7 +113,7 @@ This way you can push to your fork to create a PR, but the code on disk still li
 
 #### Govendor
 
-If you are submitting a change that requires new or updated dependencies, please include them in `vendor/vendor.json` and in the `vendor/` folder.  This helps everything get tested properly in CI.
+If you are submitting a change that requires new or updated dependencies, please include them in `vendor/vendor.json` and in the `vendor/` folder. This helps everything get tested properly in CI.
 
 Note that you will need to use [govendor](https://github.com/kardianos/govendor) to do this. This step is recommended but not required; if you don't use govendor please indicate in your PR which dependencies have changed and to what versions.
 
@@ -140,7 +139,7 @@ additional software to be installed on your computer (VirtualBox, VMware).
 If you're working on a new builder or builder feature and want verify it is functioning (and also hasn't broken anything else), we recommend running the
 acceptance tests.
 
-**Warning:** The acceptance tests create/destroy/modify *real resources*, which
+**Warning:** The acceptance tests create/destroy/modify _real resources_, which
 may incur costs for real money. In the presence of a bug, it is possible that resources may be left behind, which can cost money even though you were not using them. We recommend running tests in an account used only for that purpose so it is easy to see if there are any dangling resources, and so production resources are not accidentally destroyed or overwritten during testing.
 
 To run the acceptance tests, invoke `make testacc`:
