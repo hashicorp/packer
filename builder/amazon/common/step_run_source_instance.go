@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -178,7 +179,17 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	if err := ec2conn.WaitUntilInstanceRunning(describeInstance); err != nil {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		for {
+			if _, ok := state.GetOk(multistep.StateCancelled); ok {
+				cancel()
+			}
+		}
+	}()
+
+	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
