@@ -20,7 +20,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
 
 	// Load the dynamically-generated SSH key into the Oracle Compute cloud.
-	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_dynamic_key", config.IdentityDomain, config.Username)
+	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key", config.IdentityDomain, config.Username)
 
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
@@ -31,7 +31,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	keyInfo, err := sshKeysClient.CreateSSHKey(&sshKeysInput)
 	if err != nil {
 		// Key already exists; update key instead
-		if strings.Contains(err.Error(), "packer_dynamic_key already exists") {
+		if strings.Contains(err.Error(), "packer_generated_key already exists") {
 			updateKeysInput := compute.UpdateSSHKeyInput{
 				Name:    sshKeyName,
 				Key:     sshPublicKey,
