@@ -1,6 +1,7 @@
 package multistep
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
@@ -113,7 +114,7 @@ type debugStepPause struct {
 	PauseFn  DebugPauseFn
 }
 
-func (s *debugStepPause) Run(state StateBag) StepAction {
+func (s *debugStepPause) Run(_ context.Context, state StateBag) StepAction {
 	s.PauseFn(DebugLocationAfterRun, s.StepName, state)
 	return ActionContinue
 }
