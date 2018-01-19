@@ -72,7 +72,12 @@ func SupportedURL(u *url.URL) bool {
 // and so DownloadableURL will return "file://local/file.iso"
 // No other transformations are done to the path.
 func DownloadableURL(original string) (string, error) {
-	var result string
+	var absPrefix, result string
+
+	absPrefix = ""
+	if runtime.GOOS == "windows" {
+		absPrefix = "/"
+	}
 
 	// Check that the user specified a UNC path, and promote it to an smb:// uri.
 	if strings.HasPrefix(original, "\\\\") && len(original) > 2 && original[2] != '?' {
@@ -118,15 +123,12 @@ func DownloadableURL(original string) (string, error) {
 		}
 
 		result = filepath.Clean(result)
-		return fmt.Sprintf("file:///%s", filepath.ToSlash(result)), nil
+		return fmt.Sprintf("file://%s%s", absPrefix, filepath.ToSlash(result)), nil
 	}
 
 	// Otherwise, check if it was originally an absolute path, and fix it if so.
 	if strings.HasPrefix(original, "/") {
-		if runtime.GOOS == "windows" {
-			return fmt.Sprintf("file:///%s", result), nil
-		}
-		return fmt.Sprintf("file://%s", result), nil
+		return fmt.Sprintf("file://%s%s", absPrefix, result), nil
 	}
 
 	// Anything left should be a non-existent relative path. So fix it up here.
