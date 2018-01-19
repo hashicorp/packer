@@ -1,32 +1,31 @@
 package multistep
 
 import (
-	"context"
 	"sync"
 )
 
-// StateBag implements StateBag by using a normal map underneath
+// StateBag holds the state that is used by the Runner and Steps. The
+// StateBag implementation must be safe for concurrent access.
+type StateBag interface {
+	Get(string) interface{}
+	GetOk(string) (interface{}, bool)
+	Put(string, interface{})
+}
+
+// BasicStateBag implements StateBag by using a normal map underneath
 // protected by a RWMutex.
-type StateBag struct {
+type BasicStateBag struct {
 	data map[string]interface{}
 	l    sync.RWMutex
 	once sync.Once
-	ctx  context.Context
 }
 
-func (b *StateBag) Context() context.Context {
-	if b.ctx != nil {
-		return b.ctx
-	}
-	return context.Background()
-}
-
-func (b *StateBag) Get(k string) interface{} {
+func (b *BasicStateBag) Get(k string) interface{} {
 	result, _ := b.GetOk(k)
 	return result
 }
 
-func (b *StateBag) GetOk(k string) (interface{}, bool) {
+func (b *BasicStateBag) GetOk(k string) (interface{}, bool) {
 	b.l.RLock()
 	defer b.l.RUnlock()
 
@@ -34,7 +33,7 @@ func (b *StateBag) GetOk(k string) (interface{}, bool) {
 	return result, ok
 }
 
-func (b *StateBag) Put(k string, v interface{}) {
+func (b *BasicStateBag) Put(k string, v interface{}) {
 	b.l.Lock()
 	defer b.l.Unlock()
 
