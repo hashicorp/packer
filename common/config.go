@@ -74,18 +74,40 @@ func SupportedURL(u *url.URL) bool {
 func DownloadableURL(original string) (string, error) {
 	var result string
 
+	// Check that the user specified a UNC path, and promote it to an smb:// uri.
+	if strings.HasPrefix(original, "\\\\") && len(original) > 2 && original[2] != '?' {
+		result = filepath.ToSlash(original[2:])
+		return fmt.Sprintf("smb://%s", result), nil
+	}
+
 	// Fix the url if it's using bad characters commonly mistaken with a path.
 	original = filepath.ToSlash(original)
 
-	// Check to see that this is a parseable URL with a scheme. If so, then just pass it through.
+	// Check to see that this is a parseable URL with a scheme and a host.
+	// If so, then just pass it through.
 	if u, err := url.Parse(original); err == nil && u.Scheme != "" && u.Host != "" {
-		return filepath.ToSlash(original), nil
+		return original, nil
 	}
 
-	// Since it's not a url, this might be a path. So, check that the file exists,
-	// then make it an absolute path so we can make a proper uri.
-	if _, err := os.Stat(original); err == nil {
-		result, err = filepath.Abs(filepath.FromSlash(original))
+	// If it's a file scheme, then convert it back to a regular path so the next
+	// case which forces it to an absolute path, will correct it.
+	if u, err := url.Parse(original); err == nil && strings.ToLower(u.Scheme) == "file" {
+		original = u.Path
+	}
+
+	// If we're on Windows and we start with a slash, then this absolute path
+	// is wrong. Fix it up, so the next case can figure out the absolute path.
+	if rpath := strings.SplitN(original, "/", 2); rpath[0] == "" && runtime.GOOS == "windows" {
+		result = rpath[1]
+	} else {
+		result = original
+	}
+
+	// Since we should be some kind of path (relative or absolute), check
+	// that the file exists, then make it an absolute path so we can return an
+	// absolute uri.
+	if _, err := os.Stat(result); err == nil {
+		result, err = filepath.Abs(filepath.FromSlash(result))
 		if err != nil {
 			return "", err
 		}
@@ -96,15 +118,17 @@ func DownloadableURL(original string) (string, error) {
 		}
 
 		result = filepath.Clean(result)
-		result = filepath.ToSlash(result)
-
-		// We have no idea what this might be, so we'll leave it as is.
-	} else {
-		result = filepath.ToSlash(original)
+		return fmt.Sprintf("file:///%s", filepath.ToSlash(result)), nil
 	}
 
-	// We should have a path that can just turn into a file:// scheme'd url.
-	return fmt.Sprintf("file://%s", result), nil
+	// Otherwise, check if it was originally an absolute path, and fix it if so.
+	if strings.HasPrefix(original, "/") {
+		return fmt.Sprintf("file:///%s", result), nil
+	}
+
+	// Anything left should be a non-existent relative path. So fix it up here.
+	result = filepath.ToSlash(filepath.Clean(result))
+	return fmt.Sprintf("file://./%s", result), nil
 }
 
 // Force the parameter into a url. This will transform the parameter into
