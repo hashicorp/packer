@@ -58,7 +58,7 @@ func SupportedURL(u *url.URL) bool {
 
 	// Iterate through each downloader to see if a protocol was found.
 	ok := false
-	for scheme, _ := range cli.config.DownloaderMap {
+	for scheme := range cli.config.DownloaderMap {
 		if strings.ToLower(u.Scheme) == strings.ToLower(scheme) {
 			ok = true
 		}
