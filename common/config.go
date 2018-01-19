@@ -177,27 +177,38 @@ func ValidatedURL(original string) (string, error) {
 
 func FileExistsLocally(original string) bool {
 	// original should be something like file://C:/my/path.iso
+	u, _ := url.Parse(original)
 
-	fileURL, _ := url.Parse(original)
-	fileExists := false
-
-	if fileURL.Scheme == "file" {
-		// on windows, correct URI is file:///c:/blah/blah.iso.
-		// url.Parse will pull out the scheme "file://" and leave the path as
-		// "/c:/blah/blah/iso".  Here we remove this forward slash on absolute
-		// Windows file URLs before processing
-		// see https://blogs.msdn.microsoft.com/ie/2006/12/06/file-uris-in-windows/
-		// for more info about valid windows URIs
-		filePath := fileURL.Path
-		if runtime.GOOS == "windows" && len(filePath) > 0 && filePath[0] == '/' {
-			filePath = filePath[1:]
-		}
-		_, err := os.Stat(filePath)
-		if err != nil {
-			return fileExists
-		} else {
-			fileExists = true
-		}
+	// First create a dummy downloader so we can figure out which
+	// protocol to use.
+	cli := NewDownloadClient(&DownloadConfig{})
+	d, ok := cli.config.DownloaderMap[u.Scheme]
+	if !ok {
+		return false
 	}
-	return fileExists
+
+	// Check to see that it's got a Local way of doing things.
+	local, ok := d.(LocalDownloader)
+	if !ok {
+		return false
+	}
+
+	// Figure out where we're at.
+	wd, err := os.Getwd()
+	if err != nil {
+		return false
+	}
+
+	// Now figure out the real path to the file.
+	realpath, err := local.toPath(wd, *u)
+	if err != nil {
+		return false
+	}
+
+	// Finally we can seek the truth via os.Stat.
+	_, err = os.Stat(realpath)
+	if err != nil {
+		return false
+	}
+	return true
 }
