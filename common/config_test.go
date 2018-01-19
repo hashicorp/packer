@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
-	"runtime"
 )
 
 func TestChooseString(t *testing.T) {
