@@ -59,7 +59,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	computeClient, err := b.config.computeV2Client()
 	if err != nil {
-		return nil, fmt.Errorf("Error initializing compute client: %s", err)
+		return nil, fmt.Errorf("Error initializing compute client: %s", err.Error())
 	}
 
 	// Setup the state bag and initial state for the steps

@@ -25,7 +25,7 @@ func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAct
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

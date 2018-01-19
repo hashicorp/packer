@@ -24,7 +24,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 	// We need the v2 compute client
 	client, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -65,7 +65,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 			})
 
 			if err != nil {
-				err := fmt.Errorf("Error searching for floating ip from pool '%s'", s.FloatingIpPool)
+				err := fmt.Errorf("Error searching for floating ip from pool '%s': %s", s.FloatingIpPool, err.Error())
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -79,7 +79,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 				Pool: s.FloatingIpPool,
 			}).Extract()
 			if err != nil {
-				err := fmt.Errorf("Error creating floating ip from pool '%s'", s.FloatingIpPool)
+				err := fmt.Errorf("Error creating floating ip from pool '%s': %s", s.FloatingIpPool, err.Error())
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
@@ -100,7 +100,7 @@ func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
 		if err != nil {
 			err := fmt.Errorf(
 				"Error associating floating IP %s with instance: %s",
-				instanceIp.IP, err)
+				instanceIp.IP, err.Error())
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

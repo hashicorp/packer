@@ -33,7 +33,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -47,7 +47,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	if s.UserDataFile != "" {
 		userData, err = ioutil.ReadFile(s.UserDataFile)
 		if err != nil {
-			err = fmt.Errorf("Error reading user data file: %s", err)
+			err = fmt.Errorf("Error reading user data file: %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
@@ -82,7 +82,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 
 	s.server, err = servers.Create(computeClient, serverOptsExt).Extract()
 	if err != nil {
-		err := fmt.Errorf("Error launching source server: %s", err)
+		err := fmt.Errorf("Error launching source server: %s", err.Error())
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -100,7 +100,7 @@ func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction
 	}
 	latestServer, err := WaitForState(&stateChange)
 	if err != nil {
-		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.ID, err)
+		err := fmt.Errorf("Error waiting for server (%s) to become ready: %s", s.server.ID, err.Error())
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -123,13 +123,13 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err.Error()))
 		return
 	}
 
 	ui.Say(fmt.Sprintf("Terminating the source server: %s ...", s.server.ID))
 	if err := servers.Delete(computeClient, s.server.ID).ExtractErr(); err != nil {
-		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err))
+		ui.Error(fmt.Sprintf("Error terminating server, may still be around: %s", err.Error()))
 		return
 	}
 

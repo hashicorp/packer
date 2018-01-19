@@ -76,7 +76,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 
 			sshAgent, err := net.Dial("unix", authSock)
 			if err != nil {
-				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err.Error())
 			}
 
 			return &ssh.ClientConfig{
@@ -94,7 +94,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 
 			signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
 			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err.Error())
 			}
 
 			return &ssh.ClientConfig{

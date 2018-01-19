@@ -21,7 +21,7 @@ func (s *stepAddImageMembers) Run(state multistep.StateBag) multistep.StepAction
 
 	imageClient, err := config.imageV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing image service client: %s", err)
+		err = fmt.Errorf("Error initializing image service client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -30,7 +30,7 @@ func (s *stepAddImageMembers) Run(state multistep.StateBag) multistep.StepAction
 		ui.Say(fmt.Sprintf("Adding member '%s' to image %s", member, imageId))
 		r := members.Create(imageClient, imageId, member)
 		if _, err = r.Extract(); err != nil {
-			err = fmt.Errorf("Error adding member to image: %s", err)
+			err = fmt.Errorf("Error adding member to image: %s", err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}

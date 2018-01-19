@@ -20,7 +20,7 @@ func (s *stepUpdateImageVisibility) Run(state multistep.StateBag) multistep.Step
 	}
 	imageClient, err := config.imageV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing image service client: %s", err)
+		err = fmt.Errorf("Error initializing image service client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -37,7 +37,7 @@ func (s *stepUpdateImageVisibility) Run(state multistep.StateBag) multistep.Step
 	)
 
 	if _, err = r.Extract(); err != nil {
-		err = fmt.Errorf("Error updating image visibility: %s", err)
+		err = fmt.Errorf("Error updating image visibility: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}

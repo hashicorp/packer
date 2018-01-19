@@ -23,7 +23,7 @@ func (s *StepLoadFlavor) Run(state multistep.StateBag) multistep.StepAction {
 	// We need the v2 compute client
 	client, err := config.computeV2Client()
 	if err != nil {
-		err = fmt.Errorf("Error initializing compute client: %s", err)
+		err = fmt.Errorf("Error initializing compute client: %s", err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -32,13 +32,13 @@ func (s *StepLoadFlavor) Run(state multistep.StateBag) multistep.StepAction {
 	log.Printf("[INFO] Loading flavor by ID: %s", s.Flavor)
 	flavor, err := flavors.Get(client, s.Flavor).Extract()
 	if err != nil {
-		log.Printf("[ERROR] Failed to find flavor by ID: %s", err)
+		log.Printf("[ERROR] Failed to find flavor by ID: %s", err.Error())
 		geterr := err
 
 		log.Printf("[INFO] Loading flavor by name: %s", s.Flavor)
 		id, err := flavors.IDFromName(client, s.Flavor)
 		if err != nil {
-			log.Printf("[ERROR] Failed to find flavor by name: %s", err)
+			log.Printf("[ERROR] Failed to find flavor by name: %s", err.Error())
 			err = fmt.Errorf(
 				"Unable to find specified flavor by ID or name!\n\n"+
 					"Error from ID lookup: %s\n\n"+
