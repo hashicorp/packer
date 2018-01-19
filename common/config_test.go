@@ -95,67 +95,116 @@ func TestValidatedURL(t *testing.T) {
 	}
 }
 
+func GetNativePathToTestFixtures(t *testing.T) string {
+	const path = "./test-fixtures"
+	res, err := filepath.Abs(path)
+	if err != nil {
+		t.Fatalf("err converting test-fixtures path into an absolute path : %s", err)
+	}
+	return res
+}
+
+func GetPortablePathToTestFixtures(t *testing.T) string {
+	res := GetNativePathToTestFixtures(t)
+	return filepath.ToSlash(res)
+}
+
 func TestDownloadableURL_WindowsFiles(t *testing.T) {
 	if runtime.GOOS == "windows" {
+		portablepath := GetPortablePathToTestFixtures(t)
+		nativepath := GetNativePathToTestFixtures(t)
+
 		dirCases := []struct {
 			InputString string
 			OutputURL   string
 			ErrExpected bool
 		}{ // TODO: add different directories
 			{
-				"C:\\Temp\\SomeDir\\myfile.txt",
-				"file:///C:/Temp/SomeDir/myfile.txt",
+				fmt.Sprintf("%s\\SomeDir\\myfile.txt", nativepath),
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
 				false,
 			},
-			{ // need windows drive
-				"\\Temp\\SomeDir\\myfile.txt",
-				"",
-				true,
-			},
-			{ // need windows drive
-				"/Temp/SomeDir/myfile.txt",
-				"",
-				true,
-			},
-			{ // UNC paths; why not?
-				"\\\\?\\c:\\Temp\\SomeDir\\myfile.txt",
-				"",
-				true,
-			},
-			{
-				"file:///C:\\Temp\\SomeDir\\myfile.txt",
-				"file:///c:/Temp/SomeDir/myfile.txt",
+			{ // without the drive makes this native path a relative file:// uri
+				"test-fixtures\\SomeDir\\myfile.txt",
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
 				false,
 			},
-			{
-				"file:///c:/Temp/Somedir/myfile.txt",
-				"file:///c:/Temp/SomeDir/myfile.txt",
+			{ // without the drive makes this native path a relative file:// uri
+				"test-fixtures/SomeDir/myfile.txt",
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // UNC paths being promoted to smb:// uri scheme.
+				fmt.Sprintf("\\\\localhost\\C$\\%s\\SomeDir\\myfile.txt", nativepath),
+				fmt.Sprintf("smb://localhost/C$/%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Absolute uri (incorrect slash type)
+				fmt.Sprintf("file:///%s\\SomeDir\\myfile.txt", nativepath),
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Absolute uri (existing and mis-spelled)
+				fmt.Sprintf("file:///%s/Somedir/myfile.txt", nativepath),
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Absolute path (non-existing)
+				"\\absolute\\path\\to\\non-existing\\file.txt",
+				"file:///absolute/path/to/non-existing/file.txt",
+				false,
+			},
+			{ // Absolute paths (existing)
+				fmt.Sprintf("%s/SomeDir/myfile.txt", nativepath),
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Relative path (non-existing)
+				"./nonexisting/relative/path/to/file.txt",
+				"file://./nonexisting/relative/path/to/file.txt",
+				false,
+			},
+			{ // Relative path (existing)
+				"./test-fixtures/SomeDir/myfile.txt",
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Absolute uri (existing and with `/` prefix)
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath),
+				false,
+			},
+			{ // Absolute uri (non-existing and with `/` prefix)
+				"file:///path/to/non-existing/file.txt",
+				"file:///path/to/non-existing/file.txt",
+				false,
+			},
+			{ // Absolute uri (non-existing and missing `/` prefix)
+				"file://path/to/non-existing/file.txt",
+				"file://path/to/non-existing/file.txt",
+				false,
+			},
+			{ // Absolute uri and volume (non-existing and with `/` prefix)
+				"file:///T:/path/to/non-existing/file.txt",
+				"file:///T:/path/to/non-existing/file.txt",
+				false,
+			},
+			{ // Absolute uri and volume (non-existing and missing `/` prefix)
+				"file://T:/path/to/non-existing/file.txt",
+				"file://T:/path/to/non-existing/file.txt",
 				false,
 			},
 		}
-		// create absolute-pathed tempfile to play with
-		err := os.Mkdir("C:\\Temp\\SomeDir", 0755)
-		if err != nil {
-			t.Fatalf("err creating test dir: %s", err)
-		}
-		fi, err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
-		if err != nil {
-			t.Fatalf("err creating test file: %s", err)
-		}
-		fi.Close()
-		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
-		defer os.Remove("C:\\Temp\\SomeDir")
-
 		// Run through test cases to make sure they all parse correctly
-		for _, tc := range dirCases {
+		for idx, tc := range dirCases {
 			u, err := DownloadableURL(tc.InputString)
 			if (err != nil) != tc.ErrExpected {
-				t.Fatalf("Test Case failed: Expected err = %#v, err = %#v, input = %s",
-					tc.ErrExpected, err, tc.InputString)
+				t.Fatalf("Test Case %d failed: Expected err = %#v, err = %#v, input = %s",
+					idx, tc.ErrExpected, err, tc.InputString)
 			}
 			if u != tc.OutputURL {
-				t.Fatalf("Test Case failed: Expected %s but received %s from input %s",
-					tc.OutputURL, u, tc.InputString)
+				t.Fatalf("Test Case %d failed: Expected %s but received %s from input %s",
+					idx, tc.OutputURL, u, tc.InputString)
 			}
 		}
 	}
@@ -177,6 +226,12 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	tfPath = filepath.Clean(tfPath)
 	filePrefix := "file://"
 
+	// If we're running windows, then absolute URIs are `/`-prefixed.
+	platformPrefix := ""
+	if runtime.GOOS == "windows" {
+		platformPrefix = "/"
+	}
+
 	// Relative filepath. We run this test in a func so that
 	// the defers run right away.
 	func() {
@@ -197,8 +252,9 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 			t.Fatalf("err: %s", err)
 		}
 
-		expected := fmt.Sprintf("%s%s",
+		expected := fmt.Sprintf("%s%s%s",
 			filePrefix,
+			platformPrefix,
 			strings.Replace(tfPath, `\`, `/`, -1))
 		if u != expected {
 			t.Fatalf("unexpected: %#v != %#v", u, expected)
@@ -206,21 +262,22 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	}()
 
 	// Test some cases with and without a schema prefix
-	for _, prefix := range []string{"", filePrefix} {
+	for _, prefix := range []string{"", filePrefix + platformPrefix} {
 		// Nonexistent file
 		_, err = DownloadableURL(prefix + "i/dont/exist")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 
-		// Good file
+		// Good file (absolute)
 		u, err := DownloadableURL(prefix + tfPath)
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 
-		expected := fmt.Sprintf("%s%s",
+		expected := fmt.Sprintf("%s%s%s",
 			filePrefix,
+			platformPrefix,
 			strings.Replace(tfPath, `\`, `/`, -1))
 		if u != expected {
 			t.Fatalf("unexpected: %s != %s", u, expected)
@@ -229,38 +286,25 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 }
 
 func test_FileExistsLocally(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		dirCases := []struct {
-			Input  string
-			Output bool
-		}{
-			// file exists locally
-			{"file:///C:/Temp/SomeDir/myfile.txt", true},
-			// file is not supposed to exist locally
-			{"https://myfile.iso", true},
-			// file does not exist locally
-			{"file:///C/i/dont/exist", false},
-		}
-		// create absolute-pathed tempfile to play with
-		err := os.Mkdir("C:\\Temp\\SomeDir", 0755)
-		if err != nil {
-			t.Fatalf("err creating test dir: %s", err)
-		}
-		fi, err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
-		if err != nil {
-			t.Fatalf("err creating test file: %s", err)
-		}
-		fi.Close()
-		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
-		defer os.Remove("C:\\Temp\\SomeDir")
+	portablepath := GetPortablePathToTestFixtures(t)
 
-		// Run through test cases to make sure they all parse correctly
-		for _, tc := range dirCases {
-			fileOK := FileExistsLocally(tc.Input)
-			if !fileOK {
-				t.Fatalf("Test Case failed: Expected %#v, received = %#v, input = %s",
-					tc.Output, fileOK, tc.Input)
-			}
+	dirCases := []struct {
+		Input  string
+		Output bool
+	}{
+		// file exists locally
+		{fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath), true},
+		// file is not supposed to exist locally
+		{"https://myfile.iso", true},
+		// file does not exist locally
+		{"file:///C/i/dont/exist", false},
+	}
+	// Run through test cases to make sure they all parse correctly
+	for _, tc := range dirCases {
+		fileOK := FileExistsLocally(tc.Input)
+		if !fileOK {
+			t.Fatalf("Test Case failed: Expected %#v, received = %#v, input = %s",
+				tc.Output, fileOK, tc.Input)
 		}
 	}
 }
