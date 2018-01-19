@@ -28,7 +28,7 @@ type BasicRunner struct {
 }
 
 func (b *BasicRunner) Run(state StateBag) {
-	ctx, cancel := context.WithCancel(state.Context())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	b.l.Lock()
 	if b.state != stateIdle {
@@ -70,7 +70,7 @@ func (b *BasicRunner) Run(state StateBag) {
 			break
 		}
 
-		action := step.Run(state)
+		action := step.Run(ctx, state)
 		defer step.Cleanup(state)
 
 		if _, ok := state.GetOk(StateCancelled); ok {
