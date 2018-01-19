@@ -123,7 +123,10 @@ func DownloadableURL(original string) (string, error) {
 
 	// Otherwise, check if it was originally an absolute path, and fix it if so.
 	if strings.HasPrefix(original, "/") {
-		return fmt.Sprintf("file:///%s", result), nil
+		if runtime.GOOS == "windows" {
+			return fmt.Sprintf("file:///%s", result), nil
+		}
+		return fmt.Sprintf("file://%s", result), nil
 	}
 
 	// Anything left should be a non-existent relative path. So fix it up here.
