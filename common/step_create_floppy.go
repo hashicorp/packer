@@ -155,7 +155,10 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 			}
 
 			for _, crawlfilename := range crawlDirectoryFiles {
-				s.Add(cache, crawlfilename)
+				if err = s.Add(cache, crawlfilename); err != nil {
+					state.Put("error", fmt.Errorf("Error adding file from floppy_files : %s : %s", filename, err))
+					return multistep.ActionHalt
+				}
 				s.FilesAdded[crawlfilename] = true
 			}
 
@@ -165,7 +168,10 @@ func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
 
 		// add just a single file
 		ui.Message(fmt.Sprintf("Copying file: %s", filename))
-		s.Add(cache, filename)
+		if err = s.Add(cache, filename); err != nil {
+			state.Put("error", fmt.Errorf("Error adding file from floppy_files : %s : %s", filename, err))
+			return multistep.ActionHalt
+		}
 		s.FilesAdded[filename] = true
 	}
 	ui.Message("Done copying files from floppy_files")
