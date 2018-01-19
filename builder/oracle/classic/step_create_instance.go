@@ -2,6 +2,7 @@ package classic
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
@@ -17,9 +18,13 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Say("Creating Instance...")
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
+
+	// SSH KEY CONFIGURATION
+
+	// grab packer-generated key from statebag context.
 	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
 
-	// Load the dynamically-generated SSH key into the Oracle Compute cloud.
+	// form API call to add key to compute cloud
 	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key", config.IdentityDomain, config.Username)
 
 	sshKeysClient := client.SSHKeys()
@@ -28,9 +33,11 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Key:     sshPublicKey,
 		Enabled: true,
 	}
+
+	// Load the packer-generated SSH key into the Oracle Compute cloud.
 	keyInfo, err := sshKeysClient.CreateSSHKey(&sshKeysInput)
 	if err != nil {
-		// Key already exists; update key instead
+		// Key already exists; update key instead of creating it
 		if strings.Contains(err.Error(), "packer_generated_key already exists") {
 			updateKeysInput := compute.UpdateSSHKeyInput{
 				Name:    sshKeyName,
@@ -46,15 +53,29 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		}
 	}
 
+	// NETWORKING INFO CONFIGURATION
+	ipAddName := fmt.Sprintf("ipres_%s", config.ImageName)
+	log.Printf("MEGAN ipADDName is %s", ipAddName)
+	secListName := "Megan_packer_test"
+
+	netInfo := compute.NetworkingInfo{
+		Nat:      []string{ipAddName},
+		SecLists: []string{secListName},
+	}
+	fmt.Sprintf("Megan netInfo is %#v", netInfo)
+
+	// INSTANCE LAUNCH
+
 	// get instances client
 	instanceClient := client.Instances()
 
 	// Instances Input
 	input := &compute.CreateInstanceInput{
-		Name:      config.ImageName,
-		Shape:     config.Shape,
-		ImageList: config.ImageList,
-		SSHKeys:   []string{keyInfo.Name},
+		Name:       config.ImageName,
+		Shape:      config.Shape,
+		ImageList:  config.ImageList,
+		SSHKeys:    []string{keyInfo.Name},
+		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
