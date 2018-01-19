@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
-	"runtime"
 )
 
 // PackerKeyEnv is used to specify the key interval (delay) between keystrokes
