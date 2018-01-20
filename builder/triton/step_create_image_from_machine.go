@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateImageFromMachine creates an image with the specified attributes

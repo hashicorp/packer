@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {

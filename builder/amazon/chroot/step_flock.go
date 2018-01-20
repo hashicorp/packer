@@ -2,6 +2,8 @@ package chroot
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"log"
 	"os"
 	"path/filepath"

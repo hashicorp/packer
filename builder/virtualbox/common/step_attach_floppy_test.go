@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/hashicorp/packer/helper/multistep"
 	"io/ioutil"
 	"os"
 	"testing"

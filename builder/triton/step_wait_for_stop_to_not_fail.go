@@ -3,8 +3,8 @@ package triton
 import (
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepWaitForStopNotToFail waits for 10 seconds before returning with continue

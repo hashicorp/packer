@@ -3,8 +3,8 @@ package common
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCompactDisk is a step that removes all empty blocks from expanding

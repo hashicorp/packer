@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/communicator/winrm"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	winrmcmd "github.com/masterzen/winrm"
-	"github.com/mitchellh/multistep"
 )
 
 // StepConnectWinRM is a multistep Step implementation that waits for WinRM

@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"os"
 	"path/filepath"
 
