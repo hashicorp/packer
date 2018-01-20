@@ -3,6 +3,8 @@ package lxc
 import (
 	"errors"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"log"
 	"strings"
 	"time"

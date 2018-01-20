@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepPrepareDevice finds an available device and sets it.

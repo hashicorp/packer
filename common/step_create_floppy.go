@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.

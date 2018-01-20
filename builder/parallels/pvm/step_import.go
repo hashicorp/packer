@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step imports an PVM VM into Parallels.

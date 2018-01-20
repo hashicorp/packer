@@ -3,10 +3,9 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"log"
-
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"log"
 )
 
 // This step uploads a file containing the VirtualBox version, which

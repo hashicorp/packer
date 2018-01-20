@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCreateInstance(t *testing.T) {

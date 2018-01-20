@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepOutputDir sets up the output directory by creating it if it does

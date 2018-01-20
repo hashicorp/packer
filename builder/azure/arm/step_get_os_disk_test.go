@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {

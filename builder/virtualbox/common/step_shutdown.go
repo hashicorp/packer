@@ -3,6 +3,8 @@ package common
 import (
 	"errors"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"log"
 	"time"
 
