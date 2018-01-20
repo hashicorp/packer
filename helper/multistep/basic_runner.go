@@ -70,7 +70,7 @@ func (b *BasicRunner) Run(state StateBag) {
 			break
 		}
 
-		action := step.Run(state)
+		action := step.Run(ctx, state)
 		defer step.Cleanup(state)
 
 		if _, ok := state.GetOk(StateCancelled); ok {
