@@ -23,7 +23,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 
 	// Instances Input
 	snapshotInput := &compute.CreateSnapshotInput{
-		Instance:     instanceID,
+		Instance:     fmt.Sprintf("%s/%s", config.ImageName, instanceID),
 		MachineImage: config.ImageName,
 	}
 
