@@ -2,8 +2,6 @@
 // discrete steps.
 package multistep
 
-import "context"
-
 // A StepAction determines the next step to take regarding multi-step actions.
 type StepAction uint
 
@@ -28,7 +26,7 @@ type Step interface {
 	//
 	// The return value determines whether multi-step sequences continue
 	// or should halt.
-	Run(context.Context, StateBag) StepAction
+	Run(StateBag) StepAction
 
 	// Cleanup is called in reverse order of the steps that have run
 	// and allow steps to clean up after themselves. Do not assume if this
