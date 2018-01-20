@@ -95,9 +95,10 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*compute.ComputeClient)
+	config := state.Get("config").(*Config)
 	imID := state.Get("instance_id").(string)
 
-	ui.Say(fmt.Sprintf("Terminating instance (%s)...", id))
+	ui.Say(fmt.Sprintf("Terminating instance (%s)...", imID))
 
 	instanceClient := client.Instances()
 	// Instances Input
@@ -106,7 +107,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		ID:   imID,
 	}
 
-	instanceInfo, err := instanceClient.DeleteInstance(input)
+	err := instanceClient.DeleteInstance(input)
 	if err != nil {
 		err = fmt.Errorf("Problem destroying instance: %s", err)
 		ui.Error(err.Error())
