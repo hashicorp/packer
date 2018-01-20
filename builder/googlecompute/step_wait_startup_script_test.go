@@ -1,9 +1,7 @@
 package googlecompute
 
 import (
-	"testing"
-
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/stretchr/testify/assert"
 )
 

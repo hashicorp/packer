@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step removes any devices (floppy disks, ISOs, etc.) from the

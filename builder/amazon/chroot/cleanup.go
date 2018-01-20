@@ -1,7 +1,7 @@
 package chroot
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 // Cleanup is an interface that some steps implement for early cleanup.

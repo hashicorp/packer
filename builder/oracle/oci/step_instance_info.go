@@ -3,8 +3,8 @@ package oci
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepInstanceInfo struct{}

@@ -2,6 +2,7 @@ package docker
 
 import (
 	"errors"
+	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
 
 	"github.com/mitchellh/multistep"

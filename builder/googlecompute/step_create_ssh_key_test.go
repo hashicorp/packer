@@ -1,7 +1,7 @@
 package googlecompute
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 
 	"io/ioutil"
 	"os"

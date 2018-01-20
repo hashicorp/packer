@@ -2,6 +2,7 @@ package googlecompute
 
 import (
 	"errors"
+	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
 	"time"
 

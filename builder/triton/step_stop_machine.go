@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepStopMachine stops the machine with the given Machine ID, and waits

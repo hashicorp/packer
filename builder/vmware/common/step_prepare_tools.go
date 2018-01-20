@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type StepPrepareTools struct {

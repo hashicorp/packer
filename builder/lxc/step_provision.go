@@ -1,10 +1,9 @@
 package lxc
 
 import (
-	"log"
-
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"log"
 )
 
 // StepProvision provisions the instance within a chroot.

@@ -2,6 +2,7 @@ package docker
 
 import (
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
 	"os/exec"
 	"strings"
 
