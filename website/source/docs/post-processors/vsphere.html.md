@@ -31,7 +31,7 @@ Required:
     *not required* if `resource_pool` is specified.
 
 -   `host` (string) - The vSphere host that will be contacted to perform the
-    VM upload.
+    VM upload. This is *not required* if `vcenter_ip` is specified.
 
 -   `password` (string) - Password to use to authenticate to the
     vSphere endpoint.
@@ -50,6 +50,8 @@ Optional:
     over an insecure connection. By default this is false.
 
 -   `resource_pool` (string) - The resource pool to upload the VM to.
+
+-   `vcenter_ip` (string) - The ip address of a vCenter server to upload the vm tos.
 
 -   `vm_folder` (string) - The folder within the datastore to store the VM.
 
