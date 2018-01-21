@@ -9,14 +9,15 @@ import (
 // SourceMachineConfig represents the configuration to run a machine using
 // the SDC API in order for provisioning to take place.
 type SourceMachineConfig struct {
-	MachineName            string             `mapstructure:"source_machine_name"`
-	MachinePackage         string             `mapstructure:"source_machine_package"`
-	MachineImage           string             `mapstructure:"source_machine_image"`
-	MachineNetworks        []string           `mapstructure:"source_machine_networks"`
-	MachineMetadata        map[string]string  `mapstructure:"source_machine_metadata"`
-	MachineTags            map[string]string  `mapstructure:"source_machine_tags"`
-	MachineFirewallEnabled bool               `mapstructure:"source_machine_firewall_enabled"`
-	MachineImageFilters    MachineImageFilter `mapstructure:"source_machine_image_filter"`
+	MachineName            string                `mapstructure:"source_machine_name"`
+	MachinePackage         string                `mapstructure:"source_machine_package"`
+	MachineImage           string                `mapstructure:"source_machine_image"`
+	MachineNetworks        []string              `mapstructure:"source_machine_networks"`
+	MachineMetadata        map[string]string     `mapstructure:"source_machine_metadata"`
+	MachineTags            map[string]string     `mapstructure:"source_machine_tags"`
+	MachineFirewallEnabled bool                  `mapstructure:"source_machine_firewall_enabled"`
+	MachineFirewallDetails MachineFirewallDetail `mapstructure:"source_machine_firewall_detail"`
+	MachineImageFilters    MachineImageFilter    `mapstructure:"source_machine_image_filter"`
 }
 
 type MachineImageFilter struct {
@@ -30,8 +31,17 @@ type MachineImageFilter struct {
 	Type       string
 }
 
+type MachineFirewallDetail struct {
+	SourceAddress string `mapstructure:"source"`
+	Port          int
+}
+
 func (m *MachineImageFilter) Empty() bool {
 	return m.Name == "" && m.OS == "" && m.Version == "" && m.State == "" && m.Owner == "" && m.Type == ""
+}
+
+func (m *MachineFirewallDetail) Empty() bool {
+	return m.SourceAddress == "" || m.Port == 0
 }
 
 // Prepare performs basic validation on a SourceMachineConfig struct.

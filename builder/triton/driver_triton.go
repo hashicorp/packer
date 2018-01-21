@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/joyent/triton-go/client"
 	"github.com/joyent/triton-go/compute"
+	"github.com/joyent/triton-go/network"
 )
 
 type driverTriton struct {
@@ -138,6 +139,27 @@ func (d *driverTriton) StopMachine(machineId string) error {
 	computeClient, _ := d.client.Compute()
 	return computeClient.Instances().Stop(context.Background(), &compute.StopInstanceInput{
 		InstanceID: machineId,
+	})
+}
+
+func (d *driverTriton) CreateFirewallRule(rule string) (string, error) {
+	networkClient, _ := d.client.Network()
+	result, err := networkClient.Firewall().CreateRule(context.Background(), &network.CreateRuleInput{
+		Enabled:     true,
+		Rule:        rule,
+		Description: "Temporary Firewall Rule added by Packer",
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return result.ID, nil
+}
+
+func (d *driverTriton) DeleteFirewallRule(ruleId string) error {
+	networkClient, _ := d.client.Network()
+	return networkClient.Firewall().DeleteRule(context.Background(), &network.DeleteRuleInput{
+		ID: ruleId,
 	})
 }
 
