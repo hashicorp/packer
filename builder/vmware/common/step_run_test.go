@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"

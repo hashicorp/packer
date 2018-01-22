@@ -1,10 +1,12 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"time"
 )
 
 // stepBootWait waits the configured time period.

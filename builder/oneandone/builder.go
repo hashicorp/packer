@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 const BuilderId = "packer.oneandone"

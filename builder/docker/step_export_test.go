@@ -3,12 +3,11 @@ package docker
 import (
 	"bytes"
 	"errors"
-	"github.com/hashicorp/packer/helper/multistep"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testStepExportState(t *testing.T) multistep.StateBag {

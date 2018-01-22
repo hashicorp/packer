@@ -1,13 +1,11 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 func TestStepShutdown_impl(t *testing.T) {

@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"

@@ -1,6 +1,7 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/common/uuid"

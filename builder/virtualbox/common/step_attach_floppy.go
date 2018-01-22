@@ -1,17 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step attaches the ISO to the virtual machine.

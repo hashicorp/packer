@@ -1,9 +1,12 @@
 package profitbricks
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"

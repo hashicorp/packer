@@ -2,13 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // MultistepDebugFn will return a proper multistep.DebugPauseFn to

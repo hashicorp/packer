@@ -1,6 +1,7 @@
 package ebssurrogate
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"

@@ -1,6 +1,7 @@
 package pvm
 
 import (
+	"context"
 	"fmt"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"

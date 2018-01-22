@@ -1,6 +1,7 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/helper/multistep"

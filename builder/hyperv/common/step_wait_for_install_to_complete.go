@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"time"
 )
 
 const (

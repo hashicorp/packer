@@ -11,7 +11,6 @@ import (
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"os"
 )
 
 func testConfig() map[string]interface{} {

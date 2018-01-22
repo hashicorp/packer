@@ -1,6 +1,7 @@
 package vmx
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"

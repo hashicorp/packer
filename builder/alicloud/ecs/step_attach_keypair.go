@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"time"
 )
 
 type stepAttachKeyPar struct {

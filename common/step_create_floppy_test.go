@@ -3,8 +3,6 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 const TestFixtures = "test-fixtures"
