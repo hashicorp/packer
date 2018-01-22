@@ -70,13 +70,7 @@ func (b *BasicRunner) Run(state StateBag) {
 			break
 		}
 
-		var action StepAction
-
-		if stepCtx, ok := step.(StepRunnableWithContext); ok {
-			action = stepCtx.RunWithContext(ctx, state)
-		} else {
-			action = step.Run(state)
-		}
+		action := step.Run(ctx, state)
 		defer step.Cleanup(state)
 
 		if _, ok := state.GetOk(StateCancelled); ok {
