@@ -22,7 +22,7 @@ type StepAttachFloppy struct {
 
 // Run adds a virtual FDD device to the VM and attaches the image.
 // If the image is not specified, then this step will be skipped.
-func (s *StepAttachFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// Determine if we even have a floppy disk to attach
 	var floppyPath string
 	if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {

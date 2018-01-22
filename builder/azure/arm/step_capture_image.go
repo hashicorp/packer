@@ -67,7 +67,7 @@ func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName st
 	return <-errChan
 }
 
-func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCaptureImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Capturing image ...")
 
 	var computeName = state.Get(constants.ArmComputeName).(string)

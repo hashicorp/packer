@@ -27,7 +27,7 @@ type StepForwardSSH struct {
 	SkipNatMapping bool
 }
 
-func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepForwardSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

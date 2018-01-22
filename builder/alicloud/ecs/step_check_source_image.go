@@ -13,7 +13,7 @@ type stepCheckAlicloudSourceImage struct {
 	SourceECSImageId string
 }
 
-func (s *stepCheckAlicloudSourceImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCheckAlicloudSourceImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)

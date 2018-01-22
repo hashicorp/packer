@@ -42,7 +42,7 @@ type StepTypeBootCommand struct {
 	Ctx         interpolate.Context
 }
 
-func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.VNCEnabled {
 		log.Println("Skipping boot command step...")
 		return multistep.ActionContinue

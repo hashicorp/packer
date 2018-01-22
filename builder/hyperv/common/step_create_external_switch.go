@@ -17,7 +17,7 @@ type StepCreateExternalSwitch struct {
 	oldSwitchName string
 }
 
-func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

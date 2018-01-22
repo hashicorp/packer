@@ -16,7 +16,7 @@ type StepAllocateIp struct {
 	ReuseIps       bool
 }
 
-func (s *StepAllocateIp) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 	server := state.Get("server").(*servers.Server)

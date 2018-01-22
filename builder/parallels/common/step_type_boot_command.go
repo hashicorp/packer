@@ -39,7 +39,7 @@ type StepTypeBootCommand struct {
 }
 
 // Run types the boot command by sending key scancodes into the VM.
-func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)

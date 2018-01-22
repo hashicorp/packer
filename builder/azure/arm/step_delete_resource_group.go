@@ -117,7 +117,7 @@ func (s *StepDeleteResourceGroup) reportIfError(err error, resourceName string) 
 	}
 }
 
-func (s *StepDeleteResourceGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteResourceGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting resource group ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

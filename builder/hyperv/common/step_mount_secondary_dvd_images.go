@@ -18,7 +18,7 @@ type DvdControllerProperties struct {
 	Existing           bool
 }
 
-func (s *StepMountSecondaryDvdImages) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountSecondaryDvdImages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Mounting secondary DVD images...")

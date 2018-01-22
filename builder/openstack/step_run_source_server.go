@@ -25,7 +25,7 @@ type StepRunSourceServer struct {
 	server           *servers.Server
 }
 
-func (s *StepRunSourceServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	flavor := state.Get("flavor_id").(string)
 	ui := state.Get("ui").(packer.Ui)

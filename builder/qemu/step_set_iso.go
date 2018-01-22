@@ -14,7 +14,7 @@ type stepSetISO struct {
 	Url       []string
 }
 
-func (s *stepSetISO) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSetISO) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	iso_path := ""

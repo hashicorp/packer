@@ -15,7 +15,7 @@ type stepCreateDroplet struct {
 	dropletId int
 }
 
-func (s *stepCreateDroplet) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)

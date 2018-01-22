@@ -23,7 +23,7 @@ type StepSecurityGroup struct {
 	createdGroupId string
 }
 
-func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 

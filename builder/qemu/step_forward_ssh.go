@@ -18,7 +18,7 @@ import (
 // Produces:
 type stepForwardSSH struct{}
 
-func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepForwardSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

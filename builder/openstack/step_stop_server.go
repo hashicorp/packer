@@ -11,7 +11,7 @@ import (
 
 type StepStopServer struct{}
 
-func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 	extensions := state.Get("extensions").(map[string]struct{})

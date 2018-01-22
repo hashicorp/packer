@@ -12,7 +12,7 @@ import (
 // hard drive for the virtual machine.
 type stepResizeDisk struct{}
 
-func (s *stepResizeDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepResizeDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

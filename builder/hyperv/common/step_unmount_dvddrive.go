@@ -9,7 +9,7 @@ import (
 type StepUnmountDvdDrive struct {
 }
 
-func (s *StepUnmountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUnmountDvdDrive) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

@@ -14,7 +14,7 @@ import (
 // StepInstanceInfo verifies that this builder is running on an EC2 instance.
 type StepInstanceInfo struct{}
 
-func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)

@@ -17,7 +17,7 @@ type StepCloneVMX struct {
 	VMName    string
 }
 
-func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 

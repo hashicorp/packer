@@ -11,7 +11,7 @@ import (
 type StepChrootProvision struct {
 }
 
-func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepChrootProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)

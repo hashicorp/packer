@@ -11,7 +11,7 @@ type StepCommit struct {
 	imageId string
 }
 
-func (s *StepCommit) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCommit) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	containerId := state.Get("container_id").(string)
 	config := state.Get("config").(*Config)

@@ -21,7 +21,7 @@ type StepOutputDir struct {
 }
 
 // Run sets up the output directory.
-func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepOutputDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if _, err := os.Stat(s.Path); err == nil && s.Force {

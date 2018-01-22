@@ -51,7 +51,7 @@ func (s *StepCreateResourceGroup) doesResourceGroupExist(resourceGroupName strin
 	return exists.Response.StatusCode != 404, err
 }
 
-func (s *StepCreateResourceGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateResourceGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	var doubleResource, ok = state.GetOk(constants.ArmDoubleResourceGroupNameSet)
 	if ok && doubleResource.(bool) {
 		err := errors.New("You have filled in both temp_resource_group_name and build_resource_group_name. Please choose one.")

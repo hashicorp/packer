@@ -37,7 +37,7 @@ func (s *StepGetOSDisk) queryCompute(resourceGroupName string, computeName strin
 	return vm, err
 }
 
-func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetOSDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Querying the machine's properties ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

@@ -11,7 +11,7 @@ import (
 
 type stepTakeSnapshot struct{}
 
-func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTakeSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 

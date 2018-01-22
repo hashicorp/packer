@@ -24,7 +24,7 @@ type StepCleanVMX struct {
 	VNCEnabled               bool
 }
 
-func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCleanVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 

@@ -25,7 +25,7 @@ type stepCreateSSHKey struct {
 	keyId int
 }
 
-func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 

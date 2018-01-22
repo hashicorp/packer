@@ -38,7 +38,7 @@ type stepCreateVMX struct {
 	tempDir string
 }
 
-func (s *stepCreateVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	isoPath := state.Get("iso_path").(string)
 	ui := state.Get("ui").(packer.Ui)

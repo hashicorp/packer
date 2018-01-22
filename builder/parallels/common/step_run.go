@@ -23,7 +23,7 @@ type StepRun struct {
 }
 
 // Run starts the VM.
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

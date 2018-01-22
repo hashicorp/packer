@@ -32,7 +32,7 @@ type StepConnectWinRM struct {
 	WinRMPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectWinRM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectWinRM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator

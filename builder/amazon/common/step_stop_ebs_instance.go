@@ -15,7 +15,7 @@ type StepStopEBSBackedInstance struct {
 	DisableStopInstance bool
 }
 
-func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopEBSBackedInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)

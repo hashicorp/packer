@@ -20,7 +20,7 @@ import (
 // Produces:
 type StepRemoveDevices struct{}
 
-func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

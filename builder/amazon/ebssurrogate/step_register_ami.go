@@ -19,7 +19,7 @@ type StepRegisterAMI struct {
 	image                    *ec2.Image
 }
 
-func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	snapshotId := state.Get("snapshot_id").(string)

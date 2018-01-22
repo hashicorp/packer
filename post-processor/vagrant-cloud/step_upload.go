@@ -12,7 +12,7 @@ import (
 type stepUpload struct {
 }
 
-func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	upload := state.Get("upload").(*Upload)

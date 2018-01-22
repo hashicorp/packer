@@ -38,7 +38,7 @@ type StepTypeBootCommand struct {
 	Ctx         interpolate.Context
 }
 
-func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	debug := state.Get("debug").(bool)
 	driver := state.Get("driver").(Driver)
 	httpPort := state.Get("http_port").(uint)

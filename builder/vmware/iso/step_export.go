@@ -34,7 +34,7 @@ func (s *StepExport) generateArgs(c *Config, hidePassword bool) []string {
 	return append(c.OVFToolOptions, args...)
 }
 
-func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
