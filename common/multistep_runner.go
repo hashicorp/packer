@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -65,8 +66,8 @@ func (s abortStep) InnerStepName() string {
 	return typeName(s.step)
 }
 
-func (s abortStep) Run(state multistep.StateBag) multistep.StepAction {
-	return s.step.Run(state)
+func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	return s.step.Run(ctx, state)
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
@@ -90,9 +91,9 @@ func (s askStep) InnerStepName() string {
 	return typeName(s.step)
 }
 
-func (s askStep) Run(state multistep.StateBag) (action multistep.StepAction) {
+func (s askStep) Run(ctx context.Context, state multistep.StateBag) (action multistep.StepAction) {
 	for {
-		action = s.step.Run(state)
+		action = s.step.Run(ctx, state)
 
 		if action != multistep.ActionHalt {
 			return
