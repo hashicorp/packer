@@ -1,10 +1,12 @@
 package instance
 
 import (
+	"context"
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"os"
 )
 
 type StepUploadX509Cert struct{}

@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"

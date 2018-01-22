@@ -1,6 +1,7 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -17,7 +18,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/go-vnc"
-	"os"
 )
 
 const KeyLeftShift uint32 = 0xFFE1

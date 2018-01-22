@@ -1,6 +1,7 @@
 package triton
 
 import (
+	"context"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"

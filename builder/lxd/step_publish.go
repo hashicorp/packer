@@ -1,10 +1,12 @@
 package lxd
 
 import (
+	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"regexp"
 )
 
 type stepPublish struct{}

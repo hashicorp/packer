@@ -1,6 +1,7 @@
 package cloudstack
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"

@@ -1,12 +1,12 @@
 package docker
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
 	"os/exec"
 	"strings"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type StepConnectDocker struct{}

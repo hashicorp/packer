@@ -2,9 +2,8 @@ package lxc
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"log"
 	"os"
@@ -12,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepExport struct{}

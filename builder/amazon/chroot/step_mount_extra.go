@@ -2,15 +2,14 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"os"
 	"os/exec"
 	"syscall"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepMountExtra mounts the attached device.

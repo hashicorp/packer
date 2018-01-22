@@ -1,9 +1,11 @@
 package lxd
 
 import (
+	"context"
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 // StepProvision provisions the container

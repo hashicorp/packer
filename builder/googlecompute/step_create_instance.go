@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"

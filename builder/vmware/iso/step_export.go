@@ -2,6 +2,7 @@ package iso
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
