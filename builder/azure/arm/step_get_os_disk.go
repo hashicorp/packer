@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"

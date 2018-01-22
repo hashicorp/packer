@@ -1,10 +1,12 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 // StepEarlyCleanup performs some of the cleanup steps early in order to

@@ -1,6 +1,7 @@
 package communicator
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"

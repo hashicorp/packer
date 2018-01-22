@@ -2,10 +2,12 @@ package lin
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 type StepGeneralizeOS struct {

@@ -1,6 +1,7 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
 	"strings"
 

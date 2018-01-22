@@ -1,10 +1,9 @@
 package iso
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepRegister_impl(t *testing.T) {

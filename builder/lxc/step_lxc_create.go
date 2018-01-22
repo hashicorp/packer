@@ -2,16 +2,15 @@ package lxc
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepLxcCreate struct{}

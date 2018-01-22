@@ -1,6 +1,7 @@
 package oneandone
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -8,8 +9,6 @@ import (
 	"github.com/1and1/oneandone-cloudserver-sdk-go"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"strings"
-	"time"
 )
 
 type stepCreateServer struct{}

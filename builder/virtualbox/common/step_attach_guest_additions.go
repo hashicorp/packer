@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"log"
 )
 
 // This step attaches the VirtualBox guest additions as a inserted CD onto

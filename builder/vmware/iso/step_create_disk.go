@@ -1,13 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"path/filepath"
 )
 
 // This step creates the virtual disks for the VM.

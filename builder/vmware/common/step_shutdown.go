@@ -2,17 +2,16 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,

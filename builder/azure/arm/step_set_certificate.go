@@ -1,6 +1,8 @@
 package arm
 
 import (
+	"context"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"

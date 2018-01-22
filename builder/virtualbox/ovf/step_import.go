@@ -1,6 +1,7 @@
 package ovf
 
 import (
+	"context"
 	"fmt"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"

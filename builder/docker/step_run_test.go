@@ -1,11 +1,11 @@
 package docker
 
 import (
+	"context"
 	"errors"
-	"github.com/hashicorp/packer/helper/multistep"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testStepRunState(t *testing.T) multistep.StateBag {

@@ -1,6 +1,7 @@
 package chroot
 
 import (
+	"context"
 	"log"
 
 	"github.com/hashicorp/packer/helper/multistep"
