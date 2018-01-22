@@ -158,6 +158,11 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.
 
+-   `temp_key_vault_name` (string) temporary key vault name assigned to the Certificate Store for WinRM access to a windows VM.
+    If this value is not set, a random value will be assigned. Knowing the key vault name allows you to identify the URL
+    specifically and whitelist it in a proxy.
+
+
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
 
