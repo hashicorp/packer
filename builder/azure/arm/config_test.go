@@ -912,6 +912,7 @@ func TestConfigShouldRejectTempAndBuildResourceGroupName(t *testing.T) {
 		"subscription_id":        "ignore",
 		"communicator":           "none",
 
+    "temp_key_vault_name":    "kvn00",
 		// custom may define one or the other, but not both
 		"temp_resource_group_name":  "rgn00",
 		"build_resource_group_name": "rgn00",

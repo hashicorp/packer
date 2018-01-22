@@ -357,7 +357,7 @@ func setRuntimeValues(c *Config) {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
 	c.tmpOSDiskName = tempName.OSDiskName
-	if c.tmpKeyVaultName == "" {
+	if c.TempKeyVaultName == "" {
 		c.tmpKeyVaultName = tempName.KeyVaultName
 	} else {
 		c.tmpKeyVaultName = c.TempKeyVaultName
