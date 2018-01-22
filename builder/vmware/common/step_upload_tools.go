@@ -20,7 +20,7 @@ type StepUploadTools struct {
 	Ctx               interpolate.Context
 }
 
-func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
+func (c *StepUploadTools) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
 	if c.ToolsUploadFlavor == "" {

@@ -15,7 +15,7 @@ import (
 // the flavor by name.
 type StepLoadExtensions struct{}
 
-func (s *StepLoadExtensions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepLoadExtensions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 

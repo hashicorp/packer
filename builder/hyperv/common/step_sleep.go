@@ -12,7 +12,7 @@ type StepSleep struct {
 	ActionName string
 }
 
-func (s *StepSleep) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSleep) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.ActionName) > 0 {

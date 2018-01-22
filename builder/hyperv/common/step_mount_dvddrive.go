@@ -16,7 +16,7 @@ type StepMountDvdDrive struct {
 	Generation uint
 }
 
-func (s *StepMountDvdDrive) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountDvdDrive) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

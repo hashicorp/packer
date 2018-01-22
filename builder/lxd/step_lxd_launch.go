@@ -9,7 +9,7 @@ import (
 
 type stepLxdLaunch struct{}
 
-func (s *stepLxdLaunch) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepLxdLaunch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

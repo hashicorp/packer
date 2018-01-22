@@ -9,7 +9,7 @@ import (
 
 type stepInstanceInfo struct{}
 
-func (s *stepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(Driver)
 		ui     = state.Get("ui").(packer.Ui)

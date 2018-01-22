@@ -20,7 +20,7 @@ type StepGetPassword struct {
 	Comm  *communicator.Config
 }
 
-func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 

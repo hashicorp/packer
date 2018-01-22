@@ -26,7 +26,7 @@ type StepCreateFloppy struct {
 	FilesAdded map[string]bool
 }
 
-func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Files) == 0 && len(s.Directories) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue

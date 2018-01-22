@@ -15,7 +15,7 @@ type stepCreateFolder struct {
 	Folder string
 }
 
-func (s *stepCreateFolder) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateFolder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	dcPath := state.Get("dcPath").(string)

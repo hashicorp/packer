@@ -13,7 +13,7 @@ type stepCreateAMI struct {
 	image *ec2.Image
 }
 
-func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)

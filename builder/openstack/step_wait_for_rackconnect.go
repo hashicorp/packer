@@ -13,7 +13,7 @@ type StepWaitForRackConnect struct {
 	Wait bool
 }
 
-func (s *StepWaitForRackConnect) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForRackConnect) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.Wait {
 		return multistep.ActionContinue
 	}

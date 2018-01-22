@@ -22,7 +22,7 @@ type StepUploadBundle struct {
 	Debug bool
 }
 
-func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadBundle) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	manifestName := state.Get("manifest_name").(string)

@@ -21,7 +21,7 @@ type StepCompactDisk struct {
 	Skip bool
 }
 
-func (s StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	full_disk_path := state.Get("full_disk_path").(string)

@@ -26,7 +26,7 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //   <nothing>
 type StepCleanFiles struct{}
 
-func (StepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
+func (StepCleanFiles) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
 

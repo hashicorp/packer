@@ -19,7 +19,7 @@ type StepAMIRegionCopy struct {
 	Name              string
 }
 
-func (s *StepAMIRegionCopy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAMIRegionCopy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)

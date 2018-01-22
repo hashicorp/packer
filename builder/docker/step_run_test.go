@@ -18,7 +18,7 @@ func TestStepRun_impl(t *testing.T) {
 	var _ multistep.Step = new(StepRun)
 }
 
-func TestStepRun(t *testing.T) {
+func TestStepRun(_ context.Context, t *testing.T) {
 	state := testStepRunState(t)
 	step := new(StepRun)
 	defer step.Cleanup(state)

@@ -40,7 +40,7 @@ type bootCommandTemplateData struct {
 //   <nothing>
 type stepTypeBootCommand struct{}
 
-func (s *stepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	debug := state.Get("debug").(bool)
 	httpPort := state.Get("http_port").(uint)

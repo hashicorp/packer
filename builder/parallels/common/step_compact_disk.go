@@ -22,7 +22,7 @@ type StepCompactDisk struct {
 }
 
 // Run runs the compaction of the virtual disk attached to the VM.
-func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

@@ -15,7 +15,7 @@ type StepRegisterAMI struct {
 	EnableAMISriovNetSupport bool
 }
 
-func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	manifestPath := state.Get("remote_manifest_path").(string)

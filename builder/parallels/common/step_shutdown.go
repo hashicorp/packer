@@ -28,7 +28,7 @@ type StepShutdown struct {
 }
 
 // Run shuts down the VM.
-func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

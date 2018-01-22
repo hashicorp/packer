@@ -22,7 +22,7 @@ type StepCreateCert struct {
 	TmpServiceName string
 }
 
-func (s *StepCreateCert) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateCert) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary certificate...")

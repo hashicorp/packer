@@ -17,7 +17,7 @@ type StepTempDir struct {
 	tempDir string
 }
 
-func (s *StepTempDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTempDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating a temporary directory for sharing data...")

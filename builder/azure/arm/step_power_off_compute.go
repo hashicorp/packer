@@ -37,7 +37,7 @@ func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeN
 	return err
 }
 
-func (s *StepPowerOffCompute) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPowerOffCompute) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Powering off machine ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

@@ -13,7 +13,7 @@ type stepChooseDatacenter struct {
 	Datacenter string
 }
 
-func (s *stepChooseDatacenter) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepChooseDatacenter) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	finder := find.NewFinder(cli.Client, false)

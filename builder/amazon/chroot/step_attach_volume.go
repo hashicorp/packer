@@ -23,7 +23,7 @@ type StepAttachVolume struct {
 	volumeId string
 }
 
-func (s *StepAttachVolume) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	device := state.Get("device").(string)
 	instance := state.Get("instance").(*ec2.Instance)

@@ -14,7 +14,7 @@ import (
 
 type stepCreateServer struct{}
 
-func (s *stepCreateServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 

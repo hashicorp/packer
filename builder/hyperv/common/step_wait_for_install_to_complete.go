@@ -14,7 +14,7 @@ const (
 type StepWaitForPowerOff struct {
 }
 
-func (s *StepWaitForPowerOff) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForPowerOff) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -48,7 +48,7 @@ type StepWaitForInstallToComplete struct {
 	ActionName          string
 }
 
-func (s *StepWaitForInstallToComplete) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForInstallToComplete) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

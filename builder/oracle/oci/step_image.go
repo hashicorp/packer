@@ -9,7 +9,7 @@ import (
 
 type stepImage struct{}
 
-func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver     = state.Get("driver").(Driver)
 		ui         = state.Get("ui").(packer.Ui)

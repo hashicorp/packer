@@ -18,7 +18,7 @@ type StepCreateEncryptedAMICopy struct {
 	AMIMappings       []BlockDevice
 }
 
-func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateEncryptedAMICopy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	kmsKeyId := s.KeyID

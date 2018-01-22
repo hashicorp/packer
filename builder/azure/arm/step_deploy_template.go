@@ -58,7 +58,7 @@ func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deployment
 	return err
 }
 
-func (s *StepDeployTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeployTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deploying deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

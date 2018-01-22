@@ -26,7 +26,7 @@ type StepRun struct {
 	vmxPath  string
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

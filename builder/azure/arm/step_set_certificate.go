@@ -22,7 +22,7 @@ func NewStepSetCertificate(config *Config, ui packer.Ui) *StepSetCertificate {
 	return step
 }
 
-func (s *StepSetCertificate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSetCertificate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Setting the certificate's URL ...")
 
 	var winRMCertificateUrl = state.Get(constants.ArmCertificateUrl).(string)

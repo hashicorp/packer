@@ -39,7 +39,7 @@ func (s *StepGetCertificate) getCertificateUrl(keyVaultName string, secretName s
 	return *secret.ID, err
 }
 
-func (s *StepGetCertificate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetCertificate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Getting the certificate's URL ...")
 
 	var keyVaultName = state.Get(constants.ArmKeyVaultName).(string)

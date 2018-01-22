@@ -17,7 +17,7 @@ type stepAttachISO struct {
 	diskPath string
 }
 
-func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachISO) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	isoPath := state.Get("iso_path").(string)
