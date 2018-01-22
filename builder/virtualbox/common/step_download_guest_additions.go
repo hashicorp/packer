@@ -37,7 +37,7 @@ type StepDownloadGuestAdditions struct {
 	Ctx                  interpolate.Context
 }
 
-func (s *StepDownloadGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -114,7 +114,7 @@ func (s *StepDownloadGuestAdditions) Run(_ context.Context, state multistep.Stat
 		if s.GuestAdditionsSHA256 != "" {
 			checksum = s.GuestAdditionsSHA256
 		} else {
-			checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
+			checksum, action = s.downloadAdditionsSHA256(ctx, state, version, additionsName)
 			if action != multistep.ActionContinue {
 				return action
 			}
@@ -141,12 +141,12 @@ func (s *StepDownloadGuestAdditions) Run(_ context.Context, state multistep.Stat
 		Url:          []string{url},
 	}
 
-	return downStep.Run(state)
+	return downStep.Run(ctx, state)
 }
 
 func (s *StepDownloadGuestAdditions) Cleanup(state multistep.StateBag) {}
 
-func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
+func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context, state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf(
@@ -170,7 +170,7 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.Sta
 		Url:         []string{checksumsUrl},
 	}
 
-	action := downStep.Run(state)
+	action := downStep.Run(ctx, state)
 	if action == multistep.ActionHalt {
 		return "", action
 	}

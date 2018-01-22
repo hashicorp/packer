@@ -44,7 +44,7 @@ type StepConnect struct {
 	substep multistep.Step
 }
 
-func (s *StepConnect) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	typeMap := map[string]multistep.Step{
 		"none": nil,
 		"ssh": &StepConnectSSH{
@@ -85,7 +85,7 @@ func (s *StepConnect) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 
 	s.substep = step
-	return s.substep.Run(state)
+	return s.substep.Run(ctx, state)
 }
 
 func (s *StepConnect) Cleanup(state multistep.StateBag) {
