@@ -72,7 +72,7 @@ func getImage(c *Config, d Driver) (*Image, error) {
 }
 
 // Run executes the Packer build step that creates a GCE instance.
-func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
 	sshPublicKey := state.Get("ssh_public_key").(string)

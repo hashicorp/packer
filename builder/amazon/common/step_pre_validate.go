@@ -17,7 +17,7 @@ type StepPreValidate struct {
 	ForceDeregister bool
 }
 
-func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if s.ForceDeregister {
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")

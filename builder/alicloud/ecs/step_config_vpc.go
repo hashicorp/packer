@@ -18,7 +18,7 @@ type stepConfigAlicloudVPC struct {
 	isCreate  bool
 }
 
-func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudVPC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)

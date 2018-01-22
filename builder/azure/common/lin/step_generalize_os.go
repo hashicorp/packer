@@ -12,7 +12,7 @@ type StepGeneralizeOS struct {
 	Command string
 }
 
-func (s *StepGeneralizeOS) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGeneralizeOS) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
 

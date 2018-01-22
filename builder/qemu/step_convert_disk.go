@@ -14,7 +14,7 @@ import (
 // hard drive for the virtual machine.
 type stepConvertDisk struct{}
 
-func (s *stepConvertDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConvertDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	diskName := state.Get("disk_filename").(string)

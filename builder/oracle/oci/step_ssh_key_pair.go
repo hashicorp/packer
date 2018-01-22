@@ -21,7 +21,7 @@ type stepKeyPair struct {
 	PrivateKeyFile string
 }
 
-func (s *stepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

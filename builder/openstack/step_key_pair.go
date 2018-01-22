@@ -25,7 +25,7 @@ type StepKeyPair struct {
 	doCleanup bool
 }
 
-func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

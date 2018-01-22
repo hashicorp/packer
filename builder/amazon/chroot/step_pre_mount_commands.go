@@ -14,7 +14,7 @@ type StepPreMountCommands struct {
 	Commands []string
 }
 
-func (s *StepPreMountCommands) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPreMountCommands) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	device := state.Get("device").(string)
 	ui := state.Get("ui").(packer.Ui)

@@ -21,7 +21,7 @@ type StepPrepareParallelsTools struct {
 }
 
 // Run sets the value of "parallels_tools_path".
-func (s *StepPrepareParallelsTools) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPrepareParallelsTools) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
 	if s.ParallelsToolsMode == ParallelsToolsModeDisable {

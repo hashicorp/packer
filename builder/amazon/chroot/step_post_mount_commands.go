@@ -16,7 +16,7 @@ type StepPostMountCommands struct {
 	Commands []string
 }
 
-func (s *StepPostMountCommands) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPostMountCommands) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	device := state.Get("device").(string)
 	mountPath := state.Get("mount_path").(string)

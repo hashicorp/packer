@@ -12,7 +12,7 @@ import (
 // hard drive for the virtual machine.
 type stepCopyDisk struct{}
 
-func (s *stepCopyDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCopyDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	isoPath := state.Get("iso_path").(string)

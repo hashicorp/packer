@@ -15,7 +15,7 @@ type StepImport struct {
 	vmName     string
 }
 
-func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepImport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)

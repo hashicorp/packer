@@ -11,7 +11,7 @@ import (
 
 type stepDropletInfo struct{}
 
-func (s *stepDropletInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepDropletInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)

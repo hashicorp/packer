@@ -15,7 +15,7 @@ type setpShareAlicloudImage struct {
 	RegionId                     string
 }
 
-func (s *setpShareAlicloudImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *setpShareAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	alicloudImages := state.Get("alicloudimages").(map[string]string)

@@ -9,7 +9,7 @@ import (
 
 type stepPublish struct{}
 
-func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPublish) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

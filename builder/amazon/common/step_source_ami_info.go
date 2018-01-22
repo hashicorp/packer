@@ -52,7 +52,7 @@ func mostRecentAmi(images []*ec2.Image) *ec2.Image {
 	return sortedImages[len(sortedImages)-1]
 }
 
-func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 

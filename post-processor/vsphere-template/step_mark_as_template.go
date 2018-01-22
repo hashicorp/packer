@@ -18,7 +18,7 @@ type stepMarkAsTemplate struct {
 	VMName string
 }
 
-func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepMarkAsTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	folder := state.Get("folder").(*object.Folder)

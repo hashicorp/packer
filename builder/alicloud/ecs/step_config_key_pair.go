@@ -24,7 +24,7 @@ type StepConfigAlicloudKeyPair struct {
 	keyName string
 }
 
-func (s *StepConfigAlicloudKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

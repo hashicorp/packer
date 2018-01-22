@@ -10,7 +10,7 @@ import (
 // This step suppresses any messages that VMware product might show.
 type StepSuppressMessages struct{}
 
-func (s *StepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSuppressMessages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

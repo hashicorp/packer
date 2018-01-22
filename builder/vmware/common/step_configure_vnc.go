@@ -76,7 +76,7 @@ func VNCPassword(skipPassword bool) string {
 	return string(password)
 }
 
-func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.Enabled {
 		log.Println("Skipping VNC configuration step...")
 		return multistep.ActionContinue

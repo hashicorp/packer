@@ -27,7 +27,7 @@ type qemuArgsTemplateData struct {
 	SSHHostPort uint
 }
 
-func (s *stepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

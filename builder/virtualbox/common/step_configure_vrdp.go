@@ -26,7 +26,7 @@ type StepConfigureVRDP struct {
 	VRDPPortMax     uint
 }
 
-func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVRDP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

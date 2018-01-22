@@ -45,7 +45,7 @@ type StepDownload struct {
 	Extension string
 }
 
-func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	cache := state.Get("cache").(packer.Cache)
 	ui := state.Get("ui").(packer.Ui)
 

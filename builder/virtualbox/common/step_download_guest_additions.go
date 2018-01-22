@@ -36,7 +36,7 @@ type StepDownloadGuestAdditions struct {
 	Ctx                  interpolate.Context
 }
 
-func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownloadGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

@@ -23,7 +23,7 @@ type StepProvision struct {
 	Comm packer.Communicator
 }
 
-func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := s.Comm
 	if comm == nil {
 		raw, ok := state.Get("communicator").(packer.Communicator)

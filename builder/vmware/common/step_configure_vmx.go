@@ -21,7 +21,7 @@ type StepConfigureVMX struct {
 	SkipFloppy bool
 }
 
-func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 

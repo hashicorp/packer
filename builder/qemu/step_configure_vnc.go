@@ -20,7 +20,7 @@ import (
 //   vnc_port uint - The port that VNC is configured to listen on.
 type stepConfigureVNC struct{}
 
-func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func (stepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -31,7 +31,7 @@ type StepHTTPServer struct {
 	l net.Listener
 }
 
-func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepHTTPServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var httpPort uint = 0
