@@ -97,6 +97,7 @@ type Config struct {
 	StorageAccount                    string             `mapstructure:"storage_account"`
 	TempComputeName                   string             `mapstructure:"temp_compute_name"`
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
+	TempKeyVaultName                  string             `mapstructure:"temp_key_vault_name"`
 	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
 	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
@@ -356,7 +357,11 @@ func setRuntimeValues(c *Config) {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
 	c.tmpOSDiskName = tempName.OSDiskName
-	c.tmpKeyVaultName = tempName.KeyVaultName
+	if c.tmpKeyVaultName == "" {
+		c.tmpKeyVaultName = tempName.KeyVaultName
+	} else {
+		c.tmpKeyVaultName = c.TempKeyVaultName
+	}
 }
 
 func setUserNamePassword(c *Config) {
