@@ -37,10 +37,6 @@ type StepRunSourceInstance struct {
 }
 
 func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
-	return s.RunWithContext(context.Background(), state)
-}
-
-func (s *StepRunSourceInstance) RunWithContext(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	var keyName string
 	if name, ok := state.GetOk("keyPair"); ok {
@@ -183,6 +179,15 @@ func (s *StepRunSourceInstance) RunWithContext(ctx context.Context, state multis
 	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		for {
+			if _, ok := state.GetOk(multistep.StateCancelled); ok {
+				cancel()
+			}
+		}
+	}()
 
 	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)

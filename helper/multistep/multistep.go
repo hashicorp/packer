@@ -19,10 +19,6 @@ const StateCancelled = "cancelled"
 // This is the key set in the state bag when a step halted the sequence.
 const StateHalted = "halted"
 
-type StepRunnableWithContext interface {
-	RunWithContext(context.Context, StateBag) StepAction
-}
-
 // Step is a single step that is part of a potentially large sequence
 // of other steps, responsible for performing some specific action.
 type Step interface {
@@ -32,7 +28,7 @@ type Step interface {
 	//
 	// The return value determines whether multi-step sequences continue
 	// or should halt.
-	Run(StateBag) StepAction
+	Run(context.Context, StateBag) StepAction
 
 	// Cleanup is called in reverse order of the steps that have run
 	// and allow steps to clean up after themselves. Do not assume if this
