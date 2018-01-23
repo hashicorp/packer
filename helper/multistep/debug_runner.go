@@ -1,8 +1,8 @@
 package multistep
 
 import (
+	"context"
 	"fmt"
-	"golang.org/x/net/context"
 	"reflect"
 	"sync"
 )
