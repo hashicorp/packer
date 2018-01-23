@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,7 +20,7 @@ func TestStepTeardownInstance(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 

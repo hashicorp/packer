@@ -1,6 +1,7 @@
 package iso
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -17,7 +18,7 @@ func TestStepRegister_regularDriver(t *testing.T) {
 	state.Put("vmx_path", "foo")
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -41,7 +42,7 @@ func TestStepRegister_remoteDriver(t *testing.T) {
 	state.Put("vmx_path", "foo")
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -81,7 +82,7 @@ func TestStepRegister_WithoutUnregister_remoteDriver(t *testing.T) {
 	state.Put("vmx_path", "foo")
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

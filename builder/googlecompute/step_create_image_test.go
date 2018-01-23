@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -26,7 +27,7 @@ func TestStepCreateImage(t *testing.T) {
 	d.CreateImageResultSizeGb = 100
 
 	// run the step
-	action := step.Run(state)
+	action := step.Run(context.Background(), state)
 	assert.Equal(t, action, multistep.ActionContinue, "Step did not pass.")
 
 	uncastImage, ok := state.GetOk("image")
@@ -61,7 +62,7 @@ func TestStepCreateImage_errorOnChannel(t *testing.T) {
 	driver.CreateImageErrCh = errCh
 
 	// run the step
-	action := step.Run(state)
+	action := step.Run(context.Background(), state)
 	assert.Equal(t, action, multistep.ActionHalt, "Step should not have passed.")
 	_, ok := state.GetOk("error")
 	assert.True(t, ok, "State should have an error.")

@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -36,7 +37,7 @@ func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -62,7 +63,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

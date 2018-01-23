@@ -1,6 +1,7 @@
 package triton
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -14,7 +15,7 @@ func TestStepCreateSourceMachine(t *testing.T) {
 
 	driver := state.Get("driver").(*DriverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -39,7 +40,7 @@ func TestStepCreateSourceMachine_CreateMachineError(t *testing.T) {
 
 	driver.CreateMachineErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -61,7 +62,7 @@ func TestStepCreateSourceMachine_WaitForMachineStateError(t *testing.T) {
 
 	driver.WaitForMachineStateErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -81,7 +82,7 @@ func TestStepCreateSourceMachine_StopMachineError(t *testing.T) {
 
 	driver := state.Get("driver").(*DriverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -109,7 +110,7 @@ func TestStepCreateSourceMachine_WaitForMachineStoppedError(t *testing.T) {
 
 	driver := state.Get("driver").(*DriverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -137,7 +138,7 @@ func TestStepCreateSourceMachine_DeleteMachineError(t *testing.T) {
 
 	driver := state.Get("driver").(*DriverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 

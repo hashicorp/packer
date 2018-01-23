@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -19,7 +20,7 @@ func TestStepDeleteOSDiskShouldFailIfGetFails(t *testing.T) {
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://storage.blob.core.windows.net/images/pkrvm_os.vhd")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -38,7 +39,7 @@ func TestStepDeleteOSDiskShouldPassIfGetPasses(t *testing.T) {
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://storage.blob.core.windows.net/images/pkrvm_os.vhd")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -63,7 +64,7 @@ func TestStepDeleteOSDiskShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://storage.blob.core.windows.net/images/pkrvm_os.vhd")
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
@@ -93,7 +94,7 @@ func TestStepDeleteOSDiskShouldHandleComplexStorageContainerNames(t *testing.T) 
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://storage.blob.core.windows.net/abc/def/pkrvm_os.vhd")
-	testSubject.Run(stateBag)
+	testSubject.Run(context.Background(), stateBag)
 
 	if actualStorageContainerName != "abc" {
 		t.Fatalf("Expected the storage container name to be 'abc/def', but found '%s'.", actualStorageContainerName)
@@ -115,7 +116,7 @@ func TestStepDeleteOSDiskShouldFailIfVHDNameCannotBeURLParsed(t *testing.T) {
 	// Invalid URL per https://golang.org/src/net/url/url_test.go
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("http://[fe80::1%en0]/")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%v'.", result)
 	}
@@ -134,7 +135,7 @@ func TestStepDeleteOSDiskShouldFailIfVHDNameIsTooShort(t *testing.T) {
 
 	stateBag := DeleteTestStateBagStepDeleteOSDisk("storage.blob.core.windows.net/abc")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -157,7 +158,7 @@ func TestStepDeleteOSDiskShouldPassIfManagedDiskInTempResourceGroup(t *testing.T
 	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
 	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -181,7 +182,7 @@ func TestStepDeleteOSDiskShouldFailIfManagedDiskInExistingResourceGroupFailsToDe
 	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
 	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -205,7 +206,7 @@ func TestStepDeleteOSDiskShouldFailIfManagedDiskInExistingResourceGroupIsDeleted
 	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
 	stateBag.Put(constants.ArmResourceGroupName, "testgroup")
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}

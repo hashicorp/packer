@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestStepCreateInstance(t *testing.T) {
 
 	driver := state.Get("driver").(*driverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -44,7 +45,7 @@ func TestStepCreateInstance_CreateInstanceErr(t *testing.T) {
 	driver := state.Get("driver").(*driverMock)
 	driver.CreateInstanceErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -73,7 +74,7 @@ func TestStepCreateInstance_WaitForInstanceStateErr(t *testing.T) {
 	driver := state.Get("driver").(*driverMock)
 	driver.WaitForInstanceStateErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -91,7 +92,7 @@ func TestStepCreateInstance_TerminateInstanceErr(t *testing.T) {
 
 	driver := state.Get("driver").(*driverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -117,7 +118,7 @@ func TestStepCreateInstanceCleanup_WaitForInstanceStateErr(t *testing.T) {
 
 	driver := state.Get("driver").(*driverMock)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 

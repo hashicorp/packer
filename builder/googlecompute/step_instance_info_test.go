@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ func TestStepInstanceInfo(t *testing.T) {
 	driver.GetNatIPResult = "1.2.3.4"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -64,7 +65,7 @@ func TestStepInstanceInfo_InternalIP(t *testing.T) {
 	driver.GetInternalIPResult = "5.6.7.8"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -101,7 +102,7 @@ func TestStepInstanceInfo_getNatIPError(t *testing.T) {
 	driver.GetNatIPErr = errors.New("error")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -128,7 +129,7 @@ func TestStepInstanceInfo_waitError(t *testing.T) {
 	driver.WaitForInstanceErrCh = errCh
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -161,7 +162,7 @@ func TestStepInstanceInfo_errorTimeout(t *testing.T) {
 	driver.WaitForInstanceErrCh = errCh
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

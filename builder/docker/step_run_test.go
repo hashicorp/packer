@@ -18,7 +18,7 @@ func TestStepRun_impl(t *testing.T) {
 	var _ multistep.Step = new(StepRun)
 }
 
-func TestStepRun(_ context.Context, t *testing.T) {
+func TestStepRun(t *testing.T) {
 	state := testStepRunState(t)
 	step := new(StepRun)
 	defer step.Cleanup(state)
@@ -28,7 +28,7 @@ func TestStepRun(_ context.Context, t *testing.T) {
 	driver.StartID = "foo"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -75,7 +75,7 @@ func TestStepRun_error(t *testing.T) {
 	driver.StartError = errors.New("foo")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
