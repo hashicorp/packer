@@ -823,34 +823,40 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "oINoQSRkPinChzwEHr3VatB9++Y=",
+			"checksumSHA1": "Lg8OHK87XRGCaipG+5+zFyN8OMw=",
 			"path": "github.com/joyent/triton-go",
-			"revision": "86ba9699869b6cd5ea3290faad7be659efc7d6ce",
-			"revisionTime": "2017-12-28T20:20:46Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "d6pxw8DLxYehLr92fWZTLEWVws8=",
+			"checksumSHA1": "Y03+L+I0FVZ2bMGWt1MHTDEyWM4=",
 			"path": "github.com/joyent/triton-go/authentication",
-			"revision": "86ba9699869b6cd5ea3290faad7be659efc7d6ce",
-			"revisionTime": "2017-12-28T20:20:46Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "GCHfn8d1Mhswm7n7IRnT0n/w+dw=",
+			"checksumSHA1": "MuJsGBr6HlXQYxZY9cM5rBk+Lns=",
 			"path": "github.com/joyent/triton-go/client",
-			"revision": "86ba9699869b6cd5ea3290faad7be659efc7d6ce",
-			"revisionTime": "2017-12-28T20:20:46Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "U9D/fCNr+1uD1p/O0PW0yD/izqc=",
+			"checksumSHA1": "A+YGcdf/qfac1gqK8QY1F5+pYGA=",
 			"path": "github.com/joyent/triton-go/compute",
-			"revision": "86ba9699869b6cd5ea3290faad7be659efc7d6ce",
-			"revisionTime": "2017-12-28T20:20:46Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "9OdR/eI3qbmADruKn6yE1Dbx3LE=",
+			"checksumSHA1": "d/Py6j/uMgOAFNFGpsQrNnSsO+k=",
+			"path": "github.com/joyent/triton-go/errors",
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
+		},
+		{
+			"checksumSHA1": "MIrIeqiPmw66cko+gzk7Cht2SLE=",
 			"path": "github.com/joyent/triton-go/network",
-			"revision": "86ba9699869b6cd5ea3290faad7be659efc7d6ce",
-			"revisionTime": "2017-12-28T20:20:46Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
 			"checksumSHA1": "gEjGS03N1eysvpQ+FCHTxPcbxXc=",
@@ -1002,6 +1008,12 @@
 			"checksumSHA1": "IT4sX58d+e8osXHV5U6YCSdB/uE=",
 			"path": "github.com/pierrec/xxHash/xxHash32",
 			"revision": "5a004441f897722c627870a981d02b29924215fa"
+		},
+		{
+			"checksumSHA1": "xCv4GBFyw07vZkVtKF/XrUnkHRk=",
+			"path": "github.com/pkg/errors",
+			"revision": "e881fd58d78e04cf6d0de1217f8707c8cc2249bc",
+			"revisionTime": "2017-12-16T07:03:16Z"
 		},
 		{
 			"checksumSHA1": "Mud+5WNq90BFb4gTeM5AByN8f2Y=",
