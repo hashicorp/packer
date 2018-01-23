@@ -24,7 +24,7 @@ type StepSecurityGroup struct {
 	createdGroupId string
 }
 
-func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSecurityGroup) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -107,7 +107,7 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 	}
 
 	log.Printf("[DEBUG] Waiting for temporary security group: %s", s.createdGroupId)
-	err = waitUntilSecurityGroupExists(ec2conn,
+	err = waitUntilSecurityGroupExistsWithContext(ctx, ec2conn,
 		&ec2.DescribeSecurityGroupsInput{
 			GroupIds: []*string{aws.String(s.createdGroupId)},
 		},
@@ -154,8 +154,7 @@ func (s *StepSecurityGroup) Cleanup(state multistep.StateBag) {
 	}
 }
 
-func waitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
-	ctx := aws.BackgroundContext()
+func waitUntilSecurityGroupExistsWithContext(ctx context.Context, c *ec2.EC2, input *ec2.DescribeSecurityGroupsInput) error {
 	w := request.Waiter{
 		Name:        "DescribeSecurityGroups",
 		MaxAttempts: 40,
