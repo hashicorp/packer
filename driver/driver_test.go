@@ -10,11 +10,11 @@ import (
 
 // Defines whether acceptance tests should be run
 const TestEnvVar = "VSPHERE_DRIVER_ACC"
-const hostName = "esxi-1.vsphere55.test"
+const hostName = "esxi-1.vsphere65.test"
 
 func newTestDriver(t *testing.T) *Driver {
 	d, err := NewDriver(&ConnectConfig{
-		VCenterServer:      "vcenter.vsphere55.test",
+		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           "root",
 		Password:           "jetbrains",
 		InsecureConnection: true,
