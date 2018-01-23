@@ -28,6 +28,11 @@ type Config struct {
 	ImageName string `mapstructure:"image_name"`
 	Shape     string `mapstructure:"shape"`
 	ImageList string `mapstructure:"image_list"`
+	// Optional. Describes what computers are allowed to reach your instance
+	// via SSH. This whitelist must contain the computer you're running Packer
+	// from. It defaults to public-internet, meaning that you can SSH into your
+	// instance from anywhere as long as you have the right keys
+	SSHSourceList string `mapstructure:"ssh_source_list"`
 
 	ctx interpolate.Context
 }
@@ -47,6 +52,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	c.apiEndpointURL, err = url.Parse(c.APIEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing API Endpoint: %s", err)
+	}
+	// set default source list
+	if c.SSHSourceList == "" {
+		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
 
 	var errs *packer.MultiError

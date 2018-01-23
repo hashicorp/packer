@@ -13,15 +13,15 @@ import (
 type stepSecurity struct{}
 
 func (s *stepSecurity) Run(state multistep.StateBag) multistep.StepAction {
-	// TODO create overrides that allow savvy users to add the image to their
-	// own security lists instead of ours
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Configuring security lists and rules...")
+
+	ui.Say("Configuring security lists and rules to enable SSH access...")
+
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 
-	secListName := fmt.Sprintf("/Compute-%s/%s/Packer_SSH_Allow",
-		config.IdentityDomain, config.Username)
+	secListName := fmt.Sprintf("/Compute-%s/%s/Packer_SSH_Allow_%s",
+		config.IdentityDomain, config.Username, config.ImageName)
 	secListClient := client.SecurityLists()
 	secListInput := compute.CreateSecurityListInput{
 		Description: "Packer-generated security list to give packer ssh access",
@@ -30,41 +30,64 @@ func (s *stepSecurity) Run(state multistep.StateBag) multistep.StepAction {
 	_, err := secListClient.CreateSecurityList(&secListInput)
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
-			err = fmt.Errorf("Error creating security security IP List to"+
+			err = fmt.Errorf("Error creating security List to"+
 				" allow Packer to connect to Oracle instance via SSH: %s", err)
 			ui.Error(err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 	}
-	secListURI := fmt.Sprintf("%s/seclist/Compute-%s/%s/Packer_SSH_Allow",
-		config.APIEndpoint, config.IdentityDomain, config.Username)
-	log.Printf("Megan secListURI is %s", secListURI)
 	// DOCS NOTE: user must have Compute_Operations role
 	// Create security rule that allows Packer to connect via SSH
-
 	secRulesClient := client.SecRules()
 	secRulesInput := compute.CreateSecRuleInput{
 		Action:          "PERMIT",
 		Application:     "/oracle/public/ssh",
 		Description:     "Packer-generated security rule to allow ssh",
 		DestinationList: fmt.Sprintf("seclist:%s", secListName),
-		Name:            "Packer-allow-SSH-Rule",
-		SourceList:      "seciplist:/oracle/public/public-internet",
+		Name:            fmt.Sprintf("Packer-allow-SSH-Rule_%s", config.ImageName),
+		SourceList:      config.SSHSourceList,
 	}
 
+	secRuleName := fmt.Sprintf("/Compute-%s/%s/Packer-allow-SSH-Rule_%s",
+		config.IdentityDomain, config.Username, config.ImageName)
 	_, err = secRulesClient.CreateSecRule(&secRulesInput)
 	if err != nil {
-		err = fmt.Errorf("Error creating security rule to allow Packer to connect to Oracle instance via SSH: %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
+		log.Printf(err.Error())
+		if !strings.Contains(err.Error(), "already exists") {
+			err = fmt.Errorf("Error creating security rule to"+
+				" allow Packer to connect to Oracle instance via SSH: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 	}
-
+	state.Put("security_rule_name", secRuleName)
 	state.Put("security_list", secListName)
 	return multistep.ActionContinue
 }
 
 func (s *stepSecurity) Cleanup(state multistep.StateBag) {
-	// Nothing to do
+	client := state.Get("client").(*compute.ComputeClient)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Deleting the packer-generated security rules and lists...")
+	// delete security list that Packer generated
+	secListName := state.Get("security_list").(string)
+	secListClient := client.SecurityLists()
+	input := compute.DeleteSecurityListInput{Name: secListName}
+	err := secListClient.DeleteSecurityList(&input)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Error deleting the packer-generated security list %s; "+
+			"please delete manually. (error : %s)", secListName, err.Error()))
+	}
+	// delete security rules that Packer generated
+	secRuleName := state.Get("security_rule_name").(string)
+	secRulesClient := client.SecRules()
+	ruleInput := compute.DeleteSecRuleInput{Name: secRuleName}
+	err = secRulesClient.DeleteSecRule(&ruleInput)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Error deleting the packer-generated security rule %s; "+
+			"please delete manually. (error: %s)", secRuleName, err.Error()))
+	}
+	return
 }
