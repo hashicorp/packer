@@ -1,10 +1,9 @@
 package multistep
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
-
-	"golang.org/x/net/context"
 )
 
 type runState int32
