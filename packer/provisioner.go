@@ -26,11 +26,18 @@ type Provisioner interface {
 	Cancel()
 }
 
+// A HookedProvisioner represents a provisioner and information describing it
+type HookedProvisioner struct {
+	Provisioner Provisioner
+	Config      interface{}
+	TypeName    string
+}
+
 // A Hook implementation that runs the given provisioners.
 type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
-	Provisioners []Provisioner
+	Provisioners []*HookedProvisioner
 
 	lock               sync.Mutex
 	runningProvisioner Provisioner
@@ -59,10 +66,15 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 
 	for _, p := range h.Provisioners {
 		h.lock.Lock()
-		h.runningProvisioner = p
+		h.runningProvisioner = p.Provisioner
 		h.lock.Unlock()
 
-		if err := p.Provision(ui, comm); err != nil {
+		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
+
+		err := p.Provisioner.Provision(ui, comm)
+
+		ts.End(err)
+		if err != nil {
 			return err
 		}
 	}

@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type ExportConfig struct {

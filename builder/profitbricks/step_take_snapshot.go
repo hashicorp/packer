@@ -2,12 +2,11 @@ package profitbricks
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/profitbricks/profitbricks-sdk-go"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepTakeSnapshot struct{}
@@ -23,13 +22,16 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dcId := state.Get("datacenter_id").(string)
 	volumeId := state.Get("volume_id").(string)
 
-	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName)
+	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName, "")
 
 	state.Put("snapshotname", c.SnapshotName)
 
 	if snapshot.StatusCode > 299 {
 		var restError RestError
-		json.Unmarshal([]byte(snapshot.Response), &restError)
+		if err := json.Unmarshal([]byte(snapshot.Response), &restError); err != nil {
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 		if len(restError.Messages) > 0 {
 			ui.Error(restError.Messages[0].Message)
 		} else {
@@ -45,13 +47,6 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *stepTakeSnapshot) Cleanup(state multistep.StateBag) {
-}
-
-func (d *stepTakeSnapshot) checkForErrors(instance profitbricks.Resp) error {
-	if instance.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error occured %s", string(instance.Body)))
-	}
-	return nil
 }
 
 func (d *stepTakeSnapshot) waitTillProvisioned(path string, config Config) {

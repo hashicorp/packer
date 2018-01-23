@@ -1,22 +1,25 @@
 ---
 description: |
-    The shell-local Packer post processor enables users to do some post processing after artifacts have been built.
+    The shell-local Packer post processor enables users to do some post processing
+    after artifacts have been built.
 layout: docs
-page_title: Local Shell Post Processor
-...
+page_title: 'Local Shell - Post-Processors'
+sidebar_current: 'docs-post-processors-shell-local'
+---
 
 # Local Shell Post Processor
 
 Type: `shell-local`
 
-The local shell post processor executes scripts locally during the post processing stage. Shell local provides an easy
-way to automate executing some task with the packer outputs.
+The local shell post processor executes scripts locally during the post
+processing stage. Shell local provides a convenient way to automate executing
+some task with the packer outputs.
 
 ## Basic example
 
 The example below is fully functional.
 
-``` {.javascript}
+``` json
 {
   "type": "shell-local",
   "inline": ["echo foo"]
@@ -55,7 +58,7 @@ Optional parameters:
 
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
-    The value of this is treated as [configuration template](/docs/templates/configuration-templates.html).
+    The value of this is treated as [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
     to run, `Vars`, which is the list of `environment_vars`, if configured.
 
@@ -96,7 +99,7 @@ you much time in the process.
 
 ### Once Per Builder
 
-The `shell-local` script(s) you pass are run once per builder.  That means that
+The `shell-local` script(s) you pass are run once per builder. That means that
 if you have an `amazon-ebs` builder and a `docker` builder, your script will be
 run twice. If you have 3 builders, it will run 3 times, once for each builder.
 
@@ -109,30 +112,30 @@ of files produced by a `builder` to a json file after each `builder` is run.
 For example, if you wanted to package a file from the file builder into
 a tarball, you might wright this:
 
-```json
+``` json
 {
-    "builders": [
-        {
-            "content": "Lorem ipsum dolor sit amet",
-            "target": "dummy_artifact",
-            "type": "file"
-        }
-    ],
-    "post-processors": [
-        [
-            {
-                "output": "manifest.json",
-                "strip_path": true,
-                "type": "manifest"
-            },
-            {
-                "inline": [
-                    "jq \".builds[].files[].name\" manifest.json | xargs tar cfz artifacts.tgz"
-                ],
-                "type": "shell-local"
-            }
-        ]
+  "builders": [
+    {
+      "content": "Lorem ipsum dolor sit amet",
+      "target": "dummy_artifact",
+      "type": "file"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "output": "manifest.json",
+        "strip_path": true,
+        "type": "manifest"
+      },
+      {
+        "inline": [
+          "jq \".builds[].files[].name\" manifest.json | xargs tar cfz artifacts.tgz"
+        ],
+        "type": "shell-local"
+      }
     ]
+  ]
 }
 ```
 
@@ -146,4 +149,3 @@ are cleaned up.
 
 For a shell script, that means the script **must** exit with a zero code. You
 *must* be extra careful to `exit 0` when necessary.
-

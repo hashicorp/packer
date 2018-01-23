@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // RunConfig contains configuration for running an instance from a source
@@ -59,9 +59,9 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.SSHKeyPairName != "" {
 		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
-			errs = append(errs, errors.New("A private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
+			errs = append(errs, errors.New("A ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
 		} else if c.Comm.SSHPrivateKey == "" && !c.Comm.SSHAgentAuth {
-			errs = append(errs, errors.New("A private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
+			errs = append(errs, errors.New("A ssh_private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
 		}
 	}
 

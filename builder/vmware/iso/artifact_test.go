@@ -1,8 +1,9 @@
 package iso
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_Impl(t *testing.T) {

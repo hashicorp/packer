@@ -147,14 +147,13 @@ type renderWalker struct {
 	// If it is nil, it means the top wasn't replaced.
 	Top interface{}
 
-	key         []string
-	lastValue   reflect.Value
-	loc         reflectwalk.Location
-	cs          []reflect.Value
-	csKey       []reflect.Value
-	csData      interface{}
-	sliceIndex  int
-	unknownKeys []string
+	key        []string
+	lastValue  reflect.Value
+	loc        reflectwalk.Location
+	cs         []reflect.Value
+	csKey      []reflect.Value
+	csData     interface{}
+	sliceIndex int
 }
 
 // renderWalkerFunc is the callback called by interpolationWalk.
@@ -280,35 +279,4 @@ func (w *renderWalker) Primitive(v reflect.Value) error {
 	}
 
 	return nil
-}
-
-func (w *renderWalker) removeCurrent() {
-	// Append the key to the unknown keys
-	w.unknownKeys = append(w.unknownKeys, strings.Join(w.key, "."))
-
-	for i := 1; i <= len(w.cs); i++ {
-		c := w.cs[len(w.cs)-i]
-		switch c.Kind() {
-		case reflect.Map:
-			// Zero value so that we delete the map key
-			var val reflect.Value
-
-			// Get the key and delete it
-			k := w.csData.(reflect.Value)
-			c.SetMapIndex(k, val)
-			return
-		}
-	}
-
-	panic("No container found for removeCurrent")
-}
-
-func (w *renderWalker) replaceCurrent(v reflect.Value) {
-	c := w.cs[len(w.cs)-2]
-	switch c.Kind() {
-	case reflect.Map:
-		// Get the key and delete it
-		k := w.csKey[len(w.csKey)-1]
-		c.SetMapIndex(k, v)
-	}
 }

@@ -6,8 +6,11 @@ import (
 	"log"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+
+	packer "github.com/hashicorp/packer/common"
 )
 
 type VBox42Driver struct {
@@ -15,7 +18,7 @@ type VBox42Driver struct {
 	VBoxManagePath string
 }
 
-func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
+func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcount int) error {
 	version, err := d.Version()
 	if err != nil {
 		return err
@@ -30,7 +33,7 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string) error {
 		"storagectl", vmName,
 		"--name", name,
 		"--add", "sata",
-		portCountArg, "1",
+		portCountArg, strconv.Itoa(portcount),
 	}
 
 	return d.VBoxManage(command...)
@@ -49,7 +52,15 @@ func (d *VBox42Driver) CreateSCSIController(vmName string, name string) error {
 }
 
 func (d *VBox42Driver) Delete(name string) error {
-	return d.VBoxManage("unregistervm", name, "--delete")
+	return packer.Retry(1, 1, 5, func(i uint) (bool, error) {
+		if err := d.VBoxManage("unregistervm", name, "--delete"); err != nil {
+			if i+1 == 5 {
+				return false, err
+			}
+			return false, nil
+		}
+		return true, nil
+	})
 }
 
 func (d *VBox42Driver) Iso() (string, error) {

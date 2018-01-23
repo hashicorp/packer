@@ -16,9 +16,9 @@ import (
 
 	"google.golang.org/api/compute/v1"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/version"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -97,11 +97,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description: description,
 		Name:        name,
 		Family:      family,
+		Labels:      image_labels,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
@@ -169,7 +170,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
@@ -297,33 +298,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 	// TODO(mitchellh): deprecation warnings
 
-	// Get the network
-	if c.NetworkProjectId == "" {
-		c.NetworkProjectId = d.projectId
-	}
-	d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-	network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
+	networkId, subnetworkId, err := getNetworking(c)
 	if err != nil {
 		return nil, err
-	}
-
-	// Subnetwork
-	// Validate Subnetwork config now that we have some info about the network
-	if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
-		// Network appears to be in "custom" mode, so a subnetwork is required
-		if c.Subnetwork == "" {
-			return nil, fmt.Errorf("a subnetwork must be specified")
-		}
-	}
-	// Get the subnetwork
-	subnetworkSelfLink := ""
-	if c.Subnetwork != "" {
-		d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-		subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
-		if err != nil {
-			return nil, err
-		}
-		subnetworkSelfLink = subnetwork.SelfLink
 	}
 
 	var accessconfig *compute.AccessConfig
@@ -356,6 +333,15 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		})
 	}
 
+	var guestAccelerators []*compute.AcceleratorConfig
+	if c.AcceleratorCount > 0 {
+		ac := &compute.AcceleratorConfig{
+			AcceleratorCount: c.AcceleratorCount,
+			AcceleratorType:  c.AcceleratorType,
+		}
+		guestAccelerators = append(guestAccelerators, ac)
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -373,7 +359,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				},
 			},
 		},
-		MachineType: machineType.SelfLink,
+		GuestAccelerators: guestAccelerators,
+		Labels:            c.Labels,
+		MachineType:       machineType.SelfLink,
 		Metadata: &compute.Metadata{
 			Items: metadata,
 		},
@@ -381,8 +369,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
-				Network:       network.SelfLink,
-				Subnetwork:    subnetworkSelfLink,
+				Network:       networkId,
+				Subnetwork:    subnetworkId,
 			},
 		},
 		Scheduling: &compute.Scheduling{
@@ -391,7 +379,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
 			{
-				Email:  c.ServiceAccountEmail,
+				Email:  "default",
 				Scopes: c.Scopes,
 			},
 		},
@@ -575,14 +563,13 @@ func (d *driverGCE) refreshZoneOp(zone string, op *compute.Operation) stateRefre
 	}
 }
 
-// stateRefreshFunc is used to refresh the state of a thing and is
 // used in conjunction with waitForState.
 type stateRefreshFunc func() (string, error)
 
 // waitForState will spin in a loop forever waiting for state to
 // reach a certain target.
 func waitForState(errCh chan<- error, target string, refresh stateRefreshFunc) error {
-	err := common.Retry(2, 2, 0, func() (bool, error) {
+	err := common.Retry(2, 2, 0, func(_ uint) (bool, error) {
 		state, err := refresh()
 		if err != nil {
 			return false, err

@@ -4,8 +4,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/version"
 )
 
 func TestFuncBuildName(t *testing.T) {
@@ -255,5 +258,23 @@ func TestFuncUser(t *testing.T) {
 		if result != tc.Output {
 			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
 		}
+	}
+}
+
+func TestFuncPackerVersion(t *testing.T) {
+	template := `{{packer_version}}`
+
+	ctx := &Context{}
+	i := &I{Value: template}
+
+	result, err := i.Render(ctx)
+	if err != nil {
+		t.Fatalf("Input: %s\n\nerr: %s", template, err)
+	}
+
+	// Only match the X.Y.Z portion of the whole version string.
+	if !strings.HasPrefix(result, version.Version) {
+		t.Fatalf("Expected input to include: %s\n\nGot: %s",
+			version.Version, result)
 	}
 }

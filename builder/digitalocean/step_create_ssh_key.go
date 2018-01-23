@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -11,9 +12,9 @@ import (
 	"runtime"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -52,7 +53,7 @@ func (s *stepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
-	key, _, err := client.Keys.Create(&godo.KeyCreateRequest{
+	key, _, err := client.Keys.Create(context.TODO(), &godo.KeyCreateRequest{
 		Name:      name,
 		PublicKey: pub_sshformat,
 	})
@@ -109,7 +110,7 @@ func (s *stepCreateSSHKey) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Deleting temporary ssh key...")
-	_, err := client.Keys.DeleteByID(s.keyId)
+	_, err := client.Keys.DeleteByID(context.TODO(), s.keyId)
 	if err != nil {
 		log.Printf("Error cleaning up ssh key: %s", err)
 		ui.Error(fmt.Sprintf(

@@ -1,11 +1,12 @@
 ---
 description: |
-    This VirtualBox Packer builder is able to create VirtualBox virtual machines and
-    export them in the OVF format, starting from an existing OVF/OVA (exported
+    This VirtualBox Packer builder is able to create VirtualBox virtual machines
+    and export them in the OVF format, starting from an existing OVF/OVA (exported
     virtual machine image).
 layout: docs
-page_title: 'VirtualBox Builder (from an OVF/OVA)'
-...
+page_title: 'VirtualBox OVF/OVA - Builders'
+sidebar_current: 'docs-builders-virtualbox-ovf'
+---
 
 # VirtualBox Builder (from an OVF/OVA)
 
@@ -35,7 +36,7 @@ build.
 Here is a basic example. This example is functional if you have an OVF matching
 the settings here.
 
-``` {.javascript}
+``` json
 {
   "type": "virtualbox-ovf",
   "source_path": "source.ovf",
@@ -63,9 +64,6 @@ builder.
 
 -   `source_path` (string) - The path to an OVF or OVA file that acts as the
     source of this build. It can also be a URL.
-
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
 
 ### Optional:
 
@@ -97,7 +95,7 @@ builder.
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
-    ``` {.json}
+    ``` json
     {
       "type": "virtualbox-ovf",
       "export_opts":
@@ -164,7 +162,7 @@ builder.
     where the VirtualBox guest additions ISO will be uploaded. By default this
     is "VBoxGuestAdditions.iso" which should upload into the login directory of
     the user. This is a [configuration
-    template](/docs/templates/configuration-templates.html) where the `Version`
+    template](/docs/templates/engine.html) where the `Version`
     variable is replaced with the VirtualBox version.
 
 -   `guest_additions_sha256` (string) - The SHA256 checksum of the guest
@@ -189,7 +187,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -203,6 +201,9 @@ builder.
 -   `import_opts` (string) - Additional options to pass to the
     `VBoxManage import`. This can be useful for passing "keepallmacs" or
     "keepnatmacs" options for existing ovf images.
+
+-   `keep_registered` (boolean) - Set this to `true` if you would like to keep
+    the VM registered with virtualbox. Defaults to `false`.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
@@ -233,7 +234,7 @@ builder.
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+-   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
@@ -254,7 +255,7 @@ builder.
     defined itself as an array of strings, where each string represents a single
     argument on the command-line to `VBoxManage` (but excluding
     `VBoxManage` itself). Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use
     `VBoxManage` are below.
 
@@ -277,7 +278,7 @@ builder.
 -   `vrdp_bind_address` (string / IP address) - The IP address that should be
     binded to for VRDP. By default packer will use 127.0.0.1 for this.
 
--   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+-   `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
@@ -344,7 +345,7 @@ by the proper key:
     for the UI to update before typing more.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -355,7 +356,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -368,6 +369,9 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## Guest Additions
 
@@ -396,7 +400,7 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
-``` {.javascript}
+``` json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
@@ -411,6 +415,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.

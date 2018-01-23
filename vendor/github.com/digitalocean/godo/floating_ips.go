@@ -1,6 +1,9 @@
 package godo
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 const floatingBasePath = "v2/floating_ips"
 
@@ -8,10 +11,10 @@ const floatingBasePath = "v2/floating_ips"
 // endpoints of the Digital Ocean API.
 // See: https://developers.digitalocean.com/documentation/v2#floating-ips
 type FloatingIPsService interface {
-	List(*ListOptions) ([]FloatingIP, *Response, error)
-	Get(string) (*FloatingIP, *Response, error)
-	Create(*FloatingIPCreateRequest) (*FloatingIP, *Response, error)
-	Delete(string) (*Response, error)
+	List(context.Context, *ListOptions) ([]FloatingIP, *Response, error)
+	Get(context.Context, string) (*FloatingIP, *Response, error)
+	Create(context.Context, *FloatingIPCreateRequest) (*FloatingIP, *Response, error)
+	Delete(context.Context, string) (*Response, error)
 }
 
 // FloatingIPsServiceOp handles communication with the floating IPs related methods of the
@@ -52,14 +55,14 @@ type FloatingIPCreateRequest struct {
 }
 
 // List all floating IPs.
-func (f *FloatingIPsServiceOp) List(opt *ListOptions) ([]FloatingIP, *Response, error) {
+func (f *FloatingIPsServiceOp) List(ctx context.Context, opt *ListOptions) ([]FloatingIP, *Response, error) {
 	path := floatingBasePath
 	path, err := addOptions(path, opt)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req, err := f.client.NewRequest("GET", path, nil)
+	req, err := f.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -77,10 +80,10 @@ func (f *FloatingIPsServiceOp) List(opt *ListOptions) ([]FloatingIP, *Response, 
 }
 
 // Get an individual floating IP.
-func (f *FloatingIPsServiceOp) Get(ip string) (*FloatingIP, *Response, error) {
+func (f *FloatingIPsServiceOp) Get(ctx context.Context, ip string) (*FloatingIP, *Response, error) {
 	path := fmt.Sprintf("%s/%s", floatingBasePath, ip)
 
-	req, err := f.client.NewRequest("GET", path, nil)
+	req, err := f.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -96,10 +99,10 @@ func (f *FloatingIPsServiceOp) Get(ip string) (*FloatingIP, *Response, error) {
 
 // Create a floating IP. If the DropletID field of the request is not empty,
 // the floating IP will also be assigned to the droplet.
-func (f *FloatingIPsServiceOp) Create(createRequest *FloatingIPCreateRequest) (*FloatingIP, *Response, error) {
+func (f *FloatingIPsServiceOp) Create(ctx context.Context, createRequest *FloatingIPCreateRequest) (*FloatingIP, *Response, error) {
 	path := floatingBasePath
 
-	req, err := f.client.NewRequest("POST", path, createRequest)
+	req, err := f.client.NewRequest(ctx, "POST", path, createRequest)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -117,10 +120,10 @@ func (f *FloatingIPsServiceOp) Create(createRequest *FloatingIPCreateRequest) (*
 }
 
 // Delete a floating IP.
-func (f *FloatingIPsServiceOp) Delete(ip string) (*Response, error) {
+func (f *FloatingIPsServiceOp) Delete(ctx context.Context, ip string) (*Response, error) {
 	path := fmt.Sprintf("%s/%s", floatingBasePath, ip)
 
-	req, err := f.client.NewRequest("DELETE", path, nil)
+	req, err := f.client.NewRequest(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
 	}

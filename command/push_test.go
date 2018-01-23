@@ -208,6 +208,7 @@ func TestPush_vars(t *testing.T) {
 		"-var", "one=two",
 		"-var-file", filepath.Join(testFixture("push-vars"), "vars.json"),
 		"-var", "overridden=yes",
+		"-sensitive", "super,secret",
 		filepath.Join(testFixture("push-vars"), "template.json"),
 	}
 	if code := c.Run(args); code != 0 {
@@ -224,9 +225,16 @@ func TestPush_vars(t *testing.T) {
 		"null":       "",
 		"one":        "two",
 		"overridden": "yes",
+		"super":      "this should be secret",
+		"secret":     "this one too",
 	}
 	if !reflect.DeepEqual(actualOpts.Vars, expected) {
 		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.Vars, expected)
+	}
+
+	expected_sensitive := []string{"super", "secret"}
+	if !reflect.DeepEqual(actualOpts.SensitiveVars, expected_sensitive) {
+		t.Fatalf("bad vars: got %#v\n expected %#v\n", actualOpts.SensitiveVars, expected_sensitive)
 	}
 }
 

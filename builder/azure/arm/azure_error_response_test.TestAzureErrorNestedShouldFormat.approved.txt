@@ -1,0 +1,4 @@
+ERROR: -> DeploymentFailed : At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-debug for usage details.
+ERROR:   -> BadRequest
+ERROR:   -> InvalidRequestFormat : Cannot parse the request.
+ERROR:     -> InvalidJson : Error converting value "playground" to type 'Microsoft.WindowsAzure.Networking.Nrp.Frontend.Contract.Csm.Public.IpAllocationMethod'. Path 'properties.publicIPAllocationMethod', line 1, position 130.

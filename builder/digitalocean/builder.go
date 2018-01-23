@@ -4,15 +4,16 @@
 package digitalocean
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
 	"golang.org/x/oauth2"
 )
 
@@ -44,6 +45,28 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			return nil, fmt.Errorf("DigitalOcean: Invalid API URL, %s.", err)
 		}
 		client.BaseURL = u
+	}
+
+	if len(b.config.SnapshotRegions) > 0 {
+		opt := &godo.ListOptions{
+			Page:    1,
+			PerPage: 200,
+		}
+		regions, _, err := client.Regions.List(context.TODO(), opt)
+		if err != nil {
+			return nil, fmt.Errorf("DigitalOcean: Unable to get regions, %s", err)
+		}
+
+		validRegions := make(map[string]struct{})
+		for _, val := range regions {
+			validRegions[val.Slug] = struct{}{}
+		}
+
+		for _, region := range append(b.config.SnapshotRegions, b.config.Region) {
+			if _, ok := validRegions[region]; !ok {
+				return nil, fmt.Errorf("DigitalOcean: Invalid region, %s", region)
+			}
+		}
 	}
 
 	// Set up the state
@@ -89,7 +112,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &Artifact{
 		snapshotName: state.Get("snapshot_name").(string),
 		snapshotId:   state.Get("snapshot_image_id").(int),
-		regionName:   state.Get("region").(string),
+		regionNames:  state.Get("regions").([]string),
 		client:       client,
 	}
 

@@ -1,16 +1,19 @@
 package triton
 
 import (
+	"context"
 	"errors"
-	"strings"
+	"net/http"
+	"sort"
 	"time"
 
-	"github.com/joyent/gosdc/cloudapi"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
+	"github.com/joyent/triton-go/compute"
+	terrors "github.com/joyent/triton-go/errors"
 )
 
 type driverTriton struct {
-	client *cloudapi.Client
+	client *Client
 	ui     packer.Ui
 }
 
@@ -26,31 +29,60 @@ func NewDriverTriton(ui packer.Ui, config Config) (Driver, error) {
 	}, nil
 }
 
-func (d *driverTriton) CreateImageFromMachine(machineId string, config Config) (string, error) {
-	opts := cloudapi.CreateImageFromMachineOpts{
-		Machine:     machineId,
-		Name:        config.ImageName,
-		Version:     config.ImageVersion,
-		Description: config.ImageDescription,
-		Homepage:    config.ImageHomepage,
-		EULA:        config.ImageEULA,
-		ACL:         config.ImageACL,
-		Tags:        config.ImageTags,
-	}
-
-	image, err := d.client.CreateImageFromMachine(opts)
+func (d *driverTriton) GetImage(config Config) (string, error) {
+	computeClient, _ := d.client.Compute()
+	images, err := computeClient.Images().List(context.Background(), &compute.ListImagesInput{
+		Name:    config.MachineImageFilters.Name,
+		OS:      config.MachineImageFilters.OS,
+		Version: config.MachineImageFilters.Version,
+		Public:  config.MachineImageFilters.Public,
+		Type:    config.MachineImageFilters.Type,
+		State:   config.MachineImageFilters.State,
+		Owner:   config.MachineImageFilters.Owner,
+	})
 	if err != nil {
 		return "", err
 	}
 
-	return image.Id, err
+	if len(images) == 0 {
+		return "", errors.New("No images found in your search. Please refine your search criteria")
+	}
+
+	if len(images) > 1 {
+		if !config.MachineImageFilters.MostRecent {
+			return "", errors.New("More than 1 machine image was found in your search. Please refine your search criteria")
+		} else {
+			return mostRecentImages(images).ID, nil
+		}
+	} else {
+		return images[0].ID, nil
+	}
+}
+
+func (d *driverTriton) CreateImageFromMachine(machineId string, config Config) (string, error) {
+	computeClient, _ := d.client.Compute()
+	image, err := computeClient.Images().CreateFromMachine(context.Background(), &compute.CreateImageFromMachineInput{
+		MachineID:   machineId,
+		Name:        config.ImageName,
+		Version:     config.ImageVersion,
+		Description: config.ImageDescription,
+		HomePage:    config.ImageHomepage,
+		EULA:        config.ImageEULA,
+		ACL:         config.ImageACL,
+		Tags:        config.ImageTags,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return image.ID, err
 }
 
 func (d *driverTriton) CreateMachine(config Config) (string, error) {
-	opts := cloudapi.CreateMachineOpts{
+	computeClient, _ := d.client.Compute()
+	input := &compute.CreateInstanceInput{
 		Package:         config.MachinePackage,
 		Image:           config.MachineImage,
-		Networks:        config.MachineNetworks,
 		Metadata:        config.MachineMetadata,
 		Tags:            config.MachineTags,
 		FirewallEnabled: config.MachineFirewallEnabled,
@@ -59,29 +91,42 @@ func (d *driverTriton) CreateMachine(config Config) (string, error) {
 	if config.MachineName == "" {
 		// If not supplied generate a name for the source VM: "packer-builder-[image_name]".
 		// The version is not used because it can contain characters invalid for a VM name.
-		opts.Name = "packer-builder-" + config.ImageName
+		input.Name = "packer-builder-" + config.ImageName
 	} else {
-		opts.Name = config.MachineName
+		input.Name = config.MachineName
 	}
 
-	machine, err := d.client.CreateMachine(opts)
+	if len(config.MachineNetworks) > 0 {
+		input.Networks = config.MachineNetworks
+	}
+
+	machine, err := computeClient.Instances().Create(context.Background(), input)
 	if err != nil {
 		return "", err
 	}
 
-	return machine.Id, nil
+	return machine.ID, nil
 }
 
 func (d *driverTriton) DeleteImage(imageId string) error {
-	return d.client.DeleteImage(imageId)
+	computeClient, _ := d.client.Compute()
+	return computeClient.Images().Delete(context.Background(), &compute.DeleteImageInput{
+		ImageID: imageId,
+	})
 }
 
 func (d *driverTriton) DeleteMachine(machineId string) error {
-	return d.client.DeleteMachine(machineId)
+	computeClient, _ := d.client.Compute()
+	return computeClient.Instances().Delete(context.Background(), &compute.DeleteInstanceInput{
+		ID: machineId,
+	})
 }
 
-func (d *driverTriton) GetMachine(machineId string) (string, error) {
-	machine, err := d.client.GetMachine(machineId)
+func (d *driverTriton) GetMachineIP(machineId string) (string, error) {
+	computeClient, _ := d.client.Compute()
+	machine, err := computeClient.Instances().Get(context.Background(), &compute.GetInstanceInput{
+		ID: machineId,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +135,10 @@ func (d *driverTriton) GetMachine(machineId string) (string, error) {
 }
 
 func (d *driverTriton) StopMachine(machineId string) error {
-	return d.client.StopMachine(machineId)
+	computeClient, _ := d.client.Compute()
+	return computeClient.Instances().Stop(context.Background(), &compute.StopInstanceInput{
+		InstanceID: machineId,
+	})
 }
 
 // waitForMachineState uses the supplied client to wait for the state of
@@ -101,7 +149,10 @@ func (d *driverTriton) StopMachine(machineId string) error {
 func (d *driverTriton) WaitForMachineState(machineId string, state string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.GetMachine(machineId)
+			computeClient, _ := d.client.Compute()
+			machine, err := computeClient.Instances().Get(context.Background(), &compute.GetInstanceInput{
+				ID: machineId,
+			})
 			if machine == nil {
 				return false, err
 			}
@@ -118,16 +169,17 @@ func (d *driverTriton) WaitForMachineState(machineId string, state string, timeo
 func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			machine, err := d.client.GetMachine(machineId)
+			computeClient, _ := d.client.Compute()
+			_, err := computeClient.Instances().Get(context.Background(), &compute.GetInstanceInput{
+				ID: machineId,
+			})
 			if err != nil {
-				//TODO(jen20): is there a better way here than searching strings?
-				if strings.Contains(err.Error(), "410") || strings.Contains(err.Error(), "404") {
+				// Return true only when we receive a 410 (Gone) response.  A 404
+				// indicates that the machine is being deleted whereas a 410 indicates
+				// that this process has completed.
+				if terrors.IsSpecificStatusCode(err, http.StatusGone) {
 					return true, nil
 				}
-			}
-
-			if machine != nil {
-				return false, nil
 			}
 
 			return false, err
@@ -140,11 +192,14 @@ func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Dur
 func (d *driverTriton) WaitForImageCreation(imageId string, timeout time.Duration) error {
 	return waitFor(
 		func() (bool, error) {
-			image, err := d.client.GetImage(imageId)
+			computeClient, _ := d.client.Compute()
+			image, err := computeClient.Images().Get(context.Background(), &compute.GetImageInput{
+				ImageID: imageId,
+			})
 			if image == nil {
 				return false, err
 			}
-			return image.OS != "", err
+			return image.State == "active", err
 		},
 		3*time.Second,
 		timeout,
@@ -168,4 +223,30 @@ func waitFor(f func() (bool, error), every, timeout time.Duration) error {
 	}
 
 	return errors.New("Timed out while waiting for resource change")
+}
+
+func mostRecentImages(images []*compute.Image) *compute.Image {
+	return sortImages(images)[0]
+}
+
+type imageSort []*compute.Image
+
+func sortImages(images []*compute.Image) []*compute.Image {
+	sortedImages := images
+	sort.Sort(sort.Reverse(imageSort(sortedImages)))
+	return sortedImages
+}
+
+func (a imageSort) Len() int {
+	return len(a)
+}
+
+func (a imageSort) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a imageSort) Less(i, j int) bool {
+	itime := a[i].PublishedAt
+	jtime := a[j].PublishedAt
+	return itime.Unix() < jtime.Unix()
 }

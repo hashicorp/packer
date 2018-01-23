@@ -2,9 +2,10 @@ package vagrantcloud
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 type stepReleaseVersion struct {
@@ -30,7 +31,10 @@ func (s *stepReleaseVersion) Run(state multistep.StateBag) multistep.StepAction 
 
 	if err != nil || (resp.StatusCode != 200) {
 		cloudErrors := &VagrantCloudErrors{}
-		err = decodeBody(resp, cloudErrors)
+		if err := decodeBody(resp, cloudErrors); err != nil {
+			state.Put("error", fmt.Errorf("Error parsing provider response: %s", err))
+			return multistep.ActionHalt
+		}
 		if strings.Contains(cloudErrors.FormatErrors(), "already been released") {
 			ui.Message("Not releasing version, already released")
 			return multistep.ActionContinue

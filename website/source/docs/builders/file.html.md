@@ -1,11 +1,12 @@
 ---
 description: |
-    The `file` Packer builder is not really a builder, it just creates an
-    artifact from a file. It can be used to debug post-processors without
-    incurring high wait times. It does not run any provisioners.
+    The file Packer builder is not really a builder, it just creates an artifact
+    from a file. It can be used to debug post-processors without incurring high
+    wait times. It does not run any provisioners.
 layout: docs
-page_title: File Builder
-...
+page_title: 'File - Builders'
+sidebar_current: 'docs-builders-file'
+---
 
 # File Builder
 
@@ -20,11 +21,11 @@ wait times. It does not run any provisioners.
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will connect to the specified host via ssh.
 
-``` {.javascript}
+``` json
 {
-  "type":         "file",
-  "content":      "Lorem ipsum dolor sit amet",
-  "target":       "dummy_artifact"
+  "type": "file",
+  "content": "Lorem ipsum dolor sit amet",
+  "target": "dummy_artifact"
 }
 ```
 

@@ -1,66 +1,62 @@
 ---
-page_title: "Downloads"
+layout: "downloads"
+page_title: "Download Packer"
+sidebar_current: "downloads-packer"
+description: |-
+  Download Packer
 ---
 
-<header class="dark-background">
-  <div class="container header text-center">
-    <h1 class="text-green">Downloads</h1>
-    <span class="text-green">Latest version: <%= latest_version %></span>
-  </div>
-</header>
+<h1>Download Packer</h1>
+
 <section class="downloads">
-  <div class="container">
-    <div class="description row">
-      <div class="col-md-8 col-md-offset-2">
-        <p>
-          Below are the available downloads for the latest version of Packer
-          (<%= latest_version %>). Please download the proper package for your
-          operating system and architecture.
-        </p>
-        <p>
-          You can find the
-          <a href="https://releases.hashicorp.com/packer/<%= latest_version %>/packer_<%= latest_version %>_SHA256SUMS">
-            SHA256 checksums for Packer <%= latest_version %>
-          </a>
-          online and you can
-          <a href="https://releases.hashicorp.com/packer/<%= latest_version %>/packer_<%= latest_version %>_SHA256SUMS.sig">
-            verify the checksums signature file
-          </a>
-          which has been signed using <a href="https://www.hashicorp.com/security.html" target="_blank" rel="nofollow noopener noreferrer">HashiCorp's GPG key</a>.
-          You can also <a href="https://releases.hashicorp.com/packer/" target="_blank" rel="nofollow noopener noreferrer">download older versions of Packer</a> from the releases service.
-        </p>
-        <p>To see what has changed in each version, please refer to the <a href="https://github.com/mitchellh/packer/blob/master/CHANGELOG.md">CHANGELOG</a>.</p>
-        <p>
-          <b>Note:</b> Packer now ships as a single binary. When upgrading from
-          Packer &lt; 0.9.0, you will need to remove the old <code>packer-*</code>
-          plugins from your installation path.
-        </p>
-      </div>
+  <div class="description row">
+    <div class="col-md-12">
+      <p>
+        Below are the available downloads for the latest version of Packer
+        (<%= latest_version %>). Please download the proper package for your
+        operating system and architecture.
+      </p>
+      <p>
+        You can find the
+        <a href="https://releases.hashicorp.com/packer/<%= latest_version %>/packer_<%= latest_version %>_SHA256SUMS">
+          SHA256 checksums for Packer <%= latest_version %>
+        </a>
+        online and you can
+        <a href="https://releases.hashicorp.com/packer/<%= latest_version %>/packer_<%= latest_version %>_SHA256SUMS.sig">
+          verify the checksums signature file
+        </a>
+        which has been signed using <a href="https://hashicorp.com/security.html" target="_blank" rel="nofollow noopener noreferrer">HashiCorp's GPG key</a>.
+        You can also <a href="https://releases.hashicorp.com/packer/" target="_blank" rel="nofollow noopener noreferrer">download other versions of Packer</a> from the releases service.
+      </p>
+      <p>
+      Check out the <a href="https://github.com/hashicorp/packer/blob/v<%= latest_version %>/CHANGELOG.md">v<%= latest_version %> CHANGELOG</a> for information on the latest release.
+      </p>
     </div>
-    <% product_versions.each do |os, arches| %>
-      <% next if os == "web" %>
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2 download">
-          <div class="icon pull-left"><%= system_icon(os) %></div>
-          <div class="details">
-            <h2 class="os-name"><%= pretty_os(os) %></h2>
-            <ul>
-              <% arches.each do |arch, url| %>
-                <li><a href="<%= url %>"><%= pretty_arch(arch) %></a></li>
-              <% end %>
-            </ul>
-            <div class="clearfix"></div>
-          </div>
+  </div>
+
+  <% product_versions.each do |os, arches| %>
+    <% next if os == "web" %>
+    <div class="row">
+      <div class="col-md-12 download">
+        <div class="icon pull-left"><%= system_icon(os) %></div>
+        <div class="details">
+          <h2 class="os-name"><%= pretty_os(os) %></h2>
+          <ul>
+            <% arches.each do |arch, url| %>
+              <li><a href="<%= url %>"><%= pretty_arch(arch) %></a></li>
+            <% end %>
+          </ul>
+          <div class="clearfix"></div>
         </div>
       </div>
-    <% end %>
+    </div>
+  <% end %>
 
-    <div class="row">
-      <div class="col-md-8 col-md-offset-2 poweredby">
-        <a href="https://www.fastly.com?utm_source=hashicorp" target="_blank" rel="nofollow noopener noreferrer">
-          <%= image_tag "fastly_logo.png" %>
-        </a>
-      </div>
+  <div class="row">
+    <div class="col-md-12 poweredby">
+      <a href="https://www.fastly.com?utm_source=hashicorp" target="_blank" rel="nofollow noopener noreferrer">
+        <%= inline_svg "fastly.svg", height: 50 %>
+      </a>
     </div>
   </div>
 </section>

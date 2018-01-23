@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // ISOConfig contains configuration for downloading ISO images.
@@ -136,7 +136,24 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 }
 
 func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
-	errNotFound := fmt.Errorf("No checksum for %q found at: %s", filepath.Base(c.ISOUrls[0]), c.ISOChecksumURL)
+	u, err := url.Parse(c.ISOUrls[0])
+	if err != nil {
+		return err
+	}
+
+	checksumurl, err := url.Parse(c.ISOChecksumURL)
+	if err != nil {
+		return err
+	}
+
+	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), u.Path)
+	if err != nil {
+		return err
+	}
+
+	filename := filepath.Base(u.Path)
+
+	errNotFound := fmt.Errorf("No checksum for %q or %q found at: %s", filename, relpath, c.ISOChecksumURL)
 	for {
 		line, err := rd.ReadString('\n')
 		if err != nil && line == "" {
@@ -148,7 +165,8 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		}
 		if strings.ToLower(parts[0]) == c.ISOChecksumType {
 			// BSD-style checksum
-			if parts[1] == fmt.Sprintf("(%s)", filepath.Base(c.ISOUrls[0])) {
+			if parts[1] == fmt.Sprintf("(%s)", filename) || parts[1] == fmt.Sprintf("(%s)", relpath) ||
+				parts[1] == fmt.Sprintf("(./%s)", relpath) {
 				c.ISOChecksum = parts[3]
 				return nil
 			}
@@ -158,7 +176,7 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 				// Binary mode
 				parts[1] = parts[1][1:]
 			}
-			if parts[1] == filepath.Base(c.ISOUrls[0]) {
+			if parts[1] == filename || parts[1] == relpath || parts[1] == "./"+relpath {
 				c.ISOChecksum = parts[0]
 				return nil
 			}

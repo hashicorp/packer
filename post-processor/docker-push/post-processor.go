@@ -3,20 +3,19 @@ package dockerpush
 import (
 	"fmt"
 
-	"github.com/mitchellh/packer/builder/docker"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/post-processor/docker-import"
-	"github.com/mitchellh/packer/post-processor/docker-tag"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/builder/docker"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/docker-import"
+	"github.com/hashicorp/packer/post-processor/docker-tag"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Login                  bool
-	LoginEmail             string `mapstructure:"login_email"`
 	LoginUsername          string `mapstructure:"login_username"`
 	LoginPassword          string `mapstructure:"login_password"`
 	LoginServer            string `mapstructure:"login_server"`
@@ -81,7 +80,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message("Logging in...")
 		err := driver.Login(
 			p.config.LoginServer,
-			p.config.LoginEmail,
 			p.config.LoginUsername,
 			p.config.LoginPassword)
 		if err != nil {

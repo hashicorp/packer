@@ -29,7 +29,6 @@ type MockDriver struct {
 	IPAddressErr    error
 
 	LoginCalled   bool
-	LoginEmail    string
 	LoginUsername string
 	LoginPassword string
 	LoginRepo     string
@@ -115,10 +114,9 @@ func (d *MockDriver) IPAddress(id string) (string, error) {
 	return d.IPAddressResult, d.IPAddressErr
 }
 
-func (d *MockDriver) Login(r, e, u, p string) error {
+func (d *MockDriver) Login(r, u, p string) error {
 	d.LoginCalled = true
 	d.LoginRepo = r
-	d.LoginEmail = e
 	d.LoginUsername = u
 	d.LoginPassword = p
 	return d.LoginErr

@@ -2,9 +2,10 @@ package ovf
 
 import (
 	"fmt"
+
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vboxcommon "github.com/mitchellh/packer/builder/virtualbox/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // This step imports an OVF VM into VirtualBox.
@@ -40,8 +41,16 @@ func (s *StepImport) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
-	ui.Say("Unregistering and deleting imported VM...")
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if (config.KeepRegistered) && (!cancelled && !halted) {
+		ui.Say("Keeping virtual machine registered with VirtualBox host (keep_registered = true)")
+		return
+	}
+
+	ui.Say("Deregistering and deleting imported VM...")
 	if err := driver.Delete(s.vmName); err != nil {
 		ui.Error(fmt.Sprintf("Error deleting VM: %s", err))
 	}

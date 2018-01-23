@@ -1,81 +1,78 @@
-//
-// Header
-// - Project Specific
-// - edits should be made here
-// --------------------------------------------------
-
 #header {
-  flex-direction: row;
-  background-color: $black;
-  .navbar-brand {
-    .logo{
-      width: 110px;
-      height: 42px;
-      line-height: 70px;
-      margin-top: 15px;
-      background: image-url('logo-header.svg') 0 0 no-repeat;
-      font-size: 0;
+  background: $header-background-color;
 
-      &:hover{
-        opacity: .6;
-      }
+  .navbar-toggle {
+    height: $header-height;
+    margin: 0;
+    padding-right: 15px;
+    border-radius: 0;
+
+    .icon-bar {
+      border: 1px solid $white;
+      border-radius: 0;
     }
+  }
 
-    .by-hashicorp{
-      &:hover{
-        svg{
-          .svg-bg-line{
-            opacity: .4;
-          }
+  .navbar-brand {
+    display: block;
+    margin: 0;
+    padding: 0;
+
+    a {
+      display: flex;
+      align-items: center;
+      height: $header-height;
+      line-height: $header-height;
+
+      svg.logo {
+        transition: opacity 0.15s ease-in-out;
+        @extend svg.logo.white;
+
+        &:hover, &:focus, &:active {
+          opacity: 0.6;
+          outline: 0;
+          text-decoration: none;
         }
       }
     }
   }
 
-  .buttons{
-    margin-top: 2px; //baseline everything
+  ul.nav {
+    li {
+      a {
+        color: $header-link-color;
+        font-size: $header-font-size;
+        font-family: $font-family-open-sans;
+        font-weight: $font-weight-bold;
+        height: $header-height;
+        line-height: $header-height;
+        padding: 0 10px;
+        margin: 0;
+        text-decoration: none;
 
-    .navigation-links{
-        float: right;
-    }
-  }
+        &:hover, &:focus, &:active {
+          background-color: transparent;
+          color: $header-link-color-hover;
+          outline: 0;
 
-  .main-links,
-  .external-links {
-    li > a {
-      @include project-a-style();
-    }
-  }
+          svg {
+            fill: $header-link-color-hover;
+          }
+        }
 
-  .main-links {
-    li > a {
-      color: $white;
-
-      &:hover{
-        color: $green;
+        svg {
+          fill: $header-link-color;
+          position: relative;
+          top: 2px;
+          width: 14px;
+          height: 14px;
+          margin-right: 3px;
+        }
       }
     }
   }
-}
 
-@media (max-width: 768px) {
-  #header {
-    .navbar-brand {
-      .logo{
-        margin-left: 18px;
-      }
-    }
-  }
-}
-
-@media (max-width: 414px) {
-  #header {
-    .navbar-brand {
-      .logo{
-        width: 84px;
-        height: 32px;
-        background-size: contain;;
-      }
-    }
+  .buttons {
+    margin-top: 2px;
   }
 }

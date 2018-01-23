@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/docker"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/post-processor/docker-import"
+	"github.com/hashicorp/packer/builder/docker"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/docker-import"
 )
 
 func testConfig() map[string]interface{} {

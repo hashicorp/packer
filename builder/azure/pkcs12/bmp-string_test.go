@@ -1,70 +1,69 @@
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package pkcs12
 
 import (
 	"bytes"
-	"errors"
+	"encoding/hex"
 	"testing"
-	"unicode/utf16"
 )
 
-func decodeBMPString(bmpString []byte) (string, error) {
-	if len(bmpString)%2 != 0 {
-		return "", errors.New("expected BMP byte string to be an even length")
-	}
-
-	// strip terminator if present
-	if terminator := bmpString[len(bmpString)-2:]; terminator[0] == terminator[1] && terminator[1] == 0 {
-		bmpString = bmpString[:len(bmpString)-2]
-	}
-
-	s := make([]uint16, 0, len(bmpString)/2)
-	for len(bmpString) > 0 {
-		s = append(s, uint16(bmpString[0])*265+uint16(bmpString[1]))
-		bmpString = bmpString[2:]
-	}
-
-	return string(utf16.Decode(s)), nil
+var bmpStringTests = []struct {
+	in          string
+	expectedHex string
+	shouldFail  bool
+}{
+	{"", "0000", false},
+	// Example from https://tools.ietf.org/html/rfc7292#appendix-B.
+	{"Beavis", "0042006500610076006900730000", false},
+	// Some characters from the "Letterlike Symbols Unicode block".
+	{"\u2115 - Double-struck N", "21150020002d00200044006f00750062006c0065002d00730074007200750063006b0020004e0000", false},
+	// any character outside the BMP should trigger an error.
+	{"\U0001f000 East wind (Mahjong)", "", true},
 }
 
 func TestBMPStringDecode(t *testing.T) {
-	_, err := decodeBMPString([]byte("a"))
-	if err == nil {
-		t.Fatal("expected decode to fail, but it succeeded")
+	if _, err := decodeBMPString([]byte("a")); err == nil {
+		t.Fatalf("expected decode to fail, but it succeeded")
 	}
 }
 
 func TestBMPString(t *testing.T) {
-	str, err := bmpString("")
-	if bytes.Compare(str, []byte{0, 0}) != 0 {
-		t.Errorf("expected empty string to return double 0, but found: % x", str)
-	}
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
+	for i, test := range bmpStringTests {
+		expected, err := hex.DecodeString(test.expectedHex)
+		if err != nil {
+			t.Fatalf("#%d: failed to decode expectation", i)
+		}
 
-	// Example from https://tools.ietf.org/html/rfc7292#appendix-B
-	str, err = bmpString("Beavis")
-	if bytes.Compare(str, []byte{0x00, 0x42, 0x00, 0x65, 0x00, 0x61, 0x00, 0x0076, 0x00, 0x69, 0x00, 0x73, 0x00, 0x00}) != 0 {
-		t.Errorf("expected 'Beavis' to return 0x00 0x42 0x00 0x65 0x00 0x61 0x00 0x76 0x00 0x69 0x00 0x73 0x00 0x00, but found: % x", str)
-	}
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
+		out, err := bmpString(test.in)
+		if err == nil && test.shouldFail {
+			t.Errorf("#%d: expected to fail, but produced %x", i, out)
+			continue
+		}
 
-	// some characters from the "Letterlike Symbols Unicode block"
-	tst := "\u2115 - Double-struck N"
-	str, err = bmpString(tst)
-	if bytes.Compare(str, []byte{0x21, 0x15, 0x00, 0x20, 0x00, 0x2d, 0x00, 0x20, 0x00, 0x44, 0x00, 0x6f, 0x00, 0x75, 0x00, 0x62, 0x00, 0x6c, 0x00, 0x65, 0x00, 0x2d, 0x00, 0x73, 0x00, 0x74, 0x00, 0x72, 0x00, 0x75, 0x00, 0x63, 0x00, 0x6b, 0x00, 0x20, 0x00, 0x4e, 0x00, 0x00}) != 0 {
-		t.Errorf("expected '%s' to return 0x21 0x15 0x00 0x20 0x00 0x2d 0x00 0x20 0x00 0x44 0x00 0x6f 0x00 0x75 0x00 0x62 0x00 0x6c 0x00 0x65 0x00 0x2d 0x00 0x73 0x00 0x74 0x00 0x72 0x00 0x75 0x00 0x63 0x00 0x6b 0x00 0x20 0x00 0x4e 0x00 0x00, but found: % x", tst, str)
-	}
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
+		if err != nil && !test.shouldFail {
+			t.Errorf("#%d: failed unexpectedly: %s", i, err)
+			continue
+		}
 
-	// some character outside the BMP should error
-	tst = "\U0001f000 East wind (Mahjong)"
-	str, err = bmpString(tst)
-	if err == nil {
-		t.Errorf("expected '%s' to throw error because the first character is not in the BMP", tst)
+		if !test.shouldFail {
+			if !bytes.Equal(out, expected) {
+				t.Errorf("#%d: expected %s, got %x", i, test.expectedHex, out)
+				continue
+			}
+
+			roundTrip, err := decodeBMPString(out)
+			if err != nil {
+				t.Errorf("#%d: decoding output gave an error: %s", i, err)
+				continue
+			}
+
+			if roundTrip != test.in {
+				t.Errorf("#%d: decoding output resulted in %q, but it should have been %q", i, roundTrip, test.in)
+				continue
+			}
+		}
 	}
 }

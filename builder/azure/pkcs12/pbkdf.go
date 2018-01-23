@@ -1,32 +1,33 @@
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package pkcs12
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"math/big"
 )
 
 var (
-	deriveKeyByAlg = map[string]func(salt, password []byte, iterations int) []byte{
-		pbeWithSHAAnd3KeyTripleDESCBC: func(salt, password []byte, iterations int) []byte {
-			return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 1, 24)
-		},
-		pbewithSHAAnd40BitRC2CBC: func(salt, password []byte, iterations int) []byte {
-			return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 1, 5)
-		},
-	}
-	deriveIVByAlg = map[string]func(salt, password []byte, iterations int) []byte{
-		pbeWithSHAAnd3KeyTripleDESCBC: func(salt, password []byte, iterations int) []byte {
-			return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 2, 8)
-		},
-		pbewithSHAAnd40BitRC2CBC: func(salt, password []byte, iterations int) []byte {
-			return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 2, 8)
-		},
-	}
+	one = big.NewInt(1)
 )
 
+// sha1Sum returns the SHA-1 hash of in.
 func sha1Sum(in []byte) []byte {
 	sum := sha1.Sum(in)
 	return sum[:]
+}
+
+// fillWithRepeats returns v*ceiling(len(pattern) / v) bytes consisting of
+// repeats of pattern.
+func fillWithRepeats(pattern []byte, v int) []byte {
+	if len(pattern) == 0 {
+		return nil
+	}
+	outputLen := v * ((len(pattern) + v - 1) / v)
+	return bytes.Repeat(pattern, (outputLen+len(pattern)-1)/len(pattern))[:outputLen]
 }
 
 func pbkdf(hash func([]byte) []byte, u, v int, salt, password []byte, r int, ID byte, size int) (key []byte) {
@@ -75,7 +76,7 @@ func pbkdf(hash func([]byte) []byte, u, v int, salt, password []byte, r int, ID 
 
 	//    1.  Construct a string, D (the "diversifier"), by concatenating v/8
 	//        copies of ID.
-	D := []byte{}
+	var D []byte
 	for i := 0; i < v; i++ {
 		D = append(D, ID)
 	}
@@ -85,86 +86,70 @@ func pbkdf(hash func([]byte) []byte, u, v int, salt, password []byte, r int, ID 
 	//        truncated to create S).  Note that if the salt is the empty
 	//        string, then so is S.
 
-	S := []byte{}
-	{
-		s := len(salt)
-		times := s / v
-		if s%v > 0 {
-			times++
-		}
-		for len(S) < times*v {
-			S = append(S, salt...)
-		}
-		S = S[:times*v]
-	}
+	S := fillWithRepeats(salt, v)
 
 	//    3.  Concatenate copies of the password together to create a string P
 	//        of length v(ceiling(p/v)) bits (the final copy of the password
 	//        may be truncated to create P).  Note that if the password is the
 	//        empty string, then so is P.
 
-	P := []byte{}
-	{
-		s := len(password)
-		times := s / v
-		if s%v > 0 {
-			times++
-		}
-		for len(P) < times*v {
-			P = append(P, password...)
-		}
-		password = nil
-		P = P[:times*v]
-	}
+	P := fillWithRepeats(password, v)
 
 	//    4.  Set I=S||P to be the concatenation of S and P.
 	I := append(S, P...)
 
 	//    5.  Set c=ceiling(n/u).
-	c := size / u
-	if size%u > 0 {
-		c++
-	}
+	c := (size + u - 1) / u
 
 	//    6.  For i=1, 2, ..., c, do the following:
 	A := make([]byte, c*20)
+	var IjBuf []byte
 	for i := 0; i < c; i++ {
-
 		//        A.  Set A2=H^r(D||I). (i.e., the r-th hash of D||1,
 		//            H(H(H(... H(D||I))))
 		Ai := hash(append(D, I...))
 		for j := 1; j < r; j++ {
-			Ai = hash(Ai[:])
+			Ai = hash(Ai)
 		}
 		copy(A[i*20:], Ai[:])
 
 		if i < c-1 { // skip on last iteration
-
-			//        B.  Concatenate copies of Ai to create a string B of length v
-			//            bits (the final copy of Ai may be truncated to create B).
-			B := []byte{}
+			// B.  Concatenate copies of Ai to create a string B of length v
+			//     bits (the final copy of Ai may be truncated to create B).
+			var B []byte
 			for len(B) < v {
 				B = append(B, Ai[:]...)
 			}
 			B = B[:v]
 
-			//        C.  Treating I as a concatenation I_0, I_1, ..., I_(k-1) of v-bit
-			//            blocks, where k=ceiling(s/v)+ceiling(p/v), modify I by
-			//            setting I_j=(I_j+B+1) mod 2^v for each j.
+			// C.  Treating I as a concatenation I_0, I_1, ..., I_(k-1) of v-bit
+			//     blocks, where k=ceiling(s/v)+ceiling(p/v), modify I by
+			//     setting I_j=(I_j+B+1) mod 2^v for each j.
 			{
-				Bbi := new(big.Int)
-				Bbi.SetBytes(B)
-
-				one := big.NewInt(1)
+				Bbi := new(big.Int).SetBytes(B)
+				Ij := new(big.Int)
 
 				for j := 0; j < len(I)/v; j++ {
-					Ij := new(big.Int)
 					Ij.SetBytes(I[j*v : (j+1)*v])
 					Ij.Add(Ij, Bbi)
 					Ij.Add(Ij, one)
 					Ijb := Ij.Bytes()
+					// We expect Ijb to be exactly v bytes,
+					// if it is longer or shorter we must
+					// adjust it accordingly.
 					if len(Ijb) > v {
 						Ijb = Ijb[len(Ijb)-v:]
+					}
+					if len(Ijb) < v {
+						if IjBuf == nil {
+							IjBuf = make([]byte, v)
+						}
+						bytesShort := v - len(Ijb)
+						for i := 0; i < bytesShort; i++ {
+							IjBuf[i] = 0
+						}
+						copy(IjBuf[bytesShort:], Ijb)
+						Ijb = IjBuf
 					}
 					copy(I[j*v:(j+1)*v], Ijb)
 				}
@@ -175,9 +160,7 @@ func pbkdf(hash func([]byte) []byte, u, v int, salt, password []byte, r int, ID 
 	//        bit string, A.
 
 	//    8.  Use the first n bits of A as the output of this entire process.
-	A = A[:size]
-
-	return A
+	return A[:size]
 
 	//    If the above process is being used to generate a DES key, the process
 	//    should be used to create 64 random bits, and the key's parity bits

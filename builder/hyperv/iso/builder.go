@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
+	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	"github.com/hashicorp/packer/common"
+	powershell "github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	hypervcommon "github.com/mitchellh/packer/builder/hyperv/common"
-	"github.com/mitchellh/packer/common"
-	powershell "github.com/mitchellh/packer/common/powershell"
-	"github.com/mitchellh/packer/common/powershell/hyperv"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 const (
@@ -45,7 +46,7 @@ type Config struct {
 	common.PackerConfig         `mapstructure:",squash"`
 	common.HTTPConfig           `mapstructure:",squash"`
 	common.ISOConfig            `mapstructure:",squash"`
-	hypervcommon.FloppyConfig   `mapstructure:",squash"`
+	common.FloppyConfig         `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
 	hypervcommon.RunConfig      `mapstructure:",squash"`
@@ -57,16 +58,6 @@ type Config struct {
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
 	RamSize uint `mapstructure:"ram_size"`
-	// A list of files to place onto a floppy disk that is attached when the
-	// VM is booted. This is most useful for unattended Windows installs,
-	// which look for an Autounattend.xml file on removable media. By default,
-	// no floppy will be attached. All files listed in this setting get
-	// placed into the root directory of the floppy and the floppy is attached
-	// as the first floppy device. Currently, no support exists for creating
-	// sub-directories on the floppy. Wildcard characters (*, ?, and [])
-	// are allowed. Directory names are also allowed, which will add all
-	// the files found in the directory to the floppy.
-	FloppyFiles []string `mapstructure:"floppy_files"`
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -90,10 +81,21 @@ type Config struct {
 	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
 	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
 	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
+	TempPath                       string   `mapstructure:"temp_path"`
+
+	// A separate path can be used for storing the VM's disk image. The purpose is to enable
+	// reading and writing to take place on different physical disks (read from VHD temp path
+	// write to regular temp path while exporting the VM) to eliminate a single-disk bottleneck.
+	VhdTempPath string `mapstructure:"vhd_temp_path"`
 
 	Communicator string `mapstructure:"communicator"`
 
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+
 	SkipCompaction bool `mapstructure:"skip_compaction"`
+
+	// Use differencing disk
+	DifferencingDisk bool `mapstructure:"differencing_disk"`
 
 	ctx interpolate.Context
 }
@@ -101,7 +103,8 @@ type Config struct {
 // Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -127,9 +130,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	err = b.checkDiskSize()
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
+		//We only create a new hard drive if an existing one to copy from does not exist
+		err = b.checkDiskSize()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	err = b.checkRamSize()
@@ -151,21 +157,27 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Cpu = 1
 	}
 
-	if b.config.Generation != 2 {
+	if b.config.Generation < 1 || b.config.Generation > 2 {
 		b.config.Generation = 1
 	}
 
 	if b.config.Generation == 2 {
-		if len(b.config.FloppyFiles) > 0 {
+		if len(b.config.FloppyFiles) > 0 || len(b.config.FloppyDirectories) > 0 {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	if len(b.config.AdditionalDiskSize) > 64 {
+		err = errors.New("VM's currently support a maximun of 64 additional SCSI attached disks.")
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	log.Println(fmt.Sprintf("Using switch %s", b.config.SwitchName))
 	log.Println(fmt.Sprintf("%s: %v", "SwitchName", b.config.SwitchName))
 
 	// Errors
+
 	if b.config.GuestAdditionsMode == "" {
 		if b.config.GuestAdditionsPath != "" {
 			b.config.GuestAdditionsMode = "attach"
@@ -303,7 +315,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{},
+		&hypervcommon.StepCreateTempDir{
+			TempPath:    b.config.TempPath,
+			VhdTempPath: b.config.VhdTempPath,
+		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
@@ -318,7 +333,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			TargetPath:   b.config.TargetPath,
 		},
 		&common.StepCreateFloppy{
-			Files: b.config.FloppyFiles,
+			Files:       b.config.FloppyConfig.FloppyFiles,
+			Directories: b.config.FloppyConfig.FloppyDirectories,
 		},
 		&common.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
@@ -339,6 +355,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			AdditionalDiskSize:             b.config.AdditionalDiskSize,
+			DifferencingDisk:               b.config.DifferencingDisk,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
@@ -410,17 +428,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run the steps.
-	if b.config.PackerDebug {
-		pauseFn := common.MultistepDebugFn(ui)
-		state.Put("pauseFn", pauseFn)
-		b.runner = &multistep.DebugRunner{
-			Steps:   steps,
-			PauseFn: pauseFn,
-		}
-	} else {
-		b.runner = &multistep.BasicRunner{Steps: steps}
-	}
-
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// Report any errors.

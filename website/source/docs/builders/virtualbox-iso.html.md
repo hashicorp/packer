@@ -1,10 +1,11 @@
 ---
 description: |
-    The VirtualBox Packer builder is able to create VirtualBox virtual machines and
-    export them in the OVF format, starting from an ISO image.
+    The VirtualBox Packer builder is able to create VirtualBox virtual machines
+    and export them in the OVF format, starting from an ISO image.
 layout: docs
-page_title: 'VirtualBox Builder (from an ISO)'
-...
+page_title: 'VirtualBox ISO - Builders'
+sidebar_current: 'docs-builders-virtualbox-iso'
+---
 
 # VirtualBox Builder (from an ISO)
 
@@ -25,7 +26,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "virtualbox-iso",
   "guest_os_type": "Ubuntu_64",
@@ -76,12 +77,6 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
--   `ssh_password` (string) - The password to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -97,7 +92,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `export_opts` (array of strings) - Additional options to pass to the
@@ -106,7 +101,7 @@ builder.
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
-    ``` {.json}
+    ``` json
     {
       "type": "virtualbox-iso",
       "export_opts":
@@ -173,7 +168,7 @@ builder.
     where the VirtualBox guest additions ISO will be uploaded. By default this
     is "VBoxGuestAdditions.iso" which should upload into the login directory of
     the user. This is a [configuration
-    template](/docs/templates/configuration-templates.html) where the `Version`
+    template](/docs/templates/engine.html) where the `Version`
     variable is replaced with the VirtualBox version.
 
 -   `guest_additions_sha256` (string) - The SHA256 checksum of the guest
@@ -198,6 +193,11 @@ builder.
     is attached to an AHCI SATA controller. When set to "scsi", the drive is
     attached to an LsiLogic SCSI controller.
 
+-   `sata_port_count` (number) - The number of ports available on any SATA
+    controller created, defaults to 1. VirtualBox supports up to 30 ports on a
+    maximum of 1 SATA controller. Increasing this value can be useful if you
+    want to attach additional drives.
+
 -   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
     to treat disks as SSDs and stops them from performing disk fragmentation.
     Also set `hard_drive_Discard` to `true` to enable TRIM support.
@@ -219,7 +219,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -275,7 +275,7 @@ builder.
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
--   `ssh_host_port_min` and `ssh_host_port_max` (integer) - The minimum and
+-   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
@@ -292,7 +292,7 @@ builder.
     defined itself as an array of strings, where each string represents a single
     argument on the command-line to `VBoxManage` (but excluding
     `VBoxManage` itself). Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use
     `VBoxManage` are below.
 
@@ -315,7 +315,7 @@ builder.
     binded to for VRDP. By default packer will use 127.0.0.1 for this. If you
     wish to bind to all interfaces use 0.0.0.0
 
--   `vrdp_port_min` and `vrdp_port_max` (integer) - The minimum and maximum port
+-   `vrdp_port_min` and `vrdp_port_max` (number) - The minimum and maximum port
     to use for VRDP access to the virtual machine. Packer uses a randomly chosen
     port in this range that appears available. By default this is 5900 to 6000.
     The minimum and maximum ports are inclusive.
@@ -389,7 +389,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -400,7 +400,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -413,6 +413,9 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## Guest Additions
 
@@ -441,7 +444,7 @@ Extra VBoxManage commands are defined in the template in the `vboxmanage`
 section. An example is shown below that sets the memory and number of CPUs
 within the virtual machine:
 
-``` {.javascript}
+``` json
 {
   "vboxmanage": [
     ["modifyvm", "{{.Name}}", "--memory", "1024"],
@@ -456,6 +459,6 @@ followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
 `VBoxManage`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+template](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many VBoxManage calls.

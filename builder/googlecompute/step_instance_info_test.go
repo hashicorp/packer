@@ -2,9 +2,10 @@ package googlecompute
 
 import (
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
 	"time"
+
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepInstanceInfo_impl(t *testing.T) {

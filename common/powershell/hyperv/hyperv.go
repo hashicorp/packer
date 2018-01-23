@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell"
 )
 
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
@@ -187,34 +187,238 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64, switchName string, generation uint) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, switchName string, generation uint, diffDisks bool) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+if ($harddrivePath){
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing
+	} else {
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
+} else {
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
+}
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
-		return err
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
+			return err
+		}
+
+		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+if ($harddrivePath){
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing
+	}
+	else{
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
+} else {
+	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+}
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName)
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatBool(diffDisks)); err != nil {
+			return err
+		}
 
-		if err != nil {
+		if err := DisableAutomaticCheckpoints(vmName); err != nil {
 			return err
 		}
 
 		return DeleteAllDvdDrives(vmName)
 	}
+}
+
+func DisableAutomaticCheckpoints(vmName string) error {
+	var script = `
+param([string]$vmName)
+if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
+	Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName)
+	return err
+}
+
+func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
+	var script = `
+param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
+
+$WorkingPath = Join-Path $exportPath $vmName 
+
+if (Test-Path $WorkingPath) {
+	throw "Export path working directory: $WorkingPath already exists!"
+}
+
+$allSnapshots = [System.Boolean]::Parse($allSnapshotsString)
+
+if ($snapshotName) {
+    $snapshot = Get-VMSnapshot -VMName $vmName -Name $snapshotName
+    Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
+} else {
+    if (!$allSnapshots) {
+        #Use last snapshot if one was not specified
+        $snapshot = Get-VMSnapshot -VMName $vmName | Select -Last 1
+    } else {
+        $snapshot = $null
+    }
+    
+    if (!$snapshot) {
+        #No snapshot clone
+        Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
+    } else {
+        #Snapshot clone
+        Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
+    }
+}
+
+$result = Get-ChildItem -Path $WorkingPath | Move-Item -Destination $exportPath -Force
+$result = Remove-Item -Path $WorkingPath
+	`
+
+	allSnapshotsString := "False"
+	if allSnapshots {
+		allSnapshotsString = "True"
+	}
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, exportPath, vmName, snapshotName, allSnapshotsString)
+
+	return err
+}
+
+func CopyVmxcVirtualMachine(exportPath string, cloneFromVmxcPath string) error {
+	var script = `
+param([string]$exportPath, [string]$cloneFromVmxcPath)
+if (!(Test-Path $cloneFromVmxcPath)){
+	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
+}
+	
+if (!(Test-Path $exportPath)){
+	New-Item -ItemType Directory -Force -Path $exportPath
+}
+$cloneFromVmxcPath = Join-Path $cloneFromVmxcPath '\*'
+Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
+	`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, exportPath, cloneFromVmxcPath)
+
+	return err
+}
+
+func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string, ram int64, switchName string) error {
+	var script = `
+param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)
+
+$VirtualHarddisksPath = Join-Path -Path $importPath -ChildPath 'Virtual Hard Disks'
+if (!(Test-Path $VirtualHarddisksPath)) {
+	New-Item -ItemType Directory -Force -Path $VirtualHarddisksPath
+}
+
+$vhdPath = ""
+if ($harddrivePath){
+	$vhdx = $vmName + '.vhdx'
+	$vhdPath = Join-Path -Path $VirtualHarddisksPath -ChildPath $vhdx
+}
+
+$VirtualMachinesPath = Join-Path $importPath 'Virtual Machines'
+if (!(Test-Path $VirtualMachinesPath)) {
+	New-Item -ItemType Directory -Force -Path $VirtualMachinesPath
+}
+
+$VirtualMachinePath = Get-ChildItem -Path $VirtualMachinesPath -Filter *.vmcx -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+if (!$VirtualMachinePath){
+    $VirtualMachinePath = Get-ChildItem -Path $VirtualMachinesPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+}
+if (!$VirtualMachinePath){
+    $VirtualMachinePath = Get-ChildItem -Path $importPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
+}
+
+$compatibilityReport = Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy:$false
+if ($vhdPath){
+	Copy-Item -Path $harddrivePath -Destination $vhdPath
+	$existingFirstHarddrive = $compatibilityReport.VM.HardDrives | Select -First 1
+	if ($existingFirstHarddrive) {
+		$existingFirstHarddrive | Set-VMHardDiskDrive -Path $vhdPath
+	} else {
+		Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
+	}	
+}
+Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
+$networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
+Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
+Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName 
+$vm = Import-VM -CompatibilityReport $compatibilityReport
+
+if ($vm) {
+    $result = Rename-VM -VM $vm -NewName $VMName
+}
+	`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, importPath, vmName, harddrivePath, strconv.FormatInt(ram, 10), switchName)
+
+	return err
+}
+
+func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+	if cloneFromVmName != "" {
+		if err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots); err != nil {
+			return err
+		}
+	}
+
+	if cloneFromVmxcPath != "" {
+		if err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath); err != nil {
+			return err
+		}
+	}
+
+	if err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
+		return err
+	}
+
+	return DeleteAllDvdDrives(vmName)
+}
+
+func GetVirtualMachineGeneration(vmName string) (uint, error) {
+	var script = `
+param([string]$vmName)
+$generation = Get-Vm -Name $vmName | %{$_.Generation}
+if (!$generation){
+    $generation = 1
+}
+return $generation
+`
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generationUint32, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 32)
+
+	if err != nil {
+		return 0, err
+	}
+
+	generation := uint(generationUint32)
+
+	return generation, err
 }
 
 func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
@@ -575,7 +779,7 @@ func GetExternalOnlineVirtualSwitch() (string, error) {
 
 	var script = `
 $adapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | Sort-Object -Descending -Property Speed
-foreach ($adapter in $adapters) { 
+foreach ($adapter in $adapters) {
   $switch = Get-VMSwitch -SwitchType External | Where-Object { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
   if ($switch -ne $null) {
@@ -605,10 +809,10 @@ $adapters = foreach ($name in $names) {
   Get-NetAdapter -Physical -Name $name -ErrorAction SilentlyContinue | where status -eq 'up'
 }
 
-foreach ($adapter in $adapters) { 
+foreach ($adapter in $adapters) {
   $switch = Get-VMSwitch -SwitchType External | where { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
-  if ($switch -eq $null) { 
+  if ($switch -eq $null) {
     $switch = New-VMSwitch -Name $switchName -NetAdapterName $adapter.Name -AllowManagementOS $true -Notes 'Parent OS, VMs, WiFi'
   }
 
@@ -617,9 +821,9 @@ foreach ($adapter in $adapters) {
   }
 }
 
-if($switch -ne $null) { 
-  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch 
-} else { 
+if($switch -ne $null) {
+  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch
+} else {
   Write-Error 'No internet adapters found'
 }
 `
@@ -653,6 +857,19 @@ Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $swi
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, switchName)
+	return err
+}
+
+func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, controllerType string) error {
+
+	var script = `
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$controllerType)
+$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
+New-VHD $vhdPath -SizeBytes $vhdSizeInBytes
+Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
+`
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, vhdRoot, vhdName, strconv.FormatInt(vhdSizeBytes, 10), controllerType)
 	return err
 }
 
@@ -721,7 +938,7 @@ $vm.Uptime.TotalSeconds
 		return 0, err
 	}
 
-	uptime, err := strconv.ParseUint(strings.TrimSpace(string(cmdOut)), 10, 64)
+	uptime, err := strconv.ParseUint(strings.TrimSpace(cmdOut), 10, 64)
 
 	return uptime, err
 }
@@ -752,7 +969,7 @@ func IpAddress(mac string) (string, error) {
 param([string]$mac, [int]$addressIndex)
 try {
   $ip = Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
-	
+
   if($ip -eq $null) {
     return ""
   }
@@ -806,8 +1023,7 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 	var script = `
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
-	#Requires -RunAsAdministrator
-	
+
 	function Get-VMConsole
 	{
 	    [CmdletBinding()]
@@ -815,16 +1031,16 @@ param([string]$vmName, [string]$scanCodes)
 	        [Parameter(Mandatory)]
 	        [string] $VMName
 	    )
-	
+
 	    $ErrorActionPreference = "Stop"
-	    
+
 	    $vm = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_ComputerSystem -ErrorAction Ignore -Verbose:$false | where ElementName -eq $VMName | select -first 1
 	    if ($vm -eq $null){
 	        Write-Error ("VirtualMachine({0}) is not found!" -f $VMName)
 	    }
-		
+
 	    $vmKeyboard = $vm | Get-CimAssociatedInstance -ResultClassName "Msvm_Keyboard" -ErrorAction Ignore -Verbose:$false
-		
+
 		if ($vmKeyboard -eq $null) {
 			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
 		}
@@ -832,22 +1048,22 @@ param([string]$vmName, [string]$scanCodes)
 		if ($vmKeyboard -eq $null) {
 			$vmKeyboard = Get-CimInstance -Namespace "root\virtualization" -ClassName Msvm_Keyboard -ErrorAction Ignore -Verbose:$false | where SystemName -eq $vm.Name | select -first 1
 		}
-		
+
 	    if ($vmKeyboard -eq $null){
 	        Write-Error ("VirtualMachine({0}) keyboard class is not found!" -f $VMName)
 	    }
-	
+
 	    #TODO: It may be better using New-Module -AsCustomObject to return console object?
-	
+
 	    #Console object to return
 	    $console = [pscustomobject] @{
 	        Msvm_ComputerSystem = $vm
 	        Msvm_Keyboard = $vmKeyboard
 	    }
-	
+
 	    #Need to import assembly to use System.Windows.Input.Key
 	    Add-Type -AssemblyName WindowsBase
-	
+
 	    #region Add Console Members
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeText -Value {
 	        [OutputType([bool])]
@@ -859,13 +1075,13 @@ param([string]$vmName, [string]$scanCodes)
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeText" -Arguments @{ asciiText = $AsciiText }
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:TypeCtrlAltDel
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeCtrlAltDel -Value {
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeCtrlAltDel"
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:TypeKey
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeKey -Value {
 	        [OutputType([bool])]
@@ -874,9 +1090,9 @@ param([string]$vmName, [string]$scanCodes)
 	            [Windows.Input.Key] $Key,
 	            [Windows.Input.ModifierKeys] $ModifierKey = [Windows.Input.ModifierKeys]::None
 	        )
-	
+
 	        $keyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey($Key)
-	        
+
 	        switch ($ModifierKey)
 	        {
 	            ([Windows.Input.ModifierKeys]::Control){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftCtrl)}
@@ -884,7 +1100,7 @@ param([string]$vmName, [string]$scanCodes)
 	            ([Windows.Input.ModifierKeys]::Shift){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LeftShift)}
 	            ([Windows.Input.ModifierKeys]::Windows){ $modifierKeyCode = [Windows.Input.KeyInterop]::VirtualKeyFromKey([Windows.Input.Key]::LWin)}
 	        }
-	
+
 	        if ($ModifierKey -eq [Windows.Input.ModifierKeys]::None)
 	        {
 	            $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeKey" -Arguments @{ keyCode = $keyCode }
@@ -897,7 +1113,7 @@ param([string]$vmName, [string]$scanCodes)
 	        }
 	        $result = return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:Scancodes
 	    $console | Add-Member -MemberType ScriptMethod -Name TypeScancodes -Value {
 	        [OutputType([bool])]
@@ -908,7 +1124,7 @@ param([string]$vmName, [string]$scanCodes)
 	        $result = $this.Msvm_Keyboard | Invoke-CimMethod -MethodName "TypeScancodes" -Arguments @{ ScanCodes = $ScanCodes }
 	        return (0 -eq $result.ReturnValue)
 	    }
-	
+
 	    #Define method:ExecCommand
 	    $console | Add-Member -MemberType ScriptMethod -Name ExecCommand -Value {
 	        param (
@@ -918,46 +1134,46 @@ param([string]$vmName, [string]$scanCodes)
 	        if ([String]::IsNullOrEmpty($Command)){
 	            return
 	        }
-	
+
 	        $console.TypeText($Command) > $null
 	        $console.TypeKey([Windows.Input.Key]::Enter) > $null
 	        #sleep -Milliseconds 100
 	    }
-	
+
 	    #Define method:Dispose
 	    $console | Add-Member -MemberType ScriptMethod -Name Dispose -Value {
 	        $this.Msvm_ComputerSystem.Dispose()
 	        $this.Msvm_Keyboard.Dispose()
 	    }
-	    
-	
+
+
 	    #endregion
-	
+
 	    return $console
 	}
-	
+
 	$vmConsole = Get-VMConsole -VMName $vmName
 	$scanCodesToSend = ''
 	$scanCodes.Split(' ') | %{
 		$scanCode = $_
-			
+
 		if ($scanCode.StartsWith('wait')){
 			$timeToWait = $scanCode.Substring(4)
 			if (!$timeToWait){
 				$timeToWait = "1"
 			}
-						
+
 			if ($scanCodesToSend){
 				$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
-				
+
                 $scanCodesToSendByteArray | %{
 				    $vmConsole.TypeScancodes($_)
                 }
 			}
-			
+
 			write-host "Special code <wait> found, will sleep $timeToWait second(s) at this point."
 			Start-Sleep -s $timeToWait
-			
+
 			$scanCodesToSend = ''
 		} else {
 			if ($scanCodesToSend){
@@ -971,7 +1187,7 @@ param([string]$vmName, [string]$scanCodes)
 	}
 	if ($scanCodesToSend){
 		$scanCodesToSendByteArray = [byte[]]@($scanCodesToSend.Split(' ') | %{"0x$_"})
-		
+
         $scanCodesToSendByteArray | %{
 			$vmConsole.TypeScancodes($_)
         }

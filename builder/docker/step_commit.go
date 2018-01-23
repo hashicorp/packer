@@ -2,8 +2,9 @@ package docker
 
 import (
 	"fmt"
+
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepCommit commits the container to a image.

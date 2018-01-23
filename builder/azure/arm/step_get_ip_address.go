@@ -1,14 +1,11 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type EndpointType int
@@ -16,12 +13,14 @@ type EndpointType int
 const (
 	PublicEndpoint EndpointType = iota
 	PrivateEndpoint
+	PublicEndpointInPrivateNetwork
 )
 
 var (
 	EndpointCommunicationText = map[EndpointType]string{
-		PublicEndpoint:  "PublicEndpoint",
-		PrivateEndpoint: "PrivateEndpoint",
+		PublicEndpoint:                 "PublicEndpoint",
+		PrivateEndpoint:                "PrivateEndpoint",
+		PublicEndpointInPrivateNetwork: "PublicEndpointInPrivateNetwork",
 	}
 )
 
@@ -46,6 +45,8 @@ func NewStepGetIPAddress(client *AzureClient, ui packer.Ui, endpoint EndpointTyp
 		step.get = step.getPrivateIP
 	case PublicEndpoint:
 		step.get = step.getPublicIP
+	case PublicEndpointInPrivateNetwork:
+		step.get = step.getPublicIPInPrivateNetwork
 	}
 
 	return step
@@ -54,10 +55,11 @@ func NewStepGetIPAddress(client *AzureClient, ui packer.Ui, endpoint EndpointTyp
 func (s *StepGetIPAddress) getPrivateIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
 	resp, err := s.client.InterfacesClient.Get(resourceGroupName, interfaceName, "")
 	if err != nil {
+		s.say(s.client.LastError.Error())
 		return "", err
 	}
 
-	return *(*resp.Properties.IPConfigurations)[0].Properties.PrivateIPAddress, nil
+	return *(*resp.IPConfigurations)[0].PrivateIPAddress, nil
 }
 
 func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
@@ -66,7 +68,12 @@ func (s *StepGetIPAddress) getPublicIP(resourceGroupName string, ipAddressName s
 		return "", err
 	}
 
-	return *resp.Properties.IPAddress, nil
+	return *resp.IPAddress, nil
+}
+
+func (s *StepGetIPAddress) getPublicIPInPrivateNetwork(resourceGroupName string, ipAddressName string, interfaceName string) (string, error) {
+	s.getPrivateIP(resourceGroupName, ipAddressName, interfaceName)
+	return s.getPublicIP(resourceGroupName, ipAddressName, interfaceName)
 }
 
 func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {

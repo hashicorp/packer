@@ -5,8 +5,8 @@ description: |
     started with Packer, please start with the introduction and getting started
     guide instead.
 layout: docs
-page_title: Packer Documentation
-...
+page_title: Documentation
+---
 
 # Packer Documentation
 

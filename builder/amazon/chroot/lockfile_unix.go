@@ -4,7 +4,8 @@ package chroot
 
 import (
 	"os"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 // See: http://linux.die.net/include/sys/file.h
@@ -13,7 +14,7 @@ const LOCK_NB = 4
 const LOCK_UN = 8
 
 func lockFile(f *os.File) error {
-	err := syscall.Flock(int(f.Fd()), LOCK_EX)
+	err := unix.Flock(int(f.Fd()), LOCK_EX)
 	if err != nil {
 		return err
 	}
@@ -22,5 +23,5 @@ func lockFile(f *os.File) error {
 }
 
 func unlockFile(f *os.File) error {
-	return syscall.Flock(int(f.Fd()), LOCK_UN)
+	return unix.Flock(int(f.Fd()), LOCK_UN)
 }

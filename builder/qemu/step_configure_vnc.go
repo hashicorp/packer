@@ -2,11 +2,12 @@ package qemu
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
 	"math/rand"
 	"net"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -28,7 +29,7 @@ func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	// best.
 	msg := fmt.Sprintf("Looking for available port between %d and %d on %s", config.VNCPortMin, config.VNCPortMax, config.VNCBindAddress)
 	ui.Say(msg)
-	log.Printf(msg)
+	log.Print(msg)
 	var vncPort uint
 	portRange := int(config.VNCPortMax - config.VNCPortMin)
 	for {

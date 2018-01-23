@@ -1,24 +1,20 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepGetCertificate struct {
-	client   *AzureClient
-	template string
-	get      func(keyVaultName string, secretName string) (string, error)
-	say      func(message string)
-	error    func(e error)
-	pause    func()
+	client *AzureClient
+	get    func(keyVaultName string, secretName string) (string, error)
+	say    func(message string)
+	error  func(e error)
+	pause  func()
 }
 
 func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificate {
@@ -36,6 +32,7 @@ func NewStepGetCertificate(client *AzureClient, ui packer.Ui) *StepGetCertificat
 func (s *StepGetCertificate) getCertificateUrl(keyVaultName string, secretName string) (string, error) {
 	secret, err := s.client.GetSecret(keyVaultName, secretName)
 	if err != nil {
+		s.say(s.client.LastError.Error())
 		return "", err
 	}
 

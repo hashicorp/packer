@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepCreateImage represents a Packer build step that creates GCE machine
@@ -39,7 +39,7 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	imageCh, errCh := driver.CreateImage(
 		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
-		config.DiskName)
+		config.DiskName, config.ImageLabels)
 	var err error
 	select {
 	case err = <-errCh:

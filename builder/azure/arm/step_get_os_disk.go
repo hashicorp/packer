@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
@@ -8,10 +5,10 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepGetOSDisk struct {
@@ -33,7 +30,11 @@ func NewStepGetOSDisk(client *AzureClient, ui packer.Ui) *StepGetOSDisk {
 }
 
 func (s *StepGetOSDisk) queryCompute(resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
-	return s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+	vm, err := s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
+	return vm, err
 }
 
 func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
@@ -53,9 +54,16 @@ func (s *StepGetOSDisk) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	s.say(fmt.Sprintf(" -> OS Disk           : '%s'", *vm.Properties.StorageProfile.OsDisk.Vhd.URI))
-	state.Put(constants.ArmOSDiskVhd, *vm.Properties.StorageProfile.OsDisk.Vhd.URI)
+	var vhdUri string
+	if vm.StorageProfile.OsDisk.Vhd != nil {
+		vhdUri = *vm.StorageProfile.OsDisk.Vhd.URI
+		s.say(fmt.Sprintf(" -> OS Disk           : '%s'", vhdUri))
+	} else {
+		vhdUri = *vm.StorageProfile.OsDisk.ManagedDisk.ID
+		s.say(fmt.Sprintf(" -> Managed OS Disk   : '%s'", vhdUri))
+	}
 
+	state.Put(constants.ArmOSDiskVhd, vhdUri)
 	return multistep.ActionContinue
 }
 

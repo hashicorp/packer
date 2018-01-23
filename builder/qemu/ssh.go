@@ -1,9 +1,9 @@
 package qemu
 
 import (
+	commonssh "github.com/hashicorp/packer/common/ssh"
+	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
-	commonssh "github.com/mitchellh/packer/common/ssh"
-	"github.com/mitchellh/packer/communicator/ssh"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -35,7 +35,8 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 	}
 
 	return &gossh.ClientConfig{
-		User: config.Comm.SSHUsername,
-		Auth: auth,
+		User:            config.Comm.SSHUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }

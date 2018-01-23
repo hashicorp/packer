@@ -1,11 +1,9 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
-	"golang.org/x/crypto/ssh"
 	"testing"
+
+	"golang.org/x/crypto/ssh"
 )
 
 func TestFart(t *testing.T) {

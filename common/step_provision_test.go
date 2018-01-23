@@ -1,8 +1,9 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepProvision_Impl(t *testing.T) {

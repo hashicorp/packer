@@ -2,8 +2,9 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type VMwareProvider struct{}

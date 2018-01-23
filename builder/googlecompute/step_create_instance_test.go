@@ -229,10 +229,6 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	state.Put("ssh_public_key", "key")
 
 	errCh := make(chan error, 1)
-	go func() {
-		<-time.After(10 * time.Millisecond)
-		errCh <- nil
-	}()
 
 	config := state.Get("config").(*Config)
 	config.stateTimeout = 1 * time.Microsecond

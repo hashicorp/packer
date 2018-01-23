@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/packer/common/powershell"
-	"github.com/mitchellh/packer/common/powershell/hyperv"
+	"github.com/hashicorp/packer/common/powershell"
+	"github.com/hashicorp/packer/common/powershell/hyperv"
 )
 
 type HypervPS4Driver struct {
@@ -107,6 +107,10 @@ func (d *HypervPS4Driver) GetHostName(ip string) (string, error) {
 	return powershell.GetHostName(ip)
 }
 
+func (d *HypervPS4Driver) GetVirtualMachineGeneration(vmName string) (uint, error) {
+	return hyperv.GetVirtualMachineGeneration(vmName)
+}
+
 // Finds the IP address of a host adapter connected to switch
 func (d *HypervPS4Driver) GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	res, err := hyperv.GetHostAdapterIpAddressForSwitch(switchName)
@@ -166,8 +170,16 @@ func (d *HypervPS4Driver) CreateVirtualSwitch(switchName string, switchType stri
 	return hyperv.CreateVirtualSwitch(switchName, switchType)
 }
 
-func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, ram int64, diskSize int64, switchName string, generation uint) error {
-	return hyperv.CreateVirtualMachine(vmName, path, ram, diskSize, switchName, generation)
+func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, controllerType string) error {
+	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes, controllerType)
+}
+
+func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint, diffDisks bool) error {
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, vhdPath, ram, diskSize, switchName, generation, diffDisks)
+}
+
+func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+	return hyperv.CloneVirtualMachine(cloneFromVmxcPath, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
 }
 
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
@@ -254,7 +266,7 @@ func (d *HypervPS4Driver) verifyPSVersion() error {
 		return err
 	}
 
-	versionOutput := strings.TrimSpace(string(cmdOut))
+	versionOutput := strings.TrimSpace(cmdOut)
 	log.Printf("%s output: %s", versionCmd, versionOutput)
 
 	ver, err := strconv.ParseInt(versionOutput, 10, 32)
@@ -283,9 +295,7 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 		return err
 	}
 
-	res := strings.TrimSpace(string(cmdOut))
-
-	if res == "False" {
+	if powershell.IsFalse(cmdOut) {
 		err := fmt.Errorf("%s", "PS Hyper-V module is not loaded. Make sure Hyper-V feature is on.")
 		return err
 	}
@@ -293,21 +303,36 @@ func (d *HypervPS4Driver) verifyPSHypervModule() error {
 	return nil
 }
 
+func (d *HypervPS4Driver) isCurrentUserAHyperVAdministrator() (bool, error) {
+	//SID:S-1-5-32-578 = 'BUILTIN\Hyper-V Administrators'
+	//https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
+
+	var script = `
+$identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = new-object System.Security.Principal.WindowsPrincipal($identity)
+$hypervrole = [System.Security.Principal.SecurityIdentifier]"S-1-5-32-578"
+return $principal.IsInRole($hypervrole)
+`
+
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script)
+	if err != nil {
+		return false, err
+	}
+
+	return powershell.IsTrue(cmdOut), nil
+}
+
 func (d *HypervPS4Driver) verifyHypervPermissions() error {
 
 	log.Printf("Enter method: %s", "verifyHypervPermissions")
 
-	hypervAdminCmd := "([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole('Hyper-V Administrators')"
-
-	var ps powershell.PowerShellCmd
-	cmdOut, err := ps.Output(hypervAdminCmd)
+	hyperVAdmin, err := d.isCurrentUserAHyperVAdministrator()
 	if err != nil {
-		return err
+		log.Printf("Error discovering if current is is a Hyper-V Admin: %s", err)
 	}
+	if !hyperVAdmin {
 
-	res := strings.TrimSpace(string(cmdOut))
-
-	if res == "False" {
 		isAdmin, _ := powershell.IsCurrentUserAnAdministrator()
 
 		if !isAdmin {

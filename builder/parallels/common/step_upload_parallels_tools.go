@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // This step uploads the Parallels Tools ISO to the virtual machine.
@@ -47,7 +47,7 @@ func (s *StepUploadParallelsTools) Run(state multistep.StateBag) multistep.StepA
 		return multistep.ActionContinue
 	}
 
-	// Get the Paralells Tools path on the host machine
+	// Get the Parallels Tools path on the host machine
 	parallelsToolsPath := state.Get("parallels_tools_path").(string)
 
 	f, err := os.Open(parallelsToolsPath)

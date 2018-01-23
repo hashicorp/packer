@@ -4,10 +4,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
+	"golang.org/x/crypto/ssh"
 )
 
 type StepCreateSSHKey struct {

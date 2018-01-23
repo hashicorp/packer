@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 type StepRegister struct {
@@ -51,7 +51,7 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 	}
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
-		if s.Format == "" {
+		if s.Format == "" || config.SkipExport {
 			ui.Say("Unregistering virtual machine...")
 			if err := remoteDriver.Unregister(s.registeredPath); err != nil {
 				ui.Error(fmt.Sprintf("Error unregistering VM: %s", err))

@@ -1,19 +1,16 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
 )
 
 func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -32,7 +29,7 @@ func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return nil },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -51,7 +48,7 @@ func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(resourceGroupName string, cancelCh <-chan struct{}) error {
+		delete: func(s multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error {
 			return nil
 		},
 		say:   func(message string) {},

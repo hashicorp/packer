@@ -2,10 +2,11 @@ package docker
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io/ioutil"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // StepTempDir creates a temporary directory that we use in order to

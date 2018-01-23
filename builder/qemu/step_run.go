@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // stepRun runs the virtual machine

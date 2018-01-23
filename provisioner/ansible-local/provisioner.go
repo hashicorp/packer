@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/common/uuid"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
@@ -47,6 +47,9 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// If true, staging directory is removed after executing ansible.
+	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
 
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
@@ -86,7 +89,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.StagingDir == "" {
-		p.config.StagingDir = filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID())
+		p.config.StagingDir = filepath.ToSlash(filepath.Join(DefaultStagingDir, uuid.TimeOrderedUUID()))
 	}
 
 	// Validation
@@ -260,6 +263,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if err := p.executeAnsible(ui, comm); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
+
+	if p.config.CleanStagingDir {
+		ui.Message("Removing staging directory...")
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing staging directory: %s", err)
+		}
+	}
 	return nil
 }
 
@@ -294,9 +304,10 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
-	extraArgs := ""
+	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s\" ",
+		p.config.PackerBuildName, p.config.PackerBuilderType, common.GetHTTPAddr())
 	if len(p.config.ExtraArguments) > 0 {
-		extraArgs = " " + strings.Join(p.config.ExtraArguments, " ")
+		extraArgs = extraArgs + strings.Join(p.config.ExtraArguments, " ")
 	}
 
 	// Fetch external dependencies
@@ -366,15 +377,33 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
+
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
+
 	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status.")
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
+	}
+	return nil
+}
+
+func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("rm -rf '%s'", dir),
+	}
+
+	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
 	}
 	return nil
 }

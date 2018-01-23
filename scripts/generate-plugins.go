@@ -1,7 +1,7 @@
 // Generate Plugins is a small program that updates the lists of plugins in
 // command/plugin.go so they will be compiled into the main packer binary.
 //
-// See https://github.com/mitchellh/packer/pull/2608 for details.
+// See https://github.com/hashicorp/packer/pull/2608 for details.
 package main
 
 import (
@@ -96,15 +96,15 @@ func makeImports(builders, provisioners, postProcessors []plugin) string {
 	plugins := []string{}
 
 	for _, builder := range builders {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", builder.ImportName, filepath.ToSlash(builder.Path)))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", builder.ImportName, filepath.ToSlash(builder.Path)))
 	}
 
 	for _, provisioner := range provisioners {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", provisioner.ImportName, filepath.ToSlash(provisioner.Path)))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", provisioner.ImportName, filepath.ToSlash(provisioner.Path)))
 	}
 
 	for _, postProcessor := range postProcessors {
-		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/mitchellh/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
+		plugins = append(plugins, fmt.Sprintf("\t%s \"github.com/hashicorp/packer/%s\"\n", postProcessor.ImportName, filepath.ToSlash(postProcessor.Path)))
 	}
 
 	// Make things pretty
@@ -238,8 +238,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/packer/plugin"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/plugin"
 
 IMPORTS
 )

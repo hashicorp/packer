@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
+	"sync"
 
 	"github.com/masterzen/winrm/soap"
 )
@@ -114,10 +115,21 @@ func (c *Client) Run(command string, stdout io.Writer, stderr io.Writer) (int, e
 		return 1, err
 	}
 
-	go io.Copy(stdout, cmd.Stdout)
-	go io.Copy(stderr, cmd.Stderr)
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		io.Copy(stdout, cmd.Stdout)
+	}()
+
+	go func() {
+		defer wg.Done()
+		io.Copy(stderr, cmd.Stderr)
+	}()
 
 	cmd.Wait()
+	wg.Wait()
 
 	return cmd.ExitCode(), cmd.err
 }

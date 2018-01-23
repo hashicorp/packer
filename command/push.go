@@ -11,8 +11,9 @@ import (
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
-	"github.com/mitchellh/packer/helper/flag-kv"
-	"github.com/mitchellh/packer/template"
+	"github.com/hashicorp/packer/helper/flag-kv"
+	"github.com/hashicorp/packer/helper/flag-slice"
+	"github.com/hashicorp/packer/template"
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
@@ -42,6 +43,7 @@ func (c *PushCommand) Run(args []string) int {
 	var message string
 	var name string
 	var create bool
+	var sensitiveVars []string
 
 	flags := c.Meta.FlagSet("push", FlagSetVars)
 	flags.Usage = func() { c.Ui.Error(c.Help()) }
@@ -50,6 +52,7 @@ func (c *PushCommand) Run(args []string) int {
 	flags.StringVar(&message, "message", "", "message")
 	flags.StringVar(&name, "name", "", "name")
 	flags.BoolVar(&create, "create", false, "create (deprecated)")
+	flags.Var((*sliceflag.StringFlag)(&sensitiveVars), "sensitive", "")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -177,6 +180,18 @@ func (c *PushCommand) Run(args []string) int {
 	uploadOpts.Builds = make(map[string]*uploadBuildInfo)
 	for _, b := range tpl.Builders {
 		info := &uploadBuildInfo{Type: b.Type}
+		// todo: remove post-migration
+		if b.Type == "vagrant" {
+			c.Ui.Message("\n-----------------------------------------------------------------------------------\n" +
+				"Warning: Vagrant-related functionality will be moved from Terraform Enterprise into \n" +
+				"its own product, Vagrant Cloud. This migration is currently planned for June 27th, \n" +
+				"2017 at 6PM EDT/3PM PDT/10PM UTC. For more information see \n" +
+				"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
+				"In the meantime, you should activate your Vagrant Cloud account and replace your \n" +
+				"Atlas post-processor with the Vagrant Cloud post-processor. See\n" +
+				"https://www.packer.io/docs/post-processors/vagrant-cloud.html for more details." +
+				"-----------------------------------------------------------------------------------\n")
+		}
 
 		// Determine if we're artifacting this build
 		for _, pp := range atlasPPs {
@@ -190,6 +205,12 @@ func (c *PushCommand) Run(args []string) int {
 	}
 
 	// Collect the variables from CLI args and any var files
+	if sf := flags.Lookup("sensitive"); sf != nil {
+		sfv := sf.Value.(*sliceflag.StringFlag)
+		svars := []string(*sfv)
+		uploadOpts.SensitiveVars = svars
+	}
+
 	uploadOpts.Vars = make(map[string]string)
 	if vs := flags.Lookup("var"); vs != nil {
 		f := vs.Value.(*kvflag.Flag)
@@ -289,6 +310,8 @@ Options:
 
   -token=<token>           The access token to use to when uploading
 
+  -sensitive='var1,var2'   List of variables to mark as sensitive in Atlas UI.
+
   -var 'key=value'         Variable for templates, can be used multiple times.
 
   -var-file=path           JSON file containing user variables.
@@ -334,12 +357,19 @@ func (c *PushCommand) upload(
 	}
 
 	// Build the BuildVars struct
-
 	buildVars := atlas.BuildVars{}
 	for k, v := range opts.Vars {
+		isSensitive := false
+		for _, sensitiveVar := range opts.SensitiveVars {
+			if sensitiveVar == k {
+				isSensitive = true
+				break
+			}
+		}
 		buildVars = append(buildVars, atlas.BuildVar{
-			Key:   k,
-			Value: v,
+			Key:       k,
+			Value:     v,
+			Sensitive: isSensitive,
 		})
 	}
 
@@ -367,11 +397,12 @@ func (c *PushCommand) upload(
 }
 
 type uploadOpts struct {
-	URL      string
-	Slug     string
-	Builds   map[string]*uploadBuildInfo
-	Metadata map[string]interface{}
-	Vars     map[string]string
+	URL           string
+	Slug          string
+	Builds        map[string]*uploadBuildInfo
+	Metadata      map[string]interface{}
+	Vars          map[string]string
+	SensitiveVars []string
 }
 
 type uploadBuildInfo struct {

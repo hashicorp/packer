@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
-	"github.com/mitchellh/packer/template"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -154,6 +154,7 @@ func (c *Core) Build(n string) (Build, error) {
 		}
 
 		provisioners = append(provisioners, coreBuildProvisioner{
+			pType:       rawP.Type,
 			provisioner: provisioner,
 			config:      config,
 		})

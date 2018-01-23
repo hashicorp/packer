@@ -3,8 +3,9 @@ description: |
     The Packer compress post-processor takes an artifact with files (such as from
     VMware or VirtualBox) and compresses the artifact into a single archive.
 layout: docs
-page_title: 'Compress Post-Processor'
-...
+page_title: 'Compress - Post-Processors'
+sidebar_current: 'docs-post-processors-compress'
+---
 
 # Compress Post-Processor
 
@@ -34,7 +35,7 @@ you will need to specify the `output` option.
 -   `format` (string) - Disable archive format autodetection and use provided
     string.
 
--   `compression_level` (integer) - Specify the compression level, for
+-   `compression_level` (number) - Specify the compression level, for
     algorithms that support it, from 1 through 9 inclusive. Typically higher
     compression levels take longer but produce smaller files. Defaults to `6`
 
@@ -51,21 +52,21 @@ compress.
 Some minimal examples are shown below, showing only the post-processor
 configuration:
 
-``` {.json}
+``` json
 {
   "type": "compress",
   "output": "archive.tar.lz4"
 }
 ```
 
-``` {.json}
+``` json
 {
   "type": "compress",
   "output": "{{.BuildName}}_bundle.zip"
 }
 ```
 
-``` {.json}
+``` json
 {
   "type": "compress",
   "output": "log_{{.BuildName}}.gz",

@@ -134,6 +134,7 @@ func (d *DownloadClient) Get() (string, error) {
 		if runtime.GOOS == "windows" && len(finalPath) > 0 && finalPath[0] == '/' {
 			finalPath = finalPath[1:]
 		}
+
 		// Keep track of the source so we can make sure not to delete this later
 		sourcePath = finalPath
 		if _, err = os.Stat(finalPath); err != nil {
@@ -205,7 +206,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 	log.Printf("Verifying checksum of %s", path)
 	d.config.Hash.Reset()
 	io.Copy(d.config.Hash, f)
-	return bytes.Compare(d.config.Hash.Sum(nil), d.config.Checksum) == 0, nil
+	return bytes.Equal(d.config.Hash.Sum(nil), d.config.Checksum), nil
 }
 
 // HTTPDownloader is an implementation of Downloader that downloads

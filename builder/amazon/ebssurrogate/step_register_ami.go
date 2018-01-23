@@ -5,16 +5,18 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
 )
 
 // StepRegisterAMI creates the AMI.
 type StepRegisterAMI struct {
-	RootDevice   RootBlockDevice
-	BlockDevices []*ec2.BlockDeviceMapping
-	image        *ec2.Image
+	RootDevice               RootBlockDevice
+	BlockDevices             []*ec2.BlockDeviceMapping
+	EnableAMIENASupport      bool
+	EnableAMISriovNetSupport bool
+	image                    *ec2.Image
 }
 
 func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,16 +27,7 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say("Registering the AMI...")
 
-	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(s.BlockDevices)-1)
-	for _, blockDevice := range s.BlockDevices {
-		if *blockDevice.DeviceName == s.RootDevice.SourceDeviceName {
-			continue
-		}
-
-		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
-	}
-
-	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, s.RootDevice.createBlockDeviceMapping(snapshotId))
+	blockDevicesExcludingRoot := DeduplicateRootVolume(s.BlockDevices, s.RootDevice, snapshotId)
 
 	registerOpts := &ec2.RegisterImageInput{
 		Name:                &config.AMIName,
@@ -44,16 +37,16 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		BlockDeviceMappings: blockDevicesExcludingRoot,
 	}
 
-	if config.AMIEnhancedNetworking {
+	if s.EnableAMISriovNetSupport {
 		// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
-
+	}
+	if s.EnableAMIENASupport {
 		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)
 	}
-
 	registerResp, err := ec2conn.RegisterImage(registerOpts)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error registering AMI: %s", err))
@@ -118,10 +111,25 @@ func (s *StepRegisterAMI) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancelation or error...")
+	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))
 		return
 	}
+}
+
+func DeduplicateRootVolume(BlockDevices []*ec2.BlockDeviceMapping, RootDevice RootBlockDevice, snapshotId string) []*ec2.BlockDeviceMapping {
+	// Defensive coding to make sure we only add the root volume once
+	blockDevicesExcludingRoot := make([]*ec2.BlockDeviceMapping, 0, len(BlockDevices))
+	for _, blockDevice := range BlockDevices {
+		if *blockDevice.DeviceName == RootDevice.SourceDeviceName {
+			continue
+		}
+
+		blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, blockDevice)
+	}
+
+	blockDevicesExcludingRoot = append(blockDevicesExcludingRoot, RootDevice.createBlockDeviceMapping(snapshotId))
+	return blockDevicesExcludingRoot
 }

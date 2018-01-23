@@ -1,10 +1,12 @@
 ---
 description: |
-    The Parallels Packer builder is able to create Parallels Desktop for Mac virtual
-    machines and export them in the PVM format, starting from an ISO image.
+    The Parallels Packer builder is able to create Parallels Desktop for Mac
+    virtual machines and export them in the PVM format, starting from an ISO
+    image.
 layout: docs
-page_title: 'Parallels Builder (from an ISO)'
-...
+page_title: 'Parallels ISO - Builders'
+sidebar_current: 'docs-builders-parallels-iso'
+---
 
 # Parallels Builder (from an ISO)
 
@@ -25,7 +27,7 @@ Here is a basic example. This example is not functional. It will start the OS
 installer but then fail because we don't provide the preseed file for Ubuntu to
 self-install. Still, the example serves to show the basic configuration:
 
-``` {.javascript}
+``` json
 {
   "type": "parallels-iso",
   "guest_os_type": "ubuntu",
@@ -83,10 +85,6 @@ builder.
     and "other". This can be omitted only if `parallels_tools_mode`
     is "disable".
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -102,7 +100,7 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
--   `disk_size` (integer) - The size, in megabytes, of the hard disk to create
+-   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
 -   `disk_type` (string) - The type for image file based virtual disk drives,
@@ -153,7 +151,7 @@ builder.
     will be started. The address and port of the HTTP server will be available
     as variables in `boot_command`. This is covered in more detail below.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
@@ -183,7 +181,7 @@ builder.
 -   `parallels_tools_guest_path` (string) - The path in the virtual machine to
     upload Parallels Tools. This only takes effect if `parallels_tools_mode`
     is "upload". This is a [configuration
-    template](/docs/templates/configuration-templates.html) that has a single
+    template](/docs/templates/engine.html) that has a single
     valid variable: `Flavor`, which will be the value of
     `parallels_tools_flavor`. By default this is "prl-tools-{{.Flavor}}.iso"
     which should upload into the login directory of the user.
@@ -202,7 +200,7 @@ builder.
     itself as an array of strings, where each string represents a single
     argument on the command-line to `prlctl` (but excluding `prlctl` itself).
     Each arg is treated as a [configuration
-    template](/docs/templates/configuration-templates.html), where the `Name`
+    template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use `prlctl`
     are below.
 
@@ -274,19 +272,19 @@ proper key:
 
 -   `<pageUp>` `<pageDown>` - Simulates pressing the page up and page down keys.
 
--   `<leftAlt>` `<rightAlt>`  - Simulates pressing the alt key.
+-   `<leftAlt>` `<rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl>` `<rightCtrl>` - Simulates pressing the ctrl key.
 
 -   `<leftShift>` `<rightShift>` - Simulates pressing the shift key.
 
--   `<leftAltOn>` `<rightAltOn>`  - Simulates pressing and holding the alt key.
+-   `<leftAltOn>` `<rightAltOn>` - Simulates pressing and holding the alt key.
 
 -   `<leftCtrlOn>` `<rightCtrlOn>` - Simulates pressing and holding the ctrl key.
 
 -   `<leftShiftOn>` `<rightShiftOn>` - Simulates pressing and holding the shift key.
 
--   `<leftAltOff>` `<rightAltOff>`  - Simulates releasing a held alt key.
+-   `<leftAltOff>` `<rightAltOff>` - Simulates releasing a held alt key.
 
 -   `<leftCtrlOff>` `<rightCtrlOff>` - Simulates releasing a held ctrl key.
 
@@ -303,7 +301,7 @@ characters as well inside modifiers.
 For example: to simulate ctrl+c use `<leftCtrlOn>c<leftCtrlOff>`.
 
 In addition to the special keys, each command to type is treated as a
-[configuration template](/docs/templates/configuration-templates.html). The
+[template engine](/docs/templates/engine.html). The
 available variables are:
 
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
@@ -314,7 +312,7 @@ available variables are:
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
-``` {.text}
+``` text
 [
   "<esc><esc><enter><wait>",
   "/install/vmlinuz noapic ",
@@ -328,6 +326,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
 ## prlctl Commands
 
 In order to perform extra customization of the virtual machine, a template can
@@ -340,7 +341,7 @@ Extra `prlctl` commands are defined in the template in the `prlctl` section. An
 example is shown below that sets the memory and number of CPUs within the
 virtual machine:
 
-``` {.javascript}
+``` json
 {
   "prlctl": [
     ["set", "{{.Name}}", "--memsize", "1024"],
@@ -354,7 +355,6 @@ executed in the order defined. So in the above example, the memory will be set
 followed by the CPUs.
 
 Each command itself is an array of strings, where each string is an argument to
-`prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/configuration-templates.html). The only available
+`prlctl`. Each argument is treated as a [template engine](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.
