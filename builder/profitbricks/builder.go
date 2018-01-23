@@ -2,11 +2,12 @@ package profitbricks
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 const BuilderId = "packer.profitbricks"

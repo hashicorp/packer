@@ -2,10 +2,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // These are the extensions of files that are important for the function

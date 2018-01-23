@@ -3,11 +3,12 @@ package ecs
 import (
 	"fmt"
 
+	"time"
+
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 type stepAttachKeyPar struct {

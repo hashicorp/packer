@@ -2,9 +2,10 @@ package docker
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os/exec"
 	"strings"
+
+	"github.com/mitchellh/multistep"
 )
 
 type StepConnectDocker struct{}

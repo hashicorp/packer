@@ -1,9 +1,10 @@
 package ovf
 
 import (
+	"testing"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/mitchellh/multistep"
-	"testing"
 )
 
 func TestStepImport_impl(t *testing.T) {

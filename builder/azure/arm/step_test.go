@@ -2,10 +2,11 @@ package arm
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/mitchellh/multistep"
-	"testing"
 )
 
 func TestProcessStepResultShouldContinueForNonErrors(t *testing.T) {

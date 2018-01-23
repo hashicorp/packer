@@ -2,8 +2,9 @@ package docker
 
 import (
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func testStepCommitState(t *testing.T) multistep.StateBag {

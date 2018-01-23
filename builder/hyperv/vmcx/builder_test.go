@@ -5,11 +5,12 @@ import (
 	"reflect"
 	"testing"
 
+	"io/ioutil"
+	"os"
+
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"io/ioutil"
-	"os"
 )
 
 func testConfig() map[string]interface{} {

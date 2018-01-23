@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"log"
+
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver

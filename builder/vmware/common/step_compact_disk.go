@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 // This step compacts the virtual disk for the VM unless the "skip_compaction"

@@ -2,10 +2,11 @@ package iso
 
 import (
 	"fmt"
+	"path/filepath"
+
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"path/filepath"
 )
 
 // This step upload the VMX to the remote host

@@ -2,8 +2,9 @@ package docker
 
 import (
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func testStepRunState(t *testing.T) multistep.StateBag {
