@@ -22,8 +22,9 @@ const StateHalted = "halted"
 // Step is a single step that is part of a potentially large sequence
 // of other steps, responsible for performing some specific action.
 type Step interface {
-	// Run is called to perform the action. The parameter is a "state bag"
-	// of untyped things. Please be very careful about type-checking the
+	// Run is called to perform the action. The passed through context will be
+	// cancelled when the runner is cancelled. The second parameter is a "state
+	// bag" of untyped things. Please be very careful about type-checking the
 	// items in this bag.
 	//
 	// The return value determines whether multi-step sequences continue
