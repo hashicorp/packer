@@ -33,6 +33,7 @@ type Config struct {
 	Password     string   `mapstructure:"password"`
 	ResourcePool string   `mapstructure:"resource_pool"`
 	Username     string   `mapstructure:"username"`
+	VCenterIp    string   `mapstructure:"vcenter_ip"`
 	VMFolder     string   `mapstructure:"vm_folder"`
 	VMName       string   `mapstructure:"vm_name"`
 	VMNetwork    string   `mapstructure:"vm_network"`
@@ -111,13 +112,22 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	password := url.QueryEscape(p.config.Password)
-	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-		url.QueryEscape(p.config.Username),
-		password,
-		p.config.Host,
-		p.config.Datacenter,
-		p.config.Cluster)
-
+	ovftool_uri := ""
+	if p.config.VCenterIp == "" {
+		ovftool_uri = fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
+			url.QueryEscape(p.config.Username),
+			password,
+			p.config.Host,
+			p.config.Datacenter,
+			p.config.Cluster)
+	} else {
+		ovftool_uri = fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
+			url.QueryEscape(p.config.Username),
+			password,
+			p.config.VCenterIp,
+			p.config.Datacenter,
+			p.config.Cluster)
+	}
 	if p.config.ResourcePool != "" {
 		ovftool_uri += "/Resources/" + p.config.ResourcePool
 	}
