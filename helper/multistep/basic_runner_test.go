@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 func TestBasicRunner_ImplRunner(t *testing.T) {
@@ -22,7 +20,7 @@ func TestBasicRunner_Run(t *testing.T) {
 	stepB := &TestStepAcc{Data: "b"}
 
 	r := &BasicRunner{Steps: []Step{stepA, stepB}}
-	r.Run(context.Background(), data)
+	r.Run(data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -55,7 +53,7 @@ func TestBasicRunner_Run_Halt(t *testing.T) {
 	stepC := &TestStepAcc{Data: "c"}
 
 	r := &BasicRunner{Steps: []Step{stepA, stepB, stepC}}
-	r.Run(context.Background(), data)
+	r.Run(data)
 
 	// Test run data
 	expected := []string{"a", "b"}
@@ -88,12 +86,12 @@ func TestBasicRunner_Run_Run(t *testing.T) {
 	stepWait := &TestStepWaitForever{}
 	r := &BasicRunner{Steps: []Step{stepInt, stepWait}}
 
-	go r.Run(context.Background(), new(BasicStateBag))
+	go r.Run(new(BasicStateBag))
 	// wait until really running
 	<-ch
 
 	// now try to run aain
-	r.Run(context.Background(), new(BasicStateBag))
+	r.Run(new(BasicStateBag))
 
 	// should not get here in nominal codepath
 	t.Errorf("Was able to run an already running BasicRunner")
@@ -112,7 +110,7 @@ func TestBasicRunner_Cancel(t *testing.T) {
 	// cancelling an idle Runner is a no-op
 	r.Cancel()
 
-	go r.Run(context.Background(), data)
+	go r.Run(data)
 
 	// Wait until we reach the sync point
 	responseCh := <-ch
@@ -163,7 +161,7 @@ func TestBasicRunner_Cancel_Special(t *testing.T) {
 
 	state := new(BasicStateBag)
 	state.Put("runner", r)
-	r.Run(context.Background(), state)
+	r.Run(state)
 
 	// test that state contains cancelled
 	if _, ok := state.GetOk(StateCancelled); !ok {
