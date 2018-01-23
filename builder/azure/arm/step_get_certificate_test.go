@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -18,7 +19,7 @@ func TestStepGetCertificateShouldFailIfGetFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetCertificate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -38,7 +39,7 @@ func TestStepGetCertificateShouldPassIfGetPasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetCertificate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -65,7 +66,7 @@ func TestStepGetCertificateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepGetCertificate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

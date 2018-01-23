@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -32,7 +33,7 @@ func TestStepOutputDir(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -62,7 +63,7 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 	}
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -90,7 +91,7 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	}
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -109,7 +110,7 @@ func TestStepOutputDir_cancel(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -135,7 +136,7 @@ func TestStepOutputDir_halt(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

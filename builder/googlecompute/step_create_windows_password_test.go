@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -21,7 +22,7 @@ func TestStepCreateOrResetWindowsPassword(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -44,7 +45,7 @@ func TestStepCreateOrResetWindowsPassword_passwordSet(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -63,7 +64,7 @@ func TestStepCreateOrResetWindowsPassword_dontNeedPassword(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -89,7 +90,7 @@ func TestStepCreateOrResetWindowsPassword_debug(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -116,7 +117,7 @@ func TestStepCreateOrResetWindowsPassword_error(t *testing.T) {
 	driver.CreateOrResetWindowsPasswordErr = errors.New("error")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -148,7 +149,7 @@ func TestStepCreateOrResetWindowsPassword_errorOnChannel(t *testing.T) {
 	driver.CreateOrResetWindowsPasswordErrCh = errCh
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

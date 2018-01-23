@@ -1,6 +1,7 @@
 package vmcx
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -534,7 +535,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 		Ctx:         b.config.ctx,
 	}
 
-	ret := step.Run(state)
+	ret := step.Run(context.Background(), state)
 	if ret != multistep.ActionContinue {
 		t.Fatalf("should not have error: %#v", ret)
 	}

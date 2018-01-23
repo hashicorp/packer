@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -23,7 +24,7 @@ func TestStepWaitStartupScript(t *testing.T) {
 	d.GetInstanceMetadataResult = StartupScriptStatusDone
 
 	// Run the step.
-	assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 
 	// Check that GetInstanceMetadata was called properly.
 	assert.Equal(t, d.GetInstanceMetadataZone, testZone, "Incorrect zone passed to GetInstanceMetadata.")

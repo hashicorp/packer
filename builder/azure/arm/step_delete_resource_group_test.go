@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -36,7 +37,7 @@ func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -56,7 +57,7 @@ func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *t
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
-	testSubject.Run(stateBag)
+	testSubject.Run(context.Background(), stateBag)
 
 	value, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
 	if !ok {
