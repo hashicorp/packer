@@ -21,13 +21,13 @@ func TestBuilderAcc_default(t *testing.T) {
 
 func defaultConfig() map[string]interface{} {
 	config := map[string]interface{}{
-		"vcenter_server":      "vcenter.vsphere55.test",
+		"vcenter_server":      "vcenter.vsphere65.test",
 		"username":            "root",
 		"password":            "jetbrains",
 		"insecure_connection": true,
 
 		"template": "alpine",
-		"host":     "esxi-1.vsphere55.test",
+		"host":     "esxi-1.vsphere65.test",
 
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
@@ -200,13 +200,13 @@ func TestBuilderAcc_datastore(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: datastoreConfig(),
-		Check:    checkDatastore(t, "datastore1"), // on esxi-1.vsphere55.test
+		Check:    checkDatastore(t, "datastore1"), // on esxi-1.vsphere65.test
 	})
 }
 
 func datastoreConfig() string {
 	config := defaultConfig()
-	config["template"] = "alpine-host4" // on esxi-4.vsphere55.test
+	config["template"] = "alpine-host4" // on esxi-4.vsphere65.test
 	return renderConfig(config)
 }
 
@@ -249,7 +249,7 @@ func TestBuilderAcc_multipleDatastores(t *testing.T) {
 
 func multipleDatastoresConfig() string {
 	config := defaultConfig()
-	config["host"] = "esxi-4.vsphere55.test" // host with 2 datastores
+	config["host"] = "esxi-4.vsphere65.test" // host with 2 datastores
 	return renderConfig(config)
 }
 
@@ -477,7 +477,7 @@ func renderConfig(config map[string]interface{}) string {
 
 func testConn(t *testing.T) *driver.Driver {
 	d, err := driver.NewDriver(&driver.ConnectConfig{
-		VCenterServer:      "vcenter.vsphere55.test",
+		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           "root",
 		Password:           "jetbrains",
 		InsecureConnection: true,
