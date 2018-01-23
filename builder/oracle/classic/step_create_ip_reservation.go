@@ -24,8 +24,11 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 		Name:       fmt.Sprintf("ipres_%s", config.ImageName),
 	}
 	ipRes, err := iprClient.CreateIPReservation(IPInput)
+
 	if err != nil {
-		log.Printf("Error creating IP Reservation: %s", err)
+		err := fmt.Errorf("Error creating IP Reservation: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 	state.Put("instance_ip", ipRes.IP)
@@ -34,5 +37,5 @@ func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAc
 }
 
 func (s *stepCreateIPReservation) Cleanup(state multistep.StateBag) {
-	// Nothing to do
+	// TODO: delete ip reservation
 }
