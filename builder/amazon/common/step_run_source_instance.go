@@ -179,17 +179,7 @@ func (s *StepRunSourceInstance) Run(_ context.Context, state multistep.StateBag)
 	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go func() {
-		for {
-			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				cancel()
-			}
-		}
-	}()
-
-	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
+	if err := ec2conn.WaitUntilInstanceRunning(describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
