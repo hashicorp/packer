@@ -2,12 +2,13 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.

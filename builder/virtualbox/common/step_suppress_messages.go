@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"log"
 )
 
 // This step sets some variables in VirtualBox so that annoying

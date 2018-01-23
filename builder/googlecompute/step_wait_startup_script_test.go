@@ -1,9 +1,10 @@
 package googlecompute
 
 import (
+	"testing"
+
 	"github.com/mitchellh/multistep"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestStepWaitStartupScript(t *testing.T) {

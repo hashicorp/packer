@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
 )

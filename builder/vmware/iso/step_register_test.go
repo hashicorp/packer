@@ -1,8 +1,9 @@
 package iso
 
 import (
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepRegister_impl(t *testing.T) {

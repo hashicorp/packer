@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"testing"
 
+	"os"
+
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"os"
 )
 
 func testConfig() map[string]interface{} {

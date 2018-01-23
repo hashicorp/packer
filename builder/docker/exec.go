@@ -2,8 +2,6 @@ package docker
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/iochan"
 	"io"
 	"log"
 	"os/exec"
@@ -11,6 +9,9 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/iochan"
 )
 
 func runAndStream(cmd *exec.Cmd, ui packer.Ui) error {

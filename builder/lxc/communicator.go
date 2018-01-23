@@ -2,7 +2,6 @@ package lxc
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type LxcAttachCommunicator struct {

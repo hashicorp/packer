@@ -2,6 +2,7 @@ package oneandone
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"

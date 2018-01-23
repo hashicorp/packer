@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"bufio"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestCommunicatorRPC(t *testing.T) {

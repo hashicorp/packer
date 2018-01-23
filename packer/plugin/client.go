@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	packrpc "github.com/hashicorp/packer/packer/rpc"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +15,9 @@ import (
 	"sync"
 	"time"
 	"unicode"
+
+	"github.com/hashicorp/packer/packer"
+	packrpc "github.com/hashicorp/packer/packer/rpc"
 )
 
 // If this is true, then the "unexpected EOF" panic will not be

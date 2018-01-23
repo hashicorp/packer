@@ -1,8 +1,9 @@
 package googlecompute
 
 import (
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepCheckExistingImage_impl(t *testing.T) {
