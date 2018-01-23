@@ -1,13 +1,13 @@
 package main
 
 import (
-	"testing"
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"encoding/json"
-	"math/rand"
+	"fmt"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"math/rand"
+	"testing"
 )
 
 func TestBuilderAcc_default(t *testing.T) {
@@ -74,7 +74,7 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 			t.Fatalf("Cannot read resource pool name: %v", err)
 		}
 		if poolPath != "" {
-			t.Error("Invalid resource pool: expected '/', got '%v'", poolPath)
+			t.Errorf("Invalid resource pool: expected '/', got '%v'", poolPath)
 		}
 
 		dsr := vmInfo.Datastore[0].Reference()
