@@ -2,9 +2,10 @@ package lxd
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"time"
 )
 
 type stepLxdLaunch struct{}

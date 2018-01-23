@@ -3,10 +3,11 @@ package chroot
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // StepCopyFiles copies some files from the host into the chroot environment.

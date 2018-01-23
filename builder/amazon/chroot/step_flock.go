@@ -2,11 +2,12 @@ package chroot
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/multistep"
 )
 
 // StepFlock provisions the instance within a chroot.

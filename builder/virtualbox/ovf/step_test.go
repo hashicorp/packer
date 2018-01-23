@@ -2,10 +2,11 @@ package ovf
 
 import (
 	"bytes"
+	"testing"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
-	"testing"
 )
 
 func testState(t *testing.T) multistep.StateBag {

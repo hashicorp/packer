@@ -2,8 +2,9 @@ package common
 
 import (
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func TestStepSuppressMessages_impl(t *testing.T) {

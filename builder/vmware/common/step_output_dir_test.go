@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/mitchellh/multistep"
 )
 
 func testOutputDir(t *testing.T) *LocalOutputDir {
