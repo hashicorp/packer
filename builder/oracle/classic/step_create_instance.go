@@ -3,7 +3,6 @@ package classic
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/packer"
@@ -18,53 +17,16 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Say("Creating Instance...")
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
+	keyName := state.Get("key_name").(string)
 
-	// SSH KEY CONFIGURATION
-
-	// grab packer-generated key from statebag context.
-	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
-
-	// form API call to add key to compute cloud
-	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key", config.IdentityDomain, config.Username)
-
-	sshKeysClient := client.SSHKeys()
-	sshKeysInput := compute.CreateSSHKeyInput{
-		Name:    sshKeyName,
-		Key:     sshPublicKey,
-		Enabled: true,
-	}
-
-	// Load the packer-generated SSH key into the Oracle Compute cloud.
-	keyInfo, err := sshKeysClient.CreateSSHKey(&sshKeysInput)
-	if err != nil {
-		// Key already exists; update key instead of creating it
-		if strings.Contains(err.Error(), "packer_generated_key already exists") {
-			updateKeysInput := compute.UpdateSSHKeyInput{
-				Name:    sshKeyName,
-				Key:     sshPublicKey,
-				Enabled: true,
-			}
-			keyInfo, err = sshKeysClient.UpdateSSHKey(&updateKeysInput)
-		} else {
-			err = fmt.Errorf("Problem adding Public SSH key through Oracle's API: %s", err)
-			ui.Error(err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-	}
-
-	// NETWORKING INFO CONFIGURATION
 	ipAddName := fmt.Sprintf("ipres_%s", config.ImageName)
-	log.Printf("MEGAN ipADDName is %s", ipAddName)
-	secListName := "Megan_packer_test"
+	// secListName := "Megan_packer_test" // hack to get working; fix b4 release
+	secListName := state.Get("security_list").(string)
 
 	netInfo := compute.NetworkingInfo{
 		Nat:      []string{ipAddName},
 		SecLists: []string{secListName},
 	}
-	fmt.Sprintf("Megan netInfo is %#v", netInfo)
-
-	// INSTANCE LAUNCH
 
 	// get instances client
 	instanceClient := client.Instances()
@@ -74,7 +36,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 		Name:       config.ImageName,
 		Shape:      config.Shape,
 		ImageList:  config.ImageList,
-		SSHKeys:    []string{keyInfo.Name},
+		SSHKeys:    []string{keyName},
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
 	}
 
@@ -106,6 +68,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		Name: config.ImageName,
 		ID:   imID,
 	}
+	log.Printf("instance destroy input is %#v", input)
 
 	err := instanceClient.DeleteInstance(input)
 	if err != nil {
@@ -114,9 +77,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		state.Put("error", err)
 		return
 	}
-
 	// TODO wait for instance state to change to deleted?
-
 	ui.Say("Terminated instance.")
 	return
 }
