@@ -71,7 +71,7 @@ export PATH=$PATH:$GOPATH/bin
    `go get github.com/hashicorp/packer`. This will download the Packer source to
    `$GOPATH/src/github.com/hashicorp/packer`.
 
-4. When working on Packer, first `cd` into `$GOPATH/src/github.com/hashicorp/packer`
+4. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
    so you can run `make` and easily access other files. Run `make help` to get
    information about make targets.
 
@@ -98,9 +98,9 @@ your changes to your fork, and then open a pull-request.
 For example, my github username is `cbednarski`, so I would do the following:
 
 ```
-$ git checkout -b f-my-feature
+git checkout -b f-my-feature
 # Develop a patch.
-$ git push https://github.com/cbednarski/Packer f-my-feature
+git push https://github.com/cbednarski/Packer f-my-feature
 ```
 
 From there, open your fork in your browser to open a new pull-request.
@@ -150,7 +150,7 @@ not attempt to track the latest version for each dependency.
 You can run tests for individual packages using commands like this:
 
 ```
-$ make test TEST=./builder/amazon/...
+make test TEST=./builder/amazon/...
 ```
 
 #### Running Acceptance Tests
@@ -173,8 +173,8 @@ resources are not accidentally destroyed or overwritten during testing.
 To run the acceptance tests, invoke `make testacc`:
 
 ```
-$ make testacc TEST=./builder/amazon/ebs
-$ ...
+make testacc TEST=./builder/amazon/ebs
+...
 ```
 
 The `TEST` variable lets you narrow the scope of the acceptance tests to a
@@ -185,7 +185,7 @@ take a very long time.
 To run only a specific test, use the `-run` argument:
 
 ```
-$ make testacc TEST=./builder/amazon/ebs TESTARGS="-run TestBuilderAcc_forceDeleteSnapshot"
+make testacc TEST=./builder/amazon/ebs TESTARGS="-run TestBuilderAcc_forceDeleteSnapshot"
 ```
 
 Acceptance tests typically require other environment variables to be set for
