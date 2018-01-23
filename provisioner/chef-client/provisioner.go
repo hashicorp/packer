@@ -63,6 +63,7 @@ type Config struct {
 	SkipCleanNode              bool     `mapstructure:"skip_clean_node"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	SslVerifyMode              string   `mapstructure:"ssl_verify_mode"`
+	TrustedCertsDir            string   `mapstructure:"trusted_certs_dir"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
 	ValidationClientName       string   `mapstructure:"validation_client_name"`
 	ValidationKeyPath          string   `mapstructure:"validation_key_path"`
@@ -83,6 +84,7 @@ type ConfigTemplate struct {
 	NodeName                   string
 	ServerUrl                  string
 	SslVerifyMode              string
+	TrustedCertsDir            string
 	ValidationClientName       string
 	ValidationKeyPath          string
 }
@@ -268,7 +270,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		remoteValidationKeyPath,
 		p.config.ValidationClientName,
 		p.config.ChefEnvironment,
-		p.config.SslVerifyMode)
+		p.config.SslVerifyMode,
+		p.config.TrustedCertsDir)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -283,7 +286,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !(p.config.SkipCleanNode && p.config.SkipCleanClient) {
 
 		knifeConfigPath, knifeErr := p.createKnifeConfig(
-			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
+			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode, p.config.TrustedCertsDir)
 
 		if knifeErr != nil {
 			return fmt.Errorf("Error creating knife config on node: %s", knifeErr)
@@ -341,7 +344,8 @@ func (p *Provisioner) createConfig(
 	remoteKeyPath string,
 	validationClientName string,
 	chefEnvironment string,
-	sslVerifyMode string) (string, error) {
+	sslVerifyMode string,
+	trustedCertsDir string) (string, error) {
 
 	ui.Message("Creating configuration file 'client.rb'")
 
@@ -371,6 +375,7 @@ func (p *Provisioner) createConfig(
 		ValidationClientName:       validationClientName,
 		ChefEnvironment:            chefEnvironment,
 		SslVerifyMode:              sslVerifyMode,
+		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
@@ -386,7 +391,7 @@ func (p *Provisioner) createConfig(
 	return remotePath, nil
 }
 
-func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string) (string, error) {
+func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
 	ui.Message("Creating configuration file 'knife.rb'")
 
 	// Read the template
@@ -394,10 +399,11 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 
 	ctx := p.config.ctx
 	ctx.Data = &ConfigTemplate{
-		NodeName:      nodeName,
-		ServerUrl:     serverUrl,
-		ClientKey:     clientKey,
-		SslVerifyMode: sslVerifyMode,
+		NodeName:        nodeName,
+		ServerUrl:       serverUrl,
+		ClientKey:       clientKey,
+		SslVerifyMode:   sslVerifyMode,
+		TrustedCertsDir: trustedCertsDir,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {
@@ -685,6 +691,9 @@ environment "{{.ChefEnvironment}}"
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
 {{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir "{{.TrustedCertsDir}}"
+{{end}}
 `
 
 var DefaultKnifeTemplate = `
@@ -695,5 +704,8 @@ client_key       "{{.ClientKey}}"
 node_name "{{.NodeName}}"
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
+{{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir "{{.TrustedCertsDir}}"
 {{end}}
 `
