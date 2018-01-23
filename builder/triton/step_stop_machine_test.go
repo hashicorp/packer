@@ -1,6 +1,7 @@
 package triton
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestStepStopMachine(t *testing.T) {
 	machineId := "test-machine-id"
 	state.Put("machine", machineId)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -40,7 +41,7 @@ func TestStepStopMachine_StopMachineError(t *testing.T) {
 
 	driver.StopMachineErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -61,7 +62,7 @@ func TestStepStopMachine_WaitForMachineStoppedError(t *testing.T) {
 
 	driver.WaitForMachineStateErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

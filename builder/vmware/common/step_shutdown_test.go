@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -49,7 +50,7 @@ func TestStepShutdown_command(t *testing.T) {
 
 	resultCh := make(chan multistep.StepAction, 1)
 	go func() {
-		resultCh <- step.Run(state)
+		resultCh <- step.Run(context.Background(), state)
 	}()
 
 	select {
@@ -94,7 +95,7 @@ func TestStepShutdown_noCommand(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -138,7 +139,7 @@ func TestStepShutdown_locks(t *testing.T) {
 
 	resultCh := make(chan multistep.StepAction, 1)
 	go func() {
-		resultCh <- step.Run(state)
+		resultCh <- step.Run(context.Background(), state)
 	}()
 
 	select {

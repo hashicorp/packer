@@ -1,6 +1,8 @@
 package googlecompute
 
 import (
+	"context"
+
 	"github.com/hashicorp/packer/helper/multistep"
 
 	"io/ioutil"
@@ -19,7 +21,7 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -35,7 +37,7 @@ func TestStepCreateSSHKey(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -63,7 +65,7 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 

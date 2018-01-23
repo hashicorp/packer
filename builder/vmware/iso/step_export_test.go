@@ -1,6 +1,7 @@
 package iso
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -18,7 +19,7 @@ func testStepExport_wrongtype_impl(t *testing.T, remoteType string) {
 	config.RemoteType = "foo"
 	state.Put("config", &config)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

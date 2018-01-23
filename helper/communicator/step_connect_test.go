@@ -2,6 +2,7 @@ package communicator
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -23,7 +24,7 @@ func TestStepConnect_none(t *testing.T) {
 	defer step.Cleanup(state)
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 }

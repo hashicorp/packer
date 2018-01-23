@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -26,7 +27,7 @@ func TestStepCreateInstance(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 
 	// Verify state
 	nameRaw, ok := state.GetOk("instance_name")
@@ -67,7 +68,7 @@ func TestStepCreateInstance_fromFamily(t *testing.T) {
 		d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 		// run the step
-		assert.Equal(t, step.Run(state), multistep.ActionContinue, "Step should have passed and continued.")
+		assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
 
 		// cleanup
 		step.Cleanup(state)
@@ -93,7 +94,7 @@ func TestStepCreateInstance_windowsNeedsPassword(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
 	c.Comm.Type = "winrm"
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -142,7 +143,7 @@ func TestStepCreateInstance_windowsPasswordSet(t *testing.T) {
 	config.Comm.WinRMPassword = "password"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -188,7 +189,7 @@ func TestStepCreateInstance_error(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")
@@ -212,7 +213,7 @@ func TestStepCreateInstance_errorOnChannel(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")
@@ -238,7 +239,7 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
 
 	// run the step
-	assert.Equal(t, step.Run(state), multistep.ActionHalt, "Step should have failed and halted.")
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionHalt, "Step should have failed and halted.")
 
 	// Verify state
 	_, ok := state.GetOk("error")

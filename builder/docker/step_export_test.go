@@ -2,6 +2,7 @@ package docker
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -39,7 +40,7 @@ func TestStepExport(t *testing.T) {
 	driver.ExportReader = bytes.NewReader([]byte("data!"))
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -84,7 +85,7 @@ func TestStepExport_error(t *testing.T) {
 	driver.ExportError = errors.New("foo")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

@@ -1,6 +1,7 @@
 package triton
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -14,7 +15,7 @@ func TestStepCreateImageFromMachine(t *testing.T) {
 
 	state.Put("machine", "test-machine-id")
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -36,7 +37,7 @@ func TestStepCreateImageFromMachine_CreateImageFromMachineError(t *testing.T) {
 
 	driver.CreateImageFromMachineErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -59,7 +60,7 @@ func TestStepCreateImageFromMachine_WaitForImageCreationError(t *testing.T) {
 
 	driver.WaitForImageCreationErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
