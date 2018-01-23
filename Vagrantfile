@@ -69,11 +69,6 @@ def configureProviders(vmCfg, cpus: "2", memory: "2048")
 		end
 	end
 
-	vmCfg.vm.provider "virtualbox" do |v|
-		v.memory = memory
-		v.cpus = cpus
-	end
-
 	return vmCfg
 end
 
