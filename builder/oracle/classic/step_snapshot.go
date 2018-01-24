@@ -35,6 +35,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	state.Put("snapshot", snap)
 	ui.Say(fmt.Sprintf("Created snapshot (%s).", snap.Name))
 	return multistep.ActionContinue
 }
