@@ -1,21 +1,20 @@
 package clone
 
 import (
-	"encoding/json"
-	"fmt"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
+
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"math/rand"
 	"testing"
+	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 func TestBuilderAcc_default(t *testing.T) {
 	config := defaultConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
-		Template: renderConfig(config),
+		Template: commonT.RenderConfig(config),
 		Check:    checkDefault(t, config["vm_name"].(string), config["host"].(string), "datastore1"),
 	})
 }
@@ -33,7 +32,7 @@ func defaultConfig() map[string]interface{} {
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 	}
-	config["vm_name"] = fmt.Sprintf("test-%v", rand.Intn(1000))
+	config["vm_name"] = commonT.NewVMName()
 	return config
 }
 
@@ -100,7 +99,7 @@ func TestBuilderAcc_artifact(t *testing.T) {
 	config := defaultConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
-		Template: renderConfig(config),
+		Template: commonT.RenderConfig(config),
 		Check:    checkArtifact(t),
 	})
 }
@@ -133,7 +132,7 @@ func folderConfig() string {
 	config := defaultConfig()
 	config["folder"] = "folder1/folder2"
 	config["linked_clone"] = true // speed up
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
@@ -171,7 +170,7 @@ func resourcePoolConfig() string {
 	config := defaultConfig()
 	config["resource_pool"] = "pool1/pool2"
 	config["linked_clone"] = true // speed up
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
@@ -208,7 +207,7 @@ func TestBuilderAcc_datastore(t *testing.T) {
 func datastoreConfig() string {
 	config := defaultConfig()
 	config["template"] = "alpine-host4" // on esxi-4.vsphere65.test
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkDatastore(t *testing.T, name string) builderT.TestCheckFunc {
@@ -251,7 +250,7 @@ func TestBuilderAcc_multipleDatastores(t *testing.T) {
 func multipleDatastoresConfig() string {
 	config := defaultConfig()
 	config["host"] = "esxi-4.vsphere65.test" // host with 2 datastores
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func TestBuilderAcc_linkedClone(t *testing.T) {
@@ -265,7 +264,7 @@ func TestBuilderAcc_linkedClone(t *testing.T) {
 func linkedCloneConfig() string {
 	config := defaultConfig()
 	config["linked_clone"] = true
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
@@ -303,7 +302,7 @@ func hardwareConfig() string {
 	config["RAM_reservation"] = 1024
 	config["linked_clone"] = true // speed up
 
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkHardware(t *testing.T) builderT.TestCheckFunc {
@@ -358,7 +357,7 @@ func RAMReservationConfig() string {
 	config["RAM_reserve_all"] = true
 	config["linked_clone"] = true // speed up
 
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
@@ -391,7 +390,7 @@ func sshKeyConfig() string {
 	config["ssh_password"] = ""
 	config["ssh_private_key_file"] = "../test-key.pem"
 	config["linked_clone"] = true // speed up
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func TestBuilderAcc_snapshot(t *testing.T) {
@@ -405,7 +404,7 @@ func TestBuilderAcc_snapshot(t *testing.T) {
 func snapshotConfig() string {
 	config := defaultConfig()
 	config["create_snapshot"] = true
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
@@ -439,7 +438,7 @@ func templateConfig() string {
 	config := defaultConfig()
 	config["convert_to_template"] = true
 	config["linked_clone"] = true // speed up
-	return renderConfig(config)
+	return commonT.RenderConfig(config)
 }
 
 func checkTemplate(t *testing.T) builderT.TestCheckFunc {
@@ -458,22 +457,6 @@ func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 
 		return nil
 	}
-}
-
-func renderConfig(config map[string]interface{}) string {
-	t := map[string][]map[string]interface{}{
-		"builders": {
-			map[string]interface{}{
-				"type": "test",
-			},
-		},
-	}
-	for k, v := range config {
-		t["builders"][0][k] = v
-	}
-
-	j, _ := json.Marshal(t)
-	return string(j)
 }
 
 func testConn(t *testing.T) *driver.Driver {
