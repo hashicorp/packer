@@ -89,17 +89,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	/*
-		// Build the artifact and return it
-		artifact := &Artifact{
-			Image:  state.Get("image").(client.Image),
-			Region: b.config.AccessCfg.Region,
-			driver: driver,
-		}
+	// Build the artifact and return it
+	artifact := &Artifact{
+		Snapshot: state.Get("snapshot").(*compute.Snapshot),
+		driver:   client,
+	}
 
-		return artifact, nil
-	*/
-	return nil, nil
+	return artifact, nil
 }
 
 // Cancel terminates a running build.
