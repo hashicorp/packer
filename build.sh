@@ -2,7 +2,7 @@
 
 set -eux
 
-# glide install -v
+glide install -v
 export CGO_ENABLED=0
 export GOARCH=amd64
 mkdir -p bin
