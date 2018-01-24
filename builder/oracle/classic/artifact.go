@@ -1,7 +1,15 @@
 package classic
 
-// Artifact is an artifact implementation that contains a built Custom Image.
+import (
+	"fmt"
+
+	"github.com/hashicorp/go-oracle-terraform/compute"
+)
+
+// Artifact is an artifact implementation that contains a Snapshot.
 type Artifact struct {
+	Snapshot *compute.Snapshot
+	driver   *compute.ComputeClient
 }
 
 // BuilderId uniquely identifies the builder.
@@ -15,13 +23,17 @@ func (a *Artifact) Files() []string {
 	return nil
 }
 
-// Id returns the OCID of the associated Image.
 func (a *Artifact) Id() string {
-	return ""
+	return a.Snapshot.Name
 }
 
 func (a *Artifact) String() string {
-	return ""
+	return fmt.Sprintf("A Snapshot was created: \n"+
+		"Name: %s\n"+
+		"Instance: %s\n"+
+		"MachineImage: %s\n"+
+		"URI: %s",
+		a.Snapshot.Name, a.Snapshot.Instance, a.Snapshot.MachineImage, a.Snapshot.URI)
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -30,5 +42,11 @@ func (a *Artifact) State(name string) interface{} {
 
 // Destroy deletes the custom image associated with the artifact.
 func (a *Artifact) Destroy() error {
-	return nil
+	client := a.driver.Snapshots()
+	mic := a.driver.MachineImages()
+	input := &compute.DeleteSnapshotInput{
+		Snapshot:     a.Snapshot.Name,
+		MachineImage: a.Snapshot.MachineImage,
+	}
+	return client.DeleteSnapshot(mic, input)
 }
