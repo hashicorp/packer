@@ -1,4 +1,4 @@
 #!/bin/sh
 
-export PACKER_ACC=1
-go test -v "$@"
+(cd driver && ./test.sh)
+(cd clone && ./test.sh)

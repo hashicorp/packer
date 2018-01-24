@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"github.com/mitchellh/multistep"
@@ -31,16 +31,16 @@ func (c *ConnectConfig) Prepare() []error {
 }
 
 type StepConnect struct {
-	config *ConnectConfig
+	Config *ConnectConfig
 }
 
 func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 	d, err := driver.NewDriver(&driver.ConnectConfig{
-		VCenterServer:      s.config.VCenterServer,
-		Username:           s.config.Username,
-		Password:           s.config.Password,
-		InsecureConnection: s.config.InsecureConnection,
-		Datacenter:         s.config.Datacenter,
+		VCenterServer:      s.Config.VCenterServer,
+		Username:           s.Config.Username,
+		Password:           s.Config.Password,
+		InsecureConnection: s.Config.InsecureConnection,
+		Datacenter:         s.Config.Datacenter,
 	})
 	if err != nil {
 		state.Put("error", err)
