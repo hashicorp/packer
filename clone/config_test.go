@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func TestMinimalConfig(t *testing.T) {
+func TestCloneConfig_MinimalConfig(t *testing.T) {
 	_, warns, errs := NewConfig(minimalConfig())
 	testConfigOk(t, warns, errs)
 }
 
-func TestMandatoryParameters(t *testing.T) {
+func TestCloneConfig_MandatoryParameters(t *testing.T) {
 	params := []string{"vcenter_server", "username", "password", "template", "vm_name", "host"}
 	for _, param := range params {
 		raw := minimalConfig()
@@ -20,7 +20,7 @@ func TestMandatoryParameters(t *testing.T) {
 	}
 }
 
-func TestTimeout(t *testing.T) {
+func TestCloneConfig_Timeout(t *testing.T) {
 	raw := minimalConfig()
 	raw["shutdown_timeout"] = "3m"
 	conf, warns, err := NewConfig(raw)
@@ -30,7 +30,7 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestRAMReservation(t *testing.T) {
+func TestCloneConfig_RAMReservation(t *testing.T) {
 	raw := minimalConfig()
 	raw["RAM_reservation"] = 1000
 	raw["RAM_reserve_all"] = true
