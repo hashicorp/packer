@@ -1,5 +1,5 @@
 build:
-    image: jetbrainsinfra/golang:1.8.3
+    image: jetbrainsinfra/golang:1.9.2
     volumes:
         - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
     working_dir: /go/src/github.com/jetbrains-infra/packer-builder-vsphere
