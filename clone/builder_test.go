@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestBuilder_ImplementsBuilder(t *testing.T) {
+func TestCloneBuilder_ImplementsBuilder(t *testing.T) {
 	var raw interface{}
 	raw = &Builder{}
 	if _, ok := raw.(packer.Builder); !ok {

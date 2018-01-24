@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestBuilderAcc_default(t *testing.T) {
+func TestISOBuilderAcc_default(t *testing.T) {
 	config := defaultConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -26,7 +26,7 @@ func defaultConfig() map[string]interface{} {
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 
-		"vm_name":   commonT.NewVMName(),
+		"vm_name": commonT.NewVMName(),
 	}
 
 	return config
