@@ -42,11 +42,5 @@ func (a *Artifact) State(name string) interface{} {
 
 // Destroy deletes the custom image associated with the artifact.
 func (a *Artifact) Destroy() error {
-	client := a.driver.Snapshots()
-	mic := a.driver.MachineImages()
-	input := &compute.DeleteSnapshotInput{
-		Snapshot:     a.Snapshot.Name,
-		MachineImage: a.Snapshot.MachineImage,
-	}
-	return client.DeleteSnapshot(mic, input)
+	return nil
 }
