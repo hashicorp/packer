@@ -8,7 +8,7 @@ func TestHostAcc(t *testing.T) {
 	initDriverAcceptanceTest(t)
 
 	d := newTestDriver(t)
-	host, err := d.FindHost(hostName)
+	host, err := d.FindHost(TestHostName)
 	if err != nil {
 		t.Fatalf("Cannot find the default host '%v': %v", "datastore1", err)
 	}
@@ -17,7 +17,7 @@ func TestHostAcc(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot read host properties: %v", err)
 	}
-	if info.Name != hostName {
-		t.Errorf("Wrong host name: expected '%v', got: '%v'", hostName, info.Name)
+	if info.Name != TestHostName {
+		t.Errorf("Wrong host name: expected '%v', got: '%v'", TestHostName, info.Name)
 	}
 }
