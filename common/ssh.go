@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"fmt"
@@ -7,19 +7,20 @@ import (
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
-func commHost(state multistep.StateBag) (string, error) {
+func CommHost(state multistep.StateBag) (string, error) {
 	return state.Get("ip").(string), nil
 }
 
-func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
-	config := state.Get("config").(*Config)
+func SshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
+	comm := state.Get("comm").(*communicator.Config)
 
 	var auth []ssh.AuthMethod
 
-	if config.Comm.SSHPrivateKey != "" {
-		privateKey, err := ioutil.ReadFile(config.Comm.SSHPrivateKey)
+	if comm.SSHPrivateKey != "" {
+		privateKey, err := ioutil.ReadFile(comm.SSHPrivateKey)
 		if err != nil {
 			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
 		}
@@ -32,14 +33,14 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	} else {
 		auth = []ssh.AuthMethod{
-			ssh.Password(config.Comm.SSHPassword),
+			ssh.Password(comm.SSHPassword),
 			ssh.KeyboardInteractive(
-				packerssh.PasswordKeyboardInteractive(config.Comm.SSHPassword)),
+				packerssh.PasswordKeyboardInteractive(comm.SSHPassword)),
 		}
 	}
 
 	clientConfig := &ssh.ClientConfig{
-		User:            config.Comm.SSHUsername,
+		User:            comm.SSHUsername,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	clientConfig.Auth = auth

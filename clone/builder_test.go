@@ -1,4 +1,4 @@
-package main
+package clone
 
 import (
 	"github.com/hashicorp/packer/packer"

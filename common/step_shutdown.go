@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"github.com/mitchellh/multistep"
@@ -34,7 +34,7 @@ func (c *ShutdownConfig) Prepare() []error {
 }
 
 type StepShutdown struct {
-	config *ShutdownConfig
+	Config *ShutdownConfig
 }
 
 func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
@@ -42,13 +42,13 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	if s.config.Command != "" {
+	if s.Config.Command != "" {
 		ui.Say("Executing shutdown command...")
-		log.Printf("Shutdown command: %s", s.config.Command)
+		log.Printf("Shutdown command: %s", s.Config.Command)
 
 		var stdout, stderr bytes.Buffer
 		cmd := &packer.RemoteCmd{
-			Command: s.config.Command,
+			Command: s.Config.Command,
 			Stdout:  &stdout,
 			Stderr:  &stderr,
 		}
@@ -67,8 +67,8 @@ func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	log.Printf("Waiting max %s for shutdown to complete", s.config.Timeout)
-	err := vm.WaitForShutdown(s.config.Timeout)
+	log.Printf("Waiting max %s for shutdown to complete", s.Config.Timeout)
+	err := vm.WaitForShutdown(s.Config.Timeout)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

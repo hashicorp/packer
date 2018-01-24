@@ -1,22 +1,23 @@
-package main
+package clone
 
 import (
-	"github.com/hashicorp/packer/common"
+	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 type Config struct {
-	common.PackerConfig 	`mapstructure:",squash"`
-	ConnectConfig 			`mapstructure:",squash"`
-	CloneConfig 			`mapstructure:",squash"`
-	HardwareConfig 			`mapstructure:",squash"`
-	Comm communicator.Config 	`mapstructure:",squash"`
-	ShutdownConfig         	`mapstructure:",squash"`
-	CreateSnapshot    bool 	`mapstructure:"create_snapshot"`
-	ConvertToTemplate bool 	`mapstructure:"convert_to_template"`
+	packerCommon.PackerConfig `mapstructure:",squash"`
+	common.ConnectConfig      `mapstructure:",squash"`
+	CloneConfig               `mapstructure:",squash"`
+	HardwareConfig            `mapstructure:",squash"`
+	Comm                      communicator.Config `mapstructure:",squash"`
+	common.ShutdownConfig     `mapstructure:",squash"`
+	CreateSnapshot            bool `mapstructure:"create_snapshot"`
+	ConvertToTemplate         bool `mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context
 }

@@ -8,6 +8,6 @@ export GOARCH=amd64
 mkdir -p bin
 rm -f bin/*
 
-GOOS=darwin  go build -o bin/packer-builder-vsphere.macos
-GOOS=linux   go build -o bin/packer-builder-vsphere.linux
-GOOS=windows go build -o bin/packer-builder-vsphere.exe
+GOOS=darwin  go build -o bin/packer-builder-vsphere-clone.macos ./clone
+GOOS=linux   go build -o bin/packer-builder-vsphere-clone.linux ./clone
+GOOS=windows go build -o bin/packer-builder-vsphere-clone.exe   ./clone

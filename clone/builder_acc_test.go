@@ -1,10 +1,11 @@
-package main
+package clone
 
 import (
 	"encoding/json"
 	"fmt"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"github.com/hashicorp/packer/packer"
+	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"math/rand"
 	"testing"
@@ -111,7 +112,7 @@ func checkArtifact(t *testing.T) builderT.TestCheckFunc {
 		}
 
 		artifactRaw := artifacts[0]
-		_, ok := artifactRaw.(*Artifact)
+		_, ok := artifactRaw.(*common.Artifact)
 		if !ok {
 			t.Fatalf("unknown artifact: %#v", artifactRaw)
 		}
@@ -388,7 +389,7 @@ func TestBuilderAcc_sshKey(t *testing.T) {
 func sshKeyConfig() string {
 	config := defaultConfig()
 	config["ssh_password"] = ""
-	config["ssh_private_key_file"] = "test-key.pem"
+	config["ssh_private_key_file"] = "../test-key.pem"
 	config["linked_clone"] = true // speed up
 	return renderConfig(config)
 }
@@ -490,7 +491,7 @@ func testConn(t *testing.T) *driver.Driver {
 
 func getVM(t *testing.T, d *driver.Driver, artifacts []packer.Artifact) *driver.VirtualMachine {
 	artifactRaw := artifacts[0]
-	artifact, _ := artifactRaw.(*Artifact)
+	artifact, _ := artifactRaw.(*common.Artifact)
 
 	vm, err := d.FindVM(artifact.Name)
 	if err != nil {

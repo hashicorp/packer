@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"

@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"github.com/mitchellh/multistep"
@@ -7,14 +7,14 @@ import (
 )
 
 type StepCreateSnapshot struct{
-	createSnapshot bool
+	CreateSnapshot bool
 }
 
 func (s *StepCreateSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	if s.createSnapshot {
+	if s.CreateSnapshot {
 		ui.Say("Creating snapshot...")
 
 		err := vm.CreateSnapshot("Created by Packer")
