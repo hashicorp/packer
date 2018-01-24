@@ -34,6 +34,22 @@ type HardwareConfig struct {
 	NestedHV       bool
 }
 
+type CreateConfig struct {
+	HardwareConfig
+
+	DiskThinProvisioned bool
+	DiskControllerType  string // example: "scsi", "pvscsi"
+
+	Annotation   string
+	Name         string
+	Folder       string
+	Host         string
+	ResourcePool string
+	Datastore    string
+	GuestOS      string // example: otherGuest
+	Overwrite    bool
+}
+
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
 	return &VirtualMachine{
 		vm:     object.NewVirtualMachine(d.client.Client, *ref),
@@ -50,6 +66,75 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 		vm:     vm,
 		driver: d,
 	}, nil
+}
+
+func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
+	createSpec := config.toConfigSpec()
+
+	folder, err := d.FindFolder(config.Folder)
+	if err != nil {
+		return nil, err
+	}
+
+	resourcePool, err := d.FindResourcePool(config.Host, config.ResourcePool)
+	if err != nil {
+		return nil, err
+	}
+
+	host, err := d.FindHost(config.Host)
+	if err != nil {
+		return nil, err
+	}
+
+	datastore, err := d.FindDatastoreOrDefault(config.Datastore)
+	if err != nil {
+		return nil, err
+	}
+
+	if !config.Overwrite {
+		vmxPath := fmt.Sprintf("%s/%s.vmx", config.Name, config.Name)
+		if datastore.FileExists(vmxPath) {
+			dsPath := datastore.ResolvePath(vmxPath)
+			return nil, fmt.Errorf("File '%s' already exists", dsPath)
+		}
+	}
+
+	devices := object.VirtualDeviceList{}
+
+	devices, err = addIDE(devices)
+	if err != nil {
+		return nil, err
+	}
+	devices, err = addDisk(d, devices, config)
+	if err != nil {
+		return nil, err
+	}
+	devices, err = addNetwork(d, devices)
+	if err != nil {
+		return nil, err
+	}
+
+	createSpec.DeviceChange, err = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	if err != nil {
+		return nil, err
+	}
+
+	createSpec.Files = &types.VirtualMachineFileInfo{
+		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
+	}
+
+	task, err := folder.folder.CreateVM(d.ctx, createSpec, resourcePool.pool, host.host)
+	if err != nil {
+		return nil, err
+	}
+	taskInfo, err := task.WaitForResult(d.ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	vmRef := taskInfo.Result.(types.ManagedObjectReference)
+
+	return d.NewVM(&vmRef), nil
 }
 
 func (vm *VirtualMachine) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -82,32 +167,12 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
-	if config.Datastore == "" {
-		host, err := template.driver.FindHost(config.Host)
-		if err != nil {
-			return nil, err
-		}
-
-		info, err := host.Info("datastore")
-		if err != nil {
+	datastore, err := template.driver.FindDatastoreOrDefault(config.Datastore)
+	if err != nil {
 		return nil, err
-		}
-
-		if len(info.Datastore) > 1 {
-			return nil, fmt.Errorf("Target host has several datastores. Specify 'datastore' parameter explicitly")
-		}
-
-		ref := info.Datastore[0].Reference()
-		relocateSpec.Datastore = &ref
-	} else {
-		ds, err := template.driver.FindDatastore(config.Datastore)
-		if err != nil {
-			return nil, err
-		}
-
-		ref := ds.ds.Reference()
-		relocateSpec.Datastore = &ref
 	}
+	datastoreRef := datastore.ds.Reference()
+	relocateSpec.Datastore = &datastoreRef
 
 	var cloneSpec types.VirtualMachineCloneSpec
 	cloneSpec.Location = relocateSpec
@@ -137,8 +202,8 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 		return nil, err
 	}
 
-	ref := info.Result.(types.ManagedObjectReference)
-	vm := template.driver.NewVM(&ref)
+	vmRef := info.Result.(types.ManagedObjectReference)
+	vm := template.driver.NewVM(&vmRef)
 	return vm, nil
 }
 
@@ -152,21 +217,7 @@ func (vm *VirtualMachine) Destroy() error {
 }
 
 func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
-	var confSpec types.VirtualMachineConfigSpec
-	confSpec.NumCPUs = config.CPUs
-	confSpec.MemoryMB = config.RAM
-
-	var cpuSpec types.ResourceAllocationInfo
-	cpuSpec.Reservation = config.CPUReservation
-	cpuSpec.Limit = config.CPULimit
-	confSpec.CpuAllocation = &cpuSpec
-
-	var ramSpec types.ResourceAllocationInfo
-	ramSpec.Reservation = config.RAMReservation
-	confSpec.MemoryAllocation = &ramSpec
-
-	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
-	confSpec.NestedHVEnabled = &config.NestedHV
+	confSpec := config.toConfigSpec()
 
 	if config.DiskSize > 0 {
 		devices, err := vm.vm.Device(vm.driver.ctx)
@@ -179,7 +230,7 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 			return err
 		}
 
-		disk.CapacityInKB = config.DiskSize * 1024 * 1024 // Gb
+		disk.CapacityInKB = convertGiBToKiB(config.DiskSize)
 
 		confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
 			&types.VirtualDeviceConfigSpec{
@@ -193,6 +244,7 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = task.WaitForResult(vm.driver.ctx, nil)
 	return err
 }
@@ -284,4 +336,125 @@ func (vm *VirtualMachine) CreateSnapshot(name string) error {
 
 func (vm *VirtualMachine) ConvertToTemplate() error {
 	return vm.vm.MarkAsTemplate(vm.driver.ctx)
+}
+
+func (config HardwareConfig) toConfigSpec() types.VirtualMachineConfigSpec {
+	var confSpec types.VirtualMachineConfigSpec
+	confSpec.NumCPUs = config.CPUs
+	confSpec.MemoryMB = config.RAM
+
+	var cpuSpec types.ResourceAllocationInfo
+	cpuSpec.Reservation = config.CPUReservation
+	cpuSpec.Limit = config.CPULimit
+	confSpec.CpuAllocation = &cpuSpec
+
+	var ramSpec types.ResourceAllocationInfo
+	ramSpec.Reservation = config.RAMReservation
+	confSpec.MemoryAllocation = &ramSpec
+
+	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
+	confSpec.NestedHVEnabled = &config.NestedHV
+
+	return confSpec
+}
+
+func (config CreateConfig) toConfigSpec() types.VirtualMachineConfigSpec {
+	confSpec := config.HardwareConfig.toConfigSpec()
+	confSpec.Name = config.Name
+	confSpec.Annotation = config.Annotation
+	confSpec.GuestId = config.GuestOS
+	return confSpec
+}
+
+func addDisk(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	device, err := devices.CreateSCSIController(config.DiskControllerType)
+	if err != nil {
+		return nil, err
+	}
+	devices = append(devices, device)
+	controller, err := devices.FindDiskController(devices.Name(device))
+	if err != nil {
+		return nil, err
+	}
+
+	disk := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Key: devices.NewKey(),
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
+			},
+		},
+		CapacityInKB: convertGiBToKiB(config.DiskSize),
+	}
+
+	devices.AssignController(disk, controller)
+	devices = append(devices, disk)
+
+	return devices, nil
+}
+
+func addNetwork(d *Driver, devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
+	network, err := d.finder.DefaultNetwork(d.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	backing, err := network.EthernetCardBackingInfo(d.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	device, err := object.EthernetCardTypes().CreateEthernetCard("", backing)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(devices, device), nil
+}
+
+func addIDE(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
+	ideDevice, err := devices.CreateIDEController()
+	if err != nil {
+		return nil, err
+	}
+	devices = append(devices, ideDevice)
+
+	return devices, nil
+}
+
+func (vm *VirtualMachine) AddCdrom(isoPath string) error {
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+	ide, err := devices.FindIDEController("")
+	if err != nil {
+		return err
+	}
+
+	cdrom, err := devices.CreateCdrom(ide)
+	if err != nil {
+		return err
+	}
+
+	if isoPath != "" {
+		cdrom = devices.InsertIso(cdrom, isoPath)
+	}
+
+	newDevices := object.VirtualDeviceList{cdrom}
+	confSpec := types.VirtualMachineConfigSpec{}
+	confSpec.DeviceChange, err = newDevices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+
+	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+
+	_, err = task.WaitForResult(vm.driver.ctx, nil)
+	return err
+}
+
+func convertGiBToKiB(gib int64) int64 {
+	return gib * 1024 * 1024
 }

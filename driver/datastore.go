@@ -29,6 +29,17 @@ func (d *Driver) FindDatastore(name string) (*Datastore, error) {
 	}, nil
 }
 
+func (d *Driver) FindDatastoreOrDefault(name string) (*Datastore, error) {
+	ds, err := d.finder.DatastoreOrDefault(d.ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	return &Datastore{
+		ds:     ds,
+		driver: d,
+	}, nil
+}
+
 func (ds *Datastore) Info(params ...string) (*mo.Datastore, error) {
 	var p []string
 	if len(params) == 0 {
@@ -42,4 +53,17 @@ func (ds *Datastore) Info(params ...string) (*mo.Datastore, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+func (ds *Datastore) FileExists(path string) bool {
+	_, err := ds.ds.Stat(ds.driver.ctx, path)
+	return err == nil
+}
+
+func (ds *Datastore) Name() string {
+	return ds.ds.Name()
+}
+
+func (ds *Datastore) ResolvePath(path string) string {
+	return ds.ds.Path(path)
 }

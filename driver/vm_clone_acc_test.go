@@ -28,7 +28,7 @@ func TestVMAcc_clone(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.config.Host = hostName
+			tc.config.Host = TestHostName
 			tc.config.Name = newVMName()
 
 			templateName := "alpine"
@@ -45,17 +45,7 @@ func TestVMAcc_clone(t *testing.T) {
 				t.Fatalf("Cannot clone vm '%v': %v", templateName, err)
 			}
 
-			defer func() {
-				log.Printf("[DEBUG] Removing the clone")
-				if err := vm.Destroy(); err != nil {
-					t.Errorf("!!! ERROR REMOVING VM '%v': %v!!!", tc.config.Name, err)
-				}
-
-				// Check that the clone is no longer exists
-				if _, err := d.FindVM(tc.config.Name); err == nil {
-					t.Errorf("!!! STILL CAN FIND VM '%v'. IT MIGHT NOT HAVE BEEN DELETED !!!", tc.config.Name)
-				}
-			}()
+			defer destroyVM(t, vm, tc.config.Name)
 
 			log.Printf("[DEBUG] Running check function")
 			tc.checkFunction(t, vm, tc.config)
@@ -94,8 +84,8 @@ func cloneDefaultCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	if err != nil {
 		t.Fatal("Cannot read host properties: ", err)
 	}
-	if hostInfo.Name != hostName {
-		t.Errorf("Invalid host name: expected '%v', got '%v'", hostName, hostInfo.Name)
+	if hostInfo.Name != TestHostName {
+		t.Errorf("Invalid host name: expected '%v', got '%v'", TestHostName, hostInfo.Name)
 	}
 
 	p := d.NewResourcePool(vmInfo.ResourcePool)
@@ -276,5 +266,17 @@ func startVM(t *testing.T, vm *VirtualMachine, vmName string) (stopper func()) {
 		if err := vm.PowerOff(); err != nil {
 			t.Errorf("Cannot power off started vm '%v': %v", vmName, err)
 		}
+	}
+}
+
+func destroyVM(t *testing.T, vm *VirtualMachine, vmName string) {
+	log.Printf("[DEBUG] Deleting the VM")
+	if err := vm.Destroy(); err != nil {
+		t.Errorf("!!! ERROR DELETING VM '%v': %v!!!", vmName, err)
+	}
+
+	// Check that the clone is no longer exists
+	if _, err := vm.driver.FindVM(vmName); err == nil {
+		t.Errorf("!!! STILL CAN FIND VM '%v'. IT MIGHT NOT HAVE BEEN DELETED !!!", vmName)
 	}
 }
