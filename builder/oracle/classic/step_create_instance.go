@@ -20,7 +20,6 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	keyName := state.Get("key_name").(string)
 
 	ipAddName := fmt.Sprintf("ipres_%s", config.ImageName)
-	// secListName := "Megan_packer_test" // hack to get working; fix b4 release
 	secListName := state.Get("security_list").(string)
 
 	netInfo := compute.NetworkingInfo{
