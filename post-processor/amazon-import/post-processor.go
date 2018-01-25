@@ -34,6 +34,7 @@ type Config struct {
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
 	LicenseType string            `mapstructure:"license_type"`
+	RoleName    string            `mapstructure:"role_name"`
 
 	ctx interpolate.Context
 }
@@ -61,6 +62,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	// Set defaults
 	if p.config.S3Key == "" {
 		p.config.S3Key = "packer-import-{{timestamp}}.ova"
+	}
+
+	if p.config.RoleName == "" {
+		p.config.RoleName = "vmimport"
 	}
 
 	errs := new(packer.MultiError)
@@ -164,6 +169,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
+		RoleName: &p.config.RoleName,
 	}
 
 	if p.config.LicenseType != "" {
