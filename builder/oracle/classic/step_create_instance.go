@@ -62,7 +62,6 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	ui.Say(fmt.Sprintf("Terminating instance (%s)...", imID))
 
 	instanceClient := client.Instances()
-	// Instances Input
 	input := &compute.DeleteInstanceInput{
 		Name: config.ImageName,
 		ID:   imID,
