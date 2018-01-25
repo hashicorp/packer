@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"golang.org/x/crypto/ssh"
 )
 
