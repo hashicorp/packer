@@ -11,7 +11,7 @@ import (
 
 type stepAddKeysToAPI struct{}
 
-func (s *stepAddKeysToAPI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Adding SSH keys to API...")

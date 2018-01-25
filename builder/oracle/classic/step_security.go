@@ -12,7 +12,7 @@ import (
 
 type stepSecurity struct{}
 
-func (s *stepSecurity) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Configuring security lists and rules to enable SSH access...")
