@@ -10,8 +10,8 @@ import (
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // BuilderId uniquely identifies the builder
