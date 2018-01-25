@@ -78,5 +78,4 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	}
 	// TODO wait for instance state to change to deleted?
 	ui.Say("Terminated instance.")
-	return
 }

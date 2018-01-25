@@ -92,6 +92,4 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 		ui.Say(fmt.Sprintf("Error deleting the packer-generated security list %s; "+
 			"please delete manually. (error : %s)", secListName, err.Error()))
 	}
-
-	return
 }
