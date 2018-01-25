@@ -71,23 +71,26 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*compute.ComputeClient)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting the packer-generated security rules and lists...")
-	// delete security list that Packer generated
-	secListName := state.Get("security_list").(string)
-	secListClient := client.SecurityLists()
-	input := compute.DeleteSecurityListInput{Name: secListName}
-	err := secListClient.DeleteSecurityList(&input)
-	if err != nil {
-		ui.Say(fmt.Sprintf("Error deleting the packer-generated security list %s; "+
-			"please delete manually. (error : %s)", secListName, err.Error()))
-	}
+
 	// delete security rules that Packer generated
 	secRuleName := state.Get("security_rule_name").(string)
 	secRulesClient := client.SecRules()
 	ruleInput := compute.DeleteSecRuleInput{Name: secRuleName}
-	err = secRulesClient.DeleteSecRule(&ruleInput)
+	err := secRulesClient.DeleteSecRule(&ruleInput)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Error deleting the packer-generated security rule %s; "+
 			"please delete manually. (error: %s)", secRuleName, err.Error()))
 	}
+
+	// delete security list that Packer generated
+	secListName := state.Get("security_list").(string)
+	secListClient := client.SecurityLists()
+	input := compute.DeleteSecurityListInput{Name: secListName}
+	err = secListClient.DeleteSecurityList(&input)
+	if err != nil {
+		ui.Say(fmt.Sprintf("Error deleting the packer-generated security list %s; "+
+			"please delete manually. (error : %s)", secListName, err.Error()))
+	}
+
 	return
 }
