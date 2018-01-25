@@ -64,10 +64,6 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		p.config.S3Key = "packer-import-{{timestamp}}.ova"
 	}
 
-	if p.config.RoleName == "" {
-		p.config.RoleName = "vmimport"
-	}
-
 	errs := new(packer.MultiError)
 
 	// Check and render s3_key_name
@@ -169,7 +165,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-		RoleName: &p.config.RoleName,
+	}
+
+	if p.config.RoleName != "" {
+		params.SetRoleName(p.config.RoleName)
 	}
 
 	if p.config.LicenseType != "" {
