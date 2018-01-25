@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 // Fusion5Driver is a driver that can run VMware Fusion 5.

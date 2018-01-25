@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // These are the extensions of files that are important for the function
@@ -24,7 +25,7 @@ var KeepFileExtensions = []string{".nvram", ".vmdk", ".vmsd", ".vmx", ".vmxf"}
 //   <nothing>
 type StepCleanFiles struct{}
 
-func (StepCleanFiles) Run(state multistep.StateBag) multistep.StepAction {
+func (StepCleanFiles) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
 

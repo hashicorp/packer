@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestProcessStepResultShouldContinueForNonErrors(t *testing.T) {

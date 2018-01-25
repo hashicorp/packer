@@ -2,13 +2,14 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepMountExtra mounts the attached device.
@@ -19,7 +20,7 @@ type StepMountExtra struct {
 	mounts []string
 }
 
-func (s *StepMountExtra) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountExtra) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)

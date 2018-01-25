@@ -1,21 +1,22 @@
 package lxc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepWaitInit struct {
 	WaitTimeout time.Duration
 }
 
-func (s *StepWaitInit) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitInit) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var err error

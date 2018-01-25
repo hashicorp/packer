@@ -962,12 +962,6 @@
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
-			"checksumSHA1": "5x1RX5m8SCkCRLyLL8wBc0qJpV8=",
-			"path": "github.com/mitchellh/multistep",
-			"revision": "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d",
-			"revisionTime": "2017-03-16T18:53:39Z"
-		},
-		{
 			"checksumSHA1": "m2L8ohfZiFRsMW3iynaH/TWgnSY=",
 			"path": "github.com/mitchellh/panicwrap",
 			"revision": "fce601fe55579125e1b3cb0b992287e7290f7b83",
@@ -1227,14 +1221,16 @@
 			"revisionTime": "2017-02-08T20:51:15Z"
 		},
 		{
-			"checksumSHA1": "5ARrN3Zq+E9zazFb/N+b08Serys=",
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"path": "golang.org/x/net/context",
-			"revision": "6ccd6698c634f5d835c40c1c31848729e0cecda1"
+			"revision": "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec",
+			"revisionTime": "2018-01-12T01:53:59Z"
 		},
 		{
-			"checksumSHA1": "tHFno3QaRarH85A4DV1FYuWATQI=",
+			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
 			"path": "golang.org/x/net/context/ctxhttp",
-			"revision": "6ccd6698c634f5d835c40c1c31848729e0cecda1"
+			"revision": "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec",
+			"revisionTime": "2018-01-12T01:53:59Z"
 		},
 		{
 			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",

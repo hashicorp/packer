@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -10,8 +11,8 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -21,7 +22,7 @@ type stepKeyPair struct {
 	PrivateKeyFile string
 }
 
-func (s *stepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

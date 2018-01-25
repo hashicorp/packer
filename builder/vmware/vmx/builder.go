@@ -9,8 +9,8 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // Builder implements packer.Builder and builds the actual VMware

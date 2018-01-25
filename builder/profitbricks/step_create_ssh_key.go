@@ -1,13 +1,14 @@
 package profitbricks
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -16,7 +17,7 @@ type StepCreateSSHKey struct {
 	DebugKeyPath string
 }
 
-func (s *StepCreateSSHKey) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 

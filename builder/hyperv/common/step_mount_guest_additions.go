@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepMountGuestAdditions struct {
@@ -14,7 +15,7 @@ type StepMountGuestAdditions struct {
 	Generation         uint
 }
 
-func (s *StepMountGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.GuestAdditionsMode != "attach" {

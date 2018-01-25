@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step removes any devices (floppy disks, ISOs, etc.) from the
@@ -20,7 +21,7 @@ import (
 // Produces:
 type StepRemoveDevices struct{}
 
-func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

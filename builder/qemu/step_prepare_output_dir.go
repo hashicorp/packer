@@ -1,17 +1,18 @@
 package qemu
 
 import (
+	"context"
 	"log"
 	"os"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepPrepareOutputDir struct{}
 
-func (stepPrepareOutputDir) Run(state multistep.StateBag) multistep.StepAction {
+func (stepPrepareOutputDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

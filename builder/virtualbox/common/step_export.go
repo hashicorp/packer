@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step cleans up forwarded ports and exports the VM to an OVF.
@@ -25,7 +26,7 @@ type StepExport struct {
 	SkipExport     bool
 }
 
-func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

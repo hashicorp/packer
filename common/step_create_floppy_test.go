@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 const TestFixtures = "test-fixtures"
@@ -89,7 +90,7 @@ func TestStepCreateFloppy(t *testing.T) {
 	}
 
 	for _, step.Files = range lists {
-		if action := step.Run(state); action != multistep.ActionContinue {
+		if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 			t.Fatalf("bad action: %#v for %v", action, step.Files)
 		}
 
@@ -140,7 +141,7 @@ func xxxTestStepCreateFloppy_missing(t *testing.T) {
 	}
 
 	for _, step.Files = range lists {
-		if action := step.Run(state); action != multistep.ActionHalt {
+		if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 			t.Fatalf("bad action: %#v for %v", action, step.Files)
 		}
 
@@ -190,7 +191,7 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 	}
 
 	for _, step.Files = range lists {
-		if action := step.Run(state); action != multistep.ActionContinue {
+		if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 			t.Fatalf("bad action: %#v for %v", action, step.Files)
 		}
 
@@ -265,7 +266,7 @@ func TestStepCreateFloppyDirectories(t *testing.T) {
 			log.Println(fmt.Sprintf("Trying against floppy_dirs : %v", step.Directories))
 
 			// run the step
-			if action := step.Run(state); action != multistep.ActionContinue {
+			if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 				t.Fatalf("bad action: %#v for %v : %v", action, step.Directories, state.Get("error"))
 			}
 
