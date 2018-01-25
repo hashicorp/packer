@@ -1,13 +1,14 @@
 package ebsvolume
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type stepTagEBSVolumes struct {
@@ -15,7 +16,7 @@ type stepTagEBSVolumes struct {
 	Ctx           interpolate.Context
 }
 
-func (s *stepTagEBSVolumes) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTagEBSVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	sourceAMI := state.Get("source_image").(*ec2.Image)

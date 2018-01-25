@@ -1,20 +1,21 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"time"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepAttachKeyPar struct {
 }
 
-func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachKeyPar) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	keyPairName := state.Get("keyPair").(string)
 	if keyPairName == "" {
 		return multistep.ActionContinue

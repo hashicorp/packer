@@ -2,19 +2,20 @@ package lxc
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepLxcCreate struct{}
 
-func (s *stepLxcCreate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepLxcCreate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

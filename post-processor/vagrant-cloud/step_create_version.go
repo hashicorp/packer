@@ -1,10 +1,11 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type Version struct {
@@ -15,7 +16,7 @@ type Version struct {
 type stepCreateVersion struct {
 }
 
-func (s *stepCreateVersion) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVersion) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)

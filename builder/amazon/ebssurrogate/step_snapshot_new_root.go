@@ -1,14 +1,15 @@
 package ebssurrogate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepSnapshotNewRootVolume creates a snapshot of the created volume.
@@ -20,7 +21,7 @@ type StepSnapshotNewRootVolume struct {
 	snapshotId        string
 }
 
-func (s *StepSnapshotNewRootVolume) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSnapshotNewRootVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ec2.Instance)

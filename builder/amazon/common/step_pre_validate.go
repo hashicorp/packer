@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepPreValidate provides an opportunity to pre-validate any configuration for
@@ -17,7 +18,7 @@ type StepPreValidate struct {
 	ForceDeregister bool
 }
 
-func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if s.ForceDeregister {
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")

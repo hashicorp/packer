@@ -1,11 +1,12 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the actual virtual machine.
@@ -16,7 +17,7 @@ type stepCreateVM struct {
 	vmName string
 }
 
-func (s *stepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(parallelscommon.Driver)

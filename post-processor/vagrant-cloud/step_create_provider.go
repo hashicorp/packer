@@ -1,10 +1,11 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type Provider struct {
@@ -18,7 +19,7 @@ type stepCreateProvider struct {
 	name string // the name of the provider
 }
 
-func (s *stepCreateProvider) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateProvider) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)

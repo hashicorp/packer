@@ -9,7 +9,7 @@ import (
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	gossh "golang.org/x/crypto/ssh"
 )
 

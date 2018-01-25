@@ -1,6 +1,7 @@
 package communicator
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,8 +12,8 @@ import (
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/net/proxy"
@@ -29,7 +30,7 @@ type StepConnectSSH struct {
 	SSHPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator

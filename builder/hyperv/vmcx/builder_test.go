@@ -1,6 +1,7 @@
 package vmcx
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -9,8 +10,8 @@ import (
 	"os"
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 func testConfig() map[string]interface{} {
@@ -534,7 +535,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 		Ctx:         b.config.ctx,
 	}
 
-	ret := step.Run(state)
+	ret := step.Run(context.Background(), state)
 	if ret != multistep.ActionContinue {
 		t.Fatalf("should not have error: %#v", ret)
 	}

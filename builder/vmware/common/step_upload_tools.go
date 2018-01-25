@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type toolsUploadPathTemplate struct {
@@ -20,7 +21,7 @@ type StepUploadTools struct {
 	Ctx               interpolate.Context
 }
 
-func (c *StepUploadTools) Run(state multistep.StateBag) multistep.StepAction {
+func (c *StepUploadTools) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 
 	if c.ToolsUploadFlavor == "" {

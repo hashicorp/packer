@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRunSourceInstance struct {
@@ -35,7 +36,7 @@ type StepRunSourceInstance struct {
 	instanceId string
 }
 
-func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSourceInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	var keyName string
 	if name, ok := state.GetOk("keyPair"); ok {

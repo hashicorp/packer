@@ -1,13 +1,14 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepFlock provisions the instance within a chroot.
@@ -18,7 +19,7 @@ type StepFlock struct {
 	fh *os.File
 }
 
-func (s *StepFlock) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepFlock) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	lockfile := "/var/lock/packer-chroot/lock"

@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepProvision runs the provisioners.
@@ -21,7 +22,7 @@ type StepProvision struct {
 	Comm packer.Communicator
 }
 
-func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := s.Comm
 	if comm == nil {
 		raw, ok := state.Get("communicator").(packer.Communicator)

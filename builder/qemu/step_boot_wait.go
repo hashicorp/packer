@@ -1,17 +1,18 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // stepBootWait waits the configured time period.
 type stepBootWait struct{}
 
-func (s *stepBootWait) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepBootWait) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

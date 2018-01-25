@@ -1,6 +1,7 @@
 package multistep
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 )
@@ -19,28 +20,29 @@ type BasicRunner struct {
 	// modified.
 	Steps []Step
 
-	cancelCh chan struct{}
-	doneCh   chan struct{}
-	state    runState
-	l        sync.Mutex
+	cancel context.CancelFunc
+	doneCh chan struct{}
+	state  runState
+	l      sync.Mutex
 }
 
 func (b *BasicRunner) Run(state StateBag) {
+	ctx, cancel := context.WithCancel(context.Background())
+
 	b.l.Lock()
 	if b.state != stateIdle {
 		panic("already running")
 	}
 
-	cancelCh := make(chan struct{})
 	doneCh := make(chan struct{})
-	b.cancelCh = cancelCh
+	b.cancel = cancel
 	b.doneCh = doneCh
 	b.state = stateRunning
 	b.l.Unlock()
 
 	defer func() {
 		b.l.Lock()
-		b.cancelCh = nil
+		b.cancel = nil
 		b.doneCh = nil
 		b.state = stateIdle
 		close(doneCh)
@@ -51,7 +53,7 @@ func (b *BasicRunner) Run(state StateBag) {
 	// as quickly as possible into the state bag to mark it.
 	go func() {
 		select {
-		case <-cancelCh:
+		case <-ctx.Done():
 			// Flag cancel and wait for finish
 			state.Put(StateCancelled, true)
 			<-doneCh
@@ -67,7 +69,7 @@ func (b *BasicRunner) Run(state StateBag) {
 			break
 		}
 
-		action := step.Run(state)
+		action := step.Run(ctx, state)
 		defer step.Cleanup(state)
 
 		if _, ok := state.GetOk(StateCancelled); ok {
@@ -90,7 +92,7 @@ func (b *BasicRunner) Cancel() {
 		return
 	case stateRunning:
 		// Running, so mark that we cancelled and set the state
-		close(b.cancelCh)
+		b.cancel()
 		b.state = stateCancelling
 		fallthrough
 	case stateCancelling:
