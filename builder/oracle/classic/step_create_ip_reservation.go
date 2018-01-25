@@ -11,7 +11,7 @@ import (
 
 type stepCreateIPReservation struct{}
 
-func (s *stepCreateIPReservation) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating IP reservation...")
 	config := state.Get("config").(*Config)

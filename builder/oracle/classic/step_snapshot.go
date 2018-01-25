@@ -10,7 +10,7 @@ import (
 
 type stepSnapshot struct{}
 
-func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Snapshot...")
