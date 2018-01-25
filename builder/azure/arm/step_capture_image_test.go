@@ -1,12 +1,13 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
@@ -26,7 +27,7 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepCaptureImage()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -51,7 +52,7 @@ func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepCaptureImage()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -91,7 +92,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepCaptureImage()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

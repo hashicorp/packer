@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,10 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/go-fs"
 	"github.com/mitchellh/go-fs/fat"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateFloppy will create a floppy disk with the given files.
@@ -26,7 +27,7 @@ type StepCreateFloppy struct {
 	FilesAdded map[string]bool
 }
 
-func (s *StepCreateFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.Files) == 0 && len(s.Directories) == 0 {
 		log.Println("No floppy files specified. Floppy disk will not be made.")
 		return multistep.ActionContinue

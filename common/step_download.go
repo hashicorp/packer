@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -45,7 +46,7 @@ type StepDownload struct {
 	Extension string
 }
 
-func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	cache := state.Get("cache").(packer.Cache)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -1,12 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the virtual disks for the VM.
@@ -20,7 +21,7 @@ import (
 //   full_disk_path (string) - The full path to the created disk.
 type stepCreateDisk struct{}
 
-func (stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)

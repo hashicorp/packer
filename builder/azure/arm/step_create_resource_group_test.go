@@ -1,12 +1,13 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCreateResourceGroupShouldFailIfBothGroupNames(t *testing.T) {
@@ -26,7 +27,7 @@ func TestStepCreateResourceGroupShouldFailIfBothGroupNames(t *testing.T) {
 		error:  func(e error) {},
 		exists: func(string) (bool, error) { return false, nil },
 	}
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -46,7 +47,7 @@ func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -66,7 +67,7 @@ func TestStepCreateResourceGroupShouldFailIfExistsFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -86,7 +87,7 @@ func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -114,7 +115,7 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
@@ -152,7 +153,7 @@ func TestStepCreateResourceGroupMarkShouldFailIfTryingExistingButDoesntExist(t *
 
 	stateBag := createTestExistingStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -172,7 +173,7 @@ func TestStepCreateResourceGroupMarkShouldFailIfTryingTempButExist(t *testing.T)
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}

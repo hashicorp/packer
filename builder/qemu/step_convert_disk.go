@@ -1,11 +1,12 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 
 	"os"
 )
@@ -14,7 +15,7 @@ import (
 // hard drive for the virtual machine.
 type stepConvertDisk struct{}
 
-func (s *stepConvertDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConvertDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	diskName := state.Get("disk_filename").(string)
