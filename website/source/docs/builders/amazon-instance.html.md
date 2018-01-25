@@ -485,5 +485,27 @@ Additionally, `{{.Token}}` is available when overriding this command. You must
 create your own bundle command with the addition of `-t {{.Token}} ` if you are
 assuming a role.
 
-~&gt; **Note:** If using IAM roles to run `ec2-upload-bundle`, make sure the
-role has the `s3:GetBucketLocation` and `s3:PutObjectAcl` permissions.
+#### Bundle Upload Permissions
+
+The `ec2-upload-bundle` requires a policy document that looks something like this:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+You may wish to constrain the resource to a specific bucket.
