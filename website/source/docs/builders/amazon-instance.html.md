@@ -484,3 +484,6 @@ parameters they're used to satisfy the `ec2-upload-bundle` command.
 Additionally, `{{.Token}}` is available when overriding this command. You must
 create your own bundle command with the addition of `-t {{.Token}} ` if you are
 assuming a role.
+
+~&gt; **Note:** If using IAM roles to run `ec2-upload-bundle`, make sure the
+role has the `s3:GetBucketLocation` and `s3:PutObjectAcl` permissions.
