@@ -49,7 +49,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	}
 
 	state.Put("instance_id", instanceInfo.ID)
-	ui.Say(fmt.Sprintf("Created instance (%s).", instanceInfo.ID))
+	ui.Message(fmt.Sprintf("Created instance: %s.", instanceInfo.ID))
 	return multistep.ActionContinue
 }
 
@@ -60,7 +60,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(*Config)
 	imID := state.Get("instance_id").(string)
 
-	ui.Say(fmt.Sprintf("Terminating instance (%s)...", imID))
+	ui.Say("Terminating source instance...")
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
