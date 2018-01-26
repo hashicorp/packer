@@ -16,7 +16,6 @@ type stepAddKeysToAPI struct{}
 func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Adding SSH keys to API...")
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 
@@ -31,6 +30,8 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	}
 	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key_%s",
 		config.IdentityDomain, config.Username, uuid_string)
+
+	ui.Say(fmt.Sprintf("Creating temporary key: %s", sshKeyName))
 
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
