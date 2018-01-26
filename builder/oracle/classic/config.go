@@ -15,8 +15,6 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	Access *AccessConfig
-
 	// Access config overrides
 	Username       string `mapstructure:"username"`
 	Password       string `mapstructure:"password"`
