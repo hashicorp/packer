@@ -3,7 +3,6 @@ package classic
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -33,7 +32,6 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 	state.Put("instance_ip", ipRes.IP)
-	log.Printf("debug: ipRes is %#v", ipRes)
 	return multistep.ActionContinue
 }
 
