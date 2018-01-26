@@ -21,7 +21,7 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 	// TODO: add optional Name and Tags
 
 	ipresName := fmt.Sprintf("ipres_%s_%s", config.ImageName, uuid.TimeOrderedUUID())
-	ui.Say(fmt.Sprintf("Creating temporary IP reservation: %s", ipresName))
+	ui.Message(fmt.Sprintf("Creating temporary IP reservation: %s", ipresName))
 
 	IPInput := &compute.CreateIPReservationInput{
 		ParentPool: compute.PublicReservationPool,
@@ -43,7 +43,7 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 
 func (s *stepCreateIPReservation) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
-	ui.Message("Cleaning up IP reservations...")
+	ui.Say("Cleaning up IP reservations...")
 	client := state.Get("client").(*compute.ComputeClient)
 
 	ipResName := state.Get("ipres_name").(string)
