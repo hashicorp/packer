@@ -13,15 +13,19 @@ type stepCreateIPReservation struct{}
 
 func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Creating IP reservation...")
+
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 	iprClient := client.IPReservations()
 	// TODO: add optional Name and Tags
+
+	ipresName := fmt.Sprintf("ipres_%s", config.ImageName)
+	ui.Say(fmt.Sprintf("Creating IP reservation: %s", ipresName))
+
 	IPInput := &compute.CreateIPReservationInput{
 		ParentPool: compute.PublicReservationPool,
 		Permanent:  true,
-		Name:       fmt.Sprintf("ipres_%s", config.ImageName),
+		Name:       ipresName,
 	}
 	ipRes, err := iprClient.CreateIPReservation(IPInput)
 
@@ -32,6 +36,7 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 	state.Put("instance_ip", ipRes.IP)
+	state.Put("ipres_name", ipresName)
 	return multistep.ActionContinue
 }
 

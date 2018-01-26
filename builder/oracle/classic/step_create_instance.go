@@ -16,11 +16,11 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Instance...")
+
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.ComputeClient)
 	keyName := state.Get("key_name").(string)
-
-	ipAddName := fmt.Sprintf("ipres_%s", config.ImageName)
+	ipAddName := state.Get("ipres_name").(string)
 	secListName := state.Get("security_list").(string)
 
 	netInfo := compute.NetworkingInfo{
