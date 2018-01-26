@@ -51,11 +51,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing API Endpoint: %s", err)
 	}
-	// set default source list
+	// Set default source list
 	if c.SSHSourceList == "" {
 		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
-
+	// Use default oracle username with sudo privileges
 	if c.Comm.SSHUsername == "" {
 		c.Comm.SSHUsername = "opc"
 	}
