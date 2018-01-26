@@ -981,9 +981,10 @@
 			"revision": "87b45ffd0e9581375c491fef3d32130bb15c5bd7"
 		},
 		{
-			"checksumSHA1": "4Js6Jlu93Wa0o6Kjt393L9Z7diE=",
+			"checksumSHA1": "1JtAhgmRN0x794LRNhs0DJ5t8io=",
 			"path": "github.com/mitchellh/mapstructure",
-			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
+			"revision": "b4575eea38cca1123ec2dc90c26529b5c5acfcff",
+			"revisionTime": "2018-01-11T00:07:20Z"
 		},
 		{
 			"checksumSHA1": "m2L8ohfZiFRsMW3iynaH/TWgnSY=",
