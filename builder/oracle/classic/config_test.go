@@ -54,6 +54,6 @@ func TestValidationsIgnoresOptional(t *testing.T) {
 	delete(tc, "ssh_username")
 	_, err := NewConfig(tc)
 	if err != nil {
-		t.Fatalf("Test shouldn't care if ssh_username is missing: err: %#v", err.Error())
+		t.Fatalf("Shouldn't care if ssh_username is missing: err: %#v", err.Error())
 	}
 }
