@@ -56,6 +56,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
 
+	if c.Comm.SSHUsername == "" {
+		c.Comm.SSHUsername = "opc"
+	}
+
 	// Validate that all required fields are present
 	var errs *packer.MultiError
 	required := map[string]string{
@@ -74,6 +78,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, errs
 	}
 
 	return c, nil
