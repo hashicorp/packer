@@ -54,7 +54,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 		config.IdentityDomain, config.Username, config.ImageName)
 	_, err = secRulesClient.CreateSecRule(&secRulesInput)
 	if err != nil {
-		log.Printf(err.Error())
+		log.Printf("Error creating security rule to allow SSH: %s", err.Error())
 		if !strings.Contains(err.Error(), "already exists") {
 			err = fmt.Errorf("Error creating security rule to"+
 				" allow Packer to connect to Oracle instance via SSH: %s", err)
