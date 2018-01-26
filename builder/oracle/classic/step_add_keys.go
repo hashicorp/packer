@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
+	uuid "github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -23,7 +24,13 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
 
 	// form API call to add key to compute cloud
-	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key", config.IdentityDomain, config.Username)
+	uuid_string, err := uuid.GenerateUUID()
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error creating unique SSH key name: %s", err.Error()))
+		return multistep.ActionHalt
+	}
+	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key_%s",
+		config.IdentityDomain, config.Username, uuid_string)
 
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
@@ -35,25 +42,26 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	// Load the packer-generated SSH key into the Oracle Compute cloud.
 	keyInfo, err := sshKeysClient.CreateSSHKey(&sshKeysInput)
 	if err != nil {
-		// Key already exists; update key instead of creating it
-		if strings.Contains(err.Error(), "packer_generated_key already exists") {
-			updateKeysInput := compute.UpdateSSHKeyInput{
-				Name:    sshKeyName,
-				Key:     sshPublicKey,
-				Enabled: true,
-			}
-			keyInfo, err = sshKeysClient.UpdateSSHKey(&updateKeysInput)
-		} else {
-			err = fmt.Errorf("Problem adding Public SSH key through Oracle's API: %s", err)
-			ui.Error(err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
+		err = fmt.Errorf("Problem adding Public SSH key through Oracle's API: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
 	state.Put("key_name", keyInfo.Name)
 	return multistep.ActionContinue
 }
 
 func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
-	// Nothing to do
+	// Delete the keys we created during this run
+	keyName := state.Get("key_name").(string)
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Deleting SSH keys...")
+	deleteInput := compute.DeleteSSHKeyInput{Name: keyName}
+	client := state.Get("client").(*compute.ComputeClient)
+	deleteClient := client.SSHKeys()
+	err := deleteClient.DeleteSSHKey(&deleteInput)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting SSH keys: %s", err.Error()))
+	}
+	return
 }
