@@ -35,8 +35,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-
-	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING")) != ""
+	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING") != ""
 	httpClient := cleanhttp.DefaultClient()
 	config := &opc.Config{
 		Username:       opc.String(b.config.Username),
