@@ -92,6 +92,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// If there is no snapshot, then just return
+	if _, ok := state.GetOk("snapshot"); !ok {
+		return nil, nil
+	}
+
 	// Build the artifact and return it
 	artifact := &Artifact{
 		Snapshot: state.Get("snapshot").(*compute.Snapshot),
