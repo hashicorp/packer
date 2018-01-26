@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
+	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,8 +20,8 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 	iprClient := client.IPReservations()
 	// TODO: add optional Name and Tags
 
-	ipresName := fmt.Sprintf("ipres_%s", config.ImageName)
-	ui.Say(fmt.Sprintf("Creating IP reservation: %s", ipresName))
+	ipresName := fmt.Sprintf("ipres_%s_%s", config.ImageName, uuid.TimeOrderedUUID())
+	ui.Say(fmt.Sprintf("Creating temporary IP reservation: %s", ipresName))
 
 	IPInput := &compute.CreateIPReservationInput{
 		ParentPool: compute.PublicReservationPool,
