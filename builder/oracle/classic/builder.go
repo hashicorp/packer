@@ -3,6 +3,7 @@ package classic
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-oracle-terraform/compute"
@@ -35,6 +36,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 
+	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING")) != ""
 	httpClient := cleanhttp.DefaultClient()
 	config := &opc.Config{
 		Username:       opc.String(b.config.Username),
@@ -42,6 +44,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		IdentityDomain: opc.String(b.config.IdentityDomain),
 		APIEndpoint:    b.config.apiEndpointURL,
 		LogLevel:       opc.LogDebug,
+		Logger:         &Logger{loggingEnabled},
 		// Logger: # Leave blank to use the default logger, or provide your own
 		HTTPClient: httpClient,
 	}
