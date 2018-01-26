@@ -56,7 +56,26 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.SSHSourceList = "seciplist:/oracle/public/public-internet"
 	}
 
+	// Validate that all required fields are present
 	var errs *packer.MultiError
+	required := map[string]string{
+		"username":        c.Username,
+		"password":        c.Password,
+		"api_endpoint":    c.APIEndpoint,
+		"identity_domain": c.IdentityDomain,
+		"image_list":      c.ImageList,
+		"shape":           c.Shape,
+	}
+	for k, v := range required {
+		if v == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You must specify a %s.", k))
+		}
+	}
+
+	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
+	}
+
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
