@@ -71,7 +71,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*compute.ComputeClient)
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Deleting the packer-generated security rules and lists...")
+	ui.Say("Deleting temporary rules and lists...")
 
 	// delete security rules that Packer generated
 	secRuleName := state.Get("security_rule_name").(string)
