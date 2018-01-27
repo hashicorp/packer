@@ -15,9 +15,9 @@ azureversion=
 create_sleep=10
 
 showhelp() {
-    echo "az-setup"
+    echo "azure-setup"
     echo ""
-    echo "  az-setup helps you generate packer credentials for az"
+    echo "  azure-setup helps you generate packer credentials for azure"
     echo ""
     echo "  The script creates a resource group, storage account, application"
     echo "  (client), service principal, and permissions and displays a snippet"
@@ -25,7 +25,7 @@ showhelp() {
     echo ""
     echo "  For simplicity we make a lot of assumptions and choose reasonable"
     echo "  defaults. If you want more control over what happens, please use"
-    echo "  the az-cli directly."
+    echo "  the azure cli directly."
     echo ""
     echo "  Note that you must already have an az account, username,"
     echo "  password, and subscription. You can create those here:"
@@ -34,15 +34,15 @@ showhelp() {
     echo ""
     echo "REQUIREMENTS"
     echo ""
-    echo "  - az-cli"
+    echo "  - azure-cli"
     echo "  - jq"
     echo ""
     echo "  Use the requirements command (below) for more info."
     echo ""
     echo "USAGE"
     echo ""
-    echo "  ./az-setup.sh requirements"
-    echo "  ./az-setup.sh setup"
+    echo "  ./azure-setup.sh requirements"
+    echo "  ./azure-setup.sh setup"
     echo ""
 }
 
@@ -52,9 +52,9 @@ requirements() {
     azureversion=$(az -v)
     if [ $? -eq 0 ]; then
         found=$((found + 1))
-        echo "Found az-cli version: $azureversion"
+        echo "Found azure-cli version: $azureversion"
     else
-        echo "az cli is missing. Please install az cli from"
+        echo "azure cli is missing. Please install azure cli from"
         echo "https://az.microsoft.com/en-us/documentation/articles/xplat-cli-install/"
     fi
 
