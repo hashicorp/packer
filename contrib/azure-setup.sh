@@ -247,7 +247,7 @@ retryable() {
 setup() {
     requirements
 
-    #az login
+    az login
 
     askSubscription
     askName
