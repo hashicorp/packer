@@ -155,7 +155,7 @@ createApplication() {
     
     if [ "$azure_client_id" != "" ]; then
         echo "==> application already exist, grab appId"
-        azure_client_id=$(az ad app list | jq -r '.[] | select(.displayName | contains("spfarmpacker")) .appId')
+        azure_client_id=$(az ad app list | jq -r '.[] | select(.displayName | contains("'$meta_name'")) .appId')
     else
         echo "==> application does not exist"
         azure_client_id=$(az ad app create --display-name $meta_name --identifier-uris http://$meta_name --homepage http://$meta_name --password $azure_client_secret | jq -r .appId)
