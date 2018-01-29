@@ -57,13 +57,6 @@ func (s *StepCreateLoginKey) Run(state multistep.StateBag) multistep.StepAction 
 }
 
 func (s *StepCreateLoginKey) Cleanup(state multistep.StateBag) {
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-
-	if !cancelled && !halted {
-		return
-	}
-
 	if loginKey, ok := state.GetOk("LoginKey"); ok {
 		s.Say("Clean up login key")
 		s.Conn.DeleteLoginKey(loginKey.(*LoginKey).KeyName)

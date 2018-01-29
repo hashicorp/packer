@@ -14,13 +14,14 @@ import (
 
 //StepValidateTemplate : struct for Validation a tempalte
 type StepValidateTemplate struct {
-	Conn     *ncloud.Conn
-	Validate func() error
-	Say      func(message string)
-	Error    func(e error)
-	Config   *Config
-	zoneNo   string
-	regionNo string
+	Conn              *ncloud.Conn
+	Validate          func() error
+	Say               func(message string)
+	Error             func(e error)
+	Config            *Config
+	zoneNo            string
+	regionNo          string
+	FeeSystemTypeCode string
 }
 
 // NewStepValidateTemplate : funciton for Validation a tempalte
@@ -168,7 +169,7 @@ func (s *StepValidateTemplate) validateServerImageProduct() error {
 	}
 
 	if strings.Contains(productName, "mssql") {
-		s.Config.FeeSystemTypeCode = "FXSUM"
+		s.FeeSystemTypeCode = "FXSUM"
 	}
 
 	return nil
@@ -193,7 +194,7 @@ func (s *StepValidateTemplate) validateServerProductCode() error {
 		if product.ProductCode == productCode {
 			isExistProductCode = true
 			if strings.Contains(product.ProductName, "mssql") {
-				s.Config.FeeSystemTypeCode = "FXSUM"
+				s.FeeSystemTypeCode = "FXSUM"
 			}
 
 			if product.ProductType.Code == "VDS" {
@@ -254,6 +255,10 @@ func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepActio
 	err := s.Validate()
 
 	state.Put("ZoneNo", s.zoneNo)
+
+	if s.FeeSystemTypeCode != "" {
+		state.Put("FeeSystemTypeCode", s.FeeSystemTypeCode)
+	}
 
 	return processStepResult(err, s.Error, state)
 }
