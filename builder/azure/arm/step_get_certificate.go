@@ -1,12 +1,13 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepGetCertificate struct {
@@ -39,7 +40,7 @@ func (s *StepGetCertificate) getCertificateUrl(keyVaultName string, secretName s
 	return *secret.ID, err
 }
 
-func (s *StepGetCertificate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetCertificate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Getting the certificate's URL ...")
 
 	var keyVaultName = state.Get(constants.ArmKeyVaultName).(string)

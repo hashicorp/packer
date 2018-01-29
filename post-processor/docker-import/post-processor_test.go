@@ -2,8 +2,9 @@ package dockerimport
 
 import (
 	"bytes"
-	"github.com/hashicorp/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {

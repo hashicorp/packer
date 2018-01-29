@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepSleep struct {
@@ -12,7 +14,7 @@ type StepSleep struct {
 	ActionName string
 }
 
-func (s *StepSleep) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSleep) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.ActionName) > 0 {

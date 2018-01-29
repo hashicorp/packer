@@ -1,15 +1,17 @@
 package lxc
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"context"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepProvision provisions the instance within a chroot.
 type StepProvision struct{}
 
-func (s *StepProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)

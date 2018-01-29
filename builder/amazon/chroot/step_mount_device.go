@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -9,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type mountPathData struct {
@@ -30,7 +31,7 @@ type StepMountDevice struct {
 	mountPath string
 }
 
-func (s *StepMountDevice) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	device := state.Get("device").(string)

@@ -105,6 +105,11 @@ configuration is actually required.
     SSL certificates. If not set, this defaults to "verify\_peer" which validates
     all SSL certifications.
 
+-   `trusted_certs_dir` (string) -  This is a directory that contains additional 
+    SSL certificates to trust. Any certificates in this directory will be added to 
+    whatever CA bundle ruby is using. Use this to add self-signed certs for your 
+    Chef Server or local HTTP file servers.
+
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
     "/tmp/packer-chef-client" when guest\_os\_type unix and
@@ -158,6 +163,9 @@ environment "{{.ChefEnvironment}}"
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
 {{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir :{{.TrustedCertsDir}}
+{{end}}
 ```
 
 This template is a [configuration
@@ -170,6 +178,7 @@ variables available to use:
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `SslVerifyMode` - Whether Chef SSL verify mode is on or off.
+-   `TrustedCertsDir` - Path to dir with trusted certificates.
 -   `ValidationClientName` - The name of the client used for validation.
 -   `ValidationKeyPath` - Path to the validation key, if it is set.
 
