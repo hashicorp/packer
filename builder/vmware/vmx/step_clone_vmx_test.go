@@ -1,13 +1,14 @@
 package vmx
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCloneVMX_impl(t *testing.T) {
@@ -43,7 +44,7 @@ func TestStepCloneVMX(t *testing.T) {
 	driver := state.Get("driver").(*vmwcommon.DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

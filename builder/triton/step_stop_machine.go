@@ -1,18 +1,19 @@
 package triton
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepStopMachine stops the machine with the given Machine ID, and waits
 // for it to reach the stopped state.
 type StepStopMachine struct{}
 
-func (s *StepStopMachine) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

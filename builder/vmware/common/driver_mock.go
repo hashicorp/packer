@@ -3,7 +3,7 @@ package common
 import (
 	"sync"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type DriverMock struct {

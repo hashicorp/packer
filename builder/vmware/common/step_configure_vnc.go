@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,8 +9,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -76,7 +77,7 @@ func VNCPassword(skipPassword bool) string {
 	return string(password)
 }
 
-func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.Enabled {
 		log.Println("Skipping VNC configuration step...")
 		return multistep.ActionContinue
