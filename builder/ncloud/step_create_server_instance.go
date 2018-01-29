@@ -1,6 +1,7 @@
 package ncloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -8,8 +9,8 @@ import (
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreateServerInstance struct {
@@ -81,7 +82,7 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 	return s.serverInstanceNo, nil
 }
 
-func (s *StepCreateServerInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Instance")
 
 	var loginKey = state.Get("LoginKey").(*LoginKey)

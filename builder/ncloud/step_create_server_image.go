@@ -1,13 +1,14 @@
 package ncloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreateServerImage struct {
@@ -60,7 +61,7 @@ func (s *StepCreateServerImage) createServerImage(serverInstanceNo string) (*ncl
 	return &serverImage, nil
 }
 
-func (s *StepCreateServerImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateServerImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Image")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

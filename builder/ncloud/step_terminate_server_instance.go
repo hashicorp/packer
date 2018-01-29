@@ -1,12 +1,13 @@
 package ncloud
 
 import (
+	"context"
 	"errors"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepTerminateServerInstance struct {
@@ -66,7 +67,7 @@ func (s *StepTerminateServerInstance) terminateServerInstance(serverInstanceNo s
 	}
 }
 
-func (s *StepTerminateServerInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTerminateServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Terminate Server Instance")
 
 	var serverInstanceNo = state.Get("InstanceNo").(string)
