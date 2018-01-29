@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures a VMX by setting some default settings as well
@@ -21,7 +22,7 @@ type StepConfigureVMX struct {
 	SkipFloppy bool
 }
 
-func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 

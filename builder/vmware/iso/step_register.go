@@ -1,12 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRegister struct {
@@ -14,7 +15,7 @@ type StepRegister struct {
 	Format         string
 }
 
-func (s *StepRegister) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegister) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

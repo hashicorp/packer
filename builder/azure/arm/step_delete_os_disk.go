@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -8,8 +9,8 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepDeleteOSDisk struct {
@@ -50,7 +51,7 @@ func (s *StepDeleteOSDisk) deleteManagedDisk(resourceGroupName string, imageName
 	return err
 }
 
-func (s *StepDeleteOSDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteOSDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary OS disk ...")
 
 	var osDisk = state.Get(constants.ArmOSDiskVhd).(string)

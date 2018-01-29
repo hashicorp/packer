@@ -10,7 +10,6 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	packrpc "github.com/hashicorp/packer/packer/rpc"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -21,6 +20,8 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	packrpc "github.com/hashicorp/packer/packer/rpc"
 )
 
 // This is a count of the number of interrupts the process has received.

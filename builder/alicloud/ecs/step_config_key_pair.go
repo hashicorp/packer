@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -8,8 +9,8 @@ import (
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepConfigAlicloudKeyPair struct {
@@ -24,7 +25,7 @@ type StepConfigAlicloudKeyPair struct {
 	keyName string
 }
 
-func (s *StepConfigAlicloudKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

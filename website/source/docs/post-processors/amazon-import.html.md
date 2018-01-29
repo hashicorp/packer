@@ -70,6 +70,8 @@ Optional:
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.
 
+-   `role_name` (string) - The name of the role to use when not using the default role, 'vmimport'
+
 -   `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the
     OVA file will be copied to for import. If not specified, this will default
     to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will

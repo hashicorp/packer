@@ -1,10 +1,11 @@
 package instance
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {
