@@ -1,6 +1,8 @@
 package ncloud
 
 import (
+	"fmt"
+
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/multistep"
@@ -34,6 +36,8 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 	if err != nil {
 		return "", err
 	}
+
+	s.Say(fmt.Sprintf("Root password is %s", rootPassword.RootPassword))
 
 	return rootPassword.RootPassword, nil
 }
