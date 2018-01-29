@@ -1,12 +1,13 @@
 package ncloud
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type LoginKey struct {
@@ -44,7 +45,7 @@ func (s *StepCreateLoginKey) createLoginKey() (*LoginKey, error) {
 	return &LoginKey{KeyName, privateKey.PrivateKey}, nil
 }
 
-func (s *StepCreateLoginKey) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateLoginKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Login Key")
 
 	loginKey, err := s.CreateLoginKey()

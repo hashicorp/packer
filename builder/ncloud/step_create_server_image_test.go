@@ -2,10 +2,11 @@ package ncloud
 
 import (
 	"fmt"
-	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCreateServerImageShouldFailIfOperationCreateServerImageFails(t *testing.T) {

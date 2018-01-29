@@ -1,11 +1,12 @@
 package ncloud
 
 import (
+	"context"
 	"fmt"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepGetRootPassword struct {
@@ -42,7 +43,7 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 	return rootPassword.RootPassword, nil
 }
 
-func (s *StepGetRootPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetRootPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Get Root Password")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

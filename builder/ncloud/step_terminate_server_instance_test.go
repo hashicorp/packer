@@ -2,8 +2,9 @@ package ncloud
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepTerminateServerInstanceShouldFailIfOperationTerminationFails(t *testing.T) {
