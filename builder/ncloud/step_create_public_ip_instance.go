@@ -105,13 +105,6 @@ func (s *StepCreatePublicIPInstance) Run(state multistep.StateBag) multistep.Ste
 }
 
 func (s *StepCreatePublicIPInstance) Cleanup(state multistep.StateBag) {
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-
-	if !cancelled && !halted {
-		return
-	}
-
 	publicIPInstance, ok := state.GetOk("PublicIPInstance")
 	if !ok {
 		return
@@ -145,6 +138,11 @@ func (s *StepCreatePublicIPInstance) waitPublicIPInstanceStatus(publicIPInstance
 			if err != nil {
 				log.Printf(err.Error())
 				c1 <- err
+				return
+			}
+
+			if resp.TotalRows == 0 {
+				c1 <- nil
 				return
 			}
 

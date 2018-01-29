@@ -56,8 +56,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepCreateServerImage(conn, ui, b.config),
 			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
 			NewStepTerminateServerInstance(conn, ui),
-			NewStepDeleteLoginKey(conn, ui),
-			NewStepDeletePublicIPInstance(conn, ui),
 		}
 	} else if b.config.Comm.Type == "Windows" {
 		steps = []multistep.Step{
@@ -84,8 +82,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepCreateServerImage(conn, ui, b.config),
 			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
 			NewStepTerminateServerInstance(conn, ui),
-			NewStepDeleteLoginKey(conn, ui),
-			NewStepDeletePublicIPInstance(conn, ui),
 		}
 	}
 
