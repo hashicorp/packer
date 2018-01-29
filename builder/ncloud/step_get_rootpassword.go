@@ -35,6 +35,8 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 		return "", err
 	}
 
+	s.Say(fmt.Sprintf("Root password is %s", rootPassword.RootPassword))
+
 	return rootPassword.RootPassword, nil
 }
 
