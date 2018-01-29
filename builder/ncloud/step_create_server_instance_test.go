@@ -8,7 +8,7 @@ import (
 
 func TestStepCreateServerInstanceShouldFailIfOperationCreateFails(t *testing.T) {
 	var testSubject = &StepCreateServerInstance{
-		CreateServerInstance: func(loginKeyName string, zoneNo string) (string, error) {
+		CreateServerInstance: func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) {
 			return "", fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		Say:   func(message string) {},
@@ -30,7 +30,7 @@ func TestStepCreateServerInstanceShouldFailIfOperationCreateFails(t *testing.T) 
 
 func TestStepCreateServerInstanceShouldPassIfOperationCreatePasses(t *testing.T) {
 	var testSubject = &StepCreateServerInstance{
-		CreateServerInstance: func(loginKeyName string, zoneNo string) (string, error) { return "", nil },
+		CreateServerInstance: func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) { return "", nil },
 		Say:                  func(message string) {},
 		Error:                func(e error) {},
 	}

@@ -14,7 +14,7 @@ import (
 
 type StepCreateServerInstance struct {
 	Conn                               *ncloud.Conn
-	CreateServerInstance               func(loginKeyName string, zoneNo string) (string, error)
+	CreateServerInstance               func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error)
 	CheckServerInstanceStatusIsRunning func(serverInstanceNo string) error
 	Say                                func(message string)
 	Error                              func(e error)
@@ -35,7 +35,7 @@ func NewStepCreateServerInstance(conn *ncloud.Conn, ui packer.Ui, config *Config
 	return step
 }
 
-func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zoneNo string) (string, error) {
+func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) {
 	reqParams := new(ncloud.RequestCreateServerInstance)
 	reqParams.ServerProductCode = s.Config.ServerProductCode
 	reqParams.MemberServerImageNo = s.Config.MemberServerImageNo
@@ -44,7 +44,7 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 	}
 	reqParams.LoginKeyName = loginKeyName
 	reqParams.ZoneNo = zoneNo
-	reqParams.FeeSystemTypeCode = s.Config.FeeSystemTypeCode
+	reqParams.FeeSystemTypeCode = feeSystemTypeCode
 
 	if s.Config.UserData != "" {
 		reqParams.UserData = s.Config.UserData
@@ -87,7 +87,12 @@ func (s *StepCreateServerInstance) Run(state multistep.StateBag) multistep.StepA
 	var loginKey = state.Get("LoginKey").(*LoginKey)
 	var zoneNo = state.Get("ZoneNo").(string)
 
-	serverInstanceNo, err := s.CreateServerInstance(loginKey.KeyName, zoneNo)
+	feeSystemTypeCode := "MTRAT"
+	if _, ok := state.GetOk("FeeSystemTypeCode"); ok {
+		feeSystemTypeCode = state.Get("FeeSystemTypeCode").(string)
+	}
+
+	serverInstanceNo, err := s.CreateServerInstance(loginKey.KeyName, zoneNo, feeSystemTypeCode)
 	if err == nil {
 		state.Put("InstanceNo", serverInstanceNo)
 	}

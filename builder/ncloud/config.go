@@ -2,6 +2,8 @@ package ncloud
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -26,7 +28,6 @@ type Config struct {
 	BlockStorageSize                  int    `mapstructure:"block_storage_size"`
 	Region                            string `mapstructure:"region"`
 	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no"`
-	FeeSystemTypeCode                 string `mapstructure:"-"`
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  *interpolate.Context
@@ -93,10 +94,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = append(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+		errs = packer.MultiErrorAppend(errs, errors.New("Only one of user_data or user_data_file can be specified."))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = append(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
 		}
 	}
 
@@ -107,8 +108,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.Comm.Type == "wrinrm" && c.AccessControlGroupConfigurationNo == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("If Communicator is winrm, access_control_group_configuration_no is required"))
 	}
-
-	c.FeeSystemTypeCode = "MTRAT"
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warnings, errs
