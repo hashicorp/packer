@@ -1,11 +1,12 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -13,7 +14,7 @@ type stepCreateSecurityGroup struct {
 	tempSG string
 }
 
-func (s *stepCreateSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

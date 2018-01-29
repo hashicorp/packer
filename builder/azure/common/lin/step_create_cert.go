@@ -1,6 +1,7 @@
 package lin
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -14,15 +15,15 @@ import (
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreateCert struct {
 	TmpServiceName string
 }
 
-func (s *StepCreateCert) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateCert) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary certificate...")

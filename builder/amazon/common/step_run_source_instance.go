@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRunSourceInstance struct {
@@ -35,7 +36,7 @@ type StepRunSourceInstance struct {
 	instanceId string
 }
 
-func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSourceInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	var keyName string
 	if name, ok := state.GetOk("keyPair"); ok {
@@ -175,19 +176,18 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
 
-	describeInstanceStatus := &ec2.DescribeInstanceStatusInput{
+	describeInstance := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	if err := ec2conn.WaitUntilInstanceStatusOk(describeInstanceStatus); err != nil {
+	if err := ec2conn.WaitUntilInstanceRunning(describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	r, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{aws.String(instanceId)},
-	})
+	r, err := ec2conn.DescribeInstances(describeInstance)
+
 	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
 		err := fmt.Errorf("Error finding source instance.")
 		state.Put("error", err)

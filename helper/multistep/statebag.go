@@ -1,8 +1,8 @@
 package multistep
 
-import (
-	"sync"
-)
+import "sync"
+
+// Add context to state bag to prevent changing step signature
 
 // StateBag holds the state that is used by the Runner and Steps. The
 // StateBag implementation must be safe for concurrent access.

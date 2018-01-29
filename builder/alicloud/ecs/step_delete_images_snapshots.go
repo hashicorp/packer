@@ -1,13 +1,14 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepDeleteAlicloudImageSnapshots struct {
@@ -16,7 +17,7 @@ type stepDeleteAlicloudImageSnapshots struct {
 	AlicloudImageName                 string
 }
 
-func (s *stepDeleteAlicloudImageSnapshots) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepDeleteAlicloudImageSnapshots) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)

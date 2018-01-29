@@ -2,10 +2,11 @@ package dockerpush
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/docker-import"
-	"testing"
 )
 
 func testConfig() map[string]interface{} {

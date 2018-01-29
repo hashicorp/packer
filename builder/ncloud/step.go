@@ -1,7 +1,7 @@
 package ncloud
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func processStepResult(err error, sayError func(error), state multistep.StateBag) multistep.StepAction {
