@@ -16,13 +16,13 @@ type Config struct {
 
 	AccessKey                         string `mapstructure:"access_key"`
 	SecretKey                         string `mapstructure:"secret_key"`
-	OSType                            string `mapstructure:"os_type"`
 	ServerImageProductCode            string `mapstructure:"server_image_product_code"`
 	ServerProductCode                 string `mapstructure:"server_product_code"`
 	MemberServerImageNo               string `mapstructure:"member_server_image_no"`
 	ServerImageName                   string `mapstructure:"server_image_name"`
 	ServerImageDescription            string `mapstructure:"server_image_description"`
 	UserData                          string `mapstructure:"user_data"`
+	UserDataFile                          string `mapstructure:"user_data_file"`
 	BlockStorageSize                  int    `mapstructure:"block_storage_size"`
 	Region                            string `mapstructure:"region"`
 	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no"`
@@ -58,10 +58,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.SecretKey == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("secret_key is required"))
-	}
-
-	if c.OSType != "Linux" && c.OSType != "Windows" {
-		errs = packer.MultiErrorAppend(errs, errors.New("os_type is required. ('Linux' or 'Windows')"))
 	}
 
 	if c.MemberServerImageNo == "" && c.ServerImageProductCode == "" {
@@ -100,8 +96,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New("If user_data field is set, length of UserData should be max 21847"))
 	}
 
-	if c.OSType == "Windows" && c.AccessControlGroupConfigurationNo == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("If os_type is Windows, access_control_group_configuration_no is required"))
+	if c.Comm.Type == "wrinrm" && c.AccessControlGroupConfigurationNo == "" {
+		errs = packer.MultiErrorAppend(errs, errors.New("If Communicator is winrm, access_control_group_configuration_no is required"))
 	}
 
 	c.FeeSystemTypeCode = "MTRAT"
