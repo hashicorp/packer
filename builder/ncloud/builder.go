@@ -47,8 +47,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepGetRootPassword(conn, ui),
 			NewStepCreatePublicIPInstance(conn, ui, b.config),
 			&communicator.StepConnectSSH{
-				Config:    &b.config.Comm,
-				Host:      SSHHost,
+				Config: &b.config.Comm,
+				Host: func(stateBag multistep.StateBag) (string, error) {
+					return stateBag.Get("PublicIP").(string), nil
+				},
 				SSHConfig: SSHConfig(b.config.Comm.SSHUsername),
 			},
 			&common.StepProvision{},
@@ -68,7 +70,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
-					return stateBag.Get("WinRMHost").(string), nil
+					return stateBag.Get("PublicIP").(string), nil
 				},
 				WinRMConfig: func(state multistep.StateBag) (*communicator.WinRMConfig, error) {
 					return &communicator.WinRMConfig{

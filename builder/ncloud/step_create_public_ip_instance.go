@@ -91,13 +91,7 @@ func (s *StepCreatePublicIPInstance) Run(state multistep.StateBag) multistep.Ste
 
 	publicIPInstance, err := s.CreatePublicIPInstance(serverInstanceNo)
 	if err == nil {
-		switch s.Config.Comm.Type {
-		case "ssh":
-			state.Put("SSHHost", publicIPInstance.PublicIP)
-		case "winrm":
-			state.Put("WinRMHost", publicIPInstance.PublicIP)
-		}
-
+		state.Put("PublicIP", publicIPInstance.PublicIP)
 		state.Put("PublicIPInstance", publicIPInstance)
 	}
 

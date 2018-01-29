@@ -6,11 +6,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func SSHHost(state multistep.StateBag) (string, error) {
-	host := state.Get("SSHHost").(string)
-	return host, nil
-}
-
 // SSHConfig returns a function that can be used for the SSH communicator
 // config for connecting to the specified host via SSH
 func SSHConfig(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
