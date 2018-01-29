@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step attaches the VirtualBox guest additions as a inserted CD onto
@@ -23,7 +25,7 @@ type StepAttachGuestAdditions struct {
 	GuestAdditionsMode string
 }
 
-func (s *StepAttachGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

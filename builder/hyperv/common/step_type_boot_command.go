@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -8,9 +9,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type bootCommandTemplateData struct {
@@ -26,7 +27,7 @@ type StepTypeBootCommand struct {
 	Ctx         interpolate.Context
 }
 
-func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	driver := state.Get("driver").(Driver)

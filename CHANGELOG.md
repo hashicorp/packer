@@ -7,6 +7,8 @@
 * provisioner/ansible: Improve user retrieval. [GH-5758]
 * post-processor/docker: Remove credentials from being shown in the log. [GH-5666]
 * builder/amazon: Warn during prepare if we didn't get both an access key and a secret key when we were expecting one. [GH-5762]
+* builder/amazon: Replace `InstanceStatusOK` check with `InstanceReady`. This reduces build times universally while still working for all instance types. [GH-5678]
+* builder/amazon: Add `kms_key_id` option to block device mappings. [GH-5774]
 
 ### BUG FIXES:
 

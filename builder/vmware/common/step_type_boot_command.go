@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -12,10 +13,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/go-vnc"
-	"github.com/mitchellh/multistep"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
@@ -42,7 +43,7 @@ type StepTypeBootCommand struct {
 	Ctx         interpolate.Context
 }
 
-func (s *StepTypeBootCommand) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.VNCEnabled {
 		log.Println("Skipping boot command step...")
 		return multistep.ActionContinue

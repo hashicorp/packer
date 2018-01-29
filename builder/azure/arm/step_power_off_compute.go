@@ -1,12 +1,13 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepPowerOffCompute struct {
@@ -37,7 +38,7 @@ func (s *StepPowerOffCompute) powerOffCompute(resourceGroupName string, computeN
 	return err
 }
 
-func (s *StepPowerOffCompute) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPowerOffCompute) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Powering off machine ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

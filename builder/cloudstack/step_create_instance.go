@@ -1,6 +1,7 @@
 package cloudstack
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -8,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -27,7 +28,7 @@ type stepCreateInstance struct {
 }
 
 // Run executes the Packer build step that creates a CloudStack instance.
-func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

@@ -115,7 +115,6 @@ Packer to work:
         "ec2:DeregisterImage",
         "ec2:DescribeImageAttribute",
         "ec2:DescribeImages",
-        "ec2:DescribeInstanceStatus",
         "ec2:DescribeInstances",
         "ec2:DescribeRegions",
         "ec2:DescribeSecurityGroups",
