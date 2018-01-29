@@ -1,13 +1,14 @@
 package ncloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreatePublicIPInstance struct {
@@ -84,7 +85,7 @@ func (s *StepCreatePublicIPInstance) createPublicIPInstance(serverInstanceNo str
 	return &publicIPInstance, nil
 }
 
-func (s *StepCreatePublicIPInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreatePublicIPInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Public IP Instance")
 
 	serverInstanceNo := state.Get("InstanceNo").(string)

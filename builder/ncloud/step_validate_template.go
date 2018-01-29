@@ -2,13 +2,14 @@ package ncloud
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -249,7 +250,7 @@ func (s *StepValidateTemplate) validateTemplate() error {
 }
 
 // Run : main funciton for validation a template
-func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Validating deployment template ...")
 
 	err := s.Validate()
