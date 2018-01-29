@@ -22,7 +22,7 @@ type Config struct {
 	ServerImageName                   string `mapstructure:"server_image_name"`
 	ServerImageDescription            string `mapstructure:"server_image_description"`
 	UserData                          string `mapstructure:"user_data"`
-	UserDataFile                          string `mapstructure:"user_data_file"`
+	UserDataFile                      string `mapstructure:"user_data_file"`
 	BlockStorageSize                  int    `mapstructure:"block_storage_size"`
 	Region                            string `mapstructure:"region"`
 	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no"`
@@ -89,6 +89,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(errs, errors.New("The size of BlockStorageSize is at least 10 GB and up to 2000GB"))
 		} else if int(c.BlockStorageSize/10)*10 != c.BlockStorageSize {
 			return nil, nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
+		}
+	}
+
+	if c.UserData != "" && c.UserDataFile != "" {
+		errs = append(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+	} else if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = append(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
 		}
 	}
 
