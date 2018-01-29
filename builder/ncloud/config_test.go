@@ -9,7 +9,6 @@ func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"access_key":                "access_key",
 		"secret_key":                "secret_key",
-		"os_type":                   "Windows",
 		"server_image_product_code": "SPSW0WINNT000016",
 		"server_product_code":       "SPSVRSSD00000011",
 		"server_image_name":         "packer-test {{timestamp}}",
@@ -27,7 +26,6 @@ func testConfigForMemberServerImage() map[string]interface{} {
 	return map[string]interface{}{
 		"access_key":               "access_key",
 		"secret_key":               "secret_key",
-		"os_type":                  "Windows",
 		"server_product_code":      "SPSVRSSD00000011",
 		"member_server_image_no":   "2440",
 		"server_image_name":        "packer-test {{timestamp}}",
@@ -135,7 +133,6 @@ func TestExistsBothServerImageProductCodeAndMemberServerImageNoConfig(t *testing
 	raw := map[string]interface{}{
 		"access_key":                "access_key",
 		"secret_key":                "secret_key",
-		"os_type":                   "Windows",
 		"server_image_product_code": "SPSW0WINNT000016",
 		"server_product_code":       "SPSVRSSD00000011",
 		"member_server_image_no":    "2440",
