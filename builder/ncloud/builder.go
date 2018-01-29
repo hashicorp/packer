@@ -4,8 +4,8 @@ import (
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // Builder assume this implements packer.Builder
