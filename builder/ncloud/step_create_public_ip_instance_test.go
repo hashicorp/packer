@@ -31,13 +31,17 @@ func TestStepCreatePublicIPInstanceShouldFailIfOperationCreatePublicIPInstanceFa
 }
 
 func TestStepCreatePublicIPInstanceShouldPassIfOperationCreatePublicIPInstancePasses(t *testing.T) {
+	c := new(Config)
+	c.Comm.Prepare(nil)
+	c.Comm.Type = "ssh"
+
 	var testSubject = &StepCreatePublicIPInstance{
 		CreatePublicIPInstance: func(serverInstanceNo string) (*ncloud.PublicIPInstance, error) {
 			return &ncloud.PublicIPInstance{PublicIPInstanceNo: "a", PublicIP: "b"}, nil
 		},
 		Say:    func(message string) {},
 		Error:  func(e error) {},
-		Config: &Config{OSType: "Windows"},
+		Config: c,
 	}
 
 	stateBag := createTestStateBagStepCreatePublicIPInstance()
