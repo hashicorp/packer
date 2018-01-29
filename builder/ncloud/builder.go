@@ -8,8 +8,6 @@ import (
 	"github.com/mitchellh/multistep"
 )
 
-const version = "1.0.0"
-
 // Builder assume this implements packer.Builder
 type Builder struct {
 	config   *Config
@@ -30,8 +28,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	ui.Say("Running builder for Naver Cloud Platform (version: " + version + ") ...")
-
 	ui.Message("Creating Naver Cloud Platform Connection ...")
 	conn := ncloud.NewConnection(b.config.AccessKey, b.config.SecretKey)
 
@@ -42,7 +38,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps = []multistep.Step{}
 
-	if b.config.OSType == "Linux" {
+	if b.config.Comm.Type == "ssh" {
 		steps = []multistep.Step{
 			NewStepValidateTemplate(conn, ui, b.config),
 			NewStepCreateLoginKey(conn, ui),
@@ -63,7 +59,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteLoginKey(conn, ui),
 			NewStepDeletePublicIPInstance(conn, ui),
 		}
-	} else if b.config.OSType == "Windows" {
+	} else if b.config.Comm.Type == "Windows" {
 		steps = []multistep.Step{
 			NewStepValidateTemplate(conn, ui, b.config),
 			NewStepCreateLoginKey(conn, ui),
@@ -94,7 +90,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Run!
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, b.stateBag)
 	b.runner.Run(b.stateBag)
 
 	// If there was an error, return that
