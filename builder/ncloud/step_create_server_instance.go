@@ -3,6 +3,7 @@ package ncloud
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"time"
 
@@ -47,6 +48,15 @@ func (s *StepCreateServerInstance) createServerInstance(loginKeyName string, zon
 
 	if s.Config.UserData != "" {
 		reqParams.UserData = s.Config.UserData
+	}
+
+	if s.Config.UserDataFile != "" {
+		contents, err := ioutil.ReadFile(s.Config.UserDataFile)
+		if err != nil {
+			return "", fmt.Errorf("Problem reading user data file: %s", err)
+		}
+
+		reqParams.UserData = string(contents)
 	}
 
 	if s.Config.AccessControlGroupConfigurationNo != "" {
