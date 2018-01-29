@@ -32,7 +32,7 @@ func NewStepCreateServerImage(conn *ncloud.Conn, ui packer.Ui, config *Config) *
 }
 
 func (s *StepCreateServerImage) createServerImage(serverInstanceNo string) (*ncloud.ServerImage, error) {
-	// 서버 인스턴스 상태가 정지 중일 경우에는 서버 이미지 생성할 수 없음.
+	// Can't create server image when status of server instance is stopping (not stopped)
 	if err := waiterServerInstanceStatus(s.Conn, serverInstanceNo, "NSTOP", 1*time.Minute); err != nil {
 		return nil, err
 	}
