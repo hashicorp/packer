@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 // A driver is able to talk to VMware, control virtual machines, etc.
@@ -106,6 +106,9 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
 	errs := ""
 	for _, driver := range drivers {
 		err := driver.Verify()
+		log.Printf("Testing vmware driver %T. Success: %t",
+			driver, err == nil)
+
 		if err == nil {
 			return driver, nil
 		}

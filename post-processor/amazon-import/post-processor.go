@@ -34,6 +34,7 @@ type Config struct {
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
 	LicenseType string            `mapstructure:"license_type"`
+	RoleName    string            `mapstructure:"role_name"`
 
 	ctx interpolate.Context
 }
@@ -164,6 +165,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
+	}
+
+	if p.config.RoleName != "" {
+		params.SetRoleName(p.config.RoleName)
 	}
 
 	if p.config.LicenseType != "" {

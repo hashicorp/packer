@@ -1,10 +1,11 @@
 package oci
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepImage(t *testing.T) {
@@ -14,7 +15,7 @@ func TestStepImage(t *testing.T) {
 	step := new(stepImage)
 	defer step.Cleanup(state)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -33,7 +34,7 @@ func TestStepImage_CreateImageErr(t *testing.T) {
 	driver := state.Get("driver").(*driverMock)
 	driver.CreateImageErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -56,7 +57,7 @@ func TestStepImage_WaitForImageCreationErr(t *testing.T) {
 	driver := state.Get("driver").(*driverMock)
 	driver.WaitForImageCreationErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

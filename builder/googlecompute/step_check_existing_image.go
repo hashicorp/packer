@@ -1,10 +1,11 @@
 package googlecompute
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCheckExistingImage represents a Packer build step that checks if the
@@ -12,7 +13,7 @@ import (
 type StepCheckExistingImage int
 
 // Run executes the Packer build step that checks if the image already exists.
-func (s *StepCheckExistingImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCheckExistingImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

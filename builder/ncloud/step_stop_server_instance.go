@@ -1,13 +1,14 @@
 package ncloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepStopServerInstance struct {
@@ -50,7 +51,7 @@ func (s *StepStopServerInstance) stopServerInstance(serverInstanceNo string) err
 	return nil
 }
 
-func (s *StepStopServerInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopServerInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Stop Server Instance")
 
 	var serverInstanceNo = state.Get("InstanceNo").(string)

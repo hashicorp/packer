@@ -2,8 +2,9 @@ package ncloud
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepDeleteBlockStorageInstanceShouldFailIfOperationDeleteBlockStorageInstanceFails(t *testing.T) {

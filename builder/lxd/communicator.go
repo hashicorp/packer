@@ -2,13 +2,14 @@ package lxd
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type Communicator struct {

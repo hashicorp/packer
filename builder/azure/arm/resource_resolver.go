@@ -10,8 +10,9 @@ package arm
 
 import (
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"strings"
+
+	"github.com/Azure/azure-sdk-for-go/arm/compute"
 )
 
 type resourceResolver struct {

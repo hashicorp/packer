@@ -1,14 +1,15 @@
 package ncloud
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateBlockStorageInstance struct is for making extra block storage
@@ -54,7 +55,7 @@ func (s *StepCreateBlockStorageInstance) createBlockStorageInstance(serverInstan
 	return blockStorageInstanceList.BlockStorageInstance[0].BlockStorageInstanceNo, nil
 }
 
-func (s *StepCreateBlockStorageInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateBlockStorageInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Config.BlockStorageSize == 0 {
 		return processStepResult(nil, s.Error, state)
 	}
