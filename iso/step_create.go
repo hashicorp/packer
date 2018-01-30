@@ -20,6 +20,7 @@ type CreateConfig struct {
 	ResourcePool string `mapstructure:"resource_pool"`
 	Datastore    string `mapstructure:"datastore"`
 	GuestOSType  string `mapstructure:"guest_os_type"`
+	Network      string `mapstructure:"network"`
 }
 
 func (c *CreateConfig) Prepare() []error {
@@ -75,6 +76,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		ResourcePool:        s.config.ResourcePool,
 		Datastore:           s.config.Datastore,
 		GuestOS:             s.config.GuestOSType,
+		Network:             s.config.Network,
 	})
 
 	if err != nil {

@@ -47,6 +47,7 @@ type CreateConfig struct {
 	ResourcePool string
 	Datastore    string
 	GuestOS      string // example: otherGuest
+	Network      string // "" for default network
 	Overwrite    bool
 }
 
@@ -109,7 +110,7 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	if err != nil {
 		return nil, err
 	}
-	devices, err = addNetwork(d, devices)
+	devices, err = addNetwork(d, devices, config)
 	if err != nil {
 		return nil, err
 	}
@@ -394,8 +395,8 @@ func addDisk(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 	return devices, nil
 }
 
-func addNetwork(d *Driver, devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
-	network, err := d.finder.DefaultNetwork(d.ctx)
+func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+	network, err := d.finder.NetworkOrDefault(d.ctx, config.Network)
 	if err != nil {
 		return nil, err
 	}
