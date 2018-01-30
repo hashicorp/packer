@@ -18,6 +18,7 @@ type Config struct {
 
 	CreateConfig `mapstructure:",squash"`
 	CDRomConfig  `mapstructure:",squash"`
+	FloppyConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }

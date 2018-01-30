@@ -6,6 +6,7 @@ import (
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 type Builder struct {
@@ -38,15 +39,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateVM{
 			config: &b.config.CreateConfig,
 		},
+		&StepAddCDRom{
+			config: &b.config.CDRomConfig,
+		},
+		&StepAddFloppy{
+			config: &b.config.FloppyConfig,
+		},
 	)
-
-	if b.config.CDRomConfig.ISOPath != "" {
-		steps = append(steps,
-			&StepAddCDRom{
-				config: &b.config.CDRomConfig,
-			},
-		)
-	}
 
 	// Run!
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)

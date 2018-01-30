@@ -442,9 +442,35 @@ func (vm *VirtualMachine) AddCdrom(isoPath string) error {
 		cdrom = devices.InsertIso(cdrom, isoPath)
 	}
 
-	newDevices := object.VirtualDeviceList{cdrom}
+	return vm.addDevice(cdrom)
+}
+
+func (vm *VirtualMachine) AddFloppy(imgPath string) error {
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+
+	floppy, err := devices.CreateFloppy()
+	if err != nil {
+		return err
+	}
+
+	if imgPath != "" {
+		floppy = devices.InsertImg(floppy, imgPath)
+	}
+
+	return vm.addDevice(floppy)
+}
+
+func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
+	newDevices := object.VirtualDeviceList{device}
 	confSpec := types.VirtualMachineConfigSpec{}
+	var err error
 	confSpec.DeviceChange, err = newDevices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	if err != nil {
+		return err
+	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {

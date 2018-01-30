@@ -31,9 +31,6 @@ func TestVMAcc_create(t *testing.T) {
 
 			defer destroyVM(t, vm, tc.config.Name)
 
-			log.Printf("[DEBUG] Adding CDRom to the created VM")
-			vm.AddCdrom("[datastore1] ISO/alpine-standard-3.6.2-x86_64.iso")
-
 			log.Printf("[DEBUG] Running check function")
 			tc.checkFunction(t, vm, tc.config)
 		})
