@@ -9,12 +9,13 @@ import (
 )
 
 type Config struct {
-	packerCommon.PackerConfig `mapstructure:",squash"`
-	common.ConnectConfig      `mapstructure:",squash"`
-	Comm                      communicator.Config `mapstructure:",squash"`
-	common.ShutdownConfig     `mapstructure:",squash"`
-	CreateSnapshot            bool `mapstructure:"create_snapshot"`
-	ConvertToTemplate         bool `mapstructure:"convert_to_template"`
+	packerCommon.PackerConfig             `mapstructure:",squash"`
+	common.RunConfig                      `mapstructure:",squash"`
+	common.ConnectConfig                  `mapstructure:",squash"`
+	Comm              communicator.Config `mapstructure:",squash"`
+	common.ShutdownConfig                 `mapstructure:",squash"`
+	CreateSnapshot    bool                `mapstructure:"create_snapshot"`
+	ConvertToTemplate bool                `mapstructure:"convert_to_template"`
 
 	CreateConfig `mapstructure:",squash"`
 	CDRomConfig  `mapstructure:",squash"`
@@ -31,6 +32,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	errs := new(packer.MultiError)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)

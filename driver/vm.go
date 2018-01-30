@@ -463,6 +463,19 @@ func (vm *VirtualMachine) AddFloppy(imgPath string) error {
 	return vm.addDevice(floppy)
 }
 
+func (vm *VirtualMachine) SetBootOrder(order []string) error {
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+
+	bootOptions := types.VirtualMachineBootOptions{
+		BootOrder: devices.BootOrder(order),
+	}
+
+	return vm.vm.SetBootOptions(vm.driver.ctx, &bootOptions)
+}
+
 func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 	newDevices := object.VirtualDeviceList{device}
 	confSpec := types.VirtualMachineConfigSpec{}
