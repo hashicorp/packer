@@ -5,7 +5,6 @@ import (
 	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"testing"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
@@ -38,8 +37,8 @@ func defaultConfig() map[string]interface{} {
 
 func checkDefault(t *testing.T, name string, host string, datastore string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
-		vm := getVM(t, d, artifacts)
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
 
 		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk")
 		if err != nil {
@@ -137,8 +136,8 @@ func folderConfig() string {
 
 func checkFolder(t *testing.T, folder string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
-		vm := getVM(t, d, artifacts)
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
 
 		vmInfo, err := vm.Info("parent")
 		if err != nil {
@@ -175,8 +174,8 @@ func resourcePoolConfig() string {
 
 func checkResourcePool(t *testing.T, pool string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
-		vm := getVM(t, d, artifacts)
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
 
 		vmInfo, err := vm.Info("resourcePool")
 		if err != nil {
@@ -212,8 +211,8 @@ func datastoreConfig() string {
 
 func checkDatastore(t *testing.T, name string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
-		vm := getVM(t, d, artifacts)
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
 
 		vmInfo, err := vm.Info("datastore")
 		if err != nil {
@@ -269,8 +268,8 @@ func linkedCloneConfig() string {
 
 func checkLinkedClone(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
-		vm := getVM(t, d, artifacts)
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
 
 		vmInfo, err := vm.Info("layoutEx.disk")
 		if err != nil {
@@ -307,9 +306,9 @@ func hardwareConfig() string {
 
 func checkHardware(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
+		d := commonT.TestConn(t)
 
-		vm := getVM(t, d, artifacts)
+		vm := commonT.GetVM(t, d, artifacts)
 		vmInfo, err := vm.Info("config")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
@@ -362,9 +361,9 @@ func RAMReservationConfig() string {
 
 func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
+		d := commonT.TestConn(t)
 
-		vm := getVM(t, d, artifacts)
+		vm := commonT.GetVM(t, d, artifacts)
 		vmInfo, err := vm.Info("config")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
@@ -409,9 +408,9 @@ func snapshotConfig() string {
 
 func checkSnapshot(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
+		d := commonT.TestConn(t)
 
-		vm := getVM(t, d, artifacts)
+		vm := commonT.GetVM(t, d, artifacts)
 		vmInfo, err := vm.Info("layoutEx.disk")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
@@ -443,9 +442,9 @@ func templateConfig() string {
 
 func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
-		d := testConn(t)
+		d := commonT.TestConn(t)
 
-		vm := getVM(t, d, artifacts)
+		vm := commonT.GetVM(t, d, artifacts)
 		vmInfo, err := vm.Info("config.template")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
@@ -457,29 +456,4 @@ func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 
 		return nil
 	}
-}
-
-func testConn(t *testing.T) *driver.Driver {
-	d, err := driver.NewDriver(&driver.ConnectConfig{
-		VCenterServer:      "vcenter.vsphere65.test",
-		Username:           "root",
-		Password:           "jetbrains",
-		InsecureConnection: true,
-	})
-	if err != nil {
-		t.Fatal("Cannot connect: ", err)
-	}
-	return d
-}
-
-func getVM(t *testing.T, d *driver.Driver, artifacts []packer.Artifact) *driver.VirtualMachine {
-	artifactRaw := artifacts[0]
-	artifact, _ := artifactRaw.(*common.Artifact)
-
-	vm, err := d.FindVM(artifact.Name)
-	if err != nil {
-		t.Fatalf("Cannot find VM: %v", err)
-	}
-
-	return vm
 }

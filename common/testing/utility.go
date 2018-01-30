@@ -5,6 +5,10 @@ import (
 	"math/rand"
 	"time"
 	"encoding/json"
+	"github.com/hashicorp/packer/packer"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"testing"
+	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 func NewVMName() string {
@@ -27,3 +31,30 @@ func RenderConfig(config map[string]interface{}) string {
 	j, _ := json.Marshal(t)
 	return string(j)
 }
+
+
+func TestConn(t *testing.T) *driver.Driver {
+	d, err := driver.NewDriver(&driver.ConnectConfig{
+		VCenterServer:      "vcenter.vsphere65.test",
+		Username:           "root",
+		Password:           "jetbrains",
+		InsecureConnection: true,
+	})
+	if err != nil {
+		t.Fatal("Cannot connect: ", err)
+	}
+	return d
+}
+
+func GetVM(t *testing.T, d *driver.Driver, artifacts []packer.Artifact) *driver.VirtualMachine {
+	artifactRaw := artifacts[0]
+	artifact, _ := artifactRaw.(*common.Artifact)
+
+	vm, err := d.FindVM(artifact.Name)
+	if err != nil {
+		t.Fatalf("Cannot find VM: %v", err)
+	}
+
+	return vm
+}
+
