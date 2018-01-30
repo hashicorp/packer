@@ -1,6 +1,7 @@
 package ncloud
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestStepCreateLoginKeyShouldFailIfOperationCreateLoginKeyFails(t *testing.T
 
 	stateBag := createTestStateBagStepCreateLoginKey()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
@@ -36,7 +37,7 @@ func TestStepCreateLoginKeyShouldPassIfOperationCreateLoginKeyPasses(t *testing.
 
 	stateBag := createTestStateBagStepCreateLoginKey()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
