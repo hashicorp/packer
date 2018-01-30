@@ -47,6 +47,30 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 	)
 
+	if b.config.Comm.Type != "none" {
+		steps = append(steps,
+			&common.StepRun{},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      common.CommHost,
+				SSHConfig: common.SshConfig,
+			},
+			&packerCommon.StepProvision{},
+			&common.StepShutdown{
+				Config: &b.config.ShutdownConfig,
+			},
+		)
+	}
+
+	steps = append(steps,
+		&common.StepCreateSnapshot{
+			CreateSnapshot: b.config.CreateSnapshot,
+		},
+		&common.StepConvertToTemplate{
+			ConvertToTemplate: b.config.ConvertToTemplate,
+		},
+	)
+
 	// Run!
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
