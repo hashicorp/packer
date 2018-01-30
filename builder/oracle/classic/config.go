@@ -23,9 +23,13 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
-	ImageName string `mapstructure:"image_name"`
-	Shape     string `mapstructure:"shape"`
-	ImageList string `mapstructure:"image_list"`
+	ImageName       string `mapstructure:"image_name"`
+	Shape           string `mapstructure:"shape"`
+	SourceImageList string `mapstructure:"source_image_list"`
+	DestImageList   string `mapstructure:"dest_image_list"`
+	// Optional; if you don't enter anything, the image list description
+	// will read "Packer-built image list"
+	DestImageListDescription string `mapstructure:"dest_image_list_description`
 	// Optional. Describes what computers are allowed to reach your instance
 	// via SSH. This whitelist must contain the computer you're running Packer
 	// from. It defaults to public-internet, meaning that you can SSH into your
@@ -63,12 +67,12 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	// Validate that all required fields are present
 	var errs *packer.MultiError
 	required := map[string]string{
-		"username":        c.Username,
-		"password":        c.Password,
-		"api_endpoint":    c.APIEndpoint,
-		"identity_domain": c.IdentityDomain,
-		"image_list":      c.ImageList,
-		"shape":           c.Shape,
+		"username":          c.Username,
+		"password":          c.Password,
+		"api_endpoint":      c.APIEndpoint,
+		"identity_domain":   c.IdentityDomain,
+		"source_image_list": c.SourceImageList,
+		"shape":             c.Shape,
 	}
 	for k, v := range required {
 		if v == "" {
