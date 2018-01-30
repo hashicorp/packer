@@ -42,5 +42,22 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 }
 
 func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
-	// Nothing to do
+	// Delete the snapshot
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Creating Snapshot...")
+	client := state.Get("client").(*compute.ComputeClient)
+	snap := state.Get("snapshot").(*compute.Snapshot)
+	snapClient := client.Snapshots()
+	snapInput := compute.DeleteSnapshotInput{
+		Snapshot:     snap.Name,
+		MachineImage: snap.MachineImage,
+	}
+	machineClient := client.MachineImages()
+	err := snapClient.DeleteSnapshot(machineClient, &snapInput)
+	if err != nil {
+		err = fmt.Errorf("Problem deleting snapshot: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+	}
+	return
 }
