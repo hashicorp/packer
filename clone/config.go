@@ -9,14 +9,15 @@ import (
 )
 
 type Config struct {
-	packerCommon.PackerConfig `mapstructure:",squash"`
-	common.ConnectConfig      `mapstructure:",squash"`
-	CloneConfig               `mapstructure:",squash"`
-	common.HardwareConfig            `mapstructure:",squash"`
-	Comm                      communicator.Config `mapstructure:",squash"`
-	common.ShutdownConfig     `mapstructure:",squash"`
-	CreateSnapshot            bool `mapstructure:"create_snapshot"`
-	ConvertToTemplate         bool `mapstructure:"convert_to_template"`
+	packerCommon.PackerConfig             `mapstructure:",squash"`
+	common.ConnectConfig                  `mapstructure:",squash"`
+	common.RunConfig                      `mapstructure:",squash"`
+	CloneConfig                           `mapstructure:",squash"`
+	common.HardwareConfig                 `mapstructure:",squash"`
+	Comm              communicator.Config `mapstructure:",squash"`
+	common.ShutdownConfig                 `mapstructure:",squash"`
+	CreateSnapshot    bool                `mapstructure:"create_snapshot"`
+	ConvertToTemplate bool                `mapstructure:"convert_to_template"`
 
 	ctx interpolate.Context
 }
@@ -29,6 +30,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	errs := new(packer.MultiError)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.CloneConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)

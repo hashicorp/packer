@@ -49,7 +49,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
-			&common.StepRun{},
+			&common.StepRun{
+				Config: &b.config.RunConfig,
+			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
 				Host:      common.CommHost,
