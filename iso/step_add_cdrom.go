@@ -11,9 +11,7 @@ type CDRomConfig struct {
 }
 
 func (c *CDRomConfig) Prepare() []error {
-	var errs []error
-
-	return errs
+	return nil
 }
 
 type StepAddCDRom struct {
@@ -23,7 +21,7 @@ type StepAddCDRom struct {
 func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Adding CDRom ...")
+	ui.Say("Adding CDRom...")
 
 	vm := state.Get("vm").(*driver.VirtualMachine)
 	err := vm.AddCdrom(s.config.ISOPath)
