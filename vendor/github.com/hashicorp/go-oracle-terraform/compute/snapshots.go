@@ -176,6 +176,31 @@ func (c *SnapshotsClient) DeleteSnapshot(machineImagesClient *MachineImagesClien
 	return nil
 }
 
+// DeleteSnapshot deletes the Snapshot with the given name.
+// A machine image gets created with the associated snapshot is not deleted
+// by this method.
+func (c *SnapshotsClient) DeleteSnapshotResourceOnly(input *DeleteSnapshotInput) error {
+	// Wait for snapshot complete in case delay is active and the corresponding
+	// instance needs to be deleted first
+	getInput := &GetSnapshotInput{
+		Name: input.Snapshot,
+	}
+
+	if input.Timeout == 0 {
+		input.Timeout = WaitForSnapshotCompleteTimeout
+	}
+
+	if _, err := c.WaitForSnapshotComplete(getInput, input.Timeout); err != nil {
+		return fmt.Errorf("Could not delete snapshot: %s", err)
+	}
+
+	if err := c.deleteResource(input.Snapshot); err != nil {
+		return fmt.Errorf("Could not delete snapshot: %s", err)
+	}
+
+	return nil
+}
+
 // WaitForSnapshotComplete waits for an snapshot to be completely initialized and available.
 func (c *SnapshotsClient) WaitForSnapshotComplete(input *GetSnapshotInput, timeout time.Duration) (*Snapshot, error) {
 	var info *Snapshot

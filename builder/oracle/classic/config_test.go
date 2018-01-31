@@ -6,14 +6,15 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"identity_domain": "abc12345",
-		"username":        "test@hashicorp.com",
-		"password":        "testpassword123",
-		"api_endpoint":    "https://api-test.compute.test.oraclecloud.com/",
-		"image_list":      "/oracle/public/myimage",
-		"shape":           "oc3",
-		"image_name":      "TestImageName",
-		"ssh_username":    "opc",
+		"identity_domain":   "abc12345",
+		"username":          "test@hashicorp.com",
+		"password":          "testpassword123",
+		"api_endpoint":      "https://api-test.compute.test.oraclecloud.com/",
+		"dest_image_list":   "/Config-thing/myuser/myimage",
+		"source_image_list": "/oracle/public/whatever",
+		"shape":             "oc3",
+		"image_name":        "TestImageName",
+		"ssh_username":      "opc",
 	}
 }
 
@@ -36,7 +37,8 @@ func TestConfigValidationCatchesMissing(t *testing.T) {
 		"password",
 		"api_endpoint",
 		"identity_domain",
-		"image_list",
+		"dest_image_list",
+		"source_image_list",
 		"shape",
 	}
 	for _, key := range required {

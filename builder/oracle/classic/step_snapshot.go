@@ -52,8 +52,8 @@ func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
 		Snapshot:     snap.Name,
 		MachineImage: snap.MachineImage,
 	}
-	machineClient := client.MachineImages()
-	err := snapClient.DeleteSnapshot(machineClient, &snapInput)
+
+	err := snapClient.DeleteSnapshotResourceOnly(&snapInput)
 	if err != nil {
 		err = fmt.Errorf("Problem deleting snapshot: %s", err)
 		ui.Error(err.Error())

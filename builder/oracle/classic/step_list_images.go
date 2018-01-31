@@ -18,7 +18,6 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	client := state.Get("client").(*compute.ComputeClient)
 	ui.Say("Adding image to image list...")
 
-	// TODO: Try to get image list
 	imageListClient := client.ImageList()
 	getInput := compute.GetImageListInput{
 		Name: config.DestImageList,
@@ -27,7 +26,8 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	if err != nil {
 		ui.Say(fmt.Sprintf(err.Error()))
 		// If the list didn't exist, create it.
-		ui.Say(fmt.Sprintf("Creating image list: %s", config.DestImageList))
+		ui.Say(fmt.Sprintf("Destination image list %s does not exist; Creating it...",
+			config.DestImageList))
 
 		ilInput := compute.CreateImageListInput{
 			Name:        config.DestImageList,
@@ -37,7 +37,7 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 		// Load the packer-generated SSH key into the Oracle Compute cloud.
 		imList, err = imageListClient.CreateImageList(&ilInput)
 		if err != nil {
-			err = fmt.Errorf("Problem creating an image list through Oracle's API: %s", err)
+			err = fmt.Errorf("Problem creating image list: %s", err)
 			ui.Error(err.Error())
 			state.Put("error", err)
 			return multistep.ActionHalt
@@ -47,11 +47,12 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 
 	// Now create and image list entry for the image into that list.
 	snap := state.Get("snapshot").(*compute.Snapshot)
+	version := len(imList.Entries) + 1
 	entriesClient := client.ImageListEntries()
 	entriesInput := compute.CreateImageListEntryInput{
 		Name:          config.DestImageList,
 		MachineImages: []string{fmt.Sprintf("Compute-%s/%s/%s", config.IdentityDomain, config.Username, snap.MachineImage)},
-		Version:       1,
+		Version:       version,
 	}
 	entryInfo, err := entriesClient.CreateImageListEntry(&entriesInput)
 	if err != nil {
@@ -60,7 +61,28 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+	state.Put("image_list_entry", entryInfo)
 	ui.Message(fmt.Sprintf("created image list entry %s", entryInfo.Name))
+
+	imList, err = imageListClient.GetImageList(&getInput)
+
+	machineImagesClient := client.MachineImages()
+	getImagesInput := compute.GetMachineImageInput{
+		Name: config.ImageName,
+	}
+
+	// Grab info about the machine image to return with the artifact
+	imInfo, err := machineImagesClient.GetMachineImage(&getImagesInput)
+	if err != nil {
+		err = fmt.Errorf("Problem getting machine image info: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	state.Put("machine_image_file", imInfo.File)
+	state.Put("machine_image_name", imInfo.Name)
+	state.Put("image_list_version", version)
+
 	return multistep.ActionContinue
 }
 
