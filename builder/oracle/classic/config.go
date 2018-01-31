@@ -29,7 +29,7 @@ type Config struct {
 	DestImageList   string `mapstructure:"dest_image_list"`
 	// Optional; if you don't enter anything, the image list description
 	// will read "Packer-built image list"
-	DestImageListDescription string `mapstructure:"dest_image_list_description`
+	DestImageListDescription string `mapstructure:"dest_image_list_description"`
 	// Optional. Describes what computers are allowed to reach your instance
 	// via SSH. This whitelist must contain the computer you're running Packer
 	// from. It defaults to public-internet, meaning that you can SSH into your
@@ -72,6 +72,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		"api_endpoint":      c.APIEndpoint,
 		"identity_domain":   c.IdentityDomain,
 		"source_image_list": c.SourceImageList,
+		"dest_image_list":   c.DestImageList,
 		"shape":             c.Shape,
 	}
 	for k, v := range required {

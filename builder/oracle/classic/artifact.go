@@ -6,10 +6,13 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/compute"
 )
 
-// Artifact is an artifact implementation that contains a Snapshot.
+// Artifact is an artifact implementation that contains Image List
+// and Machine Image info.
 type Artifact struct {
-	Snapshot *compute.Snapshot
-	driver   *compute.ComputeClient
+	MachineImageName string
+	MachineImageFile string
+	ImageListVersion int
+	driver           *compute.ComputeClient
 }
 
 // BuilderId uniquely identifies the builder.
@@ -24,16 +27,15 @@ func (a *Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.Snapshot.Name
+	return a.MachineImageName
 }
 
 func (a *Artifact) String() string {
-	return fmt.Sprintf("A Snapshot was created: \n"+
+	return fmt.Sprintf("An image list entry was created: \n"+
 		"Name: %s\n"+
-		"Instance: %s\n"+
-		"MachineImage: %s\n"+
-		"URI: %s",
-		a.Snapshot.Name, a.Snapshot.Instance, a.Snapshot.MachineImage, a.Snapshot.URI)
+		"File: %s\n"+
+		"Version: %d",
+		a.MachineImageName, a.MachineImageFile, a.ImageListVersion)
 }
 
 func (a *Artifact) State(name string) interface{} {
