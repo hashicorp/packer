@@ -47,7 +47,7 @@ to files, URLS for ISOs and checksums.
       "ssh_username": "root",
       "ssh_password": "s0m3password",
       "ssh_port": 22,
-      "ssh_wait_timeout": "30s",
+      "ssh_timeout": "30s",
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
