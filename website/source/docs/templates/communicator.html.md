@@ -107,7 +107,8 @@ The SSH communicator has the following options:
     connection. This defaults to false.
 
 *   `ssh_read_write_timeout` (string) - The amount of time to wait for a remote
-    command to end. Example: "1h". Disabled by default.
+    command to end. This might be useful if, for example, packer hangs on
+    a connection after a reboot. Example: "5m". Disabled by default.
 
 -   `ssh_timeout` (string) - The time to wait for SSH to become available.
     Packer uses this to determine when the machine has booted so this is
