@@ -5,6 +5,7 @@ import (
 	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
 	"testing"
 	"github.com/hashicorp/packer/packer"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestISOBuilderAcc_default(t *testing.T) {
@@ -28,7 +29,7 @@ func defaultConfig() map[string]interface{} {
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 
-		"vm_name": commonT.NewVMName(),
+		"vm_name":      commonT.NewVMName(),
 		"communicator": "none", // do not start the VM without any bootable devices
 	}
 
@@ -152,6 +153,7 @@ func TestISOBuilderAcc_cdrom(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: cdromConfig(),
+		Check:    checkCDRom(t),
 	})
 }
 
@@ -159,6 +161,33 @@ func cdromConfig() string {
 	config := defaultConfig()
 	config["iso_path"] = "[datastore1] alpine-standard-3.6.2-x86_64.iso"
 	return commonT.RenderConfig(config)
+}
+
+func checkCDRom(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+
+		vm := commonT.GetVM(t, d, artifacts)
+		devices, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("cannot read VM properties: %v", err)
+		}
+
+		cdrom, err := devices.FindCdrom("")
+		if err != nil {
+			t.Fatalf("cannot find cdrom: %v", err)
+		}
+		iso, ok := cdrom.Backing.(*types.VirtualCdromIsoBackingInfo)
+		if !ok {
+			t.Fatalf("the iso is not connected")
+		}
+		expectedFileName := "[datastore1] alpine-standard-3.6.2-x86_64.iso"
+		if iso.FileName != expectedFileName {
+			t.Fatalf("invalid iso filename: expected '%v', got '%v'", expectedFileName, iso.FileName)
+		}
+
+		return nil
+	}
 }
 
 func TestISOBuilderAcc_networkCard(t *testing.T) {
@@ -184,12 +213,17 @@ func checkNetworkCard(t *testing.T) builderT.TestCheckFunc {
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
-		for _, device := range devices {
-			if devices.TypeName(device) == "VirtualVmxnet3" {
-				return nil
-			}
+
+		netCards := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+		if len(netCards) == 0 {
+			t.Fatalf("Cannot find the network card")
 		}
-		t.Errorf("Cannot find selected network card")
+		if len(netCards) > 1 {
+			t.Fatalf("Found several network catds")
+		}
+		if _, ok := netCards[0].(*types.VirtualVmxnet3); !ok {
+			t.Errorf("The network card type is not the expected one (vmxnet3)")
+		}
 
 		return nil
 	}
