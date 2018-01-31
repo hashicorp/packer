@@ -48,6 +48,11 @@ func ChooseString(vals ...string) string {
 // which isn't a valid URL. DownloadableURL will return "file:///local/file.iso"
 func DownloadableURL(original string) (string, error) {
 	if runtime.GOOS == "windows" {
+		// check for cygwin-style local paths.
+		if strings.Contains(original, "/cygdrive/") {
+			original := strings.Replace(original, "/cygdrive/", "", 1)
+			original = strings.Replace(original, "/", ":/", 1)
+		}
 		// If the distance to the first ":" is just one character, assume
 		// we're dealing with a drive letter and thus a file path.
 		// prepend with "file:///"" now so that url.Parse won't accidentally
