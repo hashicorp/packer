@@ -24,8 +24,8 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	}
 	imList, err := imageListClient.GetImageList(&getInput)
 	if err != nil {
-		ui.Say(fmt.Sprintf(err.Error()))
 		// If the list didn't exist, create it.
+		ui.Say(fmt.Sprintf(err.Error()))
 		ui.Say(fmt.Sprintf("Destination image list %s does not exist; Creating it...",
 			config.DestImageList))
 
@@ -34,7 +34,6 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 			Description: "Packer-built image list",
 		}
 
-		// Load the packer-generated SSH key into the Oracle Compute cloud.
 		imList, err = imageListClient.CreateImageList(&ilInput)
 		if err != nil {
 			err = fmt.Errorf("Problem creating image list: %s", err)
