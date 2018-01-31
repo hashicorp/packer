@@ -44,7 +44,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
 	// Delete the snapshot
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Creating Snapshot...")
+	ui.Say("Deleting Snapshot...")
 	client := state.Get("client").(*compute.ComputeClient)
 	snap := state.Get("snapshot").(*compute.Snapshot)
 	snapClient := client.Snapshots()
