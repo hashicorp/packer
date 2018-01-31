@@ -106,6 +106,9 @@ The SSH communicator has the following options:
 -   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
     connection. This defaults to false.
 
+*   `ssh_read_write_timeout` (string) - The amount of time to wait for a remote
+    command to end. Example: "1h". Disabled by default.
+
 -   `ssh_timeout` (string) - The time to wait for SSH to become available.
     Packer uses this to determine when the machine has booted so this is
     usually quite long. Example value: "10m"
