@@ -49,6 +49,7 @@ type CreateConfig struct {
 	GuestOS      string // example: otherGuest
 	Network      string // "" for default network
 	Overwrite    bool
+	NetworkCard  string // example: vmxnet3
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -151,6 +152,15 @@ func (vm *VirtualMachine) Info(params ...string) (*mo.VirtualMachine, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+func (vm *VirtualMachine) Devices() (object.VirtualDeviceList, error) {
+	vmInfo, err := vm.Info("config.hardware.device")
+	if err != nil {
+		return nil, err
+	}
+
+	return vmInfo.Config.Hardware.Device, nil
 }
 
 func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, error) {
@@ -406,7 +416,7 @@ func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfi
 		return nil, err
 	}
 
-	device, err := object.EthernetCardTypes().CreateEthernetCard("", backing)
+	device, err := object.EthernetCardTypes().CreateEthernetCard(config.NetworkCard, backing)
 	if err != nil {
 		return nil, err
 	}

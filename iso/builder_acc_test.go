@@ -12,7 +12,7 @@ func TestISOBuilderAcc_default(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: commonT.RenderConfig(config),
-		Check: checkDefault(t, config["vm_name"].(string), config["host"].(string), "datastore1"),
+		Check:    checkDefault(t, config["vm_name"].(string), config["host"].(string), "datastore1"),
 	})
 }
 
@@ -29,6 +29,7 @@ func defaultConfig() map[string]interface{} {
 		"ssh_password": "jetbrains",
 
 		"vm_name": commonT.NewVMName(),
+		"communicator": "none", // do not start the VM without any bootable devices
 	}
 
 	return config
@@ -158,4 +159,38 @@ func cdromConfig() string {
 	config := defaultConfig()
 	config["iso_path"] = "[datastore1] alpine-standard-3.6.2-x86_64.iso"
 	return commonT.RenderConfig(config)
+}
+
+func TestISOBuilderAcc_networkCard(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: networkCardConfig(),
+		Check:    checkNetworkCard(t),
+	})
+}
+
+func networkCardConfig() string {
+	config := defaultConfig()
+	config["network_card"] = "vmxnet3"
+	return commonT.RenderConfig(config)
+}
+
+func checkNetworkCard(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+
+		vm := commonT.GetVM(t, d, artifacts)
+		devices, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+		for _, device := range devices {
+			if devices.TypeName(device) == "VirtualVmxnet3" {
+				return nil
+			}
+		}
+		t.Errorf("Cannot find selected network card")
+
+		return nil
+	}
 }
