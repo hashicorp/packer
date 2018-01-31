@@ -80,6 +80,12 @@ configuration is actually required.
 -   `node_name` (string) - The name of the node to register with the
     Chef Server. This is optional and by default is packer-{{uuid}}.
 
+*   `policy_group` (string) - The name of a policy group that exists on the
+    Chef server. `policy_name` must also be specified.
+
+*   `policy_name` (string) - The name of a policy, as identified by the name
+    setting in a `Policyfile.rb` file. `policy_group` must also be specified.
+
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
     then the sudo will be omitted. This has no effect when guest\_os\_type is
@@ -105,9 +111,9 @@ configuration is actually required.
     SSL certificates. If not set, this defaults to "verify\_peer" which validates
     all SSL certifications.
 
--   `trusted_certs_dir` (string) -  This is a directory that contains additional 
-    SSL certificates to trust. Any certificates in this directory will be added to 
-    whatever CA bundle ruby is using. Use this to add self-signed certs for your 
+-   `trusted_certs_dir` (string) -  This is a directory that contains additional
+    SSL certificates to trust. Any certificates in this directory will be added to
+    whatever CA bundle ruby is using. Use this to add self-signed certs for your
     Chef Server or local HTTP file servers.
 
 -   `staging_directory` (string) - This is the directory where all the
@@ -159,6 +165,12 @@ validation_key "{{.ValidationKeyPath}}"
 node_name "{{.NodeName}}"
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
+{{end}}
+{{if ne .PolicyGroup ""}}
+policy_group "{{.PolicyGroup}}"
+{{end}}
+{{if ne .PolicyName ""}}
+policy_name "{{.PolicyName}}"
 {{end}}
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}

@@ -196,6 +196,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if (p.config.PolicyName != "") != (p.config.PolicyGroup != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If either policy_name or policy_group are set, they must both be set."))
+	}
+
 	jsonValid := true
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
