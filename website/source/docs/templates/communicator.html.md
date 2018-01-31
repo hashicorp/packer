@@ -91,6 +91,10 @@ The SSH communicator has the following options:
 -   `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
+*   `ssh_keep_alive_interval` (string) - How often to send "keep alive"
+    messages to the server. Set to a negative value (`-1s`) to disable. Example value:
+    "10s". Defaults to "5s".
+
 -   `ssh_password` (string) - A plaintext password to use to authenticate
     with SSH.
 
