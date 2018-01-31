@@ -63,7 +63,7 @@ This builder currently only works with the SSH communicator.
 
 ### Optional
 
- -  `dest_image_list_description` (string) - a description for your destination 
+ -  `image_description` (string) - a description for your destination 
     image list. If you don't provide one, Packer will provide a generic description. 
 
  -  `ssh_username` (string) - The username that Packer will use to SSH into the 
