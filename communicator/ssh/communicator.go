@@ -55,6 +55,10 @@ type Config struct {
 
 	// UseSftp, if true, sftp will be used instead of scp for file transfers
 	UseSftp bool
+
+	// KeepAliveInterval sets how often we send a channel request to the
+	// server. A value < 0 disables.
+	KeepAliveInterval time.Duration
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -103,6 +107,20 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	if err != nil {
 		return
 	}
+
+	go func() {
+		if c.config.KeepAliveInterval < 0 {
+			return
+		}
+		c := time.NewTicker(c.config.KeepAliveInterval)
+		defer c.Stop()
+		for range c.C {
+			_, err := session.SendRequest("keepalive@packer.io", true, nil)
+			if err != nil {
+				return
+			}
+		}
+	}()
 
 	// Start a goroutine to wait for the session to end and set the
 	// exit boolean and status.
