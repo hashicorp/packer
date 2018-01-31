@@ -38,6 +38,7 @@ type Config struct {
 	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
 	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
 	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
+	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
