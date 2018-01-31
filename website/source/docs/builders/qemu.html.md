@@ -115,6 +115,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     you specified. When no accelerator is specified, Packer will try to use `kvm`
     if it is available but will default to `tcg` otherwise.
 
+    -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
+    upstream issue which can be tracked
+    [here](https://github.com/intel/haxm/issues/20).
+
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
     be to type just enough to initialize the operating system installer. Special
