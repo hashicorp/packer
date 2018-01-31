@@ -3,9 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
@@ -23,18 +21,11 @@ func CommHost(config *SSHConfig) func(multistep.StateBag) (string, error) {
 		}
 
 		log.Println("Lookup up IP information...")
-		f, err := os.Open(vmxPath)
+
+		vmxData, err := ReadVMX(vmxPath)
 		if err != nil {
 			return "", err
 		}
-		defer f.Close()
-
-		vmxBytes, err := ioutil.ReadAll(f)
-		if err != nil {
-			return "", err
-		}
-
-		vmxData := ParseVMX(string(vmxBytes))
 
 		var ok bool
 		macAddress := ""
