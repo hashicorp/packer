@@ -89,9 +89,10 @@ obfuscated; you will need to add a working `username`, `password`,
             "password": "supersecretpasswordhere",
             "identity_domain": "#######",
             "api_endpoint": "https://api-###.compute.###.oraclecloud.com/",
-            "image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
+            "source_image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
             "shape": "oc3", 
             "image_name": "Packer_Builder_Test_{{timestamp}}"
+            "dest_image_list": "Packer_Builder_Test_List"
         }
     ],
     "provisioners": [
