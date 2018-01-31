@@ -92,7 +92,7 @@ The SSH communicator has the following options:
     configured by the builder.
 
 *   `ssh_keep_alive_interval` (string) - How often to send "keep alive"
-    messages to the server. Set to a negative value (`-1`) to disable. Example value:
+    messages to the server. Set to a negative value (`-1s`) to disable. Example value:
     "10s". Defaults to "5s".
 
 -   `ssh_password` (string) - A plaintext password to use to authenticate
