@@ -350,6 +350,8 @@ func (p *Provisioner) createConfig(
 	remoteKeyPath string,
 	validationClientName string,
 	chefEnvironment string,
+  policyGroup string,
+  policyName string,
 	sslVerifyMode string,
 	trustedCertsDir string) (string, error) {
 
