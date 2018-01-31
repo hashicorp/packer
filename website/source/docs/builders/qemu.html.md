@@ -110,9 +110,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
-    already been installed on your build machine to use the accelerator you
-    specified. When no accelerator is specified, Packer will try to use `kvm`
+    This may be `none`, `kvm`, `tcg`, `hax`, or `xen`. The appropriate software 
+    must have already been installed on your build machine to use the accelerator 
+    you specified. When no accelerator is specified, Packer will try to use `kvm`
     if it is available but will default to `tcg` otherwise.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
