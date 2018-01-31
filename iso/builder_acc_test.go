@@ -6,6 +6,7 @@ import (
 	"testing"
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/vim25/types"
+	"fmt"
 )
 
 func TestISOBuilderAcc_default(t *testing.T) {
@@ -159,7 +160,10 @@ func TestISOBuilderAcc_cdrom(t *testing.T) {
 
 func cdromConfig() string {
 	config := defaultConfig()
-	config["iso_path"] = "[datastore1] alpine-standard-3.6.2-x86_64.iso"
+	config["iso_paths"] = []string{
+		"[datastore1] test0.iso",
+		"[datastore1] test1.iso",
+	}
 	return commonT.RenderConfig(config)
 }
 
@@ -173,17 +177,19 @@ func checkCDRom(t *testing.T) builderT.TestCheckFunc {
 			t.Fatalf("cannot read VM properties: %v", err)
 		}
 
-		cdrom, err := devices.FindCdrom("")
-		if err != nil {
-			t.Fatalf("cannot find cdrom: %v", err)
+		cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
+		if len(cdroms) != 2 {
+			t.Fatalf("expected 2 cdroms, found %v", len(cdroms))
 		}
-		iso, ok := cdrom.Backing.(*types.VirtualCdromIsoBackingInfo)
-		if !ok {
-			t.Fatalf("the iso is not connected")
-		}
-		expectedFileName := "[datastore1] alpine-standard-3.6.2-x86_64.iso"
-		if iso.FileName != expectedFileName {
-			t.Fatalf("invalid iso filename: expected '%v', got '%v'", expectedFileName, iso.FileName)
+		for i := range cdroms {
+			iso, ok := cdroms[i].(*types.VirtualCdrom).Backing.(*types.VirtualCdromIsoBackingInfo)
+			if !ok {
+				t.Fatalf("the iso 'test%v.iso' is not connected", i)
+			}
+			expectedFileName := fmt.Sprintf("[datastore1] test%v.iso", i)
+			if iso.FileName != expectedFileName {
+				t.Fatalf("invalid iso filename: expected '%v', got '%v'", expectedFileName, iso.FileName)
+			}
 		}
 
 		return nil
