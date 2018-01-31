@@ -3,7 +3,6 @@ package classic
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -67,7 +66,6 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		Name: config.ImageName,
 		ID:   imID,
 	}
-	log.Printf("instance destroy input is %#v", input)
 
 	err := instanceClient.DeleteInstance(input)
 	if err != nil {

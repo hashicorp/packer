@@ -99,8 +99,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the artifact and return it
 	artifact := &Artifact{
-		Snapshot: state.Get("snapshot").(*compute.Snapshot),
-		driver:   client,
+		ImageListVersion: state.Get("image_list_version").(int),
+		MachineImageName: state.Get("machine_image_name").(string),
+		MachineImageFile: state.Get("machine_image_file").(string),
+		driver:           client,
 	}
 
 	return artifact, nil
