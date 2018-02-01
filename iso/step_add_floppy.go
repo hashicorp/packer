@@ -63,7 +63,6 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 		if err != nil {
 			return err
 		}
-		vmDir = driver.RemoveDatastorePrefix(vmDir)
 
 		uploadPath := fmt.Sprintf("%v/packer-tmp-created-floppy.img", vmDir)
 		if err := ds.UploadFile(tmpFloppy.(string), uploadPath); err != nil {
@@ -104,5 +103,5 @@ func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	// TODO: remove Floppy device, or eject the img
+	// the img will be automatically ejected
 }
