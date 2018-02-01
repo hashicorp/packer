@@ -31,7 +31,9 @@ func defaultConfig() map[string]interface{} {
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 
-		"vm_name":      commonT.NewVMName(),
+		"vm_name":   commonT.NewVMName(),
+		"disk_size": 2,
+
 		"communicator": "none", // do not start the VM without any bootable devices
 	}
 
