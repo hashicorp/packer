@@ -57,7 +57,7 @@ func (c *CreateConfig) Prepare() []error {
 }
 
 type StepCreateVM struct {
-	config *CreateConfig
+	Config *CreateConfig
 }
 
 func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
@@ -67,22 +67,22 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Creating VM...")
 
 	vm, err := d.CreateVM(&driver.CreateConfig{
-		HardwareConfig: s.config.HardwareConfig.ToDriverHardwareConfig(),
+		HardwareConfig: s.Config.HardwareConfig.ToDriverHardwareConfig(),
 
-		DiskThinProvisioned: s.config.DiskThinProvisioned,
-		DiskControllerType:  s.config.DiskControllerType,
-		Name:                s.config.VMName,
-		Folder:              s.config.Folder,
-		Host:                s.config.Host,
-		ResourcePool:        s.config.ResourcePool,
-		Datastore:           s.config.Datastore,
-		GuestOS:             s.config.GuestOSType,
-		Network:             s.config.Network,
-		NetworkCard:         s.config.NetworkCard,
+		DiskThinProvisioned: s.Config.DiskThinProvisioned,
+		DiskControllerType:  s.Config.DiskControllerType,
+		Name:                s.Config.VMName,
+		Folder:              s.Config.Folder,
+		Host:                s.Config.Host,
+		ResourcePool:        s.Config.ResourcePool,
+		Datastore:           s.Config.Datastore,
+		GuestOS:             s.Config.GuestOSType,
+		Network:             s.Config.Network,
+		NetworkCard:         s.Config.NetworkCard,
 	})
 
 	if err != nil {
-		state.Put("error", err)
+		state.Put("error", fmt.Errorf("error creating vm: %v", err))
 		return multistep.ActionHalt
 	}
 

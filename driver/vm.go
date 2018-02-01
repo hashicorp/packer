@@ -7,6 +7,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"time"
+	"strings"
 )
 
 type VirtualMachine struct {
@@ -48,7 +49,6 @@ type CreateConfig struct {
 	Datastore    string
 	GuestOS      string // example: otherGuest
 	Network      string // "" for default network
-	Overwrite    bool
 	NetworkCard  string // example: vmxnet3
 }
 
@@ -88,17 +88,9 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		return nil, err
 	}
 
-	datastore, err := d.FindDatastoreOrDefault(config.Datastore)
+	datastore, err := d.FindDatastore(config.Datastore)
 	if err != nil {
 		return nil, err
-	}
-
-	if !config.Overwrite {
-		vmxPath := fmt.Sprintf("%s/%s.vmx", config.Name, config.Name)
-		if datastore.FileExists(vmxPath) {
-			dsPath := datastore.ResolvePath(vmxPath)
-			return nil, fmt.Errorf("File '%s' already exists", dsPath)
-		}
 	}
 
 	devices := object.VirtualDeviceList{}
@@ -178,7 +170,7 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
-	datastore, err := template.driver.FindDatastoreOrDefault(config.Datastore)
+	datastore, err := template.driver.FindDatastore(config.Datastore)
 	if err != nil {
 		return nil, err
 	}
@@ -349,6 +341,21 @@ func (vm *VirtualMachine) ConvertToTemplate() error {
 	return vm.vm.MarkAsTemplate(vm.driver.ctx)
 }
 
+func (vm *VirtualMachine) GetDir() (string, error) {
+	vmInfo, err := vm.Info("name", "layoutEx.file")
+	if err != nil {
+		return "", err
+	}
+
+	vmxName := fmt.Sprintf("/%s.vmx", vmInfo.Name)
+	for _, file := range vmInfo.LayoutEx.File {
+		if strings.HasSuffix(file.Name, vmxName) {
+			return file.Name[:len(file.Name)-len(vmxName)], nil
+		}
+	}
+	return "", fmt.Errorf("cannot find '%s'", vmxName)
+}
+
 func (config HardwareConfig) toConfigSpec() types.VirtualMachineConfigSpec {
 	var confSpec types.VirtualMachineConfigSpec
 	confSpec.NumCPUs = config.CPUs
@@ -377,7 +384,7 @@ func (config CreateConfig) toConfigSpec() types.VirtualMachineConfigSpec {
 	return confSpec
 }
 
-func addDisk(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
+func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
 	device, err := devices.CreateSCSIController(config.DiskControllerType)
 	if err != nil {
 		return nil, err
