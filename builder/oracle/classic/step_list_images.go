@@ -64,11 +64,23 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	state.Put("image_list_entry", entryInfo)
 	ui.Message(fmt.Sprintf("created image list entry %s", entryInfo.Name))
 
-	imList, err = imageListClient.GetImageList(&getInput)
-
 	machineImagesClient := client.MachineImages()
 	getImagesInput := compute.GetMachineImageInput{
 		Name: config.ImageName,
+	}
+
+	// Update image list default to use latest version
+	updateInput := compute.UpdateImageListInput{
+		Default:     version,
+		Description: config.DestImageListDescription,
+		Name:        config.DestImageList,
+	}
+	_, err = imageListClient.UpdateImageList(&updateInput)
+	if err != nil {
+		err = fmt.Errorf("Problem updating default image list version: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
 
 	// Grab info about the machine image to return with the artifact
