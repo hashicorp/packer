@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/packer/common/powershell/hyperv"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const (
@@ -94,6 +94,8 @@ type Config struct {
 	Communicator string `mapstructure:"communicator"`
 
 	SkipCompaction bool `mapstructure:"skip_compaction"`
+
+	SkipExport bool `mapstructure:"skip_export"`
 
 	ctx interpolate.Context
 }
@@ -471,6 +473,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepExportVm{
 			OutputDir:      b.config.OutputDir,
 			SkipCompaction: b.config.SkipCompaction,
+			SkipExport:     b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order

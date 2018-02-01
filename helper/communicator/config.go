@@ -37,6 +37,8 @@ type Config struct {
 	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
 	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
 	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
+	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
+	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -129,6 +131,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 	if c.SSHTimeout == 0 {
 		c.SSHTimeout = 5 * time.Minute
+	}
+
+	if c.SSHKeepAliveInterval == 0 {
+		c.SSHKeepAliveInterval = 5 * time.Second
 	}
 
 	if c.SSHHandshakeAttempts == 0 {

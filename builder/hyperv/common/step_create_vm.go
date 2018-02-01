@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the actual virtual machine.
@@ -29,9 +30,11 @@ type StepCreateVM struct {
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
 	MacAddress                     string
+	SkipExport                     bool
+	OutputDir                      string
 }
 
-func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")
@@ -52,6 +55,12 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vhdPath := state.Get("packerVhdTempDir").(string)
+
+	// inline vhd path if export is skipped
+	if s.SkipExport {
+		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
+	}
+
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)

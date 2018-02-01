@@ -1,11 +1,12 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepValidateTemplate struct {
@@ -43,7 +44,7 @@ func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploy
 	return err
 }
 
-func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Validating deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

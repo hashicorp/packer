@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -9,8 +10,8 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepDeployTemplate struct {
@@ -58,7 +59,7 @@ func (s *StepDeployTemplate) deployTemplate(resourceGroupName string, deployment
 	return err
 }
 
-func (s *StepDeployTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeployTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deploying deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

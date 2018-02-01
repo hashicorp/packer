@@ -37,7 +37,7 @@ self-install. Still, the example serves to show the basic configuration:
   "parallels_tools_flavor": "lin",
   "ssh_username": "packer",
   "ssh_password": "packer",
-  "ssh_wait_timeout": "30s",
+  "ssh_timeout": "30s",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
 }
 ```

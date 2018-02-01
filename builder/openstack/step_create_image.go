@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -8,13 +9,13 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepCreateImage struct{}
 
-func (s *stepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)

@@ -1,12 +1,13 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepPreValidate struct {
@@ -14,7 +15,7 @@ type stepPreValidate struct {
 	ForceDelete           bool
 }
 
-func (s *stepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if s.ForceDelete {
 		ui.Say("Force delete flag found, skipping prevalidating image name.")

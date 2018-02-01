@@ -2,6 +2,7 @@ package communicator
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,9 +11,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/communicator/winrm"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	winrmcmd "github.com/masterzen/winrm"
-	"github.com/mitchellh/multistep"
 )
 
 // StepConnectWinRM is a multistep Step implementation that waits for WinRM
@@ -32,7 +33,7 @@ type StepConnectWinRM struct {
 	WinRMPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectWinRM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectWinRM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator

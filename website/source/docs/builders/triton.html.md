@@ -92,6 +92,9 @@ builder.
     of `triton_key_id` is stored. For example `/home/soandso/.ssh/id_rsa`. If
     this is not specified, the SSH agent is used to sign requests with the
     `triton_key_id` specified.
+    
+-   `triton_user` (string) - The username of a user who has access to your Triton
+    account. 
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
@@ -149,7 +152,7 @@ builder.
 
 ## Basic Example
 
-Below is a minimal example to create an joyent-brand image on the Joyent public
+Below is a minimal example to create an image on the Joyent public
 cloud:
 
 ``` json

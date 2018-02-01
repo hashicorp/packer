@@ -66,14 +66,17 @@ func workstationVerifyVersion(version string) error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+	return workstationTestVersion(version, stderr.String())
+}
 
+func workstationTestVersion(wanted, versionOutput string) error {
 	versionRe := regexp.MustCompile(`(?i)VMware Workstation (\d+)\.`)
-	matches := versionRe.FindStringSubmatch(stderr.String())
+	matches := versionRe.FindStringSubmatch(versionOutput)
 	if matches == nil {
 		return fmt.Errorf(
-			"Could not find VMware WS version in output: %s", stderr.String())
+			"Could not find VMware WS version in output: %s", wanted)
 	}
 	log.Printf("Detected VMware WS version: %s", matches[1])
 
-	return compareVersions(matches[1], version, "Workstation")
+	return compareVersions(matches[1], wanted, "Workstation")
 }

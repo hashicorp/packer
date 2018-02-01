@@ -1,11 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // stepRemoteUpload uploads some thing from the state bag to a remote driver
@@ -15,7 +17,7 @@ type stepRemoteUpload struct {
 	Message string
 }
 
-func (s *stepRemoteUpload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 

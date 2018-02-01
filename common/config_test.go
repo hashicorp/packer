@@ -38,36 +38,105 @@ func TestChooseString(t *testing.T) {
 }
 
 func TestDownloadableURL(t *testing.T) {
-	// Invalid URL: has hex code in host
-	_, err := DownloadableURL("http://what%20.com")
-	if err == nil {
-		t.Fatal("expected err")
+
+	cases := []struct {
+		InputString string
+		OutputURL   string
+		ErrExpected bool
+	}{
+		// Invalid URL: has hex code in host
+		{"http://what%20.com", "", true},
+		// Valid: http
+		{"HTTP://packer.io/path", "http://packer.io/path", false},
+		// No path
+		{"HTTP://packer.io", "http://packer.io", false},
+		// Invalid: unsupported scheme
+		{"ftp://host.com/path", "", true},
 	}
 
-	// Invalid: unsupported scheme
-	_, err = DownloadableURL("ftp://host.com/path")
-	if err == nil {
-		t.Fatal("expected err")
+	for _, tc := range cases {
+		u, err := DownloadableURL(tc.InputString)
+		if u != tc.OutputURL {
+			t.Fatal(fmt.Sprintf("Error with URL %s: got %s but expected %s",
+				tc.InputString, tc.OutputURL, u))
+		}
+		if (err != nil) != tc.ErrExpected {
+			if tc.ErrExpected == true {
+				t.Fatal(fmt.Sprintf("Error with URL %s: we expected "+
+					"DownloadableURL to return an error but didn't get one.",
+					tc.InputString))
+			} else {
+				t.Fatal(fmt.Sprintf("Error with URL %s: we did not expect an "+
+					" error from DownloadableURL but we got: %s",
+					tc.InputString, err))
+			}
+		}
 	}
+}
 
-	// Valid: http
-	u, err := DownloadableURL("HTTP://packer.io/path")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+func TestDownloadableURL_WindowsFiles(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		dirCases := []struct {
+			InputString string
+			OutputURL   string
+			ErrExpected bool
+		}{ // TODO: add different directories
+			{
+				"C:\\Temp\\SomeDir\\myfile.txt",
+				"file:///C:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+			{ // need windows drive
+				"\\Temp\\SomeDir\\myfile.txt",
+				"",
+				true,
+			},
+			{ // need windows drive
+				"/Temp/SomeDir/myfile.txt",
+				"",
+				true,
+			},
+			{ // UNC paths; why not?
+				"\\\\?\\c:\\Temp\\SomeDir\\myfile.txt",
+				"",
+				true,
+			},
+			{
+				"file:///C:\\Temp\\SomeDir\\myfile.txt",
+				"file:///c:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+			{
+				"file:///c:/Temp/Somedir/myfile.txt",
+				"file:///c:/Temp/SomeDir/myfile.txt",
+				false,
+			},
+		}
+		// create absolute-pathed tempfile to play with
+		err := os.Mkdir("C:\\Temp\\SomeDir", 0755)
+		if err != nil {
+			t.Fatalf("err creating test dir: %s", err)
+		}
+		fi, err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
+		if err != nil {
+			t.Fatalf("err creating test file: %s", err)
+		}
+		fi.Close()
+		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
+		defer os.Remove("C:\\Temp\\SomeDir")
 
-	if u != "http://packer.io/path" {
-		t.Fatalf("bad: %s", u)
-	}
-
-	// No path
-	u, err = DownloadableURL("HTTP://packer.io")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if u != "http://packer.io" {
-		t.Fatalf("bad: %s", u)
+		// Run through test cases to make sure they all parse correctly
+		for _, tc := range dirCases {
+			u, err := DownloadableURL(tc.InputString)
+			if (err != nil) != tc.ErrExpected {
+				t.Fatalf("Test Case failed: Expected err = %#v, err = %#v, input = %s",
+					tc.ErrExpected, err, tc.InputString)
+			}
+			if u != tc.OutputURL {
+				t.Fatalf("Test Case failed: Expected %s but received %s from input %s",
+					tc.OutputURL, u, tc.InputString)
+			}
+		}
 	}
 }
 
@@ -138,6 +207,43 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 			strings.Replace(tfPath, `\`, `/`, -1))
 		if u != expected {
 			t.Fatalf("unexpected: %s != %s", u, expected)
+		}
+	}
+}
+
+func test_FileExistsLocally(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		dirCases := []struct {
+			Input  string
+			Output bool
+		}{
+			// file exists locally
+			{"file:///C:/Temp/SomeDir/myfile.txt", true},
+			// file is not supposed to exist locally
+			{"https://myfile.iso", true},
+			// file does not exist locally
+			{"file:///C/i/dont/exist", false},
+		}
+		// create absolute-pathed tempfile to play with
+		err := os.Mkdir("C:\\Temp\\SomeDir", 0755)
+		if err != nil {
+			t.Fatalf("err creating test dir: %s", err)
+		}
+		fi, err := os.Create("C:\\Temp\\SomeDir\\myfile.txt")
+		if err != nil {
+			t.Fatalf("err creating test file: %s", err)
+		}
+		fi.Close()
+		defer os.Remove("C:\\Temp\\SomeDir\\myfile.txt")
+		defer os.Remove("C:\\Temp\\SomeDir")
+
+		// Run through test cases to make sure they all parse correctly
+		for _, tc := range dirCases {
+			fileOK := FileExistsLocally(tc.Input)
+			if !fileOK {
+				t.Fatalf("Test Case failed: Expected %#v, received = %#v, input = %s",
+					tc.Output, fileOK, tc.Input)
+			}
 		}
 	}
 }

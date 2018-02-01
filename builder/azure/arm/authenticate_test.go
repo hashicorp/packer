@@ -1,8 +1,9 @@
 package arm
 
 import (
-	"github.com/Azure/go-autorest/autorest/azure"
 	"testing"
+
+	"github.com/Azure/go-autorest/autorest/azure"
 )
 
 // Behavior is the most important thing to assert for ServicePrincipalToken, but
