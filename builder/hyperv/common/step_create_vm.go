@@ -29,6 +29,8 @@ type StepCreateVM struct {
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
+	SkipExport                     bool
+	OutputDir                      string
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -52,6 +54,12 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	vhdPath := state.Get("packerVhdTempDir").(string)
+
+	// inline vhd path if export is skipped
+	if s.SkipExport {
+		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
+	}
+
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
