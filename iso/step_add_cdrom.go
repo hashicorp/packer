@@ -16,7 +16,7 @@ func (c *CDRomConfig) Prepare() []error {
 }
 
 type StepAddCDRom struct {
-	config *CDRomConfig
+	Config *CDRomConfig
 }
 
 func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
@@ -25,7 +25,7 @@ func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say("Adding CDRoms...")
 
 	vm := state.Get("vm").(*driver.VirtualMachine)
-	for _, path := range s.config.ISOPaths {
+	for _, path := range s.Config.ISOPaths {
 		if err := vm.AddCdrom(path); err != nil {
 			state.Put("error", fmt.Errorf("error adding a cdrom: %v", err))
 			return multistep.ActionHalt

@@ -30,20 +30,25 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	steps := []multistep.Step{}
+	var steps []multistep.Step
 
 	steps = append(steps,
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
 		&StepCreateVM{
-			config: &b.config.CreateConfig,
+			Config: &b.config.CreateConfig,
 		},
 		&StepAddCDRom{
-			config: &b.config.CDRomConfig,
+			Config: &b.config.CDRomConfig,
+		},
+		&packerCommon.StepCreateFloppy{
+			Files:       b.config.FloppyFiles,
+			Directories: b.config.FloppyDirectories,
 		},
 		&StepAddFloppy{
-			config: &b.config.FloppyConfig,
+			Config:    &b.config.FloppyConfig,
+			Datastore: b.config.Datastore,
 		},
 	)
 

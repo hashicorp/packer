@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/vmware/govmomi/vim25/types"
 	"fmt"
+	"io/ioutil"
 )
 
 func TestISOBuilderAcc_default(t *testing.T) {
@@ -231,6 +232,41 @@ func checkNetworkCard(t *testing.T) builderT.TestCheckFunc {
 			t.Errorf("The network card type is not the expected one (vmxnet3)")
 		}
 
+		return nil
+	}
+}
+
+func TestISOBuilderAcc_createFloppy(t *testing.T) {
+	tmpFile, err := ioutil.TempFile("", "packer-vsphere-iso-test")
+	if err != nil {
+		t.Fatalf("Error creating temp file ")
+	}
+	content := "Hello, World!"
+	fmt.Fprint(tmpFile, content)
+	tmpFile.Close()
+
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: createFloppyConfig(tmpFile.Name()),
+		Check:    checkCreateFloppy(t, content),
+	})
+}
+
+func createFloppyConfig(filePath string) string {
+	config := defaultConfig()
+	config["floppy_files"] = []string{filePath}
+	return commonT.RenderConfig(config)
+}
+
+func checkCreateFloppy(t *testing.T, content string) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+
+		vm := commonT.GetVM(t, d, artifacts)
+		_, err := vm.GetDir()
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
 		return nil
 	}
 }
