@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -141,7 +142,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
-		p.config.User = os.Getenv("USER")
+		usr, err := user.Current()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		} else {
+			p.config.User = usr.Username
+		}
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))

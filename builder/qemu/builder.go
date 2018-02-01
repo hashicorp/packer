@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderId = "transcend.qemu"
@@ -25,6 +25,7 @@ var accels = map[string]struct{}{
 	"kvm":  {},
 	"tcg":  {},
 	"xen":  {},
+	"hax":  {},
 }
 
 var netDevice = map[string]bool{
@@ -259,7 +260,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {

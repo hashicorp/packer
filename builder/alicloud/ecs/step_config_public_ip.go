@@ -1,11 +1,12 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepConfigAlicloudPublicIP struct {
@@ -13,7 +14,7 @@ type stepConfigAlicloudPublicIP struct {
 	RegionId       string
 }
 
-func (s *stepConfigAlicloudPublicIP) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudPublicIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)

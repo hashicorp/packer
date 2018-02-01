@@ -1,13 +1,14 @@
 package lxc
 
 import (
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // The unique ID for this builder

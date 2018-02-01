@@ -1,14 +1,15 @@
 package chroot
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepSnapshot creates a snapshot of the created volume.
@@ -19,7 +20,7 @@ type StepSnapshot struct {
 	snapshotId string
 }
 
-func (s *StepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	volumeId := state.Get("volume_id").(string)

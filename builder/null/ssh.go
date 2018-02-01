@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )

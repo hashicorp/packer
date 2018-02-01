@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,8 +11,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates and runs the HTTP server that is serving files from the
@@ -31,7 +32,7 @@ type StepHTTPServer struct {
 	l net.Listener
 }
 
-func (s *StepHTTPServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepHTTPServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var httpPort uint = 0

@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 const (
@@ -17,18 +18,19 @@ const (
 type StepExportVm struct {
 	OutputDir      string
 	SkipCompaction bool
+	SkipExport     bool
 }
 
-func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExportVm) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-
 	var err error
 	var errorMsg string
 
 	vmName := state.Get("vmName").(string)
 	tmpPath := state.Get("packerTempDir").(string)
 	outputPath := s.OutputDir
+	expPath := s.OutputDir
 
 	// create temp path to export vm
 	errorMsg = "Error creating temp export path: %s"
@@ -39,20 +41,20 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	if !s.SkipExport {
+		ui.Say("Exporting vm...")
 
-	ui.Say("Exporting vm...")
-
-	err = driver.ExportVirtualMachine(vmName, vmExportPath)
-	if err != nil {
-		errorMsg = "Error exporting vm: %s"
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		err = driver.ExportVirtualMachine(vmName, vmExportPath)
+		if err != nil {
+			errorMsg = "Error exporting vm: %s"
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		// copy to output dir
+		expPath = filepath.Join(vmExportPath, vmName)
 	}
-
-	// copy to output dir
-	expPath := filepath.Join(vmExportPath, vmName)
 
 	if s.SkipCompaction {
 		ui.Say("Skipping disk compaction...")
@@ -68,16 +70,17 @@ func (s *StepExportVm) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	ui.Say("Copying to output dir...")
-	err = driver.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
-	if err != nil {
-		errorMsg = "Error exporting vm: %s"
-		err := fmt.Errorf(errorMsg, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if !s.SkipExport {
+		ui.Say("Copying to output dir...")
+		err = driver.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
+		if err != nil {
+			errorMsg = "Error exporting vm: %s"
+			err := fmt.Errorf(errorMsg, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
-
 	return multistep.ActionContinue
 }
 

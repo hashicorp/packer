@@ -2,6 +2,7 @@ package oci
 
 import (
 	"fmt"
+
 	client "github.com/hashicorp/packer/builder/oracle/oci/client"
 )
 
