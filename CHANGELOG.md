@@ -1,5 +1,10 @@
 ## (UNRELEASED)
 
+### BACKWARDS INCOMPATIBILITIES:
+* core: Affects Windows guests: User variables containing Powershell special characters no longer need to be escaped.[GH-5376]
+* provisioner/powershell: Regression from v1.1.1 forcing extra escaping of environment variables in the non-elevated provisioner has been fixed. [GH-5515]
+* 3rd party plugins: We have moved internal dependencies, meaning your 3rd party plugins will break; the work to fix them is minimal and documented in GH-5810. [GH-5810]
+
 ### IMPROVEMENTS:
 
 * builder/docker: Remove credentials from being shown in the log. [GH-5666]
@@ -9,10 +14,31 @@
 * builder/amazon: Warn during prepare if we didn't get both an access key and a secret key when we were expecting one. [GH-5762]
 * builder/amazon: Replace `InstanceStatusOK` check with `InstanceReady`. This reduces build times universally while still working for all instance types. [GH-5678]
 * builder/amazon: Add `kms_key_id` option to block device mappings. [GH-5774]
+* builder/hyper-v: New option to use differential disks and Inline disk creation to improve build time and reduce disk usage [GH-5631]
+* post-processor/vagrant: Add vagrant post-processor support for Google [GH-5732]
+* provisioner/chef: Added Policyfile support to chef-client provisioner. [GH-5831]
+* builder/qemu: Add Intel HAXM support to QEMU builder [GH-5738]
+* communicator/ssh: Add session-level keep-alives [GH-5830]
+* post-processor/amazon-import: Allow user to specify role name in amazon-import [GH-5817] 
+* provisioner/chef: Add support for 'trusted_certs_dir' chef-client configuration option [GH-5790]
+* builder/triton: Updated triton-go dependencies, allowing better error handling. [GH-5795]
+* core: Improved error logging in floppy file handling. [GH-5802]
+* provisioner/amazon: Use Amazon SDK's InstanceRunning waiter instead of InstanceStatusOK waiter [GH-5773]
+* builder/amazon: Add Paris region (eu-west-3) [GH-5718]
+* builder/azure: Add validation for incorrect VHD URLs [GH-5695]
+* builder/amazon: Remove Session Token (STS) from being shown in the log. [GH-5665]
 
 ### BUG FIXES:
 
 * builder/alicloud-ecs: Attach keypair before starting instance in alicloud builder [GH-5739]
+* builder/vmware: Fixed file handle leak that may have caused race conditions in vmware builder [GH-5767]
+* provisioner/powershell: Regression from v1.1.1 forcing extra escaping of environment variables in the non-elevated provisioner has been fixed. [GH-5515]
+* provisioner/ansible: The "default extra variables" feature added in Packer v1.0.1 caused the ansible-local provisioner to fail when an --extra-vars argument was specified in the extra_arguments configuration option; this has been fixed. [GH-5335]
+* communicator/ssh: Add deadline to SSH connection to prevent Packer hangs after script provisioner reboots vm [GH-4684]
+* builder/virtualbox: Fix regression affecting users running Packer on a Windows host that kept Packer from finding Virtualbox guest additions if Packer ran on a different drive from the one where the guest additions were stored. [GH-5761]
+* builder/virtualbox: Fix interpolation ordering so that edge cases around guest_additions_url are handled correctly [GH-5757]
+* builder/amazon: NewSession now inherits MaxRetries and other settings. [GH-5719]
+
 
 ## 1.1.3 (December 8, 2017)
 
