@@ -497,13 +497,13 @@
 			"versionExact": "v1.10.23"
 		},
 		{
-			"checksumSHA1": "1mbCBXbu6m8bfRAq1+7Cul4VXkU=",
+			"checksumSHA1": "INaeHZ2L5x6RlrcQBm4q1hFqNRM=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/service/ec2",
-			"revision": "dd3acff9dc16f9a6fd87f6b4501590a532e7206a",
-			"revisionTime": "2017-08-10T20:40:06Z",
-			"version": "v1.10.23",
-			"versionExact": "v1.10.23"
+			"revision": "5177d71d80f123f6d82aaf762387e39b88c5ba23",
+			"revisionTime": "2018-01-09T00:04:15Z",
+			"version": "v1.12.57",
+			"versionExact": "v1.12.57"
 		},
 		{
 			"checksumSHA1": "YNq7YhasHn9ceelWX2aG0Cg0Ga0=",
@@ -823,34 +823,40 @@
 			"revision": "c01cf91b011868172fdcd9f41838e80c9d716264"
 		},
 		{
-			"checksumSHA1": "EqvUu0Ku0Ec5Tk6yhGNOuOr8yeA=",
+			"checksumSHA1": "Lg8OHK87XRGCaipG+5+zFyN8OMw=",
 			"path": "github.com/joyent/triton-go",
-			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
-			"revisionTime": "2017-10-17T16:55:58Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "JKf97EAAAZFQ6Wf8qN9X7TWqNBY=",
+			"checksumSHA1": "Y03+L+I0FVZ2bMGWt1MHTDEyWM4=",
 			"path": "github.com/joyent/triton-go/authentication",
-			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
-			"revisionTime": "2017-10-17T16:55:58Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "dlO1or0cyVMAmZzyLcBuoy+M0xU=",
+			"checksumSHA1": "MuJsGBr6HlXQYxZY9cM5rBk+Lns=",
 			"path": "github.com/joyent/triton-go/client",
-			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
-			"revisionTime": "2017-10-17T16:55:58Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "O/y7BfKJFUf3A8TCRMXgo9HSb1w=",
+			"checksumSHA1": "A+YGcdf/qfac1gqK8QY1F5+pYGA=",
 			"path": "github.com/joyent/triton-go/compute",
-			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
-			"revisionTime": "2017-10-17T16:55:58Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
-			"checksumSHA1": "gyLtPyKlcumRSkrAH+SsDQo1GnY=",
+			"checksumSHA1": "d/Py6j/uMgOAFNFGpsQrNnSsO+k=",
+			"path": "github.com/joyent/triton-go/errors",
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
+		},
+		{
+			"checksumSHA1": "MIrIeqiPmw66cko+gzk7Cht2SLE=",
 			"path": "github.com/joyent/triton-go/network",
-			"revision": "5a58ad2cdec95cddd1e0a2e56f559341044b04f0",
-			"revisionTime": "2017-10-17T16:55:58Z"
+			"revision": "545edbe0d564f075ac576f1ad177f4ff39c9adaf",
+			"revisionTime": "2018-01-16T16:57:42Z"
 		},
 		{
 			"checksumSHA1": "gEjGS03N1eysvpQ+FCHTxPcbxXc=",
@@ -956,12 +962,6 @@
 			"revision": "281073eb9eb092240d33ef253c404f1cca550309"
 		},
 		{
-			"checksumSHA1": "5x1RX5m8SCkCRLyLL8wBc0qJpV8=",
-			"path": "github.com/mitchellh/multistep",
-			"revision": "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d",
-			"revisionTime": "2017-03-16T18:53:39Z"
-		},
-		{
 			"checksumSHA1": "m2L8ohfZiFRsMW3iynaH/TWgnSY=",
 			"path": "github.com/mitchellh/panicwrap",
 			"revision": "fce601fe55579125e1b3cb0b992287e7290f7b83",
@@ -983,10 +983,10 @@
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
-			"checksumSHA1": "XXmfaQ8fEupEgaGd6PptrLnrE54=",
+			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "e1b7d6e6b1b1a27984270784190f1d06ad91888b",
-			"revisionTime": "2017-09-29T21:51:32Z"
+			"revision": "81144009af586de8e7729b829266f09dd0d59701",
+			"revisionTime": "2018-01-02T16:08:24Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",
@@ -1002,6 +1002,12 @@
 			"checksumSHA1": "IT4sX58d+e8osXHV5U6YCSdB/uE=",
 			"path": "github.com/pierrec/xxHash/xxHash32",
 			"revision": "5a004441f897722c627870a981d02b29924215fa"
+		},
+		{
+			"checksumSHA1": "xCv4GBFyw07vZkVtKF/XrUnkHRk=",
+			"path": "github.com/pkg/errors",
+			"revision": "e881fd58d78e04cf6d0de1217f8707c8cc2249bc",
+			"revisionTime": "2017-12-16T07:03:16Z"
 		},
 		{
 			"checksumSHA1": "Mud+5WNq90BFb4gTeM5AByN8f2Y=",
@@ -1215,14 +1221,16 @@
 			"revisionTime": "2017-02-08T20:51:15Z"
 		},
 		{
-			"checksumSHA1": "5ARrN3Zq+E9zazFb/N+b08Serys=",
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"path": "golang.org/x/net/context",
-			"revision": "6ccd6698c634f5d835c40c1c31848729e0cecda1"
+			"revision": "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec",
+			"revisionTime": "2018-01-12T01:53:59Z"
 		},
 		{
-			"checksumSHA1": "tHFno3QaRarH85A4DV1FYuWATQI=",
+			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
 			"path": "golang.org/x/net/context/ctxhttp",
-			"revision": "6ccd6698c634f5d835c40c1c31848729e0cecda1"
+			"revision": "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec",
+			"revisionTime": "2018-01-12T01:53:59Z"
 		},
 		{
 			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",

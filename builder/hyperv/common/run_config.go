@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/template/interpolate"
 	"time"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type RunConfig struct {

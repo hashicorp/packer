@@ -3,11 +3,12 @@ package vagrant
 import (
 	"bytes"
 	"compress/flate"
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {

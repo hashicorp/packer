@@ -91,6 +91,10 @@ The SSH communicator has the following options:
 -   `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
+*   `ssh_keep_alive_interval` (string) - How often to send "keep alive"
+    messages to the server. Set to a negative value (`-1s`) to disable. Example value:
+    "10s". Defaults to "5s".
+
 -   `ssh_password` (string) - A plaintext password to use to authenticate
     with SSH.
 
@@ -101,6 +105,10 @@ The SSH communicator has the following options:
 
 -   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
     connection. This defaults to false.
+
+*   `ssh_read_write_timeout` (string) - The amount of time to wait for a remote
+    command to end. This might be useful if, for example, packer hangs on
+    a connection after a reboot. Example: "5m". Disabled by default.
 
 -   `ssh_timeout` (string) - The time to wait for SSH to become available.
     Packer uses this to determine when the machine has booted so this is

@@ -1,6 +1,7 @@
 package googlecompute
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -12,8 +13,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateWindowsPassword represents a Packer build step that sets the windows password on a Windows GCE instance.
@@ -23,7 +24,7 @@ type StepCreateWindowsPassword struct {
 }
 
 // Run executes the Packer build step that sets the windows password on a Windows GCE instance.
-func (s *StepCreateWindowsPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(Driver)
 	c := state.Get("config").(*Config)

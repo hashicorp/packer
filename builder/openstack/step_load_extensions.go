@@ -1,13 +1,14 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions"
 	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepLoadExtensions gets the FlavorRef from a Flavor. It first assumes
@@ -15,7 +16,7 @@ import (
 // the flavor by name.
 type StepLoadExtensions struct{}
 
-func (s *StepLoadExtensions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepLoadExtensions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 

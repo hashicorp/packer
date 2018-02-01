@@ -41,5 +41,5 @@ In your build configuration in TeamCity Server, add an additional **Build Step:
 Command Line** and set the **Script content** field to the following:
 
 ```shell
-awscli s3 cp . s3://bucket/ --exclude “*” --include “*.iso”
+awscli s3 cp . s3://bucket/ --exclude “*” --include “*.ovf"
 ```

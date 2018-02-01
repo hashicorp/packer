@@ -1,11 +1,13 @@
 package docker
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"io/ioutil"
 	"os"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepTempDir creates a temporary directory that we use in order to
@@ -14,7 +16,7 @@ type StepTempDir struct {
 	tempDir string
 }
 
-func (s *StepTempDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTempDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating a temporary directory for sharing data...")

@@ -97,6 +97,12 @@ can be configured for this builder.
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 
+-   `differencing_disk` (boolean) - If true enables differencing disks. Only the changes will be written to the new disk. This is especially useful if your
+    source is a vhd/vhdx. This defaults to false.
+
+-   `skip_export` (boolean) - If true skips VM export. If you are interested only in the vhd/vhdx files, you can enable this option. This will create
+    inline disks which improves the build performance. There will not be any copying of source vhds to temp directory. This defauls to false.
+    
 -   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual machine.
     This defaults to false.
 

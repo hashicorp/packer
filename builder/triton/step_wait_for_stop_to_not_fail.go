@@ -1,10 +1,11 @@
 package triton
 
 import (
+	"context"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepWaitForStopNotToFail waits for 10 seconds before returning with continue
@@ -12,7 +13,7 @@ import (
 // they are started never actually stop.
 type StepWaitForStopNotToFail struct{}
 
-func (s *StepWaitForStopNotToFail) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForStopNotToFail) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Waiting 10 seconds to avoid potential SDC bug...")
 	time.Sleep(10 * time.Second)

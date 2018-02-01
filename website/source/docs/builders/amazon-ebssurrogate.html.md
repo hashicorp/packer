@@ -80,6 +80,9 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
+        specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -242,7 +245,7 @@ builder.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -329,9 +332,9 @@ builder.
     private IP address, public DNS name or private DNS name will used as the host for SSH.
     The default behaviour if inside a VPC is to use the public IP address if available,
     otherwise the private IP address will be used. If not in a VPC the public DNS name
-    will be used.
+    will be used. Also works for WinRM.
 
-    Where Packer is configured for an outbound proxy but WinRM traffic should be direct
+    Where Packer is configured for an outbound proxy but WinRM traffic should be direct,
     `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included
     in the `NO_PROXY` environment variable.
 

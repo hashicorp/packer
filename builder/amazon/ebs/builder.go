@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -113,6 +113,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("ec2", ec2conn)
+	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -269,7 +270,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &awscommon.Artifact{
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+		Session:        session,
 	}
 
 	return artifact, nil

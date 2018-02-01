@@ -1,13 +1,14 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCaptureImage struct {
@@ -67,7 +68,7 @@ func (s *StepCaptureImage) captureImage(resourceGroupName string, computeName st
 	return <-errChan
 }
 
-func (s *StepCaptureImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCaptureImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Capturing image ...")
 
 	var computeName = state.Get(constants.ArmComputeName).(string)

@@ -275,7 +275,9 @@ func loadConfig() (*config, error) {
 	}
 
 	configFilePath := os.Getenv("PACKER_CONFIG")
-	if configFilePath == "" {
+	if configFilePath != "" {
+		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
+	} else {
 		var err error
 		configFilePath, err = packer.ConfigFile()
 

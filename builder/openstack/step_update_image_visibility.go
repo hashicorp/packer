@@ -1,16 +1,17 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepUpdateImageVisibility struct{}
 
-func (s *stepUpdateImageVisibility) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepUpdateImageVisibility) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
