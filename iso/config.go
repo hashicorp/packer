@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
+	"fmt"
 )
 
 type Config struct {
@@ -35,6 +36,9 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
+	if c.DiskSize <= 0 {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("'disk_size' must be provided"))
+	}
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.CreateConfig.Prepare()...)
 
