@@ -25,9 +25,9 @@ showhelp() {
     echo ""
     echo "  For simplicity we make a lot of assumptions and choose reasonable"
     echo "  defaults. If you want more control over what happens, please use"
-    echo "  the azure cli directly."
+    echo "  the azure-cli directly."
     echo ""
-    echo "  Note that you must already have an az account, username,"
+    echo "  Note that you must already have an Azure account, username,"
     echo "  password, and subscription. You can create those here:"
     echo ""
     echo "  - https://account.windowsazure.com/"
@@ -54,8 +54,9 @@ requirements() {
         found=$((found + 1))
         echo "Found azure-cli version: $azureversion"
     else
-        echo "azure cli is missing. Please install azure cli from"
-        echo "https://az.microsoft.com/en-us/documentation/articles/xplat-cli-install/"
+        echo "azure-cli is missing. Please install azure-cli from"
+        echo "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest"
+        echo "Alternatively, you can use the Cloud Shell https://docs.microsoft.com/en-us/azure/cloud-shell/overview right from the Azure Portal or even VS Code."
     fi
 
     jqversion=$(jq --version)
@@ -169,7 +170,7 @@ createApplication() {
 
 createServicePrincipal() {
     echo "==> Creating service principal"
-    # az CLI 0.10.2 introduced a breaking change, where appId must be supplied with the -a switch
+    # Azure CLI 0.10.2 introduced a breaking change, where appId must be supplied with the -a switch
     # prior version accepted appId as the only parameter without a switch
     newer_syntax=false
     IFS='.' read -ra azureversionsemver <<< "$azureversion"
