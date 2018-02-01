@@ -241,14 +241,12 @@ func TestISOBuilderAcc_createFloppy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating temp file ")
 	}
-	content := "Hello, World!"
-	fmt.Fprint(tmpFile, content)
+	fmt.Fprint(tmpFile, "Hello, World!")
 	tmpFile.Close()
 
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: createFloppyConfig(tmpFile.Name()),
-		Check:    checkCreateFloppy(t, content),
 	})
 }
 
@@ -256,17 +254,4 @@ func createFloppyConfig(filePath string) string {
 	config := defaultConfig()
 	config["floppy_files"] = []string{filePath}
 	return commonT.RenderConfig(config)
-}
-
-func checkCreateFloppy(t *testing.T, content string) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := commonT.TestConn(t)
-
-		vm := commonT.GetVM(t, d, artifacts)
-		_, err := vm.GetDir()
-		if err != nil {
-			t.Fatalf(err.Error())
-		}
-		return nil
-	}
 }

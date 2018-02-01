@@ -350,7 +350,7 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 	vmxName := fmt.Sprintf("/%s.vmx", vmInfo.Name)
 	for _, file := range vmInfo.LayoutEx.File {
 		if strings.HasSuffix(file.Name, vmxName) {
-			return file.Name[:len(file.Name)-len(vmxName)], nil
+			return RemoveDatastorePrefix(file.Name[:len(file.Name)-len(vmxName)]), nil
 		}
 	}
 	return "", fmt.Errorf("cannot find '%s'", vmxName)
