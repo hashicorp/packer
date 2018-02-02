@@ -494,6 +494,10 @@ func (vm *VirtualMachine) SetBootOrder(order []string) error {
 	return vm.vm.SetBootOptions(vm.driver.ctx, &bootOptions)
 }
 
+func (vm *VirtualMachine) RemoveDevice(keepFiles bool, device ...types.BaseVirtualDevice) error {
+	return vm.vm.RemoveDevice(vm.driver.ctx, keepFiles, device...)
+}
+
 func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 	newDevices := object.VirtualDeviceList{device}
 	confSpec := types.VirtualMachineConfigSpec{}

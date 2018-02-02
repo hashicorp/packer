@@ -157,7 +157,6 @@ func TestISOBuilderAcc_cdrom(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: cdromConfig(),
-		Check:    checkCDRom(t),
 	})
 }
 
@@ -168,35 +167,6 @@ func cdromConfig() string {
 		"[datastore1] test1.iso",
 	}
 	return commonT.RenderConfig(config)
-}
-
-func checkCDRom(t *testing.T) builderT.TestCheckFunc {
-	return func(artifacts []packer.Artifact) error {
-		d := commonT.TestConn(t)
-
-		vm := commonT.GetVM(t, d, artifacts)
-		devices, err := vm.Devices()
-		if err != nil {
-			t.Fatalf("cannot read VM properties: %v", err)
-		}
-
-		cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
-		if len(cdroms) != 2 {
-			t.Fatalf("expected 2 cdroms, found %v", len(cdroms))
-		}
-		for i := range cdroms {
-			iso, ok := cdroms[i].(*types.VirtualCdrom).Backing.(*types.VirtualCdromIsoBackingInfo)
-			if !ok {
-				t.Fatalf("the iso 'test%v.iso' is not connected", i)
-			}
-			expectedFileName := fmt.Sprintf("[datastore1] test%v.iso", i)
-			if iso.FileName != expectedFileName {
-				t.Fatalf("invalid iso filename: expected '%v', got '%v'", expectedFileName, iso.FileName)
-			}
-		}
-
-		return nil
-	}
 }
 
 func TestISOBuilderAcc_networkCard(t *testing.T) {
