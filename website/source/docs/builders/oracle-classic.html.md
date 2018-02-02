@@ -1,7 +1,7 @@
 ---
-description:
+description: |
   The oracle-classic builder is able to create new custom images for use with Oracle
-  Compute Cloud.
+  Cloud Infrastructure Classic Compute.
 layout: docs
 page_title: 'Oracle Cloud Infrastructure Classic - Builders'
 sidebar_current: 'docs-builders-oracle-classic'
@@ -25,7 +25,7 @@ to use it or delete it.
 
 ## Authorization
 
-This builder authenticates API calls to Oracle Cloud Infrastructure Classic Compute using basic 
+This builder authenticates API calls to Oracle Cloud Infrastructure Classic Compute using basic
 authentication (user name and password).
 To read more, see the [authentication documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsa/Authentication.html)
 
@@ -36,11 +36,11 @@ This builder currently only works with the SSH communicator.
 
 ### Required
 
- -  `api_endpoint` (string) - This is your custom API endpoint for sending 
-    requests. Instructions for determining your API endpoint can be found 
+ -  `api_endpoint` (string) - This is your custom API endpoint for sending
+    requests. Instructions for determining your API endpoint can be found
     [here](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsa/SendRequests.html)
 
- -  `dest_image_list` (string) - Where to save the machine image to once you've 
+ -  `dest_image_list` (string) - Where to save the machine image to once you've
     provisioned it. If the provided image list does not exist, Packer will create it.
 
  -  `identity_domain` (string) - This is your customer-specific identity domain
@@ -50,7 +50,7 @@ This builder currently only works with the SSH communicator.
 
  -  `source_image_list` (string) - This is what image you want to use as your base image.
     See the [documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsg/listing-machine-images.html)
-    for more details. You may use either a public image list, or a private image list. To see what public image lists are available, you can use 
+    for more details. You may use either a public image list, or a private image list. To see what public image lists are available, you can use
     the CLI, as described [here](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stopc/image-lists-stclr-and-nmcli.html#GUID-DB7E75FE-F752-4FF7-AB70-3C8DCDFCA0FA)
 
  -  `password` (string) - Your account password.
@@ -63,21 +63,21 @@ This builder currently only works with the SSH communicator.
 
 ### Optional
 
- -  `image_description` (string) - a description for your destination 
-    image list. If you don't provide one, Packer will provide a generic description. 
+ -  `image_description` (string) - a description for your destination
+    image list. If you don't provide one, Packer will provide a generic description.
 
- -  `ssh_username` (string) - The username that Packer will use to SSH into the 
-    instance; defaults to `opc`, the default oracle user, which has sudo 
-    priveliges. If you have already configured users on your machine, you may 
-    prompt Packer to use one of those instead. For more detail, see the 
+ -  `ssh_username` (string) - The username that Packer will use to SSH into the
+    instance; defaults to `opc`, the default oracle user, which has sudo
+    priveliges. If you have already configured users on your machine, you may
+    prompt Packer to use one of those instead. For more detail, see the
     [documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsg/accessing-oracle-linux-instance-using-ssh.html).
 
  -  `image_name` (string) - The name to assign to the resulting custom image.
 
 ## Basic Example
 
-Here is a basic example. Note that account specific configuration has been 
-obfuscated; you will need to add a working `username`, `password`, 
+Here is a basic example. Note that account specific configuration has been
+obfuscated; you will need to add a working `username`, `password`,
 `identity_domain`, and `api_endpoint` in order for the example to work.
 
 ``` {.json}
@@ -90,7 +90,7 @@ obfuscated; you will need to add a working `username`, `password`,
             "identity_domain": "#######",
             "api_endpoint": "https://api-###.compute.###.oraclecloud.com/",
             "source_image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
-            "shape": "oc3", 
+            "shape": "oc3",
             "image_name": "Packer_Builder_Test_{{timestamp}}"
             "dest_image_list": "Packer_Builder_Test_List"
         }
