@@ -24,13 +24,6 @@ import (
 
 var retryableSleep = 2 * time.Second
 
-var psEscape = strings.NewReplacer(
-	"$", "`$",
-	"\"", "`\"",
-	"`", "``",
-	"'", "`'",
-)
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -366,13 +359,7 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
 		keyValue := strings.SplitN(envVar, "=", 2)
-		// Escape chars special to PS in each env var value
-		escapedEnvVarValue := psEscape.Replace(keyValue[1])
-		if escapedEnvVarValue != keyValue[1] {
-			log.Printf("Env var %s converted to %s after escaping chars special to PS", keyValue[1],
-				escapedEnvVarValue)
-		}
-		envVars[keyValue[0]] = escapedEnvVarValue
+		envVars[keyValue[0]] = keyValue[1]
 	}
 
 	// Create a list of env var keys in sorted order
@@ -493,26 +480,13 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	}
 	escapedCommand := buffer.String()
 	log.Printf("Command [%s] converted to [%s] for use in XML string", command, escapedCommand)
+
 	buffer.Reset()
-
-	// Escape chars special to PowerShell in the ElevatedUser string
-	escapedElevatedUser := psEscape.Replace(p.config.ElevatedUser)
-	if escapedElevatedUser != p.config.ElevatedUser {
-		log.Printf("Elevated user %s converted to %s after escaping chars special to PowerShell",
-			p.config.ElevatedUser, escapedElevatedUser)
-	}
-
-	// Escape chars special to PowerShell in the ElevatedPassword string
-	escapedElevatedPassword := psEscape.Replace(p.config.ElevatedPassword)
-	if escapedElevatedPassword != p.config.ElevatedPassword {
-		log.Printf("Elevated password %s converted to %s after escaping chars special to PowerShell",
-			p.config.ElevatedPassword, escapedElevatedPassword)
-	}
 
 	// Generate command
 	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
-		User:              escapedElevatedUser,
-		Password:          escapedElevatedPassword,
+		User:              p.config.ElevatedUser,
+		Password:          p.config.ElevatedPassword,
 		TaskName:          taskName,
 		TaskDescription:   "Packer elevated task",
 		LogFile:           logFile,
