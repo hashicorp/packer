@@ -1,4 +1,4 @@
-package oci
+package common
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func commHost(state multistep.StateBag) (string, error) {
+func CommHost(state multistep.StateBag) (string, error) {
 	ipAddress := state.Get("instance_ip").(string)
 	return ipAddress, nil
 }
