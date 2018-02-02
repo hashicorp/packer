@@ -518,12 +518,6 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
 		{"FOO=bar=baz"},        // User env var with value containing equals
 		{"FOO==bar"},           // User env var with value starting with equals
-		// Test escaping of characters special to PowerShell
-		{"FOO=bar$baz"},  // User env var with value containing dollar
-		{"FOO=bar\"baz"}, // User env var with value containing a double quote
-		{"FOO=bar'baz"},  // User env var with value containing a single quote
-		{"FOO=bar`baz"},  // User env var with value containing a backtick
-
 	}
 	expected := []string{
 		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
@@ -531,10 +525,6 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
@@ -563,11 +553,6 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
 		{"FOO=bar=baz"},        // User env var with value containing equals
 		{"FOO==bar"},           // User env var with value starting with equals
-		// Test escaping of characters special to PowerShell
-		{"FOO=bar$baz"},  // User env var with value containing dollar
-		{"FOO=bar\"baz"}, // User env var with value containing a double quote
-		{"FOO=bar'baz"},  // User env var with value containing a single quote
-		{"FOO=bar`baz"},  // User env var with value containing a backtick
 	}
 	expected := []string{
 		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
@@ -575,10 +560,6 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
