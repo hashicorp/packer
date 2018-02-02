@@ -113,7 +113,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.EnvVarFormat == "" {
-		p.config.EnvVarFormat = `$env:%s="%s"; `
+		p.config.EnvVarFormat = `$env:%s=\"%s\"; `
 	}
 
 	if p.config.ElevatedEnvVarFormat == "" {
@@ -121,7 +121,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"`
+		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
@@ -331,19 +331,6 @@ func (p *Provisioner) retryable(f func() error) error {
 	}
 }
 
-// Enviroment variables required within the remote environment are uploaded within a PS script and
-// then enabled by 'dot sourcing' the script immediately prior to execution of the main command
-func (p *Provisioner) prepareEnvVars(elevated bool) (envVarPath string, err error) {
-	// Collate all required env vars into a plain string with required formatting applied
-	flattenedEnvVars := p.createFlattenedEnvVars(elevated)
-	// Create a powershell script on the target build fs containing the flattened env vars
-	envVarPath, err = p.uploadEnvVars(flattenedEnvVars)
-	if err != nil {
-		return "", err
-	}
-	return
-}
-
 func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	flattened = ""
 	envVars := make(map[string]string)
@@ -380,19 +367,6 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	return
 }
 
-func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (envVarPath string, err error) {
-	// Upload all env vars to a powershell script on the target build file system
-	envVarReader := strings.NewReader(flattenedEnvVars)
-	uuid := uuid.TimeOrderedUUID()
-	envVarPath = fmt.Sprintf(`${env:SYSTEMROOT}\Temp\packer-env-vars-%s.ps1`, uuid)
-	log.Printf("Uploading env vars to %s", envVarPath)
-	err = p.communicator.Upload(envVarPath, envVarReader, nil)
-	if err != nil {
-		return "", fmt.Errorf("Error uploading ps script containing env vars: %s", err)
-	}
-	return
-}
-
 func (p *Provisioner) createCommandText() (command string, err error) {
 	// Return the interpolated command
 	if p.config.ElevatedUser == "" {
@@ -403,15 +377,12 @@ func (p *Provisioner) createCommandText() (command string, err error) {
 }
 
 func (p *Provisioner) createCommandTextNonPrivileged() (command string, err error) {
-	// Prepare everything needed to enable the required env vars within the remote environment
-	envVarPath, err := p.prepareEnvVars(false)
-	if err != nil {
-		return "", err
-	}
+	// Create environment variables to set before executing the command
+	flattenedEnvVars := p.createFlattenedEnvVars(false)
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
+		Vars: flattenedEnvVars,
 		Path: p.config.RemotePath,
-		Vars: envVarPath,
 	}
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 
@@ -424,10 +395,17 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 }
 
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
-	// Prepare everything needed to enable the required env vars within the remote environment
-	envVarPath, err := p.prepareEnvVars(false)
+	// Can't double escape the env vars, lets create shiny new ones
+	flattenedEnvVars := p.createFlattenedEnvVars(true)
+	// Need to create a mini ps1 script containing all of the environment variables we want;
+	// we'll be dot-sourcing this later
+	envVarReader := strings.NewReader(flattenedEnvVars)
+	uuid := uuid.TimeOrderedUUID()
+	envVarPath := fmt.Sprintf(`${env:SYSTEMROOT}\Temp\packer-env-vars-%s.ps1`, uuid)
+	log.Printf("Uploading env vars to %s", envVarPath)
+	err = p.communicator.Upload(envVarPath, envVarReader, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
