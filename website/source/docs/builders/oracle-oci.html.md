@@ -1,5 +1,5 @@
 ---
-description:
+description: |
   The oracle-oci builder is able to create new custom images for use with Oracle
   Cloud Infrastructure (OCI).
 layout: docs
