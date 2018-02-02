@@ -3,16 +3,16 @@ description:
   The oracle-classic builder is able to create new custom images for use with Oracle
   Compute Cloud.
 layout: docs
-page_title: 'Oracle Classic - Builders'
+page_title: 'Oracle Cloud Infrastructure Classic - Builders'
 sidebar_current: 'docs-builders-oracle-classic'
 ---
 
-# Oracle Compute Cloud (Classic) Builder
+# Oracle Cloud Infrastructure Classic Compute Builder
 
 Type: `oracle-classic`
 
 The `oracle-classic` Packer builder is able to create custom images for use
-with [Oracle Compute Cloud](https://cloud.oracle.com/compute-classic). The builder
+with [Oracle Cloud Infrastructure Classic Compute](https://cloud.oracle.com/compute-classic). The builder
 takes a base image, runs any provisioning necessary on the base image after
 launching it, and finally snapshots it creating a reusable custom image.
 
@@ -25,7 +25,7 @@ to use it or delete it.
 
 ## Authorization
 
-This builder authenticates API calls to Compute Classic using basic 
+This builder authenticates API calls to Oracle Cloud Infrastructure Classic Compute using basic 
 authentication (user name and password).
 To read more, see the [authentication documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsa/Authentication.html)
 
