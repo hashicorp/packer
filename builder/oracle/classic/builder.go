@@ -1,13 +1,14 @@
-// Package oci contains a packer.Builder implementation that builds Oracle
-// Bare Metal Cloud Services (OCI) images.
-package oci
+package classic
 
 import (
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/go-oracle-terraform/compute"
+	"github.com/hashicorp/go-oracle-terraform/opc"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
-	client "github.com/hashicorp/packer/builder/oracle/oci/client"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -15,10 +16,7 @@ import (
 )
 
 // BuilderId uniquely identifies the builder
-const BuilderId = "packer.oracle.oci"
-
-// OCI API version
-const ociAPIVersion = "20160918"
+const BuilderId = "packer.oracle.classic"
 
 // Builder is a builder implementation that creates Oracle OCI custom images.
 type Builder struct {
@@ -37,27 +35,42 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver, err := NewDriverOCI(b.config)
+	loggingEnabled := os.Getenv("PACKER_OCI_CLASSIC_LOGGING") != ""
+	httpClient := cleanhttp.DefaultClient()
+	config := &opc.Config{
+		Username:       opc.String(b.config.Username),
+		Password:       opc.String(b.config.Password),
+		IdentityDomain: opc.String(b.config.IdentityDomain),
+		APIEndpoint:    b.config.apiEndpointURL,
+		LogLevel:       opc.LogDebug,
+		Logger:         &Logger{loggingEnabled},
+		// Logger: # Leave blank to use the default logger, or provide your own
+		HTTPClient: httpClient,
+	}
+	// Create the Compute Client
+	client, err := compute.NewComputeClient(config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error creating OPC Compute Client: %s", err)
 	}
 
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
-	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("client", client)
 
 	// Build the steps
 	steps := []multistep.Step{
 		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("oci_%s.pem", b.config.PackerBuildName),
+			DebugKeyPath:   fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
 			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
 		},
+		&stepCreateIPReservation{},
+		&stepAddKeysToAPI{},
+		&stepSecurity{},
 		&stepCreateInstance{},
-		&stepInstanceInfo{},
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
 			Host:   ocommon.CommHost,
@@ -66,11 +79,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				b.config.Comm.SSHPassword),
 		},
 		&common.StepProvision{},
-		&stepImage{},
+		&stepSnapshot{},
+		&stepListImages{},
 	}
 
 	// Run the steps
-	b.runner = common.NewRunnerWithPauseFn(steps, b.config.PackerConfig, ui, state)
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
 	// If there was an error, return that
@@ -78,11 +92,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// If there is no snapshot, then just return
+	if _, ok := state.GetOk("snapshot"); !ok {
+		return nil, nil
+	}
+
 	// Build the artifact and return it
 	artifact := &Artifact{
-		Image:  state.Get("image").(client.Image),
-		Region: b.config.AccessCfg.Region,
-		driver: driver,
+		ImageListVersion: state.Get("image_list_version").(int),
+		MachineImageName: state.Get("machine_image_name").(string),
+		MachineImageFile: state.Get("machine_image_file").(string),
+		driver:           client,
 	}
 
 	return artifact, nil
