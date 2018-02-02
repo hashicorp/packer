@@ -29,6 +29,7 @@ type StepCreateVM struct {
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
+	MacAddress                     string
 	SkipExport                     bool
 	OutputDir                      string
 }
@@ -130,6 +131,16 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+		}
+	}
+
+	if s.MacAddress != "" {
+		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
+		if err != nil {
+			err := fmt.Errorf("Error setting MAC address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 
