@@ -93,7 +93,9 @@ Packer looks for credentials in the following places, preferring the first locat
 
 4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server. (Needs a correct VM authentication scope configuration, see above)
 
-## Basic Example
+## Examples
+
+### Basic Example
 
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners or startup-script metadata are defined, but it will effectively
@@ -123,23 +125,48 @@ user used to connect in a startup-script.
 
 ``` {.json}
 {
-  "builders": [{
-    "type": "googlecompute",
-    "account_file": "account.json",
-    "project_id": "my project",
-    "source_image": "windows-server-2016-dc-v20170227",
-    "disk_size": "50",
-    "machine_type": "n1-standard-1",
-    "communicator": "winrm",
-    "winrm_username": "packer_user",
-    "winrm_insecure": true,
-    "winrm_use_ssl": true,
-    "metadata": {
-      "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
-    },
-    "zone": "us-central1-a"
-  }]
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image": "windows-server-2016-dc-v20170227",
+      "disk_size": "50",
+      "machine_type": "n1-standard-1",
+      "communicator": "winrm",
+      "winrm_username": "packer_user",
+      "winrm_insecure": true,
+      "winrm_use_ssl": true,
+      "metadata": {
+        "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+      },
+      "zone": "us-central1-a"
+    }
+  ]
 }
+```
+
+### Nested Hypervisor Example
+
+This is an example of using the `image_licenses` configuration option to create a GCE image that has nested virtualization enabled. See
+[Enabling Nested Virtualization for VM Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
+for details.
+
+``` json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image_family": "centos-7",
+      "ssh_username": "packer",
+      "zone": "us-central1-a",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
+    }
+  ]
+}
+
 ```
 
 ## Configuration Reference
@@ -201,6 +228,8 @@ builder.
 
 -   `image_labels` (object of key/value strings) - Key/value pair labels to
     apply to the created image.
+
+-   `image_licenses` (array of strings) - Licenses to apply to the created image.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
