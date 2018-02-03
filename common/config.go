@@ -44,9 +44,9 @@ func ChooseString(vals ...string) string {
 	return ""
 }
 
-// SupportedURL verifies that the url passed is actually supported or not
+// SupportedProtocol verifies that the url passed is actually supported or not
 // This will also validate that the protocol is one that's actually implemented.
-func SupportedURL(u *url.URL) bool {
+func SupportedProtocol(u *url.URL) bool {
 	// url.Parse shouldn't return nil except on error....but it can.
 	if u == nil {
 		return false
@@ -159,7 +159,7 @@ func ValidatedURL(original string) (string, error) {
 	}
 
 	// We should now have a url, so verify that it's a protocol we support.
-	if !SupportedURL(u) {
+	if !SupportedProtocol(u) {
 		return "", fmt.Errorf("Unsupported protocol scheme! (%#v)", u)
 	}
 
