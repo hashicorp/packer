@@ -285,7 +285,7 @@ func TestDownloadableURL_FilePaths(t *testing.T) {
 	}
 }
 
-func test_FileExistsLocally(t *testing.T) {
+func TestFileExistsLocally(t *testing.T) {
 	portablepath := GetPortablePathToTestFixtures(t)
 
 	dirCases := []struct {
@@ -294,15 +294,17 @@ func test_FileExistsLocally(t *testing.T) {
 	}{
 		// file exists locally
 		{fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath), true},
-		// file is not supposed to exist locally
+		// remote protocols short-circuit and are considered to exist locally
 		{"https://myfile.iso", true},
+		// non-existent protocols do not exist and hence fail
+		{"nonexistent-protocol://myfile.iso", false},
 		// file does not exist locally
 		{"file:///C/i/dont/exist", false},
 	}
 	// Run through test cases to make sure they all parse correctly
 	for _, tc := range dirCases {
 		fileOK := FileExistsLocally(tc.Input)
-		if !fileOK {
+		if fileOK != tc.Output {
 			t.Fatalf("Test Case failed: Expected %#v, received = %#v, input = %s",
 				tc.Output, fileOK, tc.Input)
 		}
