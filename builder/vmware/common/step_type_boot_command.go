@@ -7,7 +7,6 @@ import (
 	"net"
 	"os"
 	"regexp"
-	"runtime"
 	"strings"
 	"time"
 	"unicode"
