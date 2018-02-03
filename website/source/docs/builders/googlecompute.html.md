@@ -109,6 +109,7 @@ is assumed to be the path to the file containing the JSON.
       "account_file": "account.json",
       "project_id": "my project",
       "source_image": "debian-7-wheezy-v20150127",
+      "ssh_username": "packer",
       "zone": "us-central1-a"
     }
   ]
