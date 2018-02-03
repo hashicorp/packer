@@ -293,7 +293,7 @@ func TestFileExistsLocally(t *testing.T) {
 		Output bool
 	}{
 		// file exists locally
-		{fmt.Sprintf("file:///%s/SomeDir/myfile.txt", portablepath), true},
+		{fmt.Sprintf("file://%s/SomeDir/myfile.txt", portablepath), true},
 		// remote protocols short-circuit and are considered to exist locally
 		{"https://myfile.iso", true},
 		// non-existent protocols do not exist and hence fail
