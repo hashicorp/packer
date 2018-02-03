@@ -195,7 +195,7 @@ func FileExistsLocally(original string) bool {
 	// Check to see that it's got a Local way of doing things.
 	local, ok := d.(LocalDownloader)
 	if !ok {
-		return false
+		return true // XXX: Remote URLs short-circuit this logic.
 	}
 
 	// Figure out where we're at.
