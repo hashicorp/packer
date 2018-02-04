@@ -166,7 +166,6 @@ for details.
     }
   ]
 }
-
 ```
 
 ## Configuration Reference
