@@ -84,7 +84,7 @@ func TestNewConfig_sourcePath(t *testing.T) {
 		t.Fatalf("bad: %#v", warns)
 	}
 	if err == nil {
-		t.Fatal("should error")
+		t.Fatalf("should error")
 	}
 
 	// Good
