@@ -612,20 +612,36 @@ func (d *FTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	uri := src
 
+	// Split the hostname and port from the net/url
+	uriHostnameComponents := strings.SplitN(uri.Host, ":", 2)
+	uriHostname := uriHostnameComponents[0]
+	uriPort := ""
+	if len(uriHostnameComponents) == 2 {
+		uriPort = uriHostnameComponents[1]
+	}
+
 	// add the default ftp port
-	if uri.Port() == "" {
+	if uriPort == "" {
 		port, err := net.LookupPort("ip4", "ftp")
 		if err != nil {
 			port = 21
 		}
-		uri.Host = fmt.Sprintf("%s:%d", uri.Hostname(), port)
+		uri.Host = fmt.Sprintf("%s:%d", uriHostname, port)
+	}
+
+	// Do it again after we fixed it up
+	uriHostnameComponents = strings.SplitN(uri.Host, ":", 2)
+	uriHostname = uriHostnameComponents[0]
+	uriPort = ""
+	if len(uriHostnameComponents) == 2 {
+		uriPort = uriHostnameComponents[1]
 	}
 
 	// connect to ftp server
 	var cli *ftp.ServerConn
 
-	log.Printf("Starting download over FTP: %s(:%s) -> %s\n", uri.Hostname(), uri.Port(), uri.Path)
-	cli, err := ftp.Dial(fmt.Sprintf("%s:%s", uri.Hostname(), uri.Port()))
+	log.Printf("Starting download over FTP: %s(:%s) -> %s\n", uriHostname, uriPort, uri.Path)
+	cli, err := ftp.Dial(fmt.Sprintf("%s:%s", uriHostname, uriPort))
 	if err != nil {
 		return err
 	}
