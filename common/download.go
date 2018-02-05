@@ -20,11 +20,11 @@ import (
 
 // imports related to each Downloader implementation
 import (
+	"github.com/jlaffaye/ftp"
 	"io"
 	"net"
 	"net/http"
 	"path/filepath"
-	"github.com/jlaffaye/ftp"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
