@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cheggaaa/pb"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
@@ -63,6 +64,10 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
+	// Get a default-looking progress bar and connect it to the ui.
+	bar := GetDefaultProgressBar()
+	bar.Callback = ui.Message
+
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
 
@@ -96,7 +101,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 		downloadConfigs[i] = config
 
-		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
+		if match, _ := NewDownloadClient(config, bar).VerifyChecksum(config.TargetPath); match {
 			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
 			finalPath = config.TargetPath
 			break
@@ -139,7 +144,13 @@ func (s *StepDownload) Cleanup(multistep.StateBag) {}
 func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
 	var path string
 	ui := state.Get("ui").(packer.Ui)
-	download := NewDownloadClient(config)
+
+	// Get a default looking progress bar and connect it to the ui.
+	bar := GetDefaultProgressBar()
+	bar.Callback = ui.Message
+
+	// Create download client with config and progress bar
+	download := NewDownloadClient(config, bar)
 
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
@@ -148,12 +159,11 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 		downloadCompleteCh <- err
 	}()
 
-	progressTicker := time.NewTicker(5 * time.Second)
-	defer progressTicker.Stop()
-
 	for {
 		select {
 		case err := <-downloadCompleteCh:
+			bar.Finish()
+
 			if err != nil {
 				return "", err, true
 			}
@@ -164,13 +174,10 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 			}
 
 			return path, nil, true
-		case <-progressTicker.C:
-			progress := download.PercentProgress()
-			if progress >= 0 {
-				ui.Message(fmt.Sprintf("Download progress: %d%%", progress))
-			}
+
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
+				bar.Finish()
 				ui.Say("Interrupt received. Cancelling download...")
 				return "", nil, false
 			}

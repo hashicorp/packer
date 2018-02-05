@@ -591,6 +591,12 @@
 			"revision": "528c74964609a58f7c17471525659c9b71cd499b",
 			"revisionTime": "2018-02-10T03:43:46Z"
 		},
+        {
+			"checksumSHA1": "ymc5+iJ+1ipls3ihqPdzMjFYCqo=",
+			"path": "github.com/cheggaaa/pb",
+			"revision": "18d384da9bdc1e5a08fc2a62a494c321d9ae74ea",
+			"revisionTime": "2017-12-14T13:20:59Z"
+		},
 		{
 			"checksumSHA1": "/5cvgU+J4l7EhMXTK76KaCAfOuU=",
 			"comment": "v1.0.0-3-g6d21280",
