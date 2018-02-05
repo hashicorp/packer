@@ -122,11 +122,28 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 }
 
 // Upload implementation of communicator.Communicator interface
-func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) error {
+func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	wcp, err := c.newCopyClient()
 	if err != nil {
 		return err
 	}
+
+	// Get information about destination path
+	endpoint := winrm.NewEndpoint(c.endpoint.Host, c.endpoint.Port, c.config.Https, c.config.Insecure, nil, nil, nil, c.config.Timeout)
+	client, err := winrm.NewClient(endpoint, c.config.Username, c.config.Password)
+	if err != nil {
+		return fmt.Errorf("Was unable to create winrm client: %s", err)
+	}
+	stdout, _, _, err := client.RunWithString(fmt.Sprintf("powershell -Command \"(Get-Item %s) -is [System.IO.DirectoryInfo]\"", path), "")
+	if err != nil {
+		return fmt.Errorf("Couldn't determine whether destination was a folder or file: %s", err)
+	}
+	if strings.Contains(stdout, "True") {
+		// The path exists and is a directory.
+		// Upload file into the directory instead of overwriting.
+		path = filepath.Join(path, filepath.Base((*fi).Name()))
+	}
+
 	log.Printf("Uploading file to '%s'", path)
 	return wcp.Write(path, input)
 }
