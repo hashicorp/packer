@@ -3,7 +3,8 @@
 ### BACKWARDS INCOMPATIBILITIES:
 * core: Affects Windows guests: User variables containing Powershell special characters no longer need to be escaped.[GH-5376]
 * provisioner/powershell: Regression from v1.1.1 forcing extra escaping of environment variables in the non-elevated provisioner has been fixed. [GH-5515]
-* 3rd party plugins: We have moved internal dependencies, meaning your 3rd party plugins will break; the work to fix them is minimal and documented in GH-5810. [GH-5810]
+* 3rd party plugins: We have moved internal dependencies, meaning your 3rd party plugins will no longer compile (however existing builds will still work fine); the work to fix them is minimal and documented in GH-5810. [GH-5810]
+* provisioner/file: We've made destination semantics more consistent across the various communicators. In general, if the destination is a directory, files will be uploaded into the directory instead of failing. This mirrors the behavior of `rsync`. There's a chance some users might be depending on the previous buggy behavior, so it's worth ensuring your configuration is correct. [GH-5426]
 
 ### IMPROVEMENTS:
 
