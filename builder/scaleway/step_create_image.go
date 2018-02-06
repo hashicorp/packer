@@ -1,17 +1,18 @@
 package scaleway
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/scaleway/scaleway-cli/pkg/api"
 )
 
 type stepImage struct{}
 
-func (s *stepImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
