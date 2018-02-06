@@ -1,16 +1,17 @@
 package scaleway
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/scaleway/scaleway-cli/pkg/api"
 )
 
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	serverID := state.Get("server_id").(string)
