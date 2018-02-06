@@ -149,6 +149,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
+			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                         b.config.SourceAmi,
 			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
