@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -78,6 +79,21 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	return c.session, nil
+}
+
+func (c *AccessConfig) SessionRegion() string {
+	if c.session == nil {
+		panic("access config session should be set.")
+	}
+	return aws.StringValue(c.session.Config.Region)
+}
+
+func (c *AccessConfig) IsGovCloud() bool {
+	return strings.HasPrefix(c.SessionRegion(), "us-gov-")
+}
+
+func (c *AccessConfig) IsChinaCloud() bool {
+	return strings.HasPrefix(c.SessionRegion(), "cn-")
 }
 
 // metadataRegion returns the region from the metadata service
