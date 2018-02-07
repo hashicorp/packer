@@ -335,7 +335,7 @@ chroot by Packer:
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
-mounts `/prod` and `/dev`:
+mounts `/proc` and `/dev`:
 
 ``` json
 {
