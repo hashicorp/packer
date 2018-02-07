@@ -1,8 +1,8 @@
 ---
 description: |
-    The shell Packer provisioner provisions machines built by Packer using shell
-    scripts. Shell provisioning is the easiest way to get software installed and
-    configured on a machine.
+    The PowerShell Packer provisioner runs PowerShell scripts on Windows
+    machines.
+    It assumes that the communicator in use is WinRM.
 layout: docs
 page_title: 'PowerShell - Provisioners'
 sidebar_current: 'docs-provisioners-powershell'
