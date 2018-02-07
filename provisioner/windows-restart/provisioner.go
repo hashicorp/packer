@@ -114,6 +114,12 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 	var cmd *packer.RemoteCmd
 	trycommand := TryCheckReboot
 	abortcommand := AbortReboot
+
+	// This sleep works around an azure/winrm bug. For more info see
+	// https://github.com/hashicorp/packer/issues/5257; we can remove the
+	// sleep when the underlying bug has been resolved.
+	time.Sleep(1 * time.Second)
+
 	// Stolen from Vagrant reboot checker
 	for {
 		log.Printf("Check if machine is rebooting...")
