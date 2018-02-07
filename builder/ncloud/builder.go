@@ -59,7 +59,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeleteBlockStorageInstance(conn, ui, b.config),
 			NewStepTerminateServerInstance(conn, ui),
 		}
-	} else if b.config.Comm.Type == "Windows" {
+	} else if b.config.Comm.Type == "winrm" {
 		steps = []multistep.Step{
 			NewStepValidateTemplate(conn, ui, b.config),
 			NewStepCreateLoginKey(conn, ui),
