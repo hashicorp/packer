@@ -1,0 +1,30 @@
+workflows:
+  version: 2
+  main:
+    jobs:
+      - go-current
+      - go-previous
+      - go-latest
+base: &base
+  working_directory: /go/src/github.com/hashicorp/packer
+  steps:
+    - checkout
+    - run:
+        name: "All Commands"
+        command: |
+          make deps
+          GOMAXPROCS=2 make ci
+version: 2
+jobs:
+  go-current:
+    docker:
+      - image: circleci/golang:1.8
+    <<: *base
+  go-previous:
+    docker:
+      - image: circleci/golang:1.7
+    <<: *base
+  go-latest:
+    docker:
+      - image: circleci/golang:1
+    <<: *base
