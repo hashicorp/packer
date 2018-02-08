@@ -1,8 +1,11 @@
 package classic
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
+	"os"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -14,6 +17,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
+	attribs             map[string]interface{}
 
 	// Access config overrides
 	Username       string `mapstructure:"username"`
@@ -27,6 +31,9 @@ type Config struct {
 	Shape           string `mapstructure:"shape"`
 	SourceImageList string `mapstructure:"source_image_list"`
 	DestImageList   string `mapstructure:"dest_image_list"`
+	// Attributes and Atributes file are both optional and mutually exclusive.
+	Attributes     string `mapstructure:"attributes"`
+	AttributesFile string `mapstructure:"attributes_file"`
 	// Optional; if you don't enter anything, the image list description
 	// will read "Packer-built image list"
 	DestImageListDescription string `mapstructure:"image_description"`
@@ -81,12 +88,49 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		}
 	}
 
+	if c.Attributes != "" && c.AttributesFile != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+	} else if c.AttributesFile != "" {
+		if _, err := os.Stat(c.AttributesFile); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("attributes_file not found: %s", c.AttributesFile))
+		}
+	}
+
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
+	}
+	if c.Comm.Type == "winrm" {
+		err = fmt.Errorf("winRM is not supported with the oracle-classic builder yet.")
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
+	}
+
+	// unpack attributes from json into config
+	var data map[string]interface{}
+
+	if c.Attributes != "" {
+		err := json.Unmarshal([]byte(c.Attributes), &data)
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attributes: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		c.attribs = data
+	} else if c.AttributesFile != "" {
+		fidata, err := ioutil.ReadFile(c.AttributesFile)
+		if err != nil {
+			err = fmt.Errorf("Problem reading attributes_file: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		err = json.Unmarshal(fidata, &data)
+		c.attribs = data
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attrinutes_file: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		c.attribs = data
 	}
 
 	return c, nil

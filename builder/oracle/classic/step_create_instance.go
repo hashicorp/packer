@@ -37,6 +37,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		ImageList:  config.SourceImageList,
 		SSHKeys:    []string{keyName},
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
+		Attributes: config.attribs,
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
