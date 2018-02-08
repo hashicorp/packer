@@ -327,7 +327,7 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
-		// Changed this from using --private-key to supplying -e ansible_ssh_private_key as the latter
+		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
 		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
 		// as seen in #5852
 		// args = append(args, "--private-key", privKeyFile)
