@@ -63,6 +63,16 @@ This builder currently only works with the SSH communicator.
 
 ### Optional
 
+ -  `attributes` (string) - (string) - Attributes to apply when launching the 
+    instance. Note that you need to be careful about escaping characters due to 
+    the templates being JSON. It is often more convenient to use 
+    `attributes_file`, instead. You may only define either `attributes`  or 
+    `attributes_file`, not both.
+
+ -  `attributes_file` (string) - Path to a json file that will be used for the 
+    attributes when launching the instance. You may only define either 
+    `attributes` or `attributes_file`, not both.
+
  -  `image_description` (string) - a description for your destination
     image list. If you don't provide one, Packer will provide a generic description.
 
@@ -91,7 +101,8 @@ obfuscated; you will need to add a working `username`, `password`,
             "api_endpoint": "https://api-###.compute.###.oraclecloud.com/",
             "source_image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
             "shape": "oc3",
-            "image_name": "Packer_Builder_Test_{{timestamp}}"
+            "image_name": "Packer_Builder_Test_{{timestamp}}",
+            "attributes": "{\"userdata\": {\"pre-bootstrap\": {\"script\": [\"...\"]}}}",
             "dest_image_list": "Packer_Builder_Test_List"
         }
     ],
