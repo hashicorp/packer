@@ -139,16 +139,21 @@ The WinRM communicator has the following options.
 
 -   `winrm_password` (string) - The password to use to connect to WinRM.
 
+-   `winrm_insecure` (boolean) - If true, do not check server certificate
+    chain and host name
+
+*   `winrm_no_proxy` (boolean) - Setting this to `true` adds the remote
+    `host:post` to the `NO_PROXY` environment variable. This has the effect of
+    bypassing any configured proxies when connecting to the remote host.
+    Default to `false`.
+
 -   `winrm_timeout` (string) - The amount of time to wait for WinRM to
     become available. This defaults to "30m" since setting up a Windows
     machine generally takes a long time.
-
--   `winrm_use_ssl` (boolean) - If true, use HTTPS for WinRM
-
--   `winrm_insecure` (boolean) - If true, do not check server certificate
-    chain and host name
 
 -   `winrm_use_ntlm` (boolean) - If true, NTLM authentication will be used for WinRM,
     rather than default (basic authentication), removing the requirement for basic
     authentication to be enabled within the target guest. Further reading for remote
     connection authentication can be found [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
+
+-   `winrm_use_ssl` (boolean) - If true, use HTTPS for WinRM
