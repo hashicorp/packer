@@ -26,6 +26,7 @@ var builtins = map[string]string{
 	"mitchellh.vmware-esx":      "vmware",
 	"pearkes.digitalocean":      "digitalocean",
 	"packer.googlecompute":      "google",
+	"hashicorp.scaleway":        "scaleway",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
 	"transcend.qemu":            "libvirt",
@@ -221,6 +222,8 @@ func providerForName(name string) Provider {
 	switch name {
 	case "aws":
 		return new(AWSProvider)
+	case "scaleway":
+		return new(ScalewayProvider)
 	case "digitalocean":
 		return new(DigitalOceanProvider)
 	case "virtualbox":
