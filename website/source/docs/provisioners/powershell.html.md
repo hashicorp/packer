@@ -56,7 +56,7 @@ Optional parameters:
     files, and Packer should therefore not convert Windows line endings to Unix
     line endings (if there are any). By default this is false.
 
--   `elevated_execute_command` (string) - The command to use to execute the 
+-   `elevated_execute_command` (string) - The command to use to execute the
     elevated script. By default this is as follows:
 
     ``` powershell
@@ -125,3 +125,101 @@ commonly useful environmental variables:
     download large files over http. This may be useful if you're experiencing
     slower speeds using the default file provisioner. A file provisioner using
     the `winrm` communicator may experience these types of difficulties.
+
+## Packer's Handling of Characters Special to PowerShell
+
+The escape character in PowerShell is the `backtick`, also sometimes
+referred to as the `grave accent`. When, and when not, to escape characters
+special to PowerShell is probably best demonstrated with a series of examples.
+
+### When To Escape...
+
+Users need to deal with escaping characters special to PowerShell when they
+appear *directly* in commands used in the `inline` PowerShell provisioner and
+when they appear *directly* in the users own scripts.
+Note that where double quotes appear within double quotes, the addition of
+a backslash escape is required for the JSON template to be parsed correctly.
+
+``` json
+  "provisioners": [
+    {
+      "type": "powershell",
+      "inline": [
+          "Write-Host \"A literal dollar `$ must be escaped\"",
+          "Write-Host \"A literal backtick `` must be escaped\"",
+          "Write-Host \"Here `\"double quotes`\" must be escaped\"",
+          "Write-Host \"Here `'single quotes`' don`'t really need to be\"",
+          "Write-Host \"escaped... but it doesn`'t hurt to do so.\"",
+      ]
+    },
+```
+
+The above snippet should result in the following output on the Packer console:
+
+```
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
+    amazon-ebs: A literal dollar $ must be escaped
+    amazon-ebs: A literal backtick ` must be escaped
+    amazon-ebs: Here "double quotes" must be escaped
+    amazon-ebs: Here 'single quotes' don't really need to be
+    amazon-ebs: escaped... but it doesn't hurt to do so.
+```
+
+### When Not To Escape...
+
+Special characters appearing in user environment variable values and in the
+`elevated_user` and `elevated_password` fields will be automatically
+dealt with for the user. There is no need to use escapes in these instances.
+
+``` json
+{
+  "variables": {
+    "psvar": "My$tring"
+  },
+  ...
+  "provisioners": [
+    {
+      "type": "powershell",
+      "elevated_user": "Administrator",
+      "elevated_password": "Super$3cr3t!",
+      "inline": "Write-Output \"The dollar in the elevated_password is interpreted correctly\""
+    },
+    {
+      "type": "powershell",
+      "environment_vars": [
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote",
+        "VAR5={{user `psvar`}}"
+      ],
+      "inline": [
+        "Write-Output \"In the following examples the special character is interpreted correctly:\"",
+        "Write-Output \"The dollar in VAR1:                            $Env:VAR1\"",
+        "Write-Output \"The backtick in VAR2:                          $Env:VAR2\"",
+        "Write-Output \"The single quote in VAR3:                      $Env:VAR3\"",
+        "Write-Output \"The double quote in VAR4:                      $Env:VAR4\"",
+        "Write-Output \"The dollar in VAR5 (expanded from a user var): $Env:VAR5\""
+      ]
+    }
+  ]
+  ...
+}
+```
+
+The above snippet should result in the following output on the Packer console:
+
+```
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
+    amazon-ebs: The dollar in the elevated_password is interpreted correctly
+==> amazon-ebs: Provisioning with Powershell...
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
+    amazon-ebs: In the following examples the special character is interpreted correctly:
+    amazon-ebs: The dollar in VAR1:                            A$Dollar
+    amazon-ebs: The backtick in VAR2:                          A`Backtick
+    amazon-ebs: The single quote in VAR3:                      A'SingleQuote
+    amazon-ebs: The double quote in VAR4:                      A"DoubleQuote
+    amazon-ebs: The dollar in VAR5 (expanded from a user var): My$tring
+```
