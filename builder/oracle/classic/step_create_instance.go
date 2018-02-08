@@ -2,7 +2,9 @@ package classic
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,6 +32,33 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	// get instances client
 	instanceClient := client.Instances()
 
+	var data map[string]interface{}
+
+	if config.Attributes != "" {
+		err := json.Unmarshal([]byte(config.Attributes), &data)
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attributes: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	} else if config.AttributesFile != "" {
+		fidata, err := ioutil.ReadFile(config.AttributesFile)
+		if err != nil {
+			err = fmt.Errorf("Problem reading attributes_file: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		err = json.Unmarshal(fidata, &data)
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attrinutes_file: %s", err)
+			ui.Error(err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	}
+
 	// Instances Input
 	input := &compute.CreateInstanceInput{
 		Name:       config.ImageName,
@@ -37,6 +66,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		ImageList:  config.SourceImageList,
 		SSHKeys:    []string{keyName},
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
+		Attributes: data,
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
