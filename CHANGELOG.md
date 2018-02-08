@@ -9,6 +9,9 @@
 
 ### IMPROVEMENTS:
 
+* **New builder:** `scaleway` - The Scaleway Packer builder is able to create new images for use with Scaleway BareMetal and Virtual cloud server. [GH-4770]
+* **New builder:** `ncloud` for building server images using the NAVER Cloud Platform. [GH-5791]
+* **New builder:** `oci-classic` for building new custom images for use with Oracle Cloud Infrastructure Classic Compute. [GH-5819]
 * builder/docker: Remove credentials from being shown in the log. [GH-5666]
 * builder/triton: Triton RBAC is now supported. [GH-5741]
 * provisioner/ansible: Improve user retrieval. [GH-5758]
