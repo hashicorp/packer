@@ -11,10 +11,11 @@ import (
 
 type stepListImages struct{}
 
-func (s *stepListImages) listForSSH(state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*compute.ComputeClient)
-	config := state.Get("config").(*Config)
+func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
+	client := state.Get("client").(*compute.ComputeClient)
 	ui.Say("Adding image to image list...")
 
 	imageListClient := client.ImageList()
@@ -95,29 +96,6 @@ func (s *stepListImages) listForSSH(state multistep.StateBag) multistep.StepActi
 	state.Put("image_list_version", version)
 
 	return multistep.ActionContinue
-}
-
-func (s *stepListImages) listForWinRM(state multistep.StateBag) multistep.StepAction {
-	// This is a placeholder function; we will never reach this because we already
-	// return an error when winRM is set when validating the Packer config.
-	ui := state.Get("ui").(packer.Ui)
-	err := fmt.Errorf("The Oracle Classic builder does not currently support winRM.")
-	ui.Error(err.Error())
-	state.Put("error", err)
-	return multistep.ActionHalt
-}
-
-func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	// get variables from state
-	config := state.Get("config").(*Config)
-
-	var action multistep.StepAction
-	if config.Comm.Type == "winrm" {
-		action = s.listForWinRM(state)
-	} else if config.Comm.Type == "ssh" {
-		action = s.listForSSH(state)
-	}
-	return action
 }
 
 func (s *stepListImages) Cleanup(state multistep.StateBag) {
