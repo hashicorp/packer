@@ -210,6 +210,30 @@
 			"revisionTime": "2017-06-25T21:53:50Z"
 		},
 		{
+			"checksumSHA1": "N0jIjg2HeB8fM7dt8OED2BiRZz0=",
+			"path": "github.com/NaverCloudPlatform/ncloud-sdk-go/common",
+			"revision": "c2e73f942591b0f033a3c6df00f44badb2347c38",
+			"revisionTime": "2018-01-10T05:50:12Z"
+		},
+		{
+			"checksumSHA1": "7lT5Xmeo2MhE6CJvIInZyLBu6S8=",
+			"path": "github.com/NaverCloudPlatform/ncloud-sdk-go/oauth",
+			"revision": "c2e73f942591b0f033a3c6df00f44badb2347c38",
+			"revisionTime": "2018-01-10T05:50:12Z"
+		},
+		{
+			"checksumSHA1": "DpfU1gyyhIc1BuKZUZDRVDBkeSc=",
+			"path": "github.com/NaverCloudPlatform/ncloud-sdk-go/request",
+			"revision": "c2e73f942591b0f033a3c6df00f44badb2347c38",
+			"revisionTime": "2018-01-10T05:50:12Z"
+		},
+		{
+			"checksumSHA1": "QnZ2RMlms/zYbD8jg+lyS8ncQOY=",
+			"path": "github.com/NaverCloudPlatform/ncloud-sdk-go/sdk",
+			"revision": "c2e73f942591b0f033a3c6df00f44badb2347c38",
+			"revisionTime": "2018-01-10T05:50:12Z"
+		},
+		{
 			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
 			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
 			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
@@ -948,6 +972,12 @@
 			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639"
 		},
 		{
+			"checksumSHA1": "cJE7dphDlam/i7PhnsyosNWtbd4=",
+			"path": "github.com/mattn/go-runewidth",
+			"revision": "97311d9f7767e3d6f422ea06661bc2c7a19e8a5d",
+			"revisionTime": "2017-05-10T07:48:58Z"
+		},
+		{
 			"checksumSHA1": "UP+pXl+ic9y6qrpZA5MqDIAuGfw=",
 			"path": "github.com/mitchellh/cli",
 			"revision": "ee8578a9c12a5bb9d55303b9665cc448772c81b8",
@@ -1006,6 +1036,12 @@
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
 			"path": "github.com/nu7hatch/gouuid",
 			"revision": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+		},
+		{
+			"checksumSHA1": "WY8p2ZNGyl69P1tcVc5HFal/Ng0=",
+			"path": "github.com/olekukonko/tablewriter",
+			"revision": "96aac992fc8b1a4c83841a6c3e7178d20d989625",
+			"revisionTime": "2018-01-05T11:11:33Z"
 		},
 		{
 			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
