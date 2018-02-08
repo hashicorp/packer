@@ -41,14 +41,15 @@ type Config struct {
 	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
 
 	// WinRM
-	WinRMUser               string        `mapstructure:"winrm_username"`
-	WinRMPassword           string        `mapstructure:"winrm_password"`
 	WinRMHost               string        `mapstructure:"winrm_host"`
+	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
+	WinRMNoProxy            bool          `mapstructure:"winrm_no_proxy"`
+	WinRMPassword           string        `mapstructure:"winrm_password"`
 	WinRMPort               int           `mapstructure:"winrm_port"`
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
-	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
-	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
 	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
+	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
+	WinRMUser               string        `mapstructure:"winrm_username"`
 	WinRMTransportDecorator func() winrm.Transporter
 }
 
