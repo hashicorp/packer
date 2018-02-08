@@ -1,7 +1,9 @@
 package classic
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 
@@ -15,6 +17,7 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
+	attribs             map[string]interface{}
 
 	// Access config overrides
 	Username       string `mapstructure:"username"`
@@ -103,6 +106,31 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
+	}
+
+	// unpack attributes from json into config
+	var data map[string]interface{}
+
+	if c.Attributes != "" {
+		err := json.Unmarshal([]byte(c.Attributes), &data)
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attributes: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		c.attribs = data
+	} else if c.AttributesFile != "" {
+		fidata, err := ioutil.ReadFile(c.AttributesFile)
+		if err != nil {
+			err = fmt.Errorf("Problem reading attributes_file: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		err = json.Unmarshal(fidata, &data)
+		c.attribs = data
+		if err != nil {
+			err = fmt.Errorf("Problem parsing json from attrinutes_file: %s", err)
+			packer.MultiErrorAppend(errs, err)
+		}
+		c.attribs = data
 	}
 
 	return c, nil
