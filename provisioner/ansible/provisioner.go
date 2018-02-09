@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -141,7 +142,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
-		p.config.User = os.Getenv("USER")
+		usr, err := user.Current()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		} else {
+			p.config.User = usr.Username
+		}
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
@@ -321,7 +327,11 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
-		args = append(args, "--private-key", privKeyFile)
+		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
+		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
+		// as seen in #5852
+		// args = append(args, "--private-key", privKeyFile)
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {

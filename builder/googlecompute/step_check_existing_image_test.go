@@ -1,8 +1,10 @@
 package googlecompute
 
 import (
-	"github.com/mitchellh/multistep"
+	"context"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCheckExistingImage_impl(t *testing.T) {
@@ -21,7 +23,7 @@ func TestStepCheckExistingImage(t *testing.T) {
 	driver.ImageExistsResult = true
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

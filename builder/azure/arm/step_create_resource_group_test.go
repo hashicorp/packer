@@ -1,23 +1,73 @@
 package arm
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
+
+func TestStepCreateResourceGroupShouldFailIfBothGroupNames(t *testing.T) {
+	stateBag := new(multistep.BasicStateBag)
+
+	stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
+
+	value := "Unit Test: Tags"
+	tags := map[string]*string{
+		"tag01": &value,
+	}
+
+	stateBag.Put(constants.ArmTags, &tags)
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return nil },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
+	}
+	var result = testSubject.Run(context.Background(), stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+	}
+}
 
 func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
 		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+	}
+}
+
+func TestStepCreateResourceGroupShouldFailIfExistsFails(t *testing.T) {
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return nil },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, errors.New("FAIL") },
+	}
+
+	stateBag := createTestStateBagStepCreateResourceGroup()
+
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -32,11 +82,12 @@ func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 		create: func(string, string, *map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -58,12 +109,13 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 			actualTags = tags
 			return nil
 		},
-		say:   func(message string) {},
-		error: func(e error) {},
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
@@ -91,11 +143,52 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 	}
 }
 
+func TestStepCreateResourceGroupMarkShouldFailIfTryingExistingButDoesntExist(t *testing.T) {
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return false, nil },
+	}
+
+	stateBag := createTestExistingStateBagStepCreateResourceGroup()
+
+	var result = testSubject.Run(context.Background(), stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+	}
+}
+
+func TestStepCreateResourceGroupMarkShouldFailIfTryingTempButExist(t *testing.T) {
+	var testSubject = &StepCreateResourceGroup{
+		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		exists: func(string) (bool, error) { return true, nil },
+	}
+
+	stateBag := createTestStateBagStepCreateResourceGroup()
+
+	var result = testSubject.Run(context.Background(), stateBag)
+	if result != multistep.ActionHalt {
+		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
+	}
+
+	if _, ok := stateBag.GetOk(constants.Error); ok == false {
+		t.Fatalf("Expected the step to set stateBag['%s'], but it was not.", constants.Error)
+	}
+}
+
 func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
 	stateBag.Put(constants.ArmLocation, "Unit Test: Location")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
 
 	value := "Unit Test: Tags"
 	tags := map[string]*string{
@@ -103,6 +196,21 @@ func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 	}
 
 	stateBag.Put(constants.ArmTags, &tags)
+	return stateBag
+}
 
+func createTestExistingStateBagStepCreateResourceGroup() multistep.StateBag {
+	stateBag := new(multistep.BasicStateBag)
+
+	stateBag.Put(constants.ArmLocation, "Unit Test: Location")
+	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+
+	value := "Unit Test: Tags"
+	tags := map[string]*string{
+		"tag01": &value,
+	}
+
+	stateBag.Put(constants.ArmTags, &tags)
 	return stateBag
 }

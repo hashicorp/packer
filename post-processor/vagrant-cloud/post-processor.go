@@ -12,9 +12,9 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const VAGRANT_CLOUD_URL = "https://vagrantcloud.com/api/v1"
@@ -189,6 +189,8 @@ func providerFromBuilderName(name string) string {
 	switch name {
 	case "aws":
 		return "aws"
+	case "scaleway":
+		return "scaleway"
 	case "digitalocean":
 		return "digitalocean"
 	case "virtualbox":

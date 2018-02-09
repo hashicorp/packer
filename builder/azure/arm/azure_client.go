@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/arm/disk"
 	"github.com/Azure/azure-sdk-for-go/arm/network"
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/arm/storage"
@@ -32,6 +33,7 @@ var (
 type AzureClient struct {
 	storage.BlobStorageClient
 	resources.DeploymentsClient
+	resources.DeploymentOperationsClient
 	resources.GroupsClient
 	network.PublicIPAddressesClient
 	network.InterfacesClient
@@ -41,10 +43,12 @@ type AzureClient struct {
 	compute.VirtualMachinesClient
 	common.VaultClient
 	armStorage.AccountsClient
+	disk.DisksClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
 	LastError          azureErrorResponse
+	VaultClientDelete  common.VaultClient
 }
 
 func getCaptureResponse(body string) *CaptureTemplate {
@@ -135,6 +139,18 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.DeploymentsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DeploymentsClient.UserAgent += packerUserAgent
 
+	azureClient.DeploymentOperationsClient = resources.NewDeploymentOperationsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.DeploymentOperationsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.DeploymentOperationsClient.RequestInspector = withInspection(maxlen)
+	azureClient.DeploymentOperationsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.DeploymentOperationsClient.UserAgent += packerUserAgent
+
+	azureClient.DisksClient = disk.NewDisksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.DisksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.DisksClient.RequestInspector = withInspection(maxlen)
+	azureClient.DisksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.DisksClient.UserAgent += packerUserAgent
+
 	azureClient.GroupsClient = resources.NewGroupsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.GroupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
@@ -193,6 +209,20 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VaultClient.RequestInspector = withInspection(maxlen)
 	azureClient.VaultClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VaultClient.UserAgent += packerUserAgent
+
+	// TODO(boumenot) - SDK still does not have a full KeyVault client.
+	// There are two ways that KeyVault has to be accessed, and each one has their own SPN.  An authenticated SPN
+	// is tied to the URL, and the URL associated with getting the secret is different than the URL
+	// associated with deleting the KeyVault.  As a result, I need to have *two* different clients to
+	// access KeyVault.  I did not want to split it into two separate files, so I am starting with this.
+	//
+	// I do not like this implementation.  It is getting long in the tooth, and should be re-examined now
+	// that we have a "working" solution.
+	azureClient.VaultClientDelete = common.NewVaultClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.VaultClientDelete.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.VaultClientDelete.RequestInspector = withInspection(maxlen)
+	azureClient.VaultClientDelete.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.VaultClientDelete.UserAgent += packerUserAgent
 
 	// If this is a managed disk build, this should be ignored.
 	if resourceGroupName != "" && storageAccountName != "" {

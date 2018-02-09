@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/vsphere"
-	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
@@ -36,7 +36,7 @@ func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
 	}
 }
 
-func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepMarkAsTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	folder := state.Get("folder").(*object.Folder)
@@ -118,7 +118,10 @@ func datastorePath(vm *object.VirtualMachine) (*object.DatastorePath, error) {
 	datastore := re.FindStringSubmatch(disk)[1]
 	vmxPath := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), vm.Name()+".vmx")
 
-	return &object.DatastorePath{datastore, vmxPath}, nil
+	return &object.DatastorePath{
+		Datastore: datastore,
+		Path:      vmxPath,
+	}, nil
 }
 
 func findRuntimeVM(cli *govmomi.Client, dcPath, name, remoteFolder string) (*object.VirtualMachine, error) {

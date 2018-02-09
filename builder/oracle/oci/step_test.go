@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 
 	client "github.com/hashicorp/packer/builder/oracle/oci/client"
 )

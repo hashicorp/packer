@@ -109,6 +109,9 @@ builder.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
+        specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -248,6 +251,12 @@ builder.
     The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
+-   `skip_metadata_api_check` - (boolean) Skip the AWS Metadata API check.
+    Useful for AWS API implementations that do not have a metadata API
+    endpoint. Setting to `true` prevents Packer from authenticating via the
+    Metadata API. You may need to use other authentication methods like static
+    credentials, configuration variables, or environment variables.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Defaults to `false`.
 
@@ -329,8 +338,19 @@ builder.
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
 
--   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
-    IP if available. Also works for WinRM.
+-   `ssh_private_ip` (boolean) - *Deprecated* use `ssh_interface` instead. If `true`,
+    then SSH will always use the private IP if available. Also works for WinRM.
+
+-   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
+    `public_dns` or `private_dns`. If set, either the public IP address,
+    private IP address, public DNS name or private DNS name will used as the host for SSH.
+    The default behaviour if inside a VPC is to use the public IP address if available,
+    otherwise the private IP address will be used. If not in a VPC the public DNS name
+    will be used. Also works for WinRM.
+
+    Where Packer is configured for an outbound proxy but WinRM traffic should be direct,
+    `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included
+    in the `NO_PROXY` environment variable.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
@@ -470,3 +490,28 @@ parameters they're used to satisfy the `ec2-upload-bundle` command.
 Additionally, `{{.Token}}` is available when overriding this command. You must
 create your own bundle command with the addition of `-t {{.Token}} ` if you are
 assuming a role.
+
+#### Bundle Upload Permissions
+
+The `ec2-upload-bundle` requires a policy document that looks something like this:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+You may wish to constrain the resource to a specific bucket.

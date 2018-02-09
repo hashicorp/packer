@@ -7,6 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/template"
 )

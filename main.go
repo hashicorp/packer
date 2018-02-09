@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/hashicorp/go-uuid"
@@ -88,6 +89,7 @@ func realMain() int {
 		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
 		wrapConfig.Stdout = outW
 		wrapConfig.DetectDuration = 500 * time.Millisecond
+		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
 		exitStatus, err := panicwrap.Wrap(&wrapConfig)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
@@ -275,7 +277,9 @@ func loadConfig() (*config, error) {
 	}
 
 	configFilePath := os.Getenv("PACKER_CONFIG")
-	if configFilePath == "" {
+	if configFilePath != "" {
+		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
+	} else {
 		var err error
 		configFilePath, err = packer.ConfigFile()
 

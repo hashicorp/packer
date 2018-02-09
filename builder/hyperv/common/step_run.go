@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepRun struct {
@@ -13,7 +15,7 @@ type StepRun struct {
 	vmName string
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

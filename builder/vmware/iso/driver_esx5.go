@@ -16,8 +16,8 @@ import (
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -301,6 +301,9 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 			if e, ok := err.(*net.OpError); ok {
 				if e.Timeout() {
 					log.Printf("Timeout connecting to %s", record["IPAddress"])
+					continue
+				} else if strings.Contains(e.Error(), "connection refused") {
+					log.Printf("Connection refused when connecting to: %s", record["IPAddress"])
 					continue
 				}
 			}

@@ -1,11 +1,12 @@
 package triton
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateImageFromMachine creates an image with the specified attributes
@@ -13,7 +14,7 @@ import (
 // The machine must be in the "stopped" state prior to this step being run.
 type StepCreateImageFromMachine struct{}
 
-func (s *StepCreateImageFromMachine) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateImageFromMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
