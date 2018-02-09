@@ -131,7 +131,22 @@ builder.
     Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
 
-*   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
+-   `disk_adapter_type` (string) - The adapter type of the VMware virtual disk
+    to create. This option is for advanced usage, modify only if you know what
+    you're doing. Some of the options you can specify are "ide", "sata", "nvme"
+    or "scsi" (which uses the "lsilogic" scsi interface by default). If you
+    specify another option, Packer will assume that you're specifying a "scsi"
+    interface of that specified type. For more information, please consult the
+    <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager User's Guide</a> for desktop VMware clients.
+    For ESXi, refer to the proper ESXi documentation.
+
+-   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
+    by the cdrom device. This is chosen by default based on the disk adapter
+    type. VMware tends to lean towards "ide" for the cdrom device unless
+    "sata" is chosen for the disk adapter and so Packer attempts to mirror
+    this logic. This field can be specified as either "ide", "sata", or "scsi".
+
+-   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
@@ -193,12 +208,37 @@ builder.
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+-   `network` (string) - This is the network type that the virtual machine will
+    be created with. This can be one of the generic values that map to a device
+    such as "hostonly", "nat", or "bridged". If the network is not one of these
+    values, then it is assumed to be a VMware network device. (VMnet0..x)
+
+-   `network_adapter_type` (string) - This is the ethernet adapter type the the
+    virtual machine will be created with. By default the "e1000" network adapter
+    type will be used by Packer. For more information, please consult the
+    <a href="https://kb.vmware.com/s/article/1001805" target="_blank">Choosing a network adapter for your virtual machine</a> for desktop VMware
+    clients. For ESXi, refer to the proper ESXi documentation.
+
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running
     the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
     name of the build.
+
+-   `parallel` (string) - This specifies a parallel port to add to the VM. It
+    has the format of `Type:option1,option2,...`. Type can be one of the
+    following values: "FILE", "DEVICE", "AUTO", or "NONE".
+
+    * `FILE:path` - Specifies the path to the local file to be used for the
+                    parallel port.
+    * `DEVICE:path` - Specifies the path to the local device to be used for the
+                      parallel port.
+    * `AUTO:direction` - Specifies to use auto-detection to determine the
+                         parallel port. Direction can be `BI` to specify
+                         bidirectional communication or `UNI` to specify
+                         unidirectional communication.
+    * `NONE` - Specifies to not use a parallel port. (default)
 
 -   `remote_cache_datastore` (string) - The path to the datastore where
     supporting files will be stored during the build on the remote machine. By
@@ -234,6 +274,41 @@ builder.
 -   `remote_username` (string) - The username for the SSH user that will access
     the remote machine. This is required if `remote_type` is enabled.
 
+-   `serial` (string) - This specifies a serial port to add to the VM.
+    It has a format of `Type:option1,option2,...`. The field `Type` can be one
+    of the following values: `FILE`, `DEVICE`, `PIPE`, `AUTO`, or `NONE`.
+
+    * `FILE:path(,yield)` - Specifies the path to the local file to be used as the
+                            serial port.
+        * `yield` (bool) - This is an optional boolean that specifies whether
+                           the vm should yield the cpu when polling the port.
+                           By default, the builder will assume this as `FALSE`.
+    * `DEVICE:path(,yield)` - Specifies the path to the local device to be used
+                              as the serial port. If `path` is empty, then
+                              default to the first serial port.
+        * `yield` (bool) - This is an optional boolean that specifies whether
+                           the vm should yield the cpu when polling the port.
+                           By default, the builder will assume this as `FALSE`.
+    * `PIPE:path,endpoint,host(,yield)` - Specifies to use the named-pipe "path"
+                                          as a serial port. This has a few
+                                          options that determine how the VM
+                                          should use the named-pipe.
+        * `endpoint` (string) - Chooses the type of the VM-end, which can be
+                                either a `client` or `server`.
+        * `host` (string) - Chooses the type of the host-end, which can be either
+                            an `app` (application) or `vm` (another virtual-machine).
+        * `yield` (bool) - This is an optional boolean that specifies whether
+                           the vm should yield the cpu when polling the port.
+                           By default, the builder will assume this as `FALSE`.
+
+    * `AUTO:(yield)` - Specifies to use auto-detection to determine the serial
+                       port to use. This has one option to determine how the VM
+                       should support the serial port.
+        * `yield` (bool) - This is an optional boolean that specifies whether
+                           the vm should yield the cpu when polling the port.
+                           By default, the builder will assume this as `FALSE`.
+    * `NONE` - Specifies to not use a serial port. (default)
+
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine.
@@ -264,6 +339,8 @@ builder.
     `--noSSLVerify`, `--skipManifestCheck`, and `--targetType` are reserved,
     and should not be passed to this argument.
 
+-   `sound` (boolean) - Enable VMware's virtual soundcard device for the VM.
+
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are "darwin", "linux", and "windows". By
     default, this is empty, which means VMware tools won't be uploaded.
@@ -275,6 +352,8 @@ builder.
     valid variable: `Flavor`, which will be the value of `tools_upload_flavor`.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is "esx5".
+
+-   `usb` (boolean) - Enable VMware's USB bus for the VM.
 
 -   `version` (string) - The [vmx hardware
     version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)

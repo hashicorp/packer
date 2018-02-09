@@ -14,6 +14,8 @@ import (
 
 // Fusion5Driver is a driver that can run VMware Fusion 5.
 type Fusion5Driver struct {
+	VmwareDriver
+
 	// This is the path to the "VMware Fusion.app"
 	AppPath string
 
@@ -39,8 +41,8 @@ func (d *Fusion5Driver) CompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Fusion5Driver) CreateDisk(output string, size string, type_id string) error {
-	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", "lsilogic", "-t", type_id, output)
+func (d *Fusion5Driver) CreateDisk(output string, size string, adapter_type string, type_id string) error {
+	cmd := exec.Command(d.vdiskManagerPath(), "-c", "-s", size, "-a", adapter_type, "-t", type_id, output)
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
@@ -139,6 +141,32 @@ func (d *Fusion5Driver) Verify() error {
 		return err
 	}
 
+	libpath := filepath.Join("/", "Library", "Preferences", "VMware Fusion")
+
+	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
+		return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
+	}
+	d.VmwareDriver.DhcpConfPath = func(device string) string {
+		return filepath.Join(libpath, device, "dhcpd.conf")
+	}
+	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
+		return filepath.Join(libpath, device, "nat.conf")
+	}
+	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
+		pathNetworking := filepath.Join(libpath, "networking")
+		if _, err := os.Stat(pathNetworking); err != nil {
+			return nil, fmt.Errorf("Could not find networking conf file: %s", pathNetworking)
+		}
+
+		fd, err := os.Open(pathNetworking)
+		if err != nil {
+			return nil, err
+		}
+		defer fd.Close()
+
+		return ReadNetworkingConfig(fd)
+	}
+
 	return nil
 }
 
@@ -158,10 +186,6 @@ func (d *Fusion5Driver) ToolsInstall() error {
 	return nil
 }
 
-func (d *Fusion5Driver) DhcpLeasesPath(device string) string {
-	return "/var/db/vmware/vmnet-dhcpd-" + device + ".leases"
-}
-
 const fusionSuppressPlist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -170,3 +194,7 @@ const fusionSuppressPlist = `<?xml version="1.0" encoding="UTF-8"?>
 	<true/>
 </dict>
 </plist>`
+
+func (d *Fusion5Driver) GetVmwareDriver() VmwareDriver {
+	return d.VmwareDriver
+}
