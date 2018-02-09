@@ -97,12 +97,13 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description: description,
 		Name:        name,
 		Family:      family,
 		Labels:      image_labels,
+		Licenses:    image_licenses,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
@@ -170,7 +171,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)

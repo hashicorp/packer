@@ -3,9 +3,10 @@ package oci
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/go-querystring/query"
 	"net/http"
 	"net/url"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (

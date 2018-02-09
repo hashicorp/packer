@@ -1,14 +1,15 @@
 package ecs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepConfigAlicloudVSwitch struct {
@@ -19,7 +20,7 @@ type stepConfigAlicloudVSwitch struct {
 	VSwitchName string
 }
 
-func (s *stepConfigAlicloudVSwitch) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudVSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpcid").(string)

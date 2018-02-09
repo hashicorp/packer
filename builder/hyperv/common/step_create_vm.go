@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the actual virtual machine.
@@ -27,9 +28,13 @@ type StepCreateVM struct {
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
+	DifferencingDisk               bool
+	MacAddress                     string
+	SkipExport                     bool
+	OutputDir                      string
 }
 
-func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")
@@ -50,11 +55,17 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	vhdPath := state.Get("packerVhdTempDir").(string)
+
+	// inline vhd path if export is skipped
+	if s.SkipExport {
+		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
+	}
+
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation, s.DifferencingDisk)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
@@ -120,6 +131,16 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+		}
+	}
+
+	if s.MacAddress != "" {
+		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
+		if err != nil {
+			err := fmt.Errorf("Error setting MAC address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 

@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/packer/common/powershell/hyperv"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const (
@@ -76,9 +76,13 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
+	// Use differencing disk
+	DifferencingDisk bool `mapstructure:"differencing_disk"`
+
 	BootCommand                    []string `mapstructure:"boot_command"`
 	SwitchName                     string   `mapstructure:"switch_name"`
 	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
+	MacAddress                     string   `mapstructure:"mac_address"`
 	VlanId                         string   `mapstructure:"vlan_id"`
 	Cpu                            uint     `mapstructure:"cpu"`
 	Generation                     uint
@@ -91,13 +95,16 @@ type Config struct {
 
 	SkipCompaction bool `mapstructure:"skip_compaction"`
 
+	SkipExport bool `mapstructure:"skip_export"`
+
 	ctx interpolate.Context
 }
 
 // Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate: true,
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"boot_command",
@@ -399,6 +406,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
+			MacAddress:                     b.config.MacAddress,
 		},
 
 		&hypervcommon.StepEnableIntegrationService{},
@@ -465,6 +473,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepExportVm{
 			OutputDir:      b.config.OutputDir,
 			SkipCompaction: b.config.SkipCompaction,
+			SkipExport:     b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order

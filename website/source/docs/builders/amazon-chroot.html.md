@@ -170,6 +170,9 @@ each category, the available configuration keys are alphabetized.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
+        specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -243,6 +246,12 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
+-   `skip_metadata_api_check` - (boolean) Skip the AWS Metadata API check.
+    Useful for AWS API implementations that do not have a metadata API
+    endpoint. Setting to `true` prevents Packer from authenticating via the
+    Metadata API. You may need to use other authentication methods like static
+    credentials, configuration variables, or environment variables.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
@@ -255,7 +264,7 @@ each category, the available configuration keys are alphabetized.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -332,7 +341,7 @@ chroot by Packer:
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
-mounts `/prod` and `/dev`:
+mounts `/proc` and `/dev`:
 
 ``` json
 {

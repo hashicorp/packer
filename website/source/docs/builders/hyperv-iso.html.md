@@ -54,20 +54,20 @@ can be configured for this builder.
 ### Required:
 
 -   `iso_checksum` (string) - The checksum for the OS ISO file or virtual
-    harddrive file. Because these files are so large, this is required and 
-    Packer will verify it prior to booting a virtual machine with the ISO or 
-    virtual harddrive attached. The type of the checksum is specified with 
+    harddrive file. Because these files are so large, this is required and
+    Packer will verify it prior to booting a virtual machine with the ISO or
+    virtual harddrive attached. The type of the checksum is specified with
     `iso_checksum_type`, documented below.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
-    recommended since ISO files and virtual harddrive files are	generally large 
+    recommended since ISO files and virtual harddrive files are generally large
     and corruption does happen from time to time.
 
 -   `iso_url` (string) - A URL to the ISO containing the installation image or
     virtual harddrive vhd or vhdx file to clone. This URL can be either an HTTP
-    URL or a file URL (or path to a file). If this is an HTTP URL, Packer will 
+    URL or a file URL (or path to a file). If this is an HTTP URL, Packer will
     download the file and cache it between runs.
 
 ### Optional:
@@ -97,6 +97,12 @@ can be configured for this builder.
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40 GB.
 
+-   `differencing_disk` (boolean) - If true enables differencing disks. Only the changes will be written to the new disk. This is especially useful if your
+    source is a vhd/vhdx. This defaults to false.
+
+-   `skip_export` (boolean) - If true skips VM export. If you are interested only in the vhd/vhdx files, you can enable this option. This will create
+    inline disks which improves the build performance. There will not be any copying of source vhds to temp directory. This defauls to false.
+    
 -   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual machine.
     This defaults to false.
 
@@ -204,7 +210,7 @@ can be configured for this builder.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
 
-*   `vhd_temp_path` (string) - A separate path to be used for storing the VM's
+-   `vhd_temp_path` (string) - A separate path to be used for storing the VM's
     disk image. The purpose is to enable reading and writing to take place on
     different physical disks (read from VHD temp path, write to regular temp
     path while exporting the VM) to eliminate a single-disk bottleneck.
@@ -212,6 +218,10 @@ can be configured for this builder.
 -   `vlan_id` (string) - This is the vlan of the virtual machine's network card
     for the new virtual machine. By default none is set. If none is set then
     vlans are not set on the virtual machine's network card.
+
+-   `mac_address` (string) - This allows a specific MAC address to be used on the
+    default virtual network card.  The MAC address must be a string with no
+    delimeters, for example "0000deadbeef".
 
 -   `vm_name` (string) - This is the name of the virtual machine for the new virtual
     machine, without the file extension. By default this is "packer-BUILDNAME",

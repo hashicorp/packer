@@ -38,9 +38,23 @@ const (
 	DefaultVMSize                            = "Standard_A1"
 )
 
+const (
+	// https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions#naming-rules-and-restrictions
+	// Regular expressions in Go are not expressive enough, such that the regular expression returned by Azure
+	// can be used (no backtracking).
+	//
+	//  -> ^[^_\W][\w-._]{0,79}(?<![-.])$
+	//
+	// This is not an exhaustive match, but it should be extremely close.
+	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,63}$"
+	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
+)
+
 var (
 	reCaptureContainerName = regexp.MustCompile("^[a-z0-9][a-z0-9\\-]{2,62}$")
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
+	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
+	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 )
 
 type Config struct {
@@ -83,6 +97,7 @@ type Config struct {
 	StorageAccount                    string             `mapstructure:"storage_account"`
 	TempComputeName                   string             `mapstructure:"temp_compute_name"`
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
+	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
 	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
 	cloudEnvironment                  *azure.Environment
@@ -129,7 +144,13 @@ type keyVaultCertificate struct {
 }
 
 func (c *Config) toVMID() string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, c.tmpResourceGroupName, c.tmpComputeName)
+	var resourceGroupName string
+	if c.tmpResourceGroupName != "" {
+		resourceGroupName = c.tmpResourceGroupName
+	} else {
+		resourceGroupName = c.BuildResourceGroupName
+	}
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", c.SubscriptionID, resourceGroupName, c.tmpComputeName)
 }
 
 func (c *Config) isManagedImage() bool {
@@ -328,9 +349,10 @@ func setRuntimeValues(c *Config) {
 		c.tmpComputeName = c.TempComputeName
 	}
 	c.tmpDeploymentName = tempName.DeploymentName
-	if c.TempResourceGroupName == "" {
+	// Only set tmpResourceGroupName if no name has been specified
+	if c.TempResourceGroupName == "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = tempName.ResourceGroupName
-	} else {
+	} else if c.TempResourceGroupName != "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
 	c.tmpOSDiskName = tempName.OSDiskName
@@ -511,6 +533,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.TempResourceGroupName != "" && c.BuildResourceGroupName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The settings temp_resource_group_name and build_resource_group_name cannot both be defined.  Please define one or neither."))
+	}
+
 	/////////////////////////////////////////////
 	// Compute
 	toInt := func(b bool) int {
@@ -564,10 +590,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
-	if c.Location == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A location must be specified"))
-	}
-
 	/////////////////////////////////////////////
 	// Deployment
 	xor := func(a, b bool) bool {
@@ -578,12 +600,40 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (storage_account and resource_group_name) or Managed Image (managed_image_resource_group_name and managed_image_name) output"))
 	}
 
+	if !xor(c.Location != "", c.BuildResourceGroupName != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Must specify either a location to create the resource group in or an existing build_resource_group_name."))
+	}
+
 	if c.ManagedImageName == "" && c.ManagedImageResourceGroupName == "" {
 		if c.StorageAccount == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A storage_account must be specified"))
 		}
 		if c.ResourceGroupName == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A resource_group_name must be specified"))
+		}
+	}
+
+	if c.TempResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.TempResourceGroupName, "temp_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.BuildResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.BuildResourceGroupName, "build_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.ManagedImageResourceGroupName != "" {
+		if ok, err := assertResourceGroupName(c.ManagedImageResourceGroupName, "managed_image_resource_group_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.ManagedImageName != "" {
+		if ok, err := assertManagedImageName(c.ManagedImageName, "managed_image_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
 
@@ -614,4 +664,24 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
+}
+
+func assertManagedImageName(name, setting string) (bool, error) {
+	if !isValidAzureName(reManagedDiskName, name) {
+		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validManagedDiskName)
+	}
+	return true, nil
+}
+
+func assertResourceGroupName(rgn, setting string) (bool, error) {
+	if !isValidAzureName(reResourceGroupName, rgn) {
+		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validResourceGroupNameRe)
+	}
+	return true, nil
+}
+
+func isValidAzureName(re *regexp.Regexp, rgn string) bool {
+	return re.Match([]byte(rgn)) &&
+		!strings.HasSuffix(rgn, ".") &&
+		!strings.HasSuffix(rgn, "-")
 }

@@ -1,17 +1,18 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepMountAlicloudDisk struct {
 }
 
-func (s *stepMountAlicloudDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepMountAlicloudDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)

@@ -75,6 +75,17 @@ directly.
 This behavior was adopted from the standard behavior of rsync. Note that under
 the covers, rsync may or may not be used.
 
+## Uploading files that don't exist before Packer starts
+
+In general, local files used as the source **must** exist before Packer is run.
+This is great for catching typos and ensuring that once a build is started,
+that it will succeed. However, this also means that you can't generate a file
+during your build and then upload it using the file provisioner later.
+A convenient workaround is to upload a directory instead of a file. The
+directory still must exist, but its contents don't. You can write your
+generated file to the directory during the Packer run, and have it be uploaded
+later.
+
 ## Symbolic link uploads
 
 The behavior when uploading symbolic links depends on the communicator. The
@@ -90,6 +101,9 @@ drwxr-xr-x  3 mwhooker  staff  102 Jan 27 17:10 a
 lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
 -rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 file1
 lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
+$ ls -l toupload
+total 0
+-rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 files.tar
 ```
 
 ``` json
@@ -97,7 +111,7 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
   "provisioners": [
     {
       "type": "shell-local",
-      "command": "mkdir -p toupload; tar cf toupload/files.tar files"
+      "command": "tar cf toupload/files.tar files"
     },
     {
       "destination": "/tmp/",

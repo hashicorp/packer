@@ -135,6 +135,7 @@ type CreateDiskArgs struct {
 	ZoneId       string
 	DiskName     string
 	Description  string
+	Encrypted    bool
 	DiskCategory DiskCategory
 	Size         int
 	SnapshotId   string
@@ -240,6 +241,29 @@ func (client *Client) DetachDisk(instanceId string, diskId string) error {
 	return err
 }
 
+type ResizeDiskArgs struct {
+	DiskId string
+	NewSize int
+}
+
+type ResizeDiskResponse struct {
+	common.Response
+}
+
+//
+// ResizeDisk can only support to enlarge disk size
+// You can read doc at https://help.aliyun.com/document_detail/25522.html
+func (client *Client) ResizeDisk(diskId string, sizeGB int) error {
+	args := ResizeDiskArgs{
+		DiskId:diskId,
+		NewSize:sizeGB,
+	}
+	response := ResizeDiskResponse{}
+	err := client.Invoke("ResizeDisk", &args, &response)
+	return err
+}
+
+
 type ResetDiskArgs struct {
 	DiskId     string
 	SnapshotId string
@@ -248,6 +272,7 @@ type ResetDiskArgs struct {
 type ResetDiskResponse struct {
 	common.Response
 }
+
 
 // ResetDisk resets disk to original status
 //
