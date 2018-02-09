@@ -137,7 +137,9 @@ builder.
     or "scsi" (which uses the "lsilogic" scsi interface by default). If you
     specify another option, Packer will assume that you're specifying a "scsi"
     interface of that specified type. For more information, please consult the
-    <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"><img src="../../assets/images/Adobe_PDF_file_icon_24x24.png"/> Virtual Disk Manager User's Guide</a> for desktop VMware clients.
+    <a href="http://www.vmware.com/pdf/VirtualDiskManager.pdf" target="_blank"
+    rel="nofollow noopener noreferrer">
+    Virtual Disk Manager User's Guide</a> for desktop VMware clients.
     For ESXi, refer to the proper ESXi documentation.
 
 -   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
@@ -216,7 +218,9 @@ builder.
 -   `network_adapter_type` (string) - This is the ethernet adapter type the the
     virtual machine will be created with. By default the "e1000" network adapter
     type will be used by Packer. For more information, please consult the
-    <a href="https://kb.vmware.com/s/article/1001805" target="_blank">Choosing a network adapter for your virtual machine</a> for desktop VMware
+    <a href="https://kb.vmware.com/s/article/1001805" target="_blank"
+    rel="nofollow noopener noreferrer">
+    Choosing a network adapter for your virtual machine</a> for desktop VMware
     clients. For ESXi, refer to the proper ESXi documentation.
 
 -   `output_directory` (string) - This is the path to the directory where the
