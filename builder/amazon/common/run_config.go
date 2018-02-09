@@ -53,7 +53,6 @@ type RunConfig struct {
 	// Communicator settings
 	Comm           communicator.Config `mapstructure:",squash"`
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
-	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
 	SSHInterface   string              `mapstructure:"ssh_interface"`
 }
 
@@ -78,14 +77,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
-	if c.SSHPrivateIp && c.SSHInterface != "" {
-		errs = append(errs, errors.New("ssh_interface and ssh_private_ip should not both be specified"))
-	}
-
-	// Legacy configurable
-	if c.SSHPrivateIp {
-		c.SSHInterface = "private_ip"
-	}
 
 	// Valadating ssh_interface
 	if c.SSHInterface != "public_ip" &&
