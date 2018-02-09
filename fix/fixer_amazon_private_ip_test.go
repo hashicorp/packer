@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func TestFixerAmazonEnhancedNetworking_Impl(t *testing.T) {
-	var _ Fixer = new(FixerAmazonEnhancedNetworking)
+func TestFixerAmazonPrivateIP_Impl(t *testing.T) {
+	var _ Fixer = new(FixerAmazonPrivateIP)
 }
 
-func TestFixerAmazonEnhancedNetworking(t *testing.T) {
+func TestFixerAmazonPrivateIP(t *testing.T) {
 	cases := []struct {
 		Input    map[string]interface{}
 		Expected map[string]interface{}
@@ -17,32 +17,32 @@ func TestFixerAmazonEnhancedNetworking(t *testing.T) {
 		// Attach field == false
 		{
 			Input: map[string]interface{}{
-				"type":                "amazon-ebs",
-				"enhanced_networking": false,
+				"type":           "amazon-ebs",
+				"ssh_private_ip": false,
 			},
 
 			Expected: map[string]interface{}{
-				"type":        "amazon-ebs",
-				"ena_support": false,
+				"type":          "amazon-ebs",
+				"ssh_interface": "public_ip",
 			},
 		},
 
 		// Attach field == true
 		{
 			Input: map[string]interface{}{
-				"type":                "amazon-ebs",
-				"enhanced_networking": true,
+				"type":           "amazon-ebs",
+				"ssh_private_ip": true,
 			},
 
 			Expected: map[string]interface{}{
-				"type":        "amazon-ebs",
-				"ena_support": true,
+				"type":          "amazon-ebs",
+				"ssh_interface": "private_ip",
 			},
 		},
 	}
 
 	for _, tc := range cases {
-		var f FixerAmazonEnhancedNetworking
+		var f FixerAmazonPrivateIP
 
 		input := map[string]interface{}{
 			"builders": []map[string]interface{}{tc.Input},
