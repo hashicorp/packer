@@ -33,3 +33,7 @@ func (d *Workstation10Driver) Verify() error {
 
 	return workstationVerifyVersion(VMWARE_WS_VERSION)
 }
+
+func (d *Workstation10Driver) GetVmwareDriver() VmwareDriver {
+	return d.Workstation9Driver.VmwareDriver
+}

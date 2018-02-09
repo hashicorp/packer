@@ -38,21 +38,43 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	DiskName            string   `mapstructure:"vmdk_name"`
-	DiskSize            uint     `mapstructure:"disk_size"`
-	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	Format              string   `mapstructure:"format"`
-	GuestOSType         string   `mapstructure:"guest_os_type"`
+	// disk drives
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+	DiskAdapterType    string `mapstructure:"disk_adapter_type"`
+	DiskName           string `mapstructure:"vmdk_name"`
+	DiskSize           uint   `mapstructure:"disk_size"`
+	DiskTypeId         string `mapstructure:"disk_type_id"`
+	Format             string `mapstructure:"format"`
+
+	// cdrom drive
+	CdromAdapterType string `mapstructure:"cdrom_adapter_type"`
+
+	// platform information
+	GuestOSType string `mapstructure:"guest_os_type"`
+	Version     string `mapstructure:"version"`
+	VMName      string `mapstructure:"vm_name"`
+
+	// Network adapter and type
+	NetworkAdapterType string `mapstructure:"network_adapter_type"`
+	Network            string `mapstructure:"network"`
+
+	// device presence
+	Sound bool `mapstructure:"sound"`
+	USB   bool `mapstructure:"usb"`
+
+	// communication ports
+	Serial   string `mapstructure:"serial"`
+	Parallel string `mapstructure:"parallel"`
+
+	// booting a guest
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
 	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	SkipExport          bool     `mapstructure:"skip_export"`
-	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
-	Version             string   `mapstructure:"version"`
 
+	// remote vsphere
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`
 	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
@@ -109,6 +131,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskSize = 40000
 	}
 
+	if b.config.DiskAdapterType == "" {
+		// Default is lsilogic
+		b.config.DiskAdapterType = "lsilogic"
+	}
+
 	if b.config.DiskTypeId == "" {
 		// Default is growable virtual disk split in 2GB files.
 		b.config.DiskTypeId = "1"
@@ -156,6 +183,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs, fmt.Errorf("vmx_template_path is invalid: %s", err))
 		}
 
+	}
+
+	if b.config.Network == "" {
+		b.config.Network = "nat"
+	}
+
+	if !b.config.Sound {
+		b.config.Sound = false
+	}
+
+	if !b.config.USB {
+		b.config.USB = false
 	}
 
 	// Remote configuration validation
