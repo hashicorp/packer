@@ -140,6 +140,8 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(p.filterLog(out.String()))
 
+	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
+
 	return artifact, false, nil
 }
 
