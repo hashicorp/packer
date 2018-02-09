@@ -1,4 +1,4 @@
-## (UNRELEASED)
+## 1.2.0 (February 9, 2018)
 
 ### BACKWARDS INCOMPATIBILITIES:
 * 3rd party plugins: We have moved internal dependencies, meaning your 3rd
