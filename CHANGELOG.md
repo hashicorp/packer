@@ -6,6 +6,7 @@
 * 3rd party plugins: We have moved internal dependencies, meaning your 3rd party plugins will no longer compile (however existing builds will still work fine); the work to fix them is minimal and documented in GH-5810. [GH-5810]
 * provisioner/file: We've made destination semantics more consistent across the various communicators. In general, if the destination is a directory, files will be uploaded into the directory instead of failing. This mirrors the behavior of `rsync`. There's a chance some users might be depending on the previous buggy behavior, so it's worth ensuring your configuration is correct. [GH-5426]
 * builder/openstack: Extension support has been removed. To use OpenStack builder with the OpenStack Newton (Oct 2016) or earlier, we recommend you use Packer v1.1.2 or earlier version.
+* builder/amazon: The `ssh_private_ip` option has been removed. Instead, please use `"ssh_interface": "private"`. A fixer has been written for this, which can be invoked with `packer fix`. [GH-5876]
 
 ### IMPROVEMENTS:
 
