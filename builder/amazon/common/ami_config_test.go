@@ -11,6 +11,12 @@ func testAMIConfig() *AMIConfig {
 	}
 }
 
+func getFakeAccessConfig(region string) *AccessConfig {
+	return &AccessConfig{
+		RawRegion: region,
+	}
+}
+
 func TestAMIConfigPrepare_name(t *testing.T) {
 	c := testAMIConfig()
 	if err := c.Prepare(nil, nil); err != nil {
@@ -118,6 +124,15 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	if err := c.Prepare(nil, nil); err == nil {
 		t.Fatal("should have error b/c theres a region in in ami_regions that isn't in the key map")
 	}
+
+	// allow rawregion to exist in ami_regions list.
+	accessConf := getFakeAccessConfig("us-east-1")
+	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-2"}
+	c.AMIRegionKMSKeyIDs = nil
+	if err := c.Prepare(accessConf, nil); err != nil {
+		t.Fatal("should allow user to have the raw region in ami_regions")
+	}
+
 }
 
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {

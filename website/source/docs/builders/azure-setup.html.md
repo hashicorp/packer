@@ -63,6 +63,14 @@ If you already have node.js installed you can use `npm` to install `azure-cli`:
 $ npm install -g azure-cli --no-progress
 ```
 
+You can also use the Python-based Azure CLI in Docker. It also comes with `jq` pre-installed:
+
+```shell
+$ docker run -it azuresdk/azure-cli-python
+```
+
+As there are differences between the node.js client and the Python client, we've included commands for the Python client underneath each node.js command.
+
 ## Guided Setup
 
 The Packer project includes a [setup script](https://github.com/hashicorp/packer/blob/master/contrib/azure-setup.sh) that can help you setup your account. It uses an interactive bash script to log you into Azure, name your resources, and export your Packer configuration.
@@ -80,12 +88,43 @@ $ azure config mode arm
 $ azure login -u USERNAME
 ```
 
+If you're using the Python client:
+
+```shell
+$ az login
+# To sign in, use a web browser to open the page https://aka.ms/devicelogin and enter the code CODE_PROVIDED to authenticate
+```
+
+Once you've completed logging in, you should get a JSON array like the one below:
+
+```shell
+[
+  {
+    "cloudName": "AzureCloud",
+    "id": "$uuid",
+    "isDefault": false,
+    "name": "Pay-As-You-Go",
+    "state": "Enabled",
+    "tenantId": "$tenant_uuid",
+    "user": {
+      "name": "my_email@anywhere.com",
+      "type": "user"
+    }
+  }
+]
+
+```
 Get your account information
 
 ``` shell
 $ azure account list --json | jq -r '.[].name'
 $ azure account set ACCOUNTNAME
 $ azure account show --json | jq -r ".[] | .id"
+```
+
+Python:
+```shell
+$ az account set "$(az account list | jq -r '.[].name')"
 ```
 
 -&gt; Throughout this document when you see a command pipe to `jq` you may instead omit `--json` and everything after it, but the output will be more verbose. For example you can simply run `azure account list` instead.
@@ -107,6 +146,12 @@ $ azure location list
 $ azure group create -n GROUPNAME -l LOCATION
 ```
 
+Python:
+
+```shell
+$ az group create -n GROUPNAME -l LOCATION
+```
+
 Your storage account (below) will need to use the same `GROUPNAME` and `LOCATION`.
 
 ### Create a Storage Account
@@ -121,9 +166,15 @@ $ azure storage account create \
   --kind storage STORAGENAME
 ```
 
--&gt; `LRS` is meant as a literal "LRS" and not as a variable.
+Python:
 
-Make sure that `GROUPNAME` and `LOCATION` are the same as above.
+```shell
+$ az storage account create -n STORAGENAME -g GROUPNAME -l LOCATION --sku Standard_LRS
+```
+
+-&gt; `LRS` and `Standard_LRS` are meant as literal "LRS" or "Standard_LRS" and not as variables.
+
+Make sure that `GROUPNAME` and `LOCATION` are the same as above. Also, ensure that `GROUPNAME` is less than 24 characters long and contains only lowercase letters and numbers.
 
 ### Create an Application
 
@@ -135,6 +186,12 @@ $ azure ad app create \
   -i APPURL \
   --home-page APPURL \
   -p PASSWORD
+```
+
+Python:
+
+```shell
+az ad app create --display-name APPNAME --identifier-uris APPURL --homepage APPURL --password PASSWORD
 ```
 
 Password is your `client_secret` and can be anything you like. I recommend using `openssl rand -base64 24`.
@@ -153,6 +210,13 @@ $ azure ad app list --json \
 $ azure ad sp create --applicationId APPID
 ```
 
+Python:
+
+```shell
+$ id=$(az ad app list | jq -r '.[] | select(.displayName == "Packer") | .appId')
+$ az ad sp create --appid "$id"
+```
+
 ### Grant Permissions to Your Application
 
 Finally, we will associate the proper permissions with our application's service principal. We're going to assign the `Owner` role to our Packer application and change the scope to manage our whole subscription. (The `Owner` role can be scoped to a specific resource group to further reduce the scope of the account.) This allows Packer to create temporary resource groups for each build.
@@ -162,6 +226,13 @@ $ azure role assignment create \
   --spn APPURL \
   -o "Owner" \
   -c /subscriptions/SUBSCRIPTIONID
+```
+
+Python:
+
+```shell
+# NOTE: Trying to assign the role to the service principal by name directly yields a HTTP 400 error. See: https://github.com/Azure/azure-cli/issues/4911
+$ az role assignment create --assignee "$(az ad sp list | jq -r '.[] | select(.displayName == "APPNAME") | .objectId')" --role Owner
 ```
 
 There are a lot of pre-defined roles and you can define your own with more granular permissions, though this is out of scope. You can see a list of pre-configured roles via:
@@ -174,6 +245,23 @@ $ azure role list --json \
 ### Configuring Packer
 
 Now (finally) everything has been setup in Azure. Let's get our configuration keys together:
+
+Python:
+
+```shell
+$ cat <<EOF
+> {
+>   "subscription_id": $(az account show | jq '.id'),
+>   "client_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .appId'),
+>   "client_secret": "$password",
+>   "location": "$location",
+>   "tenant_id": $(az account show | jq '.tenantId')
+>   "object_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .objectId')
+> }
+> EOF
+```
+
+node.js:
 
 Get `subscription_id`:
 
@@ -188,6 +276,7 @@ Get `client_id`
 $ azure ad app list --json \
   | jq '.[] | select(.displayName | contains("APPNAME")) | .appId'
 ```
+
 
 Get `client_secret`
 

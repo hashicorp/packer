@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -12,8 +13,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepGetPassword reads the password from a Windows server and sets it
@@ -24,7 +25,7 @@ type StepGetPassword struct {
 	Timeout time.Duration
 }
 
-func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm

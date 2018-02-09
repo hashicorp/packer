@@ -1,10 +1,12 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testStepOutputDir(t *testing.T) *StepOutputDir {
@@ -28,7 +30,7 @@ func TestStepOutputDir(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -55,7 +57,7 @@ func TestStepOutputDir_exists(t *testing.T) {
 	}
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -74,7 +76,7 @@ func TestStepOutputDir_cancelled(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -99,7 +101,7 @@ func TestStepOutputDir_halted(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

@@ -1,11 +1,12 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type uploadCmdData struct {
@@ -22,7 +23,7 @@ type StepUploadBundle struct {
 	Debug bool
 }
 
-func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadBundle) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	manifestName := state.Get("manifest_name").(string)

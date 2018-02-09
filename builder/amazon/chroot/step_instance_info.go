@@ -1,28 +1,29 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepInstanceInfo verifies that this builder is running on an EC2 instance.
 type StepInstanceInfo struct{}
 
-func (s *StepInstanceInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
+	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Get our own instance ID
 	ui.Say("Gathering information about this EC2 instance...")
 
-	sess := session.New()
-	ec2meta := ec2metadata.New(sess)
+	ec2meta := ec2metadata.New(session)
 	identity, err := ec2meta.GetInstanceIdentityDocument()
 	if err != nil {
 		err := fmt.Errorf(

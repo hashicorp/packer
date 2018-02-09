@@ -1,9 +1,11 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"context"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestStepUploadVersion_impl(t *testing.T) {
@@ -22,7 +24,7 @@ func TestStepUploadVersion(t *testing.T) {
 	driver.VersionResult = "foo"
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -47,7 +49,7 @@ func TestStepUploadVersion_noPath(t *testing.T) {
 	state.Put("communicator", comm)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

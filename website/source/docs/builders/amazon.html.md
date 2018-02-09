@@ -49,49 +49,90 @@ filesystem and data.
 
 <span id="specifying-amazon-credentials"></span>
 
-## Specifying Amazon Credentials
+## Authentication
 
-When you use any of the amazon builders, you must provide credentials to the API
-in the form of an access key id and secret. These look like:
+The AWS provider offers a flexible means of providing credentials for
+authentication. The following methods are supported, in this order, and
+explained below:
 
-    access key id:     AKIAIOSFODNN7EXAMPLE
-    secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+-   Static credentials
+-   Environment variables
+-   Shared credentials file
+-   EC2 Role
 
-If you use other AWS tools you may already have these configured. If so, packer
-will try to use them, *unless* they are specified in your packer template.
-Credentials are resolved in the following order:
+### Static Credentials
 
-1.  Values hard-coded in the packer template are always authoritative.
-2.  *Variables* in the packer template may be resolved from command-line flags
-    or from environment variables. Please read about [User
-    Variables](https://www.packer.io/docs/templates/user-variables.html)
-    for details.
-3.  If no credentials are found, packer falls back to automatic lookup.
+Static credentials can be provided in the form of an access key id and secret.
+These look like:
 
-### Automatic Lookup
+```json
+{
+    "access_key": "AKIAIOSFODNN7EXAMPLE",
+    "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
 
-Packer depends on the [AWS
-SDK](https://aws.amazon.com/documentation/sdk-for-go/) to perform automatic
-lookup using *credential chains*. In short, the SDK looks for credentials in
-the following order:
+### Environment variables
 
-1.  Environment variables.
-2.  Shared credentials file.
-3.  If your application is running on an Amazon EC2 instance, IAM role for Amazon EC2.
+You can provide your credentials via the `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY`, environment variables, representing your AWS Access
+Key and AWS Secret Key, respectively. Note that setting your AWS credentials
+using either these environment variables will override the use of
+`AWS_SHARED_CREDENTIALS_FILE` and `AWS_PROFILE`. The `AWS_DEFAULT_REGION` and
+`AWS_SESSION_TOKEN` environment variables are also used, if applicable:
 
-Please refer to the SDK's documentation on [specifying
-credentials](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials)
-for more information.
 
-## Using an IAM Task or Instance Role
+Usage:
 
-If AWS keys are not specified in the template, a
-[shared credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-or through environment variables Packer will use credentials provided by
-the task's or instance's IAM role, if it has one.
+```
+$ export AWS_ACCESS_KEY_ID="anaccesskey"
+$ export AWS_SECRET_ACCESS_KEY="asecretkey"
+$ export AWS_DEFAULT_REGION="us-west-2"
+$ packer build packer.json
+```
 
-The following policy document provides the minimal set permissions necessary for
-Packer to work:
+### Shared Credentials file
+
+You can use an AWS credentials file to specify your credentials. The default
+location is &#36;HOME/.aws/credentials on Linux and OS X, or
+"%USERPROFILE%.aws\credentials" for Windows users. If we fail to detect
+credentials inline, or in the environment, Packer will check this location. You
+can optionally specify a different location in the configuration by setting the
+environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
+
+You may also configure the profile to use by setting the `profile`
+configuration option, or setting the `AWS_PROFILE` environment variable:
+
+```json
+{
+    "profile": "customprofile",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
+
+
+### IAM Task or Instance Role
+
+Finally, Packer will use credentials provided by the task's or instance's IAM
+role, if it has one.
+
+This is a preferred approach over any other when running in EC2 as you can
+avoid hard coding credentials. Instead these are leased on-the-fly by Packer,
+which reduces the chance of leakage.
+
+The default deadline for the EC2 metadata API endpoint is 100 milliseconds,
+which can be overidden by setting the `AWS_METADATA_TIMEOUT` environment
+variable. The variable expects a positive golang Time.Duration string, which is
+a sequence of decimal numbers and a unit suffix; valid suffixes are `ns`
+(nanoseconds), `us` (microseconds), `ms` (milliseconds), `s` (seconds), `m`
+(minutes), and `h` (hours). Examples of valid inputs: `100ms`, `250ms`, `1s`,
+`2.5s`, `2.5m`, `1m30s`.
+
+The following policy document provides the minimal set permissions necessary
+for Packer to work:
 
 ``` json
 {

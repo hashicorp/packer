@@ -1,19 +1,20 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepWaitStartupScript int
 
 // Run reads the instance metadata and looks for the log entry
 // indicating the startup script finished.
-func (s *StepWaitStartupScript) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitStartupScript) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

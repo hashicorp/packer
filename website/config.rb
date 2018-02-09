@@ -2,7 +2,7 @@ set :base_url, "https://www.packer.io/"
 
 activate :hashicorp do |h|
   h.name         = "packer"
-  h.version      = "1.1.1"
+  h.version      = "1.1.3"
   h.github_slug  = "hashicorp/packer"
   h.website_root = "website"
 end

@@ -1,8 +1,9 @@
 package chroot
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestCommunicator_ImplementsCommunicator(t *testing.T) {

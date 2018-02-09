@@ -9,6 +9,12 @@ sidebar_current: 'docs-commands-push'
 
 # `push` Command
 
+!&gt; The Packer and Artifact Registry features of Atlas will no longer be
+actively developed or maintained and will be fully decommissioned on Friday,
+March 30, 2018. Please see our [guide on building immutable infrastructure with
+Packer on CI/CD](/guides/packer-on-cicd/) for ideas on implementing these
+features yourself.
+
 The `packer push` command uploads a template and other required files to the
 Atlas service, which will run your packer build for you. [Learn more about
 Packer in Atlas.](https://atlas.hashicorp.com/help/packer/features)
@@ -23,7 +29,7 @@ artifacts in Atlas. In order to do that you will also need to configure the
 [Atlas post-processor](/docs/post-processors/atlas.html). This is optional, and
 both the post-processor and push commands can be used independently.
 
-!&gt; The push command uploads your template and other files, like provisioning
+~&gt; The push command uploads your template and other files, like provisioning
 scripts, to Atlas. Take care not to upload files that you don't intend to, like
 secrets or large binaries. **If you have secrets in your Packer template, you
 should [move them into environment
