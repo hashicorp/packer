@@ -17,6 +17,6 @@ designed to support both platforms. Please choose the one that's right for you:
     instance and creating an image list from a snapshot of it after
     provisioning.
 
--   [oracle-oci](/docs/builders/amazon-instance.html) - Create custom images in
+-   [oracle-oci](/docs/builders/oracle-oci.html) - Create custom images in
     Oracle Cloud Infrastructure (OCI) by launching a base instance and creating
     an image from it after provisioning.
