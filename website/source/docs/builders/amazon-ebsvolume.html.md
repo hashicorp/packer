@@ -224,8 +224,8 @@ builder.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
--   `ssh_private_ip` (boolean) - *Deprecated* use `ssh_interface` instead. If `true`,
-    then SSH will always use the private IP if available. Also works for WinRM.
+-   `ssh_private_ip` (boolean) - No longer supported. See
+    [`ssh_interface`](#ssh_interface). A fixer exists to migrate.
 
 -   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
     `public_dns` or `private_dns`. If set, either the public IP address,
