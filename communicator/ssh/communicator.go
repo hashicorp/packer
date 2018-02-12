@@ -112,7 +112,7 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	}
 
 	go func() {
-		if c.config.KeepAliveInterval < 0 {
+		if c.config.KeepAliveInterval <= 0 {
 			return
 		}
 		c := time.NewTicker(c.config.KeepAliveInterval)
