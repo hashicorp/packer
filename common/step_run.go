@@ -39,15 +39,6 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	ui.Say("Waiting for IP...")
-	ip, err := vm.WaitForIP()
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-	state.Put("ip", ip)
-	ui.Say(fmt.Sprintf("IP address: %v", ip))
-
 	return multistep.ActionContinue
 }
 
