@@ -6,14 +6,29 @@ import (
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"strings"
+	"time"
 )
 
 type RunConfig struct {
-	BootOrder string `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
+	BootOrder   string        `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
+	RawBootWait string        `mapstructure:"boot_wait"`  // example: "1m30s"; default: "10s"
+	bootWait    time.Duration ``
 }
 
 func (c *RunConfig) Prepare() []error {
-	return nil
+	var errs []error
+
+	if c.RawBootWait == "" {
+		c.RawBootWait = "10s"
+	}
+
+	var err error
+	c.bootWait, err = time.ParseDuration(c.RawBootWait)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("failed parsing boot_wait: %s", err))
+	}
+
+	return errs
 }
 
 type StepRun struct {
@@ -37,6 +52,22 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	if err != nil {
 		state.Put("error", fmt.Errorf("error powering on VM: %v", err))
 		return multistep.ActionHalt
+	}
+
+	if int64(s.Config.bootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.bootWait))
+		wait := time.After(s.Config.bootWait)
+	WAITLOOP:
+		for {
+			select {
+			case <-wait:
+				break WAITLOOP
+			case <-time.After(1 * time.Second):
+				if _, ok := state.GetOk(multistep.StateCancelled); ok {
+					return multistep.ActionHalt
+				}
+			}
+		}
 	}
 
 	return multistep.ActionContinue
