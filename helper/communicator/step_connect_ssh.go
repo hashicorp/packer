@@ -182,6 +182,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			Pty:        s.Config.SSHPty,
 			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
+			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
+			Timeout:                s.Config.SSHReadWriteTimeout,
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")

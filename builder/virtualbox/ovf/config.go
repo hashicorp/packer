@@ -97,7 +97,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.SourcePath == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is required"))
 	} else {
-		c.SourcePath, err = common.DownloadableURL(c.SourcePath)
+		c.SourcePath, err = common.ValidatedURL(c.SourcePath)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is invalid: %s", err))
 		}

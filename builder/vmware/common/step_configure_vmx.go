@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
@@ -26,15 +25,13 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	vmxContents, err := ioutil.ReadFile(vmxPath)
+	vmxData, err := ReadVMX(vmxPath)
 	if err != nil {
 		err := fmt.Errorf("Error reading VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	vmxData := ParseVMX(string(vmxContents))
 
 	// Set this so that no dialogs ever appear from Packer.
 	vmxData["msg.autoanswer"] = "true"
