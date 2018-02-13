@@ -26,12 +26,13 @@ type Config struct {
 	AccessCfgFileAccount string `mapstructure:"access_cfg_file_account"`
 
 	// Access config overrides
-	UserID      string `mapstructure:"user_ocid"`
-	TenancyID   string `mapstructure:"tenancy_ocid"`
-	Region      string `mapstructure:"region"`
-	Fingerprint string `mapstructure:"fingerprint"`
-	KeyFile     string `mapstructure:"key_file"`
-	PassPhrase  string `mapstructure:"pass_phrase"`
+	UserID       string `mapstructure:"user_ocid"`
+	TenancyID    string `mapstructure:"tenancy_ocid"`
+	Region       string `mapstructure:"region"`
+	Fingerprint  string `mapstructure:"fingerprint"`
+	KeyFile      string `mapstructure:"key_file"`
+	PassPhrase   string `mapstructure:"pass_phrase"`
+	UsePrivateIP bool   `mapstructure:"use_private_ip"`
 
 	AvailabilityDomain string `mapstructure:"availability_domain"`
 	CompartmentID      string `mapstructure:"compartment_ocid"`
