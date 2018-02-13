@@ -24,7 +24,8 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"subnet_ocid": "ocd1...",
 
 		// Comm
-		"ssh_username": "opc",
+		"ssh_username":   "opc",
+		"use_private_ip": false,
 	}
 }
 
@@ -167,7 +168,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test that AccessCfgFile properties are overridden by their
-	// corosponding template keys.
+	// corresponding template keys.
 	accessOverrides := map[string]string{
 		"user_ocid":    "User",
 		"tenancy_ocid": "Tenancy",
