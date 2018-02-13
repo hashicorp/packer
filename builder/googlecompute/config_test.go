@@ -309,6 +309,9 @@ func testConfig(t *testing.T) map[string]interface{} {
 			"label-1": "value-1",
 			"label-2": "value-2",
 		},
+		"image_licenses": []string{
+			"test-license",
+		},
 		"zone": "us-east1-a",
 	}
 }

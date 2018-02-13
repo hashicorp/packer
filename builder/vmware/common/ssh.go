@@ -3,9 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
@@ -16,41 +14,12 @@ import (
 func CommHost(config *SSHConfig) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 		driver := state.Get("driver").(Driver)
-		vmxPath := state.Get("vmx_path").(string)
 
 		if config.Comm.SSHHost != "" {
 			return config.Comm.SSHHost, nil
 		}
 
-		log.Println("Lookup up IP information...")
-		f, err := os.Open(vmxPath)
-		if err != nil {
-			return "", err
-		}
-		defer f.Close()
-
-		vmxBytes, err := ioutil.ReadAll(f)
-		if err != nil {
-			return "", err
-		}
-
-		vmxData := ParseVMX(string(vmxBytes))
-
-		var ok bool
-		macAddress := ""
-		if macAddress, ok = vmxData["ethernet0.address"]; !ok || macAddress == "" {
-			if macAddress, ok = vmxData["ethernet0.generatedaddress"]; !ok || macAddress == "" {
-				return "", errors.New("couldn't find MAC address in VMX")
-			}
-		}
-
-		ipLookup := &DHCPLeaseGuestLookup{
-			Driver:     driver,
-			Device:     "vmnet8",
-			MACAddress: macAddress,
-		}
-
-		ipAddress, err := ipLookup.GuestIP()
+		ipAddress, err := driver.GuestIP(state)
 		if err != nil {
 			log.Printf("IP lookup failed: %s", err)
 			return "", fmt.Errorf("IP lookup failed: %s", err)

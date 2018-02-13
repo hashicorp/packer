@@ -33,8 +33,8 @@ type StepRunSpotInstance struct {
 	SpotPrice                         string
 	SpotPriceProduct                  string
 	SubnetId                          string
-	Tags                              map[string]string
-	VolumeTags                        map[string]string
+	Tags                              TagMap
+	VolumeTags                        TagMap
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
@@ -143,14 +143,14 @@ func (s *StepRunSpotInstance) Run(_ context.Context, state multistep.StateBag) m
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, s.SourceAMI)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	ReportTags(ui, ec2Tags)
+	ec2Tags.Report(ui)
 
 	ui.Message(fmt.Sprintf(
 		"Requesting spot instance '%s' for: %s",
@@ -284,21 +284,21 @@ func (s *StepRunSpotInstance) Run(_ context.Context, state multistep.StateBag) m
 		}
 	}
 
-	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
+	if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
 		ui.Say("Adding tags to source EBS Volumes")
-		tags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+
+		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, s.SourceAMI)
 		if err != nil {
 			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-
-		ReportTags(ui, tags)
+		volumeTags.Report(ui)
 
 		_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Resources: volumeIds,
-			Tags:      tags,
+			Tags:      volumeTags,
 		})
 
 		if err != nil {

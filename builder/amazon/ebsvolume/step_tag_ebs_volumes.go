@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -44,14 +43,14 @@ func (s *stepTagEBSVolumes) Run(_ context.Context, state multistep.StateBag) mul
 				continue
 			}
 
-			tags, err := awscommon.ConvertToEC2Tags(mapping.Tags, *ec2conn.Config.Region, *sourceAMI.ImageId, s.Ctx)
+			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, *sourceAMI.ImageId)
 			if err != nil {
 				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
 				state.Put("error", err)
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-			awscommon.ReportTags(ui, tags)
+			tags.Report(ui)
 
 			for _, v := range instance.BlockDeviceMappings {
 				if *v.DeviceName == mapping.DeviceName {

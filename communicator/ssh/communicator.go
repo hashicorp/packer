@@ -55,6 +55,13 @@ type Config struct {
 
 	// UseSftp, if true, sftp will be used instead of scp for file transfers
 	UseSftp bool
+
+	// KeepAliveInterval sets how often we send a channel request to the
+	// server. A value < 0 disables.
+	KeepAliveInterval time.Duration
+
+	// Timeout is how long to wait for a read or write to succeed.
+	Timeout time.Duration
 }
 
 // Creates a new packer.Communicator implementation over SSH. This takes
@@ -103,6 +110,20 @@ func (c *comm) Start(cmd *packer.RemoteCmd) (err error) {
 	if err != nil {
 		return
 	}
+
+	go func() {
+		if c.config.KeepAliveInterval <= 0 {
+			return
+		}
+		c := time.NewTicker(c.config.KeepAliveInterval)
+		defer c.Stop()
+		for range c.C {
+			_, err := session.SendRequest("keepalive@packer.io", true, nil)
+			if err != nil {
+				return
+			}
+		}
+	}()
 
 	// Start a goroutine to wait for the session to end and set the
 	// exit boolean and status.
@@ -273,6 +294,10 @@ func (c *comm) reconnect() (err error) {
 		return
 	}
 
+	if c.config.Timeout > 0 {
+		c.conn = &timeoutConn{c.conn, c.config.Timeout, c.config.Timeout}
+	}
+
 	log.Printf("handshaking with SSH")
 
 	// Default timeout to 1 minute if it wasn't specified (zero value). For
@@ -377,14 +402,30 @@ func (c *comm) connectToAgent() {
 
 func (c *comm) sftpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
 	sftpFunc := func(client *sftp.Client) error {
-		return sftpUploadFile(path, input, client, fi)
+		return c.sftpUploadFile(path, input, client, fi)
 	}
 
 	return c.sftpSession(sftpFunc)
 }
 
-func sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.FileInfo) error {
+func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.FileInfo) error {
 	log.Printf("[DEBUG] sftp: uploading %s", path)
+
+	// find out if destination is a directory (this is to replicate rsync behavior)
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+	cmd.Wait()
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
+		path = filepath.Join(path, filepath.Base((*fi).Name()))
+	}
 
 	f, err := client.Create(path)
 	if err != nil {
@@ -436,7 +477,7 @@ func (c *comm) sftpUploadDirSession(dst string, src string, excl []string) error
 				return nil
 			}
 
-			return sftpVisitFile(finalDst, path, info, client)
+			return c.sftpVisitFile(finalDst, path, info, client)
 		}
 
 		return filepath.Walk(src, walkFunc)
@@ -445,7 +486,7 @@ func (c *comm) sftpUploadDirSession(dst string, src string, excl []string) error
 	return c.sftpSession(sftpFunc)
 }
 
-func sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
+func (c *comm) sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
 	log.Printf("[DEBUG] sftp: creating dir %s", path)
 
 	if err := client.Mkdir(path); err != nil {
@@ -463,16 +504,16 @@ func sftpMkdir(path string, client *sftp.Client, fi os.FileInfo) error {
 	return nil
 }
 
-func sftpVisitFile(dst string, src string, fi os.FileInfo, client *sftp.Client) error {
+func (c *comm) sftpVisitFile(dst string, src string, fi os.FileInfo, client *sftp.Client) error {
 	if !fi.IsDir() {
 		f, err := os.Open(src)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		return sftpUploadFile(dst, f, client, &fi)
+		return c.sftpUploadFile(dst, f, client, &fi)
 	} else {
-		err := sftpMkdir(dst, client, fi)
+		err := c.sftpMkdir(dst, client, fi)
 		return err
 	}
 }
@@ -532,6 +573,23 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
+
+	// find out if destination is a directory (this is to replicate rsync behavior)
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+	cmd.Wait()
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
+		target_dir = path
+		target_file = filepath.Base((*fi).Name())
+	}
 
 	// On windows, filepath.Dir uses backslash seperators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash

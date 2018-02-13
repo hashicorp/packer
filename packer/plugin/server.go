@@ -19,6 +19,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	packrpc "github.com/hashicorp/packer/packer/rpc"
@@ -88,7 +89,7 @@ func Server() (*packrpc.Server, error) {
 
 	// Eat the interrupts
 	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		var count int32 = 0
 		for {

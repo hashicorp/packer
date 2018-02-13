@@ -180,7 +180,7 @@ func (rw *BasicUi) Ask(query string) (string, error) {
 		rw.scanner = bufio.NewScanner(rw.Reader)
 	}
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(sigCh)
 
 	log.Printf("ui: ask: %s", query)

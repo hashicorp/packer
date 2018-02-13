@@ -28,6 +28,7 @@ type StepCloneVM struct {
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
+	MacAddress                     string
 }
 
 func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -112,6 +113,16 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 		err = driver.SetVirtualMachineVirtualizationExtensions(s.VMName, s.EnableVirtualizationExtensions)
 		if err != nil {
 			err := fmt.Errorf("Error creating setting virtual machine virtualization extensions: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	if s.MacAddress != "" {
+		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
+		if err != nil {
+			err := fmt.Errorf("Error setting MAC address: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt

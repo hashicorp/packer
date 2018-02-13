@@ -55,7 +55,24 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 }
 
 func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
-	cpCmd, err := c.CmdWrapper(fmt.Sprintf("lxc file push - %s", filepath.Join(c.ContainerName, dst)))
+	fileDestination := filepath.Join(c.ContainerName, dst)
+	// find out if the place we are pushing to is a directory
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, dst)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+	cmd.Wait()
+
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
+		fileDestination = filepath.Join(c.ContainerName, dst, (*fi).Name())
+	}
+
+	cpCmd, err := c.CmdWrapper(fmt.Sprintf("lxc file push - %s", fileDestination))
 	if err != nil {
 		return err
 	}

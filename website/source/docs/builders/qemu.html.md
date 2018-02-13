@@ -47,7 +47,7 @@ to files, URLS for ISOs and checksums.
       "ssh_username": "root",
       "ssh_password": "s0m3password",
       "ssh_port": 22,
-      "ssh_wait_timeout": "30s",
+      "ssh_timeout": "30s",
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
@@ -110,10 +110,14 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may be `none`, `kvm`, `tcg`, or `xen`. The appropriate software must
-    already been installed on your build machine to use the accelerator you
-    specified. When no accelerator is specified, Packer will try to use `kvm`
+    This may be `none`, `kvm`, `tcg`, `hax`, or `xen`. The appropriate software 
+    must have already been installed on your build machine to use the accelerator 
+    you specified. When no accelerator is specified, Packer will try to use `kvm`
     if it is available but will default to `tcg` otherwise.
+
+    -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
+    upstream issue which can be tracked
+    [here](https://github.com/intel/haxm/issues/20).
 
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
