@@ -36,7 +36,8 @@ func baseTestConfig() *Config {
 		"key_file":     keyFile.Name(),
 
 		// Comm
-		"ssh_username": "opc",
+		"ssh_username":   "opc",
+		"use_private_ip": false,
 	})
 
 	// Once we have a config object they key file isn't re-read so we can
@@ -50,9 +51,10 @@ func baseTestConfig() *Config {
 }
 
 func testState() multistep.StateBag {
+	baseTestConfig := baseTestConfig()
 	state := new(multistep.BasicStateBag)
-	state.Put("config", baseTestConfig())
-	state.Put("driver", &driverMock{})
+	state.Put("config", baseTestConfig)
+	state.Put("driver", &driverMock{cfg: baseTestConfig})
 	state.Put("hook", &packer.MockHook{})
 	state.Put("ui", &packer.BasicUi{
 		Reader: new(bytes.Buffer),

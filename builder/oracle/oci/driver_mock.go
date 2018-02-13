@@ -24,6 +24,8 @@ type driverMock struct {
 	WaitForImageCreationErr error
 
 	WaitForInstanceStateErr error
+
+	cfg *Config
 }
 
 // CreateInstance creates a new compute instance.
@@ -57,10 +59,13 @@ func (d *driverMock) DeleteImage(id string) error {
 	return nil
 }
 
-// GetInstanceIP returns the public IP corresponding to the given instance id.
+// GetInstanceIP returns the public or private IP corresponding to the given instance id.
 func (d *driverMock) GetInstanceIP(id string) (string, error) {
 	if d.GetInstanceIPErr != nil {
 		return "", d.GetInstanceIPErr
+	}
+	if d.cfg.UsePrivateIP {
+		return "private_ip", nil
 	}
 	return "ip", nil
 }
