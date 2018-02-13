@@ -111,7 +111,7 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 	c.ISOChecksum = strings.ToLower(c.ISOChecksum)
 
 	for i, url := range c.ISOUrls {
-		url, err := DownloadableURL(url)
+		url, err := ValidatedURL(url)
 		if err != nil {
 			errs = append(
 				errs, fmt.Errorf("Failed to parse iso_url %d: %s", i+1, err))

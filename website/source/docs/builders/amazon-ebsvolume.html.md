@@ -149,6 +149,12 @@ builder.
     in case Packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
 
+-   `skip_metadata_api_check` - (boolean) Skip the AWS Metadata API check.
+    Useful for AWS API implementations that do not have a metadata API
+    endpoint. Setting to `true` prevents Packer from authenticating via the
+    Metadata API. You may need to use other authentication methods like static
+    credentials, configuration variables, or environment variables.
+
 -   `skip_region_validation` (boolean) - Set to `true` if you want to skip
     validation of the region configuration option. Defaults to `false`.
 
@@ -218,8 +224,8 @@ builder.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
--   `ssh_private_ip` (boolean) - *Deprecated* use `ssh_interface` instead. If `true`,
-    then SSH will always use the private IP if available. Also works for WinRM.
+-   `ssh_private_ip` (boolean) - No longer supported. See
+    [`ssh_interface`](#ssh_interface). A fixer exists to migrate.
 
 -   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
     `public_dns` or `private_dns`. If set, either the public IP address,

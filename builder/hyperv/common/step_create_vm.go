@@ -29,6 +29,9 @@ type StepCreateVM struct {
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
+	MacAddress                     string
+	SkipExport                     bool
+	OutputDir                      string
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -52,6 +55,12 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	vhdPath := state.Get("packerVhdTempDir").(string)
+
+	// inline vhd path if export is skipped
+	if s.SkipExport {
+		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
+	}
+
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
@@ -122,6 +131,16 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+		}
+	}
+
+	if s.MacAddress != "" {
+		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
+		if err != nil {
+			err := fmt.Errorf("Error setting MAC address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 

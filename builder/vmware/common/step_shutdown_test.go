@@ -116,6 +116,10 @@ func TestStepShutdown_noCommand(t *testing.T) {
 }
 
 func TestStepShutdown_locks(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	state := testStepShutdownState(t)
 	step := new(StepShutdown)
 	step.Testing = true

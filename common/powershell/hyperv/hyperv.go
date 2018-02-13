@@ -319,6 +319,18 @@ Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
 	return err
 }
 
+func SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	var script = `
+param([string]$vmName, [string]$mac)
+Set-VMNetworkAdapter $vmName -staticmacaddress $mac
+	`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, mac)
+
+	return err
+}
+
 func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string, ram int64, switchName string) error {
 	var script = `
 param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)

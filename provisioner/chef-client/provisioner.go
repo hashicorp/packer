@@ -56,6 +56,8 @@ type Config struct {
 	InstallCommand             string   `mapstructure:"install_command"`
 	KnifeCommand               string   `mapstructure:"knife_command"`
 	NodeName                   string   `mapstructure:"node_name"`
+	PolicyGroup                string   `mapstructure:"policy_group"`
+	PolicyName                 string   `mapstructure:"policy_name"`
 	PreventSudo                bool     `mapstructure:"prevent_sudo"`
 	RunList                    []string `mapstructure:"run_list"`
 	ServerUrl                  string   `mapstructure:"server_url"`
@@ -82,6 +84,8 @@ type ConfigTemplate struct {
 	ClientKey                  string
 	EncryptedDataBagSecretPath string
 	NodeName                   string
+	PolicyGroup                string
+	PolicyName                 string
 	ServerUrl                  string
 	SslVerifyMode              string
 	TrustedCertsDir            string
@@ -192,6 +196,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if (p.config.PolicyName != "") != (p.config.PolicyGroup != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If either policy_name or policy_group are set, they must both be set."))
+	}
+
 	jsonValid := true
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
@@ -270,6 +278,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		remoteValidationKeyPath,
 		p.config.ValidationClientName,
 		p.config.ChefEnvironment,
+		p.config.PolicyGroup,
+		p.config.PolicyName,
 		p.config.SslVerifyMode,
 		p.config.TrustedCertsDir)
 	if err != nil {
@@ -344,6 +354,8 @@ func (p *Provisioner) createConfig(
 	remoteKeyPath string,
 	validationClientName string,
 	chefEnvironment string,
+	policyGroup string,
+	policyName string,
 	sslVerifyMode string,
 	trustedCertsDir string) (string, error) {
 
@@ -374,6 +386,8 @@ func (p *Provisioner) createConfig(
 		ValidationKeyPath:          remoteKeyPath,
 		ValidationClientName:       validationClientName,
 		ChefEnvironment:            chefEnvironment,
+		PolicyGroup:                policyGroup,
+		PolicyName:                 policyName,
 		SslVerifyMode:              sslVerifyMode,
 		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
@@ -687,6 +701,12 @@ validation_key "{{.ValidationKeyPath}}"
 node_name "{{.NodeName}}"
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
+{{end}}
+{{if ne .PolicyGroup ""}}
+policy_group "{{.PolicyGroup}}"
+{{end}}
+{{if ne .PolicyName ""}}
+policy_name "{{.PolicyName}}"
 {{end}}
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}

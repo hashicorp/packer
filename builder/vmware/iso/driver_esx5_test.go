@@ -50,8 +50,9 @@ func TestESX5Driver_HostIP(t *testing.T) {
 	defer listen.Close()
 
 	driver := ESX5Driver{Host: "localhost", Port: uint(port)}
+	state := new(multistep.BasicStateBag)
 
-	if host, _ := driver.HostIP(); host != expected_host {
+	if host, _ := driver.HostIP(state); host != expected_host {
 		t.Error(fmt.Sprintf("Expected string, %s but got %s", expected_host, host))
 	}
 }

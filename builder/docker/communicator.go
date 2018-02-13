@@ -105,6 +105,21 @@ func (c *Communicator) uploadReader(dst string, src io.Reader) error {
 
 // uploadFile uses docker cp to copy the file from the host to the container
 func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) error {
+	// find out if it's a directory
+	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, dst)
+	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+
+	err := c.Start(cmd)
+
+	if err != nil {
+		log.Printf("Unable to check whether remote path is a dir: %s", err)
+		return err
+	}
+	cmd.Wait()
+	if cmd.ExitStatus == 0 {
+		log.Printf("path is a directory; copying file into directory.")
+		dst = filepath.Join(dst, filepath.Base((*fi).Name()))
+	}
 
 	// command format: docker cp /path/to/infile containerid:/path/to/outfile
 	log.Printf("Copying to %s on container %s.", dst, c.ContainerID)
