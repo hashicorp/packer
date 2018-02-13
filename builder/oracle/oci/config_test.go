@@ -167,7 +167,7 @@ func TestConfig(t *testing.T) {
 	})
 
 	// Test that AccessCfgFile properties are overridden by their
-	// corosponding template keys.
+	// corresponding template keys.
 	accessOverrides := map[string]string{
 		"user_ocid":    "User",
 		"tenancy_ocid": "Tenancy",
