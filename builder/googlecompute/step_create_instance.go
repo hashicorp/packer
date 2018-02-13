@@ -98,29 +98,34 @@ func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 
 	var errCh <-chan error
 	var metadata map[string]string
+	ServiceAccountEmail := c.Account.ClientEmail
+	if ServiceAccountEmail == "" {
+		ServiceAccountEmail = "default"
+	}
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
 	errCh, err = d.RunInstance(&InstanceConfig{
-		AcceleratorType:   c.AcceleratorType,
-		AcceleratorCount:  c.AcceleratorCount,
-		Address:           c.Address,
-		Description:       "New instance created by Packer",
-		DiskSizeGb:        c.DiskSizeGb,
-		DiskType:          c.DiskType,
-		Image:             sourceImage,
-		Labels:            c.Labels,
-		MachineType:       c.MachineType,
-		Metadata:          metadata,
-		Name:              name,
-		Network:           c.Network,
-		NetworkProjectId:  c.NetworkProjectId,
-		OmitExternalIP:    c.OmitExternalIP,
-		OnHostMaintenance: c.OnHostMaintenance,
-		Preemptible:       c.Preemptible,
-		Region:            c.Region,
-		Scopes:            c.Scopes,
-		Subnetwork:        c.Subnetwork,
-		Tags:              c.Tags,
-		Zone:              c.Zone,
+		AcceleratorType:     c.AcceleratorType,
+		AcceleratorCount:    c.AcceleratorCount,
+		Address:             c.Address,
+		Description:         "New instance created by Packer",
+		DiskSizeGb:          c.DiskSizeGb,
+		DiskType:            c.DiskType,
+		Image:               sourceImage,
+		Labels:              c.Labels,
+		MachineType:         c.MachineType,
+		Metadata:            metadata,
+		Name:                name,
+		Network:             c.Network,
+		NetworkProjectId:    c.NetworkProjectId,
+		OmitExternalIP:      c.OmitExternalIP,
+		OnHostMaintenance:   c.OnHostMaintenance,
+		Preemptible:         c.Preemptible,
+		Region:              c.Region,
+		ServiceAccountEmail: ServiceAccountEmail,
+		Scopes:              c.Scopes,
+		Subnetwork:          c.Subnetwork,
+		Tags:                c.Tags,
+		Zone:                c.Zone,
 	})
 
 	if err == nil {
