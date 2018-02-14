@@ -300,6 +300,12 @@ each category, the available configuration keys are alphabetized.
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
+    You may set this in place of `source_ami` or in conjunction with it. If you
+    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    the filter. The provided `source_ami` must meet all of the filtering criteria
+    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
+    but will cause Packer to fail if the `source_ami` does not exist.
+
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
     policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's

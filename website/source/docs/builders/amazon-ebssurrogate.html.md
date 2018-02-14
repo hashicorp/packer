@@ -294,6 +294,12 @@ builder.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
+        
+    You may set this in place of `source_ami` or in conjunction with it. If you
+    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    the filter. The provided `source_ami` must meet all of the filtering criteria
+    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
+    but will cause Packer to fail if the `source_ami` does not exist.        
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
