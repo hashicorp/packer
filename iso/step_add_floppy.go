@@ -48,11 +48,6 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 	d := state.Get("driver").(*driver.Driver)
 
 	tmpFloppy := state.Get("floppy_path")
-	if s.Config.FloppyIMGPath != "" && tmpFloppy != nil {
-		return fmt.Errorf("'floppy_img_path' cannot be used together with 'floppy_files' and 'floppy_dirs'")
-	}
-
-	var floppyIMGPath string
 	if tmpFloppy != nil {
 		ui.Say("Uploading created floppy image")
 
@@ -72,15 +67,21 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 
 		// remember the path to the temporary floppy image to remove it after the build is finished
 		s.uploadedFloppyPath = uploadPath
-		floppyIMGPath = ds.ResolvePath(uploadPath)
-	} else {
-		floppyIMGPath = s.Config.FloppyIMGPath
+		floppyIMGPath := ds.ResolvePath(uploadPath)
+		ui.Say("Adding generated Floppy...")
+		err = vm.AddFloppy(floppyIMGPath)
+		if err != nil {
+			return err
+		}
 	}
 
-	ui.Say("Adding Floppy...")
-	err := vm.AddFloppy(floppyIMGPath)
-	if err != nil {
-		return err
+	if s.Config.FloppyIMGPath != "" {
+		floppyIMGPath := s.Config.FloppyIMGPath
+		ui.Say("Adding Floppy image...")
+		err := vm.AddFloppy(floppyIMGPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
