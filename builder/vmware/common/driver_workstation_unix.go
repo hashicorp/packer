@@ -59,7 +59,7 @@ func workstationDhcpConfPath(device string) string {
 		log.Printf("Error finding VMware root: %s", err)
 		return ""
 	}
-	return filepath.Join(base, device, "dhcp/dhcpd.conf")
+	return filepath.Join(base, device, "dhcp/dhcp.conf")
 }
 
 func workstationVmnetnatConfPath(device string) string {
