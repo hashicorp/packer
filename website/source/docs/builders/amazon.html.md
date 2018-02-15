@@ -1,10 +1,10 @@
 ---
+description: |
+    Packer is able to create Amazon AMIs. To achieve this, Packer comes with
+    multiple builders depending on the strategy you want to use to build the AMI.
 layout: docs
-sidebar_current: docs-builders-amazon
-page_title: Amazon AMI - Builders
-description: |-
-  Packer is able to create Amazon AMIs. To achieve this, Packer comes with
-  multiple builders depending on the strategy you want to use to build the AMI.
+page_title: 'Amazon AMI - Builders'
+sidebar_current: 'docs-builders-amazon'
 ---
 
 # Amazon AMI Builder
@@ -34,7 +34,7 @@ Packer supports the following builders at the moment:
     not require running in AWS. This is an **advanced builder and should not be
     used by newcomers**.
 
--> **Don't know which builder to use?** If in doubt, use the [amazon-ebs
+-&gt; **Don't know which builder to use?** If in doubt, use the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html). It is much easier to use and Amazon
 generally recommends EBS-backed images nowadays.
 
@@ -49,63 +49,92 @@ filesystem and data.
 
 <span id="specifying-amazon-credentials"></span>
 
-## Specifying Amazon Credentials
+## Authentication
 
-When you use any of the amazon builders, you must provide credentials to the API
-in the form of an access key id and secret. These look like:
+The AWS provider offers a flexible means of providing credentials for
+authentication. The following methods are supported, in this order, and
+explained below:
 
-    access key id:     AKIAIOSFODNN7EXAMPLE
-    secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+-   Static credentials
+-   Environment variables
+-   Shared credentials file
+-   EC2 Role
 
-If you use other AWS tools you may already have these configured. If so, packer
-will try to use them, *unless* they are specified in your packer template.
-Credentials are resolved in the following order:
+### Static Credentials
 
-1.  Values hard-coded in the packer template are always authoritative.
-2.  *Variables* in the packer template may be resolved from command-line flags
-    or from environment variables. Please read about [User
-    Variables](https://www.packer.io/docs/templates/user-variables.html)
-    for details.
-3.  If no credentials are found, packer falls back to automatic lookup.
+Static credentials can be provided in the form of an access key id and secret.
+These look like:
 
-### Automatic Lookup
+```json
+{
+    "access_key": "AKIAIOSFODNN7EXAMPLE",
+    "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
 
-If no AWS credentials are found in a packer template, we proceed on to the
-following steps:
+### Environment variables
 
-1.  Lookup via environment variables.
-    -   First `AWS_ACCESS_KEY_ID`, then `AWS_ACCESS_KEY`
-    -   First `AWS_SECRET_ACCESS_KEY`, then `AWS_SECRET_KEY`
+You can provide your credentials via the `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY`, environment variables, representing your AWS Access
+Key and AWS Secret Key, respectively. Note that setting your AWS credentials
+using either these environment variables will override the use of
+`AWS_SHARED_CREDENTIALS_FILE` and `AWS_PROFILE`. The `AWS_DEFAULT_REGION` and
+`AWS_SESSION_TOKEN` environment variables are also used, if applicable:
 
-2.  Look for [local AWS configuration
-    files](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-    - Looks for the credentials file in the `AWS_SHARED_CREDENTIALS_FILE`
-      environment variable, and if that's empty, use the default credentials
-      file (`.aws/credentials`) in the user's home directory.
-    - Uses the profile name set in the `AWS_PROFILE` environment variable. If
-      the environment variable is not set, uses "default" as the profile name.
 
-3.  Lookup an IAM role for the current EC2 instance (if you're running in EC2)
+Usage:
 
-~> **Subtle details of automatic lookup may change over time.** The most
-reliable way to specify your configuration is by setting them in template
-variables (directly or indirectly), or by using the `AWS_ACCESS_KEY_ID` and
-`AWS_SECRET_ACCESS_KEY` environment variables.
+```
+$ export AWS_ACCESS_KEY_ID="anaccesskey"
+$ export AWS_SECRET_ACCESS_KEY="asecretkey"
+$ export AWS_DEFAULT_REGION="us-west-2"
+$ packer build packer.json
+```
 
-Environment variables provide the best portability, allowing you to run your
-packer build on your workstation, in Atlas, or on another build server.
+### Shared Credentials file
 
-## Using an IAM Instance Profile
+You can use an AWS credentials file to specify your credentials. The default
+location is &#36;HOME/.aws/credentials on Linux and OS X, or
+"%USERPROFILE%.aws\credentials" for Windows users. If we fail to detect
+credentials inline, or in the environment, Packer will check this location. You
+can optionally specify a different location in the configuration by setting the
+environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
 
-If AWS keys are not specified in the template, a
-[credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html#cli-config-files)
-file or through environment variables Packer will use credentials provided by
-the instance's IAM profile, if it has one.
+You may also configure the profile to use by setting the `profile`
+configuration option, or setting the `AWS_PROFILE` environment variable:
 
-The following policy document provides the minimal set permissions necessary for
-Packer to work:
+```json
+{
+    "profile": "customprofile",
+    "region": "us-east-1",
+    "type": "amazon-ebs"
+}
+```
 
-```javascript
+
+### IAM Task or Instance Role
+
+Finally, Packer will use credentials provided by the task's or instance's IAM
+role, if it has one.
+
+This is a preferred approach over any other when running in EC2 as you can
+avoid hard coding credentials. Instead these are leased on-the-fly by Packer,
+which reduces the chance of leakage.
+
+The default deadline for the EC2 metadata API endpoint is 100 milliseconds,
+which can be overidden by setting the `AWS_METADATA_TIMEOUT` environment
+variable. The variable expects a positive golang Time.Duration string, which is
+a sequence of decimal numbers and a unit suffix; valid suffixes are `ns`
+(nanoseconds), `us` (microseconds), `ms` (milliseconds), `s` (seconds), `m`
+(minutes), and `h` (hours). Examples of valid inputs: `100ms`, `250ms`, `1s`,
+`2.5s`, `2.5m`, `1m30s`.
+
+The following policy document provides the minimal set permissions necessary
+for Packer to work:
+
+``` json
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -149,6 +178,9 @@ Packer to work:
 }
 ```
 
+Note that if you'd like to create a spot instance, you must also add  
+`ec2:RequestSpotInstances` and `ec2:CancelSpotInstanceRequests`
+
 ## Troubleshooting
 
 ### Attaching IAM Policies to Roles
@@ -164,7 +196,7 @@ The example policy below may help packer work with IAM roles. Note that this
 example provides more than the minimal set of permissions needed for packer to
 work, but specifics will depend on your use-case.
 
-```json
+``` json
 {
     "Sid": "PackerIAMPassRole",
     "Effect": "Allow",
@@ -185,6 +217,6 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-http://www.time.gov/. On Linux/OS X, you can run the `date` command to get the
+<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
 current time. If you're on Linux, you can try setting the time with ntp by
 running `sudo ntpd -q`.

@@ -1,9 +1,11 @@
 package common
 
 import (
+	"context"
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepSuppressMessages_impl(t *testing.T) {
@@ -17,7 +19,7 @@ func TestStepSuppressMessages(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -37,7 +39,7 @@ func TestStepSuppressMessages_error(t *testing.T) {
 	driver.SuppressMessagesErr = errors.New("foo")
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {

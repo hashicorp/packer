@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 var testPem = `
@@ -208,7 +208,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 
-	if b.config.DiskSize != 40000 {
+	if b.config.DiskSize != 40960 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
 

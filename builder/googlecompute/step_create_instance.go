@@ -1,13 +1,14 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCreateInstance represents a Packer build step that creates GCE instances.
@@ -72,7 +73,7 @@ func getImage(c *Config, d Driver) (*Image, error) {
 }
 
 // Run executes the Packer build step that creates a GCE instance.
-func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
 	sshPublicKey := state.Get("ssh_public_key").(string)
@@ -99,11 +100,14 @@ func (s *StepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	var metadata map[string]string
 	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
 	errCh, err = d.RunInstance(&InstanceConfig{
+		AcceleratorType:   c.AcceleratorType,
+		AcceleratorCount:  c.AcceleratorCount,
 		Address:           c.Address,
 		Description:       "New instance created by Packer",
 		DiskSizeGb:        c.DiskSizeGb,
 		DiskType:          c.DiskType,
 		Image:             sourceImage,
+		Labels:            c.Labels,
 		MachineType:       c.MachineType,
 		Metadata:          metadata,
 		Name:              name,

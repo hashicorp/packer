@@ -1,23 +1,33 @@
 package triton
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCreateSourceMachine creates an machine with the specified attributes
 // and waits for it to become available for provisioners.
 type StepCreateSourceMachine struct{}
 
-func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSourceMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Creating source machine...")
+	if !config.MachineImageFilters.Empty() {
+		ui.Say("Selecting an image based on search criteria")
+		imageId, err := driver.GetImage(config)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Problem selecting an image based on an search criteria: %s", err))
+			return multistep.ActionHalt
+		}
+		ui.Say(fmt.Sprintf("Based, on given search criteria, Machine ID is: %q", imageId))
+		config.MachineImage = imageId
+	}
 
 	machineId, err := driver.CreateMachine(config)
 	if err != nil {
@@ -33,7 +43,6 @@ func (s *StepCreateSourceMachine) Run(state multistep.StateBag) multistep.StepAc
 	}
 
 	state.Put("machine", machineId)
-
 	return multistep.ActionContinue
 }
 
@@ -62,6 +71,13 @@ func (s *StepCreateSourceMachine) Cleanup(state multistep.StateBag) {
 		err = driver.DeleteMachine(machineId)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Problem deleting source machine: %s", err))
+			return
+		}
+
+		ui.Say(fmt.Sprintf("Waiting for source machine to be destroyed (%s)...", machineId))
+		err = driver.WaitForMachineDeletion(machineId, 10*time.Minute)
+		if err != nil {
+			state.Put("error", fmt.Errorf("Problem waiting for source machine to be deleted: %s", err))
 			return
 		}
 	}

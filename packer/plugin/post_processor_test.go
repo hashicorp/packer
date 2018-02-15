@@ -1,9 +1,10 @@
 package plugin
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"os/exec"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type helperPostProcessor byte

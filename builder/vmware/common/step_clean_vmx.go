@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step cleans up the VMX by removing or changing this prior to
@@ -19,9 +20,12 @@ import (
 //
 // Produces:
 //   <nothing>
-type StepCleanVMX struct{}
+type StepCleanVMX struct {
+	RemoveEthernetInterfaces bool
+	VNCEnabled               bool
+}
 
-func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCleanVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
@@ -57,8 +61,20 @@ func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
 		vmxData[ide+"clientdevice"] = "TRUE"
 	}
 
-	ui.Message("Disabling VNC server...")
-	vmxData["remotedisplay.vnc.enabled"] = "FALSE"
+	if s.VNCEnabled {
+		ui.Message("Disabling VNC server...")
+		vmxData["remotedisplay.vnc.enabled"] = "FALSE"
+	}
+
+	if s.RemoveEthernetInterfaces {
+		ui.Message("Removing Ethernet Interfaces...")
+		for k := range vmxData {
+			if strings.HasPrefix(k, "ethernet") {
+				log.Printf("Deleting key: %s", k)
+				delete(vmxData, k)
+			}
+		}
+	}
 
 	// Rewrite the VMX
 	if err := WriteVMX(vmxPath, vmxData); err != nil {

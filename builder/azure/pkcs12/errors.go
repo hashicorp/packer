@@ -1,3 +1,7 @@
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package pkcs12
 
 import "errors"
@@ -16,7 +20,7 @@ type NotImplementedError string
 type EncodeError string
 
 func (e NotImplementedError) Error() string {
-	return string(e)
+	return "pkcs12: " + string(e)
 }
 
 func (e EncodeError) Error() string {

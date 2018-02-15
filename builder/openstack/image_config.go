@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // ImageConfig is for common configuration related to creating Images.
@@ -26,7 +26,7 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 	// "snapshot", since it came from snapshotting a VM. A "snapshot" looks
 	// slightly different in the OpenStack UI and OpenStack won't show "snapshot"
 	// images as a choice in the list of images to boot from for a new instance.
-	// See https://github.com/mitchellh/packer/issues/3038
+	// See https://github.com/hashicorp/packer/issues/3038
 	if c.ImageMetadata == nil {
 		c.ImageMetadata = map[string]string{"image_type": "image"}
 	} else if c.ImageMetadata["image_type"] == "" {

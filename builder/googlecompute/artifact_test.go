@@ -1,8 +1,9 @@
 package googlecompute
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_impl(t *testing.T) {

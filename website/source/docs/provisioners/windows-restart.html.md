@@ -1,10 +1,10 @@
 ---
+description: |
+    The Windows restart provisioner restarts a Windows machine and waits for it to
+    come back up.
 layout: docs
-sidebar_current: docs-provisioners-windows-restart
-page_title: Windows Restart - Provisioners
-description: |-
-  The Windows restart provisioner restarts a Windows machine and waits for it to
-  come back up.
+page_title: 'Windows Restart - Provisioners'
+sidebar_current: 'docs-provisioners-windows-restart'
 ---
 
 # Windows Restart Provisioner
@@ -25,7 +25,7 @@ through the Windows Remote Management (WinRM) service, not by ACPI functions, so
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "windows-restart"
 }
@@ -40,10 +40,17 @@ Optional parameters:
 -   `restart_command` (string) - The command to execute to initiate the
     restart. By default this is `shutdown /r /f /t 0 /c "packer restart"`.
 
-- `restart_check_command` (string) - A command to execute to check if the
-    restart succeeded. This will be done in a loop.
+-   `restart_check_command` (string) - A command to execute to check if the
+    restart succeeded. This will be done in a loop. Example usage:
 
-- `restart_timeout` (string) - The timeout to wait for the restart. By
+``` json
+    {
+      "type": "windows-restart",
+      "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
+    },
+```
+
+-   `restart_timeout` (string) - The timeout to wait for the restart. By
     default this is 5 minutes. Example value: `5m`. If you are installing
     updates or have a lot of startup services, you will probably need to
     increase this duration.

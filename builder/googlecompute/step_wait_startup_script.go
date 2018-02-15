@@ -1,19 +1,20 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepWaitStartupScript int
 
 // Run reads the instance metadata and looks for the log entry
 // indicating the startup script finished.
-func (s *StepWaitStartupScript) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitStartupScript) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -22,7 +23,7 @@ func (s *StepWaitStartupScript) Run(state multistep.StateBag) multistep.StepActi
 	ui.Say("Waiting for any running startup script to finish...")
 
 	// Keep checking the serial port output to see if the startup script is done.
-	err := common.Retry(10, 60, 0, func() (bool, error) {
+	err := common.Retry(10, 60, 0, func(_ uint) (bool, error) {
 		status, err := driver.GetInstanceMetadata(config.Zone,
 			instanceName, StartupScriptStatusKey)
 

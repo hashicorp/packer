@@ -1,26 +1,31 @@
 ---
+description: |
+    shell-local will run a shell script of your choosing on the machine where Packer
+    is being run - in other words, it shell-local will run the shell script on your
+    build server, or your desktop, etc., rather than the remote/guest machine being
+    provisioned by Packer.
 layout: docs
-sidebar_current: docs-provisioners-shell-local
-page_title: Shell (Local) - Provisioners
-description: |-
-  The shell Packer provisioner provisions machines built by Packer using shell
-  scripts. Shell provisioning is the easiest way to get software installed and
-  configured on a machine.
+page_title: 'Shell (Local) - Provisioners'
+sidebar_current: 'docs-provisioners-shell-local'
 ---
 
 # Local Shell Provisioner
 
 Type: `shell-local`
 
-The local shell provisioner executes a local shell script on the machine running
-Packer. The [remote shell](/docs/provisioners/shell.html) provisioner executes
+shell-local will run a shell script of your choosing on the machine where Packer
+is being run - in other words, it shell-local will run the shell script on your
+build server, or your desktop, etc., rather than the remote/guest machine being
+provisioned by Packer.
+
+The [remote shell](/docs/provisioners/shell.html) provisioner executes
 shell scripts on a remote machine.
 
 ## Basic Example
 
 The example below is fully functional.
 
-```json
+``` json
 {
   "type": "shell-local",
   "command": "echo foo"
@@ -34,12 +39,12 @@ required element is "command".
 
 Required:
 
-- `command` (string) - The command to execute. This will be executed within
+-   `command` (string) - The command to execute. This will be executed within
     the context of a shell as specified by `execute_command`.
 
 Optional parameters:
 
-- `execute_command` (array of strings) - The command to use to execute
+-   `execute_command` (array of strings) - The command to use to execute
     the script. By default this is `["/bin/sh", "-c", "{{.Command}}"]`. The value
     is an array of arguments executed directly by the OS. The value of this is
     treated as [configuration

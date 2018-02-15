@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step adds a NAT port forwarding definition so that SSH is available
@@ -27,10 +28,16 @@ type StepForwardSSH struct {
 	SkipNatMapping bool
 }
 
-func (s *StepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepForwardSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
+
+	if s.CommConfig.Type == "none" {
+		log.Printf("Not using a communicator, skipping setting up port forwarding...")
+		state.Put("sshHostPort", 0)
+		return multistep.ActionContinue
+	}
 
 	guestPort := s.CommConfig.Port()
 	sshHostPort := guestPort

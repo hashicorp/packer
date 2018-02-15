@@ -1,8 +1,9 @@
 package vagrant
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestArtifact_ImplementsArtifact(t *testing.T) {

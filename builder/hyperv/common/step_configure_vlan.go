@@ -1,10 +1,11 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepConfigureVlan struct {
@@ -12,7 +13,7 @@ type StepConfigureVlan struct {
 	SwitchVlanId string
 }
 
-func (s *StepConfigureVlan) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVlan) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

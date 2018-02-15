@@ -1,9 +1,9 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
-import "github.com/Azure/go-autorest/autorest/azure"
+import (
+	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/Azure/go-autorest/autorest/azure"
+)
 
 type Authenticate struct {
 	env          azure.Environment
@@ -21,17 +21,17 @@ func NewAuthenticate(env azure.Environment, clientID, clientSecret, tenantID str
 	}
 }
 
-func (a *Authenticate) getServicePrincipalToken() (*azure.ServicePrincipalToken, error) {
+func (a *Authenticate) getServicePrincipalToken() (*adal.ServicePrincipalToken, error) {
 	return a.getServicePrincipalTokenWithResource(a.env.ResourceManagerEndpoint)
 }
 
-func (a *Authenticate) getServicePrincipalTokenWithResource(resource string) (*azure.ServicePrincipalToken, error) {
-	oauthConfig, err := a.env.OAuthConfigForTenant(a.tenantID)
+func (a *Authenticate) getServicePrincipalTokenWithResource(resource string) (*adal.ServicePrincipalToken, error) {
+	oauthConfig, err := adal.NewOAuthConfig(a.env.ActiveDirectoryEndpoint, a.tenantID)
 	if err != nil {
 		return nil, err
 	}
 
-	spt, err := azure.NewServicePrincipalToken(
+	spt, err := adal.NewServicePrincipalToken(
 		*oauthConfig,
 		a.clientID,
 		a.clientSecret,

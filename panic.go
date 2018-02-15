@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/panicwrap"
 )
 
@@ -19,7 +20,7 @@ A crash log has been placed at "crash.log" relative to your current
 working directory. It would be immensely helpful if you could please
 report the crash with Packer[1] so that we can fix this.
 
-[1]: https://github.com/mitchellh/packer/issues
+[1]: https://github.com/hashicorp/packer/issues
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!! PACKER CRASH !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 `
@@ -33,6 +34,10 @@ func panicHandler(logF *os.File) panicwrap.HandlerFunc {
 		// Write away just output this thing on stderr so that it gets
 		// shown in case anything below fails.
 		fmt.Fprintf(os.Stderr, fmt.Sprintf("%s\n", m))
+
+		if err := packer.CheckpointReporter.ReportPanic(m); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to report panic. This is safe to ignore: %s", err)
+		}
 
 		// Create the crash log file where we'll write the logs
 		f, err := os.Create("crash.log")

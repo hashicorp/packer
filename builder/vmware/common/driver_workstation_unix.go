@@ -39,16 +39,49 @@ func workstationFindVmrun() (string, error) {
 	return exec.LookPath("vmrun")
 }
 
+// return the base path to vmware's config on the host
+func workstationVMwareRoot() (s string, err error) {
+	return "/etc/vmware", nil
+}
+
 func workstationDhcpLeasesPath(device string) string {
-	return "/etc/vmware/" + device + "/dhcpd/dhcpd.leases"
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcpd/dhcpd.leases")
+}
+
+func workstationDhcpConfPath(device string) string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "dhcp/dhcp.conf")
+}
+
+func workstationVmnetnatConfPath(device string) string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, device, "nat/nat.conf")
+}
+
+func workstationNetmapConfPath() string {
+	base, err := workstationVMwareRoot()
+	if err != nil {
+		log.Printf("Error finding VMware root: %s", err)
+		return ""
+	}
+	return filepath.Join(base, "netmap.conf")
 }
 
 func workstationToolsIsoPath(flavor string) string {
 	return "/usr/lib/vmware/isoimages/" + flavor + ".iso"
-}
-
-func workstationVmnetnatConfPath() string {
-	return ""
 }
 
 func workstationVerifyVersion(version string) error {
@@ -66,14 +99,17 @@ func workstationVerifyVersion(version string) error {
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+	return workstationTestVersion(version, stderr.String())
+}
 
+func workstationTestVersion(wanted, versionOutput string) error {
 	versionRe := regexp.MustCompile(`(?i)VMware Workstation (\d+)\.`)
-	matches := versionRe.FindStringSubmatch(stderr.String())
+	matches := versionRe.FindStringSubmatch(versionOutput)
 	if matches == nil {
 		return fmt.Errorf(
-			"Could not find VMware WS version in output: %s", stderr.String())
+			"Could not find VMware WS version in output: %s", wanted)
 	}
 	log.Printf("Detected VMware WS version: %s", matches[1])
 
-	return compareVersions(matches[1], version, "Workstation")
+	return compareVersions(matches[1], wanted, "Workstation")
 }

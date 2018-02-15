@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // Config is the configuration structure for the builder.
@@ -24,11 +24,10 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	BootCommand    []string `mapstructure:"boot_command"`
-	RemoteType     string   `mapstructure:"remote_type"`
-	SkipCompaction bool     `mapstructure:"skip_compaction"`
-	SourcePath     string   `mapstructure:"source_path"`
-	VMName         string   `mapstructure:"vm_name"`
+	RemoteType     string `mapstructure:"remote_type"`
+	SkipCompaction bool   `mapstructure:"skip_compaction"`
+	SourcePath     string `mapstructure:"source_path"`
+	VMName         string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
@@ -51,7 +50,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Defaults
 	if c.VMName == "" {
-		c.VMName = fmt.Sprintf("packer-%s-{{timestamp}}", c.PackerBuildName)
+		c.VMName = fmt.Sprintf(
+			"packer-%s-%d", c.PackerBuildName, interpolate.InitTime.Unix())
 	}
 
 	// Prepare the errors
@@ -81,6 +81,12 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		warnings = append(warnings,
 			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
 				"will forcibly halt the virtual machine, which may result in data loss.")
+	}
+
+	if c.Headless && c.DisableVNC {
+		warnings = append(warnings,
+			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+				"you won't be able to see any output.")
 	}
 
 	// Check for any errors.

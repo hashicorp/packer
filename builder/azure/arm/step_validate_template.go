@@ -1,14 +1,12 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepValidateTemplate struct {
@@ -40,10 +38,13 @@ func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploy
 	}
 
 	_, err = s.client.Validate(resourceGroupName, deploymentName, *deployment)
+	if err != nil {
+		s.say(s.client.LastError.Error())
+	}
 	return err
 }
 
-func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Validating deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

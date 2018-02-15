@@ -17,7 +17,7 @@ import (
 // extremely specific.
 type Driver interface {
 	// Create a SATA controller.
-	CreateSATAController(vm string, controller string) error
+	CreateSATAController(vm string, controller string, portcount int) error
 
 	// Create a SCSI controller.
 	CreateSCSIController(vm string, controller string) error

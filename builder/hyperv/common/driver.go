@@ -52,6 +52,8 @@ type Driver interface {
 	//Set the vlan to use for machine
 	SetVirtualMachineVlanId(string, string) error
 
+	SetVmNetworkAdapterMacAddress(string, string) error
+
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
 
 	CreateExternalVirtualSwitch(string, string) error
@@ -64,9 +66,15 @@ type Driver interface {
 
 	DeleteVirtualSwitch(string) error
 
-	CreateVirtualMachine(string, string, int64, int64, string, uint) error
+	CreateVirtualMachine(string, string, string, string, int64, int64, string, uint, bool) error
+
+	AddVirtualMachineHardDrive(string, string, string, int64, string) error
+
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
 
 	DeleteVirtualMachine(string) error
+
+	GetVirtualMachineGeneration(string) (uint, error)
 
 	SetVirtualMachineCpuCount(string, uint) error
 

@@ -1,17 +1,18 @@
 package profitbricks
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepTakeSnapshot struct{}
 
-func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTakeSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
@@ -22,7 +23,7 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dcId := state.Get("datacenter_id").(string)
 	volumeId := state.Get("volume_id").(string)
 
-	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName)
+	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName, "")
 
 	state.Put("snapshotname", c.SnapshotName)
 

@@ -1,11 +1,12 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type uploadCmdData struct {
@@ -15,35 +16,32 @@ type uploadCmdData struct {
 	ManifestPath    string
 	Region          string
 	SecretKey       string
+	Token           string
 }
 
 type StepUploadBundle struct {
 	Debug bool
 }
 
-func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadBundle) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	manifestName := state.Get("manifest_name").(string)
 	manifestPath := state.Get("manifest_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	region, err := config.Region()
-	if err != nil {
-		err := fmt.Errorf("Error retrieving region: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	accessKey := config.AccessKey
 	secretKey := config.SecretKey
-	accessConfig, err := config.AccessConfig.Config()
+	session, err := config.AccessConfig.Session()
+	region := *session.Config.Region
+	accessConfig := session.Config
+	var token string
 	if err == nil && accessKey == "" && secretKey == "" {
 		credentials, err := accessConfig.Credentials.Get()
 		if err == nil {
 			accessKey = credentials.AccessKeyID
 			secretKey = credentials.SecretAccessKey
+			token = credentials.SessionToken
 		}
 	}
 
@@ -54,6 +52,7 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 		ManifestPath:    manifestPath,
 		Region:          region,
 		SecretKey:       secretKey,
+		Token:           token,
 	}
 	config.BundleUploadCommand, err = interpolate.Render(config.BundleUploadCommand, &config.ctx)
 	if err != nil {
@@ -77,6 +76,12 @@ func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	if cmd.ExitStatus != 0 {
+		if cmd.ExitStatus == 3 {
+			ui.Error(fmt.Sprintf("Please check that the bucket `%s` "+
+				"does not exist, or exists and is writable. This error "+
+				"indicates that the bucket may be owned by somebody else.",
+				config.S3Bucket))
+		}
 		state.Put("error", fmt.Errorf(
 			"Bundle upload failed. Please see the output above for more\n"+
 				"details on what went wrong."))

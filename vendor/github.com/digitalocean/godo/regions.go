@@ -1,10 +1,12 @@
 package godo
 
+import "context"
+
 // RegionsService is an interface for interfacing with the regions
 // endpoints of the DigitalOcean API
 // See: https://developers.digitalocean.com/documentation/v2#regions
 type RegionsService interface {
-	List(*ListOptions) ([]Region, *Response, error)
+	List(context.Context, *ListOptions) ([]Region, *Response, error)
 }
 
 // RegionsServiceOp handles communication with the region related methods of the
@@ -29,23 +31,19 @@ type regionsRoot struct {
 	Links   *Links `json:"links"`
 }
 
-type regionRoot struct {
-	Region Region
-}
-
 func (r Region) String() string {
 	return Stringify(r)
 }
 
 // List all regions
-func (s *RegionsServiceOp) List(opt *ListOptions) ([]Region, *Response, error) {
+func (s *RegionsServiceOp) List(ctx context.Context, opt *ListOptions) ([]Region, *Response, error) {
 	path := "v2/regions"
 	path, err := addOptions(path, opt)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}

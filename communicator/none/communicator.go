@@ -2,9 +2,10 @@ package none
 
 import (
 	"errors"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"os"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type comm struct {

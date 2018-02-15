@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,8 +10,8 @@ import (
 	"runtime"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -22,10 +23,10 @@ type StepKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 
-	keyName string
+	doCleanup bool
 }
 
-func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {
@@ -113,17 +114,17 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
-	// Set the keyname so we know to delete it later
-	s.keyName = s.TemporaryKeyPairName
+	// we created a temporary key, so remember to clean it up
+	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.keyName)
+	state.Put("keyPair", s.TemporaryKeyPairName)
 	state.Put("privateKey", keypair.PrivateKey)
 
 	return multistep.ActionContinue
 }
 
-// Work around for https://github.com/mitchellh/packer/issues/2526
+// Work around for https://github.com/hashicorp/packer/issues/2526
 func berToDer(ber string, ui packer.Ui) string {
 	// Check if x/crypto/ssh can parse the key
 	_, err := ssh.ParsePrivateKey([]byte(ber))
@@ -167,13 +168,7 @@ func berToDer(ber string, ui packer.Ui) string {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
-	// If we used an SSH private key file, do not go about deleting
-	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
-		return
-	}
-	// If no key name is set, then we never created it, so just return
-	if s.TemporaryKeyPairName == "" {
+	if !s.doCleanup {
 		return
 	}
 
@@ -189,7 +184,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
-	err = keypairs.Delete(computeClient, s.keyName).ExtractErr()
+	err = keypairs.Delete(computeClient, s.TemporaryKeyPairName).ExtractErr()
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
