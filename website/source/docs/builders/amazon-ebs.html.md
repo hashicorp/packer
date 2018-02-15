@@ -192,10 +192,14 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the Packer build starts. These are not necessarily
-    preserved when booting from the AMI built with Packer. See
-    `ami_block_device_mappings`, above, for details.
+-   `launch_block_device_mappings` (array of block device mappings) - Add one
+    or more block devices before the Packer build starts. If you add instance
+    store volumes or EBS volumes in addition to the root device volume, the
+    created AMI will contain block device mapping information for those
+    volumes. Amazon creates snapshots of the source instance's root volume and
+    any other EBS volumes described here. When you launch an instance from this
+    new AMI, the instance automatically launches with these additional volumes,
+    and will restore them from snapshots taken from the source instance.
 
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.
@@ -303,10 +307,10 @@ builder.
         This is most useful for selecting a daily distro build.
 
     You may set this in place of `source_ami` or in conjunction with it. If you
-    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    set this in conjunction with `source_ami`, the `source_ami` will be added to
     the filter. The provided `source_ami` must meet all of the filtering criteria
-    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
-    but will cause Packer to fail if the `source_ami` does not exist.        
+    provided in `source_ami_filter`; this pins the AMI returned by the filter,
+    but will cause Packer to fail if the `source_ami` does not exist.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
