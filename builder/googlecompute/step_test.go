@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testState(t *testing.T) multistep.StateBag {

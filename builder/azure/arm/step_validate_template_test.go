@@ -1,14 +1,12 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
@@ -20,7 +18,7 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -39,7 +37,7 @@ func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -65,7 +63,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

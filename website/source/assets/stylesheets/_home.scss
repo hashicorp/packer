@@ -1,8 +1,3 @@
-// TODO: remove
-$hero-height: 350px;
-$baseline: 20px;
-
-
 #page-home {
   // Override the main header
   #header {
@@ -79,6 +74,7 @@ $baseline: 20px;
       letter-spacing: -0.02em;
       margin: 20px 0 10px 0;
       padding: 0;
+      color: $black;
     }
 
     p {
@@ -98,7 +94,7 @@ $baseline: 20px;
       font-weight: $font-weight-bold;
       line-height: 1;
       margin: 0;
-      padding: 5px;
+      padding: 7px 5px 5px 5px;
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
@@ -147,8 +143,58 @@ $baseline: 20px;
           height: 100px;
           width: 33.3%;
           background-color: $white;
+          padding: 5px;
+
+          img {
+            max-width: 100%;
+          }
         }
       }
+    }
+  }
+
+  .terminal {
+    border: 1px solid $white;
+    background-color: $black;
+    box-sizing: border-box;
+    color: $white;
+    font-family: $font-family-monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 20px auto;
+    padding: 10px 20px 20px 20px;
+
+    .terminal-content {
+      margin-top: 5px;
+      overflow-x: scroll;
+      width: 100%;
+      white-space: nowrap;
+
+      span {
+        display: block;
+        white-space: pre;
+      }
+    }
+
+    span.circle {
+      &:before {
+        content: '\25CF';
+        color: $white;
+        font-family: $font-family-monospace;
+        font-size: 30px;
+        line-height: 1;
+        margin: 0 0 0 -4px;
+        padding: 0;
+        height: 100%;
+      }
+    }
+
+    span.vbox {
+      color: rgb(91, 251, 90);
+    }
+
+    span.vmware {
+      color: rgb(83, 255, 255);
     }
   }
 }

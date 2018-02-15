@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var builtins = map[string]string{
@@ -25,6 +25,8 @@ var builtins = map[string]string{
 	"mitchellh.vmware":          "vmware",
 	"mitchellh.vmware-esx":      "vmware",
 	"pearkes.digitalocean":      "digitalocean",
+	"packer.googlecompute":      "google",
+	"hashicorp.scaleway":        "scaleway",
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
 	"transcend.qemu":            "libvirt",
@@ -220,6 +222,8 @@ func providerForName(name string) Provider {
 	switch name {
 	case "aws":
 		return new(AWSProvider)
+	case "scaleway":
+		return new(ScalewayProvider)
 	case "digitalocean":
 		return new(DigitalOceanProvider)
 	case "virtualbox":
@@ -232,6 +236,8 @@ func providerForName(name string) Provider {
 		return new(HypervProvider)
 	case "libvirt":
 		return new(LibVirtProvider)
+	case "google":
+		return new(GoogleProvider)
 	default:
 		return nil
 	}

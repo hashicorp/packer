@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type guestAdditionsPathTemplate struct {
@@ -21,7 +22,7 @@ type StepUploadGuestAdditions struct {
 	Ctx                interpolate.Context
 }
 
-func (s *StepUploadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

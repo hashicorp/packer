@@ -2,9 +2,10 @@ package docker
 
 import (
 	"bytes"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func testState(t *testing.T) multistep.StateBag {

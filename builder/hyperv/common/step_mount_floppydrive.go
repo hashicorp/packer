@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 const (
@@ -20,7 +22,7 @@ type StepMountFloppydrive struct {
 	floppyPath string
 }
 
-func (s *StepMountFloppydrive) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepMountFloppydrive) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if s.Generation > 1 {
 		return multistep.ActionContinue
 	}

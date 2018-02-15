@@ -1,14 +1,15 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -21,7 +22,7 @@ type StepCreateVolume struct {
 	RootVolumeSize int64
 }
 
-func (s *StepCreateVolume) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)

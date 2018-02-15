@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step starts the virtual machine.
@@ -23,7 +24,7 @@ type StepRun struct {
 	vmName string
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

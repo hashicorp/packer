@@ -1,17 +1,18 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCheckRootDevice makes sure the root device on the AMI is EBS-backed.
 type StepCheckRootDevice struct{}
 
-func (s *StepCheckRootDevice) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCheckRootDevice) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	image := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 

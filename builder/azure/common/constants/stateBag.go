@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package constants
 
 // complete flags
@@ -16,7 +13,9 @@ const (
 const (
 	ArmCaptureTemplate                 string = "arm.CaptureTemplate"
 	ArmComputeName                     string = "arm.ComputeName"
+	ArmImageParameters                 string = "arm.ImageParameters"
 	ArmCertificateUrl                  string = "arm.CertificateUrl"
+	ArmKeyVaultDeploymentName          string = "arm.KeyVaultDeploymentName"
 	ArmDeploymentName                  string = "arm.DeploymentName"
 	ArmNicName                         string = "arm.NicName"
 	ArmKeyVaultName                    string = "arm.KeyVaultName"
@@ -25,7 +24,14 @@ const (
 	ArmPublicIPAddressName             string = "arm.PublicIPAddressName"
 	ArmResourceGroupName               string = "arm.ResourceGroupName"
 	ArmIsResourceGroupCreated          string = "arm.IsResourceGroupCreated"
+	ArmDoubleResourceGroupNameSet      string = "arm.DoubleResourceGroupNameSet"
 	ArmStorageAccountName              string = "arm.StorageAccountName"
 	ArmTags                            string = "arm.Tags"
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
+	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
+
+	ArmIsManagedImage                string = "arm.IsManagedImage"
+	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
+	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
+	ArmManagedImageName              string = "arm.ManagedImageName"
 )

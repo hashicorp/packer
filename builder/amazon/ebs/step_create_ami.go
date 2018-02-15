@@ -1,19 +1,20 @@
 package ebs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type stepCreateAMI struct {
 	image *ec2.Image
 }
 
-func (s *stepCreateAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -92,7 +93,7 @@ func (s *stepCreateAMI) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
-	ui.Say("Deregistering the AMI because cancelation or error...")
+	ui.Say("Deregistering the AMI because cancellation or error...")
 	deregisterOpts := &ec2.DeregisterImageInput{ImageId: s.image.ImageId}
 	if _, err := ec2conn.DeregisterImage(deregisterOpts); err != nil {
 		ui.Error(fmt.Sprintf("Error deregistering AMI, may still be around: %s", err))

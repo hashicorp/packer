@@ -1,8 +1,9 @@
 package plugin
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"log"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type cmdProvisioner struct {

@@ -1,4 +1,6 @@
-// implementation of https://tools.ietf.org/html/rfc2898#section-6.1.2
+// Copyright 2015 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package pkcs12
 
@@ -12,12 +14,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/mitchellh/packer/builder/azure/pkcs12/rc2"
-)
-
-const (
-	pbeWithSHAAnd3KeyTripleDESCBC = "pbeWithSHAAnd3-KeyTripleDES-CBC"
-	pbewithSHAAnd40BitRC2CBC      = "pbewithSHAAnd40BitRC2-CBC"
+	"github.com/hashicorp/packer/builder/azure/pkcs12/rc2"
 )
 
 const (
@@ -26,25 +23,112 @@ const (
 )
 
 var (
-	oidPbeWithSHAAnd3KeyTripleDESCBC = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 1, 3}
-	oidPbewithSHAAnd40BitRC2CBC      = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 1, 6}
+	oidPBEWithSHAAnd3KeyTripleDESCBC = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 12, 1, 3})
+	oidPBEWithSHAAnd40BitRC2CBC      = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 12, 1, 6})
 )
 
-var algByOID = map[string]string{
-	oidPbeWithSHAAnd3KeyTripleDESCBC.String(): pbeWithSHAAnd3KeyTripleDESCBC,
-	oidPbewithSHAAnd40BitRC2CBC.String():      pbewithSHAAnd40BitRC2CBC,
+// pbeCipher is an abstraction of a PKCS#12 cipher.
+type pbeCipher interface {
+	// create returns a cipher.Block given a key.
+	create(key []byte) (cipher.Block, error)
+	// deriveKey returns a key derived from the given password and salt.
+	deriveKey(salt, password []byte, iterations int) []byte
+	// deriveKey returns an IV derived from the given password and salt.
+	deriveIV(salt, password []byte, iterations int) []byte
 }
 
-var blockcodeByAlg = map[string]func(key []byte) (cipher.Block, error){
-	pbeWithSHAAnd3KeyTripleDESCBC: des.NewTripleDESCipher,
-	pbewithSHAAnd40BitRC2CBC: func(key []byte) (cipher.Block, error) {
-		return rc2.New(key, len(key)*8)
-	},
+type shaWithTripleDESCBC struct{}
+
+func (shaWithTripleDESCBC) create(key []byte) (cipher.Block, error) {
+	return des.NewTripleDESCipher(key)
+}
+
+func (shaWithTripleDESCBC) deriveKey(salt, password []byte, iterations int) []byte {
+	return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 1, 24)
+}
+
+func (shaWithTripleDESCBC) deriveIV(salt, password []byte, iterations int) []byte {
+	return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 2, 8)
+}
+
+type shaWith40BitRC2CBC struct{}
+
+func (shaWith40BitRC2CBC) create(key []byte) (cipher.Block, error) {
+	return rc2.New(key, len(key)*8)
+}
+
+func (shaWith40BitRC2CBC) deriveKey(salt, password []byte, iterations int) []byte {
+	return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 1, 5)
+}
+
+func (shaWith40BitRC2CBC) deriveIV(salt, password []byte, iterations int) []byte {
+	return pbkdf(sha1Sum, 20, 64, salt, password, iterations, 2, 8)
 }
 
 type pbeParams struct {
 	Salt       []byte
 	Iterations int
+}
+
+func pbDecrypterFor(algorithm pkix.AlgorithmIdentifier, password []byte) (cipher.BlockMode, int, error) {
+	var cipherType pbeCipher
+
+	switch {
+	case algorithm.Algorithm.Equal(oidPBEWithSHAAnd3KeyTripleDESCBC):
+		cipherType = shaWithTripleDESCBC{}
+	case algorithm.Algorithm.Equal(oidPBEWithSHAAnd40BitRC2CBC):
+		cipherType = shaWith40BitRC2CBC{}
+	default:
+		return nil, 0, NotImplementedError("algorithm " + algorithm.Algorithm.String() + " is not supported")
+	}
+
+	var params pbeParams
+	if err := unmarshal(algorithm.Parameters.FullBytes, &params); err != nil {
+		return nil, 0, err
+	}
+
+	key := cipherType.deriveKey(params.Salt, password, params.Iterations)
+	iv := cipherType.deriveIV(params.Salt, password, params.Iterations)
+
+	block, err := cipherType.create(key)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return cipher.NewCBCDecrypter(block, iv), block.BlockSize(), nil
+}
+
+func pbDecrypt(info decryptable, password []byte) (decrypted []byte, err error) {
+	cbc, blockSize, err := pbDecrypterFor(info.Algorithm(), password)
+	if err != nil {
+		return nil, err
+	}
+
+	encrypted := info.Data()
+	if len(encrypted) == 0 {
+		return nil, errors.New("pkcs12: empty encrypted data")
+	}
+	if len(encrypted)%blockSize != 0 {
+		return nil, errors.New("pkcs12: input is not a multiple of the block size")
+	}
+	decrypted = make([]byte, len(encrypted))
+	cbc.CryptBlocks(decrypted, encrypted)
+
+	psLen := int(decrypted[len(decrypted)-1])
+	if psLen == 0 || psLen > blockSize {
+		return nil, ErrDecryption
+	}
+
+	if len(decrypted) < psLen {
+		return nil, ErrDecryption
+	}
+	ps := decrypted[len(decrypted)-psLen:]
+	decrypted = decrypted[:len(decrypted)-psLen]
+	if bytes.Compare(ps, bytes.Repeat([]byte{byte(psLen)}, psLen)) != 0 {
+		return nil, ErrDecryption
+	}
+
+	return
 }
 
 func pad(src []byte, blockSize int) []byte {
@@ -54,15 +138,15 @@ func pad(src []byte, blockSize int) []byte {
 }
 
 func pbEncrypt(plainText, salt, password []byte, iterations int) (cipherText []byte, err error) {
-	_, err = io.ReadFull(rand.Reader, salt)
-	if err != nil {
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
 		return nil, errors.New("pkcs12: failed to create a random salt value: " + err.Error())
 	}
 
-	key := deriveKeyByAlg[pbeWithSHAAnd3KeyTripleDESCBC](salt, password, iterations)
-	iv := deriveIVByAlg[pbeWithSHAAnd3KeyTripleDESCBC](salt, password, iterations)
+	cipherType := shaWithTripleDESCBC{}
+	key := cipherType.deriveKey(salt, password, iterations)
+	iv := cipherType.deriveIV(salt, password, iterations)
 
-	block, err := des.NewTripleDESCipher(key)
+	block, err := cipherType.create(key)
 	if err != nil {
 		return nil, errors.New("pkcs12: failed to create a block cipher: " + err.Error())
 	}
@@ -76,7 +160,8 @@ func pbEncrypt(plainText, salt, password []byte, iterations int) (cipherText []b
 	return cipherText, nil
 }
 
+// decryptable abstracts a object that contains ciphertext.
 type decryptable interface {
-	GetAlgorithm() pkix.AlgorithmIdentifier
-	GetData() []byte
+	Algorithm() pkix.AlgorithmIdentifier
+	Data() []byte
 }

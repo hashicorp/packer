@@ -1,26 +1,24 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -32,14 +30,14 @@ func TestStepDeleteResourceGroupShouldFailIfDeleteFails(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(string, <-chan struct{}) error { return nil },
+		delete: func(multistep.StateBag, string, <-chan struct{}) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -51,7 +49,7 @@ func TestStepDeleteResourceGroupShouldPassIfDeletePasses(t *testing.T) {
 
 func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *testing.T) {
 	var testSubject = &StepDeleteResourceGroup{
-		delete: func(resourceGroupName string, cancelCh <-chan struct{}) error {
+		delete: func(s multistep.StateBag, resourceGroupName string, cancelCh <-chan struct{}) error {
 			return nil
 		},
 		say:   func(message string) {},
@@ -59,7 +57,7 @@ func TestStepDeleteResourceGroupShouldDeleteStateBagArmResourceGroupCreated(t *t
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteResourceGroup()
-	testSubject.Run(stateBag)
+	testSubject.Run(context.Background(), stateBag)
 
 	value, ok := stateBag.GetOk(constants.ArmIsResourceGroupCreated)
 	if !ok {

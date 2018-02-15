@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestProvisionerRPC(t *testing.T) {

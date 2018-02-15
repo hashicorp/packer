@@ -18,6 +18,8 @@ type Endpoint struct {
 	HTTPS bool
 	// set the flag true for skipping ssl verifications
 	Insecure bool
+	// if set, used to verify the hostname on the returned certificate
+	TLSServerName string
 	// pointer pem certs, and key
 	CACert []byte // cert auth to intdetify the server cert
 	Key    []byte // public key for client auth connections

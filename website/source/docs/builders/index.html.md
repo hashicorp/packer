@@ -1,10 +1,10 @@
 ---
+description: |
+    Builders are responsible for creating machines and generating images from them
+    for various platforms.
 layout: docs
 page_title: Builders
-sidebar_current: docs-builders
-description: |-
-  Builders are responsible for creating machines and generating images from them
-  for various platforms.
+sidebar_current: 'docs-builders'
 ---
 
 # Builders

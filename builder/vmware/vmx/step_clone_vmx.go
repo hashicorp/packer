@@ -1,13 +1,14 @@
 package vmx
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 
-	"github.com/mitchellh/multistep"
-	vmwcommon "github.com/mitchellh/packer/builder/vmware/common"
-	"github.com/mitchellh/packer/packer"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCloneVMX takes a VMX file and clones the VM into the output directory.
@@ -17,7 +18,7 @@ type StepCloneVMX struct {
 	VMName    string
 }
 
-func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -53,6 +54,16 @@ func (s *StepCloneVMX) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
+	var networkType string
+	if _, ok := vmxData["ethernet0.connectionType"]; ok {
+		networkType = vmxData["ethernet0.connectionType"]
+	}
+	if networkType == "" {
+		networkType = "nat"
+		log.Printf("Defaulting to network type : nat")
+	}
+
+	state.Put("vmnetwork", networkType)
 	state.Put("full_disk_path", filepath.Join(s.OutputDir, diskName))
 	state.Put("vmx_path", vmxPath)
 	return multistep.ActionContinue

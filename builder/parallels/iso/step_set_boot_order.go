@@ -1,11 +1,12 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	parallelscommon "github.com/mitchellh/packer/builder/parallels/common"
-	"github.com/mitchellh/packer/packer"
+	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step sets the device boot order for the virtual machine.
@@ -18,7 +19,7 @@ import (
 // Produces:
 type stepSetBootOrder struct{}
 
-func (s *stepSetBootOrder) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSetBootOrder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(parallelscommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

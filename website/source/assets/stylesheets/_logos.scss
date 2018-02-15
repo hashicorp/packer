@@ -8,12 +8,12 @@ svg.logo {
     }
 
     path.p-front {
-      fill: #4DA7DD;
+      fill: $packer-blue;
       opacity: 1.0;
     }
 
     path.p-back {
-      fill: #3192D0;
+      fill: $packer-blue-dark;
       opacity: 1.0;
     }
   }

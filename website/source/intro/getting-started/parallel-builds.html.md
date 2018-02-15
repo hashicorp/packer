@@ -73,7 +73,7 @@ array.
 You'll also need to modify the `variables` section of the template to include
 the access keys for DigitalOcean.
 
-```javascript
+```json
 "variables": {
   "do_api_token": "",
   // ...
@@ -166,7 +166,8 @@ us-east-1: ami-376d1d5e
 
 As you can see, Packer builds both the Amazon and DigitalOcean images in
 parallel. It outputs information about each in different colors (although you
-can't see that in the block above) so that it is easy to identify.
+can't see that in the block above), making it is easier to identify the actions
+executed when you execute the command.
 
 At the end of the build, Packer outputs both of the artifacts created (an AMI
 and a DigitalOcean snapshot). Both images created are bare bones Ubuntu

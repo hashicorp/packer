@@ -2,8 +2,9 @@ package oneandone
 
 import (
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/communicator/ssh"
+
+	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -41,7 +42,8 @@ func sshConfig(state multistep.StateBag) (*gossh.ClientConfig, error) {
 		auth = append(auth, gossh.PublicKeys(signer))
 	}
 	return &gossh.ClientConfig{
-		User: config.Comm.SSHUsername,
-		Auth: auth,
+		User:            config.Comm.SSHUsername,
+		Auth:            auth,
+		HostKeyCallback: gossh.InsecureIgnoreHostKey(),
 	}, nil
 }

@@ -27,10 +27,10 @@ func (s *Shell) Execute(command string, arguments ...string) (*Command, error) {
 }
 
 // Close will terminate this shell. No commands can be issued once the shell is closed.
-func (shell *Shell) Close() error {
-	request := NewDeleteShellRequest(shell.client.url, shell.id, &shell.client.Parameters)
+func (s *Shell) Close() error {
+	request := NewDeleteShellRequest(s.client.url, s.id, &s.client.Parameters)
 	defer request.Free()
 
-	_, err := shell.client.sendRequest(request)
+	_, err := s.client.sendRequest(request)
 	return err
 }

@@ -3,9 +3,10 @@ package vagrant
 import (
 	"bytes"
 	"fmt"
-	"github.com/mitchellh/packer/packer"
 	"strings"
 	"text/template"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type digitalOceanVagrantfileTemplate struct {

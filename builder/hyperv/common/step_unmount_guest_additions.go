@@ -1,15 +1,17 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepUnmountGuestAdditions struct {
 }
 
-func (s *StepUnmountGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUnmountGuestAdditions) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

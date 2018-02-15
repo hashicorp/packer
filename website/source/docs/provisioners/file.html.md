@@ -1,12 +1,12 @@
 ---
+description: |
+    The file Packer provisioner uploads files to machines built by Packer. The
+    recommended usage of the file provisioner is to use it to upload files, and
+    then use shell provisioner to move them to the proper place, set permissions,
+    etc.
 layout: docs
-sidebar_current: docs-provisioners-file
-page_title: File - Provisioners
-description: |-
-  The file Packer provisioner uploads files to machines built by Packer. The
-  recommended usage of the file provisioner is to use it to upload files, and
-  then use shell provisioner to move them to the proper place, set permissions,
-  etc.
+page_title: 'File - Provisioners'
+sidebar_current: 'docs-provisioners-file'
 ---
 
 # File Provisioner
@@ -22,7 +22,7 @@ The file provisioner can upload both single files and complete directories.
 
 ## Basic Example
 
-```json
+``` json
 {
   "type": "file",
   "source": "app.tar.gz",
@@ -34,18 +34,18 @@ The file provisioner can upload both single files and complete directories.
 
 The available configuration options are listed below. All elements are required.
 
-- `source` (string) - The path to a local file or directory to upload to
+-   `source` (string) - The path to a local file or directory to upload to
     the machine. The path can be absolute or relative. If it is relative, it is
     relative to the working directory when Packer is executed. If this is a
     directory, the existence of a trailing slash is important. Read below on
     uploading directories.
 
-- `destination` (string) - The path where the file will be uploaded to in
+-   `destination` (string) - The path where the file will be uploaded to in
     the machine. This value must be a writable location and any parent
     directories must already exist.
 
-- `direction` (string) - The direction of the file transfer. This defaults to
-    "upload." If it is set to "download" then the file "source" in the machine
+-   `direction` (string) - The direction of the file transfer. This defaults to
+    "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
 
 ## Directory Uploads
@@ -57,10 +57,7 @@ know.
 First, the destination directory must already exist. If you need to create it,
 use a shell provisioner just prior to the file provisioner in order to create
 the directory. If the destination directory does not exist, the file
-provisioner may succeed, but it will have undefined results. Note that the
-`docker` builder does not have this requirement.  It will create any needed
-destination directories, but it's generally best practice to not rely on this
-behavior.
+provisioner may succeed, but it will have undefined results.
 
 Next, the existence of a trailing slash on the source path will determine
 whether the directory name will be embedded within the destination, or whether
@@ -78,6 +75,17 @@ directly.
 This behavior was adopted from the standard behavior of rsync. Note that under
 the covers, rsync may or may not be used.
 
+## Uploading files that don't exist before Packer starts
+
+In general, local files used as the source **must** exist before Packer is run.
+This is great for catching typos and ensuring that once a build is started,
+that it will succeed. However, this also means that you can't generate a file
+during your build and then upload it using the file provisioner later.
+A convenient workaround is to upload a directory instead of a file. The
+directory still must exist, but its contents don't. You can write your
+generated file to the directory during the Packer run, and have it be uploaded
+later.
+
 ## Symbolic link uploads
 
 The behavior when uploading symbolic links depends on the communicator. The
@@ -86,21 +94,24 @@ treat local symlinks as regular files. If you wish to preserve symlinks when
 uploading, it's recommended that you use `tar`. Below is an example of what
 that might look like:
 
-```text
+``` text
 $ ls -l files
 total 16
 drwxr-xr-x  3 mwhooker  staff  102 Jan 27 17:10 a
 lrwxr-xr-x  1 mwhooker  staff    1 Jan 27 17:10 b -> a
 -rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 file1
 lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
+$ ls -l toupload
+total 0
+-rw-r--r--  1 mwhooker  staff    0 Jan 27 17:10 files.tar
 ```
 
-```json
+``` json
 {
   "provisioners": [
     {
       "type": "shell-local",
-      "command": "mkdir -p toupload; tar cf toupload/files.tar files"
+      "command": "tar cf toupload/files.tar files"
     },
     {
       "destination": "/tmp/",
@@ -117,3 +128,15 @@ lrwxr-xr-x  1 mwhooker  staff    5 Jan 27 17:10 file1link -> file1
   ]
 }
 ```
+
+## Slowness when transferring large files over WinRM.
+
+Because of the way our WinRM transfers works, it can take a very long time to
+upload and download even moderately sized files. If you're experiencing
+slowness using the file provisioner on Windows, it's suggested that you set up
+an SSH server and use the [ssh
+communicator](/docs/templates/communicator.html#ssh-communicator). If you only
+want to transfer files to your guest, and if your builder supports it, you may
+also use the `http_directory` directive. This will cause that directory to be
+available to the guest over http, and set the environment variable
+`PACKER_HTTP_ADDR` to the address.

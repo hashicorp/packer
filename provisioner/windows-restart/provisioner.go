@@ -1,16 +1,20 @@
 package restart
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+
 	"log"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
@@ -110,6 +114,12 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 	var cmd *packer.RemoteCmd
 	trycommand := TryCheckReboot
 	abortcommand := AbortReboot
+
+	// This sleep works around an azure/winrm bug. For more info see
+	// https://github.com/hashicorp/packer/issues/5257; we can remove the
+	// sleep when the underlying bug has been resolved.
+	time.Sleep(1 * time.Second)
+
 	// Stolen from Vagrant reboot checker
 	for {
 		log.Printf("Check if machine is rebooting...")
@@ -119,6 +129,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
+
 		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
@@ -147,7 +158,7 @@ WaitLoop:
 		select {
 		case <-waitDone:
 			if err != nil {
-				ui.Error(fmt.Sprintf("Error waiting for WinRM: %s", err))
+				ui.Error(fmt.Sprintf("Error waiting for machine to restart: %s", err))
 				return err
 			}
 
@@ -155,7 +166,7 @@ WaitLoop:
 			close(p.cancel)
 			break WaitLoop
 		case <-timeout:
-			err := fmt.Errorf("Timeout waiting for WinRM.")
+			err := fmt.Errorf("Timeout waiting for machine to restart.")
 			ui.Error(err.Error())
 			close(p.cancel)
 			return err
@@ -170,8 +181,17 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(p *Provisioner) error {
-	cmd := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
-
+	runCustomRestartCheck := true
+	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
+		runCustomRestartCheck = false
+	}
+	// This command is configurable by the user to make sure that the
+	// vm has met their necessary criteria for having restarted. If the
+	// user doesn't set a special restart command, we just run the
+	// default as cmdModuleLoad below.
+	cmdRestartCheck := &packer.RemoteCmd{Command: p.config.RestartCheckCommand}
+	log.Printf("Checking that communicator is connected with: '%s'",
+		cmdRestartCheck.Command)
 	for {
 		select {
 		case <-p.cancel:
@@ -179,16 +199,38 @@ var waitForCommunicator = func(p *Provisioner) error {
 			return fmt.Errorf("Communicator wait canceled")
 		case <-time.After(retryableSleep):
 		}
-
-		log.Printf("Attempting to communicator to machine with: '%s'", cmd.Command)
-
-		err := cmd.StartWithUi(p.comm, p.ui)
-		if err != nil {
-			log.Printf("Communication connection err: %s", err)
-			continue
+		if runCustomRestartCheck {
+			// run user-configured restart check
+			err := cmdRestartCheck.StartWithUi(p.comm, p.ui)
+			if err != nil {
+				log.Printf("Communication connection err: %s", err)
+				continue
+			}
+			log.Printf("Connected to machine")
+			runCustomRestartCheck = false
 		}
 
-		log.Printf("Connected to machine")
+		// This is the non-user-configurable check that powershell
+		// modules have loaded.
+
+		// If we catch the restart in just the right place, we will be able
+		// to run the restart check but the output will be an error message
+		// about how it needs powershell modules to load, and we will start
+		// provisioning before powershell is actually ready.
+		// In this next check, we parse stdout to make sure that the command is
+		// actually running as expected.
+		cmdModuleLoad := &packer.RemoteCmd{Command: DefaultRestartCheckCommand}
+		var buf, buf2 bytes.Buffer
+		cmdModuleLoad.Stdout = &buf
+		cmdModuleLoad.Stdout = io.MultiWriter(cmdModuleLoad.Stdout, &buf2)
+
+		cmdModuleLoad.StartWithUi(p.comm, p.ui)
+		stdoutToRead := buf2.String()
+
+		if !strings.Contains(stdoutToRead, "restarted.") {
+			log.Printf("echo didn't succeed; retrying...")
+			continue
+		}
 		break
 	}
 

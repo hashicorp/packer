@@ -1,10 +1,10 @@
 ---
+description: |
+    It is possible to write custom builders using the Packer plugin interface, and
+    this page documents how to do that.
 layout: docs
-sidebar_current: docs-extending-custom-builders
-page_title: Custom Builders - Extending
-description: |-
-  It is possible to write custom builders using the Packer plugin interface, and
-  this page documents how to do that.
+page_title: 'Custom Builders - Extending'
+sidebar_current: 'docs-extending-custom-builders'
 ---
 
 # Custom Builders
@@ -19,17 +19,17 @@ plugin interface, and this page documents how to do that.
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins.html).
 
-~> **Warning!** This is an advanced topic. If you're new to Packer, we
+~&gt; **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting a bit more comfortable before you dive into writing plugins.
 
 ## The Interface
 
 The interface that must be implemented for a builder is the `packer.Builder`
-interface. It is reproduced below for easy reference. The actual interface in
-the source code contains some basic documentation as well explaining what each
+interface. It is reproduced below for reference. The actual interface in the
+source code contains some basic documentation as well explaining what each
 method should do.
 
-```go
+``` go
 type Builder interface {
   Prepare(...interface{}) error
   Run(ui Ui, hook Hook, cache Cache) (Artifact, error)
@@ -82,11 +82,11 @@ And `packer.Cache` is used to store files between multiple Packer runs, and is
 covered in more detail in the cache section below.
 
 Because builder runs are typically a complex set of many steps, the
-[multistep](https://github.com/mitchellh/multistep) library is recommended to
-bring order to the complexity. Multistep is a library which allows you to
-separate your logic into multiple distinct "steps" and string them together. It
-fully supports cancellation mid-step and so on. Please check it out, it is how
-the built-in builders are all implemented.
+[multistep](https://github.com/hashicorp/packer/blob/master/helper/multistep)
+helper is recommended to bring order to the complexity. Multistep is a library
+which allows you to separate your logic into multiple distinct "steps" and
+string them together. It fully supports cancellation mid-step and so on. Please
+check it out, it is how the built-in builders are all implemented.
 
 Finally, as a result of `Run`, an implementation of `packer.Artifact` should be
 returned. More details on creating a `packer.Artifact` are covered in the
@@ -109,21 +109,20 @@ respond to these cancellations and clean up after itself.
 
 The `Run` method is expected to return an implementation of the
 `packer.Artifact` interface. Each builder must create their own implementation.
-The interface is very simple and the documentation on the interface is quite
-clear.
+The interface has ample documentation to help you get started.
 
 The only part of an artifact that may be confusing is the `BuilderId` method.
 This method must return an absolutely unique ID for the builder. In general, I
 follow the practice of making the ID contain my GitHub username and then the
 platform it is building for. For example, the builder ID of the VMware builder
-is "mitchellh.vmware" or something similar.
+is "hashicorp.vmware" or something similar.
 
 Post-processors use the builder ID value in order to make some assumptions about
 the artifact results, so it is important it never changes.
 
 Other than the builder ID, the rest should be self-explanatory by reading the
 [packer.Artifact interface
-documentation](https://github.com/mitchellh/packer/blob/master/packer/artifact.go).
+documentation](https://github.com/hashicorp/packer/blob/master/packer/artifact.go).
 
 ## Provisioning
 
@@ -135,14 +134,14 @@ When the machine is ready to be provisioned, run the `packer.HookProvision`
 hook, making sure the communicator is not nil, since this is required for
 provisioners. An example of calling the hook is shown below:
 
-```go
+``` go
 hook.Run(packer.HookProvision, ui, comm, nil)
 ```
 
 At this point, Packer will run the provisioners and no additional work is
 necessary.
 
--> **Note:** Hooks are still undergoing thought around their general design
+-&gt; **Note:** Hooks are still undergoing thought around their general design
 and will likely change in a future version. They aren't fully "baked" yet, so
 they aren't documented here other than to tell you how to hook in provisioners.
 
@@ -166,5 +165,5 @@ The locking mechanisms of the cache allow one of the builders to download it
 only once, but allow both builders to share the downloaded file.
 
 The [documentation for
-packer.Cache](https://github.com/mitchellh/packer/blob/master/packer/cache.go)
+packer.Cache](https://github.com/hashicorp/packer/blob/master/packer/cache.go)
 is very detailed in how it works.

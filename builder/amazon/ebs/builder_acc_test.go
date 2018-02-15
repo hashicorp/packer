@@ -1,16 +1,18 @@
+/*
+Deregister the test image with
+aws ec2 deregister-image --image-id $(aws ec2 describe-images --output text --filters "Name=name,Values=packer-test-packer-test-dereg" --query 'Images[*].{ID:ImageId}')
+*/
 package ebs
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/packer/builder/amazon/common"
-	builderT "github.com/mitchellh/packer/helper/builder/testing"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/builder/amazon/common"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
@@ -59,14 +61,14 @@ func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
 
 	// Get image data by AMI name
 	ec2conn, _ := testEC2Conn()
-	imageResp, _ := ec2conn.DescribeImages(
-		&ec2.DescribeImagesInput{Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("name"),
-				Values: []*string{aws.String(amiName)},
-			},
-		}},
-	)
+	describeInput := &ec2.DescribeImagesInput{Filters: []*ec2.Filter{
+		{
+			Name:   aws.String("name"),
+			Values: []*string{aws.String(amiName)},
+		},
+	}}
+	ec2conn.WaitUntilImageExists(describeInput)
+	imageResp, _ := ec2conn.DescribeImages(describeInput)
 	image := imageResp.Images[0]
 
 	// Get snapshot ids for image
@@ -244,26 +246,15 @@ func checkBootEncrypted() builderT.TestCheckFunc {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("AWS_ACCESS_KEY_ID"); v == "" {
-		t.Fatal("AWS_ACCESS_KEY_ID must be set for acceptance tests")
-	}
-
-	if v := os.Getenv("AWS_SECRET_ACCESS_KEY"); v == "" {
-		t.Fatal("AWS_SECRET_ACCESS_KEY must be set for acceptance tests")
-	}
 }
 
 func testEC2Conn() (*ec2.EC2, error) {
 	access := &common.AccessConfig{RawRegion: "us-east-1"}
-	config, err := access.Config()
+	session, err := access.Session()
 	if err != nil {
 		return nil, err
 	}
 
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, err
-	}
 	return ec2.New(session), nil
 }
 
@@ -303,7 +294,7 @@ const testBuilderAccForceDeregister = `
 		"source_ami": "ami-76b2a71e",
 		"ssh_username": "ubuntu",
 		"force_deregister": "%s",
-		"ami_name": "packer-test-%s"
+		"ami_name": "%s"
 	}]
 }
 `
@@ -318,7 +309,7 @@ const testBuilderAccForceDeleteSnapshot = `
 		"ssh_username": "ubuntu",
 		"force_deregister": "%s",
 		"force_delete_snapshot": "%s",
-		"ami_name": "packer-test-%s"
+		"ami_name": "%s"
 	}]
 }
 `

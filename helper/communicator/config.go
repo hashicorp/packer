@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/packer/template/interpolate"
 )
 
 // Config is the common configuration that communicators allow within
@@ -16,22 +16,29 @@ type Config struct {
 	Type string `mapstructure:"communicator"`
 
 	// SSH
-	SSHHost               string        `mapstructure:"ssh_host"`
-	SSHPort               int           `mapstructure:"ssh_port"`
-	SSHUsername           string        `mapstructure:"ssh_username"`
-	SSHPassword           string        `mapstructure:"ssh_password"`
-	SSHPrivateKey         string        `mapstructure:"ssh_private_key_file"`
-	SSHPty                bool          `mapstructure:"ssh_pty"`
-	SSHTimeout            time.Duration `mapstructure:"ssh_timeout"`
-	SSHAgentAuth          bool          `mapstructure:"ssh_agent_auth"`
-	SSHDisableAgent       bool          `mapstructure:"ssh_disable_agent"`
-	SSHHandshakeAttempts  int           `mapstructure:"ssh_handshake_attempts"`
-	SSHBastionHost        string        `mapstructure:"ssh_bastion_host"`
-	SSHBastionPort        int           `mapstructure:"ssh_bastion_port"`
-	SSHBastionUsername    string        `mapstructure:"ssh_bastion_username"`
-	SSHBastionPassword    string        `mapstructure:"ssh_bastion_password"`
-	SSHBastionPrivateKey  string        `mapstructure:"ssh_bastion_private_key_file"`
-	SSHFileTransferMethod string        `mapstructure:"ssh_file_transfer_method"`
+	SSHHost                   string        `mapstructure:"ssh_host"`
+	SSHPort                   int           `mapstructure:"ssh_port"`
+	SSHUsername               string        `mapstructure:"ssh_username"`
+	SSHPassword               string        `mapstructure:"ssh_password"`
+	SSHPrivateKey             string        `mapstructure:"ssh_private_key_file"`
+	SSHPty                    bool          `mapstructure:"ssh_pty"`
+	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
+	SSHAgentAuth              bool          `mapstructure:"ssh_agent_auth"`
+	SSHDisableAgentForwarding bool          `mapstructure:"ssh_disable_agent_forwarding"`
+	SSHHandshakeAttempts      int           `mapstructure:"ssh_handshake_attempts"`
+	SSHBastionHost            string        `mapstructure:"ssh_bastion_host"`
+	SSHBastionPort            int           `mapstructure:"ssh_bastion_port"`
+	SSHBastionAgentAuth       bool          `mapstructure:"ssh_bastion_agent_auth"`
+	SSHBastionUsername        string        `mapstructure:"ssh_bastion_username"`
+	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
+	SSHBastionPrivateKey      string        `mapstructure:"ssh_bastion_private_key_file"`
+	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
+	SSHProxyHost              string        `mapstructure:"ssh_proxy_host"`
+	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
+	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
+	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
+	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
+	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -41,6 +48,7 @@ type Config struct {
 	WinRMTimeout            time.Duration `mapstructure:"winrm_timeout"`
 	WinRMUseSSL             bool          `mapstructure:"winrm_use_ssl"`
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
+	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
 }
 
@@ -125,6 +133,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		c.SSHTimeout = 5 * time.Minute
 	}
 
+	if c.SSHKeepAliveInterval == 0 {
+		c.SSHKeepAliveInterval = 5 * time.Second
+	}
+
 	if c.SSHHandshakeAttempts == 0 {
 		c.SSHHandshakeAttempts = 10
 	}
@@ -136,6 +148,12 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 
 		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKey != "" {
 			c.SSHBastionPrivateKey = c.SSHPrivateKey
+		}
+	}
+
+	if c.SSHProxyHost != "" {
+		if c.SSHProxyPort == 0 {
+			c.SSHProxyPort = 1080
 		}
 	}
 
@@ -159,7 +177,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SSHBastionHost != "" {
+	if c.SSHBastionHost != "" && !c.SSHBastionAgentAuth {
 		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
@@ -170,6 +188,10 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf(
 			"ssh_file_transfer_method ('%s') is invalid, valid methods: sftp, scp",
 			c.SSHFileTransferMethod))
+	}
+
+	if c.SSHBastionHost != "" && c.SSHProxyHost != "" {
+		errs = append(errs, errors.New("please specify either ssh_bastion_host or ssh_proxy_host, not both"))
 	}
 
 	return errs
@@ -184,6 +206,10 @@ func (c *Config) prepareWinRM(ctx *interpolate.Context) []error {
 
 	if c.WinRMTimeout == 0 {
 		c.WinRMTimeout = 30 * time.Minute
+	}
+
+	if c.WinRMUseNTLM == true {
+		c.WinRMTransportDecorator = func() winrm.Transporter { return &winrm.ClientNTLM{} }
 	}
 
 	var errs []error

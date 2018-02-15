@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepPreValidate provides an opportunity to pre-validate any configuration for
@@ -17,7 +18,7 @@ type StepPreValidate struct {
 	ForceDeregister bool
 }
 
-func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	if s.ForceDeregister {
 		ui.Say("Force Deregister flag found, skipping prevalidating AMI Name")
@@ -26,7 +27,7 @@ func (s *StepPreValidate) Run(state multistep.StateBag) multistep.StepAction {
 
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 
-	ui.Say("Prevalidating AMI Name...")
+	ui.Say(fmt.Sprintf("Prevalidating AMI Name: %s", s.DestAmiName))
 	resp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{
 		Filters: []*ec2.Filter{{
 			Name:   aws.String("name"),

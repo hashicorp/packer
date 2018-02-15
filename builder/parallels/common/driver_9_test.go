@@ -58,3 +58,29 @@ func TestIPAddress(t *testing.T) {
 		t.Fatalf("Should have found 10.211.55.124, not %s!\n", ip)
 	}
 }
+
+func TestXMLParseConfig(t *testing.T) {
+	td, err := ioutil.TempDir("", "configpvs")
+	if err != nil {
+		t.Fatalf("Error creating temp file: %s", err)
+	}
+	defer os.Remove(td)
+
+	config := []byte(`
+<ExampleParallelsConfig>
+  <SystemConfig>
+    <DiskSize>20</DiskSize>
+  </SystemConfig>
+</ExampleParallelsConfig>
+`)
+	ioutil.WriteFile(td+"/config.pvs", config, 0666)
+
+	result, err := getConfigValueFromXpath(td, "//DiskSize")
+	if err != nil {
+		t.Fatalf("Error parsing XML: %s", err)
+	}
+
+	if result != "20" {
+		t.Fatalf("Expected %q, got %q", "20", result)
+	}
+}
