@@ -177,9 +177,9 @@ for Packer to work:
   }]
 }
 ```
-### Notes to pay for a spot instance to create the AMI
 
-You need to add two more actions: `ec2:RequestSpotInstances` and `ec2:CancelSpotInstanceRequests`
+Note that if you'd like to create a spot instance, you must also add  
+`ec2:RequestSpotInstances` and `ec2:CancelSpotInstanceRequests`
 
 ## Troubleshooting
 
