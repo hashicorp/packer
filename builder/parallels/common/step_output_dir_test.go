@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testStepOutputDir(t *testing.T) *StepOutputDir {
@@ -29,7 +30,7 @@ func TestStepOutputDir(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -51,7 +52,7 @@ func TestStepOutputDir_cancelled(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -76,7 +77,7 @@ func TestStepOutputDir_halted(t *testing.T) {
 	step := testStepOutputDir(t)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

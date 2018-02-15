@@ -1,16 +1,18 @@
 package chroot
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepEarlyUnflock unlocks the flock.
 type StepEarlyUnflock struct{}
 
-func (s *StepEarlyUnflock) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepEarlyUnflock) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	cleanup := state.Get("flock_cleanup").(Cleanup)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -11,19 +11,9 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 # Change into that directory
 cd $DIR
 
-# Get the git commit
-GIT_COMMIT=$(git rev-parse HEAD)
-GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
-
-# If its dev mode, only build for ourself
-if [ "${PACKER_DEV}x" != "x" ]; then
-    XC_OS=${XC_OS:-$(go env GOOS)}
-    XC_ARCH=${XC_ARCH:-$(go env GOARCH)}
-fi
-
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+XC_ARCH=${XC_ARCH:-"386 amd64 arm arm64 ppc64le"}
+XC_OS=${XC_OS:-linux darwin windows freebsd openbsd solaris}
 
 # Delete the old dir
 echo "==> Removing old directory..."
@@ -37,7 +27,8 @@ set +e
 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
-    -ldflags "-X github.com/mitchellh/packer/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" \
+    -osarch="!darwin/arm !darwin/arm64" \
+    -ldflags "${GOLDFLAGS}" \
     -output "pkg/{{.OS}}_{{.Arch}}/packer" \
     .
 set -e

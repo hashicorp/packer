@@ -1,6 +1,9 @@
 package godo
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 const domainsBasePath = "v2/domains"
 
@@ -8,16 +11,16 @@ const domainsBasePath = "v2/domains"
 // See: https://developers.digitalocean.com/documentation/v2#domains and
 // https://developers.digitalocean.com/documentation/v2#domain-records
 type DomainsService interface {
-	List(*ListOptions) ([]Domain, *Response, error)
-	Get(string) (*Domain, *Response, error)
-	Create(*DomainCreateRequest) (*Domain, *Response, error)
-	Delete(string) (*Response, error)
+	List(context.Context, *ListOptions) ([]Domain, *Response, error)
+	Get(context.Context, string) (*Domain, *Response, error)
+	Create(context.Context, *DomainCreateRequest) (*Domain, *Response, error)
+	Delete(context.Context, string) (*Response, error)
 
-	Records(string, *ListOptions) ([]DomainRecord, *Response, error)
-	Record(string, int) (*DomainRecord, *Response, error)
-	DeleteRecord(string, int) (*Response, error)
-	EditRecord(string, int, *DomainRecordEditRequest) (*DomainRecord, *Response, error)
-	CreateRecord(string, *DomainRecordEditRequest) (*DomainRecord, *Response, error)
+	Records(context.Context, string, *ListOptions) ([]DomainRecord, *Response, error)
+	Record(context.Context, string, int) (*DomainRecord, *Response, error)
+	DeleteRecord(context.Context, string, int) (*Response, error)
+	EditRecord(context.Context, string, int, *DomainRecordEditRequest) (*DomainRecord, *Response, error)
+	CreateRecord(context.Context, string, *DomainRecordEditRequest) (*DomainRecord, *Response, error)
 }
 
 // DomainsServiceOp handles communication with the domain related methods of the
@@ -88,14 +91,14 @@ func (d Domain) String() string {
 }
 
 // List all domains.
-func (s DomainsServiceOp) List(opt *ListOptions) ([]Domain, *Response, error) {
+func (s DomainsServiceOp) List(ctx context.Context, opt *ListOptions) ([]Domain, *Response, error) {
 	path := domainsBasePath
 	path, err := addOptions(path, opt)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -113,14 +116,14 @@ func (s DomainsServiceOp) List(opt *ListOptions) ([]Domain, *Response, error) {
 }
 
 // Get individual domain. It requires a non-empty domain name.
-func (s *DomainsServiceOp) Get(name string) (*Domain, *Response, error) {
+func (s *DomainsServiceOp) Get(ctx context.Context, name string) (*Domain, *Response, error) {
 	if len(name) < 1 {
 		return nil, nil, NewArgError("name", "cannot be an empty string")
 	}
 
 	path := fmt.Sprintf("%s/%s", domainsBasePath, name)
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -135,14 +138,14 @@ func (s *DomainsServiceOp) Get(name string) (*Domain, *Response, error) {
 }
 
 // Create a new domain
-func (s *DomainsServiceOp) Create(createRequest *DomainCreateRequest) (*Domain, *Response, error) {
+func (s *DomainsServiceOp) Create(ctx context.Context, createRequest *DomainCreateRequest) (*Domain, *Response, error) {
 	if createRequest == nil {
 		return nil, nil, NewArgError("createRequest", "cannot be nil")
 	}
 
 	path := domainsBasePath
 
-	req, err := s.client.NewRequest("POST", path, createRequest)
+	req, err := s.client.NewRequest(ctx, "POST", path, createRequest)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -156,14 +159,14 @@ func (s *DomainsServiceOp) Create(createRequest *DomainCreateRequest) (*Domain, 
 }
 
 // Delete domain
-func (s *DomainsServiceOp) Delete(name string) (*Response, error) {
+func (s *DomainsServiceOp) Delete(ctx context.Context, name string) (*Response, error) {
 	if len(name) < 1 {
 		return nil, NewArgError("name", "cannot be an empty string")
 	}
 
 	path := fmt.Sprintf("%s/%s", domainsBasePath, name)
 
-	req, err := s.client.NewRequest("DELETE", path, nil)
+	req, err := s.client.NewRequest(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +187,7 @@ func (d DomainRecordEditRequest) String() string {
 }
 
 // Records returns a slice of DomainRecords for a domain
-func (s *DomainsServiceOp) Records(domain string, opt *ListOptions) ([]DomainRecord, *Response, error) {
+func (s *DomainsServiceOp) Records(ctx context.Context, domain string, opt *ListOptions) ([]DomainRecord, *Response, error) {
 	if len(domain) < 1 {
 		return nil, nil, NewArgError("domain", "cannot be an empty string")
 	}
@@ -195,7 +198,7 @@ func (s *DomainsServiceOp) Records(domain string, opt *ListOptions) ([]DomainRec
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -213,7 +216,7 @@ func (s *DomainsServiceOp) Records(domain string, opt *ListOptions) ([]DomainRec
 }
 
 // Record returns the record id from a domain
-func (s *DomainsServiceOp) Record(domain string, id int) (*DomainRecord, *Response, error) {
+func (s *DomainsServiceOp) Record(ctx context.Context, domain string, id int) (*DomainRecord, *Response, error) {
 	if len(domain) < 1 {
 		return nil, nil, NewArgError("domain", "cannot be an empty string")
 	}
@@ -224,7 +227,7 @@ func (s *DomainsServiceOp) Record(domain string, id int) (*DomainRecord, *Respon
 
 	path := fmt.Sprintf("%s/%s/records/%d", domainsBasePath, domain, id)
 
-	req, err := s.client.NewRequest("GET", path, nil)
+	req, err := s.client.NewRequest(ctx, "GET", path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -239,7 +242,7 @@ func (s *DomainsServiceOp) Record(domain string, id int) (*DomainRecord, *Respon
 }
 
 // DeleteRecord deletes a record from a domain identified by id
-func (s *DomainsServiceOp) DeleteRecord(domain string, id int) (*Response, error) {
+func (s *DomainsServiceOp) DeleteRecord(ctx context.Context, domain string, id int) (*Response, error) {
 	if len(domain) < 1 {
 		return nil, NewArgError("domain", "cannot be an empty string")
 	}
@@ -250,7 +253,7 @@ func (s *DomainsServiceOp) DeleteRecord(domain string, id int) (*Response, error
 
 	path := fmt.Sprintf("%s/%s/records/%d", domainsBasePath, domain, id)
 
-	req, err := s.client.NewRequest("DELETE", path, nil)
+	req, err := s.client.NewRequest(ctx, "DELETE", path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +264,7 @@ func (s *DomainsServiceOp) DeleteRecord(domain string, id int) (*Response, error
 }
 
 // EditRecord edits a record using a DomainRecordEditRequest
-func (s *DomainsServiceOp) EditRecord(
+func (s *DomainsServiceOp) EditRecord(ctx context.Context,
 	domain string,
 	id int,
 	editRequest *DomainRecordEditRequest,
@@ -280,7 +283,7 @@ func (s *DomainsServiceOp) EditRecord(
 
 	path := fmt.Sprintf("%s/%s/records/%d", domainsBasePath, domain, id)
 
-	req, err := s.client.NewRequest("PUT", path, editRequest)
+	req, err := s.client.NewRequest(ctx, "PUT", path, editRequest)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -295,7 +298,7 @@ func (s *DomainsServiceOp) EditRecord(
 }
 
 // CreateRecord creates a record using a DomainRecordEditRequest
-func (s *DomainsServiceOp) CreateRecord(
+func (s *DomainsServiceOp) CreateRecord(ctx context.Context,
 	domain string,
 	createRequest *DomainRecordEditRequest) (*DomainRecord, *Response, error) {
 	if len(domain) < 1 {
@@ -307,7 +310,7 @@ func (s *DomainsServiceOp) CreateRecord(
 	}
 
 	path := fmt.Sprintf("%s/%s/records", domainsBasePath, domain)
-	req, err := s.client.NewRequest("POST", path, createRequest)
+	req, err := s.client.NewRequest(ctx, "POST", path, createRequest)
 
 	if err != nil {
 		return nil, nil, err

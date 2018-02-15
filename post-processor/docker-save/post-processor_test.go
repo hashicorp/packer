@@ -2,8 +2,9 @@ package dockersave
 
 import (
 	"bytes"
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func testConfig() map[string]interface{} {

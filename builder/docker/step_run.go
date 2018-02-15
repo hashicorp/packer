@@ -1,16 +1,18 @@
 package docker
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepRun struct {
 	containerId string
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	tempDir := state.Get("temp_dir").(string)
@@ -26,7 +28,7 @@ func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
 	for host, container := range config.Volumes {
 		runConfig.Volumes[host] = container
 	}
-	runConfig.Volumes[tempDir] = "/packer-files"
+	runConfig.Volumes[tempDir] = config.ContainerDir
 
 	ui.Say("Starting docker container...")
 	containerId, err := driver.StartContainer(&runConfig)

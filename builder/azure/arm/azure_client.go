@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
@@ -13,14 +10,16 @@ import (
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/arm/disk"
 	"github.com/Azure/azure-sdk-for-go/arm/network"
 	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/arm/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/mitchellh/packer/builder/azure/common"
-	"github.com/mitchellh/packer/version"
+	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/version"
 )
 
 const (
@@ -34,17 +33,22 @@ var (
 type AzureClient struct {
 	storage.BlobStorageClient
 	resources.DeploymentsClient
+	resources.DeploymentOperationsClient
 	resources.GroupsClient
 	network.PublicIPAddressesClient
 	network.InterfacesClient
 	network.SubnetsClient
 	network.VirtualNetworksClient
+	compute.ImagesClient
 	compute.VirtualMachinesClient
 	common.VaultClient
 	armStorage.AccountsClient
+	disk.DisksClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
+	LastError          azureErrorResponse
+	VaultClientDelete  common.VaultClient
 }
 
 func getCaptureResponse(body string) *CaptureTemplate {
@@ -96,6 +100,22 @@ func templateCapture(client *AzureClient) autorest.RespondDecorator {
 	}
 }
 
+func errorCapture(client *AzureClient) autorest.RespondDecorator {
+	return func(r autorest.Responder) autorest.Responder {
+		return autorest.ResponderFunc(func(resp *http.Response) error {
+			body, bodyString := handleBody(resp.Body, math.MaxInt64)
+			resp.Body = body
+
+			errorResponse := newAzureErrorResponse(bodyString)
+			if errorResponse != nil {
+				client.LastError = *errorResponse
+			}
+
+			return r.Respond(resp)
+		})
+	}
+}
+
 // WAITING(chrboum): I have logged https://github.com/Azure/azure-sdk-for-go/issues/311 to get this
 // method included in the SDK.  It has been accepted, and I'll cut over to the official way
 // once it ships.
@@ -107,58 +127,76 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
 	cloud *azure.Environment,
-	servicePrincipalToken, servicePrincipalTokenVault *azure.ServicePrincipalToken) (*AzureClient, error) {
+	servicePrincipalToken, servicePrincipalTokenVault *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
 
 	maxlen := getInspectorMaxLength()
 
 	azureClient.DeploymentsClient = resources.NewDeploymentsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.DeploymentsClient.Authorizer = servicePrincipalToken
+	azureClient.DeploymentsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DeploymentsClient.RequestInspector = withInspection(maxlen)
-	azureClient.DeploymentsClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.DeploymentsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DeploymentsClient.UserAgent += packerUserAgent
 
+	azureClient.DeploymentOperationsClient = resources.NewDeploymentOperationsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.DeploymentOperationsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.DeploymentOperationsClient.RequestInspector = withInspection(maxlen)
+	azureClient.DeploymentOperationsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.DeploymentOperationsClient.UserAgent += packerUserAgent
+
+	azureClient.DisksClient = disk.NewDisksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.DisksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.DisksClient.RequestInspector = withInspection(maxlen)
+	azureClient.DisksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.DisksClient.UserAgent += packerUserAgent
+
 	azureClient.GroupsClient = resources.NewGroupsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.GroupsClient.Authorizer = servicePrincipalToken
+	azureClient.GroupsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.GroupsClient.RequestInspector = withInspection(maxlen)
-	azureClient.GroupsClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.GroupsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GroupsClient.UserAgent += packerUserAgent
 
+	azureClient.ImagesClient = compute.NewImagesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.ImagesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.ImagesClient.RequestInspector = withInspection(maxlen)
+	azureClient.ImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.ImagesClient.UserAgent += packerUserAgent
+
 	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.InterfacesClient.Authorizer = servicePrincipalToken
+	azureClient.InterfacesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.InterfacesClient.RequestInspector = withInspection(maxlen)
-	azureClient.InterfacesClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.InterfacesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.InterfacesClient.UserAgent += packerUserAgent
 
 	azureClient.SubnetsClient = network.NewSubnetsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.SubnetsClient.Authorizer = servicePrincipalToken
+	azureClient.SubnetsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.SubnetsClient.RequestInspector = withInspection(maxlen)
-	azureClient.SubnetsClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.SubnetsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.SubnetsClient.UserAgent += packerUserAgent
 
 	azureClient.VirtualNetworksClient = network.NewVirtualNetworksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.VirtualNetworksClient.Authorizer = servicePrincipalToken
+	azureClient.VirtualNetworksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualNetworksClient.RequestInspector = withInspection(maxlen)
-	azureClient.VirtualNetworksClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.VirtualNetworksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VirtualNetworksClient.UserAgent += packerUserAgent
 
 	azureClient.PublicIPAddressesClient = network.NewPublicIPAddressesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.PublicIPAddressesClient.Authorizer = servicePrincipalToken
+	azureClient.PublicIPAddressesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.PublicIPAddressesClient.RequestInspector = withInspection(maxlen)
-	azureClient.PublicIPAddressesClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.PublicIPAddressesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.PublicIPAddressesClient.UserAgent += packerUserAgent
 
 	azureClient.VirtualMachinesClient = compute.NewVirtualMachinesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.VirtualMachinesClient.Authorizer = servicePrincipalToken
+	azureClient.VirtualMachinesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.VirtualMachinesClient.RequestInspector = withInspection(maxlen)
-	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient))
+	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
 	azureClient.VirtualMachinesClient.UserAgent += packerUserAgent
 
 	azureClient.AccountsClient = armStorage.NewAccountsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
-	azureClient.AccountsClient.Authorizer = servicePrincipalToken
+	azureClient.AccountsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
-	azureClient.AccountsClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.AccountsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.AccountsClient.UserAgent += packerUserAgent
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
@@ -167,28 +205,46 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	}
 
 	azureClient.VaultClient = common.NewVaultClient(*keyVaultURL)
-	azureClient.VaultClient.Authorizer = servicePrincipalTokenVault
+	azureClient.VaultClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalTokenVault)
 	azureClient.VaultClient.RequestInspector = withInspection(maxlen)
-	azureClient.VaultClient.ResponseInspector = byInspecting(maxlen)
+	azureClient.VaultClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.VaultClient.UserAgent += packerUserAgent
 
-	accountKeys, err := azureClient.AccountsClient.ListKeys(resourceGroupName, storageAccountName)
-	if err != nil {
-		return nil, err
+	// TODO(boumenot) - SDK still does not have a full KeyVault client.
+	// There are two ways that KeyVault has to be accessed, and each one has their own SPN.  An authenticated SPN
+	// is tied to the URL, and the URL associated with getting the secret is different than the URL
+	// associated with deleting the KeyVault.  As a result, I need to have *two* different clients to
+	// access KeyVault.  I did not want to split it into two separate files, so I am starting with this.
+	//
+	// I do not like this implementation.  It is getting long in the tooth, and should be re-examined now
+	// that we have a "working" solution.
+	azureClient.VaultClientDelete = common.NewVaultClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.VaultClientDelete.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.VaultClientDelete.RequestInspector = withInspection(maxlen)
+	azureClient.VaultClientDelete.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.VaultClientDelete.UserAgent += packerUserAgent
+
+	// If this is a managed disk build, this should be ignored.
+	if resourceGroupName != "" && storageAccountName != "" {
+		accountKeys, err := azureClient.AccountsClient.ListKeys(resourceGroupName, storageAccountName)
+		if err != nil {
+			return nil, err
+		}
+
+		storageClient, err := storage.NewClient(
+			storageAccountName,
+			*(*accountKeys.Keys)[0].Value,
+			cloud.StorageEndpointSuffix,
+			storage.DefaultAPIVersion,
+			true /*useHttps*/)
+
+		if err != nil {
+			return nil, err
+		}
+
+		azureClient.BlobStorageClient = storageClient.GetBlobService()
 	}
 
-	storageClient, err := storage.NewClient(
-		storageAccountName,
-		*(*accountKeys.Keys)[0].Value,
-		cloud.StorageEndpointSuffix,
-		storage.DefaultAPIVersion,
-		true /*useHttps*/)
-
-	if err != nil {
-		return nil, err
-	}
-
-	azureClient.BlobStorageClient = storageClient.GetBlobService()
 	return azureClient, nil
 }
 

@@ -1,17 +1,15 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/arm/compute"
 
-	"github.com/mitchellh/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/builder/azure/common/constants"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {
@@ -25,7 +23,7 @@ func TestStepGetOSDiskShouldFailIfGetFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetOSDisk()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -46,7 +44,7 @@ func TestStepGetOSDiskShouldPassIfGetPasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepGetOSDisk()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -72,7 +70,7 @@ func TestStepGetOSDiskShouldTakeValidateArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepGetOSDisk()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
@@ -110,7 +108,7 @@ func createTestStateBagStepGetOSDisk() multistep.StateBag {
 
 func createVirtualMachineFromUri(vhdUri string) compute.VirtualMachine {
 	vm := compute.VirtualMachine{
-		Properties: &compute.VirtualMachineProperties{
+		VirtualMachineProperties: &compute.VirtualMachineProperties{
 			StorageProfile: &compute.StorageProfile{
 				OsDisk: &compute.OSDisk{
 					Vhd: &compute.VirtualHardDisk{

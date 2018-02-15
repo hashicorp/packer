@@ -2,12 +2,21 @@ set :base_url, "https://www.packer.io/"
 
 activate :hashicorp do |h|
   h.name         = "packer"
-  h.version      = "0.12.3"
-  h.github_slug  = "mitchellh/packer"
+  h.version      = "1.2.0"
+  h.github_slug  = "hashicorp/packer"
   h.website_root = "website"
 end
 
 helpers do
+  # Returns the FQDN of the image URL.
+  #
+  # @param [String] path
+  #
+  # @return [String]
+  def image_url(path)
+    File.join(base_url, image_path(path))
+  end
+
   # Get the title for the page.
   #
   # @param [Middleman::Page] page
@@ -18,8 +27,8 @@ helpers do
       return "#{page.data.page_title} - Packer by HashiCorp"
     end
 
-     "Packer by HashiCorp"
-   end
+    "Packer by HashiCorp"
+  end
 
   # Get the description for the page
   #
@@ -72,7 +81,7 @@ helpers do
   def body_classes_for(page)
     classes = []
 
-    if !(layout = page.data.layout).blank?
+    if !(page.data.layout).blank?
       classes << "layout-#{page.data.layout}"
     end
 

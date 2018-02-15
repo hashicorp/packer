@@ -1,16 +1,17 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
 type stepShutdownInstance struct{}
 
-func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdownInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -20,7 +21,7 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	// Retrieve the instance ID from the previously saved state.
 	instanceID, ok := state.Get("instance_id").(string)
 	if !ok || instanceID == "" {
-		ui.Error("Could not retrieve instance_id from state!")
+		state.Put("error", fmt.Errorf("Could not retrieve instance_id from state!"))
 		return multistep.ActionHalt
 	}
 
@@ -30,12 +31,13 @@ func (s *stepShutdownInstance) Run(state multistep.StateBag) multistep.StepActio
 	// Shutdown the virtual machine.
 	_, err := client.VirtualMachine.StopVirtualMachine(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error shutting down instance %s: %s", config.InstanceName, err))
+		err := fmt.Errorf("Error shutting down instance %s: %s", config.InstanceName, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	ui.Message("Instance has been shutdown!")
-
 	return multistep.ActionContinue
 }
 

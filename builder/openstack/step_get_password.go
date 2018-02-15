@@ -1,15 +1,16 @@
 package openstack
 
 import (
+	"context"
 	"crypto/rsa"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/helper/communicator"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -20,7 +21,7 @@ type StepGetPassword struct {
 	Comm  *communicator.Config
 }
 
-func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mitchellh/packer/builder/file"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template"
+	"github.com/hashicorp/packer/builder/file"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template"
 )
 
 const expectedFileContents = "Hello world!"

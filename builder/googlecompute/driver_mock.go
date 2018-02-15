@@ -8,9 +8,10 @@ type DriverMock struct {
 	CreateImageName            string
 	CreateImageDesc            string
 	CreateImageFamily          string
+	CreateImageLabels          map[string]string
+	CreateImageLicenses        []string
 	CreateImageZone            string
 	CreateImageDisk            string
-	CreateImageResultLicenses  []string
 	CreateImageResultProjectId string
 	CreateImageResultSelfLink  string
 	CreateImageResultSizeGb    int64
@@ -81,10 +82,12 @@ type DriverMock struct {
 	WaitForInstanceErrCh <-chan error
 }
 
-func (d *DriverMock) CreateImage(name, description, family, zone, disk string) (<-chan *Image, <-chan error) {
+func (d *DriverMock) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
 	d.CreateImageName = name
 	d.CreateImageDesc = description
 	d.CreateImageFamily = family
+	d.CreateImageLabels = image_labels
+	d.CreateImageLicenses = image_licenses
 	d.CreateImageZone = zone
 	d.CreateImageDisk = disk
 	if d.CreateImageResultProjectId == "" {
@@ -103,7 +106,8 @@ func (d *DriverMock) CreateImage(name, description, family, zone, disk string) (
 	if resultCh == nil {
 		ch := make(chan *Image, 1)
 		ch <- &Image{
-			Licenses:  d.CreateImageResultLicenses,
+			Labels:    d.CreateImageLabels,
+			Licenses:  d.CreateImageLicenses,
 			Name:      name,
 			ProjectId: d.CreateImageResultProjectId,
 			SelfLink:  d.CreateImageResultSelfLink,

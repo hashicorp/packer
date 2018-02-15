@@ -1,20 +1,21 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type Upload struct {
-	Token      string `json:"token"`
 	UploadPath string `json:"upload_path"`
 }
 
 type stepPrepareUpload struct {
 }
 
-func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPrepareUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	box := state.Get("box").(*Box)
@@ -30,9 +31,13 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 	resp, err := client.Get(path)
 
 	if err != nil || (resp.StatusCode != 200) {
-		cloudErrors := &VagrantCloudErrors{}
-		err = decodeBody(resp, cloudErrors)
-		state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
+		if resp == nil || resp.Body == nil {
+			state.Put("error", "No response from server.")
+		} else {
+			cloudErrors := &VagrantCloudErrors{}
+			err = decodeBody(resp, cloudErrors)
+			state.Put("error", fmt.Errorf("Error preparing upload: %s", cloudErrors.FormatErrors()))
+		}
 		return multistep.ActionHalt
 	}
 
@@ -40,8 +45,6 @@ func (s *stepPrepareUpload) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", fmt.Errorf("Error parsing upload response: %s", err))
 		return multistep.ActionHalt
 	}
-
-	ui.Message(fmt.Sprintf("Box upload prepared with token %s", upload.Token))
 
 	// Save the upload details to the state
 	state.Put("upload", upload)

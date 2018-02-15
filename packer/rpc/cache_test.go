@@ -1,8 +1,9 @@
 package rpc
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type testCache struct {

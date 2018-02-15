@@ -1,17 +1,17 @@
 package vsphere
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 var builtins = map[string]string{
@@ -129,20 +129,25 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s",
-		strings.Replace(
-			strings.Join(args, " "),
-			password,
-			"<password>",
-			-1))
+	log.Printf("Starting ovftool with parameters: %s", p.filterLog(strings.Join(args, " ")))
+
+	var out bytes.Buffer
 	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n", err)
+		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, p.filterLog(out.String()))
 	}
 
+	ui.Message(p.filterLog(out.String()))
+
+	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
+
 	return artifact, false, nil
+}
+
+func (p *PostProcessor) filterLog(s string) string {
+	password := url.QueryEscape(p.config.Password)
+	return strings.Replace(s, password, "<password>", -1)
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {

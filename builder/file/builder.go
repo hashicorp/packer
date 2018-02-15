@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 const BuilderId = "packer.file"

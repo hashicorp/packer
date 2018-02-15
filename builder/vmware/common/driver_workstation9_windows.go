@@ -59,8 +59,18 @@ func workstationDhcpLeasesPath(device string) string {
 	return findFile("vmnetdhcp.leases", workstationDataFilePaths())
 }
 
-func workstationVmnetnatConfPath() string {
+func workstationDhcpConfPath(device string) string {
+	// device isn't used on a windows host
+	return findFile("vmnetdhcp.conf", workstationDataFilePaths())
+}
+
+func workstationVmnetnatConfPath(device string) string {
+	// device isn't used on a windows host
 	return findFile("vmnetnat.conf", workstationDataFilePaths())
+}
+
+func workstationNetmapConfPath() string {
+	return findFile("netmap.conf", workstationDataFilePaths())
 }
 
 // See http://blog.natefinch.com/2012/11/go-win-stuff.html

@@ -1,8 +1,9 @@
 package docker
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestExportArtifact_impl(t *testing.T) {

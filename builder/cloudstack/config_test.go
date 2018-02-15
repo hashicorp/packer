@@ -38,7 +38,7 @@ func TestNewConfig(t *testing.T) {
 				"source_template": "d31e6af5-94a8-4756-abf3-6493c38db7e5",
 			},
 			Nullify: "cidr_list",
-			Err:     true,
+			Err:     false,
 		},
 		"no_cidr_list_with_use_local_ip_address": {
 			Config: map[string]interface{}{

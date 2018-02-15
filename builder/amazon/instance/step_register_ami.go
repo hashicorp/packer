@@ -1,18 +1,22 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/packer"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
-type StepRegisterAMI struct{}
+type StepRegisterAMI struct {
+	EnableAMIENASupport      bool
+	EnableAMISriovNetSupport bool
+}
 
-func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	manifestPath := state.Get("remote_manifest_path").(string)
@@ -29,12 +33,13 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		registerOpts.VirtualizationType = aws.String(config.AMIVirtType)
 	}
 
-	if config.AMIEnhancedNetworking {
+	if s.EnableAMISriovNetSupport {
 		// Set SriovNetSupport to "simple". See http://goo.gl/icuXh5
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
-
-		// Set EnaSupport to true.
+	}
+	if s.EnableAMIENASupport {
+		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)
 	}

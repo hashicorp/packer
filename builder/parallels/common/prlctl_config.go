@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // PrlctlConfig contains the configuration for running "prlctl" commands

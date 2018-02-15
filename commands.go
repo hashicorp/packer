@@ -1,9 +1,8 @@
 package main
 
 import (
+	"github.com/hashicorp/packer/command"
 	"github.com/mitchellh/cli"
-	"github.com/mitchellh/packer/command"
-	"github.com/mitchellh/packer/version"
 )
 
 // Commands is the mapping of all the available Packer commands.
@@ -50,11 +49,8 @@ func init() {
 
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
-				Meta:              *CommandMeta,
-				Revision:          version.GitCommit,
-				Version:           version.Version,
-				VersionPrerelease: version.VersionPrerelease,
-				CheckFunc:         commandVersionCheck,
+				Meta:      *CommandMeta,
+				CheckFunc: commandVersionCheck,
 			}, nil
 		},
 

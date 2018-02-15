@@ -11,8 +11,8 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/mitchellh/multistep"
-	packerssh "github.com/mitchellh/packer/communicator/ssh"
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -84,6 +84,7 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 		}
 
@@ -101,12 +102,14 @@ func SSHConfig(useAgent bool, username, password string) func(multistep.StateBag
 				Auth: []ssh.AuthMethod{
 					ssh.PublicKeys(signer),
 				},
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			}, nil
 
 		} else {
 
 			return &ssh.ClientConfig{
-				User: username,
+				User:            username,
+				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth: []ssh.AuthMethod{
 					ssh.Password(password),
 					ssh.KeyboardInteractive(

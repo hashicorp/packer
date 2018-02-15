@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
@@ -16,11 +13,25 @@ const (
 )
 
 type Artifact struct {
+	// VHD
 	StorageAccountLocation string
 	OSDiskUri              string
 	TemplateUri            string
 	OSDiskUriReadOnlySas   string
 	TemplateUriReadOnlySas string
+
+	// Managed Image
+	ManagedImageResourceGroupName string
+	ManagedImageName              string
+	ManagedImageLocation          string
+}
+
+func NewManagedImageArtifact(resourceGroup, name, location string) (*Artifact, error) {
+	return &Artifact{
+		ManagedImageResourceGroupName: resourceGroup,
+		ManagedImageName:              name,
+		ManagedImageLocation:          location,
+	}, nil
 }
 
 func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) (*Artifact, error) {
@@ -78,6 +89,10 @@ func storageUriToTemplateUri(su *url.URL) (*url.URL, error) {
 	return url.Parse(strings.Replace(su.String(), filename, templateFilename, 1))
 }
 
+func (a *Artifact) isMangedImage() bool {
+	return a.ManagedImageResourceGroupName != ""
+}
+
 func (*Artifact) BuilderId() string {
 	return BuilderId
 }
@@ -86,27 +101,49 @@ func (*Artifact) Files() []string {
 	return []string{}
 }
 
-func (*Artifact) Id() string {
-	return ""
+func (a *Artifact) Id() string {
+	return a.OSDiskUri
 }
 
-func (*Artifact) State(name string) interface{} {
-	return nil
+func (a *Artifact) State(name string) interface{} {
+	switch name {
+	case "atlas.artifact.metadata":
+		return a.stateAtlasMetadata()
+	default:
+		return nil
+	}
 }
 
 func (a *Artifact) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s:\n\n", a.BuilderId()))
-	buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
-	buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))
-	buf.WriteString(fmt.Sprintf("OSDiskUriReadOnlySas: %s\n", a.OSDiskUriReadOnlySas))
-	buf.WriteString(fmt.Sprintf("TemplateUri: %s\n", a.TemplateUri))
-	buf.WriteString(fmt.Sprintf("TemplateUriReadOnlySas: %s\n", a.TemplateUriReadOnlySas))
+	if a.isMangedImage() {
+		buf.WriteString(fmt.Sprintf("ManagedImageResourceGroupName: %s\n", a.ManagedImageResourceGroupName))
+		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
+		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
+	} else {
+		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
+		buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))
+		buf.WriteString(fmt.Sprintf("OSDiskUriReadOnlySas: %s\n", a.OSDiskUriReadOnlySas))
+		buf.WriteString(fmt.Sprintf("TemplateUri: %s\n", a.TemplateUri))
+		buf.WriteString(fmt.Sprintf("TemplateUriReadOnlySas: %s\n", a.TemplateUriReadOnlySas))
+	}
 
 	return buf.String()
 }
 
 func (*Artifact) Destroy() error {
 	return nil
+}
+
+func (a *Artifact) stateAtlasMetadata() interface{} {
+	metadata := make(map[string]string)
+	metadata["StorageAccountLocation"] = a.StorageAccountLocation
+	metadata["OSDiskUri"] = a.OSDiskUri
+	metadata["OSDiskUriReadOnlySas"] = a.OSDiskUriReadOnlySas
+	metadata["TemplateUri"] = a.TemplateUri
+	metadata["TemplateUriReadOnlySas"] = a.TemplateUriReadOnlySas
+
+	return metadata
 }

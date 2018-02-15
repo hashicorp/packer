@@ -1,8 +1,9 @@
 package null
 
 import (
-	"github.com/mitchellh/packer/packer"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestNullArtifact(t *testing.T) {

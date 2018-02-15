@@ -7,15 +7,14 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	awscommon "github.com/mitchellh/packer/builder/amazon/common"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 const BuilderId = "packer.post-processor.amazon-import"
@@ -34,6 +33,8 @@ type Config struct {
 	Description string            `mapstructure:"ami_description"`
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
+	LicenseType string            `mapstructure:"license_type"`
+	RoleName    string            `mapstructure:"role_name"`
 
 	ctx interpolate.Context
 }
@@ -91,17 +92,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey))
+	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey, p.config.Token))
 	return nil
 }
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	var err error
 
-	config, err := p.config.Config()
+	session, err := p.config.Session()
 	if err != nil {
 		return nil, false, err
 	}
+	config := session.Config
 
 	// Render this key since we didn't in the configure phase
 	p.config.S3Key, err = interpolate.Render(p.config.S3Key, &p.config.ctx)
@@ -123,13 +125,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Hope we found something useful
 	if source == "" {
 		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
-	}
-
-	// Set up the AWS session
-	log.Println("Creating AWS session")
-	session, err := session.NewSession(config)
-	if err != nil {
-		return nil, false, err
 	}
 
 	// open the source file
@@ -161,7 +156,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	log.Printf("Calling EC2 to import from s3://%s/%s", p.config.S3Bucket, p.config.S3Key)
 
 	ec2conn := ec2.New(session)
-	import_start, err := ec2conn.ImportImage(&ec2.ImportImageInput{
+	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
 				UserBucket: &ec2.UserBucket{
@@ -170,7 +165,18 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
-	})
+	}
+
+	if p.config.RoleName != "" {
+		params.SetRoleName(p.config.RoleName)
+	}
+
+	if p.config.LicenseType != "" {
+		ui.Message(fmt.Sprintf("Setting license type to '%s'", p.config.LicenseType))
+		params.LicenseType = &p.config.LicenseType
+	}
+
+	import_start, err := ec2conn.ImportImage(params)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("Failed to start import from s3://%s/%s: %s", p.config.S3Bucket, p.config.S3Key, err)
@@ -368,7 +374,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			*config.Region: createdami,
 		},
 		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+		Session:        session,
 	}
 
 	if !p.config.SkipClean {

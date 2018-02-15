@@ -2,15 +2,14 @@ package googlecomputeexport
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/builder/googlecompute"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/helper/config"
-	"github.com/mitchellh/packer/packer"
-	"github.com/mitchellh/packer/template/interpolate"
+	"github.com/hashicorp/packer/builder/googlecompute"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Config struct {
@@ -88,13 +87,12 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		exporterConfig.CalcTimeout()
 
 		// Set up credentials and GCE driver.
-		b, err := ioutil.ReadFile(accountKeyFilePath)
-		if err != nil {
-			err = fmt.Errorf("Error fetching account credentials: %s", err)
-			return nil, p.config.KeepOriginalImage, err
+		if accountKeyFilePath != "" {
+			err := googlecompute.ProcessAccountFile(&exporterConfig.Account, accountKeyFilePath)
+			if err != nil {
+				return nil, p.config.KeepOriginalImage, err
+			}
 		}
-		accountKeyContents := string(b)
-		googlecompute.ProcessAccountFile(&exporterConfig.Account, accountKeyContents)
 		driver, err := googlecompute.NewDriverGCE(ui, projectId, &exporterConfig.Account)
 		if err != nil {
 			return nil, p.config.KeepOriginalImage, err
@@ -120,14 +118,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		}
 
 		// Run the steps.
-		if p.config.PackerDebug {
-			p.runner = &multistep.DebugRunner{
-				Steps:   steps,
-				PauseFn: common.MultistepDebugFn(ui),
-			}
-		} else {
-			p.runner = &multistep.BasicRunner{Steps: steps}
-		}
+		p.runner = common.NewRunner(steps, p.config.PackerConfig, ui)
 		p.runner.Run(state)
 	}
 

@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/common"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step removes any devices (floppy disks, ISOs, etc.) from the
@@ -20,7 +21,7 @@ import (
 // Produces:
 type StepRemoveDevices struct{}
 
-func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
@@ -45,7 +46,7 @@ func (s *StepRemoveDevices) Run(state multistep.StateBag) multistep.StepAction {
 		var vboxErr error
 		// Retry for 10 minutes to remove the floppy controller.
 		log.Printf("Trying for 10 minutes to remove floppy controller.")
-		err := common.Retry(15, 15, 40, func() (bool, error) {
+		err := common.Retry(15, 15, 40, func(_ uint) (bool, error) {
 			// Don't forget to remove the floppy controller as well
 			command = []string{
 				"storagectl", vmName,

@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/mitchellh/multistep"
-	"github.com/mitchellh/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepKeyPair struct {
@@ -19,10 +20,10 @@ type StepKeyPair struct {
 	KeyPairName          string
 	PrivateKeyFile       string
 
-	keyName string
+	doCleanup bool
 }
 
-func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {
@@ -67,11 +68,10 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionHalt
 	}
 
-	// Set the keyname so we know to delete it later
-	s.keyName = s.TemporaryKeyPairName
+	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.keyName)
+	state.Put("keyPair", s.TemporaryKeyPairName)
 	state.Put("privateKey", *keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
@@ -104,10 +104,7 @@ func (s *StepKeyPair) Run(state multistep.StateBag) multistep.StepAction {
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
-	// If no key name is set, then we never created it, so just return
-	// If we used an SSH private key file, do not go about deleting
-	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
+	if !s.doCleanup {
 		return
 	}
 
@@ -116,10 +113,10 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 
 	// Remove the keypair
 	ui.Say("Deleting temporary keypair...")
-	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.keyName})
+	_, err := ec2conn.DeleteKeyPair(&ec2.DeleteKeyPairInput{KeyName: &s.TemporaryKeyPairName})
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.keyName))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
 	}
 
 	// Also remove the physical key if we're debugging.
