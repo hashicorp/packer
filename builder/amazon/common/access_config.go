@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -96,20 +95,8 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	creds := credentials.NewChainCredentials(providers)
-	cp, err := creds.Get()
-	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-			return nil, errors.New("No valid credential sources found for AWS Builder. " +
-				"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
-				"for more information on providing credentials for the AWS Builder.")
-		}
-
-		return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
-	}
-	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 
 	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
-	config = config.WithCredentials(creds)
 
 	if c.RawRegion != "" {
 		config = config.WithRegion(c.RawRegion)
@@ -126,11 +113,17 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		Config:            *config,
 	}
 
+	if c.ProfileName != "" {
+		opts.Profile = c.ProfileName
+	}
+
 	if c.MFACode != "" {
 		opts.AssumeRoleTokenProvider = func() (string, error) {
 			return c.MFACode, nil
 		}
 	}
+
+	config = config.WithCredentials(creds)
 
 	if sess, err := session.NewSessionWithOptions(opts); err != nil {
 		return nil, err
@@ -139,8 +132,19 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	} else {
 		log.Printf("Found region %s", *sess.Config.Region)
 		c.session = sess
-	}
 
+		cp, err := c.session.Config.Credentials.Get()
+		if err != nil {
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+				return nil, fmt.Errorf("No valid credential sources found for AWS Builder. " +
+					"Please see https://www.packer.io/docs/builders/amazon.html#specifying-amazon-credentials " +
+					"for more information on providing credentials for the AWS Builder.")
+			} else {
+				return nil, fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+			}
+		}
+		log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
+	}
 	return c.session, nil
 }
 
