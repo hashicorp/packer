@@ -1,5 +1,8 @@
 ## UNRELEASED
 
+## BUG FIXES:
+* builder/amazon: Fix issues using assume role [GH-5914]
+
 
 ## 1.2.0 (February 9, 2018)
 
