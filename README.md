@@ -23,25 +23,8 @@ from a single source configuration.
 
 Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel. Packer
-comes out of the box with support for the following platforms:
-
-* Amazon EC2 (AMI). Both EBS-backed and instance-store AMIs
-* Azure
-* CloudStack
-* DigitalOcean
-* Docker
-* Google Compute Engine
-* Hyper-V
-* 1&1
-* OpenStack
-* Oracle Cloud Infrastructure
-* Parallels
-* ProfitBricks
-* QEMU. Both KVM and Xen images.
-* Scaleway
-* Triton (Joyent Public Cloud)
-* VMware
-* VirtualBox
+comes out of the box with support for many platforms, the full list of which can
+be found at https://www.packer.io/docs/builders/index.html. 
 
 Support for other platforms can be added via plugins.
 
