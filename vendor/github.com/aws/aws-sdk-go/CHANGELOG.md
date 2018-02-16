@@ -1,3 +1,27 @@
+Release v1.12.72 (2018-02-07)
+===
+
+### Service Client Updates
+* `aws/endpoints`: Updated Regions and Endpoints metadata.
+* `service/glue`: Updates service API and documentation
+  * This new feature will now allow customers to add a customized json classifier. They can specify a json path to indicate the object, array or field of the json documents they'd like crawlers to inspect when they crawl json files.
+* `service/servicecatalog`: Updates service API, documentation, and paginators
+  * This release of Service Catalog adds SearchProvisionedProducts API and ProvisionedProductPlan APIs.
+* `service/servicediscovery`: Updates service API and documentation
+  * This release adds support for registering CNAME record types and creating Route 53 alias records that route traffic to Amazon Elastic Load Balancers using Amazon Route 53 Auto Naming APIs.
+* `service/ssm`: Updates service API and documentation
+  * This Patch Manager release supports configuring Linux repos as part of patch baselines, controlling updates of non-OS security packages and also creating patch baselines for SUSE12
+
+### SDK Enhancements
+* `private/model/api`: Add validation to ensure there is no duplication of services in models/apis ([#1758](https://github.com/aws/aws-sdk-go/pull/1758))
+    * Prevents the SDK from mistakenly generating code a single service multiple times with different model versions.
+* `example/service/ec2/instancesbyRegion`: Fix typos in example ([#1762](https://github.com/aws/aws-sdk-go/pull/1762))
+* `private/model/api`: removing SDK API reference crosslinks from input/output shapes. (#1765) 
+
+### SDK Bugs
+* `aws/session`: Fix bug in session.New not supporting AWS_SDK_LOAD_CONFIG ([#1770](https://github.com/aws/aws-sdk-go/pull/1770))
+    * Fixes a bug in the session.New function that was not correctly sourcing the shared configuration files' path.
+    * Fixes [#1771](https://github.com/aws/aws-sdk-go/pull/1771)
 Release v1.12.71 (2018-02-05)
 ===
 
