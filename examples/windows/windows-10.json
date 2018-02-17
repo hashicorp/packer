@@ -1,0 +1,49 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server":      "vcenter.vsphere65.test",
+      "username":            "root",
+      "password":            "jetbrains",
+      "insecure_connection": "true",
+
+      "vm_name": "example-windows",
+      "host":     "esxi-1.vsphere65.test",
+
+      "guest_os_type": "windows9_64Guest",
+
+      "communicator": "winrm",
+      "winrm_username": "jetbrains",
+      "winrm_password": "jetbrains",
+
+      "CPUs":             1,
+      "RAM":              4096,
+      "RAM_reserve_all": true,
+
+      "disk_controller_type":  "pvscsi",
+      "disk_size":        32,
+      "disk_thin_provisioned": true,
+
+      "network_card": "vmxnet3",
+
+      "iso_paths": [
+        "[datastore1] ISO/en_windows_10_multi-edition_vl_version_1709_updated_dec_2017_x64_dvd_100406172.iso",
+        "[datastore1] ISO/VMware Tools/10.2.0/windows.iso"
+      ],
+
+      "floppy_files": [
+        "setup/"
+      ],
+      "floppy_img_path": "[datastore1] ISO/VMware Tools/10.2.0/pvscsi-Windows8.flp",
+      "boot_order": "disk,cdrom"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "windows-shell",
+      "inline": ["dir c:\\"]
+    }
+  ]
+}
