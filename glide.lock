@@ -1,5 +1,5 @@
-hash: 709325293541fff31ae48288c6f5873f67f90ae6ab69d9ae4465fcdf0626d843
-updated: 2017-06-27T10:42:45.867528732+03:00
+hash: 9dff375b5720b1ffb1164694bb6aba1f546c9e2a93509000eb9919e5241610f1
+updated: 2018-02-17T22:26:59.87828+03:00
 imports:
 - name: github.com/Azure/go-ntlmssp
   version: 29affced641074a59483ed003b5ef73a8bd3593c
@@ -26,6 +26,7 @@ imports:
   - communicator/none
   - communicator/ssh
   - communicator/winrm
+  - helper/builder/testing
   - helper/communicator
   - helper/config
   - packer
@@ -105,4 +106,8 @@ imports:
   - md4
   - ssh
   - ssh/agent
+- name: golang.org/x/mobile
+  version: 4bfed40defcb2fed54d60707c13cec9d7888a483
+  subpackages:
+  - event/key
 testImports: []

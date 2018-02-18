@@ -1,0 +1,63 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server":      "vcenter.vsphere65.test",
+      "username":            "root",
+      "password":            "jetbrains",
+      "insecure_connection": "true",
+
+      "vm_name": "example-ubuntu",
+      "host":     "esxi-1.vsphere65.test",
+
+      "guest_os_type": "ubuntu64Guest",
+
+      "ssh_username": "jetbrains",
+      "ssh_password": "jetbrains",
+
+      "CPUs":             1,
+      "RAM":              1024,
+      "RAM_reserve_all": true,
+
+      "disk_controller_type":  "pvscsi",
+      "disk_size":        32,
+      "disk_thin_provisioned": true,
+
+      "network_card": "vmxnet3",
+
+      "iso_paths": [
+        "[datastore1] ISO/ubuntu-16.04.3-server-amd64.iso"
+      ],
+      "floppy_files": [
+        "{{template_dir}}/preseed.cfg"
+      ],
+      "boot_command": [
+        "<enter><wait><f6><esc><wait>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+        "<bs><bs><bs>",
+        "/install/vmlinuz",
+        " initrd=/install/initrd.gz",
+        " priority=critical",
+        " locale=en_US",
+        " file=/media/preseed.cfg",
+        "<enter>"
+      ],
+      "boot_order": "disk,cdrom"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["ls /"]
+    }
+  ]
+}
