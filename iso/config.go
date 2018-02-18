@@ -12,6 +12,7 @@ import (
 type Config struct {
 	packerCommon.PackerConfig             `mapstructure:",squash"`
 	common.RunConfig                      `mapstructure:",squash"`
+	BootConfig                            `mapstructure:",squash"`
 	common.ConnectConfig                  `mapstructure:",squash"`
 	Comm              communicator.Config `mapstructure:",squash"`
 	common.ShutdownConfig                 `mapstructure:",squash"`
