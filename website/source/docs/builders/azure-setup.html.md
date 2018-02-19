@@ -123,7 +123,7 @@ $ azure account show --json | jq -r ".[] | .id"
 ```
 
 Python:
-```shell
+``` shell
 $ az account set "$(az account list | jq -r '.[].name')"
 ```
 
@@ -214,7 +214,7 @@ Python:
 
 ```shell
 $ id=$(az ad app list | jq -r '.[] | select(.displayName == "Packer") | .appId')
-$ az ad sp create --appid "$id"
+$ az ad sp create --id "$id"
 ```
 
 ### Grant Permissions to Your Application
