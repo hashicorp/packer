@@ -596,10 +596,10 @@
 			"revision": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
-			"checksumSHA1": "bFj0ceSRvaFFCfmS4el1PjWhcgw=",
+			"checksumSHA1": "X2/71FBrn4pA3WcA620ySVO0uHU=",
 			"path": "github.com/creack/goselect",
-			"revision": "1bd5ca702c6154bccc56ecd598932ee8b295cab2",
-			"revisionTime": "2016-07-14T17:28:59Z"
+			"revision": "528c74964609a58f7c17471525659c9b71cd499b",
+			"revisionTime": "2018-02-10T03:43:46Z"
 		},
 		{
 			"checksumSHA1": "Lf3uUXTkKK5DJ37BxQvxO1Fq+K8=",
