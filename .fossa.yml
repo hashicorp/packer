@@ -1,0 +1,8 @@
+cli:
+  project: github.com/hashicorp/packer
+
+analyze:
+  modules:
+    - name: packer
+      path: github.com/hashicorp/packer
+      type: gopackage
