@@ -477,13 +477,12 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		// try and convert the specified network to a device.
 		device, err := netmap.NameIntoDevice(network)
 
-		// success. so we know that it's an actual network type inside netmap.conf
 		if err == nil {
+			// success. so we know that it's an actual network type inside netmap.conf
 			templateData.Network_Type = network
 			templateData.Network_Device = device
-
-			// otherwise, we were unable to find the type, so assume its a custom device.
 		} else {
+			// otherwise, we were unable to find the type, so assume its a custom device.
 			templateData.Network_Type = "custom"
 			templateData.Network_Device = network
 		}
