@@ -75,6 +75,7 @@ type InstanceConfig struct {
 	OnHostMaintenance string
 	Preemptible       bool
 	Region            string
+	ServiceAccountEmail string
 	Scopes            []string
 	Subnetwork        string
 	Tags              []string
