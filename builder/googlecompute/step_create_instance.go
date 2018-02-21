@@ -117,6 +117,7 @@ func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		OnHostMaintenance: c.OnHostMaintenance,
 		Preemptible:       c.Preemptible,
 		Region:            c.Region,
+		ServiceAccountEmail: c.ServiceAccountEmail,
 		Scopes:            c.Scopes,
 		Subnetwork:        c.Subnetwork,
 		Tags:              c.Tags,

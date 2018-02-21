@@ -343,6 +343,14 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		guestAccelerators = append(guestAccelerators, ac)
 	}
 
+	serviceAccount := &compute.ServiceAccount{
+		Email:  "default",
+		Scopes: c.Scopes,
+	}
+	if c.ServiceAccountEmail != "" {
+		serviceAccount.Email = c.ServiceAccountEmail
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -379,10 +387,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Preemptible:       c.Preemptible,
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
-			{
-				Email:  "default",
-				Scopes: c.Scopes,
-			},
+			serviceAccount,
 		},
 		Tags: &compute.Tags{
 			Items: c.Tags,
