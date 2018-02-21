@@ -99,10 +99,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
 	}
-	if c.Comm.Type == "winrm" {
-		err = fmt.Errorf("winRM is not supported with the oracle-classic builder yet.")
-		errs = packer.MultiErrorAppend(errs, err)
-	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
