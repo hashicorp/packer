@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -27,10 +28,11 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
-	ImageName       string `mapstructure:"image_name"`
-	Shape           string `mapstructure:"shape"`
-	SourceImageList string `mapstructure:"source_image_list"`
-	DestImageList   string `mapstructure:"dest_image_list"`
+	ImageName       string        `mapstructure:"image_name"`
+	Shape           string        `mapstructure:"shape"`
+	SourceImageList string        `mapstructure:"source_image_list"`
+	SnapshotTimeout time.Duration `mapstructure:"snapshot_timeout"`
+	DestImageList   string        `mapstructure:"dest_image_list"`
 	// Attributes and Atributes file are both optional and mutually exclusive.
 	Attributes     string `mapstructure:"attributes"`
 	AttributesFile string `mapstructure:"attributes_file"`
@@ -69,6 +71,10 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	// Use default oracle username with sudo privileges
 	if c.Comm.SSHUsername == "" {
 		c.Comm.SSHUsername = "opc"
+	}
+
+	if c.SnapshotTimeout == 0 {
+		c.SnapshotTimeout = 20 * time.Minute
 	}
 
 	// Validate that all required fields are present
