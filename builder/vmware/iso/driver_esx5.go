@@ -147,6 +147,29 @@ func (d *ESX5Driver) ToolsInstall() error {
 }
 
 func (d *ESX5Driver) Verify() error {
+	// Ensure that NetworkMapper is nil, since the mapping of device<->network
+	// is handled by ESX and thus can't be performed by packer unless we
+	// query things.
+
+	// FIXME: If we want to expose the network devices to the user, then we can
+	// probably use esxcli to enumerate the portgroup and switchId
+	d.base.NetworkMapper = nil
+
+	// Be safe/friendly and overwrite the rest of the utility functions with
+	// log functions despite the fact that these shouldn't be called anyways.
+	d.base.DhcpLeasesPath = func(device string) string {
+		log.Printf("Unexpected error, ESX5 driver attempted to call DhcpLeasesPath(%#v)\n", device)
+		return ""
+	}
+	d.base.DhcpConfPath = func(device string) string {
+		log.Printf("Unexpected error, ESX5 driver attempted to call DhcpConfPath(%#v)\n", device)
+		return ""
+	}
+	d.base.VmnetnatConfPath = func(device string) string {
+		log.Printf("Unexpected error, ESX5 driver attempted to call VmnetnatConfPath(%#v)\n", device)
+		return ""
+	}
+
 	checks := []func() error{
 		d.connect,
 		d.checkSystemVersion,
