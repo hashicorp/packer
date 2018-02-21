@@ -462,26 +462,41 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	network := config.Network
 	driver := state.Get("driver").(vmwcommon.Driver).GetVmwareDriver()
 
-	// read netmap config
-	netmap, err := driver.NetworkMapper()
-	if err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
+	// check to see if the driver implements a network mapper for mapping
+	// the network-type to its device-name.
+	if driver.NetworkMapper != nil {
 
-	// try and convert the specified network to a device
-	device, err := netmap.NameIntoDevice(network)
+		// read network map configuration into a NetworkNameMapper.
+		netmap, err := driver.NetworkMapper()
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 
-	// success. so we know that it's an actual network type inside netmap.conf
-	if err == nil {
-		templateData.Network_Type = network
-		templateData.Network_Device = device
-		// we were unable to find the type, so assume it's a custom network device.
+		// try and convert the specified network to a device.
+		device, err := netmap.NameIntoDevice(network)
+
+		// success. so we know that it's an actual network type inside netmap.conf
+		if err == nil {
+			templateData.Network_Type = network
+			templateData.Network_Device = device
+
+			// otherwise, we were unable to find the type, so assume its a custom device.
+		} else {
+			templateData.Network_Type = "custom"
+			templateData.Network_Device = network
+		}
+
+		// if NetworkMapper is nil, then we're using something like ESX, so fall
+		// back to the previous logic of using "nat" despite it not mattering to ESX.
 	} else {
-		templateData.Network_Type = "custom"
+		templateData.Network_Type = "nat"
 		templateData.Network_Device = network
+
+		network = "nat"
 	}
+
 	// store the network so that we can later figure out what ip address to bind to
 	state.Put("vmnetwork", network)
 
