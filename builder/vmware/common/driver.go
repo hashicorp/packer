@@ -309,12 +309,14 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 
 	// grab network mapper
 	netmap, err := d.NetworkMapper()
+	log.Printf("MEGAN: NEtworkMapper is %#v", netmap)
 	if err != nil {
 		return "", err
 	}
 
 	// convert the stashed network to a device
 	network := state.Get("vmnetwork").(string)
+	log.Printf("MEGAN: network is %#v", network)
 	device, err := netmap.NameIntoDevice(network)
 
 	// we were unable to find the device, maybe it's a custom one...
@@ -337,6 +339,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Printf("MEGAN mac address is %s", MACAddress)
 
 	// figure out the correct dhcp leases
 	dhcpLeasesPath := d.DhcpLeasesPath(device)

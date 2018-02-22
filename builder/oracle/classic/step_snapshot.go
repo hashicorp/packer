@@ -3,7 +3,6 @@ package classic
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -30,7 +29,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 	snapshotInput := &compute.CreateSnapshotInput{
 		Instance:     fmt.Sprintf("%s/%s", config.ImageName, instanceID),
 		MachineImage: config.ImageName,
-		Timeout:      time.Minute * 20,
+		Timeout:      config.SnapshotTimeout,
 	}
 
 	snap, err := snapshotClient.CreateSnapshot(snapshotInput)
