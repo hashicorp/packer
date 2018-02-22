@@ -268,6 +268,9 @@ builder.
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
 
+-   `service_account_email` (string) - The service account to be used for launched instance. Defaults to
+    the project's default service account.
+
 -   `scopes` (array of strings) - The service account scopes for launched instance.
     Defaults to:
 
