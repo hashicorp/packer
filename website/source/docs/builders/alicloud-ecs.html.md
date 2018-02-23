@@ -35,9 +35,9 @@ builder.
     can also be sourced from the `ALICLOUD_REGION` environment variables.
 
 -   `instance_type` (string) - Type of the instance. For values, see [Instance
-    Type Table](). You can also obtain the latest instance type table by invoking
-    the [Querying Instance Type
-    Table](https://intl.aliyun.com/help/doc-detail/25620.htm?spm=a3c0i.o25499en.a3.6.Dr1bik)
+    Type Table](https://www.alibabacloud.com/help/doc-detail/25378.htm?spm=a3c0i.o25499en.a3.9.14a36ac8iYqKRA).
+    You can also obtain the latest instance type table by invoking the [Querying
+    Instance Type Table](https://intl.aliyun.com/help/doc-detail/25620.htm?spm=a3c0i.o25499en.a3.6.Dr1bik)
     interface.
 
 -   `image_name` (string) - The name of the user-defined image, \[2, 128\] English
@@ -80,45 +80,47 @@ builder.
     duplicated existing image, the source snapshot of this image will be delete
     either.
 
--   `disk_name` (string) - The value of disk name is blank by default. \[2, 128\]
-    English or Chinese characters, must begin with an uppercase/lowercase letter
-    or Chinese character. Can contain numbers, `.`, `_` and `-`. The disk name
-    will appear on the console. It cannot begin with `http://` or `https://`.
+-   `image_disk_mappings` (array of image disk mappings) - Add one or more data disks
+    to the image.
 
--   `disk_category` (string) - Category of the data disk. Optional values are:
-    -   cloud - general cloud disk
-    -   cloud\_efficiency - efficiency cloud disk
-    -   cloud\_ssd - cloud SSD
+    -   `disk_name` (string) - The value of disk name is blank by default. \[2, 128\]
+        English or Chinese characters, must begin with an uppercase/lowercase letter
+        or Chinese character. Can contain numbers, `.`, `_` and `-`. The disk name
+        will appear on the console. It cannot begin with `http://` or `https://`.
 
-    Default value: cloud.
+    -   `disk_category` (string) - Category of the data disk. Optional values are:
+        -   cloud - general cloud disk
+        -   cloud\_efficiency - efficiency cloud disk
+        -   cloud\_ssd - cloud SSD
 
--   `disk_size` (number) - Size of the system disk, in GB, values range:
-    -   cloud - 5 ~ 2000
-    -   cloud\_efficiency - 20 ~ 2048
-    -   cloud\_ssd - 20 ~ 2048
+        Default value: cloud.
 
-    The value should be equal to or greater than the size of the specific SnapshotId.
+    -   `disk_size` (number) - Size of the system disk, in GB, values range:
+        -   cloud - 5 ~ 2000
+        -   cloud\_efficiency - 20 ~ 2048
+        -   cloud\_ssd - 20 ~ 2048
 
--   `disk_snapshot_id` (string) - Snapshots are used to create the data disk
-    After this parameter is specified, Size is ignored. The actual size of the
-    created disk is the size of the specified snapshot.
+        The value should be equal to or greater than the size of the specific SnapshotId.
 
-    Snapshots from on or before July 15, 2013 cannot be used to create a disk.
+    -   `disk_snapshot_id` (string) - Snapshots are used to create the data disk
+        After this parameter is specified, Size is ignored. The actual size of the
+        created disk is the size of the specified snapshot.
 
--   `disk_description` (string) - The value of disk description is blank by default. \[2, 256\] characters. The disk description will appear on the console. It cannot begin with `http://` or `https://`.
+        Snapshots from on or before July 15, 2013 cannot be used to create a disk.
 
--   `disk_delete_with_instance` (string) - Whether or not the disk is released along with the instance:
--   True indicates that when the instance is released, this disk will be released with it
--   False indicates that when the instance is released, this disk will be retained.
+    -   `disk_description` (string) - The value of disk description is blank by default. \[2, 256\] characters. The disk description will appear on the console. It cannot begin with `http://` or `https://`.
 
--   `disk_device` (string) - Device information of the related instance: such as
-    `/dev/xvdb` It is null unless the Status is In\_use.
+    -   `disk_delete_with_instance` (string) - Whether or not the disk is released along with the instance:
+        -   True indicates that when the instance is released, this disk will be released with it
+        -   False indicates that when the instance is released, this disk will be retained.
+
+    -   `disk_device` (string) - Device information of the related instance: such as
+        `/dev/xvdb` It is null unless the Status is In\_use.
 
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
 
--   `io_optimized` (boolean) - I/O optimized.
-
-    Default value: false for Generation I instances; true for other instances.
+-   `io_optimized` (boolean) - Whether an ECS instance is I/O optimized or not.
+    The default value is `false`.
 
 -   `force_stop_instance` (boolean) - Whether to force shutdown upon device restart.
     The default value is `false`.
