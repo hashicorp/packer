@@ -19,11 +19,13 @@ func TestCommunicator(t *testing.T) {
 		return
 	}
 
-	c := &Communicator{}
+	c := &Communicator{
+		ExecuteCommand: []string{"/bin/sh", "-c", "{{.Command}}"},
+	}
 
 	var buf bytes.Buffer
 	cmd := &packer.RemoteCmd{
-		Command: "/bin/echo foo",
+		Command: "echo foo",
 		Stdout:  &buf,
 	}
 
