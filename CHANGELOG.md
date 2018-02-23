@@ -3,6 +3,7 @@
 ### BUG FIXES:
 
 * builder/amazon: Fix authorization using assume role. [GH-5914]
+* builder/hyper-v: Fix command collisions with VMWare PowerCLI. [GH-5861]
 * builder/vmware-iso: Fix panic when building on esx5 remotes. [GH-5931]
 * builder/vmware: Fix issue detecting host IP. [GH-5898] [GH-5900]
 * provisioner/ansible-local: Fix conflicting escaping schemes for vars provided
