@@ -1,7 +1,15 @@
-## UNRELEASED
+## 1.2.1 (February 23, 2918)
 
-## BUG FIXES:
+### BUG FIXES:
 * builder/amazon: Fix issues using assume role [GH-5914]
+* builder/vmware-esxi: Fall back to "nat" if driver does not impelment a NetworkMapper [GH-5916]
+* builder/vmware: Fix VMware Workstation methodology for finding dhcp.conf and dhcpd.leases files [GH-5882]
+* provisioner/ansible-local: Fix conflicting escaping schemes for vars provided
+ to "--extra-vars" [GH-5888]
+
+### IMPROVEMENTS:
+* builder/oracle-classic: Implement winRM communicator for oracle-classic builder [GH-5918]
+* builder/oracle-classic: Add snapshot_timeout option to builder [GH-5930]
 
 
 ## 1.2.0 (February 9, 2018)
