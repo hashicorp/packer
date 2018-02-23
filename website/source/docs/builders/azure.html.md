@@ -149,6 +149,10 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
+-   `disk_additional_size` (array of integers) - The size(s) of any additional
+    hard disks for the VM in gigabytes. If this is not specified then the VM
+    will only contain an OS disk.
+
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this

@@ -112,6 +112,9 @@ type Config struct {
 	OSType       string `mapstructure:"os_type"`
 	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb"`
 
+	// Additional Disks
+	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
+
 	// Runtime Values
 	UserName               string
 	Password               string
