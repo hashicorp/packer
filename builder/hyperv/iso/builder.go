@@ -24,6 +24,10 @@ const (
 	MinDiskSize     = 256              // 256MB
 	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
 
+	DefaultDiskBlockSize = 32  // 32MB
+	MinDiskBlockSize     = 1   // 1MB
+	MaxDiskBlockSize     = 256 // 256MB
+
 	DefaultRamSize                 = 1 * 1024  // 1GB
 	MinRamSize                     = 32        // 32MB
 	MaxRamSize                     = 32 * 1024 // 32GB
@@ -55,9 +59,15 @@ type Config struct {
 	// The size, in megabytes, of the hard disk to create for the VM.
 	// By default, this is 130048 (about 127 GB).
 	DiskSize uint `mapstructure:"disk_size"`
+
+	// The size, in megabytes, of the block size used to create the hard disk.
+	// By default, this is 32768 (about 32 MB)
+	DiskBlockSize uint `mapstructure:"disk_block_size"`
+
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
 	RamSize uint `mapstructure:"ram_size"`
+
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -139,6 +149,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	err = b.checkDiskBlockSize()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	err = b.checkRamSize()
@@ -352,6 +367,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName:                     b.config.SwitchName,
 			RamSize:                        b.config.RamSize,
 			DiskSize:                       b.config.DiskSize,
+			DiskBlockSize:                  b.config.DiskBlockSize,
 			Generation:                     b.config.Generation,
 			Cpu:                            b.config.Cpu,
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
@@ -487,6 +503,22 @@ func (b *Builder) checkDiskSize() error {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxDiskSize {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+	}
+
+	return nil
+}
+
+func (b *Builder) checkDiskBlockSize() error {
+	if b.config.DiskBlockSize == 0 {
+		b.config.DiskBlockSize = DefaultDiskBlockSize
+	}
+
+	log.Println(fmt.Sprintf("%s: %v", "DiskBlockSize", b.config.DiskBlockSize))
+
+	if b.config.DiskBlockSize < MinDiskBlockSize {
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size >= %v MB, but defined: %v", MinDiskBlockSize, b.config.DiskBlockSize)
+	} else if b.config.DiskBlockSize > MaxDiskBlockSize {
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size <= %v MB, but defined: %v", MaxDiskBlockSize, b.config.DiskBlockSize)
 	}
 
 	return nil
