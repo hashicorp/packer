@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -178,7 +179,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
 
-		comm := &Communicator{}
+		comm := &sl.Communicator{
+			Ctx:            p.config.ctx,
+			ExecuteCommand: []string{p.config.ExecuteCommand},
+		}
 
 		cmd := &packer.RemoteCmd{Command: command}
 

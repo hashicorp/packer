@@ -3,8 +3,8 @@ package chroot
 import (
 	"fmt"
 
+	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/post-processor/shell-local"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -21,7 +21,10 @@ func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ctx inte
 		}
 
 		ui.Say(fmt.Sprintf("Executing command: %s", command))
-		comm := &shell_local.Communicator{}
+		comm := &sl.Communicator{
+			Ctx:            ctx,
+			ExecuteCommand: []string{""},
+		}
 		cmd := &packer.RemoteCmd{Command: command}
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return fmt.Errorf("Error executing command: %s", err)
