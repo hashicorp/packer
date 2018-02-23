@@ -3,9 +3,9 @@ package shell
 import (
 	"errors"
 	"fmt"
-	"runtime"
 
 	"github.com/hashicorp/packer/common"
+	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -41,31 +41,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	if len(p.config.ExecuteCommand) == 0 {
-		if runtime.GOOS == "windows" {
-			p.config.ExecuteCommand = []string{
-				"cmd",
-				"/C",
-				"{{.Command}}",
-			}
-		} else {
-			p.config.ExecuteCommand = []string{
-				"/bin/sh",
-				"-c",
-				"{{.Command}}",
-			}
-		}
-	}
-
 	var errs *packer.MultiError
 	if p.config.Command == "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("command must be specified"))
-	}
-
-	if len(p.config.ExecuteCommand) == 0 {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("execute_command must not be empty"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -77,7 +56,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, _ packer.Communicator) error {
 	// Make another communicator for local
-	comm := &Communicator{
+	comm := &sl.Communicator{
 		Ctx:            p.config.ctx,
 		ExecuteCommand: p.config.ExecuteCommand,
 	}

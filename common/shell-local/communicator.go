@@ -1,10 +1,11 @@
-package shell
+package shell_local
 
 import (
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
@@ -17,17 +18,34 @@ type Communicator struct {
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	// Render the template so that we know how to execute the command
-	c.Ctx.Data = &ExecuteCommandTemplate{
-		Command: cmd.Command,
-	}
-	for i, field := range c.ExecuteCommand {
-		command, err := interpolate.Render(field, &c.Ctx)
-		if err != nil {
-			return fmt.Errorf("Error processing command: %s", err)
+	if len(c.ExecuteCommand) == 0 {
+		// Get default Execute Command
+		if runtime.GOOS == "windows" {
+			c.ExecuteCommand = []string{
+				"cmd",
+				"/C",
+				"{{.Command}}",
+			}
+		} else {
+			c.ExecuteCommand = []string{
+				"/bin/sh",
+				"-c",
+				"{{.Command}}",
+			}
 		}
+	} else {
+		// Render the template so that we know how to execute the command
+		c.Ctx.Data = &ExecuteCommandTemplate{
+			Command: cmd.Command,
+		}
+		for i, field := range c.ExecuteCommand {
+			command, err := interpolate.Render(field, &c.Ctx)
+			if err != nil {
+				return fmt.Errorf("Error processing command: %s", err)
+			}
 
-		c.ExecuteCommand[i] = command
+			c.ExecuteCommand[i] = command
+		}
 	}
 
 	// Build the local command to execute
