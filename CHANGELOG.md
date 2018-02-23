@@ -1,4 +1,4 @@
-## 1.2.1 (February 23, 2918)
+## 1.2.1 (February 23, 2018)
 
 ### BUG FIXES:
 
