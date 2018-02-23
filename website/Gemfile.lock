@@ -6,7 +6,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    autoprefixer-rails (7.2.4)
+    autoprefixer-rails (7.1.5)
       execjs
     bootstrap-sass (3.3.7)
       autoprefixer-rails (>= 5.2.1)
@@ -51,7 +51,7 @@ GEM
     http_parser.rb (0.6.0)
     i18n (0.7.0)
     json (2.1.0)
-    kramdown (1.16.2)
+    kramdown (1.15.0)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -102,8 +102,8 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
     mini_portile2 (2.3.0)
-    minitest (5.11.1)
-    multi_json (1.13.0)
+    minitest (5.10.3)
+    multi_json (1.12.2)
     nokogiri (1.8.1)
       mini_portile2 (~> 2.3.0)
     padrino-helpers (0.12.8.1)
@@ -115,7 +115,7 @@ GEM
     rack (1.6.8)
     rack-livereload (0.3.16)
       rack
-    rack-test (0.8.2)
+    rack-test (0.7.0)
       rack (>= 1.0, < 3)
     rb-fsevent (0.10.2)
     rb-inotify (0.9.10)
@@ -137,10 +137,10 @@ GEM
     thor (0.20.0)
     thread_safe (0.3.6)
     tilt (1.4.1)
-    turbolinks (5.1.0)
-      turbolinks-source (~> 5.1)
-    turbolinks-source (5.1.0)
-    tzinfo (1.2.4)
+    turbolinks (5.0.1)
+      turbolinks-source (~> 5)
+    turbolinks-source (5.0.3)
+    tzinfo (1.2.3)
       thread_safe (~> 0.1)
     uber (0.0.15)
     uglifier (2.7.2)
@@ -156,4 +156,4 @@ DEPENDENCIES
   middleman-hashicorp (= 0.3.29)
 
 BUNDLED WITH
-   1.16.1
+   1.15.4
