@@ -94,7 +94,7 @@ func TestAdditionalDiskArtifactString(t *testing.T) {
 							},
 						},
 						DataDisks: []CaptureDisk{
-							CaptureDisk{
+							{
 								Image: CaptureUri{
 									Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
 								},
@@ -188,7 +188,7 @@ func TestAdditionalDiskArtifactProperties(t *testing.T) {
 							},
 						},
 						DataDisks: []CaptureDisk{
-							CaptureDisk{
+							{
 								Image: CaptureUri{
 									Uri: "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.4085bb15-3644-4641-b9cd-f575918640b4.vhd",
 								},
