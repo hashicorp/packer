@@ -117,7 +117,7 @@ func createVirtualMachineWithDataDisksFromUri(vhdUri string) compute.VirtualMach
 					},
 				},
 				DataDisks: &[]compute.DataDisk{
-					compute.DataDisk{
+					{
 						Vhd: &compute.VirtualHardDisk{
 							URI: &vhdUri,
 						},
