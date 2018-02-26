@@ -519,3 +519,25 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 func convertGiBToKiB(gib int64) int64 {
 	return gib * 1024 * 1024
 }
+
+func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
+	var confSpec types.VirtualMachineConfigSpec
+
+	var ov []types.BaseOptionValue
+	for k, v := range params {
+		o := types.OptionValue{
+			Key:   k,
+			Value: v,
+		}
+		ov = append(ov, &o)
+	}
+	confSpec.ExtraConfig = ov
+
+	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+
+	_, err = task.WaitForResult(vm.driver.ctx, nil)
+	return err
+}
