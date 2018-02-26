@@ -19,7 +19,9 @@ import (
 //   vmName string
 //
 // Produces:
-type StepRemoveDevices struct{}
+type StepRemoveDevices struct{
+	Bundling VBoxBundleConfig
+}
 
 func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
@@ -68,29 +70,31 @@ func (s *StepRemoveDevices) Run(_ context.Context, state multistep.StateBag) mul
 		}
 	}
 
-	if _, ok := state.GetOk("attachedIso"); ok {
-		controllerName := "IDE Controller"
-		port := "0"
-		device := "1"
-		if _, ok := state.GetOk("attachedIsoOnSata"); ok {
-			controllerName = "SATA Controller"
-			port = "1"
-			device = "0"
-		}
+	if !s.Bundling.BundleISO {
+		if _, ok := state.GetOk("attachedIso"); ok {
+			controllerName := "IDE Controller"
+			port := "0"
+			device := "1"
+			if _, ok := state.GetOk("attachedIsoOnSata"); ok {
+				controllerName = "SATA Controller"
+				port = "1"
+				device = "0"
+			}
 
-		command := []string{
-			"storageattach", vmName,
-			"--storagectl", controllerName,
-			"--port", port,
-			"--device", device,
-			"--medium", "none",
-		}
+			command := []string{
+				"storageattach", vmName,
+				"--storagectl", controllerName,
+				"--port", port,
+				"--device", device,
+				"--medium", "none",
+			}
 
-		if err := driver.VBoxManage(command...); err != nil {
-			err := fmt.Errorf("Error detaching ISO: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
+			if err := driver.VBoxManage(command...); err != nil {
+				err := fmt.Errorf("Error detaching ISO: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
 		}
 	}
 

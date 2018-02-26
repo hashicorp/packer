@@ -316,6 +316,11 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
+-   `bundle_iso` (boolean) - Defaults to `false`. When enabled, Packer includes
+    any attached ISO disc devices into the final virtual machine. Useful for
+    some live distributions that require installation media to continue to be
+    attached after installation.
+
 -   `virtualbox_version_file` (string) - The path within the virtual machine to
     upload a file that contains the VirtualBox version that was used to create
     the machine. This information can be useful for provisioning. By default
