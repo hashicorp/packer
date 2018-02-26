@@ -50,6 +50,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config:    &b.config.FloppyConfig,
 			Datastore: b.config.Datastore,
 		},
+		&StepConfigParams{
+			Config:    &b.config.ConfigParamsConfig,
+		},
 	)
 
 	if b.config.Comm.Type != "none" {
