@@ -25,6 +25,11 @@ func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	ui.Say("Adding CDRoms...")
+	if err := vm.AddSATAController(); err != nil {
+		state.Put("error", fmt.Errorf("error adding SATA controller: %v", err))
+		return multistep.ActionHalt
+	}
+
 	for _, path := range s.Config.ISOPaths {
 		if err := vm.AddCdrom(path); err != nil {
 			state.Put("error", fmt.Errorf("error adding a cdrom: %v", err))
