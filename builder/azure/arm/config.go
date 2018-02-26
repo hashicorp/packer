@@ -96,6 +96,7 @@ type Config struct {
 	ResourceGroupName                 string             `mapstructure:"resource_group_name"`
 	StorageAccount                    string             `mapstructure:"storage_account"`
 	TempComputeName                   string             `mapstructure:"temp_compute_name"`
+	TempKeyVaultName                  string             `mapstructure:"temp_key_vault_name"`
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
 	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
@@ -348,6 +349,11 @@ func setRuntimeValues(c *Config) {
 	} else {
 		c.tmpComputeName = c.TempComputeName
 	}
+	if c.TempKeyVaultName == "" {
+		c.tmpKeyVaultName = tempName.KeyVaultName
+	} else {
+		c.tmpKeyVaultName = c.TempKeyVaultName
+	}
 	c.tmpDeploymentName = tempName.DeploymentName
 	// Only set tmpResourceGroupName if no name has been specified
 	if c.TempResourceGroupName == "" && c.BuildResourceGroupName == "" {
@@ -356,7 +362,6 @@ func setRuntimeValues(c *Config) {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
 	c.tmpOSDiskName = tempName.OSDiskName
-	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
 func setUserNamePassword(c *Config) {
