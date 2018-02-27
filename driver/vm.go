@@ -41,15 +41,16 @@ type CreateConfig struct {
 	DiskThinProvisioned bool
 	DiskControllerType  string // example: "scsi", "pvscsi"
 
-	Annotation   string
-	Name         string
-	Folder       string
-	Host         string
-	ResourcePool string
-	Datastore    string
-	GuestOS      string // example: otherGuest
-	Network      string // "" for default network
-	NetworkCard  string // example: vmxnet3
+	Annotation    string
+	Name          string
+	Folder        string
+	Host          string
+	ResourcePool  string
+	Datastore     string
+	GuestOS       string // example: otherGuest
+	Network       string // "" for default network
+	NetworkCard   string // example: vmxnet3
+	USBController bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -106,6 +107,14 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	devices, err = addNetwork(d, devices, config)
 	if err != nil {
 		return nil, err
+	}
+
+	if config.USBController {
+		t := true
+		usb := &types.VirtualUSBController{
+			EhciEnabled: &t,
+		}
+		devices = append(devices, usb)
 	}
 
 	createSpec.DeviceChange, err = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
