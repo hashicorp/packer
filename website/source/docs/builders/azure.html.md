@@ -151,7 +151,11 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
 
 -   `disk_additional_size` (array of integers) - The size(s) of any additional
     hard disks for the VM in gigabytes. If this is not specified then the VM
-    will only contain an OS disk.
+    will only contain an OS disk. The number of additional disks and maximum size of a disk depends on the configuration of your VM. See [Windows](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds) or [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds) for more information.
+
+	For VHD builds the final artifacts will be named `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture container along side the OS disk. The additional disks are included in the deployment template `PREFIX-vmTemplate.UUID`.
+	
+	For Managed build the final artifacts are included in the managed image. The additional disk will have the same storage account type as the OS disk, as specified with the `managed_image_storage_account_type` setting.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
