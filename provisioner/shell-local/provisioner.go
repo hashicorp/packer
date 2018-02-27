@@ -1,63 +1,29 @@
 package shell
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/hashicorp/packer/common"
 	sl "github.com/hashicorp/packer/common/shell-local"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
-type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-
-	// Command is the command to execute
-	Command string
-
-	// ExecuteCommand is the command used to execute the command.
-	ExecuteCommand []string `mapstructure:"execute_command"`
-
-	ctx interpolate.Context
-}
-
 type Provisioner struct {
-	config Config
+	config sl.Config
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	err := config.Decode(&p.config, &config.DecodeOpts{
-		Interpolate:        true,
-		InterpolateContext: &p.config.ctx,
-		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{
-				"execute_command",
-			},
-		},
-	}, raws...)
+	err := sl.Decode(&p.config, raws)
 	if err != nil {
 		return err
 	}
 
-	var errs *packer.MultiError
-	if p.config.Command == "" {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("command must be specified"))
-	}
-
-	if errs != nil && len(errs.Errors) > 0 {
-		return errs
-	}
-
-	return nil
+	return sl.Validate(&p.config)
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, _ packer.Communicator) error {
 	// Make another communicator for local
 	comm := &sl.Communicator{
-		Ctx:            p.config.ctx,
+		Ctx:            p.config.Ctx,
 		ExecuteCommand: p.config.ExecuteCommand,
 	}
 
