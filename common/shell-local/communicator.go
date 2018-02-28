@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
@@ -17,22 +16,7 @@ type Communicator struct {
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	if len(c.ExecuteCommand) == 0 {
-		// Get default Execute Command
-		if runtime.GOOS == "windows" {
-			c.ExecuteCommand = []string{
-				"cmd",
-				"/C",
-				"{{.Vars}}",
-				"{{.Command}}",
-			}
-		} else {
-			c.ExecuteCommand = []string{
-				"/bin/sh",
-				"-c",
-				"{{.Vars}}",
-				"{{.Command}}",
-			}
-		}
+		return fmt.Errorf("Error launching command via shell-local communicator: No ExecuteCommand provided")
 	}
 
 	// Build the local command to execute
