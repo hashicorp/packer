@@ -22,8 +22,7 @@ func RunLocalCommands(commands []string, wrappedCommand CommandWrapper, ctx inte
 
 		ui.Say(fmt.Sprintf("Executing command: %s", command))
 		comm := &sl.Communicator{
-			Ctx:            ctx,
-			ExecuteCommand: []string{""},
+			ExecuteCommand: []string{command},
 		}
 		cmd := &packer.RemoteCmd{Command: command}
 		if err := cmd.StartWithUi(comm, ui); err != nil {
