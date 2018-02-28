@@ -26,29 +26,12 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
 	if config.Inline != nil {
-		tf, err := ioutil.TempFile("", "packer-shell")
+		tempScriptFileName, err := createInlineScriptFile(config)
 		if err != nil {
-			return false, fmt.Errorf("Error preparing shell script: %s", err)
+			return false, err
 		}
-		defer os.Remove(tf.Name())
-
-		// Set the path to the temporary file
-		scripts = append(scripts, tf.Name())
-
-		// Write our contents to it
-		writer := bufio.NewWriter(tf)
-		writer.WriteString(fmt.Sprintf("#!%s\n", config.InlineShebang))
-		for _, command := range config.Inline {
-			if _, err := writer.WriteString(command + "\n"); err != nil {
-				return false, fmt.Errorf("Error preparing shell script: %s", err)
-			}
-		}
-
-		if err := writer.Flush(); err != nil {
-			return false, fmt.Errorf("Error preparing shell script: %s", err)
-		}
-
-		tf.Close()
+		defer os.Remove(tempScriptFileName)
+		scripts = append(scripts, tempScriptFileName)
 	}
 
 	// Create environment variables to set before executing the command
@@ -89,6 +72,29 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func createInlineScriptFile(config *Config) (string, error) {
+	tf, err := ioutil.TempFile("", "packer-shell")
+	if err != nil {
+		return "", fmt.Errorf("Error preparing shell script: %s", err)
+	}
+
+	// Write our contents to it
+	writer := bufio.NewWriter(tf)
+	writer.WriteString(fmt.Sprintf("#!%s\n", config.InlineShebang))
+	for _, command := range config.Inline {
+		if _, err := writer.WriteString(command + "\n"); err != nil {
+			return "", fmt.Errorf("Error preparing shell script: %s", err)
+		}
+	}
+
+	if err := writer.Flush(); err != nil {
+		return "", fmt.Errorf("Error preparing shell script: %s", err)
+	}
+
+	tf.Close()
+	return tf.Name(), nil
 }
 
 // Generates the final command to send to the communicator, using either the
