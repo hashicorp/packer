@@ -15,7 +15,7 @@ type ExecuteCommandTemplate struct {
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
-	err := sl.Decode(&p.config, raws)
+	err := sl.Decode(&p.config, raws...)
 	if err != nil {
 		return err
 	}
