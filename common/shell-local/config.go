@@ -75,6 +75,7 @@ func Validate(config *Config) error {
 				"{{.Vars}}",
 				"{{.Script}}",
 			}
+		}
 	} else {
 		if config.InlineShebang == "" {
 			config.InlineShebang = "/bin/sh -e"
@@ -110,32 +111,32 @@ func Validate(config *Config) error {
 			errors.New("Command, Inline, Script and Scripts options cannot all be empty."))
 	}
 
-	if config.Command != "" {
-		// Backwards Compatibility: Before v1.2.2, the shell-local
-		// provisioner only allowed a single Command, and to run
-		// multiple commands you needed to run several provisioners in a
-		// row, one for each command. In deduplicating the post-processor and
-		// provisioner code, we've changed this to allow an array of scripts or
-		// inline commands just like in the post-processor. This conditional
-		// grandfathers in the "Command" option, allowing the original usage to
-		// continue to work.
-		config.Inline = append(config.Inline, config.Command)
-	}
+	// Check that user hasn't given us too many commands to run
+	tooManyOptionsErr := errors.New("You may only specify one of the " +
+		"following options: Command, Inline, Script or Scripts. Please" +
+		" consolidate these options in your config.")
 
-	if config.Script != "" && len(config.Scripts) > 0 {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("Only one of script or scripts can be specified."))
+	if config.Command != "" {
+		if len(config.Inline) != 0 || len(config.Scripts) != 0 || config.Script != "" {
+			errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
+		} else {
+			config.Inline = []string{config.Command}
+		}
 	}
 
 	if config.Script != "" {
-		config.Scripts = []string{config.Script}
+		if len(config.Scripts) > 0 || len(config.Inline) > 0 {
+			errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
+		} else {
+			config.Scripts = []string{config.Script}
+		}
 	}
 
 	if len(config.Scripts) > 0 && config.Inline != nil {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("You may specify either a script file(s) or an inline script(s), but not both."))
+		errs = packer.MultiErrorAppend(errs, tooManyOptionsErr)
 	}
 
+	// Check that all scripts we need to run exist locally
 	for _, path := range config.Scripts {
 		if _, err := os.Stat(path); err != nil {
 			errs = packer.MultiErrorAppend(errs,
