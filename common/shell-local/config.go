@@ -86,7 +86,7 @@ func Validate(config *Config) error {
 
 	// Clean up input
 	if config.Inline != nil && len(config.Inline) == 0 {
-		config.Inline = nil
+		config.Inline = make([]string, 0)
 	}
 
 	if config.Scripts == nil {
