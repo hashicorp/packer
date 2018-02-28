@@ -58,10 +58,10 @@ func Decode(config *Config, raws ...interface{}) error {
 		},
 	}, raws...)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error decoding config: %s, config is %#v, and raws is %#v", err, config, raws)
 	}
 
-	return Validate(config)
+	return nil
 }
 
 func Validate(config *Config) error {
@@ -98,7 +98,7 @@ func Validate(config *Config) error {
 	}
 
 	// Verify that the user has given us a command to run
-	if config.Command != "" && len(config.Inline) == 0 &&
+	if config.Command == "" && len(config.Inline) == 0 &&
 		len(config.Scripts) == 0 && config.Script == "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Command, Inline, Script and Scripts options cannot all be empty."))
