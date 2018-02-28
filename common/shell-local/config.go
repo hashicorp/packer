@@ -68,18 +68,24 @@ func Validate(config *Config) error {
 	var errs *packer.MultiError
 
 	if runtime.GOOS == "windows" {
-		if config.InlineShebang == "" {
-			config.InlineShebang = ""
-		}
 		if len(config.ExecuteCommand) == 0 {
-			config.ExecuteCommand = []string{`{{.Vars}} "{{.Script}}"`}
-		}
+			config.ExecuteCommand = []string{
+				"cmd",
+				"/C",
+				"{{.Vars}}",
+				"{{.Script}}",
+			}
 	} else {
 		if config.InlineShebang == "" {
-			// TODO: verify that provisioner defaulted to this as well
 			config.InlineShebang = "/bin/sh -e"
 		}
 		if len(config.ExecuteCommand) == 0 {
+			config.ExecuteCommand = []string{
+				"/bin/sh",
+				"-c",
+				"{{.Vars}}",
+				"{{.Script}}",
+			}
 			config.ExecuteCommand = []string{`chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`}
 		}
 	}
