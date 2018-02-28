@@ -9,12 +9,10 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Communicator struct {
 	ExecuteCommand []string
-	Ctx            interpolate.Context
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
@@ -24,27 +22,16 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 			c.ExecuteCommand = []string{
 				"cmd",
 				"/C",
+				"{{.Vars}}",
 				"{{.Command}}",
 			}
 		} else {
 			c.ExecuteCommand = []string{
 				"/bin/sh",
 				"-c",
+				"{{.Vars}}",
 				"{{.Command}}",
 			}
-		}
-	} else {
-		// Render the template so that we know how to execute the command
-		c.Ctx.Data = &ExecuteCommandTemplate{
-			Command: cmd.Command,
-		}
-		for i, field := range c.ExecuteCommand {
-			command, err := interpolate.Render(field, &c.Ctx)
-			if err != nil {
-				return fmt.Errorf("Error processing command: %s", err)
-			}
-
-			c.ExecuteCommand[i] = command
 		}
 	}
 
@@ -96,8 +83,4 @@ func (c *Communicator) Download(string, io.Writer) error {
 
 func (c *Communicator) DownloadDir(string, string, []string) error {
 	return fmt.Errorf("downloadDir not supported")
-}
-
-type ExecuteCommandTemplate struct {
-	Command string
 }
