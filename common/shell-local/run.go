@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 	"sort"
 	"strings"
 
@@ -106,24 +105,6 @@ func createInterpolatedCommands(config *Config, script string, flattenedEnvVars 
 		Script: script,
 	}
 
-	if len(config.ExecuteCommand) == 0 {
-		// Get default Execute Command
-		if runtime.GOOS == "windows" {
-			config.ExecuteCommand = []string{
-				"cmd",
-				"/C",
-				"{{.Vars}}",
-				"{{.Script}}",
-			}
-		} else {
-			config.ExecuteCommand = []string{
-				"/bin/sh",
-				"-c",
-				"{{.Vars}}",
-				"{{.Script}}",
-			}
-		}
-	}
 	interpolatedCmds := make([]string, len(config.ExecuteCommand))
 	for i, cmd := range config.ExecuteCommand {
 		interpolatedCmd, err := interpolate.Render(cmd, &config.Ctx)
