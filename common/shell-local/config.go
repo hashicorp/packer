@@ -87,7 +87,6 @@ func Validate(config *Config) error {
 				"{{.Vars}}",
 				"{{.Script}}",
 			}
-			config.ExecuteCommand = []string{`chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`}
 		}
 	}
 
