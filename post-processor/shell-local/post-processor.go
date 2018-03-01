@@ -30,7 +30,11 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	} else if len(p.config.ExecuteCommand) == 1 {
 		// Backwards compatibility -- before merge, post-processor didn't have
 		// configurable call to shell program, meaning users may not have
-		// defined this in their call
+		// defined this in their call. If users are still using the old way of
+		// defining ExecuteCommand (e.g. just supplying a single string that is
+		// now being interpolated as a slice with one item), then assume we need
+		// to prepend this call still, and use the one that the post-processor
+		// defaulted to before.
 		p.config.ExecuteCommand = append([]string{"sh", "-c"}, p.config.ExecuteCommand...)
 	}
 
