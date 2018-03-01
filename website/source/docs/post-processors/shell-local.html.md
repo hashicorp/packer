@@ -13,7 +13,7 @@ Type: `shell-local`
 
 The local shell post processor executes scripts locally during the post
 processing stage. Shell local provides a convenient way to automate executing
-some task with the packer outputs.
+some task with packer outputs and variables.
 
 ## Basic example
 
@@ -32,6 +32,9 @@ The reference of available configuration options is listed below. The only
 required element is either "inline" or "script". Every other option is optional.
 
 Exactly *one* of the following is required:
+
+-   `command` (string) - This is a single command to execute. It will be written
+    to a temporary file and run using the `execute_command` call below.
 
 -   `inline` (array of strings) - This is an array of commands to execute. The
     commands are concatenated by newlines and turned into a single file, so they
@@ -52,15 +55,32 @@ Exactly *one* of the following is required:
 Optional parameters:
 
 -   `environment_vars` (array of strings) - An array of key/value pairs to
-    inject prior to the execute\_command. The format should be `key=value`.
+    inject prior to the `execute_command`. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
--   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`.
-    The value of this is treated as [template engine](/docs/templates/engine.html).
+-   `execute_command` (array of strings) - The command used to execute the script. By
+    default this is `["sh", "-c", "chmod +x \"{{.Script}}\"; {{.Vars}} \"{{.Script}}\""]`
+    on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
+    This is treated as a [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
-    to run, `Vars`, which is the list of `environment_vars`, if configured.
+    to run, and `Vars`, which is the list of `environment_vars`, if configured.
+    If you choose to set this option, make sure that the first element in the
+    array is the shell program you want to use (for example, "sh" or
+    "/usr/local/bin/zsh" or even "powershell.exe" although anything other than
+    a flavor of the shell command language is not explicitly supported and may
+    be broken by assumptions made within Packer).
+
+    For backwards compatibility, `execute_command` will accept a string insetad
+    of an array of strings. If a single string or an array of strings with only
+    one element is provided, Packer will replicate past behavior by appending
+    your `execute_command` to the array of strings `["sh", "-c"]`. For example,
+    if you set `"execute_command": "foo bar"`, the final `execute_command` that
+    Packer runs will be ["sh", "-c", "foo bar"]. If you set `"execute_command": ["foo", "bar"]`,
+    the final execute_command will remain `["foo", "bar"]`.
+
+    Again, the above is only provided as a backwards compatibility fix; we
+    strongly recommend that you set execute_command as an array of strings.
 
 -   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when

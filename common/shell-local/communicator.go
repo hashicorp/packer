@@ -3,6 +3,7 @@ package shell_local
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"syscall"
@@ -20,6 +21,7 @@ func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
 	}
 
 	// Build the local command to execute
+	log.Printf("Executing local shell command %s", c.ExecuteCommand)
 	localCmd := exec.Command(c.ExecuteCommand[0], c.ExecuteCommand[1:]...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
