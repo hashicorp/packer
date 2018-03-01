@@ -1,6 +1,8 @@
 package shell_local
 
 import (
+	"runtime"
+
 	sl "github.com/hashicorp/packer/common/shell-local"
 	"github.com/hashicorp/packer/packer"
 )
@@ -18,6 +20,18 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	err := sl.Decode(&p.config, raws...)
 	if err != nil {
 		return err
+	}
+	if len(p.config.ExecuteCommand) == 0 && runtime.GOOS != "windows" {
+		// Backwards compatibility from before post-processor merge with
+		// provisioner. Don't need to default separately for windows becuase the
+		// post-processor never worked for windows before the merge with the
+		// provisioner code, so the provisioner defaults are fine.
+		p.config.ExecuteCommand = []string{"sh", "-c", `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`}
+	} else if len(p.config.ExecuteCommand) == 1 {
+		// Backwards compatibility -- before merge, post-processor didn't have
+		// configurable call to shell program, meaning users may not have
+		// defined this in their call
+		p.config.ExecuteCommand = append([]string{"sh", "-c"}, p.config.ExecuteCommand...)
 	}
 
 	return sl.Validate(&p.config)
