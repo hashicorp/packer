@@ -41,7 +41,7 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		ui.Say(fmt.Sprintf("Post processing with local shell script: %s", script))
+		ui.Say(fmt.Sprintf("Running local shell script: %s", script))
 
 		comm := &Communicator{
 			ExecuteCommand: interpolatedCmds,
@@ -93,6 +93,10 @@ func createInlineScriptFile(config *Config) (string, error) {
 	}
 
 	tf.Close()
+	err = os.Chmod(tf.Name(), 0555)
+	if err != nil {
+		log.Printf("error modifying permissions of temp script file: %s", err.Error())
+	}
 	return tf.Name(), nil
 }
 

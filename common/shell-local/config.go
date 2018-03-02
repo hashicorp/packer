@@ -67,6 +67,11 @@ func Decode(config *Config, raws ...interface{}) error {
 func Validate(config *Config) error {
 	var errs *packer.MultiError
 
+	// Do not treat these defaults as a source of truth; the shell-local
+	// provisioner sets these defaults before Validate is called. Eventually
+	// we will have to bring the provisioner and post-processor defaults in
+	// line with one another, but for now the following may or may not be
+	// applied depending on where Validate is being called from.
 	if runtime.GOOS == "windows" {
 		if len(config.ExecuteCommand) == 0 {
 			config.ExecuteCommand = []string{
@@ -84,8 +89,7 @@ func Validate(config *Config) error {
 			config.ExecuteCommand = []string{
 				"/bin/sh",
 				"-c",
-				"{{.Vars}}",
-				"{{.Script}}",
+				"{{.Vars}} {{.Script}}",
 			}
 		}
 	}
