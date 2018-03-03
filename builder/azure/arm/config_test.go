@@ -1057,6 +1057,46 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 	}
 }
 
+func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
+
+	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
+	if c.AdditionalDiskSize != nil {
+		t.Errorf("Expected Config to not have a set of additional disks, but got a non nil value")
+	}
+}
+
+func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
+	config := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                constants.Target_Linux,
+		"communicator":           "none",
+	}
+
+	diskconfig := map[string][]int32{
+		"disk_additional_size": {32, 64},
+	}
+
+	c, _, _ := newConfig(config, diskconfig, getPackerConfiguration())
+	if c.AdditionalDiskSize == nil {
+		t.Errorf("Expected Config to have a set of additional disks, but got nil")
+	}
+	if len(c.AdditionalDiskSize) != 2 {
+		t.Errorf("Expected Config to have a 2 additional disks, but got %d additional disks", len(c.AdditionalDiskSize))
+	}
+	if c.AdditionalDiskSize[0] != 32 {
+		t.Errorf("Expected Config to have the first additional disks of size 32Gb, but got %dGb", c.AdditionalDiskSize[0])
+	}
+	if c.AdditionalDiskSize[1] != 64 {
+		t.Errorf("Expected Config to have the second additional disks of size 64Gb, but got %dGb", c.AdditionalDiskSize[1])
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
