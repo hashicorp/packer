@@ -191,6 +191,35 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.StorageProfile
+	dataDisks := make([]DataDiskUnion, len(diskSizeGB))
+
+	for i, additionalsize := range diskSizeGB {
+		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalsize)
+		dataDisks[i].Lun = to.IntPtr(i)
+		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("datadisk-%d", i+1))
+		dataDisks[i].CreateOption = "Empty"
+		dataDisks[i].Caching = "ReadWrite"
+		if isManaged {
+			dataDisks[i].Vhd = nil
+			dataDisks[i].ManagedDisk = profile.OsDisk.ManagedDisk
+		} else {
+			dataDisks[i].Vhd = &compute.VirtualHardDisk{
+				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/datadisk-', '%d','.vhd')]", i+1)),
+			}
+			dataDisks[i].ManagedDisk = nil
+		}
+	}
+	profile.DataDisks = &dataDisks
+	return nil
+}
+
 func (s *TemplateBuilder) SetCustomData(customData string) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {

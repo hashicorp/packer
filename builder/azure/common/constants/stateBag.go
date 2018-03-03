@@ -21,6 +21,7 @@ const (
 	ArmKeyVaultName                    string = "arm.KeyVaultName"
 	ArmLocation                        string = "arm.Location"
 	ArmOSDiskVhd                       string = "arm.OSDiskVhd"
+	ArmAdditionalDiskVhds              string = "arm.AdditionalDiskVhds"
 	ArmPublicIPAddressName             string = "arm.PublicIPAddressName"
 	ArmResourceGroupName               string = "arm.ResourceGroupName"
 	ArmIsResourceGroupCreated          string = "arm.IsResourceGroupCreated"

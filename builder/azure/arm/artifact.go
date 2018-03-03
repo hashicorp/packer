@@ -12,6 +12,11 @@ const (
 	BuilderId = "Azure.ResourceManagement.VMImage"
 )
 
+type AdditionalDiskArtifact struct {
+	AdditionalDiskUri            string
+	AdditionalDiskUriReadOnlySas string
+}
+
 type Artifact struct {
 	// VHD
 	StorageAccountLocation string
@@ -24,6 +29,9 @@ type Artifact struct {
 	ManagedImageResourceGroupName string
 	ManagedImageName              string
 	ManagedImageLocation          string
+
+	// Additional Disks
+	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
 func NewManagedImageArtifact(resourceGroup, name, location string) (*Artifact, error) {
@@ -53,11 +61,27 @@ func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) 
 		return nil, err
 	}
 
+	var additional_disks *[]AdditionalDiskArtifact
+	if template.Resources[0].Properties.StorageProfile.DataDisks != nil {
+		data_disks := make([]AdditionalDiskArtifact, len(template.Resources[0].Properties.StorageProfile.DataDisks))
+		for i, additionaldisk := range template.Resources[0].Properties.StorageProfile.DataDisks {
+			additionalVhdUri, err := url.Parse(additionaldisk.Image.Uri)
+			if err != nil {
+				return nil, err
+			}
+			data_disks[i].AdditionalDiskUri = additionalVhdUri.String()
+			data_disks[i].AdditionalDiskUriReadOnlySas = getSasUrl(getStorageUrlPath(additionalVhdUri))
+		}
+		additional_disks = &data_disks
+	}
+
 	return &Artifact{
 		OSDiskUri:              vhdUri.String(),
 		OSDiskUriReadOnlySas:   getSasUrl(getStorageUrlPath(vhdUri)),
 		TemplateUri:            templateUri.String(),
 		TemplateUriReadOnlySas: getSasUrl(getStorageUrlPath(templateUri)),
+
+		AdditionalDisks: additional_disks,
 
 		StorageAccountLocation: template.Resources[0].Location,
 	}, nil
@@ -128,6 +152,12 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("OSDiskUriReadOnlySas: %s\n", a.OSDiskUriReadOnlySas))
 		buf.WriteString(fmt.Sprintf("TemplateUri: %s\n", a.TemplateUri))
 		buf.WriteString(fmt.Sprintf("TemplateUriReadOnlySas: %s\n", a.TemplateUriReadOnlySas))
+		if a.AdditionalDisks != nil {
+			for i, additionaldisk := range *a.AdditionalDisks {
+				buf.WriteString(fmt.Sprintf("AdditionalDiskUri (datadisk-%d): %s\n", i+1, additionaldisk.AdditionalDiskUri))
+				buf.WriteString(fmt.Sprintf("AdditionalDiskUriReadOnlySas (datadisk-%d): %s\n", i+1, additionaldisk.AdditionalDiskUriReadOnlySas))
+			}
+		}
 	}
 
 	return buf.String()
