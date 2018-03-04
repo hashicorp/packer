@@ -41,15 +41,16 @@ type CreateConfig struct {
 	DiskThinProvisioned bool
 	DiskControllerType  string // example: "scsi", "pvscsi"
 
-	Annotation   string
-	Name         string
-	Folder       string
-	Host         string
-	ResourcePool string
-	Datastore    string
-	GuestOS      string // example: otherGuest
-	Network      string // "" for default network
-	NetworkCard  string // example: vmxnet3
+	Annotation    string
+	Name          string
+	Folder        string
+	Host          string
+	ResourcePool  string
+	Datastore     string
+	GuestOS       string // example: otherGuest
+	Network       string // "" for default network
+	NetworkCard   string // example: vmxnet3
+	USBController bool
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -106,6 +107,14 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	devices, err = addNetwork(d, devices, config)
 	if err != nil {
 		return nil, err
+	}
+
+	if config.USBController {
+		t := true
+		usb := &types.VirtualUSBController{
+			EhciEnabled: &t,
+		}
+		devices = append(devices, usb)
 	}
 
 	createSpec.DeviceChange, err = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
@@ -446,12 +455,12 @@ func (vm *VirtualMachine) AddCdrom(isoPath string) error {
 	if err != nil {
 		return err
 	}
-	ide, err := devices.FindIDEController("")
+	sata, err := vm.FindSATAController()
 	if err != nil {
 		return err
 	}
 
-	cdrom, err := devices.CreateCdrom(ide)
+	cdrom, err := vm.CreateCdrom(sata)
 	if err != nil {
 		return err
 	}
@@ -518,4 +527,26 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 
 func convertGiBToKiB(gib int64) int64 {
 	return gib * 1024 * 1024
+}
+
+func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
+	var confSpec types.VirtualMachineConfigSpec
+
+	var ov []types.BaseOptionValue
+	for k, v := range params {
+		o := types.OptionValue{
+			Key:   k,
+			Value: v,
+		}
+		ov = append(ov, &o)
+	}
+	confSpec.ExtraConfig = ov
+
+	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+
+	_, err = task.WaitForResult(vm.driver.ctx, nil)
+	return err
 }

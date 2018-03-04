@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+# Create user account
+USERNAME=jetbrains
+PASSWORD=jetbrains
+dscl . -create "/Users/${USERNAME}"
+dscl . -create "/Users/${USERNAME}" UserShell /bin/bash
+dscl . -create "/Users/${USERNAME}" RealName "${USERNAME}"
+dscl . -create "/Users/${USERNAME}" UniqueID 510
+dscl . -create "/Users/${USERNAME}" PrimaryGroupID 20
+dscl . -create "/Users/${USERNAME}" NFSHomeDirectory "/Users/${USERNAME}"
+dscl . -passwd "/Users/${USERNAME}" "${PASSWORD}"
+dscl . -append /Groups/admin GroupMembership "${USERNAME}"
+createhomedir -c
+
+# Start VMware Tools daemon explicitly
+launchctl load /Library/LaunchDaemons/com.vmware.launchd.tools.plist
+
+# Enable SSH
+systemsetup -setremotelogin on
+
+# Disable the welcome screen
+touch "$3/private/var/db/.AppleSetupDone"
