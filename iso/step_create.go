@@ -14,14 +14,15 @@ type CreateConfig struct {
 	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
 	DiskControllerType  string `mapstructure:"disk_controller_type"`
 
-	VMName       string `mapstructure:"vm_name"`
-	Folder       string `mapstructure:"folder"`
-	Host         string `mapstructure:"host"`
-	ResourcePool string `mapstructure:"resource_pool"`
-	Datastore    string `mapstructure:"datastore"`
-	GuestOSType  string `mapstructure:"guest_os_type"`
-	Network      string `mapstructure:"network"`
-	NetworkCard  string `mapstructure:"network_card"`
+	VMName        string `mapstructure:"vm_name"`
+	Folder        string `mapstructure:"folder"`
+	Host          string `mapstructure:"host"`
+	ResourcePool  string `mapstructure:"resource_pool"`
+	Datastore     string `mapstructure:"datastore"`
+	GuestOSType   string `mapstructure:"guest_os_type"`
+	Network       string `mapstructure:"network"`
+	NetworkCard   string `mapstructure:"network_card"`
+	USBController bool   `mapstructure:"usb_controller"`
 }
 
 func (c *CreateConfig) Prepare() []error {
@@ -79,6 +80,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		GuestOS:             s.Config.GuestOSType,
 		Network:             s.Config.Network,
 		NetworkCard:         s.Config.NetworkCard,
+		USBController:       s.Config.USBController,
 	})
 
 	if err != nil {
