@@ -604,7 +604,7 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if !xor(c.Location != "", c.BuildResourceGroupName != "") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Must specify either a location to create the resource group in or an existing build_resource_group_name."))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a location to create the resource group in or an existing build_resource_group_name, but not both."))
 	}
 
 	if c.ManagedImageName == "" && c.ManagedImageResourceGroupName == "" {
