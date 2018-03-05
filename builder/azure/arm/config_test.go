@@ -1097,6 +1097,57 @@ func TestConfigAdditionalDiskOverrideDefault(t *testing.T) {
 	}
 }
 
+// Test that configuration handles plan info
+//
+// The use of plan info requires that the following three properties are set.
+//
+//  1. plan_name
+//  2. plan_product
+//  3. plan_publisher
+func TestPlanInfoConfiguration(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+	}
+
+	config["plan_name"] = "--plan-name--"
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject the use of plan_name without plan_product and plan_publisher")
+	}
+
+	config["plan_product"] = "--plan-product--"
+	_, _, err = newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject the use of plan_name and plan_product without plan_publisher")
+	}
+
+	config["plan_publisher"] = "--plan-publisher--"
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("expected config to accept a complete plan configuration: %s", err)
+	}
+
+	if c.PlanName != "--plan-name--" {
+		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanName)
+	}
+	if c.PlanProduct != "--plan-product--" {
+		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanProduct)
+	}
+	if c.PlanPublisher != "--plan-publisher--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanPublisher)
+	}
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
