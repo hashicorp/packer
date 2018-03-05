@@ -414,7 +414,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -434,7 +434,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	cmd = comm.StartCmd.Command
-	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
 	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -461,7 +461,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -495,7 +495,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -612,7 +612,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	// Non-elevated
 	cmd, _ := p.createCommandText()
 
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. \${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -645,7 +645,7 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 		t.Fatalf("Failed to upload env var file")
 	}
 
-	re := regexp.MustCompile(`\${env:SYSTEMROOT}\\Temp\\packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1`)
+	re := regexp.MustCompile(`\${env:SYSTEMROOT}/Temp/packer-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1`)
 	matched := re.MatchString(envVarPath)
 	if !matched {
 		t.Fatalf("Got unexpected path for env var file: %s", envVarPath)
