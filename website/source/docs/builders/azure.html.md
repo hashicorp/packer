@@ -162,6 +162,17 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
+-   `plan_name` (string) The plan name.  This setting (`plan_product`, `plan_publisher`, and `plan_promotion_code`) are
+     only needed for Marketplace images. Please refer to [Deploy an image with Marketplace terms](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage#deploy-an-image-with-marketplace-terms) for more details.
+
+-   `plan_product` (string) The plan product.  See `plan_name` for more information.
+
+-   `plan_publisher` (string)  Specifies the produce of the image from the Marketplace.  This value is the same value as
+     Offer (`image_offer`). See `plan_name` for more information.
+
+-   `plan_promotion_code` (string) Some Marketplace images use a promotion code.  See `plan_name` for more
+    information.
+
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.

@@ -30,9 +30,17 @@ type Resource struct {
 	Type       *string             `json:"type"`
 	Location   *string             `json:"location,omitempty"`
 	DependsOn  *[]string           `json:"dependsOn,omitempty"`
+	Plan       *Plan               `json:"plan,omitempty"`
 	Properties *Properties         `json:"properties,omitempty"`
 	Tags       *map[string]*string `json:"tags,omitempty"`
 	Resources  *[]Resource         `json:"resources,omitempty"`
+}
+
+type Plan struct {
+	Name          *string `json:"name"`
+	Product       *string `json:"product"`
+	Publisher     *string `json:"publisher"`
+	PromotionCode *string `json:"promotionCode,omitempty"`
 }
 
 type OSDiskUnion struct {

@@ -115,6 +115,12 @@ type Config struct {
 	// Additional Disks
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
 
+	// Plan Info
+	PlanName          string `mapstructure:"plan_name"`
+	PlanProduct       string `mapstructure:"plan_product"`
+	PlanPublisher     string `mapstructure:"plan_publisher"`
+	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
+
 	// Runtime Values
 	UserName               string
 	Password               string
@@ -645,6 +651,14 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 	if c.VirtualNetworkName == "" && c.VirtualNetworkSubnetName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
+	}
+
+	/////////////////////////////////////////////
+	// Plan Info
+	if c.PlanName != "" || c.PlanProduct != "" || c.PlanPublisher != "" || c.PlanPromotionCode != "" {
+		if c.PlanName == "" || c.PlanProduct == "" || c.PlanPublisher == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("if either plan_name, plan_product, plan_publisher, or plan_promotion_code are defined then plan_name, plan_product, and plan_publisher must be defined"))
+		}
 	}
 
 	/////////////////////////////////////////////
