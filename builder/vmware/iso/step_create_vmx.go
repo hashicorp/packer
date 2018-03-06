@@ -716,7 +716,6 @@ tools.upgrade.policy = "upgradeAtPowerCycle"
 // USB
 usb.pciSlotNumber = "32"
 usb.present = "{{ .Usb_Present }}"
-usb_xhci.present = "TRUE"
 
 // Serial
 serial0.present = "{{ .Serial_Present }}"
