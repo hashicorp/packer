@@ -113,7 +113,7 @@ func storageUriToTemplateUri(su *url.URL) (*url.URL, error) {
 	return url.Parse(strings.Replace(su.String(), filename, templateFilename, 1))
 }
 
-func (a *Artifact) isMangedImage() bool {
+func (a *Artifact) isManagedImage() bool {
 	return a.ManagedImageResourceGroupName != ""
 }
 
@@ -142,7 +142,7 @@ func (a *Artifact) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s:\n\n", a.BuilderId()))
-	if a.isMangedImage() {
+	if a.isManagedImage() {
 		buf.WriteString(fmt.Sprintf("ManagedImageResourceGroupName: %s\n", a.ManagedImageResourceGroupName))
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
