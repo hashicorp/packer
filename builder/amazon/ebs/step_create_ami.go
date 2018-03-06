@@ -42,6 +42,10 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 	amis[*ec2conn.Config.Region] = *createResp.ImageId
 	state.Put("amis", amis)
 
+	namedamis := make(map[string]string)
+	namedamis[config.AMIName] = createResp.ImageId
+	state.Put("namedamis", namedamis)
+
 	// Wait for the image to become ready
 	stateChange := awscommon.StateChangeConf{
 		Pending:   []string{"pending"},
