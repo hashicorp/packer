@@ -49,7 +49,7 @@ showhelp() {
 requirements() {
     found=0
 
-    azureversion=$(az -v)
+    azureversion=$(az --version)
     if [ $? -eq 0 ]; then
         found=$((found + 1))
         echo "Found azure-cli version: $azureversion"
@@ -74,7 +74,7 @@ requirements() {
 }
 
 askSubscription() {
-    az account list
+    az account list -otable
     echo ""
     echo "Please enter the Id of the account you wish to use. If you do not see"
     echo "a valid account in the list press Ctrl+C to abort and create one."
@@ -120,7 +120,7 @@ askSecret() {
 }
 
 askLocation() {
-    az account list-locations
+    az account list-locations -otable
     echo ""
     echo "Choose which region your resource group and storage account will be created.  example: westus"
     echo -n "> "
@@ -140,7 +140,7 @@ createResourceGroup() {
 
 createStorageAccount() {
     echo "==> Creating storage account"
-    az storage account create --name $meta_name --resource-group $meta_name --location $location --kind Storage
+    az storage account create --name $meta_name --resource-group $meta_name --location $location --kind Storage --sku Standard_LRS
     if [ $? -eq 0 ]; then
         azure_storage_name=$meta_name
     else
@@ -170,21 +170,8 @@ createApplication() {
 
 createServicePrincipal() {
     echo "==> Creating service principal"
-    # Azure CLI 0.10.2 introduced a breaking change, where appId must be supplied with the -a switch
-    # prior version accepted appId as the only parameter without a switch
-    newer_syntax=false
-    IFS='.' read -ra azureversionsemver <<< "$azureversion"
-    if [ ${azureversionsemver[0]} -ge 0 ] && [ ${azureversionsemver[1]} -ge 10 ] && [ ${azureversionsemver[2]} -ge 2 ]; then
-        newer_syntax=true
-    fi
-
-    if [ "${newer_syntax}" = true ]; then
-        azure_object_id=$(az ad sp create --id $azure_client_id | jq -r .objectId)
-        echo $azure_object_id "was selected."
-    else
-        azure_object_id=$(az ad sp create --id $azure_client_id  | jq -r .objectId)
-        echo $azure_object_id "was selected."
-    fi
+    azure_object_id=$(az ad sp create --id $azure_client_id | jq -r .objectId)
+    echo $azure_object_id "was selected."
 
     if [ $? -ne 0 ]; then
         echo "Error creating service principal: $azure_client_id"
@@ -195,8 +182,9 @@ createServicePrincipal() {
 createPermissions() {
     echo "==> Creating permissions"
     az role assignment create --assignee $azure_object_id --role "Owner" --scope /subscriptions/$azure_subscription_id
-    # We want to use this more conservative scope but it does not work with the
-    # current implementation which uses temporary resource groups
+    # If the user wants to use a more conserative scope, she can.  She must
+    # configure the Azure builder to use build_resource_group_name.  The
+    # easiest solution is subscription wide permission.
     # az role assignment create --spn http://$meta_name -g $azure_group_name -o "API Management Service Contributor"
     if [ $? -ne 0 ]; then
         echo "Error creating permissions for: http://$meta_name"
