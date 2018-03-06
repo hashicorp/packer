@@ -357,7 +357,9 @@ builder.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is "esx5".
 
--   `usb` (boolean) - Enable VMware's USB bus for the VM.
+-   `usb` (boolean) - Enable VMware's USB bus for the guest VM. To enable usage
+    of the XHCI bus for USB 3 (5 Gbit/s), one can use the `vmx_data` option to
+    enable it by specifying "true" for the `usb_xhci.present` property.
 
 -   `version` (string) - The [vmx hardware
     version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)
