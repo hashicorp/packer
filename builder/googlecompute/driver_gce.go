@@ -14,15 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v1"
-
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
-
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
+	compute "google.golang.org/api/compute/v1"
 )
 
 // driverGCE is a Driver implementation that actually talks to GCE.
@@ -380,7 +378,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
 			{
-				Email:  "default",
+				Email:  c.ServiceAccountEmail,
 				Scopes: c.Scopes,
 			},
 		},
