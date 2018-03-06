@@ -58,6 +58,8 @@ type Config struct {
 	UseInternalIP        bool              `mapstructure:"use_internal_ip"`
 	Zone                 string            `mapstructure:"zone"`
 
+	ServiceAccountEmail string `mapstructure:"service_account_email"`
+
 	Account            AccountFile
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
