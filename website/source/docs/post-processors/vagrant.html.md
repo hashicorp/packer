@@ -34,6 +34,7 @@ providers.
 -   DigitalOcean
 -   Google
 -   Hyper-V
+-   LXC
 -   Parallels
 -   QEMU
 -   VirtualBox
@@ -101,8 +102,18 @@ Specify overrides within the `override` configuration by provider name:
 In the example above, the compression level will be set to 1 except for VMware,
 where it will be set to 0.
 
-The available provider names are: `aws`, `digitalocean`, `google`, `virtualbox`,
-`vmware`, and `parallels`.
+The available provider names are:
+
+- `aws`
+- `digitalocean`
+- `google`
+- `hyperv`
+- `parallels`
+- `libvirt`
+- `lxc`
+- `scaleway`
+- `virtualbox`
+- `vmware`
 
 ## Input Artifacts
 
