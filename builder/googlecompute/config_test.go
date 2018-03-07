@@ -170,6 +170,32 @@ func TestConfigPrepare(t *testing.T) {
 			[]string{"https://www.googleapis.com/auth/cloud-platform"},
 			false,
 		},
+
+		{
+			"disable_default_service_account",
+			"",
+			false,
+		},
+		{
+			"disable_default_service_account",
+			nil,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			false,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			true,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			"NOT A BOOL",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
