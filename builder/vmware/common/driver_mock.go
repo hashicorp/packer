@@ -98,9 +98,9 @@ type NetworkMapperMock struct {
 	DeviceIntoNameCalled int
 }
 
-func (m NetworkMapperMock) NameIntoDevice(name string) (string, error) {
+func (m NetworkMapperMock) NameIntoDevices(name string) ([]string, error) {
 	m.NameIntoDeviceCalled += 1
-	return "", nil
+	return make([]string, 0), nil
 }
 func (m NetworkMapperMock) DeviceIntoName(device string) (string, error) {
 	m.DeviceIntoNameCalled += 1
