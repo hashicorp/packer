@@ -315,7 +315,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 
 	// convert the stashed network to a device
 	network := state.Get("vmnetwork").(string)
-	device, err := netmap.NameIntoDevice(network)
+	devices, err := netmap.NameIntoDevices(network)
 
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
@@ -326,7 +326,9 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 			return "", err
 		}
 
+		var device string
 		device, err = readCustomDeviceName(vmxData)
+		devices = append(devices, device)
 		if err != nil {
 			return "", err
 		}
@@ -338,64 +340,67 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	// figure out the correct dhcp leases
-	dhcpLeasesPath := d.DhcpLeasesPath(device)
-	log.Printf("DHCP leases path: %s", dhcpLeasesPath)
-	if dhcpLeasesPath == "" {
-		return "", errors.New("no DHCP leases path found.")
-	}
-
-	// open up the lease and read its contents
-	fh, err := os.Open(dhcpLeasesPath)
-	if err != nil {
-		return "", err
-	}
-	defer fh.Close()
-
-	dhcpBytes, err := ioutil.ReadAll(fh)
-	if err != nil {
-		return "", err
-	}
-
-	// start grepping through the file looking for fields that we care about
-	var lastIp string
-	var lastLeaseEnd time.Time
-
-	var curIp string
-	var curLeaseEnd time.Time
-
-	ipLineRe := regexp.MustCompile(`^lease (.+?) {$`)
-	endTimeLineRe := regexp.MustCompile(`^\s*ends \d (.+?);$`)
-	macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
-
-	for _, line := range strings.Split(string(dhcpBytes), "\n") {
-		// Need to trim off CR character when running in windows
-		line = strings.TrimRight(line, "\r")
-
-		matches := ipLineRe.FindStringSubmatch(line)
-		if matches != nil {
-			lastIp = matches[1]
-			continue
+	for _, device := range devices {
+		// figure out the correct dhcp leases
+		dhcpLeasesPath := d.DhcpLeasesPath(device)
+		log.Printf("Trying DHCP leases path: %s", dhcpLeasesPath)
+		if dhcpLeasesPath == "" {
+			return "", fmt.Errorf("no DHCP leases path found for device %s", device)
 		}
 
-		matches = endTimeLineRe.FindStringSubmatch(line)
-		if matches != nil {
-			lastLeaseEnd, _ = time.Parse("2006/01/02 15:04:05", matches[1])
-			continue
+		// open up the lease and read its contents
+		fh, err := os.Open(dhcpLeasesPath)
+		if err != nil {
+			return "", err
+		}
+		defer fh.Close()
+
+		dhcpBytes, err := ioutil.ReadAll(fh)
+		if err != nil {
+			return "", err
 		}
 
-		// If the mac address matches and this lease ends farther in the
-		// future than the last match we might have, then choose it.
-		matches = macLineRe.FindStringSubmatch(line)
-		if matches != nil && strings.EqualFold(matches[1], MACAddress) && curLeaseEnd.Before(lastLeaseEnd) {
-			curIp = lastIp
-			curLeaseEnd = lastLeaseEnd
+		// start grepping through the file looking for fields that we care about
+		var lastIp string
+		var lastLeaseEnd time.Time
+
+		var curIp string
+		var curLeaseEnd time.Time
+
+		ipLineRe := regexp.MustCompile(`^lease (.+?) {$`)
+		endTimeLineRe := regexp.MustCompile(`^\s*ends \d (.+?);$`)
+		macLineRe := regexp.MustCompile(`^\s*hardware ethernet (.+?);$`)
+
+		for _, line := range strings.Split(string(dhcpBytes), "\n") {
+			// Need to trim off CR character when running in windows
+			line = strings.TrimRight(line, "\r")
+
+			matches := ipLineRe.FindStringSubmatch(line)
+			if matches != nil {
+				lastIp = matches[1]
+				continue
+			}
+
+			matches = endTimeLineRe.FindStringSubmatch(line)
+			if matches != nil {
+				lastLeaseEnd, _ = time.Parse("2006/01/02 15:04:05", matches[1])
+				continue
+			}
+
+			// If the mac address matches and this lease ends farther in the
+			// future than the last match we might have, then choose it.
+			matches = macLineRe.FindStringSubmatch(line)
+			if matches != nil && strings.EqualFold(matches[1], MACAddress) && curLeaseEnd.Before(lastLeaseEnd) {
+				curIp = lastIp
+				curLeaseEnd = lastLeaseEnd
+			}
+		}
+		if curIp != "" {
+			return curIp, nil
 		}
 	}
-	if curIp == "" {
-		return "", fmt.Errorf("IP not found for MAC %s in DHCP leases at %s", MACAddress, dhcpLeasesPath)
-	}
-	return curIp, nil
+
+	return "", fmt.Errorf("None of the found device(s) %v has a DHCP lease for MAC %s", devices, MACAddress)
 }
 
 func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
@@ -408,7 +413,7 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 
 	// convert network to name
 	network := state.Get("vmnetwork").(string)
-	device, err := netmap.NameIntoDevice(network)
+	devices, err := netmap.NameIntoDevices(network)
 
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
@@ -419,49 +424,56 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 			return "", err
 		}
 
+		var device string
 		device, err = readCustomDeviceName(vmxData)
+		devices = append(devices, device)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	// parse dhcpd configuration
-	pathDhcpConfig := d.DhcpConfPath(device)
-	if _, err := os.Stat(pathDhcpConfig); err != nil {
-		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
-	}
-
-	config, err := ReadDhcpConfig(pathDhcpConfig)
-	if err != nil {
-		return "", err
-	}
-
-	// find the entry configured in the dhcpd
-	interfaceConfig, err := config.HostByName(device)
-	if err != nil {
-		return "", err
-	}
-
-	// finally grab the hardware address
-	address, err := interfaceConfig.Hardware()
-	if err == nil {
-		return address.String(), nil
-	}
-
-	// we didn't find it, so search through our interfaces for the device name
-	interfaceList, err := net.Interfaces()
-	if err == nil {
-		return "", err
-	}
-
-	names := make([]string, 0)
-	for _, intf := range interfaceList {
-		if strings.HasSuffix(strings.ToLower(intf.Name), device) {
-			return intf.HardwareAddr.String(), nil
+	var lastError error
+	for _, device := range devices {
+		// parse dhcpd configuration
+		pathDhcpConfig := d.DhcpConfPath(device)
+		if _, err := os.Stat(pathDhcpConfig); err != nil {
+			return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
 		}
-		names = append(names, intf.Name)
+
+		config, err := ReadDhcpConfig(pathDhcpConfig)
+		if err != nil {
+			lastError = err
+			continue
+		}
+
+		// find the entry configured in the dhcpd
+		interfaceConfig, err := config.HostByName(device)
+		if err != nil {
+			lastError = err
+			continue
+		}
+
+		// finally grab the hardware address
+		address, err := interfaceConfig.Hardware()
+		if err == nil {
+			return address.String(), nil
+		}
+
+		// we didn't find it, so search through our interfaces for the device name
+		interfaceList, err := net.Interfaces()
+		if err == nil {
+			return "", err
+		}
+
+		names := make([]string, 0)
+		for _, intf := range interfaceList {
+			if strings.HasSuffix(strings.ToLower(intf.Name), device) {
+				return intf.HardwareAddr.String(), nil
+			}
+			names = append(names, intf.Name)
+		}
 	}
-	return "", fmt.Errorf("Unable to find device %s : %v", device, names)
+	return "", fmt.Errorf("Unable to find host address from devices %v, last error: %s", devices, lastError)
 }
 
 func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
@@ -474,7 +486,7 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 
 	// convert network to name
 	network := state.Get("vmnetwork").(string)
-	device, err := netmap.NameIntoDevice(network)
+	devices, err := netmap.NameIntoDevices(network)
 
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
@@ -485,32 +497,41 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 			return "", err
 		}
 
+		var device string
 		device, err = readCustomDeviceName(vmxData)
+		devices = append(devices, device)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	// parse dhcpd configuration
-	pathDhcpConfig := d.DhcpConfPath(device)
-	if _, err := os.Stat(pathDhcpConfig); err != nil {
-		return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
-	}
-	config, err := ReadDhcpConfig(pathDhcpConfig)
-	if err != nil {
-		return "", err
-	}
+	var lastError error
+	for _, device := range devices {
+		// parse dhcpd configuration
+		pathDhcpConfig := d.DhcpConfPath(device)
+		if _, err := os.Stat(pathDhcpConfig); err != nil {
+			return "", fmt.Errorf("Could not find vmnetdhcp conf file: %s", pathDhcpConfig)
+		}
+		config, err := ReadDhcpConfig(pathDhcpConfig)
+		if err != nil {
+			lastError = err
+			continue
+		}
 
-	// find the entry configured in the dhcpd
-	interfaceConfig, err := config.HostByName(device)
-	if err != nil {
-		return "", err
-	}
+		// find the entry configured in the dhcpd
+		interfaceConfig, err := config.HostByName(device)
+		if err != nil {
+			lastError = err
+			continue
+		}
 
-	address, err := interfaceConfig.IP4()
-	if err != nil {
-		return "", err
-	}
+		address, err := interfaceConfig.IP4()
+		if err != nil {
+			lastError = err
+			continue
+		}
 
-	return address.String(), nil
+		return address.String(), nil
+	}
+	return "", fmt.Errorf("Unable to find host IP from devices %v, last error: %s", devices, lastError)
 }
