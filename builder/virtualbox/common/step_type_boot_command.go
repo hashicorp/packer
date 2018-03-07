@@ -155,6 +155,7 @@ func scancodes(message string) []string {
 	special["<end>"] = []string{"4f", "cf"}
 	special["<pageUp>"] = []string{"49", "c9"}
 	special["<pageDown>"] = []string{"51", "d1"}
+	special["<menu>"] = []string{"e05d", "e0cd"}
 	special["<leftAlt>"] = []string{"38", "b8"}
 	special["<leftCtrl>"] = []string{"1d", "9d"}
 	special["<leftShift>"] = []string{"2a", "aa"}
@@ -190,6 +191,12 @@ func scancodes(message string) []string {
 	for len(message) > 0 {
 		var scancode []string
 
+		if strings.HasPrefix(message, "<menuOn>") {
+			scancode = []string{"e05d"}
+			message = message[len("<menuOn>"):]
+			log.Printf("Special code '<menuOn>' found, replacing with: e05d")
+		}
+
 		if strings.HasPrefix(message, "<leftAltOn>") {
 			scancode = []string{"38"}
 			message = message[len("<leftAltOn>"):]
@@ -206,6 +213,12 @@ func scancodes(message string) []string {
 			scancode = []string{"2a"}
 			message = message[len("<leftShiftOn>"):]
 			log.Printf("Special code '<leftShiftOn>' found, replacing with: 2a")
+		}
+
+		if strings.HasPrefix(message, "<menuOff>") {
+			scancode = []string{"e0cd"}
+			message = message[len("<menuOff>"):]
+			log.Printf("Special code '<menuOff>' found, replacing with: e0cd")
 		}
 
 		if strings.HasPrefix(message, "<leftAltOff>") {
