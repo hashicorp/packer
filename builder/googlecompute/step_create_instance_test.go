@@ -248,6 +248,54 @@ func TestStepCreateInstance_errorTimeout(t *testing.T) {
 	assert.False(t, ok, "State should not have an instance name.")
 }
 
+func TestStepCreateInstance_noServiceAccount(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	c.DisableDefaultServiceAccount = true
+	c.ServiceAccountEmail = ""
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// cleanup
+	step.Cleanup(state)
+
+	// Check args passed to the driver.
+	assert.Equal(t, d.RunInstanceConfig.DisableDefaultServiceAccount, c.DisableDefaultServiceAccount, "Incorrect value for DisableDefaultServiceAccount passed to driver.")
+	assert.Equal(t, d.RunInstanceConfig.ServiceAccountEmail, c.ServiceAccountEmail, "Incorrect value for ServiceAccountEmail passed to driver.")
+}
+
+func TestStepCreateInstance_customServiceAccount(t *testing.T) {
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+
+	c := state.Get("config").(*Config)
+	c.DisableDefaultServiceAccount = true
+	c.ServiceAccountEmail = "custom-service-account"
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{}, 100)
+
+	// run the step
+	assert.Equal(t, step.Run(context.Background(), state), multistep.ActionContinue, "Step should have passed and continued.")
+
+	// cleanup
+	step.Cleanup(state)
+
+	// Check args passed to the driver.
+	assert.Equal(t, d.RunInstanceConfig.DisableDefaultServiceAccount, c.DisableDefaultServiceAccount, "Incorrect value for DisableDefaultServiceAccount passed to driver.")
+	assert.Equal(t, d.RunInstanceConfig.ServiceAccountEmail, c.ServiceAccountEmail, "Incorrect value for ServiceAccountEmail passed to driver.")
+}
+
 func TestCreateInstanceMetadata(t *testing.T) {
 	state := testState(t)
 	c := state.Get("config").(*Config)

@@ -210,6 +210,9 @@ builder.
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
+-   `disable_default_service_account` (bool) - If true, the default service account will not be used if `service_account_email`
+    is not specified. Set this value to true and omit `service_account_email` to provision a VM with no service account.
+
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
@@ -269,7 +272,7 @@ builder.
     to the region hosting the specified `zone`.
 
 -   `service_account_email` (string) - The service account to be used for launched instance. Defaults to
-    the project's default service account.
+    the project's default service account unless `disable_default_service_account` is true.
 
 -   `scopes` (array of strings) - The service account scopes for launched instance.
     Defaults to:
