@@ -5,7 +5,7 @@ import (
 )
 
 type VBoxBundleConfig struct {
-  BundleISO      bool `mapstructure:"bundle_iso"`
+	BundleISO bool `mapstructure:"bundle_iso"`
 }
 
 func (c *VBoxBundleConfig) Prepare(ctx *interpolate.Context) []error {
