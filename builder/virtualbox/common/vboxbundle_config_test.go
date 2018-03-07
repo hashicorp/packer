@@ -26,7 +26,7 @@ func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 	}
 
 	expected := VBoxBundleConfig{
-    BundleISO: true,
+		BundleISO: true,
 	}
 
 	if !reflect.DeepEqual(c, expected) {

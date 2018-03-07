@@ -19,7 +19,7 @@ import (
 //   vmName string
 //
 // Produces:
-type StepRemoveDevices struct{
+type StepRemoveDevices struct {
 	Bundling VBoxBundleConfig
 }
 
