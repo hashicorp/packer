@@ -30,6 +30,7 @@ var builtins = map[string]string{
 	"packer.parallels":          "parallels",
 	"MSOpenTech.hyperv":         "hyperv",
 	"transcend.qemu":            "libvirt",
+	"ustream.lxc":               "lxc",
 }
 
 type Config struct {
@@ -238,6 +239,8 @@ func providerForName(name string) Provider {
 		return new(LibVirtProvider)
 	case "google":
 		return new(GoogleProvider)
+	case "lxc":
+		return new(LXCProvider)
 	default:
 		return nil
 	}
