@@ -343,12 +343,18 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		guestAccelerators = append(guestAccelerators, ac)
 	}
 
-	serviceAccount := &compute.ServiceAccount{
-		Email:  "default",
-		Scopes: c.Scopes,
+	// Configure the instance's service account. If the user has set
+	// disable_default_service_account, then the default service account
+	// will not be used. If they also do not set service_account_email, then
+	// the instance will be created with no service account or scopes.
+	serviceAccount := &compute.ServiceAccount{}
+	if !c.DisableDefaultServiceAccount {
+		serviceAccount.Email = "default"
+		serviceAccount.Scopes = c.Scopes
 	}
 	if c.ServiceAccountEmail != "" {
 		serviceAccount.Email = c.ServiceAccountEmail
+		serviceAccount.Scopes = c.Scopes
 	}
 
 	// Create the instance information
