@@ -31,24 +31,55 @@ return $false
 	return cmdOut, err
 }
 
+func GetVirtualMachineNetworkAdapterMacAddress(vmName string) (string, error) {
+
+	var script = `
+param([string]vmName)
+try {
+  $adapter = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
+  $macaddr = $adapter.MacAddress -replace "(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})", '$1-$2-$3-$4-$5-$6'
+  if ($macaddr -eq null) {
+	return $false
+  }
+} catch {
+  return $false
+}
+$macaddr
+`
+	var ps powershell.PowerShellCmd
+	cmdOut, err := ps.Output(script, vmName)
+
+	return cmdOut, err
+}
+
 func GetVirtualMachineNetworkAdapterAddress(vmName string) (string, error) {
 
 	var script = `
-param([string]$vmName, [int]$addressIndex)
+param([string]$vmName, [int]$addressIndex, [string]$macaddress)
 try {
   $adapter = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
   $ip = $adapter.IPAddresses[$addressIndex]
   if($ip -eq $null) {
-    return $false
+    $ip = (Get-NetNeighbor -LinkLayerAddress $macaddress).IPAddress
+	if ($ip -eq $null) {
+	  return $false
+	}
   }
 } catch {
   return $false
 }
 $ip
 `
+	cmdOut, err := GetVirtualMachineNetworkAdapterMacAddress(vmName)
+
+	var macaddress string
+	macaddress = strings.TrimSpace(cmdOut)
+	if macaddress == "False" {
+		macaddress = ""
+	}
 
 	var ps powershell.PowerShellCmd
-	cmdOut, err := ps.Output(script, vmName, "0")
+	cmdOut, err = ps.Output(script, vmName, "0", macaddress)
 
 	return cmdOut, err
 }
@@ -983,7 +1014,11 @@ try {
   $ip = Hyper-V\Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
 
   if($ip -eq $null) {
-    return ""
+    $macaddr = $mac -replace "(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})", '$1-$2-$3-$4-$5-$6'
+    $ip = (Get-NetNeighbor -LinkLayerAddress $macaddr).IPAddress
+	if ($ip -eq $null) {
+	  return ""
+	}
   }
 } catch {
   return ""
