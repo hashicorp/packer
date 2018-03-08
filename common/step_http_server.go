@@ -3,14 +3,12 @@ package common
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
-	"os"
-	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -77,25 +75,21 @@ func (s *StepHTTPServer) Run(_ context.Context, state multistep.StateBag) multis
 	return multistep.ActionContinue
 }
 
-func httpAddrFilename(suffix string) string {
-	uuid := os.Getenv("PACKER_RUN_UUID")
-	return filepath.Join(os.TempDir(), fmt.Sprintf("packer-%s-%s", uuid, suffix))
-}
-
 func SetHTTPPort(port string) error {
-	return ioutil.WriteFile(httpAddrFilename("port"), []byte(port), 0644)
+	return common.SetSharedState("port", port)
 }
 
 func SetHTTPIP(ip string) error {
-	return ioutil.WriteFile(httpAddrFilename("ip"), []byte(ip), 0644)
+	return common.SetSharedState("ip", ip)
 }
 
 func GetHTTPAddr() string {
-	ip, err := ioutil.ReadFile(httpAddrFilename("ip"))
+	ip, err := common.RetrieveSharedState("ip")
 	if err != nil {
 		return ""
 	}
-	port, err := ioutil.ReadFile(httpAddrFilename("port"))
+
+	port, err := common.RetrieveSharedState("port")
 	if err != nil {
 		return ""
 	}
@@ -107,6 +101,6 @@ func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()
 	}
-	os.Remove(httpAddrFilename("port"))
-	os.Remove(httpAddrFilename("ip"))
+	common.RemoveSharedStateFile("port")
+	common.RemoveSharedStateFile("ip")
 }
