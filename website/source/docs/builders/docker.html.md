@@ -24,9 +24,11 @@ has a simple mental model: you provision containers much the same way you
 provision a normal virtualized or dedicated server. For more information, read
 the section on [Dockerfiles](#dockerfiles).
 
-The Docker builder must run on a machine that has Docker installed. Therefore
-the builder only works on machines that support Docker. You can learn about
-what [platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/) in the Docker documentation.
+The Docker builder must run on a machine that has Docker Engine installed.
+Therefore the builder only works on machines that support Docker and _does not
+support running on a Docker remote host_. You can learn about what
+[platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/)
+in the Docker documentation.
 
 ## Basic Example: Export
 
@@ -125,9 +127,8 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+The Docker builder uses a special Docker communicator _and will not use_ the
+standard [communicators](/docs/templates/communicator.html).
 
 ### Required:
 
