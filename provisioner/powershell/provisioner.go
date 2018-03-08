@@ -17,6 +17,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -114,7 +115,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			},
 		},
 	}, raws...)
-
 	if err != nil {
 		return err
 	}
@@ -358,9 +358,16 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
+	winRMPass, err := commonhelper.RetrieveSharedState("winrm_password")
+	// This shared state is only created by the amazon builder.
+	if err == nil {
+		envVars["AUTO_WINRM_PASSWORD"] = psEscape.Replace(winRMPass)
+
 	}
 
 	// Split vars into key/value components
@@ -500,6 +507,16 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	if escapedElevatedUser != p.config.ElevatedUser {
 		log.Printf("Elevated user %s converted to %s after escaping chars special to PowerShell",
 			p.config.ElevatedUser, escapedElevatedUser)
+	}
+	// Replace ElevatedPassword for winrm users who used this feature
+	if strings.Compare(p.config.ElevatedPassword, ".AUTO_WINRM_PASSWORD") == 0 {
+		winRMPass, err := commonhelper.RetrieveSharedState("winrm_password")
+		// This shared state is only created by the amazon builder.
+		if err != nil {
+			fmt.Printf("Error reading AUTO_WINRM_PASSWORD from state: %s", err)
+			return "", err
+		}
+		p.config.ElevatedPassword = winRMPass
 	}
 
 	// Escape chars special to PowerShell in the ElevatedPassword string
