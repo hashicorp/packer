@@ -8,7 +8,7 @@ build:
 		--tty \
 		--volume "$(shell pwd):/website" \
 		hashicorp/middleman-hashicorp:${VERSION} \
-		bundle exec middleman build --verbose --clean
+		ENV=production bundle exec middleman build --verbose --clean
 
 website:
 	@echo "==> Starting website in Docker..."
