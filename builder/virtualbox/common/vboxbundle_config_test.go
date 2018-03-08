@@ -14,7 +14,7 @@ func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(c, VBoxBundleConfig{BundleISO: false}) {
-		t.Fatalf("bad: %#v", c.VBoxBundle)
+		t.Fatalf("bad: %#v", c.BundleISO)
 	}
 
 	// Test with a good one
