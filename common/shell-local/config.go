@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -44,6 +45,8 @@ type Config struct {
 	// can be used to inject the environment_vars into the environment.
 	ExecuteCommand []string `mapstructure:"execute_command"`
 
+	UseLinuxPathing bool `mapstructure:"use_linux_pathing"`
+
 	Ctx interpolate.Context
 }
 
@@ -67,11 +70,6 @@ func Decode(config *Config, raws ...interface{}) error {
 func Validate(config *Config) error {
 	var errs *packer.MultiError
 
-	// Do not treat these defaults as a source of truth; the shell-local
-	// provisioner sets these defaults before Validate is called. Eventually
-	// we will have to bring the provisioner and post-processor defaults in
-	// line with one another, but for now the following may or may not be
-	// applied depending on where Validate is being called from.
 	if runtime.GOOS == "windows" {
 		if len(config.ExecuteCommand) == 0 {
 			config.ExecuteCommand = []string{
@@ -89,7 +87,8 @@ func Validate(config *Config) error {
 			config.ExecuteCommand = []string{
 				"/bin/sh",
 				"-c",
-				"{{.Vars}} {{.Script}}",
+				"{{.Vars}}",
+				"{{.Script}}",
 			}
 		}
 	}
@@ -146,6 +145,15 @@ func Validate(config *Config) error {
 				fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
+	if config.UseLinuxPathing {
+		for index, script := range config.Scripts {
+			converted, err := convertToLinuxPath(script)
+			if err != nil {
+				return err
+			}
+			config.Scripts[index] = converted
+		}
+	}
 
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
 	for _, kv := range config.Vars {
@@ -161,4 +169,17 @@ func Validate(config *Config) error {
 	}
 
 	return nil
+}
+
+// C:/path/to/your/file becomes /mnt/c/path/to/your/file
+func convertToLinuxPath(winPath string) (string, error) {
+	// get absolute path of script, and morph it into the bash path
+	winAbsPath, err := filepath.Abs(winPath)
+	if err != nil {
+		return "", fmt.Errorf("Error converting %s to absolute path: %s", winPath, err.Error())
+	}
+	winAbsPath = strings.Replace(winAbsPath, "\\", "/", -1)
+	splitPath := strings.SplitN(winAbsPath, ":/", 2)
+	winBashPath := fmt.Sprintf("/mnt/%s/%s", strings.ToLower(splitPath[0]), splitPath[1])
+	return winBashPath, nil
 }
