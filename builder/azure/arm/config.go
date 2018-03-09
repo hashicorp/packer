@@ -57,6 +57,13 @@ var (
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 )
 
+type PlanInformation struct {
+	PlanName          string `mapstructure:"plan_name"`
+	PlanProduct       string `mapstructure:"plan_product"`
+	PlanPublisher     string `mapstructure:"plan_publisher"`
+	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -107,6 +114,7 @@ type Config struct {
 	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
 	CustomDataFile                    string `mapstructure:"custom_data_file"`
 	customData                        string
+	PlanInfo                          PlanInformation `mapstructure:"plan_info"`
 
 	// OS
 	OSType       string `mapstructure:"os_type"`
@@ -114,12 +122,6 @@ type Config struct {
 
 	// Additional Disks
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
-
-	// Plan Info
-	PlanName          string `mapstructure:"plan_name"`
-	PlanProduct       string `mapstructure:"plan_product"`
-	PlanPublisher     string `mapstructure:"plan_publisher"`
-	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
 
 	// Runtime Values
 	UserName               string
@@ -655,9 +657,18 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	/////////////////////////////////////////////
 	// Plan Info
-	if c.PlanName != "" || c.PlanProduct != "" || c.PlanPublisher != "" || c.PlanPromotionCode != "" {
-		if c.PlanName == "" || c.PlanProduct == "" || c.PlanPublisher == "" {
+	if c.PlanInfo.PlanName != "" || c.PlanInfo.PlanProduct != "" || c.PlanInfo.PlanPublisher != "" || c.PlanInfo.PlanPromotionCode != "" {
+		if c.PlanInfo.PlanName == "" || c.PlanInfo.PlanProduct == "" || c.PlanInfo.PlanPublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("if either plan_name, plan_product, plan_publisher, or plan_promotion_code are defined then plan_name, plan_product, and plan_publisher must be defined"))
+		} else {
+			if c.AzureTags == nil {
+				c.AzureTags = make(map[string]*string)
+			}
+
+			c.AzureTags["PlanInfo"] = &c.PlanInfo.PlanName
+			c.AzureTags["PlanProduct"] = &c.PlanInfo.PlanProduct
+			c.AzureTags["PlanPublisher"] = &c.PlanInfo.PlanPublisher
+			c.AzureTags["PlanPromotionCode"] = &c.PlanInfo.PlanPromotionCode
 		}
 	}
 
