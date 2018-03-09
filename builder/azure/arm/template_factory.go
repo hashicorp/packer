@@ -81,6 +81,10 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetCustomData(config.customData)
 	}
 
+	if config.PlanInfo.PlanName != "" {
+		builder.SetPlanInfo(config.PlanInfo.PlanName, config.PlanInfo.PlanProduct, config.PlanInfo.PlanPublisher, config.PlanInfo.PlanPromotionCode)
+	}
+
 	if config.VirtualNetworkName != "" && DefaultPrivateVirtualNetworkWithPublicIp != config.PrivateVirtualNetworkWithPublicIp {
 		builder.SetPrivateVirtualNetworWithPublicIp(
 			config.VirtualNetworkResourceGroupName,
