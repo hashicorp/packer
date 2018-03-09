@@ -60,7 +60,7 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (array of strings) - The command used to execute the script. By
-    default this is `["sh", "-c", "chmod +x \"{{.Script}}\"; {{.Vars}} \"{{.Script}}\""]`
+    default this is `["/bin/sh", "-c", "{{.Vars}}, "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
     This is treated as a [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
@@ -69,7 +69,9 @@ Optional parameters:
     array is the shell program you want to use (for example, "sh" or
     "/usr/local/bin/zsh" or even "powershell.exe" although anything other than
     a flavor of the shell command language is not explicitly supported and may
-    be broken by assumptions made within Packer).
+    be broken by assumptions made within Packer). It's worth noting that if you
+    choose to try to use shell-local for Powershell or other Windows commands,
+    the environment variables will not be set properly for your environment.
 
     For backwards compatibility, `execute_command` will accept a string insetad
     of an array of strings. If a single string or an array of strings with only
@@ -89,12 +91,45 @@ Optional parameters:
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
-## Execute Command Example
+-  `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
+   are running Packer in a Windows environment with the Windows Subsystem for
+   Linux feature enabled, and would like to invoke a bash script rather than
+   invoking a Cmd script, you'll need to set this flag to true; it tells Packer
+   to use the linux subsystem path for your script rather than the Windows path.
+   (e.g. /mnt/c/path/to/your/file instead of C:/path/to/your/file).
+
+## Execute Command
 
 To many new users, the `execute_command` is puzzling. However, it provides an
 important function: customization of how the command is executed. The most
 common use case for this is dealing with **sudo password prompts**. You may also
 need to customize this if you use a non-POSIX shell, such as `tcsh` on FreeBSD.
+
+### The Windows Linux Subsystem
+
+If you have a bash script that you'd like to run on your Windows Linux
+Subsystem as part of the shell-local post-processor, you must set
+`execute_command` and `use_linux_pathing`.
+
+The example below is a fully functional test config.
+
+```
+{
+    "builders": [
+      {
+        "type":         "null",
+        "communicator": "none"
+      }
+    ],
+    "provisioners": [
+      {
+          "type": "shell-local",
+          "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"]
+          "use_linux_pathing": true
+          "scripts": ["./scripts/.sh"]
+      },
+```
 
 ## Default Environmental Variables
 
