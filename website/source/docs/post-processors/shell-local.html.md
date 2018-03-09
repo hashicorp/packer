@@ -96,7 +96,10 @@ Optional parameters:
    Linux feature enabled, and would like to invoke a bash script rather than
    invoking a Cmd script, you'll need to set this flag to true; it tells Packer
    to use the linux subsystem path for your script rather than the Windows path.
-   (e.g. /mnt/c/path/to/your/file instead of C:/path/to/your/file).
+   (e.g. /mnt/c/path/to/your/file instead of C:/path/to/your/file). Please see
+   the example below for more guidance on how to use this feature. If you are
+   not on a Windows host, or you do not intend to use the shell-local
+   post-processor to run a bash script, please ignore this option.
 
 ## Execute Command
 
@@ -107,11 +110,21 @@ need to customize this if you use a non-POSIX shell, such as `tcsh` on FreeBSD.
 
 ### The Windows Linux Subsystem
 
-If you have a bash script that you'd like to run on your Windows Linux
-Subsystem as part of the shell-local post-processor, you must set
-`execute_command` and `use_linux_pathing`.
+The shell-local post-processor was designed with the idea of allowing you to run
+commands in your local operating system's native shell. For Windows, we've
+assumed in our defaults that this is Cmd. However, it is possible to run a
+bash script as part of the Windows Linux Subsystem from the shell-local
+post-processor, by modifying the `execute_command` and the `use_linux_pathing`
+options in the post-processor config.
 
 The example below is a fully functional test config.
+
+One limitation of this offering is that "inline" and "command" options are not
+available to you; please limit yourself to using the "script" or "scripts"
+options instead.
+
+Please note that the WSL is a beta feature, and this tool is not guaranteed to
+work as you expect it to.
 
 ```
 {
@@ -125,10 +138,19 @@ The example below is a fully functional test config.
       {
           "type": "shell-local",
           "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"]
-          "use_linux_pathing": true
-          "scripts": ["./scripts/.sh"]
+          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+          "use_linux_pathing": true,
+          "scripts": ["C:/Users/me/scripts/example_bash.sh"]
       },
+      {
+          "type": "shell-local",
+          "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+          "use_linux_pathing": true,
+          "script": "C:/Users/me/scripts/example_bash.sh"
+      }
+  ]
+}
 ```
 
 ## Default Environmental Variables
