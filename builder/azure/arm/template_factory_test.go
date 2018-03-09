@@ -526,9 +526,11 @@ func TestKeyVaultDeployment03(t *testing.T) {
 
 func TestPlanInfo01(t *testing.T) {
 	planInfo := map[string]interface{}{
-		"plan_name":      "planName00",
-		"plan_product":   "planProduct00",
-		"plan_publisher": "planPublisher00",
+		"plan_info": map[string]string{
+			"plan_name":      "planName00",
+			"plan_product":   "planProduct00",
+			"plan_publisher": "planPublisher00",
+		},
 	}
 
 	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())
@@ -545,10 +547,15 @@ func TestPlanInfo01(t *testing.T) {
 
 func TestPlanInfo02(t *testing.T) {
 	planInfo := map[string]interface{}{
-		"plan_name":           "planName00",
-		"plan_product":        "planProduct00",
-		"plan_publisher":      "planPublisher00",
-		"plan_promotion_code": "planPromotionCode00",
+		"azure_tags": map[string]string{
+			"dept": "engineering",
+		},
+		"plan_info": map[string]string{
+			"plan_name":           "planName00",
+			"plan_product":        "planProduct00",
+			"plan_publisher":      "planPublisher00",
+			"plan_promotion_code": "planPromotionCode00",
+		},
 	}
 
 	c, _, _ := newConfig(planInfo, getArmBuilderConfiguration(), getPackerConfiguration())

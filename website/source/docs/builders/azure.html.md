@@ -162,16 +162,35 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
--   `plan_name` (string) The plan name.  This setting (`plan_product`, `plan_publisher`, and `plan_promotion_code`) are
-     only needed for Marketplace images. Please refer to [Deploy an image with Marketplace terms](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage#deploy-an-image-with-marketplace-terms) for more details.
+-   `plan_info` (object) - Used for creating images from Marketplace images.  Please refer to [Deploy an image with
+     Marketplace terms](https://aka.ms/azuremarketplaceapideployment) for more details.  Not all Marketplace images
+     support programmatic deployment, and support is controlled by the image publisher.
 
--   `plan_product` (string) The plan product.  See `plan_name` for more information.
+     An example plan_info object is defined below.
 
--   `plan_publisher` (string)  Specifies the produce of the image from the Marketplace.  This value is the same value as
-     Offer (`image_offer`). See `plan_name` for more information.
+     ```json
+     {
+        "plan_info": {
+            "plan_name": "rabbitmq",
+            "plan_product": "rabbitmq",
+            "plan_publisher": "bitnami"
+        }
+     }
+     ```
 
--   `plan_promotion_code` (string) Some Marketplace images use a promotion code.  See `plan_name` for more
-    information.
+     `plan_name` (string) - The plan name, required.
+     `plan_product` (string) - The plan product, required.
+     `plan_publisher` (string) - The plan publisher, required.
+     `plan_promotion_code` (string) - Some images accept a promotion code, optional.
+
+     Images created from the Marketplace with `plan_info` **must** specify `plan_info` whenever the image is deployed.
+     The builder automatically adds tags to the image to ensure this information is not lost.  The following tags are
+     added.
+
+       1. PlanName
+       1. PlanProduct
+       1. PlanPublisher
+       1. PlanPromotionCode
 
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer

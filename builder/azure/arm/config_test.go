@@ -1119,32 +1119,112 @@ func TestPlanInfoConfiguration(t *testing.T) {
 		"communicator":           "none",
 	}
 
-	config["plan_name"] = "--plan-name--"
+	planInfo := map[string]string{
+		"plan_name": "--plan-name--",
+	}
+	config["plan_info"] = planInfo
+
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject the use of plan_name without plan_product and plan_publisher")
 	}
 
-	config["plan_product"] = "--plan-product--"
+	planInfo["plan_product"] = "--plan-product--"
 	_, _, err = newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject the use of plan_name and plan_product without plan_publisher")
 	}
 
-	config["plan_publisher"] = "--plan-publisher--"
+	planInfo["plan_publisher"] = "--plan-publisher--"
 	c, _, err := newConfig(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("expected config to accept a complete plan configuration: %s", err)
 	}
 
-	if c.PlanName != "--plan-name--" {
-		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanName)
+	if c.PlanInfo.PlanName != "--plan-name--" {
+		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanInfo.PlanName)
 	}
-	if c.PlanProduct != "--plan-product--" {
-		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanProduct)
+	if c.PlanInfo.PlanProduct != "--plan-product--" {
+		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanInfo.PlanProduct)
 	}
-	if c.PlanPublisher != "--plan-publisher--" {
-		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanPublisher)
+	if c.PlanInfo.PlanPublisher != "--plan-publisher--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanInfo.PlanPublisher)
+	}
+}
+
+func TestPlanInfoPromotionCode(t *testing.T) {
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+		"plan_info": map[string]string{
+			"plan_name":           "--plan-name--",
+			"plan_product":        "--plan-product--",
+			"plan_publisher":      "--plan-publisher--",
+			"plan_promotion_code": "--plan-promotion-code--",
+		},
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatalf("expected config to accept plan_info configuration, but got %s", err)
+	}
+
+	if c.PlanInfo.PlanName != "--plan-name--" {
+		t.Fatalf("Expected PlanName to be '--plan-name--', but got %q", c.PlanInfo.PlanName)
+	}
+	if c.PlanInfo.PlanProduct != "--plan-product--" {
+		t.Fatalf("Expected PlanProduct to be '--plan-product--', but got %q", c.PlanInfo.PlanProduct)
+	}
+	if c.PlanInfo.PlanPublisher != "--plan-publisher--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-publisher--, but got %q", c.PlanInfo.PlanPublisher)
+	}
+	if c.PlanInfo.PlanPromotionCode != "--plan-promotion-code--" {
+		t.Fatalf("Expected PlanPublisher to be '--plan-promotion-code----, but got %q", c.PlanInfo.PlanPromotionCode)
+	}
+}
+
+// plan_info defines 3 or 4 tags based on plan data.
+// The user can define up to 15 tags.  If the combination of these two
+// exceeds the max tag amount, the builder should reject the configuration.
+func TestPlanInfoTooManyTagsErrors(t *testing.T) {
+	exactMaxNumberOfTags := map[string]string{}
+	for i := 0; i < 15; i++ {
+		exactMaxNumberOfTags[fmt.Sprintf("tag%.2d", i)] = "ignored"
+	}
+
+	config := map[string]interface{}{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"image_offer":            "ignore",
+		"image_publisher":        "ignore",
+		"image_sku":              "ignore",
+		"location":               "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"subscription_id":        "ignore",
+		"os_type":                "linux",
+		"communicator":           "none",
+		"azure_tags":             exactMaxNumberOfTags,
+		"plan_info": map[string]string{
+			"plan_name":           "--plan-name--",
+			"plan_product":        "--plan-product--",
+			"plan_publisher":      "--plan-publisher--",
+			"plan_promotion_code": "--plan-promotion-code--",
+		},
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject configuration due to excess tags")
 	}
 }
 
