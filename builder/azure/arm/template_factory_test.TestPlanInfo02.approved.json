@@ -35,6 +35,13 @@
         },
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
       },
+      "tags": {
+        "PlanInfo": "planName00",
+        "PlanProduct": "planProduct00",
+        "PlanPromotionCode": "planPromotionCode00",
+        "PlanPublisher": "planPublisher00",
+        "dept": "engineering"
+      },
       "type": "Microsoft.Network/publicIPAddresses"
     },
     {
@@ -55,6 +62,13 @@
             }
           }
         ]
+      },
+      "tags": {
+        "PlanInfo": "planName00",
+        "PlanProduct": "planProduct00",
+        "PlanPromotionCode": "planPromotionCode00",
+        "PlanPublisher": "planPublisher00",
+        "dept": "engineering"
       },
       "type": "Microsoft.Network/virtualNetworks"
     },
@@ -81,6 +95,13 @@
             }
           }
         ]
+      },
+      "tags": {
+        "PlanInfo": "planName00",
+        "PlanProduct": "planProduct00",
+        "PlanPromotionCode": "planPromotionCode00",
+        "PlanPublisher": "planPublisher00",
+        "dept": "engineering"
       },
       "type": "Microsoft.Network/networkInterfaces"
     },
@@ -144,6 +165,13 @@
             }
           }
         }
+      },
+      "tags": {
+        "PlanInfo": "planName00",
+        "PlanProduct": "planProduct00",
+        "PlanPromotionCode": "planPromotionCode00",
+        "PlanPublisher": "planPublisher00",
+        "dept": "engineering"
       },
       "type": "Microsoft.Compute/virtualMachines"
     }
