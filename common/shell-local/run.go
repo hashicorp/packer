@@ -15,8 +15,9 @@ import (
 )
 
 type ExecuteCommandTemplate struct {
-	Vars   string
-	Script string
+	Vars    string
+	Script  string
+	Command string
 }
 
 func Run(ui packer.Ui, config *Config) (bool, error) {
@@ -106,8 +107,9 @@ func createInlineScriptFile(config *Config) (string, error) {
 // the host OS
 func createInterpolatedCommands(config *Config, script string, flattenedEnvVars string) ([]string, error) {
 	config.Ctx.Data = &ExecuteCommandTemplate{
-		Vars:   flattenedEnvVars,
-		Script: script,
+		Vars:    flattenedEnvVars,
+		Script:  script,
+		Command: script,
 	}
 
 	interpolatedCmds := make([]string, len(config.ExecuteCommand))
