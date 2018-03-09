@@ -622,7 +622,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.ElevatedUser = "vagrant"
 	p.config.ElevatedPassword = "vagrant"
 	cmd, _ = p.createCommandText()
-	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "%TEMP%\\packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "%TEMP%/packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
 	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected elevated command: %s", cmd)
