@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -144,8 +145,17 @@ func createFlattenedEnvVars(config *Config) (flattened string) {
 	sort.Strings(keys)
 
 	// Re-assemble vars surrounding value with single quotes and flatten
+	if runtime.GOOS == "windows" {
+		log.Printf("MEGAN NEED TO IMPLEMENT")
+		// createEnvVarsSourceFileWindows()
+	}
 	for _, key := range keys {
 		flattened += fmt.Sprintf("%s='%s' ", key, envVars[key])
 	}
 	return
 }
+
+// func createFlattenedEnvVarsWindows(
+// // The default shell, cmd, can set vars via dot sourcing
+// // set TESTXYZ=XYZ
+// )
