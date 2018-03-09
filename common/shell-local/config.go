@@ -147,11 +147,19 @@ func Validate(config *Config) error {
 	}
 	if config.UseLinuxPathing {
 		for index, script := range config.Scripts {
-			converted, err := convertToLinuxPath(script)
+			converted, err := ConvertToLinuxPath(script)
 			if err != nil {
 				return err
 			}
 			config.Scripts[index] = converted
+		}
+		// Interoperability issues with WSL makes creating and running tempfiles
+		// via golang's os package basically impossible.
+		if len(config.Inline) > 0 {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Packer is unable to use the Command and Inline "+
+					"features with the Windows Linux Subsystem. Please use "+
+					"the Script or Scripts options instead"))
 		}
 	}
 
@@ -172,7 +180,7 @@ func Validate(config *Config) error {
 }
 
 // C:/path/to/your/file becomes /mnt/c/path/to/your/file
-func convertToLinuxPath(winPath string) (string, error) {
+func ConvertToLinuxPath(winPath string) (string, error) {
 	// get absolute path of script, and morph it into the bash path
 	winAbsPath, err := filepath.Abs(winPath)
 	if err != nil {
