@@ -179,6 +179,26 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 	return nil
 }
 
+func (s *TemplateBuilder) SetPlanInfo(name, product, publisher, promotionCode string) error {
+	var promotionCodeVal *string = nil
+	if promotionCode != "" {
+		promotionCodeVal = to.StringPtr(promotionCode)
+	}
+
+	for i, x := range *s.template.Resources {
+		if strings.EqualFold(*x.Type, resourceVirtualMachine) {
+			(*s.template.Resources)[i].Plan = &Plan{
+				Name:          to.StringPtr(name),
+				Product:       to.StringPtr(product),
+				Publisher:     to.StringPtr(publisher),
+				PromotionCode: promotionCodeVal,
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
@@ -296,6 +316,17 @@ func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
 	for _, x := range *s.template.Resources {
 		if strings.EqualFold(*x.Type, t) {
 			return &x, nil
+		}
+	}
+
+	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
+}
+
+func (s *TemplateBuilder) getResourceByType2(t string) (**Resource, error) {
+	for _, x := range *s.template.Resources {
+		if strings.EqualFold(*x.Type, t) {
+			p := &x
+			return &p, nil
 		}
 	}
 
