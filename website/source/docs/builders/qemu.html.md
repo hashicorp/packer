@@ -456,3 +456,7 @@ seems to be related to having a `common` directory or file in the directory
 they've run Packer in, like the packer source directory. This appears to be an
 upstream bug with qemu, and the best solution for now is to remove the
 file/directory or run in another directory.
+
+Some users have reported issues with incorrect keymaps using qemu version 2.11.
+This is a bug with qemu, and the solution is to upgrade, or downgrade to 2.10.1
+or earlier.
