@@ -155,7 +155,7 @@ func scancodes(message string) []string {
 	special["<end>"] = []string{"4f", "cf"}
 	special["<pageUp>"] = []string{"49", "c9"}
 	special["<pageDown>"] = []string{"51", "d1"}
-	special["<menu>"] = []string{"e05d", "e0cd"}
+	special["<menu>"] = []string{"e05d", "e0dd"}
 	special["<leftAlt>"] = []string{"38", "b8"}
 	special["<leftCtrl>"] = []string{"1d", "9d"}
 	special["<leftShift>"] = []string{"2a", "aa"}
