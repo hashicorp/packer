@@ -374,9 +374,13 @@ The Azure builder creates the following random values at runtime.
 -   Compute Name: a random 15-character name prefixed with pkrvm; the name of the VM.
 -   Deployment Name: a random 15-character name prefixed with pkfdp; the name of the deployment.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
+-   NIC Name: a random 15-character name prefixed with pkrni.
+-   Public IP Name: a random 15-character name prefixed with pkrip.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
+-   Subnet Name: a random 15-character name prefixed with pkrsn.
 -   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
+-   Virtual Network Name: a random 15-character name prefixed with pkrvn.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.
