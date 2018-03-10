@@ -99,7 +99,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// If a managed image already exists it cannot be overwritten.
 		_, err = azureClient.ImagesClient.Get(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
 		if err == nil {
-			return nil, fmt.Errorf("A managed image named %s already exists in the resource group %s.", b.config.ManagedImageName, b.config.ManagedImageResourceGroupName)
+			if b.config.PackerForce {
+				_, errChan := azureClient.ImagesClient.Delete(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, nil)
+				ui.Say(fmt.Sprintf("the managed image named %s already exists, but deleting it due to -force flag", b.config.ManagedImageName))
+				err = <-errChan
+				if err != nil {
+					return nil, fmt.Errorf("failed to delete the managed image named %s : %s", b.config.ManagedImageName, azureClient.LastError.Error())
+				}
+			} else {
+				return nil, fmt.Errorf("the managed image named %s already exists in the resource group %s, use the -force option to automatically delete it.", b.config.ManagedImageName, b.config.ManagedImageResourceGroupName)
+			}
 		}
 	}
 
