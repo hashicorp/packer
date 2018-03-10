@@ -130,9 +130,13 @@ type Config struct {
 	tmpCertificatePassword string
 	tmpResourceGroupName   string
 	tmpComputeName         string
+	tmpNicName             string
+	tmpPublicIPAddressName string
 	tmpDeploymentName      string
 	tmpKeyVaultName        string
 	tmpOSDiskName          string
+	tmpSubnetName          string
+	tmpVirtualNetworkName  string
 	tmpWinRMCertificateUrl string
 
 	useDeviceLogin bool
@@ -366,7 +370,11 @@ func setRuntimeValues(c *Config) {
 	} else if c.TempResourceGroupName != "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
+	c.tmpNicName = tempName.NicName
+	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
+	c.tmpSubnetName = tempName.SubnetName
+	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
