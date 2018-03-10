@@ -29,11 +29,9 @@ type Builder struct {
 }
 
 const (
-	DefaultNicName             = "packerNic"
-	DefaultPublicIPAddressName = "packerPublicIP"
-	DefaultSasBlobContainer    = "system/Microsoft.Compute"
-	DefaultSasBlobPermission   = "r"
-	DefaultSecretName          = "packerKeyVaultSecret"
+	DefaultSasBlobContainer  = "system/Microsoft.Compute"
+	DefaultSasBlobPermission = "r"
+	DefaultSecretName        = "packerKeyVaultSecret"
 )
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -303,8 +301,8 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmKeyVaultDeploymentName, fmt.Sprintf("kv%s", b.config.tmpDeploymentName))
 	}
 	stateBag.Put(constants.ArmKeyVaultName, b.config.tmpKeyVaultName)
-	stateBag.Put(constants.ArmNicName, DefaultNicName)
-	stateBag.Put(constants.ArmPublicIPAddressName, DefaultPublicIPAddressName)
+	stateBag.Put(constants.ArmNicName, b.config.tmpNicName)
+	stateBag.Put(constants.ArmPublicIPAddressName, b.config.tmpPublicIPAddressName)
 	if b.config.TempResourceGroupName != "" && b.config.BuildResourceGroupName != "" {
 		stateBag.Put(constants.ArmDoubleResourceGroupNameSet, true)
 	}
