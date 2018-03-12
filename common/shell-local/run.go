@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 	"sort"
 	"strings"
 
@@ -36,7 +35,10 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 	}
 
 	// Create environment variables to set before executing the command
-	flattenedEnvVars := createFlattenedEnvVars(config)
+	flattenedEnvVars, err := createFlattenedEnvVars(config)
+	if err != nil {
+		return false, err
+	}
 
 	for _, script := range scripts {
 		interpolatedCmds, err := createInterpolatedCommands(config, script, flattenedEnvVars)
@@ -123,8 +125,8 @@ func createInterpolatedCommands(config *Config, script string, flattenedEnvVars 
 	return interpolatedCmds, nil
 }
 
-func createFlattenedEnvVars(config *Config) (flattened string) {
-	flattened = ""
+func createFlattenedEnvVars(config *Config) (string, error) {
+	flattened := ""
 	envVars := make(map[string]string)
 
 	// Always available Packer provided env vars
@@ -146,18 +148,8 @@ func createFlattenedEnvVars(config *Config) (flattened string) {
 	}
 	sort.Strings(keys)
 
-	// Re-assemble vars surrounding value with single quotes and flatten
-	if runtime.GOOS == "windows" {
-		log.Printf("MEGAN NEED TO IMPLEMENT")
-		// createEnvVarsSourceFileWindows()
-	}
 	for _, key := range keys {
-		flattened += fmt.Sprintf("%s='%s' ", key, envVars[key])
+		flattened += fmt.Sprintf(config.EnvVarFormat, key, envVars[key])
 	}
-	return
+	return flattened, nil
 }
-
-// func createFlattenedEnvVarsWindows(
-// // The default shell, cmd, can set vars via dot sourcing
-// // set TESTXYZ=XYZ
-// )

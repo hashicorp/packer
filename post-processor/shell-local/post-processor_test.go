@@ -139,7 +139,7 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 	p = new(PostProcessor)
 	p.Configure(raws)
 	if runtime.GOOS != "windows" {
-		expected = []string{"sh", "-c", `chmod +x "{{.Script}}"; {{.Vars}} "{{.Script}}"`}
+		expected = []string{"/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"}
 	} else {
 		expected = []string{"cmd", "/C", "{{.Vars}}", "{{.Script}}"}
 	}

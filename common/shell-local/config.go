@@ -38,6 +38,8 @@ type Config struct {
 	// An array of environment variables that will be injected before
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
+
+	EnvVarFormat string
 	// End dedupe with postprocessor
 
 	// The command used to execute the script. The '{{ .Path }}' variable
@@ -160,6 +162,15 @@ func Validate(config *Config) error {
 				fmt.Errorf("Packer is unable to use the Command and Inline "+
 					"features with the Windows Linux Subsystem. Please use "+
 					"the Script or Scripts options instead"))
+		}
+	}
+	// This is currently undocumented and not a feature users are expected to
+	// interact with.
+	if config.EnvVarFormat == "" {
+		if (runtime.GOOS == "windows") && !config.UseLinuxPathing {
+			config.EnvVarFormat = `set "%s=%s" && `
+		} else {
+			config.EnvVarFormat = "%s='%s' "
 		}
 	}
 
