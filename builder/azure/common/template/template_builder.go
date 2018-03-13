@@ -461,12 +461,24 @@ const BasicTemplate = `{
     "dnsNameForPublicIP": {
       "type": "string"
     },
+	"nicName": {
+      "type": "string"
+	},
     "osDiskName": {
       "type": "string"
     },
+    "publicIPAddressName": {
+      "type": "string"
+	},
+	"subnetName": {
+      "type": "string"
+	},
     "storageAccountBlobEndpoint": {
       "type": "string"
     },
+	"virtualNetworkName": {
+      "type": "string"
+	},
     "vmSize": {
       "type": "string"
     },
@@ -482,14 +494,12 @@ const BasicTemplate = `{
     "publicIPAddressApiVersion": "2017-04-01",
     "virtualNetworksApiVersion": "2017-04-01",
     "location": "[resourceGroup().location]",
-    "nicName": "packerNic",
-    "publicIPAddressName": "packerPublicIP",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-    "subnetName": "packerSubnet",
+    "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "10.0.0.0/24",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "virtualNetworkName": "packerNetwork",
+    "virtualNetworkName": "[parameters('virtualNetworkName')]",
     "virtualNetworkResourceGroup": "[resourceGroup().name]",
     "vmStorageAccountContainerName": "images",
     "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
@@ -498,7 +508,7 @@ const BasicTemplate = `{
     {
       "apiVersion": "[variables('publicIPAddressApiVersion')]",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[parameters('publicIPAddressName')]",
       "location": "[variables('location')]",
       "properties": {
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
@@ -531,10 +541,10 @@ const BasicTemplate = `{
     {
       "apiVersion": "[variables('networkInterfacesApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
+      "name": "[parameters('nicName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties": {
@@ -544,7 +554,7 @@ const BasicTemplate = `{
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
               },
               "subnet": {
                 "id": "[variables('subnetRef')]"
@@ -560,7 +570,7 @@ const BasicTemplate = `{
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -584,7 +594,7 @@ const BasicTemplate = `{
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
             }
           ]
         },
