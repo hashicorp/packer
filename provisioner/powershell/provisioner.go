@@ -338,7 +338,7 @@ func (p *Provisioner) retryable(f func() error) error {
 	}
 }
 
-// Enviroment variables required within the remote environment are uploaded within a PS script and
+// Environment variables required within the remote environment are uploaded within a PS script and
 // then enabled by 'dot sourcing' the script immediately prior to execution of the main command
 func (p *Provisioner) prepareEnvVars(elevated bool) (envVarPath string, err error) {
 	// Collate all required env vars into a plain string with required formatting applied
