@@ -203,11 +203,11 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		defer f.Close()
 
 		// Create environment variables to set before executing the command
-		flattendVars := p.createFlattenedEnvVars()
+		flattenedVars := p.createFlattenedEnvVars()
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars: flattendVars,
+			Vars: flattenedVars,
 			Path: p.config.RemotePath,
 		}
 		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
