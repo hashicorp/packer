@@ -132,7 +132,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                b.config.AlicloudRegion,
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-			InstnaceName:            b.config.InstanceName,
+			InstanceName:            b.config.InstanceName,
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == VpcNet {
