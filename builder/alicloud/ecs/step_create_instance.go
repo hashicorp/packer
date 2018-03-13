@@ -21,7 +21,7 @@ type stepCreateAlicloudInstance struct {
 	RegionId                string
 	InternetChargeType      string
 	InternetMaxBandwidthOut int
-	InstnaceName            string
+	InstanceName            string
 	ZoneId                  string
 	instance                *ecs.InstanceAttributesType
 }
@@ -63,7 +63,7 @@ func (s *stepCreateAlicloudInstance) Run(_ context.Context, state multistep.Stat
 			IoOptimized:             ioOptimized,
 			VSwitchId:               vswitchId,
 			SecurityGroupId:         securityGroupId,
-			InstanceName:            s.InstnaceName,
+			InstanceName:            s.InstanceName,
 			Password:                password,
 			ZoneId:                  s.ZoneId,
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
@@ -89,7 +89,7 @@ func (s *stepCreateAlicloudInstance) Run(_ context.Context, state multistep.Stat
 			InternetMaxBandwidthOut: s.InternetMaxBandwidthOut,
 			IoOptimized:             ioOptimized,
 			SecurityGroupId:         securityGroupId,
-			InstanceName:            s.InstnaceName,
+			InstanceName:            s.InstanceName,
 			Password:                password,
 			ZoneId:                  s.ZoneId,
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
