@@ -434,7 +434,7 @@ func TestRetryable(t *testing.T) {
 	err := p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err != nil {
-		t.Fatalf("should not have error retrying funuction")
+		t.Fatalf("should not have error retrying function")
 	}
 
 	count = 0
@@ -442,7 +442,7 @@ func TestRetryable(t *testing.T) {
 	err = p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err == nil {
-		t.Fatalf("should have error retrying funuction")
+		t.Fatalf("should have error retrying function")
 	}
 }
 
