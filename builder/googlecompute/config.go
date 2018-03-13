@@ -225,6 +225,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
 	}
 
+	// If DisableDefaultServiceAccount is provided, don't allow a value for ServiceAccountEmail
+	if c.DisableDefaultServiceAccount && c.ServiceAccountEmail != "" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("you may not specify a 'service_account_email' when 'disable_default_service_account' is true"))
+	}
+
 	// Check for any errors.
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
