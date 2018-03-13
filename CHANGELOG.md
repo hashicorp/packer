@@ -1435,7 +1435,7 @@
 
 * builder/googlecompute: Support for ubuntu-os-cloud project
 * builder/googlecompute: Support for OAuth2 to avoid client secrets file
-* builder/googlecompute: GCE image from persistant disk instead of tarball
+* builder/googlecompute: GCE image from persistent disk instead of tarball
 * builder/qemu: Checksum type "none" can be used
 * provisioner/chef: Generate a node name if none available
 * provisioner/chef: Added ssl_verify_mode configuration
