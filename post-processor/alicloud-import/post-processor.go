@@ -214,7 +214,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	if err != nil {
 		e, _ := err.(*packercommon.Error)
-		if e.Code == "NoSetRoletoECSServiceAcount" {
+		if e.Code == "NoSetRoletoECSServiceAccount" {
 			ramClient := ram.NewClient(p.config.AlicloudAccessKey, p.config.AlicloudSecretKey)
 			roleResponse, err := ramClient.GetRole(ram.RoleQueryRequest{
 				RoleName: "AliyunECSImageImportDefaultRole",
@@ -282,7 +282,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				imageId, err = ecsClient.ImportImage(imageImageArgs)
 				if err != nil {
 					e, _ = err.(*packercommon.Error)
-					if e.Code == "NoSetRoletoECSServiceAcount" {
+					if e.Code == "NoSetRoletoECSServiceAccount" {
 						time.Sleep(5 * time.Second)
 						continue
 					} else if e.Code == "ImageIsImporting" ||
