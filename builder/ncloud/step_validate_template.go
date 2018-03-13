@@ -25,7 +25,7 @@ type StepValidateTemplate struct {
 	FeeSystemTypeCode string
 }
 
-// NewStepValidateTemplate : funciton for Validation a tempalte
+// NewStepValidateTemplate : function for Validation a tempalte
 func NewStepValidateTemplate(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepValidateTemplate {
 	var step = &StepValidateTemplate{
 		Conn:   conn,
@@ -249,7 +249,7 @@ func (s *StepValidateTemplate) validateTemplate() error {
 	return s.validateServerProductCode()
 }
 
-// Run : main funciton for validation a template
+// Run : main function for validation a template
 func (s *StepValidateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Validating deployment template ...")
 
