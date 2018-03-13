@@ -191,7 +191,7 @@ func TestBuild_Run(t *testing.T) {
 		t.Fatal("should be called")
 	}
 
-	// Verify hooks are disapatchable
+	// Verify hooks are dispatchable
 	dispatchHook := builder.RunHook
 	dispatchHook.Run("foo", nil, nil, 42)
 
