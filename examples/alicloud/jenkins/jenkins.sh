@@ -32,7 +32,7 @@ mv $TOMCAT_NAME /opt
 wget $JENKINS_URL
 mv jenkins.war $TOMCAT_PATH/webapps/
 
-#set emvironment
+#set environment
 echo "TOMCAT_PATH=\"$TOMCAT_PATH\"">>/etc/profile
 echo "JENKINS_HOME=\"$TOMCAT_PATH/webapps/jenkins\"">>/etc/profile
 echo PATH="\"\$PATH:\$TOMCAT_PATH:\$JENKINS_HOME\"">>/etc/profile
