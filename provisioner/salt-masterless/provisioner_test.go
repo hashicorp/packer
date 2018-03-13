@@ -32,7 +32,7 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if p.config.TempConfigDir != DefaultTempConfigDir {
+	if p.config.TempConfigDir != p.guestOSTypeConfig.tempDir {
 		t.Errorf("unexpected temp config dir: %s", p.config.TempConfigDir)
 	}
 }
@@ -307,5 +307,21 @@ func TestProvisionerPrepare_LogLevel(t *testing.T) {
 
 	if !strings.Contains(p.config.CmdArgs, "-l debug") {
 		t.Fatal("-l debug should be set in CmdArgs")
+	}
+}
+
+func TestProvisionerPrepare_GuestOSType(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	config["guest_os_type"] = "Windows"
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if p.config.GuestOSType != "windows" {
+		t.Fatalf("GuestOSType should be 'windows'")
 	}
 }
