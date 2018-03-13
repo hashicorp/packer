@@ -119,7 +119,7 @@ func getAppPath(bundleID string) (string, error) {
 	return pathOutput, nil
 }
 
-// CompactDisk performs the compation of the specified virtual disk image.
+// CompactDisk performs the compaction of the specified virtual disk image.
 func (d *Parallels9Driver) CompactDisk(diskPath string) error {
 	prlDiskToolPath, err := exec.LookPath("prl_disk_tool")
 	if err != nil {
