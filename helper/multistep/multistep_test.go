@@ -2,7 +2,7 @@ package multistep
 
 import "context"
 
-// A step for testing that accumuluates data into a string slice in the
+// A step for testing that accumulates data into a string slice in the
 // the state bag. It always uses the "data" key in the state bag, and will
 // initialize it.
 type TestStepAcc struct {
