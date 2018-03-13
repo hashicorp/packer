@@ -113,7 +113,7 @@ func TestEmptyConfig(t *testing.T) {
 	_, _, err := NewConfig(raw)
 
 	if err == nil {
-		t.Error("Expected Config to require 'access_key', 'secret_key' and some mendatory fields, but it did not")
+		t.Error("Expected Config to require 'access_key', 'secret_key' and some mandatory fields, but it did not")
 	}
 
 	if !strings.Contains(err.Error(), "access_key is required") {
