@@ -31,7 +31,7 @@ func (s *stepLxdLaunch) Run(_ context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 	// TODO: Should we check `lxc info <container>` for "Running"?
-	// We have to do this so /tmp doens't get cleared and lose our provisioner scripts.
+	// We have to do this so /tmp doesn't get cleared and lose our provisioner scripts.
 	time.Sleep(1 * time.Second)
 
 	return multistep.ActionContinue
