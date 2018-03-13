@@ -53,7 +53,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 		application = "/oracle/public/ssh"
 	} else if commType == "WINRM" {
 		// Check to see whether a winRM security protocol is already defined;
-		// don't need to do this for SSH becasue it is built into the Oracle API.
+		// don't need to do this for SSH because it is built into the Oracle API.
 		protocolClient := client.SecurityProtocols()
 		winrmProtocol := fmt.Sprintf("WINRM_%s", runUUID)
 		input := compute.CreateSecurityProtocolInput{
