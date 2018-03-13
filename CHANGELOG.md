@@ -1598,7 +1598,7 @@
     manager certs. [GH-1137]
 * builder/amazon/all: `delete_on_termination` set to false will work.
 * builder/amazon/all: Fix race condition on setting tags. [GH-1367]
-* builder/amazon/all: More desctriptive error messages if Amazon only
+* builder/amazon/all: More descriptive error messages if Amazon only
     sends an error code. [GH-1189]
 * builder/docker: Error if `DOCKER_HOST` is set.
 * builder/docker: Remove the container during cleanup. [GH-1206]
