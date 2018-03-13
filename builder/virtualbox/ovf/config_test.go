@@ -78,7 +78,7 @@ func TestNewConfig_sourcePath(t *testing.T) {
 
 	// Bad
 	c = testConfig(t)
-	c["source_path"] = "ftp://i/dont/exist"
+	c["source_path"] = "non-existent-protocol://i/dont/exist"
 	_, warns, err = NewConfig(c)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)

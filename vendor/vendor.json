@@ -901,6 +901,12 @@
 			"revision": "df949784da9ed028ee76df44652e42d37a09d7e4"
 		},
 		{
+			"checksumSHA1": "WKkSFBHssaE3Q3wIQ/xNkTuGqfs=",
+			"path": "github.com/jlaffaye/ftp",
+			"revision": "83891dbe0099af272b7f8d094427215a09b5fd0f",
+			"revisionTime": "2018-01-05T07:56:08Z"
+		},
+		{
 			"checksumSHA1": "3/Bhy+ua/DCv2ElMD5GzOYSGN6g=",
 			"comment": "0.2.2-2-gc01cf91",
 			"path": "github.com/jmespath/go-jmespath",

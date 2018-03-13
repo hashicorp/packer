@@ -141,7 +141,7 @@ func DownloadableURL(original string) (string, error) {
 func ValidatedURL(original string) (string, error) {
 
 	// See if the user failed to give a url
-	if ok, _ := regexp.MatchString("(?m)^[^[:punct:]]+://", original); !ok {
+	if ok, _ := regexp.MatchString("(?m)^[[:alnum:]+-.]+://", original); !ok {
 
 		// So since no magic was found, this must be a path.
 		result, err := DownloadableURL(original)

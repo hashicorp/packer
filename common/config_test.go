@@ -45,7 +45,7 @@ func TestValidatedURL(t *testing.T) {
 	}
 
 	// Invalid: unsupported scheme
-	_, err = ValidatedURL("ftp://host.com/path")
+	_, err = ValidatedURL("non-existent-protocol://host.com/path")
 	if err == nil {
 		t.Fatalf("expected err : %s", err)
 	}
@@ -72,7 +72,7 @@ func TestValidatedURL(t *testing.T) {
 		// No path
 		{"HTTP://packer.io", "http://packer.io", false},
 		// Invalid: unsupported scheme
-		{"ftp://host.com/path", "", true},
+		{"non-existent-protocol://host.com/path", "", true},
 	}
 
 	for _, tc := range cases {
