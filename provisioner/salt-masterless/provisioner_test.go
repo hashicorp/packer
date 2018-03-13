@@ -49,7 +49,7 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_CustomeState(t *testing.T) {
+func TestProvisionerPrepare_CustomState(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
