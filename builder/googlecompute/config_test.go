@@ -276,6 +276,55 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 	}
 }
 
+func TestConfigPrepareServiceAccount(t *testing.T) {
+	cases := []struct {
+		Keys   []string
+		Values []interface{}
+		Err    bool
+	}{
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, "service@account.email.com"},
+			true,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{false, "service@account.email.com"},
+			false,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, ""},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw := testConfig(t)
+
+		errStr := ""
+		for k := range tc.Keys {
+
+			// Create the string for error reporting
+			// convert value to string if it can be converted
+			errStr += fmt.Sprintf("%s:%v, ", tc.Keys[k], tc.Values[k])
+			if tc.Values[k] == nil {
+				delete(raw, tc.Keys[k])
+			} else {
+				raw[tc.Keys[k]] = tc.Values[k]
+			}
+		}
+
+		_, warns, errs := NewConfig(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
 func TestConfigDefaults(t *testing.T) {
 	cases := []struct {
 		Read  func(c *Config) interface{}
