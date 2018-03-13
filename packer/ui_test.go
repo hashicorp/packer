@@ -215,7 +215,7 @@ func TestBasicUi_Ask(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		// Because of the internal bufio we can't eaily reset the input, so create a new one each time
+		// Because of the internal bufio we can't easily reset the input, so create a new one each time
 		bufferUi := testUi()
 		writeReader(bufferUi, testCase.Input)
 
