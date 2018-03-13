@@ -34,13 +34,20 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		AdminUsername:              &template.TemplateParameter{Value: config.UserName},
 		AdminPassword:              &template.TemplateParameter{Value: config.Password},
 		DnsNameForPublicIP:         &template.TemplateParameter{Value: config.tmpComputeName},
+		NicName:                    &template.TemplateParameter{Value: config.tmpNicName},
 		OSDiskName:                 &template.TemplateParameter{Value: config.tmpOSDiskName},
+		PublicIPAddressName:        &template.TemplateParameter{Value: config.tmpPublicIPAddressName},
+		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
-		VMSize: &template.TemplateParameter{Value: config.VMSize},
-		VMName: &template.TemplateParameter{Value: config.tmpComputeName},
+		VirtualNetworkName:         &template.TemplateParameter{Value: config.tmpVirtualNetworkName},
+		VMSize:                     &template.TemplateParameter{Value: config.VMSize},
+		VMName:                     &template.TemplateParameter{Value: config.tmpComputeName},
 	}
 
-	builder, _ := template.NewTemplateBuilder(template.BasicTemplate)
+	builder, err := template.NewTemplateBuilder(template.BasicTemplate)
+	if err != nil {
+		return nil, err
+	}
 	osType := compute.Linux
 
 	switch config.OSType {
