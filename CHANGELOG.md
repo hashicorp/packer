@@ -1321,7 +1321,7 @@
 * builder/parallels: Support Parallels Desktop 11. [GH-2199]
 * builder/openstack: Add `rackconnect_wait` for Rackspace customers to wait for
     RackConnect data to appear
-* buidler/openstack: Add `ssh_interface` option for rackconnect for users that
+* builder/openstack: Add `ssh_interface` option for rackconnect for users that
     have prohibitive firewalls
 * builder/openstack: Flavor names can be used as well as refs
 * builder/openstack: Add `availability_zone` [GH-2016]
