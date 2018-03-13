@@ -89,7 +89,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = []multistep.Step{
 		&stepPreValidate{
 			AlicloudDestImageName: b.config.AlicloudImageName,
-			ForceDelete:           b.config.AlicloudImageForceDetele,
+			ForceDelete:           b.config.AlicloudImageForceDelete,
 		},
 		&stepCheckAlicloudSourceImage{
 			SourceECSImageId: b.config.AlicloudSourceImage,
@@ -165,8 +165,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceStop: b.config.ForceStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
-			AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-			AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
+			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
+			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
