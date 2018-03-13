@@ -235,7 +235,7 @@ func TestAdditionalDiskArtifactProperties(t *testing.T) {
 	}
 }
 
-func TestArtifactOverHypenatedCaptureUri(t *testing.T) {
+func TestArtifactOverHyphenatedCaptureUri(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
 			{
