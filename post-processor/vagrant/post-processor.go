@@ -246,7 +246,7 @@ func providerForName(name string) Provider {
 	}
 }
 
-// OutputPathTemplate is the structure that is availalable within the
+// OutputPathTemplate is the structure that is available within the
 // OutputPath variables.
 type outputPathTemplate struct {
 	ArtifactId string
