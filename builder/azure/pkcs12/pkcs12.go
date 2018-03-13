@@ -398,7 +398,7 @@ func Encode(derBytes []byte, privateKey interface{}, password string) (pfxBytes 
 		return nil, err
 	}
 
-	// Marhsal []contentInfo so we can re-constitute the byte stream that will
+	// Marshal []contentInfo so we can re-constitute the byte stream that will
 	// be suitable for computing the MAC
 	bytes, err := asn1.Marshal(contentInfos)
 	if err != nil {
