@@ -137,7 +137,7 @@ func (s *stepConfigAlicloudVSwitch) Cleanup(state multistep.StateBag) {
 			e, _ := err.(*common.Error)
 			if (e.Code == "IncorrectVSwitchStatus" || e.Code == "DependencyViolation" ||
 				e.Code == "DependencyViolation.HaVip" ||
-				e.Code == "IncorretRouteEntryStatus") && time.Now().Before(timeoutPoint) {
+				e.Code == "IncorrectRouteEntryStatus") && time.Now().Before(timeoutPoint) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
