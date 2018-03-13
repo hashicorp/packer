@@ -101,7 +101,7 @@ can be configured for this builder.
     source is a vhd/vhdx. This defaults to false.
 
 -   `skip_export` (boolean) - If true skips VM export. If you are interested only in the vhd/vhdx files, you can enable this option. This will create
-    inline disks which improves the build performance. There will not be any copying of source vhds to temp directory. This defauls to false.
+    inline disks which improves the build performance. There will not be any copying of source vhds to temp directory. This defaults to false.
     
 -   `enable_dynamic_memory` (boolean) - If true enable dynamic memory for virtual machine.
     This defaults to false.
