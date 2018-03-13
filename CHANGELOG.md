@@ -411,7 +411,7 @@
 * builder/cloudstack: Properly report back errors. [GH-5103] [GH-5123]
 * builder/docker: Fix windows filepath in docker-toolbox call [GH-4887]
 * builder/docker: Fix windows filepath in docker-toolbox call. [GH-4887]
-* builder/hyperv: Use SID to verify membersip in Admin group, fixing for non-
+* builder/hyperv: Use SID to verify membership in Admin group, fixing for non-
     english users. [GH-5022]
 * builder/hyperv: Verify membership in the group Hyper-V Administrators by SID
     not name. [GH-5022]
