@@ -19,9 +19,9 @@
     "capture_name_prefix": "packer",
 
     "os_type": "Linux",
-    "image_publisher": "Canonical",
-    "image_offer": "UbuntuServer",
-    "image_sku": "16.04-LTS",
+    "image_publisher": "bitnami",
+    "image_offer": "rabbitmq",
+    "image_sku": "rabbitmq",
 
     "azure_tags": {
         "dept": "engineering",
