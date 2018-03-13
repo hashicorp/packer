@@ -43,7 +43,7 @@ func (d *Parallels9Driver) Import(name, srcPath, dstDir string, reassignMAC bool
 
 	srcMAC := "auto"
 	if !reassignMAC {
-		srcMAC, err = getFirtsMACAddress(srcPath)
+		srcMAC, err = getFirstMACAddress(srcPath)
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func getVMID(path string) (string, error) {
 	return getConfigValueFromXpath(path, "/ParallelsVirtualMachine/Identification/VmUuid")
 }
 
-func getFirtsMACAddress(path string) (string, error) {
+func getFirstMACAddress(path string) (string, error) {
 	return getConfigValueFromXpath(path, "/ParallelsVirtualMachine/Hardware/NetworkAdapter[@id='0']/MAC")
 }
 
