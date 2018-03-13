@@ -89,9 +89,9 @@ type guestOSTypeConfig struct {
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		configDir:         "/etc/salt",
-		tempDir:           "/tmp/salt/",
-		stateRoot:         "/srv/salt/",
-		pillarRoot:        "/srv/pillar/",
+		tempDir:           "/tmp/salt",
+		stateRoot:         "/srv/salt",
+		pillarRoot:        "/srv/pillar",
 		bootstrapFetchCmd: "curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com",
 		bootstrapRunCmd:   "sh /tmp/install_salt.sh",
 	},
@@ -129,7 +129,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
+	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, false)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
@@ -413,7 +413,7 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 func (p *Provisioner) moveFile(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
 	ui.Message(fmt.Sprintf("Moving %s to %s", src, dst))
 	cmd := &packer.RemoteCmd{
-		Command: p.guestCommands.MovePath(src, dst),
+		Command: p.sudo(p.guestCommands.MovePath(src, dst)),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil || cmd.ExitStatus != 0 {
 		if err == nil {
