@@ -1569,7 +1569,7 @@
 * builder/docker: Can now specify login credentials to pull images.
 * builder/docker: Support mounting additional volumes. [GH-1430]
 * builder/parallels/all: Path to tools ISO is calculated automatically. [GH-1455]
-* builder/parallels-pvm: `reassign_mac` option to choose wehther or not
+* builder/parallels-pvm: `reassign_mac` option to choose whether or not
     to generate a new MAC address. [GH-1461]
 * builder/qemu: Can specify "none" acceleration type. [GH-1395]
 * builder/qemu: Can specify "tcg" acceleration type. [GH-1395]
