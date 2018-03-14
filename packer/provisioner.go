@@ -82,7 +82,7 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 	return nil
 }
 
-// Cancels the privisioners that are still running.
+// Cancels the provisioners that are still running.
 func (h *ProvisionHook) Cancel() {
 	h.lock.Lock()
 	defer h.lock.Unlock()

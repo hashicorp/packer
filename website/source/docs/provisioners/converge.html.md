@@ -59,7 +59,7 @@ Optional parameters:
     various
     [configuration template variables](/docs/templates/engine.html) available.
 
--   `prevent_sudo` (boolean) - stop Converge from running with adminstrator
+-   `prevent_sudo` (boolean) - stop Converge from running with administrator
     privileges via sudo
 
 -   `bootstrap_command` (string) - the command used to bootstrap Converge. This

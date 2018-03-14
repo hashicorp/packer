@@ -591,7 +591,7 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 		target_file = filepath.Base((*fi).Name())
 	}
 
-	// On windows, filepath.Dir uses backslash seperators (ie. "\tmp").
+	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
 	// which works for unix and windows
 	target_dir = filepath.ToSlash(target_dir)
@@ -748,7 +748,7 @@ func (c *comm) scpSession(scpCommand string, f func(io.Writer, *bufio.Reader) er
 	err = session.Wait()
 	if err != nil {
 		if exitErr, ok := err.(*ssh.ExitError); ok {
-			// Otherwise, we have an ExitErorr, meaning we can just read
+			// Otherwise, we have an ExitError, meaning we can just read
 			// the exit status
 			log.Printf("non-zero exit status: %d", exitErr.ExitStatus())
 			stdoutB, err := ioutil.ReadAll(stdoutR)

@@ -11,7 +11,7 @@ import (
 )
 
 type StepCreateTempDir struct {
-	// The user-supplied root directores into which we create subdirectories.
+	// The user-supplied root directories into which we create subdirectories.
 	TempPath    string
 	VhdTempPath string
 	// The subdirectories with the randomly generated name.

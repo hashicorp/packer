@@ -60,7 +60,7 @@ type Instance struct {
 	TimeCreated time.Time `json:"timeCreated"`
 }
 
-// GetInstanceParams are the paramaters available when communicating with the
+// GetInstanceParams are the parameters available when communicating with the
 // GetInstance API endpoint.
 type GetInstanceParams struct {
 	ID string `url:"instanceId,omitempty"`

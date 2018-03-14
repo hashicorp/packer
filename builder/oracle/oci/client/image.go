@@ -56,7 +56,7 @@ type Image struct {
 	TimeCreated time.Time `json:"timeCreated"`
 }
 
-// GetImageParams are the paramaters available when communicating with the
+// GetImageParams are the parameters available when communicating with the
 // GetImage API endpoint.
 type GetImageParams struct {
 	ID string `url:"imageId"`
