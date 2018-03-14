@@ -357,14 +357,14 @@ shown below:
 
 This builder allows you to build Docker images *without* Dockerfiles.
 
-With this builder, you can repeatably create Docker images without the use of a
+With this builder, you can repeatedly create Docker images without the use of a
 Dockerfile. You don't need to know the syntax or semantics of Dockerfiles.
 Instead, you can just provide shell scripts, Chef recipes, Puppet manifests,
 etc. to provision your Docker container just like you would a regular
 virtualized or dedicated machine.
 
 While Docker has many features, Packer views Docker simply as an container
-runner. To that end, Packer is able to repeatably build these containers
+runner. To that end, Packer is able to repeatedly build these containers
 using portable provisioning scripts.
 
 ## Overriding the host directory
