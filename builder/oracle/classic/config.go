@@ -33,7 +33,7 @@ type Config struct {
 	SourceImageList string        `mapstructure:"source_image_list"`
 	SnapshotTimeout time.Duration `mapstructure:"snapshot_timeout"`
 	DestImageList   string        `mapstructure:"dest_image_list"`
-	// Attributes and Atributes file are both optional and mutually exclusive.
+	// Attributes and Attributes file are both optional and mutually exclusive.
 	Attributes     string `mapstructure:"attributes"`
 	AttributesFile string `mapstructure:"attributes_file"`
 	// Optional; if you don't enter anything, the image list description
@@ -129,7 +129,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		err = json.Unmarshal(fidata, &data)
 		c.attribs = data
 		if err != nil {
-			err = fmt.Errorf("Problem parsing json from attrinutes_file: %s", err)
+			err = fmt.Errorf("Problem parsing json from attributes_file: %s", err)
 			packer.MultiErrorAppend(errs, err)
 		}
 		c.attribs = data

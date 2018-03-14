@@ -226,7 +226,7 @@ func (s *stepCreateInstance) generateUserData(userData string, httpGETOnly bool)
 	if len(ud) > maxUD {
 		return "", fmt.Errorf(
 			"The supplied user_data contains %d bytes after encoding, "+
-				"this exeeds the limit of %d bytes", len(ud), maxUD)
+				"this exceeds the limit of %d bytes", len(ud), maxUD)
 	}
 
 	return ud, nil

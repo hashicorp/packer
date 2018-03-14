@@ -51,7 +51,7 @@ type Driver interface {
 	// Send scancodes to the vm using the prltype python script.
 	SendKeyScanCodes(string, ...string) error
 
-	// Apply default сonfiguration settings to the virtual machine
+	// Apply default configuration settings to the virtual machine
 	SetDefaultConfiguration(string) error
 
 	// Finds the MAC address of the NIC nic0

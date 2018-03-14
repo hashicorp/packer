@@ -29,7 +29,7 @@ type VNIC struct {
 	TimeCreated        time.Time `json:"timeCreated"`
 }
 
-// GetVNICParams are the paramaters available when communicating with the
+// GetVNICParams are the parameters available when communicating with the
 // ListVNICs API endpoint.
 type GetVNICParams struct {
 	ID string `url:"vnicId"`

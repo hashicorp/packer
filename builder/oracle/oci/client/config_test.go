@@ -144,7 +144,7 @@ func TestParseEncryptedPrivateKeyValidPassword(t *testing.T) {
 		password,
 		cipherType)
 	if err != nil {
-		t.Fatalf("Unexpected error encryting PEM block: %+v", err)
+		t.Fatalf("Unexpected error encrypting PEM block: %+v", err)
 	}
 
 	// Parse private key
@@ -195,7 +195,7 @@ func TestParseEncryptedPrivateKeyPKCS8(t *testing.T) {
 		password,
 		cipherType)
 	if err != nil {
-		t.Fatalf("Unexpected error encryting PEM block: %+v", err)
+		t.Fatalf("Unexpected error encrypting PEM block: %+v", err)
 	}
 
 	// Parse private key

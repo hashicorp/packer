@@ -172,7 +172,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if len(b.config.AdditionalDiskSize) > 64 {
-		err = errors.New("VM's currently support a maximun of 64 additional SCSI attached disks.")
+		err = errors.New("VM's currently support a maximum of 64 additional SCSI attached disks.")
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 

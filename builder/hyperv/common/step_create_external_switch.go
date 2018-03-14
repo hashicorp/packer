@@ -23,7 +23,7 @@ func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateB
 	ui := state.Get("ui").(packer.Ui)
 
 	vmName := state.Get("vmName").(string)
-	errorMsg := "Error createing external switch: %s"
+	errorMsg := "Error creating external switch: %s"
 	var err error
 
 	ui.Say("Creating external switch...")

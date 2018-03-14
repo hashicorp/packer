@@ -8,7 +8,7 @@ import (
 
 // Behavior is the most important thing to assert for ServicePrincipalToken, but
 // that cannot be done in a unit test because it involves network access.  Instead,
-// I assert the expected intertness of this class.
+// I assert the expected inertness of this class.
 func TestNewAuthenticate(t *testing.T) {
 	testSubject := NewAuthenticate(azure.PublicCloud, "clientID", "clientString", "tenantID")
 	spn, err := testSubject.getServicePrincipalToken()

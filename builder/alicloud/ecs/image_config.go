@@ -32,8 +32,8 @@ type AlicloudImageConfig struct {
 	AlicloudImageUNShareAccounts      []string `mapstructure:"image_unshare_account"`
 	AlicloudImageDestinationRegions   []string `mapstructure:"image_copy_regions"`
 	AlicloudImageDestinationNames     []string `mapstructure:"image_copy_names"`
-	AlicloudImageForceDetele          bool     `mapstructure:"image_force_delete"`
-	AlicloudImageForceDeteleSnapshots bool     `mapstructure:"image_force_delete_snapshots"`
+	AlicloudImageForceDelete          bool     `mapstructure:"image_force_delete"`
+	AlicloudImageForceDeleteSnapshots bool     `mapstructure:"image_force_delete_snapshots"`
 	AlicloudImageForceDeleteInstances bool     `mapstructure:"image_force_delete_instances"`
 	AlicloudImageSkipRegionValidation bool     `mapstructure:"skip_region_validation"`
 	AlicloudDiskDevices               `mapstructure:",squash"`

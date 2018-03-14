@@ -83,7 +83,7 @@ type InstanceConfig struct {
 	Zone                         string
 }
 
-// WindowsPasswordConfig is the data structue that GCE needs to encrypt the created
+// WindowsPasswordConfig is the data structure that GCE needs to encrypt the created
 // windows password.
 type WindowsPasswordConfig struct {
 	key      *rsa.PrivateKey

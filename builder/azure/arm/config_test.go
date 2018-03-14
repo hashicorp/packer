@@ -499,7 +499,7 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 	wellFormedCaptureNamePrefix := []string{
 		"packer",
 		"AbcdefghijklmnopqrstuvwX",
-		"hypen-hypen",
+		"hyphen-hyphen",
 		"0leading-number",
 		"v1.core.local",
 	}
@@ -514,8 +514,8 @@ func TestConfigShouldRejectMalformedCaptureNamePrefix(t *testing.T) {
 	}
 
 	malformedCaptureNamePrefix := []string{
-		"-leading-hypen",
-		"trailing-hypen-",
+		"-leading-hyphen",
+		"trailing-hyphen-",
 		"trailing-period.",
 		"_leading-underscore",
 		"punc-!@#$%^&*()_+-=-punc",
@@ -550,7 +550,7 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 	wellFormedCaptureContainerName := []string{
 		"0leading",
 		"aleading",
-		"hype-hypen",
+		"hype-hyphen",
 		"abcdefghijklmnopqrstuvwxyz0123456789-abcdefghijklmnopqrstuvwxyz", // 63 characters
 	}
 
@@ -565,9 +565,9 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 
 	malformedCaptureContainerName := []string{
 		"No-Capitals",
-		"double--hypens",
-		"-leading-hypen",
-		"trailing-hypen-",
+		"double--hyphens",
+		"-leading-hyphen",
+		"trailing-hyphen-",
 		"punc-!@#$%^&*()_+-=-punc",
 		"there-are-over-63-characters-in-this-string-and-that-is-a-bad-container-name",
 	}
