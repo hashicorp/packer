@@ -184,7 +184,7 @@ func (c *baseClient) Request() (*http.Request, error) {
 	return req, nil
 }
 
-// Recieve creates a http request from the client and executes it returning the
+// Receive creates a http request from the client and executes it returning the
 // response.
 func (c *baseClient) Receive(successV, failureV interface{}) (*http.Response, error) {
 	req, err := c.Request()
