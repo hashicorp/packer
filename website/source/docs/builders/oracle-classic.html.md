@@ -78,7 +78,7 @@ This builder currently only works with the SSH communicator.
 
  -  `ssh_username` (string) - The username that Packer will use to SSH into the
     instance; defaults to `opc`, the default oracle user, which has sudo
-    priveliges. If you have already configured users on your machine, you may
+    privileges. If you have already configured users on your machine, you may
     prompt Packer to use one of those instead. For more detail, see the
     [documentation](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsg/accessing-oracle-linux-instance-using-ssh.html).
 
