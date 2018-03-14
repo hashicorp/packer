@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/vsphere"
@@ -77,9 +78,22 @@ func (s *stepMarkAsTemplate) Run(_ context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
+	err = common.Retry(2, 10, 30, func(i uint) (bool, error) {
+		ui.Message(fmt.Sprintf("Registering VM, attempt %d", i+1))
+
+		task, err := folder.RegisterVM(context.Background(), dsPath.String(), s.VMName, true, nil, host)
+		if err == nil {
+			// success
+			return true, nil
+		}
+		ui.Message(fmt.Sprintf("Error registering VM; will retry..."+
+			"Error: %s", err.Error()))
+		// retry
+		return false, nil
+	})
+
 	if err != nil {
-		state.Put("error", err)
+		state.Put("error registering vm")
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
