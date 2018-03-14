@@ -2482,7 +2482,7 @@
 * core: Non-200 response codes on downloads now show proper errors.
     [GH-141]
 * amazon-ebs: SSH handshake is retried. [GH-130]
-* vagrant: The `BuildName` template propery works properly in
+* vagrant: The `BuildName` template property works properly in
     the output path.
 * vagrant: Properly configure the provider-specific post-processors so
     things like `vagrantfile_template` work. [GH-129]
