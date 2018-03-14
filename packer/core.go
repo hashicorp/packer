@@ -67,7 +67,7 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		return nil, err
 	}
 
-	// Go through and interpolate all the build names. We shuld be able
+	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
 	result.builds = make(map[string]*template.Builder)
 	for _, b := range c.Template.Builders {
