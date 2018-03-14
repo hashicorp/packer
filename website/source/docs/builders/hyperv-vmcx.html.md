@@ -651,7 +651,7 @@ Finish Setup cache proxy during installation -->
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c winrm set winrm/config @{MaxTimeoutms="1800000"}</CommandLine>
-                    <Description>Win RM MaxTimoutms</Description>
+                    <Description>Win RM MaxTimeoutms</Description>
                     <Order>5</Order>
                     <RequiresUserInput>true</RequiresUserInput>
                 </SynchronousCommand>
