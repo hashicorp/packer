@@ -591,7 +591,7 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 		target_file = filepath.Base((*fi).Name())
 	}
 
-	// On windows, filepath.Dir uses backslash seperators (ie. "\tmp").
+	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
 	// which works for unix and windows
 	target_dir = filepath.ToSlash(target_dir)
