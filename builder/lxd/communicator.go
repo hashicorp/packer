@@ -90,7 +90,7 @@ func (c *Communicator) UploadDir(dst string, src string, exclude []string) error
 
 	// Don't use 'z' flag as compressing may take longer and the transfer is likely local.
 	// If this isn't the case, it is possible for the user to compress in another step then transfer.
-	// It wouldn't be possibe to disable compression, without exposing this option.
+	// It wouldn't be possible to disable compression, without exposing this option.
 	tar, err := c.CmdWrapper(fmt.Sprintf("tar -cf - -C %s .", src))
 	if err != nil {
 		return err
