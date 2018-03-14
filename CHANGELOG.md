@@ -2012,7 +2012,7 @@
 * builder/digitalocean: scrub API keys from config debug output. [GH-516]
 * builder/virtualbox: error if VirtualBox version cant be detected. [GH-488]
 * builder/virtualbox: detect if vboxdrv isn't properly setup. [GH-488]
-* builder/virtualbox: sleep a bit before export to ensure the sesssion
+* builder/virtualbox: sleep a bit before export to ensure the session
     is unlocked. [GH-512]
 * builder/virtualbox: create SATA drives properly on VirtualBox 4.3. [GH-547]
 * builder/virtualbox: support user templates in SSH key path. [GH-539]
