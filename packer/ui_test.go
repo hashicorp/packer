@@ -99,34 +99,34 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 
 func TestTargetedUI(t *testing.T) {
 	bufferUi := testUi()
-	targettedUi := &TargetedUI{
+	targetedUi := &TargetedUI{
 		Target: "foo",
 		Ui:     bufferUi,
 	}
 
 	var actual, expected string
-	targettedUi.Say("foo")
+	targetedUi.Say("foo")
 	actual = readWriter(bufferUi)
 	expected = "==> foo: foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Message("foo")
+	targetedUi.Message("foo")
 	actual = readWriter(bufferUi)
 	expected = "    foo: foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Error("bar")
+	targetedUi.Error("bar")
 	actual = readErrorWriter(bufferUi)
 	expected = "==> foo: bar\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
 
-	targettedUi.Say("foo\nbar")
+	targetedUi.Say("foo\nbar")
 	actual = readWriter(bufferUi)
 	expected = "==> foo: foo\n==> foo: bar\n"
 	if actual != expected {
