@@ -148,7 +148,7 @@ func TestKnownGoodRequests(t *testing.T) {
 
 		for header, val := range tt.expectedHeaders {
 			if sentReq.Header.Get(header) != val {
-				t.Fatalf("%s: Header mismatch in responnse,\n\t expecting \"%s\"\n\t got \"%s\"", tt.name, val, sentReq.Header.Get(header))
+				t.Fatalf("%s: Header mismatch in response,\n\t expecting \"%s\"\n\t got \"%s\"", tt.name, val, sentReq.Header.Get(header))
 			}
 		}
 	}
