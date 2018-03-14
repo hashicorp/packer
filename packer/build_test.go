@@ -102,7 +102,7 @@ func TestBuild_Prepare_Twice(t *testing.T) {
 	build.Prepare()
 }
 
-func TestBuildPrepare_BuilderWarniings(t *testing.T) {
+func TestBuildPrepare_BuilderWarnings(t *testing.T) {
 	expected := []string{"foo"}
 
 	build := testBuild()
