@@ -159,7 +159,7 @@ builder.
     `_` or `-`. It cannot begin with `http://` or `https://`.
 
 -   `security_token` (string) - STS access token, can be set through template or by exporting
-     as environment vairalbe such "export SecurityToken=value".
+     as environment variable such "export SecurityToken=value".
 
 -   `skip_region_validation` (boolean) - The region validation can be skipped if this
     value is true, the default value is false.
