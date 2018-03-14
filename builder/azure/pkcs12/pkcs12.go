@@ -92,7 +92,7 @@ const (
 )
 
 // unmarshal calls asn1.Unmarshal, but also returns an error if there is any
-// trailing data after unmarshaling.
+// trailing data after unmarshalling.
 func unmarshal(in []byte, out interface{}) error {
 	trailing, err := asn1.Unmarshal(in, out)
 	if err != nil {
