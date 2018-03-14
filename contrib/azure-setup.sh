@@ -182,7 +182,7 @@ createServicePrincipal() {
 createPermissions() {
     echo "==> Creating permissions"
     az role assignment create --assignee $azure_object_id --role "Owner" --scope /subscriptions/$azure_subscription_id
-    # If the user wants to use a more conserative scope, she can.  She must
+    # If the user wants to use a more conservative scope, she can.  She must
     # configure the Azure builder to use build_resource_group_name.  The
     # easiest solution is subscription wide permission.
     # az role assignment create --spn http://$meta_name -g $azure_group_name -o "API Management Service Contributor"

@@ -187,7 +187,7 @@ func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 		// Create a new parameter struct.
 		p := client.Firewall.NewDeleteFirewallRuleParams(fwRuleID)
 
-		ui.Message("Deleting firewal rule...")
+		ui.Message("Deleting firewall rule...")
 		if _, err := client.Firewall.DeleteFirewallRule(p); err != nil {
 			// This is a very poor way to be told the ID does no longer exist :(
 			if !strings.Contains(err.Error(), fmt.Sprintf(

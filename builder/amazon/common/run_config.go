@@ -78,7 +78,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// Validation
 	errs := c.Comm.Prepare(ctx)
 
-	// Valadating ssh_interface
+	// Validating ssh_interface
 	if c.SSHInterface != "public_ip" &&
 		c.SSHInterface != "private_ip" &&
 		c.SSHInterface != "public_dns" &&

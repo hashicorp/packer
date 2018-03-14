@@ -274,7 +274,7 @@ func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtual
 	return nil
 }
 
-func (s *TemplateBuilder) SetPrivateVirtualNetworWithPublicIp(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
+func (s *TemplateBuilder) SetPrivateVirtualNetworkWithPublicIp(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
 	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
 	s.setVariable("virtualNetworkName", virtualNetworkName)
 	s.setVariable("subnetName", subnetName)

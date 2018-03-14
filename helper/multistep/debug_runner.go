@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-// DebugLocation is the location where the pause is occuring when debugging
+// DebugLocation is the location where the pause is occurring when debugging
 // a step sequence. "DebugLocationAfterRun" is after the run of the named
 // step. "DebugLocationBeforeCleanup" is before the cleanup of the named
 // step.

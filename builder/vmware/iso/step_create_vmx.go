@@ -446,7 +446,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.SCSI_Present = "TRUE"
 		templateData.CDROMType = "scsi"
 	default:
-		err := fmt.Errorf("Error procesing VMX template: %s", cdromAdapterType)
+		err := fmt.Errorf("Error processing VMX template: %s", cdromAdapterType)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -505,7 +505,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	} else {
 		serial, err := unformat_serial(config.Serial)
 		if err != nil {
-			err := fmt.Errorf("Error procesing VMX template: %s", err)
+			err := fmt.Errorf("Error processing VMX template: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -541,7 +541,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			break
 
 		default:
-			err := fmt.Errorf("Error procesing VMX template: %v", serial)
+			err := fmt.Errorf("Error processing VMX template: %v", serial)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -554,7 +554,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	} else {
 		parallel, err := unformat_parallel(config.Parallel)
 		if err != nil {
-			err := fmt.Errorf("Error procesing VMX template: %s", err)
+			err := fmt.Errorf("Error processing VMX template: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -578,7 +578,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 			break
 
 		default:
-			err := fmt.Errorf("Error procesing VMX template: %v", parallel)
+			err := fmt.Errorf("Error processing VMX template: %v", parallel)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -590,7 +590,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	/// render the .vmx template
 	vmxContents, err := interpolate.Render(vmxTemplate, &ctx)
 	if err != nil {
-		err := fmt.Errorf("Error procesing VMX template: %s", err)
+		err := fmt.Errorf("Error processing VMX template: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

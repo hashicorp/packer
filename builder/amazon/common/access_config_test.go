@@ -42,7 +42,7 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 
 }
 
-func TestAccessConfigPrepare_RegionRestrictd(t *testing.T) {
+func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {
 	c := testAccessConfig()
 
 	// Create a Session with a custom region

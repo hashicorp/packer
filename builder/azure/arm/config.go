@@ -418,7 +418,7 @@ func setCloudEnvironment(c *Config) error {
 	name := strings.ToUpper(c.CloudEnvironmentName)
 	envName, ok := lookup[name]
 	if !ok {
-		return fmt.Errorf("There is no cloud envionment matching the name '%s'!", c.CloudEnvironmentName)
+		return fmt.Errorf("There is no cloud environment matching the name '%s'!", c.CloudEnvironmentName)
 	}
 
 	env, err := azure.EnvironmentFromName(envName)

@@ -43,8 +43,8 @@ func (s *stepRunAlicloudInstance) Cleanup(state multistep.StateBag) {
 		ui := state.Get("ui").(packer.Ui)
 		client := state.Get("client").(*ecs.Client)
 		instance := state.Get("instance").(*ecs.InstanceAttributesType)
-		instanceAttrubite, _ := client.DescribeInstanceAttribute(instance.InstanceId)
-		if instanceAttrubite.Status == ecs.Starting || instanceAttrubite.Status == ecs.Running {
+		instanceAttribute, _ := client.DescribeInstanceAttribute(instance.InstanceId)
+		if instanceAttribute.Status == ecs.Starting || instanceAttribute.Status == ecs.Running {
 			if err := client.StopInstance(instance.InstanceId, true); err != nil {
 				ui.Say(fmt.Sprintf("Error stopping instance %s, it may still be around %s", instance.InstanceId, err))
 				return
