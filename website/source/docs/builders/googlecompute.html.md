@@ -263,7 +263,7 @@ builder.
     If preemptible is true this can only be `TERMINATE`. If preemptible
     is false, it defaults to `MIGRATE`
 
--   `preemptible` (boolean) - If true, launch a preembtible instance.
+-   `preemptible` (boolean) - If true, launch a preemptible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
