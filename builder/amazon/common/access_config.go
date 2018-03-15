@@ -96,7 +96,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	creds := credentials.NewChainCredentials(providers)
 
-	config := aws.NewConfig().WithMaxRetries(11).WithCredentialsChainVerboseErrors(true)
+	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
 
 	if c.RawRegion != "" {
 		config = config.WithRegion(c.RawRegion)
