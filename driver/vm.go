@@ -18,6 +18,7 @@ type VirtualMachine struct {
 type CloneConfig struct {
 	Name         string
 	Folder       string
+	Cluster 	 string
 	Host         string
 	ResourcePool string
 	Datastore    string
@@ -44,6 +45,7 @@ type CreateConfig struct {
 	Annotation    string
 	Name          string
 	Folder        string
+	Cluster		  string
 	Host          string
 	ResourcePool  string
 	Datastore     string
@@ -79,14 +81,18 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		return nil, err
 	}
 
-	resourcePool, err := d.FindResourcePool(config.Host, config.ResourcePool)
+	resourcePool, err := d.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
 	if err != nil {
 		return nil, err
 	}
 
-	host, err := d.FindHost(config.Host)
-	if err != nil {
-		return nil, err
+	var host *object.HostSystem
+	if config.Host != "" {
+		h, err := d.FindHost(config.Host)
+		if err != nil {
+			return nil, err
+		}
+		host = h.host
 	}
 
 	datastore, err := d.FindDatastore(config.Datastore)
@@ -126,7 +132,7 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
 	}
 
-	task, err := folder.folder.CreateVM(d.ctx, createSpec, resourcePool.pool, host.host)
+	task, err := folder.folder.CreateVM(d.ctx, createSpec, resourcePool.pool, host)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +178,7 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 
 	var relocateSpec types.VirtualMachineRelocateSpec
 
-	pool, err := template.driver.FindResourcePool(config.Host, config.ResourcePool)
+	pool, err := template.driver.FindResourcePool(config.Cluster, config.Host, config.ResourcePool)
 	if err != nil {
 		return nil, err
 	}

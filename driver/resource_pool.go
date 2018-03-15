@@ -19,8 +19,15 @@ func (d *Driver) NewResourcePool(ref *types.ManagedObjectReference) *ResourcePoo
 	}
 }
 
-func (d *Driver) FindResourcePool(host string, name string) (*ResourcePool, error) {
-	p, err := d.finder.ResourcePool(d.ctx, fmt.Sprintf("/%v/host/%v/Resources/%v", d.datacenter.Name(), host, name))
+func (d *Driver) FindResourcePool(cluster string, host string, name string) (*ResourcePool, error) {
+	var res string
+	if cluster != "" {
+		res = cluster
+	} else {
+		res = host
+	}
+
+	p, err := d.finder.ResourcePool(d.ctx, fmt.Sprintf("%v/Resources/%v", res, name))
 	if err != nil {
 		return nil, err
 	}
