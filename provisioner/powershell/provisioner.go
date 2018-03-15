@@ -374,19 +374,14 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	if httpAddr != "" {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr
 	}
-	winRMPass, err := commonhelper.RetrieveSharedState("winrm_password")
-	// This shared state is only created by the amazon builder.
-	if err == nil {
-		envVars["AUTO_WINRM_PASSWORD"] = psEscape.Replace(winRMPass)
 
-	}
 	// interpolate environment variables
 	p.config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: p.getWinRMPassword(),
 	}
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
-		envVar, err = interpolate.Render(envVar, &p.config.ctx)
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
 		if err != nil {
 			return
 		}
