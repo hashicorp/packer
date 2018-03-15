@@ -100,11 +100,21 @@ type Provisioner struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars string
-	Path string
+	Vars          string
+	Path          string
+	WinRMPassword string
+}
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	//Create passthrough for winrm password so we can fill it in once we know it
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
+
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -115,6 +125,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			},
 		},
 	}, raws...)
+
 	if err != nil {
 		return err
 	}
@@ -369,9 +380,16 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 		envVars["AUTO_WINRM_PASSWORD"] = psEscape.Replace(winRMPass)
 
 	}
-
+	// interpolate environment variables
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: p.getWinRMPassword(),
+	}
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
+		envVar, err = interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return
+		}
 		keyValue := strings.SplitN(envVar, "=", 2)
 		// Escape chars special to PS in each env var value
 		escapedEnvVarValue := psEscape.Replace(keyValue[1])
@@ -430,8 +448,9 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path: p.config.RemotePath,
-		Vars: envVarPath,
+		Path:          p.config.RemotePath,
+		Vars:          envVarPath,
+		WinRMPassword: p.getWinRMPassword(),
 	}
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 
@@ -443,6 +462,11 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 	return command, nil
 }
 
+func (p *Provisioner) getWinRMPassword() string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password")
+	return winRMPass
+
+}
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Prepare everything needed to enable the required env vars within the remote environment
 	envVarPath, err := p.prepareEnvVars(true)
@@ -451,8 +475,9 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path: p.config.RemotePath,
-		Vars: envVarPath,
+		Path:          p.config.RemotePath,
+		Vars:          envVarPath,
+		WinRMPassword: p.getWinRMPassword(),
 	}
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
@@ -509,15 +534,11 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 			p.config.ElevatedUser, escapedElevatedUser)
 	}
 	// Replace ElevatedPassword for winrm users who used this feature
-	if strings.Compare(p.config.ElevatedPassword, ".AUTO_WINRM_PASSWORD") == 0 {
-		winRMPass, err := commonhelper.RetrieveSharedState("winrm_password")
-		// This shared state is only created by the amazon builder.
-		if err != nil {
-			fmt.Printf("Error reading AUTO_WINRM_PASSWORD from state: %s", err)
-			return "", err
-		}
-		p.config.ElevatedPassword = winRMPass
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: p.getWinRMPassword(),
 	}
+
+	p.config.ElevatedPassword, _ = interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
 
 	// Escape chars special to PowerShell in the ElevatedPassword string
 	escapedElevatedPassword := psEscape.Replace(p.config.ElevatedPassword)
