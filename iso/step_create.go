@@ -9,16 +9,12 @@ import (
 )
 
 type CreateConfig struct {
+	common.VMConfig `mapstructure:",squash"`
 	common.HardwareConfig `mapstructure:",squash"`
 
 	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
 	DiskControllerType  string `mapstructure:"disk_controller_type"`
 
-	VMName        string `mapstructure:"vm_name"`
-	Folder        string `mapstructure:"folder"`
-	Host          string `mapstructure:"host"`
-	ResourcePool  string `mapstructure:"resource_pool"`
-	Datastore     string `mapstructure:"datastore"`
 	GuestOSType   string `mapstructure:"guest_os_type"`
 	Network       string `mapstructure:"network"`
 	NetworkCard   string `mapstructure:"network_card"`
@@ -32,15 +28,8 @@ func (c *CreateConfig) Prepare() []error {
 	tmp := *c
 
 	// do recursive calls
+	errs = append(errs, tmp.VMConfig.Prepare()...)
 	errs = append(errs, tmp.HardwareConfig.Prepare()...)
-
-	// check for errors
-	if tmp.VMName == "" {
-		errs = append(errs, fmt.Errorf("Target VM name is required"))
-	}
-	if tmp.Host == "" {
-		errs = append(errs, fmt.Errorf("vSphere host is required"))
-	}
 
 	if len(errs) > 0 {
 		return errs
@@ -74,6 +63,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		DiskControllerType:  s.Config.DiskControllerType,
 		Name:                s.Config.VMName,
 		Folder:              s.Config.Folder,
+		Cluster:             s.Config.Cluster,
 		Host:                s.Config.Host,
 		ResourcePool:        s.Config.ResourcePool,
 		Datastore:           s.Config.Datastore,

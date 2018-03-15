@@ -4,7 +4,6 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/mo"
-	"fmt"
 )
 
 type Host struct {
@@ -20,7 +19,7 @@ func (d *Driver) NewHost(ref *types.ManagedObjectReference) *Host {
 }
 
 func (d *Driver) FindHost(name string) (*Host, error) {
-	h, err := d.finder.HostSystem(d.ctx, fmt.Sprintf("/%v/host/%v", d.datacenter.Name(), name))
+	h, err := d.finder.HostSystem(d.ctx, name)
 	if err != nil {
 		return nil, err
 	}
