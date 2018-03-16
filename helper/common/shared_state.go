@@ -15,7 +15,7 @@ func sharedStateFilename(suffix string) string {
 }
 
 func SetSharedState(key string, value string) error {
-	return ioutil.WriteFile(sharedStateFilename(key), []byte(value), 0644)
+	return ioutil.WriteFile(sharedStateFilename(key), []byte(value), 0600)
 }
 
 func RetrieveSharedState(key string) (string, error) {
