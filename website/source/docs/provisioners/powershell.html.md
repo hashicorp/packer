@@ -80,7 +80,11 @@ Optional parameters:
     as an environment variable. For example:
 
     ```json
-    "environment_vars": "WINRMPASS={{.WinRMPassword}}",
+      {
+        "type": "powershell",
+        "environment_vars": "WINRMPASS={{.WinRMPassword}}",
+        "inline": ["Write-Host \"Automatically generated aws password is: $Env:WINRMPASS\""]
+      },
     ```
 
 -   `execute_command` (string) - The command to use to execute the script. By
