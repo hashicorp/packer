@@ -33,7 +33,7 @@
         "{{template_dir}}/preseed.cfg"
       ],
       "boot_command": [
-        "<enter><wait><f6><esc><wait>",
+        "<enter><wait><f6><wait><esc><wait>",
         "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
         "<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
