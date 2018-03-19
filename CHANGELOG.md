@@ -1,3 +1,26 @@
+## (UNRELEASED)
+
+### BUG FIXES:
+
+* builder/virtualbox: Correctly send multi-byte scancodes when typing boot
+    command. [GH-5987]
+* provisioner/powershell: Fix environment variable file escaping. [GH-5973]
+
+### IMPROVEMENTS:
+
+* builder/amazon: Added new region `cn-northwest-1`. [GH-5960]
+* builder/azure: Add support concurrent deployments in the same resource group.
+    [GH-6005]
+* builder/azure: Add support for building with additional disks. [GH-5944]
+* builder/azure: Add support for marketplace plan information. [GH-5970]
+* builder/azure: Make all command output human readable. [GH-5967]
+* builder/azure: Respect `-force` for managed image deletion. [GH-6003]
+* builder/google: Add option to specify a service account, or to run without
+    one. [GH-5991] [GH-5928]
+* post-processor/vagrant: Add LXC support. [GH-5980]
+* provisioner/salt-masterless: Added Windows support. [GH-5702]
+
+
 ## 1.2.1 (February 23, 2018)
 
 ### BUG FIXES:
