@@ -123,14 +123,6 @@ This is a preferred approach over any other when running in EC2 as you can
 avoid hard coding credentials. Instead these are leased on-the-fly by Packer,
 which reduces the chance of leakage.
 
-The default deadline for the EC2 metadata API endpoint is 100 milliseconds,
-which can be overidden by setting the `AWS_METADATA_TIMEOUT` environment
-variable. The variable expects a positive golang Time.Duration string, which is
-a sequence of decimal numbers and a unit suffix; valid suffixes are `ns`
-(nanoseconds), `us` (microseconds), `ms` (milliseconds), `s` (seconds), `m`
-(minutes), and `h` (hours). Examples of valid inputs: `100ms`, `250ms`, `1s`,
-`2.5s`, `2.5m`, `1m30s`.
-
 The following policy document provides the minimal set permissions necessary
 for Packer to work:
 
