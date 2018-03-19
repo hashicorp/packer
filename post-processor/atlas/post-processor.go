@@ -155,10 +155,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	ui.Message("\n-----------------------------------------------------------------------\n" +
 		"Deprecation warning: The Packer and Artifact Registry features of Atlas\n" +
 		"will no longer be actively developed or maintained and will be fully\n" +
-		"decommissioned on Friday, March 30, 2018. Please see our guide on\n" +
-		"building immutable infrastructure with Packer on CI/CD for ideas on\n" +
-		"implementing these features yourself:\n" +
-		"https://www.packer.io/guides/packer-on-cicd/\n" +
+		"decommissioned. Please see our guide on building immutable\n" +
+		"infrastructure with Packer on CI/CD for ideas on implementing\n" +
+		"these features yourself: https://www.packer.io/guides/packer-on-cicd/\n" +
 		"-----------------------------------------------------------------------\n",
 	)
 
