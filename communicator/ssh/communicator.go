@@ -423,6 +423,9 @@ func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client,
 	}
 	cmd.Wait()
 	if cmd.ExitStatus == 0 {
+		if fi == nil {
+			return fmt.Errorf("Upload path is a directory, unable to continue.")
+		}
 		log.Printf("path is a directory; copying file into directory.")
 		path = filepath.Join(path, filepath.Base((*fi).Name()))
 	}
@@ -586,6 +589,9 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	}
 	cmd.Wait()
 	if cmd.ExitStatus == 0 {
+		if fi == nil {
+			return fmt.Errorf("Upload path is a directory, unable to continue.")
+		}
 		log.Printf("path is a directory; copying file into directory.")
 		target_dir = path
 		target_file = filepath.Base((*fi).Name())
