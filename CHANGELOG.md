@@ -4,30 +4,16 @@
 
 * builder/amazon: Fix authorization using assume role. [GH-5914]
 * builder/hyper-v: Fix command collisions with VMWare PowerCLI. [GH-5861]
-* builder/virtualbox: Correctly send multi-byte scancodes when typing boot
-    command. [GH-5987]
 * builder/vmware-iso: Fix panic when building on esx5 remotes. [GH-5931]
 * builder/vmware: Fix issue detecting host IP. [GH-5898] [GH-5900]
 * provisioner/ansible-local: Fix conflicting escaping schemes for vars provided
     via `--extra-vars`. [GH-5888]
-* provisioner/powershell: Fix environment variable file escaping. [GH-5973]
 
 ### IMPROVEMENTS:
 
-* builder/amazon: Added new region `cn-northwest-1`. [GH-5960]
-* builder/azure: Add support concurrent deployments in the same resource group.
-    [GH-6005]
-* builder/azure: Add support for building with additional disks. [GH-5944]
-* builder/azure: Add support for marketplace plan information. [GH-5970]
-* builder/azure: Make all command output human readable. [GH-5967]
-* builder/azure: Respect `-force` for managed image deletion. [GH-6003]
-* builder/google: Add option to specify a service account, or to run without
-    one. [GH-5991] [GH-5928]
 * builder/oracle-classic: Add `snapshot_timeout` option to control how long we
     wait for the snapshot to be created. [GH-5932]
 * builder/oracle-classic: Add support for WinRM connections. [GH-5929]
-* post-processor/vagrant: Add LXC support. [GH-5980]
-* provisioner/salt-masterless: Added Windows support. [GH-5702]
 
 
 ## 1.2.0 (February 9, 2018)
