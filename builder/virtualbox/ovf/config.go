@@ -104,7 +104,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		fileOK := common.FileExistsLocally(c.SourcePath)
 		if !fileOK {
 			packer.MultiErrorAppend(errs,
-				fmt.Errorf("Source file needs to exist at time of config validation!"))
+				fmt.Errorf("Source file '%s' needs to exist at time of config validation!", c.SourcePath))
 		}
 
 	}
