@@ -19,6 +19,7 @@ type CreateConfig struct {
 	Network       string `mapstructure:"network"`
 	NetworkCard   string `mapstructure:"network_card"`
 	USBController bool   `mapstructure:"usb_controller"`
+	Version       int    `mapstructure:"vm_version"`
 }
 
 func (c *CreateConfig) Prepare() []error {
@@ -30,6 +31,10 @@ func (c *CreateConfig) Prepare() []error {
 	// do recursive calls
 	errs = append(errs, tmp.VMConfig.Prepare()...)
 	errs = append(errs, tmp.HardwareConfig.Prepare()...)
+
+	if tmp.Version < 0 {
+		errs = append(errs, fmt.Errorf("'vm_version' cannot be a negative number"))
+	}
 
 	if len(errs) > 0 {
 		return errs
@@ -71,6 +76,7 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		Network:             s.Config.Network,
 		NetworkCard:         s.Config.NetworkCard,
 		USBController:       s.Config.USBController,
+		Version:             s.Config.Version,
 	})
 
 	if err != nil {

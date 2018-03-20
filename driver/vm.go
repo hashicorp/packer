@@ -53,6 +53,7 @@ type CreateConfig struct {
 	Network       string // "" for default network
 	NetworkCard   string // example: vmxnet3
 	USBController bool
+	Version       int // example: 10
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -396,6 +397,9 @@ func (config CreateConfig) toConfigSpec() types.VirtualMachineConfigSpec {
 	confSpec.Name = config.Name
 	confSpec.Annotation = config.Annotation
 	confSpec.GuestId = config.GuestOS
+	if config.Version != 0 {
+		confSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
+	}
 	return confSpec
 }
 
