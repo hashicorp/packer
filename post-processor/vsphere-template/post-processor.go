@@ -89,7 +89,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("The Packer vSphere Template post-processor "+
+			"can only take an artifact from the VMware-iso builder, built on "+
+			"ESXi (i.e. remote) or an artifact from the vSphere post-processor. "+
+			"Artifact type %s does not fit this requirement", artifact.BuilderId())
 	}
 
 	f := artifact.State(iso.ArtifactConfFormat)
