@@ -413,11 +413,9 @@ func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client,
 
 	// find out if destination is a directory (this is to replicate rsync behavior)
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
-	var stdout, stderr bytes.Buffer
+
 	cmd := &packer.RemoteCmd{
 		Command: testDirectoryCommand,
-		Stdout:  &stdout,
-		Stderr:  &stderr,
 	}
 
 	err := c.Start(cmd)
@@ -427,18 +425,10 @@ func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client,
 		return err
 	}
 	cmd.Wait()
-	if stdout.Len() > 0 {
-		return fmt.Errorf("%s", stdout.Bytes())
-	}
-	if stderr.Len() > 0 {
-		return fmt.Errorf("%s", stderr.Bytes())
-	}
 	if cmd.ExitStatus == 0 {
-		if fi == nil {
-			return fmt.Errorf("Upload path is a directory, unable to continue.")
-		}
-		log.Printf("path is a directory; copying file into directory.")
-		path = filepath.Join(path, filepath.Base((*fi).Name()))
+		return fmt.Errorf(
+			"Destination path (%s) is a directory that already exists. "+
+				"Please ensure the destination is writable.", path)
 	}
 
 	f, err := client.Create(path)
@@ -553,7 +543,7 @@ func (c *comm) sftpDownloadSession(path string, output io.Writer) error {
 func (c *comm) sftpSession(f func(*sftp.Client) error) error {
 	client, err := c.newSftpClient()
 	if err != nil {
-		return err
+		return fmt.Errorf("sftpSession error: %s", err.Error())
 	}
 	defer client.Close()
 
@@ -579,7 +569,15 @@ func (c *comm) newSftpClient() (*sftp.Client, error) {
 		return nil, err
 	}
 
-	return sftp.NewClientPipe(pr, pw)
+	// Capture stdout so we can return errors to the user
+	var stdout bytes.Buffer
+	tee := io.TeeReader(pr, &stdout)
+	client, err := sftp.NewClientPipe(tee, pw)
+	if err != nil && stdout.Len() > 0 {
+		log.Printf("[ERROR] Upload failed: %s", stdout.Bytes())
+	}
+
+	return client, err
 }
 
 func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) error {
@@ -611,12 +609,9 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 		return fmt.Errorf("%s", stderr.Bytes())
 	}
 	if cmd.ExitStatus == 0 {
-		if fi == nil {
-			return fmt.Errorf("Upload path is a directory, unable to continue.")
-		}
-		log.Printf("path is a directory; copying file into directory.")
-		target_dir = path
-		target_file = filepath.Base((*fi).Name())
+		return fmt.Errorf(
+			"Destination path (%s) is a directory that already exists. "+
+				"Please ensure the destination is writable.", path)
 	}
 
 	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
