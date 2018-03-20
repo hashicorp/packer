@@ -1058,7 +1058,6 @@ func TestConfigShouldRejectManagedDiskNames(t *testing.T) {
 }
 
 func TestConfigAdditionalDiskDefaultIsNil(t *testing.T) {
-
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())
 	if c.AdditionalDiskSize != nil {
 		t.Errorf("Expected Config to not have a set of additional disks, but got a non nil value")
@@ -1225,6 +1224,43 @@ func TestPlanInfoTooManyTagsErrors(t *testing.T) {
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject configuration due to excess tags")
+	}
+}
+
+// The Azure builder creates temporary resources, but the user has some control over
+// these values. This test asserts those values are controllable by the user.
+func TestConfigShouldAllowTempNameOverrides(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"temp_resource_group_name":          "myTempResourceGroupName",
+		"temp_compute_name":                 "myTempComputeName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.TempResourceGroupName != "myTempResourceGroupName" {
+		t.Errorf("expected TempResourceGroupName to be %q, but got %q", "myTempResourceGroupName", c.TempResourceGroupName)
+	}
+	if c.tmpResourceGroupName != "myTempResourceGroupName" {
+		t.Errorf("expected tmpResourceGroupName to be %q, but got %q", "myTempResourceGroupName", c.tmpResourceGroupName)
+	}
+
+	if c.TempComputeName != "myTempComputeName" {
+		t.Errorf("expected TempComputeName to be %q, but got %q", "myTempComputeName", c.TempComputeName)
+	}
+	if c.tmpComputeName != "myTempComputeName" {
+		t.Errorf("expected tmpComputeName to be %q, but got %q", "myTempComputeName", c.tmpResourceGroupName)
 	}
 }
 
