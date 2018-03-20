@@ -96,7 +96,7 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		host = h.host
 	}
 
-	datastore, err := d.FindDatastore(config.Datastore)
+	datastore, err := d.FindDatastore(config.Datastore, config.Host)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func (template *VirtualMachine) Clone(config *CloneConfig) (*VirtualMachine, err
 	poolRef := pool.pool.Reference()
 	relocateSpec.Pool = &poolRef
 
-	datastore, err := template.driver.FindDatastore(config.Datastore)
+	datastore, err := template.driver.FindDatastore(config.Datastore, config.Host)
 	if err != nil {
 		return nil, err
 	}

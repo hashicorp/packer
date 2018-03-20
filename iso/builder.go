@@ -49,6 +49,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepAddFloppy{
 			Config:    &b.config.FloppyConfig,
 			Datastore: b.config.Datastore,
+			Host: b.config.Host,
 		},
 		&StepConfigParams{
 			Config:    &b.config.ConfigParamsConfig,

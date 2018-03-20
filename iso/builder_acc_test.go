@@ -27,7 +27,6 @@ func defaultConfig() map[string]interface{} {
 		"insecure_connection": true,
 
 		"host": "esxi-1.vsphere65.test",
-		"datastore": "datastore1",
 
 		"ssh_username": "root",
 		"ssh_password": "jetbrains",

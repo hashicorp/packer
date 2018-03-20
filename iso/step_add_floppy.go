@@ -29,6 +29,7 @@ func (c *FloppyConfig) Prepare() []error {
 type StepAddFloppy struct {
 	Config    *FloppyConfig
 	Datastore string
+	Host string
 
 	uploadedFloppyPath string
 }
@@ -51,7 +52,7 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 	if tmpFloppy != nil {
 		ui.Say("Uploading created floppy image")
 
-		ds, err := d.FindDatastore(s.Datastore)
+		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
 			return err
 		}
@@ -102,7 +103,7 @@ func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
 	}
 
 	if s.uploadedFloppyPath != "" {
-		ds, err := d.FindDatastore(s.Datastore)
+		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
 			ui.Error(err.Error())
 			return

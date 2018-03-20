@@ -29,7 +29,6 @@ func TestVMAcc_clone(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.config.Host = TestHostName
-			tc.config.Datastore = "datastore1"
 			tc.config.Name = newVMName()
 
 			templateName := "alpine"
