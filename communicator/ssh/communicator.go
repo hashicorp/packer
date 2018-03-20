@@ -413,7 +413,12 @@ func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client,
 
 	// find out if destination is a directory (this is to replicate rsync behavior)
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
-	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+	var stdout, stderr bytes.Buffer
+	cmd := &packer.RemoteCmd{
+		Command: testDirectoryCommand,
+		Stdout:  &stdout,
+		Stderr:  &stderr,
+	}
 
 	err := c.Start(cmd)
 
@@ -422,6 +427,12 @@ func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client,
 		return err
 	}
 	cmd.Wait()
+	if stdout.Len() > 0 {
+		return fmt.Errorf("%s", stdout.Bytes())
+	}
+	if stderr.Len() > 0 {
+		return fmt.Errorf("%s", stderr.Bytes())
+	}
 	if cmd.ExitStatus == 0 {
 		if fi == nil {
 			return fmt.Errorf("Upload path is a directory, unable to continue.")
@@ -579,7 +590,12 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 
 	// find out if destination is a directory (this is to replicate rsync behavior)
 	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
-	cmd := &packer.RemoteCmd{Command: testDirectoryCommand}
+	var stdout, stderr bytes.Buffer
+	cmd := &packer.RemoteCmd{
+		Command: testDirectoryCommand,
+		Stdout:  &stdout,
+		Stderr:  &stderr,
+	}
 
 	err := c.Start(cmd)
 
@@ -588,6 +604,12 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 		return err
 	}
 	cmd.Wait()
+	if stdout.Len() > 0 {
+		return fmt.Errorf("%s", stdout.Bytes())
+	}
+	if stderr.Len() > 0 {
+		return fmt.Errorf("%s", stderr.Bytes())
+	}
 	if cmd.ExitStatus == 0 {
 		if fi == nil {
 			return fmt.Errorf("Upload path is a directory, unable to continue.")
