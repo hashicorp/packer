@@ -17,11 +17,12 @@ import (
 
 // AccessConfig is for common configuration related to Triton access
 type AccessConfig struct {
-	Endpoint    string `mapstructure:"triton_url"`
-	Account     string `mapstructure:"triton_account"`
-	Username    string `mapstructure:"triton_user"`
-	KeyID       string `mapstructure:"triton_key_id"`
-	KeyMaterial string `mapstructure:"triton_key_material"`
+	Endpoint              string `mapstructure:"triton_url"`
+	Account               string `mapstructure:"triton_account"`
+	Username              string `mapstructure:"triton_user"`
+	KeyID                 string `mapstructure:"triton_key_id"`
+	KeyMaterial           string `mapstructure:"triton_key_material"`
+	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
 
 	signer authentication.Signer
 }
@@ -131,18 +132,24 @@ func (c *AccessConfig) CreateTritonClient() (*Client, error) {
 	}
 
 	return &Client{
-		config: config,
+		config:                config,
+		insecureSkipTLSVerify: c.InsecureSkipTLSVerify,
 	}, nil
 }
 
 type Client struct {
-	config *tgo.ClientConfig
+	config                *tgo.ClientConfig
+	insecureSkipTLSVerify bool
 }
 
 func (c *Client) Compute() (*compute.ComputeClient, error) {
 	computeClient, err := compute.NewClient(c.config)
 	if err != nil {
 		return nil, errwrap.Wrapf("Error Creating Triton Compute Client: {{err}}", err)
+	}
+
+	if c.insecureSkipTLSVerify {
+		computeClient.Client.InsecureSkipTLSVerify()
 	}
 
 	return computeClient, nil
@@ -152,6 +159,10 @@ func (c *Client) Network() (*network.NetworkClient, error) {
 	networkClient, err := network.NewClient(c.config)
 	if err != nil {
 		return nil, errwrap.Wrapf("Error Creating Triton Network Client: {{err}}", err)
+	}
+
+	if c.insecureSkipTLSVerify {
+		networkClient.Client.InsecureSkipTLSVerify()
 	}
 
 	return networkClient, nil
