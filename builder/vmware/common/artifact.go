@@ -9,7 +9,7 @@ import (
 )
 
 // BuilderId for the local artifacts
-const BuilderId = "mitchellh.vmware"
+const BuilderId = "hashicorp.vmware"
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
