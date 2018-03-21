@@ -230,6 +230,9 @@ can be configured for this builder.
 -   `temp_path` (string) - This is the temporary path in which Packer will create the virtual
     machine. Default value is system `%temp%`
 
+-   `disk_block_size` (string) - The block size of the VHD to be created. 
+    Recommended disk block size for Linux hyper-v guests is 1 MiB. This defaults to "32 MiB".
+
 ## Boot Command
 
 The `boot_command` configuration is very important: it specifies the keys
