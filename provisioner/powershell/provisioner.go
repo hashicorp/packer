@@ -17,6 +17,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -99,11 +100,22 @@ type Provisioner struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars string
-	Path string
+	Vars          string
+	Path          string
+	WinRMPassword string
+}
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	//Create passthrough for winrm password so we can fill it in once we know it
+	log.Printf("MEGAN context is %#v", p.config.ctx)
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
+
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -236,6 +248,7 @@ func extractScript(p *Provisioner) (string, error) {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	log.Printf("MEGAN context is %#v", p.config.ctx)
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
 
@@ -358,13 +371,22 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
+
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr
 	}
 
+	// interpolate environment variables
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(),
+	}
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return
+		}
 		keyValue := strings.SplitN(envVar, "=", 2)
 		// Escape chars special to PS in each env var value
 		escapedEnvVarValue := psEscape.Replace(keyValue[1])
@@ -423,8 +445,9 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path: p.config.RemotePath,
-		Vars: envVarPath,
+		Path:          p.config.RemotePath,
+		Vars:          envVarPath,
+		WinRMPassword: getWinRMPassword(),
 	}
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 
@@ -436,6 +459,11 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 	return command, nil
 }
 
+func getWinRMPassword() string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password")
+	return winRMPass
+
+}
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Prepare everything needed to enable the required env vars within the remote environment
 	envVarPath, err := p.prepareEnvVars(true)
@@ -444,8 +472,9 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	}
 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
-		Path: p.config.RemotePath,
-		Vars: envVarPath,
+		Path:          p.config.RemotePath,
+		Vars:          envVarPath,
+		WinRMPassword: getWinRMPassword(),
 	}
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
@@ -501,6 +530,12 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		log.Printf("Elevated user %s converted to %s after escaping chars special to PowerShell",
 			p.config.ElevatedUser, escapedElevatedUser)
 	}
+	// Replace ElevatedPassword for winrm users who used this feature
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(),
+	}
+
+	p.config.ElevatedPassword, _ = interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
 
 	// Escape chars special to PowerShell in the ElevatedPassword string
 	escapedElevatedPassword := psEscape.Replace(p.config.ElevatedPassword)
