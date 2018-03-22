@@ -255,12 +255,6 @@ builder.
     The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
--   `skip_metadata_api_check` - (boolean) Skip the AWS Metadata API check.
-    Useful for AWS API implementations that do not have a metadata API
-    endpoint. Setting to `true` prevents Packer from authenticating via the
-    Metadata API. You may need to use other authentication methods like static
-    credentials, configuration variables, or environment variables.
-
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Defaults to `false`.
 

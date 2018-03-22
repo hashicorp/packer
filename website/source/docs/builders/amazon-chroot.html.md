@@ -246,12 +246,6 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
--   `skip_metadata_api_check` - (boolean) Skip the AWS Metadata API check.
-    Useful for AWS API implementations that do not have a metadata API
-    endpoint. Setting to `true` prevents Packer from authenticating via the
-    Metadata API. You may need to use other authentication methods like static
-    credentials, configuration variables, or environment variables.
-
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
