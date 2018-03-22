@@ -24,7 +24,8 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		"subnet_ocid": "ocd1...",
 
 		// Comm
-		"ssh_username": "opc",
+		"ssh_username":   "opc",
+		"use_private_ip": false,
 	}
 }
 
