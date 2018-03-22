@@ -123,6 +123,8 @@ builder.
     value provided by the [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
 
+ -  `use_private_ip` (boolean) - Use private ip addresses to connect to the instance via ssh.
+
 
 ## Basic Example
 
