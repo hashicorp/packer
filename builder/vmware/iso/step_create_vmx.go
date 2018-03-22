@@ -475,14 +475,19 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		}
 
 		// try and convert the specified network to a device.
-		device, err := netmap.NameIntoDevice(network)
+		devices, err := netmap.NameIntoDevices(network)
 
-		if err == nil {
-			// success. so we know that it's an actual network type inside netmap.conf
+		if err == nil && len(devices) > 0 {
+			// If multiple devices exist, for example for network "nat", VMware chooses
+			// the actual device. Only type "custom" allows the exact choice of a
+			// specific virtual network (see below). We allow VMware to choose the device
+			// and for device-specific operations like GuestIP, try to go over all
+			// devices that match a name (e.g. "nat").
+			// https://pubs.vmware.com/workstation-9/index.jsp?topic=%2Fcom.vmware.ws.using.doc%2FGUID-3B504F2F-7A0B-415F-AE01-62363A95D052.html
 			templateData.Network_Type = network
-			templateData.Network_Device = device
+			templateData.Network_Device = ""
 		} else {
-			// otherwise, we were unable to find the type, so assume its a custom device.
+			// otherwise, we were unable to find the type, so assume it's a custom device
 			templateData.Network_Type = "custom"
 			templateData.Network_Device = network
 		}
