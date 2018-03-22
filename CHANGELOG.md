@@ -5,6 +5,11 @@
 * builder/virtualbox: Correctly send multi-byte scancodes when typing boot
     command. [GH-5987]
 * provisioner/powershell: Fix environment variable file escaping. [GH-5973]
+* builder/vmware: Handle multiple devices per VMware network type [GH-5985]
+* builder/amazon: Fix AWS credential defaulting [GH-6019]
+* builder/virtualbox: Special boot-commands no longer overwrite previous commands [GH-6002]
+* builder/vmware: Default to disabling XHCI bus for USB on the vmware-iso builder. [GH-5975]
+
 
 ### IMPROVEMENTS:
 
@@ -19,6 +24,8 @@
     one. [GH-5991] [GH-5928]
 * post-processor/vagrant: Add LXC support. [GH-5980]
 * provisioner/salt-masterless: Added Windows support. [GH-5702]
+* builder/oracle-oci: Add new "use_private_ip" option. [GH-5893]
+* provisioner/salt: Add windows support to salt provisioner [GH-6012] [GH-6012]
 
 
 ## 1.2.1 (February 23, 2018)
