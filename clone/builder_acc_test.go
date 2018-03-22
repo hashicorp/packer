@@ -28,8 +28,8 @@ func defaultConfig() map[string]interface{} {
 		"template": "alpine",
 		"host":     "esxi-1.vsphere65.test",
 
-		"ssh_username": "root",
-		"ssh_password": "jetbrains",
+		"linked_clone": true, // speed up
+		"communicator": "none",
 	}
 	config["vm_name"] = commonT.NewVMName()
 	return config
@@ -40,7 +40,7 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
-		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk")
+		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -86,10 +86,6 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 			t.Errorf("Invalid datastore name: expected '%v', got '%v'", datastore, dsInfo.Name)
 		}
 
-		if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
-			t.Error("Not a full clone")
-		}
-
 		return nil
 	}
 }
@@ -130,7 +126,6 @@ func TestCloneBuilderAcc_folder(t *testing.T) {
 func folderConfig() string {
 	config := defaultConfig()
 	config["folder"] = "folder1/folder2"
-	config["linked_clone"] = true // speed up
 	return commonT.RenderConfig(config)
 }
 
@@ -168,7 +163,6 @@ func TestCloneBuilderAcc_resourcePool(t *testing.T) {
 func resourcePoolConfig() string {
 	config := defaultConfig()
 	config["resource_pool"] = "pool1/pool2"
-	config["linked_clone"] = true // speed up
 	return commonT.RenderConfig(config)
 }
 
@@ -206,6 +200,7 @@ func TestCloneBuilderAcc_datastore(t *testing.T) {
 func datastoreConfig() string {
 	config := defaultConfig()
 	config["template"] = "alpine-host4" // on esxi-4.vsphere65.test
+	config["linked_clone"] = false
 	return commonT.RenderConfig(config)
 }
 
@@ -249,7 +244,40 @@ func TestCloneBuilderAcc_multipleDatastores(t *testing.T) {
 func multipleDatastoresConfig() string {
 	config := defaultConfig()
 	config["host"] = "esxi-4.vsphere65.test" // host with 2 datastores
+	config["linked_clone"] = false
 	return commonT.RenderConfig(config)
+}
+
+func TestCloneBuilderAcc_fullClone(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: fullCloneConfig(),
+		Check:    checkFullClone(t),
+	})
+}
+
+func fullCloneConfig() string {
+	config := defaultConfig()
+	config["linked_clone"] = false
+	return commonT.RenderConfig(config)
+}
+
+func checkFullClone(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("layoutEx.disk")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		if len(vmInfo.LayoutEx.Disk[0].Chain) != 1 {
+			t.Error("Not a full clone")
+		}
+
+		return nil
+	}
 }
 
 func TestCloneBuilderAcc_linkedClone(t *testing.T) {
@@ -299,7 +327,6 @@ func hardwareConfig() string {
 	config["CPU_limit"] = 1500
 	config["RAM"] = 2048
 	config["RAM_reservation"] = 1024
-	config["linked_clone"] = true // speed up
 
 	return commonT.RenderConfig(config)
 }
@@ -354,7 +381,6 @@ func TestCloneBuilderAcc_RAMReservation(t *testing.T) {
 func RAMReservationConfig() string {
 	config := defaultConfig()
 	config["RAM_reserve_all"] = true
-	config["linked_clone"] = true // speed up
 
 	return commonT.RenderConfig(config)
 }
@@ -377,6 +403,21 @@ func checkRAMReservation(t *testing.T) builderT.TestCheckFunc {
 	}
 }
 
+func TestCloneBuilderAcc_sshPassword(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: sshPasswordConfig(),
+	})
+}
+
+func sshPasswordConfig() string {
+	config := defaultConfig()
+	config["communicator"] = "ssh"
+	config["ssh_username"] = "root"
+	config["ssh_password"] = "jetbrains"
+	return commonT.RenderConfig(config)
+}
+
 func TestCloneBuilderAcc_sshKey(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -386,9 +427,9 @@ func TestCloneBuilderAcc_sshKey(t *testing.T) {
 
 func sshKeyConfig() string {
 	config := defaultConfig()
-	config["ssh_password"] = ""
+	config["communicator"] = "ssh"
+	config["ssh_username"] = "root"
 	config["ssh_private_key_file"] = "../test-key.pem"
-	config["linked_clone"] = true // speed up
 	return commonT.RenderConfig(config)
 }
 
@@ -402,6 +443,7 @@ func TestCloneBuilderAcc_snapshot(t *testing.T) {
 
 func snapshotConfig() string {
 	config := defaultConfig()
+	config["linked_clone"] = false
 	config["create_snapshot"] = true
 	return commonT.RenderConfig(config)
 }
@@ -436,7 +478,6 @@ func TestCloneBuilderAcc_template(t *testing.T) {
 func templateConfig() string {
 	config := defaultConfig()
 	config["convert_to_template"] = true
-	config["linked_clone"] = true // speed up
 	return commonT.RenderConfig(config)
 }
 
