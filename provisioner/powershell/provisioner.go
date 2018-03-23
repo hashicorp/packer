@@ -571,8 +571,5 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	if err != nil {
 		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
 	}
-
-	// CMD formatted Path required for this op
-	path = fmt.Sprintf("%s-%s.ps1", "%TEMP%/packer-elevated-shell", uuid)
 	return path, err
 }
