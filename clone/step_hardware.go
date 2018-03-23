@@ -19,14 +19,16 @@ func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepActi
 		ui.Say("Customizing hardware parameters...")
 
 		err := vm.Configure(&driver.HardwareConfig{
-			CPUs:           s.config.CPUs,
-			CPUReservation: s.config.CPUReservation,
-			CPULimit:       s.config.CPULimit,
-			RAM:            s.config.RAM,
-			RAMReservation: s.config.RAMReservation,
-			RAMReserveAll:  s.config.RAMReserveAll,
-			DiskSize:       s.config.DiskSize,
-			NestedHV:       s.config.NestedHV,
+			CPUs:                s.config.CPUs,
+			CPUReservation:      s.config.CPUReservation,
+			CPULimit:            s.config.CPULimit,
+			RAM:                 s.config.RAM,
+			RAMReservation:      s.config.RAMReservation,
+			RAMReserveAll:       s.config.RAMReserveAll,
+			DiskSize:            s.config.DiskSize,
+			NestedHV:            s.config.NestedHV,
+			CpuHotAddEnabled:    s.config.CpuHotAddEnabled,
+			MemoryHotAddEnabled: s.config.MemoryHotAddEnabled,
 		})
 		if err != nil {
 			state.Put("error", err)

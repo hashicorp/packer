@@ -327,6 +327,8 @@ func hardwareConfig() string {
 	config["CPU_limit"] = 1500
 	config["RAM"] = 2048
 	config["RAM_reservation"] = 1024
+	config["CPU_hot_plug"] = true
+	config["RAM_hot_plug"] = true
 
 	return commonT.RenderConfig(config)
 }
@@ -364,6 +366,16 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 		ramReservation := vmInfo.Config.MemoryAllocation.GetResourceAllocationInfo().Reservation
 		if ramReservation != 1024 {
 			t.Errorf("VM should have RAM reservation for 1024 MB, got %v", ramReservation)
+		}
+
+		cpuHotAdd := vmInfo.Config.CpuHotAddEnabled
+		if !*cpuHotAdd {
+			t.Errorf("VM should have CPU hot add enabled, got %v", cpuHotAdd)
+		}
+
+		memoryHotAdd := vmInfo.Config.MemoryHotAddEnabled
+		if !*memoryHotAdd {
+			t.Errorf("VM should have Memory hot add enabled, got %v", memoryHotAdd)
 		}
 
 		return nil
