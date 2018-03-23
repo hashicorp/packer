@@ -53,16 +53,16 @@ func minimalConfig() map[string]interface{} {
 
 func testConfigOk(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Error("Should be no warnings: %#v", warns)
+		t.Errorf("Should be no warnings: %#v", warns)
 	}
 	if err != nil {
-		t.Error("Unexpected error: %s", err)
+		t.Errorf("Unexpected error: %s", err)
 	}
 }
 
 func testConfigErr(t *testing.T, context string, warns []string, err error) {
 	if len(warns) > 0 {
-		t.Error("Should be no warnings: %#v", warns)
+		t.Errorf("Should be no warnings: %#v", warns)
 	}
 	if err == nil {
 		t.Error("An error is not raised for", context)
