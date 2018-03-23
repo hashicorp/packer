@@ -460,8 +460,8 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 func getWinRMPassword() string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password")
 	return winRMPass
-
 }
+
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
 	// Prepare everything needed to enable the required env vars within the remote environment
 	envVarPath, err := p.prepareEnvVars(true)
