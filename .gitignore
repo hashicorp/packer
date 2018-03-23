@@ -1,5 +1,4 @@
 .idea/
-.glide/
 vendor/
 packer-builder-vsphere*
 bin/

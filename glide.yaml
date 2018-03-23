@@ -1,9 +1,0 @@
-package: github.com/jetbrains-infra/packer-builder-vsphere
-import:
-- package: github.com/hashicorp/packer
-  version: v1.0.2
-- package: github.com/mitchellh/multistep
-- package: github.com/vmware/govmomi
-  version: v0.15.0
-- package: golang.org/x/crypto
-- package: golang.org/x/mobile
