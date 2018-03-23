@@ -54,6 +54,9 @@ Below is a fully functioning example.
 
 ### Optional:
 
+-  `init_sleep` (string) - The number of seconds to sleep between launching the
+   LXD instance and provisioning it; defaults to 3 seconds.
+
 -  `name` (string) - The name of the started container. Defaults to
    `packer-$PACKER_BUILD_NAME`.
 
