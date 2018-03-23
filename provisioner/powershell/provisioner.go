@@ -111,7 +111,6 @@ type EnvVarsTemplate struct {
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	//Create passthrough for winrm password so we can fill it in once we know it
-	log.Printf("MEGAN context is %#v", p.config.ctx)
 	p.config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: `{{.WinRMPassword}}`,
 	}
@@ -248,7 +247,6 @@ func extractScript(p *Provisioner) (string, error) {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
-	log.Printf("MEGAN context is %#v", p.config.ctx)
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
 
