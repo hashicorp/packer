@@ -1,0 +1,15 @@
+[[constraint]]
+  name = "github.com/hashicorp/packer"
+  version = "=1.0.2"
+
+[[override]]
+  name = "github.com/masterzen/azure-sdk-for-go"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/vmware/govmomi"
+  version = "=0.15.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true

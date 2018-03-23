@@ -2,7 +2,7 @@
 
 set -eux
 
-glide install -v
+dep ensure
 export CGO_ENABLED=0
 export GOARCH=amd64
 mkdir -p bin
