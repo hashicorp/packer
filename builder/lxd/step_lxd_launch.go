@@ -3,6 +3,7 @@ package lxd
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -46,8 +47,9 @@ func (s *stepLxdLaunch) Run(_ context.Context, state multistep.StateBag) multist
 
 	// TODO: Should we check `lxc info <container>` for "Running"?
 	// We have to do this so /tmp doesn't get cleared and lose our provisioner scripts.
-	time.Sleep(time.Duration(sleep_seconds) * time.Second)
 
+	time.Sleep(time.Duration(sleep_seconds) * time.Second)
+	log.Printf("Sleeping for %d seconds...", sleep_seconds)
 	return multistep.ActionContinue
 }
 
