@@ -6,8 +6,6 @@ import (
 )
 
 func TestVMAcc_create(t *testing.T) {
-	initDriverAcceptanceTest(t)
-
 	testCases := []struct {
 		name          string
 		config        *CreateConfig

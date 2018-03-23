@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"os"
 	"fmt"
 	"testing"
 	"time"
@@ -9,7 +8,6 @@ import (
 )
 
 // Defines whether acceptance tests should be run
-const TestEnvVar = "VSPHERE_DRIVER_ACC"
 const TestHostName = "esxi-1.vsphere65.test"
 
 func newTestDriver(t *testing.T) *Driver {
@@ -28,19 +26,4 @@ func newTestDriver(t *testing.T) *Driver {
 func newVMName() string {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return fmt.Sprintf("test-%v", rand.Intn(1000))
-}
-
-func initDriverAcceptanceTest(t *testing.T) {
-	// We only run acceptance tests if an env var is set because they're
-	// slow and require outside configuration.
-	if os.Getenv(TestEnvVar) == "" {
-		t.Skip(fmt.Sprintf(
-			"Acceptance tests skipped unless env '%s' set",
-			TestEnvVar))
-	}
-
-	// We require verbose mode so that the user knows what is going on.
-	if !testing.Verbose() {
-		t.Fatal("Acceptance tests must be run with the -v flag on tests")
-	}
 }
