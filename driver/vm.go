@@ -26,14 +26,16 @@ type CloneConfig struct {
 }
 
 type HardwareConfig struct {
-	CPUs           int32
-	CPUReservation int64
-	CPULimit       int64
-	RAM            int64
-	RAMReservation int64
-	RAMReserveAll  bool
-	DiskSize       int64
-	NestedHV       bool
+	CPUs                int32
+	CPUReservation      int64
+	CPULimit            int64
+	RAM                 int64
+	RAMReservation      int64
+	RAMReserveAll       bool
+	DiskSize            int64
+	NestedHV            bool
+	CpuHotAddEnabled    bool
+	MemoryHotAddEnabled bool
 }
 
 type CreateConfig struct {
@@ -388,6 +390,9 @@ func (config HardwareConfig) toConfigSpec() types.VirtualMachineConfigSpec {
 
 	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
 	confSpec.NestedHVEnabled = &config.NestedHV
+
+	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
+	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
 
 	return confSpec
 }

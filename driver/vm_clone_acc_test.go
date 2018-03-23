@@ -115,11 +115,13 @@ func cloneDefaultCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	log.Printf("[DEBUG] Configuring the vm")
 	hwConfig := &HardwareConfig{
-		CPUs:           2,
-		CPUReservation: 1000,
-		CPULimit:       1500,
-		RAM:            2048,
-		RAMReservation: 1024,
+		CPUs:                2,
+		CPUReservation:      1000,
+		CPULimit:            1500,
+		RAM:                 2048,
+		RAMReservation:      1024,
+		MemoryHotAddEnabled: true,
+		CpuHotAddEnabled:    true,
 	}
 	vm.Configure(hwConfig)
 
@@ -152,6 +154,16 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	ramReservation := vmInfo.Config.MemoryAllocation.GetResourceAllocationInfo().Reservation
 	if ramReservation != hwConfig.RAMReservation {
 		t.Errorf("VM should have RAM reservation for %v MB, got %v", hwConfig.RAMReservation, ramReservation)
+	}
+
+	cpuHotAdd := vmInfo.Config.CpuHotAddEnabled
+	if *cpuHotAdd != hwConfig.CpuHotAddEnabled {
+		t.Errorf("VM should have CPU hot add set to %v, got %v", hwConfig.CpuHotAddEnabled, cpuHotAdd)
+	}
+
+	memoryHotAdd := vmInfo.Config.MemoryHotAddEnabled
+	if *memoryHotAdd != hwConfig.MemoryHotAddEnabled {
+		t.Errorf("VM should have Memroy hot add set to %v, got %v", hwConfig.MemoryHotAddEnabled, memoryHotAdd)
 	}
 }
 
