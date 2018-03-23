@@ -565,7 +565,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 		return "", err
 	}
 	uuid := uuid.TimeOrderedUUID()
-	path := fmt.Sprintf(`${env:TEMP}/packer-elevated-shell-%s.ps1`, uuid)
+	path := fmt.Sprintf(`C:/Windows/Temp/packer-elevated-shell-%s.ps1`, uuid)
 	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
 	err = p.communicator.Upload(path, &buffer, nil)
 	if err != nil {
