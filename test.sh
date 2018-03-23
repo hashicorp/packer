@@ -1,5 +1,7 @@
-#!/bin/sh -e
+#!/bin/sh
 
-(cd driver && ./test.sh "$@")
-(cd clone && ./test.sh "$@")
-(cd iso && ./test.sh "$@")
+set -eux
+
+export PACKER_ACC=1
+
+go test -v ./driver ./iso ./clone
