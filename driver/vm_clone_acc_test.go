@@ -8,8 +8,6 @@ import (
 )
 
 func TestVMAcc_clone(t *testing.T) {
-	initDriverAcceptanceTest(t)
-
 	testCases := []struct {
 		name          string
 		config        *CloneConfig

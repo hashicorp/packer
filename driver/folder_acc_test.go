@@ -3,8 +3,6 @@ package driver
 import "testing"
 
 func TestFolderAcc(t *testing.T) {
-	initDriverAcceptanceTest(t)
-
 	d := newTestDriver(t)
 	f, err := d.FindFolder("folder1/folder2")
 	if err != nil {

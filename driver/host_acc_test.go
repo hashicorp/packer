@@ -5,8 +5,6 @@ import (
 )
 
 func TestHostAcc(t *testing.T) {
-	initDriverAcceptanceTest(t)
-
 	d := newTestDriver(t)
 	host, err := d.FindHost(TestHostName)
 	if err != nil {

@@ -5,8 +5,6 @@ import (
 )
 
 func TestDatastoreAcc(t *testing.T) {
-	initDriverAcceptanceTest(t)
-
 	d := newTestDriver(t)
 	ds, err := d.FindDatastore("datastore1", "")
 	if err != nil {
