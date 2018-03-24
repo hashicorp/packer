@@ -1,3 +1,32 @@
+# 1.0.5
+
+* Fix hooks race (#707)
+* Fix panic deadlock (#695)
+
+# 1.0.4
+
+* Fix race when adding hooks (#612)
+* Fix terminal check in AppEngine (#635)
+
+# 1.0.3
+
+* Replace example files with testable examples
+
+# 1.0.2
+
+* bug: quote non-string values in text formatter (#583)
+* Make (*Logger) SetLevel a public method
+
+# 1.0.1
+
+* bug: fix escaping in text formatter (#575)
+
+# 1.0.0
+
+* Officially changed name to lower-case
+* bug: colors on Windows 10 (#541)
+* bug: fix race in accessing level (#512)
+
 # 0.11.5
 
 * feature: add writer and writerlevel to entry (#372)
