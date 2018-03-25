@@ -176,6 +176,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		}
 	}
 
+	amiDevices := b.config.BuildAMIDevices()
+	launchDevices := b.config.BuildLaunchDevices()
+
 	// Build the steps
 	steps := []multistep.Step{
 		&awscommon.StepPreValidate{
@@ -227,8 +230,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
-		&StepSnapshotNewRootVolume{
-			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
+		&StepSnapshotVolumes{
+			LaunchDevices: launchDevices,
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -239,7 +242,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepRegisterAMI{
 			RootDevice:               b.config.RootDevice,
-			BlockDevices:             b.config.BlockDevices.BuildAMIDevices(),
+			AMIDevices:               amiDevices,
+			LaunchDevices:            launchDevices,
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
