@@ -53,22 +53,6 @@ $ip
 	return cmdOut, err
 }
 
-//func CreateVirtualHardDiskDrive(vmName string, diskPath string, diskSize int64, diskBlockSize int64, generation uint) (uint, uint, error) {
-//
-//		var script = `
-//param([string]$vmName, [string]$path,
-//
-//
-//[long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
-//$vhdx = $vmName + '.vhdx'
-//$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-//New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
-//`
-//		var ps powershell.PowerShellCmd
-//		err := ps.Run(script, vmName, path, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10))
-//		return err
-//}
-
 func CreateDvdDrive(vmName string, isoPath string, generation uint) (uint, uint, error) {
 	var ps powershell.PowerShellCmd
 	var script string
