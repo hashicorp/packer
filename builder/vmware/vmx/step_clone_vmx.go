@@ -33,7 +33,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	ui.Say("Successfully cloned source VM to: %s", vmxPath)
+	ui.Say(fmt.Sprintf("Successfully cloned source VM to: %s", vmxPath))
 
 	// now we read the .vmx so we can determine what else to stash
 	vmxData, err := vmwcommon.ReadVMX(vmxPath)
@@ -70,7 +70,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		networkType = "nat"
 		log.Printf("Defaulting to network type: %s", networkType)
 	}
-	ui.Say("Using network type: %s", networkType)
+	ui.Say(fmt.Sprintf("Using network type: %s", networkType))
 
 	// we were able to find everything, so stash it in our state.
 	state.Put("vmx_path", vmxPath)
