@@ -1,19 +1,25 @@
-## (UNRELEASED)
+## 1.2.2 (March 26, 2018)
 
 ### BUG FIXES:
 
+* builder/amazon: Fix AWS credential defaulting [GH-6019]
+* builder/LXC: make sleep timeout easily configurable [GH-6038]
 * builder/virtualbox: Correctly send multi-byte scancodes when typing boot
     command. [GH-5987]
-* provisioner/powershell: Fix environment variable file escaping. [GH-5973]
+* builder/virtualbox: Special boot-commands no longer overwrite previous
+    commands [GH-6002]
+* builder/vmware: Default to disabling XHCI bus for USB on the vmware-iso
+    builder. [GH-5975]
 * builder/vmware: Handle multiple devices per VMware network type [GH-5985]
-* builder/amazon: Fix AWS credential defaulting [GH-6019]
-* builder/virtualbox: Special boot-commands no longer overwrite previous commands [GH-6002]
-* builder/vmware: Default to disabling XHCI bus for USB on the vmware-iso builder. [GH-5975]
+* communicator/ssh: Handle errors uploading files more gracefully [GH-6033]
+* provisioner/powershell: Fix environment variable file escaping. [GH-5973]
 
 
 ### IMPROVEMENTS:
 
 * builder/amazon: Added new region `cn-northwest-1`. [GH-5960]
+* builder/amazon: Users may now access the amazon-generated administrator
+    password [GH-5998]
 * builder/azure: Add support concurrent deployments in the same resource group.
     [GH-6005]
 * builder/azure: Add support for building with additional disks. [GH-5944]
@@ -22,9 +28,9 @@
 * builder/azure: Respect `-force` for managed image deletion. [GH-6003]
 * builder/google: Add option to specify a service account, or to run without
     one. [GH-5991] [GH-5928]
+* builder/oracle-oci: Add new "use_private_ip" option. [GH-5893]
 * post-processor/vagrant: Add LXC support. [GH-5980]
 * provisioner/salt-masterless: Added Windows support. [GH-5702]
-* builder/oracle-oci: Add new "use_private_ip" option. [GH-5893]
 * provisioner/salt: Add windows support to salt provisioner [GH-6012] [GH-6012]
 
 
