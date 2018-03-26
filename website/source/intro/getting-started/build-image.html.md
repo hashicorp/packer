@@ -114,7 +114,7 @@ installing Redis.
 
 ## Your First Image
 
-With a properly validated template. It is time to build your first image. This
+With a properly validated template, it is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
