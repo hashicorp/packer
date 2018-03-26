@@ -321,6 +321,9 @@ func (p *Provisioner) Cancel() {
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.inventoryFile
+	if len(p.config.InventoryDirectory) > 0 {
+		inventory = p.config.InventoryDirectory
+	}
 	var envvars []string
 
 	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
