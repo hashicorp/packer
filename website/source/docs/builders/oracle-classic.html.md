@@ -148,6 +148,7 @@ Save this file as `windows_attributes.json`:
 
 Following is a minimal but working Packer config that references this attributes
 file:
+
 ```{.json}
 {
     "variables": {
@@ -163,7 +164,7 @@ file:
             "password": "{{ user `opc_password`}}",
             "identity_domain": "{{ user `opc_identity_domain`}}",
             "api_endpoint": "{{ user `opc_api_endpoint`}}",
-            "source_image_list": "/Compute-{{ user `opc_identity_domain` }}/{{ user opc_username`}}/Microsoft_Windows_Server_2012_R2-17.3.6-20170930-124649",
+            "source_image_list": "/Compute-{{ user `opc_identity_domain` }}/{{ user `opc_username`}}/Microsoft_Windows_Server_2012_R2-17.3.6-20170930-124649",
             "attributes_file": "./windows_attributes.json",
             "shape": "oc3",
             "image_name": "Packer_Windows_Demo_{{timestamp}}",
