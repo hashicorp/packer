@@ -52,26 +52,6 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 	if commType == "SSH" {
 		application = "/oracle/public/ssh"
 	} else if commType == "WINRM" {
-		// Check to see whether a winRM security protocol is already defined;
-		// don't need to do this for SSH because it is built into the Oracle API.
-		protocolClient := client.SecurityProtocols()
-		winrmProtocol := fmt.Sprintf("WINRM_%s", runUUID)
-		input := compute.CreateSecurityProtocolInput{
-			Name:        winrmProtocol,
-			Description: "packer-generated protocol to allow winRM communicator",
-			DstPortSet:  []string{"5985", "5986", "443"}, // TODO make configurable
-			IPProtocol:  "tcp",
-		}
-		_, err = protocolClient.CreateSecurityProtocol(&input)
-		if err != nil {
-			err = fmt.Errorf("Error creating security protocol to"+
-				" allow Packer to connect to Oracle instance via %s: %s", commType, err)
-			ui.Error(err.Error())
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-		state.Put("winrm_protocol", winrmProtocol)
-
 		// Check to see whether a winRM security application is already defined
 		applicationClient := client.SecurityApplications()
 		application = fmt.Sprintf("packer_winRM_%s", runUUID)
@@ -146,18 +126,6 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 
 	// Some extra cleanup if we used the winRM communicator
 	if config.Comm.Type == "winrm" {
-		// Delete the packer-generated protocol
-		protocol := state.Get("winrm_protocol").(string)
-		protocolClient := client.SecurityProtocols()
-		deleteProtocolInput := compute.DeleteSecurityProtocolInput{
-			Name: namePrefix + protocol,
-		}
-		err = protocolClient.DeleteSecurityProtocol(&deleteProtocolInput)
-		if err != nil {
-			ui.Say(fmt.Sprintf("Error deleting the packer-generated winrm security protocol %s; "+
-				"please delete manually. (error : %s)", protocol, err.Error()))
-		}
-
 		// Delete the packer-generated application
 		application := state.Get("winrm_application").(string)
 		applicationClient := client.SecurityApplications()
