@@ -35,6 +35,9 @@ func (d *driverOCI) CreateInstance(publicKey string) (string, error) {
 			"ssh_authorized_keys": publicKey,
 		},
 	}
+	if d.cfg.UserData != "" {
+		params.Metadata["user_data"] = d.cfg.UserData
+	}
 	instance, err := d.client.Compute.Instances.Launch(params)
 	if err != nil {
 		return "", err
