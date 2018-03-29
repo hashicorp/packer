@@ -126,7 +126,8 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 			return err
 		}
 
-		// workaround for large archive formats on go >=1.10
+		// go >=1.10 wants to use GNU tar format to workaround issues in
+		// libarchive < 3.3.2
 		setHeaderFormat(header)
 
 		// We have to set the Name explicitly because it is supposed to
