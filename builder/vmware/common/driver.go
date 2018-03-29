@@ -296,6 +296,7 @@ func (d *VmwareDriver) GuestAddress(state multistep.StateBag) (string, error) {
 			return "", errors.New("couldn't find MAC address in VMX")
 		}
 	}
+	log.Printf("GuestAddress: Found MAC address in VMX: %s", macAddress)
 
 	res, err := net.ParseMAC(macAddress)
 	if err != nil {
@@ -317,6 +318,11 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 	network := state.Get("vmnetwork").(string)
 	devices, err := netmap.NameIntoDevices(network)
 
+	// log them to see what was detected
+	for _, device := range devices {
+		log.Printf("GuestIP(%s): Discovered device: %s", network, device)
+	}
+
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
 	if err != nil || network == "custom" {
@@ -332,6 +338,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		log.Printf("GuestIP(%s): Discovered custom device: %s", network, device)
 	}
 
 	// figure out our MAC address for looking up the guest address
@@ -415,6 +422,11 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 	network := state.Get("vmnetwork").(string)
 	devices, err := netmap.NameIntoDevices(network)
 
+	// log them to see what was detected
+	for _, device := range devices {
+		log.Printf("HostAddress(%s): Discovered device: %s", network, device)
+	}
+
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
 	if err != nil || network == "custom" {
@@ -430,6 +442,7 @@ func (d *VmwareDriver) HostAddress(state multistep.StateBag) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		log.Printf("HostAddress(%s): Discovered custom device: %s", network, device)
 	}
 
 	var lastError error
@@ -488,6 +501,11 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 	network := state.Get("vmnetwork").(string)
 	devices, err := netmap.NameIntoDevices(network)
 
+	// log them to see what was detected
+	for _, device := range devices {
+		log.Printf("HostIP(%s): Discovered device: %s", network, device)
+	}
+
 	// we were unable to find the device, maybe it's a custom one...
 	// so, check to see if it's in the .vmx configuration
 	if err != nil || network == "custom" {
@@ -503,6 +521,7 @@ func (d *VmwareDriver) HostIP(state multistep.StateBag) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		log.Printf("HostIP(%s): Discovered custom device: %s", network, device)
 	}
 
 	var lastError error
