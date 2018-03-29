@@ -126,6 +126,11 @@ func DirToBox(dst, dir string, ui packer.Ui, level int) error {
 			return err
 		}
 
+		// We have to set the Format explicitly because of a bug in
+		// libarchive. This affects eg. the tar in macOS listing huge
+		// files with zero byte length.
+		header.Format = tar.FormatGNU
+
 		// We have to set the Name explicitly because it is supposed to
 		// be a relative path to the root. Otherwise, the tar ends up
 		// being a bunch of files in the root, even if they're actually
