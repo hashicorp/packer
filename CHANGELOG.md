@@ -1,3 +1,8 @@
+## (UNRELEASED)
+
+### BUG FIXES:
+* post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS X. [GH-6084]
+
 ## 1.2.2 (March 26, 2018)
 
 ### BUG FIXES:
