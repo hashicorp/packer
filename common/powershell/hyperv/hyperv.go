@@ -649,9 +649,9 @@ func CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string
 
 	var script = `
 param([string]$srcPath, [string]$dstPath, [string]$vhdDirName, [string]$vmDir)
-Move-Item -Path $srcPath/*.* -Destination $dstPath
-Move-Item -Path $srcPath/$vhdDirName -Destination $dstPath
-Move-Item -Path $srcPath/$vmDir -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vhdDirName) -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vmDir) -Destination $dstPath
 `
 
 	var ps powershell.PowerShellCmd
