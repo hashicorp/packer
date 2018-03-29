@@ -162,14 +162,9 @@ func (d *Workstation9Driver) Verify() error {
 		if _, err := os.Stat(pathNetmap); err != nil {
 			return nil, fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
 		}
+		log.Printf("Located networkmapper configuration file using Workstation: %s", pathNetmap)
 
-		fd, err := os.Open(pathNetmap)
-		if err != nil {
-			return nil, err
-		}
-		defer fd.Close()
-
-		return ReadNetworkMap(fd)
+		return ReadNetmapConfig(pathNetmap)
 	}
 	return nil
 }
