@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -120,7 +121,7 @@ func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) m
 func (*StepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func scancodes(message string) []string {
-	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+	// Scancodes reference: https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
 	//
 	// Scancodes represent raw keyboard output and are fed to the VM by the
 	// VBoxManage controlvm keyboardputscancode program.
@@ -130,7 +131,7 @@ func scancodes(message string) []string {
 	// derived from the first by the addition of 0x80.
 	special := make(map[string][]string)
 	special["<bs>"] = []string{"0e", "8e"}
-	special["<del>"] = []string{"53", "d3"}
+	special["<del>"] = []string{"e053", "e0d3"}
 	special["<enter>"] = []string{"1c", "9c"}
 	special["<esc>"] = []string{"01", "81"}
 	special["<f1>"] = []string{"3b", "bb"}
@@ -143,24 +144,28 @@ func scancodes(message string) []string {
 	special["<f8>"] = []string{"42", "c2"}
 	special["<f9>"] = []string{"43", "c3"}
 	special["<f10>"] = []string{"44", "c4"}
+	special["<f11>"] = []string{"57", "d7"}
+	special["<f12>"] = []string{"58", "d8"}
 	special["<return>"] = []string{"1c", "9c"}
 	special["<tab>"] = []string{"0f", "8f"}
-	special["<up>"] = []string{"48", "c8"}
-	special["<down>"] = []string{"50", "d0"}
-	special["<left>"] = []string{"4b", "cb"}
-	special["<right>"] = []string{"4d", "cd"}
+	special["<up>"] = []string{"e048", "e0c8"}
+	special["<down>"] = []string{"e050", "e0d0"}
+	special["<left>"] = []string{"e04b", "e0cb"}
+	special["<right>"] = []string{"e04d", "e0cd"}
 	special["<spacebar>"] = []string{"39", "b9"}
-	special["<insert>"] = []string{"52", "d2"}
-	special["<home>"] = []string{"47", "c7"}
-	special["<end>"] = []string{"4f", "cf"}
-	special["<pageUp>"] = []string{"49", "c9"}
-	special["<pageDown>"] = []string{"51", "d1"}
+	special["<insert>"] = []string{"e052", "e0d2"}
+	special["<home>"] = []string{"e047", "e0c7"}
+	special["<end>"] = []string{"e04f", "e0cf"}
+	special["<pageUp>"] = []string{"e049", "e0c9"}
+	special["<pageDown>"] = []string{"e051", "e0d1"}
 	special["<leftAlt>"] = []string{"38", "b8"}
 	special["<leftCtrl>"] = []string{"1d", "9d"}
 	special["<leftShift>"] = []string{"2a", "aa"}
 	special["<rightAlt>"] = []string{"e038", "e0b8"}
 	special["<rightCtrl>"] = []string{"e01d", "e09d"}
 	special["<rightShift>"] = []string{"36", "b6"}
+	special["<leftSuper>"] = []string{"e05b", "e0db"}
+	special["<rightSuper>"] = []string{"e05c", "e0dc"}
 
 	shiftedChars := "~!@#$%^&*()_+{}|:\"<>?"
 
@@ -186,9 +191,50 @@ func scancodes(message string) []string {
 		}
 	}
 
+	azOnRegex := regexp.MustCompile("^<(?P<ordinary>[a-zA-Z])On>")
+	azOffRegex := regexp.MustCompile("^<(?P<ordinary>[a-zA-Z])Off>")
+
 	result := make([]string, 0, len(message)*2)
 	for len(message) > 0 {
 		var scancode []string
+
+		if azOnRegex.MatchString(message) {
+			m := azOnRegex.FindStringSubmatch(message)
+			r, _ := utf8.DecodeRuneInString(m[1])
+			message = message[len("<aOn>"):]
+			scancodeInt := scancodeMap[r]
+			keyShift := unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
+
+			if keyShift {
+				scancode = append(scancode, "2a")
+			}
+
+			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
+
+			log.Printf("Sending char '%c', code '%v', shift %v", r, scancodeInt, keyShift)
+		}
+
+		if azOffRegex.MatchString(message) {
+			m := azOffRegex.FindStringSubmatch(message)
+			r, _ := utf8.DecodeRuneInString(m[1])
+			message = message[len("<aOff>"):]
+			scancodeInt := scancodeMap[r] + 0x80
+			keyShift := unicode.IsUpper(r) || strings.ContainsRune(shiftedChars, r)
+
+			if keyShift {
+				scancode = append(scancode, "aa")
+			}
+
+			scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
+
+			log.Printf("Sending char '%c', code '%v', shift %v", r, scancodeInt, keyShift)
+		}
+
+		if strings.HasPrefix(message, "<f12On>") {
+			scancode = append(scancode, "58")
+			message = message[len("<f12On>"):]
+			log.Printf("Special code '<f12On>', replacing with: 58")
+		}
 
 		if strings.HasPrefix(message, "<leftAltOn>") {
 			scancode = append(scancode, "38")
@@ -206,6 +252,18 @@ func scancodes(message string) []string {
 			scancode = append(scancode, "2a")
 			message = message[len("<leftShiftOn>"):]
 			log.Printf("Special code '<leftShiftOn>' found, replacing with: 2a")
+		}
+
+		if strings.HasPrefix(message, "<leftSuperOn>") {
+			scancode = append(scancode, "e05b")
+			message = message[len("<leftSuperOn>"):]
+			log.Printf("Special code '<leftSuperOn>' found, replacing with: e05b")
+		}
+
+		if strings.HasPrefix(message, "<f12Off>") {
+			scancode = append(scancode, "d8")
+			message = message[len("<f12Off>"):]
+			log.Printf("Special code '<f12Off>' found, replacing with: d8")
 		}
 
 		if strings.HasPrefix(message, "<leftAltOff>") {
@@ -226,6 +284,12 @@ func scancodes(message string) []string {
 			log.Printf("Special code '<leftShiftOff>' found, replacing with: aa")
 		}
 
+		if strings.HasPrefix(message, "<leftSuperOff>") {
+			scancode = append(scancode, "e0db")
+			message = message[len("<leftSuperOff>"):]
+			log.Printf("Special code '<leftSuperOff>' found, replacing with: e0db")
+		}
+
 		if strings.HasPrefix(message, "<rightAltOn>") {
 			scancode = append(scancode, "e038")
 			message = message[len("<rightAltOn>"):]
@@ -244,6 +308,12 @@ func scancodes(message string) []string {
 			log.Printf("Special code '<rightShiftOn>' found, replacing with: 36")
 		}
 
+		if strings.HasPrefix(message, "<rightSuperOn>") {
+			scancode = append(scancode, "e05c")
+			message = message[len("<rightSuperOn>"):]
+			log.Printf("Special code '<rightSuperOn>' found, replacing with: e05c")
+		}
+
 		if strings.HasPrefix(message, "<rightAltOff>") {
 			scancode = append(scancode, "e0b8")
 			message = message[len("<rightAltOff>"):]
@@ -260,6 +330,12 @@ func scancodes(message string) []string {
 			scancode = append(scancode, "b6")
 			message = message[len("<rightShiftOff>"):]
 			log.Printf("Special code '<rightShiftOff>' found, replacing with: b6")
+		}
+
+		if strings.HasPrefix(message, "<rightSuperOff>") {
+			scancode = append(scancode, "e0dc")
+			message = message[len("<rightSuperOff>"):]
+			log.Printf("Special code '<rightSuperOff>' found, replacing with: e0dc")
 		}
 
 		if strings.HasPrefix(message, "<wait>") {
