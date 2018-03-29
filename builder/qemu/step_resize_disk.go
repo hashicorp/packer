@@ -21,6 +21,7 @@ func (s *stepResizeDisk) Run(_ context.Context, state multistep.StateBag) multis
 
 	command := []string{
 		"resize",
+		"-f", config.Format,
 		path,
 		fmt.Sprintf("%vM", config.DiskSize),
 	}
