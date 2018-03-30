@@ -85,9 +85,9 @@ askSubscription() {
     if [ "$azure_subscription_id" != "" ]; then
         az account set --subscription $azure_subscription_id
     else
-        azure_subscription_id=$(az account list | jq -r .[].id)
+        azure_subscription_id=$(az account list | jq -r '.[] | select(.isDefault==true) | .id')
     fi
-    azure_tenant_id=$(az account list | jq -r '.[] | select(.tenantId) |  .tenantId') 
+    azure_tenant_id=$(az account list | jq -r '.[] | select(.id=="'$azure_subscription_id'") |  .tenantId')
     echo "Using subscription_id: $azure_subscription_id"
     echo "Using tenant_id: $azure_tenant_id"
 }
