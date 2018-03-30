@@ -37,7 +37,8 @@ func TestStepCloneVMX(t *testing.T) {
 		"sata0:0.filename = \"%s\"\n"+
 		"nvme0:0.filename = \"%s\"\n"+
 		"ide1:0.filename = \"%s\"\n"+
-		"ide0:0.filename = \"auto detect\"\n", scsiFilename,
+		"ide0:0.filename = \"auto detect\"\n"+
+		"ethernet0.connectiontype = \"nat\"\n", scsiFilename,
 		sataFilename, nvmeFilename, ideFilename)
 
 	// Set up expected mock disk file paths
@@ -84,13 +85,13 @@ func TestStepCloneVMX(t *testing.T) {
 	if vmxPath, ok := state.GetOk("vmx_path"); !ok {
 		t.Fatal("should set vmx_path")
 	} else if vmxPath != destPath {
-		t.Fatalf("bad: %#v", vmxPath)
+		t.Fatalf("bad path to vmx: %#v", vmxPath)
 	}
 
 	if diskPath, ok := state.GetOk("full_disk_path"); !ok {
 		t.Fatal("should set full_disk_path")
 	} else if diskPath != diskPaths[0] {
-		t.Fatalf("bad: %#v", diskPath)
+		t.Fatalf("bad disk path: %#v", diskPath)
 	}
 
 	if stateDiskPaths, ok := state.GetOk("additional_disk_paths"); !ok {
@@ -98,5 +99,12 @@ func TestStepCloneVMX(t *testing.T) {
 	} else {
 		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskPaths[1:],
 			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskPaths[1:])
+	}
+
+	// Test we got the network type
+	if networkType, ok := state.GetOk("vmnetwork"); !ok {
+		t.Fatal("should set vmnetwork")
+	} else if networkType != "nat" {
+		t.Fatalf("bad network type: %#v", networkType)
 	}
 }
