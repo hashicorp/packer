@@ -3,8 +3,8 @@ package common
 import (
 	"errors"
 	"fmt"
-	"log"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
