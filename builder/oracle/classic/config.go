@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -92,6 +93,12 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		if v == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("You must specify a %s.", k))
 		}
+	}
+
+	// Object names can contain only alphanumeric characters, hyphens, underscores, and periods
+	reValidObject := regexp.MustCompile("^[a-zA-Z0-9-._/]+$")
+	if !reValidObject.MatchString(c.DestImageList) {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("dest_image_list can contain only alphanumeric characters, hyphens, underscores, and periods."))
 	}
 
 	if c.Attributes != "" && c.AttributesFile != "" {
