@@ -2,6 +2,7 @@ package vmx
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,6 +10,14 @@ import (
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/stretchr/testify/assert"
+)
+
+const (
+	scsiFilename = "scsiDisk.vmdk"
+	sataFilename = "sataDisk.vmdk"
+	nvmeFilename = "nvmeDisk.vmdk"
+	ideFilename  = "ideDisk.vmdk"
 )
 
 func TestStepCloneVMX_impl(t *testing.T) {
@@ -22,6 +31,21 @@ func TestStepCloneVMX(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
+
+	// Set up mock vmx file contents
+	var testCloneVMX = fmt.Sprintf("scsi0:0.filename = \"%s\"\n"+
+		"sata0:0.filename = \"%s\"\n"+
+		"nvme0:0.filename = \"%s\"\n"+
+		"ide1:0.filename = \"%s\"\n"+
+		"ide0:0.filename = \"auto detect\"\n", scsiFilename,
+		sataFilename, nvmeFilename, ideFilename)
+
+	// Set up expected mock disk file paths
+	diskFilenames := []string{scsiFilename, sataFilename, ideFilename, nvmeFilename}
+	var diskPaths []string
+	for _, diskFilename := range diskFilenames {
+		diskPaths = append(diskPaths, filepath.Join(td, diskFilename))
+	}
 
 	// Create the source
 	sourcePath := filepath.Join(td, "source.vmx")
@@ -65,11 +89,14 @@ func TestStepCloneVMX(t *testing.T) {
 
 	if diskPath, ok := state.GetOk("full_disk_path"); !ok {
 		t.Fatal("should set full_disk_path")
-	} else if diskPath != filepath.Join(td, "foo") {
+	} else if diskPath != diskPaths[0] {
 		t.Fatalf("bad: %#v", diskPath)
 	}
-}
 
-const testCloneVMX = `
-scsi0:0.fileName = "foo"
-`
+	if stateDiskPaths, ok := state.GetOk("additional_disk_paths"); !ok {
+		t.Fatal("should set additional_disk_paths")
+	} else {
+		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskPaths[1:],
+			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskPaths[1:])
+	}
+}
