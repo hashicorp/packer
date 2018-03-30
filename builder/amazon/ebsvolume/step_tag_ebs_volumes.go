@@ -18,7 +18,6 @@ type stepTagEBSVolumes struct {
 func (s *stepTagEBSVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
-	sourceAMI := state.Get("source_image").(*ec2.Image)
 	ui := state.Get("ui").(packer.Ui)
 
 	volumes := make(EbsVolumes)
@@ -43,7 +42,7 @@ func (s *stepTagEBSVolumes) Run(_ context.Context, state multistep.StateBag) mul
 				continue
 			}
 
-			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, *sourceAMI.ImageId)
+			tags, err := mapping.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 			if err != nil {
 				err := fmt.Errorf("Error tagging device %s with %s", mapping.DeviceName, err)
 				state.Put("error", err)
