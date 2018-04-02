@@ -91,7 +91,7 @@ testrace: deps ## Test for race conditions
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
-	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
+	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
