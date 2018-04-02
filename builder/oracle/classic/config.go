@@ -97,8 +97,17 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	// Object names can contain only alphanumeric characters, hyphens, underscores, and periods
 	reValidObject := regexp.MustCompile("^[a-zA-Z0-9-._/]+$")
-	if !reValidObject.MatchString(c.DestImageList) {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("dest_image_list can contain only alphanumeric characters, hyphens, underscores, and periods."))
+	var objectValidation = []struct {
+		name  string
+		value string
+	}{
+		{"dest_image_list", c.DestImageList},
+		{"image_name", c.ImageName},
+	}
+	for _, ov := range objectValidation {
+		if !reValidObject.MatchString(ov.value) {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("%s can contain only alphanumeric characters, hyphens, underscores, and periods.", ov.name))
+		}
 	}
 
 	if c.Attributes != "" && c.AttributesFile != "" {
