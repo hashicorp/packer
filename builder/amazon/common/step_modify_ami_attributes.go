@@ -27,13 +27,6 @@ func (s *StepModifyAMIAttributes) Run(_ context.Context, state multistep.StateBa
 	session := state.Get("awsSession").(*session.Session)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
-
-	var sourceAMI string
-	if rawSourceAMI, hasSourceAMI := state.GetOk("source_image"); hasSourceAMI {
-		sourceAMI = *rawSourceAMI.(*ec2.Image).ImageId
-	} else {
-		sourceAMI = ""
-	}
 	snapshots := state.Get("snapshots").(map[string][]string)
 
 	// Determine if there is any work to do.
@@ -50,10 +43,7 @@ func (s *StepModifyAMIAttributes) Run(_ context.Context, state multistep.StateBa
 	}
 
 	var err error
-	s.Ctx.Data = &BuildInfoTemplate{
-		SourceAMI:   sourceAMI,
-		BuildRegion: *ec2conn.Config.Region,
-	}
+	s.Ctx.Data = extractBuildInfo(*ec2conn.Config.Region, state)
 	s.Description, err = interpolate.Render(s.Description, &s.Ctx)
 	if err != nil {
 		err = fmt.Errorf("Error interpolating AMI description: %s", err)

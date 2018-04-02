@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -23,12 +24,10 @@ func (t TagMap) IsSet() bool {
 	return len(t) > 0
 }
 
-func (t TagMap) EC2Tags(ctx interpolate.Context, region, sourceAMIID string) (EC2Tags, error) {
+func (t TagMap) EC2Tags(ctx interpolate.Context, region string, state multistep.StateBag) (EC2Tags, error) {
 	var ec2Tags []*ec2.Tag
-	ctx.Data = &BuildInfoTemplate{
-		SourceAMI:   sourceAMIID,
-		BuildRegion: region,
-	}
+	ctx.Data = extractBuildInfo(region, state)
+
 	for key, value := range t {
 		interpolatedKey, err := interpolate.Render(key, &ctx)
 		if err != nil {

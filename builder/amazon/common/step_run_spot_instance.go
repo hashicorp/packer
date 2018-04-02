@@ -143,7 +143,7 @@ func (s *StepRunSpotInstance) Run(_ context.Context, state multistep.StateBag) m
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, s.SourceAMI)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
@@ -287,7 +287,7 @@ func (s *StepRunSpotInstance) Run(_ context.Context, state multistep.StateBag) m
 	if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
 		ui.Say("Adding tags to source EBS Volumes")
 
-		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, s.SourceAMI)
+		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)
