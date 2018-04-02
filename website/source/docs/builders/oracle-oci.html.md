@@ -125,6 +125,15 @@ builder.
 
  -  `use_private_ip` (boolean) - Use private ip addresses to connect to the instance via ssh.
 
+ - `user_data` (string) - user_data to be used by cloud
+   init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Generally speaking, it is easier to use the `user_data_file`,
+   but you can use this option to put either the platintext data or the base64
+   encoded data directly into your Packer config.
+
+ - `user_data_file` (string) - Path to a file to be used as user_data by cloud
+   init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Example:
+   `"user_data_file": "./boot_config/myscript.sh"`
+
 
 ## Basic Example
 
