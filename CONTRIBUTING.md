@@ -91,9 +91,10 @@ export PATH=$PATH:$GOPATH/bin
 
 ### Opening an Pull Request
 
-When you are ready to open a pull-request, you will need to
-[fork Packer](https://github.com/hashicorp/packer#fork-destination-box), push
-your changes to your fork, and then open a pull-request.
+Thank you for contributing! When you are ready to open a pull-request, you will
+need to [fork
+Packer](https://github.com/hashicorp/packer#fork-destination-box), push your
+changes to your fork, and then open a pull-request.
 
 For example, my github username is `cbednarski`, so I would do the following:
 
@@ -108,6 +109,29 @@ From there, open your fork in your browser to open a new pull-request.
 **Note:** Go infers package names from their file paths. This means `go build`
 will break if you `git clone` your fork instead of using `go get` on the main
 Packer project.
+
+### Pull Request Lifecycle
+
+1. You are welcome to submit your pull request for commentary or review before
+  it is fully completed. Please prefix the title of your pull request with
+  "[WIP]" to indicate this. It's also a good idea to include specific questions
+  or items you'd like feedback on.
+
+1. Once you believe your pull request is ready to be merged, you can remove any
+  "[WIP]" prefix from the title and a core team member will review. 
+
+1. One of Packer's core team members will look over your contribution and
+  either provide comments letting you know if there is anything left to do. We
+  do our best to provide feedback in a timely manner, but it may take some time
+  for us to respond.
+
+1. Once all outstanding comments and checklist items have been addressed, your
+  contribution will be merged! Merged PRs will be included in the next
+  Packer release. The core team takes care of updating the CHANGELOG as they
+  merge.
+
+1. In rare cases, we might decide that a PR should be closed. We'll make sure to
+  provide clear reasoning when this happens.
 
 ### Tips for Working on Packer
 
