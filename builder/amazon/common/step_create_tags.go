@@ -26,13 +26,6 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
 
-	var sourceAMI string
-	if rawSourceAMI, hasSourceAMI := state.GetOk("source_image"); hasSourceAMI {
-		sourceAMI = *rawSourceAMI.(*ec2.Image).ImageId
-	} else {
-		sourceAMI = ""
-	}
-
 	if !s.Tags.IsSet() && !s.SnapshotTags.IsSet() {
 		return multistep.ActionContinue
 	}
@@ -79,7 +72,7 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 
 		// Convert tags to ec2.Tag format
 		ui.Say("Creating AMI tags")
-		amiTags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, sourceAMI)
+		amiTags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -88,7 +81,7 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 		amiTags.Report(ui)
 
 		ui.Say("Creating snapshot tags")
-		snapshotTags, err := s.SnapshotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, sourceAMI)
+		snapshotTags, err := s.SnapshotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
