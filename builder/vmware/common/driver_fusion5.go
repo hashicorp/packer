@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -157,6 +158,7 @@ func (d *Fusion5Driver) Verify() error {
 		if _, err := os.Stat(pathNetworking); err != nil {
 			return nil, fmt.Errorf("Could not find networking conf file: %s", pathNetworking)
 		}
+		log.Printf("Located networkmapper configuration file using Fusion5: %s", pathNetworking)
 
 		fd, err := os.Open(pathNetworking)
 		if err != nil {
