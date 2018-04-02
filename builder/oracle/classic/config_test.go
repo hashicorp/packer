@@ -2,6 +2,8 @@ package classic
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() map[string]interface{} {
@@ -57,5 +59,29 @@ func TestValidationsIgnoresOptional(t *testing.T) {
 	_, err := NewConfig(tc)
 	if err != nil {
 		t.Fatalf("Shouldn't care if ssh_username is missing: err: %#v", err.Error())
+	}
+}
+
+func TestConfigValidatesObjects(t *testing.T) {
+	var objectTests = []struct {
+		object string
+		valid  bool
+	}{
+		{"foo-BAR.0_9", true},
+		{"%", false},
+		{"Matt...?", false},
+		{"/Config-thing/myuser/myimage", true},
+	}
+	for _, s := range []string{"dest_image_list", "image_name"} {
+		for _, tt := range objectTests {
+			tc := testConfig()
+			tc[s] = tt.object
+			_, err := NewConfig(tc)
+			if tt.valid {
+				assert.NoError(t, err, tt.object)
+			} else {
+				assert.Error(t, err, tt.object)
+			}
+		}
 	}
 }
