@@ -83,6 +83,7 @@ func (d *Fusion6Driver) Verify() error {
 		if _, err := os.Stat(pathNetworking); err != nil {
 			return nil, fmt.Errorf("Could not find networking conf file: %s", pathNetworking)
 		}
+		log.Printf("Located networkmapper configuration file using Fusion6: %s", pathNetworking)
 
 		fd, err := os.Open(pathNetworking)
 		if err != nil {
