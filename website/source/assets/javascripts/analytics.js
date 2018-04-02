@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
-  track('.downloads .download a', function(el) {
+  track('.downloads .download .details li a', function(el) {
+    var m = el.href.match(/packer_(\d+\.\d+\.\d+)_(.*?)_(.*?)\.zip/)
     return {
       event: 'Download',
       category: 'Button',
-      label: 'Packer | v' + el.href.match(/\/(\d+\.\d+\.\d+)\//)[1]
+      label: 'Packer | v' + m[1] + ' | ' + m[2] + ' | ' + m[3],
+      version: m[1],
+      os: m[2],
+      architecture: m[3],
+      product: 'packer'
     }
   })
 })
