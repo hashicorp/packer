@@ -72,14 +72,16 @@ func TestConfigValidatesObjects(t *testing.T) {
 		{"Matt...?", false},
 		{"/Config-thing/myuser/myimage", true},
 	}
-	for _, tt := range objectTests {
-		tc := testConfig()
-		tc["dest_image_list"] = tt.object
-		_, err := NewConfig(tc)
-		if tt.valid {
-			assert.NoError(t, err, tt.object)
-		} else {
-			assert.Error(t, err, tt.object)
+	for _, s := range []string{"dest_image_list", "image_name"} {
+		for _, tt := range objectTests {
+			tc := testConfig()
+			tc[s] = tt.object
+			_, err := NewConfig(tc)
+			if tt.valid {
+				assert.NoError(t, err, tt.object)
+			} else {
+				assert.Error(t, err, tt.object)
+			}
 		}
 	}
 }
