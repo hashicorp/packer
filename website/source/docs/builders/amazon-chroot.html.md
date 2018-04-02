@@ -77,10 +77,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
@@ -251,10 +249,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
@@ -307,10 +303,8 @@ each category, the available configuration keys are alphabetized.
     Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 ## Basic Example
 
@@ -432,3 +426,12 @@ provisioning commands to install the os and bootloader.
   ]
 }
 ```
+
+## Build template data
+
+The available variables are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
+- `SourceAMIName` - The source AMI Name (for example `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to build the AMI.
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
