@@ -57,18 +57,22 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 }
 
 func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
+	instanceID, ok := state.GetOk("instance_id")
+	if !ok {
+		return
+	}
+
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*compute.ComputeClient)
 	config := state.Get("config").(*Config)
-	imID := state.Get("instance_id").(string)
 
 	ui.Say("Terminating source instance...")
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
 		Name: config.ImageName,
-		ID:   imID,
+		ID:   instanceID.(string),
 	}
 
 	err := instanceClient.DeleteInstance(input)

@@ -15,7 +15,6 @@ type stepSnapshot struct {
 
 func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
-	s.cleanupSnap = false
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Snapshot...")
 	config := state.Get("config").(*Config)
@@ -39,7 +38,6 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	s.cleanupSnap = true
 	state.Put("snapshot", snap)
 	ui.Message(fmt.Sprintf("Created snapshot: %s.", snap.Name))
 	return multistep.ActionContinue
@@ -47,13 +45,16 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 
 func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
 	// Delete the snapshot
-	ui := state.Get("ui").(packer.Ui)
-	if !s.cleanupSnap {
+	var snap *compute.Snapshot
+	if snapshot, ok := state.GetOk("snapshot"); ok {
+		snap = snapshot.(*compute.Snapshot)
+	} else {
 		return
 	}
+
+	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting Snapshot...")
 	client := state.Get("client").(*compute.ComputeClient)
-	snap := state.Get("snapshot").(*compute.Snapshot)
 	snapClient := client.Snapshots()
 	snapInput := compute.DeleteSnapshotInput{
 		Snapshot:     snap.Name,
