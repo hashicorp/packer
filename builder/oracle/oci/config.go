@@ -1,8 +1,11 @@
 package oci
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -41,6 +44,9 @@ type Config struct {
 	BaseImageID string `mapstructure:"base_image_ocid"`
 	Shape       string `mapstructure:"shape"`
 	ImageName   string `mapstructure:"image_name"`
+	// UserData and UserDataFile file are both optional and mutually exclusive.
+	UserData     string `mapstructure:"user_data"`
+	UserDataFile string `mapstructure:"user_data_file"`
 
 	// Networking
 	SubnetID string `mapstructure:"subnet_ocid"`
@@ -192,6 +198,30 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 				fmt.Errorf("unable to parse image name: %s", err))
 		} else {
 			c.ImageName = name
+		}
+	}
+
+	// Optional UserData config
+	if c.UserData != "" && c.UserDataFile != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
+	} else if c.UserDataFile != "" {
+		if _, err := os.Stat(c.UserDataFile); err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+		}
+	}
+	// read UserDataFile into string.
+	if c.UserDataFile != "" {
+		fiData, err := ioutil.ReadFile(c.UserDataFile)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Problem reading user_data_file: %s", err))
+		}
+		c.UserData = string(fiData)
+	}
+	// Test if UserData is encoded already, and if not, encode it
+	if c.UserData != "" {
+		if _, err := base64.StdEncoding.DecodeString(c.UserData); err != nil {
+			log.Printf("[DEBUG] base64 encoding user data...")
+			c.UserData = base64.StdEncoding.EncodeToString([]byte(c.UserData))
 		}
 	}
 
