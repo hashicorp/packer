@@ -1022,8 +1022,8 @@
 		{
 			"checksumSHA1": "mVqDwKcibat0IKAdzAhfGIHPwI8=",
 			"path": "github.com/mitchellh/go-fs",
-			"revision": "7bae45d9a684750e82b97ff320c82556614e621b",
-			"revisionTime": "2016-11-08T19:11:23Z"
+			"revision": "b7b9ca407ffff465de12fc37ccbb81ea8b428c43",
+			"revisionTime": "2018-04-02T23:53:30Z"
 		},
 		{
 			"checksumSHA1": "B5dy+Lg6jFPgHYhozztz88z3b4A=",
@@ -1067,6 +1067,10 @@
 			"checksumSHA1": "mrqMlK6gqe//WsJSrJ1HgkPM0lM=",
 			"path": "github.com/mitchellh/reflectwalk",
 			"revision": "eecf4c70c626c7cfbb95c90195bc34d386c74ac6"
+		},
+		{
+			"path": "github.com/mithcellh/go-fs",
+			"revision": ""
 		},
 		{
 			"checksumSHA1": "KhOVzKefFYORHdIVe+/gNAHB23A=",
