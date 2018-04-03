@@ -9,10 +9,10 @@
 [travis]: https://travis-ci.org/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
 [appveyor]: https://ci.appveyor.com/project/hashicorp/packer
-[godoc-badge]: https://godoc.org/github.com/mitchellh/packer?status.svg
-[godoc]: https://godoc.org/github.com/mitchellh/packer
-[report-badge]: https://goreportcard.com/badge/github.com/mitchellh/packer
-[report]: https://goreportcard.com/report/github.com/mitchellh/packer
+[godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
+[godoc]: https://godoc.org/github.com/hashicorp/packer
+[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer
+[report]: https://goreportcard.com/report/github.com/hashicorp/packer
 
 * Website: https://www.packer.io
 * IRC: `#packer-tool` on Freenode
