@@ -1,9 +1,10 @@
 package fat
 
 import (
-	"github.com/mitchellh/go-fs"
 	"io"
 	"math"
+
+	"github.com/mitchellh/go-fs"
 )
 
 type ClusterChain struct {
