@@ -286,7 +286,65 @@ directories, append a shell provisioner after Chef to modify them.
 
 ## Examples
 
-### Chef Client Local Mode
+### Chef Client Local Mode - Simple
+
+The following example shows how to run the `chef-client` provisioner in local
+mode.
+
+**Packer variables**
+
+Set the necessary Packer variables using environment variables or provide a [var
+file](/docs/templates/user-variables.html).
+
+``` json
+"variables": {
+  "chef_dir": "/tmp/packer-chef-client"
+}
+```
+
+**Setup the** `chef-client` **provisioner**
+
+Make sure we have the correct directories and permissions for the `chef-client`
+provisioner. You will need to bootstrap the Chef run by providing the necessary
+cookbooks using Berkshelf or some other means.
+
+``` json
+  "provisioners": [
+    ...
+    { "type": "shell", "inline": [ "mkdir -p {{user `chef_dir`}}" ] },
+    { "type": "file",  "source": "./roles",        "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./cookbooks",    "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./data_bags",    "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./environments", "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./scripts/install_chef.sh", "destination": "{{user `chef_dir`}}/install_chef.sh" },
+    {
+      "type":              "chef-client",
+      "install_command":   "sudo bash {{user `chef_dir`}}/install_chef.sh",
+      "server_url":        "http://localhost:8889",
+      "config_template":   "./config/client.rb.template",
+      "run_list":          [ "role[testing]" ],
+      "skip_clean_node":   true,
+      "skip_clean_client": true
+    }
+    ...
+  ]
+```
+
+And ./config/client.rb.template referenced by the above configuration:
+
+```ruby
+log_level         :info
+log_location      STDOUT
+local_mode        true
+chef_zero.enabled true
+ssl_verify_mode   "verify_peer"
+role_path         "{{user `chef_dir`}}/roles"
+data_bag_path     "{{user `chef_dir`}}/data_bags"
+environment_path  "{{user `chef_dir`}}/environments"
+cookbook_path     [ "{{user `chef_dir`}}/cookbooks" ]
+```
+
+### Chef Client Local Mode - Passing variables
 
 The following example shows how to run the `chef-client` provisioner in local
 mode, while passing a `run_list` using a variable.
