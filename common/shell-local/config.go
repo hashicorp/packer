@@ -29,6 +29,9 @@ type Config struct {
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
 
+	// The file extension to use for the file generated from the inline commands
+	TempfileExtension string `mapstructure:"tempfile_extension"`
+
 	// The local path of the shell script to upload and execute.
 	Script string
 
@@ -39,7 +42,7 @@ type Config struct {
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
 
-	EnvVarFormat string
+	EnvVarFormat string `mapstructure:"env_var_format"`
 	// End dedupe with postprocessor
 
 	// The command used to execute the script. The '{{ .Path }}' variable
@@ -76,8 +79,10 @@ func Validate(config *Config) error {
 		if len(config.ExecuteCommand) == 0 {
 			config.ExecuteCommand = []string{
 				"cmd",
+				"/V",
 				"/C",
 				"{{.Vars}}",
+				"call",
 				"{{.Script}}",
 			}
 		}
@@ -89,8 +94,7 @@ func Validate(config *Config) error {
 			config.ExecuteCommand = []string{
 				"/bin/sh",
 				"-c",
-				"{{.Vars}}",
-				"{{.Script}}",
+				"{{.Vars}} {{.Script}}",
 			}
 		}
 	}
@@ -168,9 +172,16 @@ func Validate(config *Config) error {
 	// interact with.
 	if config.EnvVarFormat == "" {
 		if (runtime.GOOS == "windows") && !config.UseLinuxPathing {
-			config.EnvVarFormat = `set "%s=%s" && `
+			config.EnvVarFormat = "set %s=%s && "
 		} else {
 			config.EnvVarFormat = "%s='%s' "
+		}
+	}
+
+	// drop unnecessary "." in extension; we add this later.
+	if config.TempfileExtension != "" {
+		if strings.HasPrefix(config.TempfileExtension, ".") {
+			config.TempfileExtension = config.TempfileExtension[1:]
 		}
 	}
 

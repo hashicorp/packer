@@ -30,8 +30,13 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		defer os.Remove(tempScriptFileName)
 		scripts = append(scripts, tempScriptFileName)
+
+		defer os.Remove(tempScriptFileName)
+		// figure out what extension the file should have, and rename it.
+		if config.TempfileExtension != "" {
+			os.Rename(tempScriptFileName, fmt.Sprintf("%s.%s", tempScriptFileName, config.TempfileExtension))
+		}
 	}
 
 	// Create environment variables to set before executing the command
@@ -78,14 +83,18 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 }
 
 func createInlineScriptFile(config *Config) (string, error) {
-	tf, err := ioutil.TempFile("", "packer-shell")
+	tf, err := ioutil.TempFile(os.TempDir(), "packer-shell")
 	if err != nil {
 		return "", fmt.Errorf("Error preparing shell script: %s", err)
 	}
-
+	defer tf.Close()
 	// Write our contents to it
 	writer := bufio.NewWriter(tf)
-	writer.WriteString(fmt.Sprintf("#!%s\n", config.InlineShebang))
+	if config.InlineShebang != "" {
+		shebang := fmt.Sprintf("#!%s\n", config.InlineShebang)
+		log.Printf("Prepending inline script with %s", shebang)
+		writer.WriteString(shebang)
+	}
 	for _, command := range config.Inline {
 		if _, err := writer.WriteString(command + "\n"); err != nil {
 			return "", fmt.Errorf("Error preparing shell script: %s", err)
