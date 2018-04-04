@@ -100,6 +100,8 @@ Optional parameters:
    the example below for more guidance on how to use this feature. If you are
    not on a Windows host, or you do not intend to use the shell-local
    post-processor to run a bash script, please ignore this option.
+   If you set this flag to true, you still need to provide the standard windows
+   path to the script when providing a `script`. This is a beta feature.
 
 ## Execute Command
 
@@ -123,8 +125,10 @@ One limitation of this offering is that "inline" and "command" options are not
 available to you; please limit yourself to using the "script" or "scripts"
 options instead.
 
-Please note that the WSL is a beta feature, and this tool is not guaranteed to
-work as you expect it to.
+Please note that this feature is still in beta, as the underlying WSL is also
+still in beta. There will be some limitations as a result. For example, it will
+likely not work unless both Packer and the scripts you want to run are both on
+the C drive.
 
 ```
 {
@@ -289,6 +293,7 @@ Required customizations: env_var_format and execute_command
           "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
           "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
           "env_var_format": "$env:%s=\"%s\"; ",
+          "script": "./scripts/example_ps.ps1"
       }
 ```
 
@@ -313,7 +318,7 @@ Example of running a bash script on linux:
       {
           "type": "shell-local",
           "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-          "scripts": ["./scripts/dummy_bash.sh"]
+          "scripts": ["./scripts/example_bash.sh"]
       }
 ```
 
