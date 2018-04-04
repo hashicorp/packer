@@ -20,7 +20,8 @@ import (
 var (
 	// AD app id for packer-azure driver.
 	clientIDs = map[string]string{
-		azure.PublicCloud.Name: "04cc58ec-51ab-4833-ac0d-ce3a7912414b",
+		azure.PublicCloud.Name:       "04cc58ec-51ab-4833-ac0d-ce3a7912414b",
+		azure.USGovernmentCloud.Name: "a1479822-da77-46a7-abd0-6edacc8a8fac",
 	}
 )
 

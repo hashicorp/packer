@@ -44,7 +44,7 @@ There are three pieces of information you must provide to enable device login mo
 
 > Device login mode is enabled by not setting client\_id and client\_secret.
 
-> Device login mode is for the public cloud only, and Linux VMs only.
+> Device login mode is for the Public and US Gov clouds only, and Linux VMs only.
 
 The device login flow asks that you open a web browser, navigate to <http://aka.ms/devicelogin>, and input the supplied
 code. This authorizes the Packer for Azure application to act on your behalf. An OAuth token will be created, and stored
