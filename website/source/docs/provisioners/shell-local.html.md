@@ -197,3 +197,104 @@ are cleaned up.
 
 For a shell script, that means the script **must** exit with a zero code. You
 *must* be extra careful to `exit 0` when necessary.
+
+
+## Usage Examples:
+
+Example of running a .cmd file on windows:
+
+```
+      {
+          "type": "shell-local",
+          "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
+          "scripts": ["./scripts/test_cmd.cmd"]
+      },
+```
+
+Contents of "test_cmd.cmd":
+
+```
+echo %SHELLLOCALTEST%
+```
+
+Example of running an inline command on windows:
+Required customization: tempfile_extension
+
+```
+      {
+          "type": "shell-local",
+          "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
+          "tempfile_extension": ".cmd",
+          "inline": ["echo %SHELLLOCALTEST%"]
+      },
+```
+
+Example of running a bash command on windows using WSL:
+Required customizations: use_linux_pathing and execute_command
+
+```
+      {
+          "type": "shell-local",
+          "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
+          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+          "use_linux_pathing": true,
+          "script": "./scripts/example_bash.sh"
+      }
+```
+
+Contents of "example_bash.sh":
+
+```
+#!/bin/bash
+echo $SHELLLOCALTEST
+```
+
+Example of running a powershell script on windows:
+Required customizations: env_var_format and execute_command
+
+```
+
+      {
+          "type": "shell-local",
+          "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
+          "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+          "env_var_format": "$env:%s=\"%s\"; ",
+      }
+```
+
+Example of running a powershell script on windows as "inline":
+Required customizations: env_var_format, tempfile_extension, and execute_command
+
+```
+      {
+          "type": "shell-local",
+          "tempfile_extension": ".ps1",
+          "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
+          "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+          "env_var_format": "$env:%s=\"%s\"; ",
+          "inline": ["write-output $env:SHELLLOCALTEST"]
+      }
+```
+
+
+Example of running a bash script on linux:
+
+```
+      {
+          "type": "shell-local",
+          "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+          "scripts": ["./scripts/dummy_bash.sh"]
+      }
+```
+
+Example of running a bash "inline" on linux:
+
+```
+      {
+          "type": "shell-local",
+          "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+          "inline": ["echo hello",
+                     "echo $PROVISIONERTEST"]
+      }
+```
+
