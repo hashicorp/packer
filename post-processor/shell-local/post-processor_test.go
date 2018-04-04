@@ -141,7 +141,7 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		expected = []string{"/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"}
 	} else {
-		expected = []string{"cmd", "/C", "{{.Vars}}", "{{.Script}}"}
+		expected = []string{"cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"}
 	}
 	if strings.Compare(strings.Join(p.config.ExecuteCommand, " "), strings.Join(expected, " ")) != 0 {
 		t.Fatalf("Did not get expected default: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
