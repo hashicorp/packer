@@ -81,8 +81,13 @@ Optional Parameters:
     should be placed. When unspecified, the host is not associated with any
     groups.
 
+-   `inventory_file` (string) - The inventory file to use during provisioning.
+    When unspecified, Packer will create a temporary inventory file and will
+    use the `host_alias`.
+
 -   `host_alias` (string) - The alias by which the Ansible host should be known.
-    Defaults to `default`.
+    Defaults to `default`. This setting is ignored when using a custom inventory
+    file.
 
 -   `inventory_directory` (string) - The directory in which to place the
     temporary generated Ansible inventory file. By default, this is the
