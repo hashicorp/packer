@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -91,7 +92,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
-			UserAgent:  "Packer",
+			UserAgent:  useragent.String(),
 		}
 		downloadConfigs[i] = config
 
