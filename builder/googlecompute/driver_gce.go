@@ -10,15 +10,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 	"strings"
 	"time"
 
 	"google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -81,14 +80,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 
 	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(client)
-	// Set UserAgent
-	versionString := version.FormattedVersion()
-	service.UserAgent = fmt.Sprintf(
-		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
-
 	if err != nil {
 		return nil, err
 	}
+
+	// Set UserAgent
+	service.UserAgent = useragent.String()
 
 	return &driverGCE{
 		projectId: p,
