@@ -176,6 +176,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
+			&StepSaveWinRMPassword{
+				Password: b.config.tmpAdminPassword,
+			},
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
 				Host: func(stateBag multistep.StateBag) (string, error) {
