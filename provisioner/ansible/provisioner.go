@@ -56,7 +56,7 @@ type Config struct {
 	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
-	inventoryFile        string
+	InventoryFile        string   `mapstructure:"inventory_file"`
 }
 
 type Provisioner struct {
@@ -266,7 +266,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	go p.adapter.Serve()
 
-	if len(p.config.inventoryFile) == 0 {
+	if len(p.config.InventoryFile) == 0 {
 		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
@@ -295,9 +295,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		tf.Close()
-		p.config.inventoryFile = tf.Name()
+		p.config.InventoryFile = tf.Name()
 		defer func() {
-			p.config.inventoryFile = ""
+			p.config.InventoryFile = ""
 		}()
 	}
 
@@ -320,7 +320,7 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.inventoryFile
+	inventory := p.config.InventoryFile
 	if len(p.config.InventoryDirectory) > 0 {
 		inventory = p.config.InventoryDirectory
 	}
