@@ -44,7 +44,7 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 			Owners: aws.StringSlice([]string{"self"}),
 			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
-				Values: []*string{aws.String(s.AMIName)},
+				Values: aws.StringSlice([]string{s.AMIName}),
 			}}})
 
 		if err != nil {

@@ -1,7 +1,14 @@
 ## (UNRELEASED)
 
 ### BUG FIXES:
+
 * post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS X. [GH-6084]
+
+### IMPROVEMENTS:
+
+* builder/amazon: Setting `force_delete` will only delete AMIs owned by the
+  user. This should prevent failures where we try to delete an AMI with
+  a matching name, but owned by someone else. [GH-6111]
 
 ## 1.2.2 (March 26, 2018)
 
