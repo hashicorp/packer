@@ -41,6 +41,7 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 		))
 
 		resp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
+			Owners: aws.StringSlice([]string{"self"}),
 			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
 				Values: []*string{aws.String(s.AMIName)},
