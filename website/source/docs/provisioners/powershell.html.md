@@ -72,10 +72,9 @@ Optional parameters:
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the
-    environment, as well, which are covered in the section below. If you are
-    using AWS and would like to use the randomly-generated unique
-    If you are running on AWS and would like to access the AWS-generated
-    Administrator password that Packer uses to connect to the instance via
+    environment, as well, which are covered in the section below.
+    If you are running on AWS or Azure and would like to access the generated
+    password that Packer uses to connect to the instance via
     WinRM, you can use the template variable `{{.WinRMPassword}}` to set this
     as an environment variable. For example:
 
