@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
@@ -51,7 +52,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, err
 	}
 
-	c.UserAgent = "Packer - Scaleway builder"
+	c.UserAgent = useragent.String()
 
 	if c.Organization == "" {
 		c.Organization = os.Getenv("SCALEWAY_API_ACCESS_KEY")
