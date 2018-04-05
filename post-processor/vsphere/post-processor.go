@@ -110,9 +110,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
-	password := url.QueryEscape(p.config.Password)
+	password := escapeWithSpaces(p.config.Password)
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-		url.QueryEscape(p.config.Username),
+		escapeWithSpaces(p.config.Username),
 		password,
 		p.config.Host,
 		p.config.Datacenter,
@@ -146,7 +146,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 }
 
 func (p *PostProcessor) filterLog(s string) string {
-	password := url.QueryEscape(p.config.Password)
+	password := escapeWithSpaces(p.config.Password)
 	return strings.Replace(s, password, "<password>", -1)
 }
 
@@ -185,4 +185,11 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
 
 	return args, nil
+}
+
+// Encode everything except for + signs
+func escapeWithSpaces(stringToEscape string) string {
+	escapedString := url.QueryEscape(stringToEscape)
+	escapedString = strings.Replace(escapedString, "+", `%20`, -1)
+	return escapedString
 }
