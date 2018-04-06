@@ -603,10 +603,23 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	}
 	cmd.Wait()
 	if stdout.Len() > 0 {
+		out := string(stdout.Bytes())
+		// this command will fail on windows guests
+		if !strings.Contains(out, "cmdlet") {
+			return fmt.Errorf("[ERROR] Unable to check whether remote path is a dir: %s", out)
+		} else {
+			log.Printf("The guest is a windows guest; ignoring 'test -d' command.")
+		}
 		return fmt.Errorf("%s", stdout.Bytes())
 	}
 	if stderr.Len() > 0 {
-		return fmt.Errorf("%s", stderr.Bytes())
+		errOut := string(stderr.Bytes())
+		// this command will fail on windows guests
+		if !strings.Contains(errOut, "cmdlet") {
+			return fmt.Errorf("[ERROR] Unable to check whether remote path is a dir: %s", errOut)
+		} else {
+			log.Printf("The guest is a windows guest; ignoring 'test -d' command.")
+		}
 	}
 	if cmd.ExitStatus == 0 {
 		return fmt.Errorf(
