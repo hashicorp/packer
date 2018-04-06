@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 
@@ -14,7 +14,7 @@ import (
 
 type StepGetDataDisk struct {
 	client *AzureClient
-	query  func(resourceGroupName string, computeName string) (compute.VirtualMachine, error)
+	query  func(ctx context.Context, resourceGroupName string, computeName string) (compute.VirtualMachine, error)
 	say    func(message string)
 	error  func(e error)
 }
@@ -30,15 +30,15 @@ func NewStepGetAdditionalDisks(client *AzureClient, ui packer.Ui) *StepGetDataDi
 	return step
 }
 
-func (s *StepGetDataDisk) queryCompute(resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
-	vm, err := s.client.VirtualMachinesClient.Get(resourceGroupName, computeName, "")
+func (s *StepGetDataDisk) queryCompute(ctx context.Context, resourceGroupName string, computeName string) (compute.VirtualMachine, error) {
+	vm, err := s.client.VirtualMachinesClient.Get(ctx, resourceGroupName, computeName, "")
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
 	return vm, err
 }
 
-func (s *StepGetDataDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepGetDataDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Querying the machine's additional disks properties ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
@@ -47,7 +47,7 @@ func (s *StepGetDataDisk) Run(_ context.Context, state multistep.StateBag) multi
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
 
-	vm, err := s.query(resourceGroupName, computeName)
+	vm, err := s.query(ctx, resourceGroupName, computeName)
 	if err != nil {
 		state.Put(constants.Error, err)
 		s.error(err)
