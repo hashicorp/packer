@@ -16,7 +16,7 @@ import (
 type StepDeleteAdditionalDisk struct {
 	client        *AzureClient
 	delete        func(string, string) error
-	deleteManaged func(string, string) error
+	deleteManaged func(context.Context, string, string) error
 	say           func(message string)
 	error         func(e error)
 }
@@ -43,15 +43,18 @@ func (s *StepDeleteAdditionalDisk) deleteBlob(storageContainerName string, blobN
 	return err
 }
 
-func (s *StepDeleteAdditionalDisk) deleteManagedDisk(resourceGroupName string, imageName string) error {
+func (s *StepDeleteAdditionalDisk) deleteManagedDisk(ctx context.Context, resourceGroupName string, imageName string) error {
 	xs := strings.Split(imageName, "/")
+	// TODO(paulmey): verify if this is right, imagename is passed in, *disk* is deleted... is this a copy/paste error?
 	diskName := xs[len(xs)-1]
-	_, errChan := s.client.DisksClient.Delete(resourceGroupName, diskName, nil)
-	err := <-errChan
+	f, err := s.client.DisksClient.Delete(ctx, resourceGroupName, diskName)
+	if err == nil {
+		err = f.WaitForCompletion(ctx, s.client.DisksClient.Client)
+	}
 	return err
 }
 
-func (s *StepDeleteAdditionalDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepDeleteAdditionalDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Deleting the temporary Additional disk ...")
 
 	var dataDisks = state.Get(constants.ArmAdditionalDiskVhds).([]string)
@@ -73,7 +76,7 @@ func (s *StepDeleteAdditionalDisk) Run(_ context.Context, state multistep.StateB
 		s.say(fmt.Sprintf(" -> Additional Disk %d: '%s'", i+1, additionaldisk))
 		var err error
 		if isManagedDisk {
-			err = s.deleteManaged(resourceGroupName, additionaldisk)
+			err = s.deleteManaged(ctx, resourceGroupName, additionaldisk)
 			if err != nil {
 				s.say("Failed to delete the managed Additional Disk!")
 				return processStepResult(err, s.error, state)

@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -9,11 +10,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/Azure/azure-sdk-for-go/arm/disk"
-	"github.com/Azure/azure-sdk-for-go/arm/network"
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
-	armStorage "github.com/Azure/azure-sdk-for-go/arm/storage"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
+	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
@@ -39,7 +39,7 @@ type AzureClient struct {
 	compute.VirtualMachinesClient
 	common.VaultClient
 	armStorage.AccountsClient
-	disk.DisksClient
+	compute.DisksClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -141,7 +141,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.DeploymentOperationsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.DeploymentOperationsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.DeploymentOperationsClient.UserAgent)
 
-	azureClient.DisksClient = disk.NewDisksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.DisksClient = compute.NewDisksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DisksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.DisksClient.RequestInspector = withInspection(maxlen)
 	azureClient.DisksClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
@@ -222,7 +222,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 
 	// If this is a managed disk build, this should be ignored.
 	if resourceGroupName != "" && storageAccountName != "" {
-		accountKeys, err := azureClient.AccountsClient.ListKeys(resourceGroupName, storageAccountName)
+		accountKeys, err := azureClient.AccountsClient.ListKeys(context.TODO(), resourceGroupName, storageAccountName)
 		if err != nil {
 			return nil, err
 		}
