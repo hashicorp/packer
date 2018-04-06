@@ -1,9 +1,10 @@
-//+build !noasm !appengine
+//+build !noasm
+//+build !appengine
 
 // Copyright 2015, Klaus Post, see LICENSE for details.
 
 // func crc32sse(a []byte) hash
-TEXT ·crc32sse(SB), 7, $0
+TEXT ·crc32sse(SB), 4, $0
 	MOVQ a+0(FP), R10
 	XORQ BX, BX
 
@@ -15,7 +16,7 @@ TEXT ·crc32sse(SB), 7, $0
 	RET
 
 // func crc32sseAll(a []byte, dst []hash)
-TEXT ·crc32sseAll(SB), 7, $0
+TEXT ·crc32sseAll(SB), 4, $0
 	MOVQ  a+0(FP), R8      // R8: src
 	MOVQ  a_len+8(FP), R10 // input length
 	MOVQ  dst+24(FP), R9   // R9: dst
@@ -95,50 +96,56 @@ one_crc:
 	JMP  rem_loop
 
 // func matchLenSSE4(a, b []byte, max int) int
-TEXT ·matchLenSSE4(SB), 7, $0
-	MOVQ a+0(FP), R8     // R8: &a
-	MOVQ b+24(FP), R9    // R9: &b
-	MOVQ max+48(FP), R10 // R10: max
-	XORQ R11, R11        // match length
-
-	MOVQ R10, R12
-	SHRQ $4, R10            // max/16
-	ANDQ $15, R12           // max & 15
-	CMPQ R10, $0
-	JEQ  matchlen_verysmall
+TEXT ·matchLenSSE4(SB), 4, $0
+	MOVQ  a+0(FP), SI        // RSI: &a
+	MOVQ  b+24(FP), DI       // RDI: &b
+	MOVQ  max+48(FP), R10    // R10: max
+	XORQ  R11, R11           // R11: match length
+	MOVQ  R10, R12           // R12: Remainder
+	SHRQ  $4, R10            // max / 16
+	MOVQ  $16, AX            // Set length for PCMPESTRI
+	MOVQ  $16, DX            // Set length for PCMPESTRI
+	ANDQ  $15, R12           // max & 15
+	TESTQ R10, R10
+	JZ    matchlen_verysmall
 
 loopback_matchlen:
-	MOVOU (R8), X0 // a[x]
-	MOVOU (R9), X1 // b[x]
+	MOVOU (SI), X0 // a[x]
+	MOVOU (DI), X1 // b[x]
 
 	// PCMPESTRI $0x18, X1, X0
+	// 0x18 = _SIDD_UBYTE_OPS (0x0) | _SIDD_CMP_EQUAL_EACH (0x8) | _SIDD_NEGATIVE_POLARITY (0x10)
 	BYTE $0x66; BYTE $0x0f; BYTE $0x3a
 	BYTE $0x61; BYTE $0xc1; BYTE $0x18
 
 	JC match_ended
 
-	ADDQ $16, R8
-	ADDQ $16, R9
+	ADDQ $16, SI
+	ADDQ $16, DI
 	ADDQ $16, R11
 
 	SUBQ $1, R10
 	JNZ  loopback_matchlen
 
+	// Check the remainder using REP CMPSB
 matchlen_verysmall:
-	CMPQ R12, $0
-	JEQ  done_matchlen
+	TESTQ R12, R12
+	JZ    done_matchlen
+	MOVQ  R12, CX
+	ADDQ  R12, R11
 
-loopback_matchlen_single:
-	// Naiive, but small use
-	MOVB (R8), R13
-	MOVB (R9), R14
-	CMPB R13, R14
-	JNE  done_matchlen
-	ADDQ $1, R8
-	ADDQ $1, R9
-	ADDQ $1, R11
-	SUBQ $1, R12
-	JNZ  loopback_matchlen_single
+	// Compare CX bytes at [SI] [DI]
+	// Subtract one from CX for every match.
+	// Terminates when CX is zero (checked pre-compare)
+	CLD
+	REP; CMPSB
+
+	// Check if last was a match.
+	JZ done_matchlen
+
+	// Subtract remanding bytes.
+	SUBQ CX, R11
+	SUBQ $1, R11
 	MOVQ R11, ret+56(FP)
 	RET
 
@@ -150,7 +157,7 @@ done_matchlen:
 	RET
 
 // func histogram(b []byte, h []int32)
-TEXT ·histogram(SB), 7, $0
+TEXT ·histogram(SB), 4, $0
 	MOVQ b+0(FP), SI     // SI: &b
 	MOVQ b_len+8(FP), R9 // R9: len(b)
 	MOVQ h+24(FP), DI    // DI: Histogram

@@ -14,7 +14,6 @@ import (
 const (
 	NoCompression       = 0
 	BestSpeed           = 1
-	fastCompression     = 3
 	BestCompression     = 9
 	DefaultCompression  = -1
 	ConstantCompression = -2 // Does only Huffman encoding
@@ -45,19 +44,24 @@ type compressionLevel struct {
 	good, lazy, nice, chain, fastSkipHashing, level int
 }
 
+// Compression levels have been rebalanced from zlib deflate defaults
+// to give a bigger spread in speed and compression.
+// See https://blog.klauspost.com/rebalancing-deflate-compression-levels/
 var levels = []compressionLevel{
 	{}, // 0
-	// For levels 1-3 we don't bother trying with lazy matches
-	{4, 0, 8, 4, 4, 1},
-	{4, 0, 16, 8, 5, 2},
-	{4, 0, 24, 24, 6, 3},
-	// Levels 4-9 use increasingly more lazy matching
+	// Level 1+2 uses snappy algorithm - values not used
+	{0, 0, 0, 0, 0, 1},
+	{0, 0, 0, 0, 0, 2},
+	// For levels 3-6 we don't bother trying with lazy matches.
+	// Lazy matching is at least 30% slower, with 1.5% increase.
+	{4, 0, 8, 4, 4, 3},
+	{4, 0, 12, 6, 5, 4},
+	{6, 0, 24, 16, 6, 5},
+	{8, 0, 32, 32, 7, 6},
+	// Levels 7-9 use increasingly more lazy matching
 	// and increasingly stringent conditions for "good enough".
-	{4, 4, 16, 16, skipNever, 4},
-	{8, 16, 32, 32, skipNever, 5},
-	{8, 16, 128, 128, skipNever, 6},
-	{8, 32, 128, 256, skipNever, 7},
-	{32, 128, 258, 1024, skipNever, 8},
+	{4, 8, 16, 16, skipNever, 7},
+	{6, 16, 32, 64, skipNever, 8},
 	{32, 258, 258, 4096, skipNever, 9},
 }
 
@@ -102,6 +106,7 @@ type compressor struct {
 	err            error
 	ii             uint16 // position of last match, intended to overflow to reset.
 
+	snap      snappyEnc
 	hashMatch [maxMatchLength + minMatchLength]hash
 }
 
@@ -164,10 +169,9 @@ func (d *compressor) writeBlockSkip(tok tokens, index int, eof bool) error {
 	if index > 0 || eof {
 		if d.blockStart <= index {
 			window := d.window[d.blockStart:index]
-			if tok.n == len(window) && !eof {
-				d.writeStoredBlock(window)
-				// If we removed less than 10 literals, huffman compress the block.
-			} else if tok.n > len(window)-10 {
+			// If we removed less than a 64th of all literals
+			// we huffman compress the block.
+			if tok.n > len(window)-(tok.n>>6) {
 				d.w.writeBlockHuff(eof, window)
 			} else {
 				// Write a dynamic huffman block.
@@ -189,7 +193,8 @@ func (d *compressor) writeBlockSkip(tok tokens, index int, eof bool) error {
 func (d *compressor) fillWindow(b []byte) {
 	// Do not fill window if we are in store-only mode,
 	// use constant or Snappy compression.
-	if d.compressionLevel.level == 0 {
+	switch d.compressionLevel.level {
+	case 0, 1, 2:
 		return
 	}
 	// If we are given too much, cut it.
@@ -1077,18 +1082,35 @@ func (d *compressor) storeHuff() {
 // Any error that occurred will be in d.err
 func (d *compressor) storeSnappy() {
 	// We only compress if we have maxStoreBlockSize.
-	if d.windowEnd < maxStoreBlockSize && !d.sync {
-		return
+	if d.windowEnd < maxStoreBlockSize {
+		if !d.sync {
+			return
+		}
+		// Handle extremely small sizes.
+		if d.windowEnd < 128 {
+			if d.windowEnd == 0 {
+				return
+			}
+			if d.windowEnd <= 32 {
+				d.err = d.writeStoredBlock(d.window[:d.windowEnd])
+				d.tokens.n = 0
+				d.windowEnd = 0
+			} else {
+				d.w.writeBlockHuff(false, d.window[:d.windowEnd])
+				d.err = d.w.err
+			}
+			d.tokens.n = 0
+			d.windowEnd = 0
+			return
+		}
 	}
-	if d.windowEnd == 0 {
-		return
-	}
-	snappyEncode(&d.tokens, d.window[:d.windowEnd])
+
+	d.snap.Encode(&d.tokens, d.window[:d.windowEnd])
 	// If we made zero matches, store the block as is.
 	if d.tokens.n == d.windowEnd {
 		d.err = d.writeStoredBlock(d.window[:d.windowEnd])
-		// If we removed less than 10 literals, huffman compress the block.
-	} else if d.tokens.n > d.windowEnd-10 {
+		// If we removed less than 1/16th, huffman compress the block.
+	} else if d.tokens.n > d.windowEnd-(d.windowEnd>>4) {
 		d.w.writeBlockHuff(false, d.window[:d.windowEnd])
 		d.err = d.w.err
 	} else {
@@ -1143,15 +1165,16 @@ func (d *compressor) init(w io.Writer, level int) (err error) {
 		d.window = make([]byte, maxStoreBlockSize)
 		d.fill = (*compressor).fillHuff
 		d.step = (*compressor).storeHuff
-	case level == 1:
+	case level >= 1 && level <= 3:
+		d.snap = newSnappy(level)
 		d.window = make([]byte, maxStoreBlockSize)
 		d.fill = (*compressor).fillHuff
 		d.step = (*compressor).storeSnappy
 		d.tokens.tokens = make([]token, maxStoreBlockSize+1)
 	case level == DefaultCompression:
-		level = 6
+		level = 5
 		fallthrough
-	case 2 <= level && level <= 9:
+	case 4 <= level && level <= 9:
 		d.compressionLevel = levels[level]
 		d.initDeflate()
 		d.fill = (*compressor).fillDeflate
@@ -1183,6 +1206,13 @@ func (d *compressor) reset(w io.Writer) {
 	d.w.reset(w)
 	d.sync = false
 	d.err = nil
+	// We only need to reset a few things for Snappy.
+	if d.snap != nil {
+		d.snap.Reset()
+		d.windowEnd = 0
+		d.tokens.n = 0
+		return
+	}
 	switch d.compressionLevel.chain {
 	case 0:
 		// level was NoCompression or ConstantCompresssion.
@@ -1228,10 +1258,10 @@ func (d *compressor) close() error {
 
 // NewWriter returns a new Writer compressing data at the given level.
 // Following zlib, levels range from 1 (BestSpeed) to 9 (BestCompression);
-// higher levels typically run slower but compress more. Level 0
-// (NoCompression) does not attempt any compression; it only adds the
-// necessary DEFLATE framing. Level -1 (DefaultCompression) uses the default
-// compression level.
+// higher levels typically run slower but compress more.
+// Level 0 (NoCompression) does not attempt any compression; it only adds the
+// necessary DEFLATE framing.
+// Level -1 (DefaultCompression) uses the default compression level.
 // Level -2 (ConstantCompression) will use Huffman compression only, giving
 // a very fast compression for all types of input, but sacrificing considerable
 // compression efficiency.
