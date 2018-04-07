@@ -56,10 +56,10 @@ builder.
     or `ams1`). Consequently, this is the region where the snapshot will be
     available.
 
--   `commercial_type` (string) - The name of the server commercial type: `C1`,
-    `C2S`, `C2M`, `C2L`, `X64-2GB`, `X64-4GB`, `X64-8GB`, `X64-15GB`,
-    `X64-30GB`, `X64-60GB`, `X64-120GB`, `ARM64-2GB`, `ARM64-4GB`, `ARM64-8GB`,
-    `ARM64-16GB`, `ARM64-32GB`, `ARM64-64GB`, `ARM64-128GB`
+-   `commercial_type` (string) - The name of the server commercial type:
+      `ARM64-128GB`,`ARM64-16GB`,`ARM64-2GB`,`ARM64-32GB`,`ARM64-4GB`, `ARM64-64GB`,
+      `ARM64-8GB`,`C1`,`C2L`,`C2M`,`C2S`,`VC1L`,`VC1M`,`VC1S`,
+      `X64-120GB`,`X64-15GB`,`X64-30GB`,`X64-60GB`
 
 ### Optional:
 
@@ -84,7 +84,7 @@ access tokens:
   "api_token": "YOUR TOKEN",
   "image": "UUID OF THE BASE IMAGE",
   "region": "par1",
-  "commercial_type": "X64-2GB",
+  "commercial_type": "VC1S",
   "ssh_username": "root",
   "ssh_private_key_file": "~/.ssh/id_rsa"
 }
