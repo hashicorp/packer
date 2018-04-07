@@ -149,10 +149,48 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
+-   `disk_additional_size` (array of integers) - The size(s) of any additional
+    hard disks for the VM in gigabytes. If this is not specified then the VM
+    will only contain an OS disk. The number of additional disks and maximum size of a disk depends on the configuration of your VM. See [Windows](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds) or [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds) for more information.
+
+	For VHD builds the final artifacts will be named `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture container along side the OS disk. The additional disks are included in the deployment template `PREFIX-vmTemplate.UUID`.
+	
+	For Managed build the final artifacts are included in the managed image. The additional disk will have the same storage account type as the OS disk, as specified with the `managed_image_storage_account_type` setting.
+
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
+
+-   `plan_info` (object) - Used for creating images from Marketplace images.  Please refer to [Deploy an image with
+     Marketplace terms](https://aka.ms/azuremarketplaceapideployment) for more details.  Not all Marketplace images
+     support programmatic deployment, and support is controlled by the image publisher.
+
+     An example plan_info object is defined below.
+
+     ```json
+     {
+        "plan_info": {
+            "plan_name": "rabbitmq",
+            "plan_product": "rabbitmq",
+            "plan_publisher": "bitnami"
+        }
+     }
+     ```
+
+     `plan_name` (string) - The plan name, required.
+     `plan_product` (string) - The plan product, required.
+     `plan_publisher` (string) - The plan publisher, required.
+     `plan_promotion_code` (string) - Some images accept a promotion code, optional.
+
+     Images created from the Marketplace with `plan_info` **must** specify `plan_info` whenever the image is deployed.
+     The builder automatically adds tags to the image to ensure this information is not lost.  The following tags are
+     added.
+
+       1. PlanName
+       1. PlanProduct
+       1. PlanPublisher
+       1. PlanPromotionCode
 
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
@@ -336,9 +374,13 @@ The Azure builder creates the following random values at runtime.
 -   Compute Name: a random 15-character name prefixed with pkrvm; the name of the VM.
 -   Deployment Name: a random 15-character name prefixed with pkfdp; the name of the deployment.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
+-   NIC Name: a random 15-character name prefixed with pkrni.
+-   Public IP Name: a random 15-character name prefixed with pkrip.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
+-   Subnet Name: a random 15-character name prefixed with pkrsn.
 -   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
+-   Virtual Network Name: a random 15-character name prefixed with pkrvn.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.

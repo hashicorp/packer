@@ -29,14 +29,17 @@ import (
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
+	ncloudbuilder "github.com/hashicorp/packer/builder/ncloud"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
+	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	qemubuilder "github.com/hashicorp/packer/builder/qemu"
+	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
@@ -96,14 +99,17 @@ var Builders = map[string]packer.Builder{
 	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
 	"lxc":                 new(lxcbuilder.Builder),
 	"lxd":                 new(lxdbuilder.Builder),
+	"ncloud":              new(ncloudbuilder.Builder),
 	"null":                new(nullbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
+	"oracle-classic":      new(oracleclassicbuilder.Builder),
 	"oracle-oci":          new(oracleocibuilder.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
+	"scaleway":            new(scalewaybuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),

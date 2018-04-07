@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -232,6 +232,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EbsOptimized:             b.config.EbsOptimized,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			InstanceType:             b.config.InstanceType,
+			IsRestricted:             b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                b.config.SourceAmi,
 			SubnetId:                 b.config.SubnetId,
 			Tags:                     b.config.RunTags,

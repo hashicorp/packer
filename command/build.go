@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
@@ -138,13 +139,15 @@ func (c BuildCommand) Run(args []string) int {
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
+	// ctx := context.Background()
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
+		// buildCtx, cancelCtx := ctx.WithCancel()
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		defer signal.Stop(sigCh)
 		go func(b packer.Build) {
 			<-sigCh
@@ -154,6 +157,7 @@ func (c BuildCommand) Run(args []string) int {
 
 			log.Printf("Stopping build: %s", b.Name())
 			b.Cancel()
+			//cancelCtx()
 			log.Printf("Build cancelled: %s", b.Name())
 		}(b)
 

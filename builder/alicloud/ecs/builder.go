@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -89,7 +89,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = []multistep.Step{
 		&stepPreValidate{
 			AlicloudDestImageName: b.config.AlicloudImageName,
-			ForceDelete:           b.config.AlicloudImageForceDetele,
+			ForceDelete:           b.config.AlicloudImageForceDelete,
 		},
 		&stepCheckAlicloudSourceImage{
 			SourceECSImageId: b.config.AlicloudSourceImage,
@@ -132,7 +132,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                b.config.AlicloudRegion,
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-			InstnaceName:            b.config.InstanceName,
+			InstanceName:            b.config.InstanceName,
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == VpcNet {
@@ -165,8 +165,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceStop: b.config.ForceStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
-			AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-			AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
+			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
+			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},

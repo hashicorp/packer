@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -56,6 +57,13 @@ var (
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
 )
+
+type PlanInformation struct {
+	PlanName          string `mapstructure:"plan_name"`
+	PlanProduct       string `mapstructure:"plan_product"`
+	PlanPublisher     string `mapstructure:"plan_publisher"`
+	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -107,10 +115,14 @@ type Config struct {
 	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
 	CustomDataFile                    string `mapstructure:"custom_data_file"`
 	customData                        string
+	PlanInfo                          PlanInformation `mapstructure:"plan_info"`
 
 	// OS
 	OSType       string `mapstructure:"os_type"`
 	OSDiskSizeGB int32  `mapstructure:"os_disk_size_gb"`
+
+	// Additional Disks
+	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
 
 	// Runtime Values
 	UserName               string
@@ -119,9 +131,13 @@ type Config struct {
 	tmpCertificatePassword string
 	tmpResourceGroupName   string
 	tmpComputeName         string
+	tmpNicName             string
+	tmpPublicIPAddressName string
 	tmpDeploymentName      string
 	tmpKeyVaultName        string
 	tmpOSDiskName          string
+	tmpSubnetName          string
+	tmpVirtualNetworkName  string
 	tmpWinRMCertificateUrl string
 
 	useDeviceLogin bool
@@ -342,6 +358,9 @@ func setRuntimeValues(c *Config) {
 	var tempName = NewTempName()
 
 	c.tmpAdminPassword = tempName.AdminPassword
+	// store so that we can access this later during provisioning
+	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword)
+
 	c.tmpCertificatePassword = tempName.CertificatePassword
 	if c.TempComputeName == "" {
 		c.tmpComputeName = tempName.ComputeName
@@ -355,7 +374,11 @@ func setRuntimeValues(c *Config) {
 	} else if c.TempResourceGroupName != "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
+	c.tmpNicName = tempName.NicName
+	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
 	c.tmpOSDiskName = tempName.OSDiskName
+	c.tmpSubnetName = tempName.SubnetName
+	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
 	c.tmpKeyVaultName = tempName.KeyVaultName
 }
 
@@ -399,7 +422,7 @@ func setCloudEnvironment(c *Config) error {
 	name := strings.ToUpper(c.CloudEnvironmentName)
 	envName, ok := lookup[name]
 	if !ok {
-		return fmt.Errorf("There is no cloud envionment matching the name '%s'!", c.CloudEnvironmentName)
+		return fmt.Errorf("There is no cloud environment matching the name '%s'!", c.CloudEnvironmentName)
 	}
 
 	env, err := azure.EnvironmentFromName(envName)
@@ -601,7 +624,7 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if !xor(c.Location != "", c.BuildResourceGroupName != "") {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Must specify either a location to create the resource group in or an existing build_resource_group_name."))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a location to create the resource group in or an existing build_resource_group_name, but not both."))
 	}
 
 	if c.ManagedImageName == "" && c.ManagedImageResourceGroupName == "" {
@@ -642,6 +665,23 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 	if c.VirtualNetworkName == "" && c.VirtualNetworkSubnetName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_subnet_name is specified, so must virtual_network_name"))
+	}
+
+	/////////////////////////////////////////////
+	// Plan Info
+	if c.PlanInfo.PlanName != "" || c.PlanInfo.PlanProduct != "" || c.PlanInfo.PlanPublisher != "" || c.PlanInfo.PlanPromotionCode != "" {
+		if c.PlanInfo.PlanName == "" || c.PlanInfo.PlanProduct == "" || c.PlanInfo.PlanPublisher == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("if either plan_name, plan_product, plan_publisher, or plan_promotion_code are defined then plan_name, plan_product, and plan_publisher must be defined"))
+		} else {
+			if c.AzureTags == nil {
+				c.AzureTags = make(map[string]*string)
+			}
+
+			c.AzureTags["PlanInfo"] = &c.PlanInfo.PlanName
+			c.AzureTags["PlanProduct"] = &c.PlanInfo.PlanProduct
+			c.AzureTags["PlanPublisher"] = &c.PlanInfo.PlanPublisher
+			c.AzureTags["PlanPromotionCode"] = &c.PlanInfo.PlanPromotionCode
+		}
 	}
 
 	/////////////////////////////////////////////

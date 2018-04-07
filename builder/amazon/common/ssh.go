@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )

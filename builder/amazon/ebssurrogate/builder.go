@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderId = "mitchellh.amazon.ebssurrogate"
@@ -26,8 +26,8 @@ type Config struct {
 	awscommon.BlockDevices `mapstructure:",squash"`
 	awscommon.AMIConfig    `mapstructure:",squash"`
 
-	RootDevice    RootBlockDevice   `mapstructure:"ami_root_device"`
-	VolumeRunTags map[string]string `mapstructure:"run_volume_tags"`
+	RootDevice    RootBlockDevice  `mapstructure:"ami_root_device"`
+	VolumeRunTags awscommon.TagMap `mapstructure:"run_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -166,6 +166,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			IamInstanceProfile:                b.config.IamInstanceProfile,
 			InstanceInitiatedShutdownBehavior: b.config.InstanceInitiatedShutdownBehavior,
 			InstanceType:                      b.config.InstanceType,
+			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                         b.config.SourceAmi,
 			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
@@ -174,6 +175,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VolumeTags:                        b.config.VolumeRunTags,
 		}
 	}
+
+	amiDevices := b.config.BuildAMIDevices()
+	launchDevices := b.config.BuildLaunchDevices()
 
 	// Build the steps
 	steps := []multistep.Step{
@@ -226,8 +230,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
-		&StepSnapshotNewRootVolume{
-			NewRootMountPoint: b.config.RootDevice.SourceDeviceName,
+		&StepSnapshotVolumes{
+			LaunchDevices: launchDevices,
 		},
 		&awscommon.StepDeregisterAMI{
 			AccessConfig:        &b.config.AccessConfig,
@@ -238,7 +242,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepRegisterAMI{
 			RootDevice:               b.config.RootDevice,
-			BlockDevices:             b.config.BlockDevices.BuildAMIDevices(),
+			AMIDevices:               amiDevices,
+			LaunchDevices:            launchDevices,
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 		},

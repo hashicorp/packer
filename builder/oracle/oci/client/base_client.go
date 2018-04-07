@@ -3,9 +3,10 @@ package oci
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/go-querystring/query"
 	"net/http"
 	"net/url"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -183,7 +184,7 @@ func (c *baseClient) Request() (*http.Request, error) {
 	return req, nil
 }
 
-// Recieve creates a http request from the client and executes it returning the
+// Receive creates a http request from the client and executes it returning the
 // response.
 func (c *baseClient) Receive(successV, failureV interface{}) (*http.Response, error) {
 	req, err := c.Request()

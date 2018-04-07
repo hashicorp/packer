@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	client "github.com/hashicorp/packer/builder/oracle/oci/client"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // BuilderId uniquely identifies the builder
@@ -50,7 +51,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&stepKeyPair{
+		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("oci_%s.pem", b.config.PackerBuildName),
 			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
@@ -59,8 +60,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepInstanceInfo{},
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: SSHConfig(
+			Host:   ocommon.CommHost,
+			SSHConfig: ocommon.SSHConfig(
 				b.config.Comm.SSHUsername,
 				b.config.Comm.SSHPassword),
 		},

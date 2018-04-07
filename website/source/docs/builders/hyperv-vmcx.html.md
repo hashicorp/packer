@@ -225,6 +225,10 @@ can be configured for this builder.
     for the new virtual machine. By default none is set. If none is set then
     vlans are not set on the virtual machine's network card.
 
+-   `mac_address` (string) - This allows a specific MAC address to be used on the
+    default virtual network card.  The MAC address must be a string with no
+    delimiters, for example "0000deadbeef".
+
 -   `vm_name` (string) - This is the name of the virtual machine for the new
     virtual machine, without the file extension. By default this is
     "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
@@ -647,7 +651,7 @@ Finish Setup cache proxy during installation -->
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c winrm set winrm/config @{MaxTimeoutms="1800000"}</CommandLine>
-                    <Description>Win RM MaxTimoutms</Description>
+                    <Description>Win RM MaxTimeoutms</Description>
                     <Order>5</Order>
                     <RequiresUserInput>true</RequiresUserInput>
                 </SynchronousCommand>

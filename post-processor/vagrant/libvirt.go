@@ -2,9 +2,10 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"path/filepath"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type LibVirtProvider struct{}

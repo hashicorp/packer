@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/mitchellh/reflectwalk"
 	"reflect"
 	"strings"
+
+	"github.com/mitchellh/reflectwalk"
 )
 
 type walker struct {

@@ -17,7 +17,7 @@ type AMIConfig struct {
 	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
-	AMITags                 map[string]string `mapstructure:"tags"`
+	AMITags                 TagMap            `mapstructure:"tags"`
 	AMIENASupport           bool              `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
@@ -25,7 +25,7 @@ type AMIConfig struct {
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
-	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
+	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 }

@@ -35,6 +35,9 @@ func (d *driverOCI) CreateInstance(publicKey string) (string, error) {
 			"ssh_authorized_keys": publicKey,
 		},
 	}
+	if d.cfg.UserData != "" {
+		params.Metadata["user_data"] = d.cfg.UserData
+	}
 	instance, err := d.client.Compute.Instances.Launch(params)
 	if err != nil {
 		return "", err
@@ -63,7 +66,7 @@ func (d *driverOCI) DeleteImage(id string) error {
 	return d.client.Compute.Images.Delete(&client.DeleteImageParams{ID: id})
 }
 
-// GetInstanceIP returns the public IP corresponding to the given instance id.
+// GetInstanceIP returns the public or private IP corresponding to the given instance id.
 func (d *driverOCI) GetInstanceIP(id string) (string, error) {
 	// get nvic and cross ref to find pub ip address
 	vnics, err := d.client.Compute.VNICAttachments.List(
@@ -85,6 +88,9 @@ func (d *driverOCI) GetInstanceIP(id string) (string, error) {
 		return "", fmt.Errorf("Error getting VNIC details: %s", err)
 	}
 
+	if d.cfg.UsePrivateIP {
+		return vnic.PrivateIP, nil
+	}
 	return vnic.PublicIP, nil
 }
 

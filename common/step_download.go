@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -45,7 +47,7 @@ type StepDownload struct {
 	Extension string
 }
 
-func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	cache := state.Get("cache").(packer.Cache)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -62,7 +64,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
 	// First try to use any already downloaded file
-	// If it fails, proceed to regualar download logic
+	// If it fails, proceed to regular download logic
 
 	var downloadConfigs = make([]*DownloadConfig, len(s.Url))
 	var finalPath string
@@ -90,7 +92,7 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
-			UserAgent:  "Packer",
+			UserAgent:  useragent.String(),
 		}
 		downloadConfigs[i] = config
 

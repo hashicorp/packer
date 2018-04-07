@@ -85,7 +85,7 @@ func (c *FixCommand) Run(args []string) int {
 	c.Ui.Say(result)
 
 	if flagValidate {
-		// Attemot to parse and validate the template
+		// Attempt to parse and validate the template
 		tpl, err := template.Parse(strings.NewReader(result))
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(

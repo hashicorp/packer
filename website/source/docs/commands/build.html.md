@@ -49,3 +49,8 @@ that are created will be outputted at the end of the build.
 
 -   `-parallel=false` - Disable parallelization of multiple builders (on by
     default).
+
+-   `-var` - Set a variable in your packer template. This option can be used
+    multiple times. This is useful for setting version numbers for your build.
+
+-   `-var-file` - Set template variables from a file.

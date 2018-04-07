@@ -48,6 +48,14 @@ The available configuration options are listed below. All elements are required.
     "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
 
+-   `generated` (boolean) - For advanced users only. If true, check the file
+    existence only before uploading, rather than upon pre-build validation.
+    This allows to upload files created on-the-fly. This defaults to false. We
+    don't recommend using this feature, since it can cause Packer to become
+    dependent on system state. We would prefer you generate your files before
+    the Packer run, but realize that there are situations where this may be
+    unavoidable.
+
 ## Directory Uploads
 
 The file provisioner is also able to upload a complete directory to the remote

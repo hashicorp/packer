@@ -31,7 +31,7 @@ type VNICAttachment struct {
 	VNICID             string    `json:"vnicId"`
 }
 
-// ListVnicAttachmentsParams are the paramaters available when communicating
+// ListVnicAttachmentsParams are the parameters available when communicating
 // with the ListVnicAttachments API endpoint.
 type ListVnicAttachmentsParams struct {
 	AvailabilityDomain string `url:"availabilityDomain,omitempty"`
