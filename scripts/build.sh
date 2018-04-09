@@ -94,7 +94,7 @@ IFS=$OLDIFS
 # Copy our OS/Arch to the bin/ directory
 echo "==> Copying binaries for this platform..."
 DEV_PLATFORM="./pkg/$(go env GOOS)_$(go env GOARCH)"
-for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f); do
+for F in $(find ${DEV_PLATFORM} -mindepth 1 -maxdepth 1 -type f 2>/dev/null); do
     cp -v ${F} bin/
     cp -v ${F} ${MAIN_GOPATH}/bin/
 done
