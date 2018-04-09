@@ -4,7 +4,7 @@ VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
-GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
+GOFMT_FILES?=find . -path ./vendor -prune -o -name "*.go"
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
