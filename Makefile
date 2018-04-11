@@ -42,6 +42,7 @@ package:
 
 deps:
 	@go get golang.org/x/tools/cmd/stringer
+	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
 	@govendor sync
 
@@ -73,6 +74,8 @@ fmt-examples:
 # source files.
 generate: deps ## Generate dynamically generated code
 	go generate .
+	gofmt -w common/boot_command/boot_command.go
+	goimports -w common/boot_command/boot_command.go
 	gofmt -w command/plugin.go
 
 test: deps fmt-check ## Run unit tests
