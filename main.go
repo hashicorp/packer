@@ -1,6 +1,7 @@
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
+//go:generate go generate ./common/boot_command/...
 package main
 
 import (

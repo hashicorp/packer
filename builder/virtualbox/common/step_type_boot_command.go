@@ -94,6 +94,7 @@ func (s *StepTypeBootCommand) Run(_ context.Context, state multistep.StateBag) m
 
 			var codes []string
 
+			// split string into a list of 2-char pairs
 			for i := 0; i < len(code)/2; i++ {
 				codes = append(codes, code[i*2:i*2+2])
 			}

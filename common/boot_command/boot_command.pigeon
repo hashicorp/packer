@@ -1,0 +1,95 @@
+{
+package bootcommand
+
+
+
+/*
+func main() {
+    in := "<wait><wait10><wait1s><wait1m2ns>"
+    in += "foo/bar > one"
+    in += "<fOn> b<fOff>"
+    in += "<f3><f12><spacebar><leftalt><rightshift><rightsuper>"
+    got, err := ParseReader("", strings.NewReader(in))
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("%s\n", got)
+}
+*/
+}
+
+Input <- expr:Expr EOF {
+    return expr, nil
+}
+
+Expr <- l:( Wait / CharToggle / Special / Literal)+ {
+    return l, nil
+}
+
+Wait = ExprStart "wait" duration:( Duration / Integer )? ExprEnd {
+    var d time.Duration
+    switch t := duration.(type) {
+    case time.Duration:
+        d = t
+    case int64:
+        d = time.Duration(t) * time.Second
+    default:
+        d = time.Second
+    }
+    return &waitExpression{d}, nil
+}
+
+CharToggle = ExprStart lit:(Literal) t:(On / Off) ExprEnd {
+    return &literal{lit.(*literal).s, t.(KeyAction)}, nil
+}
+
+Special = ExprStart s:(SpecialKey) t:(On / Off)? ExprEnd {
+    if t == nil {
+        //return fmt.Sprintf("S(%s)", s), nil
+        return &specialExpression{string(s.([]byte)), KeyPress}, nil
+    }
+    return &specialExpression{string(s.([]byte)), t.(KeyAction)}, nil
+    //return fmt.Sprintf("S%s(%s)", t, s), nil
+}
+
+Number = '-'? Integer ( '.' Digit+ )? {
+    return string(c.text), nil
+}
+
+Integer = '0' / NonZeroDigit Digit* {
+    return strconv.ParseInt(string(c.text), 10, 64)
+}
+
+Duration = ( Number TimeUnit )+ {
+    return time.ParseDuration(string(c.text))
+}
+
+On = "on"i {
+    return KeyOn, nil
+}
+
+Off = "off"i {
+    return KeyOff, nil
+}
+
+Literal = . {
+    r, _ := utf8.DecodeRune(c.text)
+    return &literal{r, KeyPress}, nil
+}
+
+ExprEnd = ">"
+ExprStart = "<"
+SpecialKey = "bs"i / "del"i / "enter"i / "esc"i / "f10"i / "f11"i / "f12"i
+        / "f1"i / "f2"i / "f3"i / "f4"i / "f5"i / "f6"i / "f7"i / "f8"i / "f9"i
+        /  "return"i / "tab"i / "up"i / "down"i / "spacebar"i / "insert"i / "home"i
+        / "end"i / "pageUp"i / "pageDown"i / "leftAlt"i / "leftCtrl"i / "leftShift"i
+        / "rightAlt"i / "rightCtrl"i / "rightShift"i / "leftSuper"i / "rightSuper"i
+        / "left"i / "right"i
+
+NonZeroDigit = [1-9]
+Digit = [0-9]
+TimeUnit = ("ns" / "us" / "µs" / "ms" / "s" / "m" / "h")
+
+_ "whitespace" <- [ \n\t\r]*
+
+EOF <- !.
