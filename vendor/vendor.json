@@ -1,6 +1,6 @@
 {
 	"comment": "",
-	"ignore": "test appengine",
+	"ignore": "test",
 	"package": [
 		{
 			"checksumSHA1": "aABATU51PlDHfGeSe5cc9udwSXg=",
@@ -1090,6 +1090,13 @@
 			"path": "github.com/olekukonko/tablewriter",
 			"revision": "96aac992fc8b1a4c83841a6c3e7178d20d989625",
 			"revisionTime": "2018-01-05T11:11:33Z"
+		},
+		{
+			"checksumSHA1": "/LfGOK58LAN5bN/kVhyjw6prFuw=",
+			"path": "github.com/oracle/oci-go-sdk",
+			"revision": "36126af3da60f6d2053487efed8801aa794f7605",
+			"revisionTime": "2018-03-02T19:49:46Z",
+			"tree": true
 		},
 		{
 			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
