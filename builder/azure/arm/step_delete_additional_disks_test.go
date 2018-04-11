@@ -13,7 +13,7 @@ import (
 func TestStepDeleteAdditionalDiskShouldFailIfGetFails(t *testing.T) {
 	var testSubject = &StepDeleteAdditionalDisk{
 		delete:        func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
-		deleteManaged: func(string, string) error { return nil },
+		deleteManaged: func(context.Context, string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
 	}
@@ -110,7 +110,7 @@ func TestStepDeleteAdditionalDiskShouldFailIfVHDNameCannotBeURLParsed(t *testing
 		delete:        func(string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
-		deleteManaged: func(string, string) error { return nil },
+		deleteManaged: func(context.Context, string, string) error { return nil },
 	}
 
 	// Invalid URL per https://golang.org/src/net/url/url_test.go
@@ -130,7 +130,7 @@ func TestStepDeleteAdditionalDiskShouldFailIfVHDNameIsTooShort(t *testing.T) {
 		delete:        func(string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
-		deleteManaged: func(string, string) error { return nil },
+		deleteManaged: func(context.Context, string, string) error { return nil },
 	}
 
 	stateBag := DeleteTestStateBagStepDeleteAdditionalDisk([]string{"storage.blob.core.windows.net/abc"})
@@ -173,7 +173,7 @@ func TestStepDeleteAdditionalDiskShouldFailIfManagedDiskInExistingResourceGroupF
 		delete:        func(string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
-		deleteManaged: func(string, string) error { return errors.New("UNIT TEST FAIL!") },
+		deleteManaged: func(context.Context, string, string) error { return errors.New("UNIT TEST FAIL!") },
 	}
 
 	stateBag := new(multistep.BasicStateBag)
@@ -197,7 +197,7 @@ func TestStepDeleteAdditionalDiskShouldFailIfManagedDiskInExistingResourceGroupI
 		delete:        func(string, string) error { return nil },
 		say:           func(message string) {},
 		error:         func(e error) {},
-		deleteManaged: func(string, string) error { return nil },
+		deleteManaged: func(context.Context, string, string) error { return nil },
 	}
 
 	stateBag := new(multistep.BasicStateBag)
