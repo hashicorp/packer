@@ -1,8 +1,6 @@
 package oci
 
-import (
-	client "github.com/hashicorp/packer/builder/oracle/oci/client"
-)
+import "github.com/oracle/oci-go-sdk/core"
 
 // driverMock implements the Driver interface and communicates with Oracle
 // OCI.
@@ -40,12 +38,12 @@ func (d *driverMock) CreateInstance(publicKey string) (string, error) {
 }
 
 // CreateImage creates a new custom image.
-func (d *driverMock) CreateImage(id string) (client.Image, error) {
+func (d *driverMock) CreateImage(id string) (core.Image, error) {
 	if d.CreateImageErr != nil {
-		return client.Image{}, d.CreateImageErr
+		return core.Image{}, d.CreateImageErr
 	}
 	d.CreateImageID = id
-	return client.Image{ID: id}, nil
+	return core.Image{Id: &id}, nil
 }
 
 // DeleteImage mocks deleting a custom image.

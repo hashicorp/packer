@@ -27,7 +27,7 @@ func (s *stepImage) Run(_ context.Context, state multistep.StateBag) multistep.S
 		return multistep.ActionHalt
 	}
 
-	err = driver.WaitForImageCreation(image.ID)
+	err = driver.WaitForImageCreation(*image.Id)
 	if err != nil {
 		err = fmt.Errorf("Error waiting for image creation to finish: %s", err)
 		ui.Error(err.Error())
