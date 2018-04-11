@@ -20,12 +20,12 @@ func TestStepCreateResourceGroupShouldFailIfBothGroupNames(t *testing.T) {
 		"tag01": &value,
 	}
 
-	stateBag.Put(constants.ArmTags, &tags)
+	stateBag.Put(constants.ArmTags, tags)
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return nil },
+		create: func(context.Context, string, string, map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, nil },
+		exists: func(context.Context, string) (bool, error) { return false, nil },
 	}
 	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
@@ -39,10 +39,12 @@ func TestStepCreateResourceGroupShouldFailIfBothGroupNames(t *testing.T) {
 
 func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		create: func(context.Context, string, string, map[string]*string) error {
+			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, nil },
+		exists: func(context.Context, string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -59,10 +61,10 @@ func TestStepCreateResourceGroupShouldFailIfCreateFails(t *testing.T) {
 
 func TestStepCreateResourceGroupShouldFailIfExistsFails(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return nil },
+		create: func(context.Context, string, string, map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, errors.New("FAIL") },
+		exists: func(context.Context, string) (bool, error) { return false, errors.New("FAIL") },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -79,10 +81,10 @@ func TestStepCreateResourceGroupShouldFailIfExistsFails(t *testing.T) {
 
 func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return nil },
+		create: func(context.Context, string, string, map[string]*string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, nil },
+		exists: func(context.Context, string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -100,10 +102,10 @@ func TestStepCreateResourceGroupShouldPassIfCreatePasses(t *testing.T) {
 func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualResourceGroupName string
 	var actualLocation string
-	var actualTags *map[string]*string
+	var actualTags map[string]*string
 
 	var testSubject = &StepCreateResourceGroup{
-		create: func(resourceGroupName string, location string, tags *map[string]*string) error {
+		create: func(_ context.Context, resourceGroupName string, location string, tags map[string]*string) error {
 			actualResourceGroupName = resourceGroupName
 			actualLocation = location
 			actualTags = tags
@@ -111,7 +113,7 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 		},
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, nil },
+		exists: func(context.Context, string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -123,7 +125,7 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 	var expectedLocation = stateBag.Get(constants.ArmLocation).(string)
-	var expectedTags = stateBag.Get(constants.ArmTags).(*map[string]*string)
+	var expectedTags = stateBag.Get(constants.ArmTags).(map[string]*string)
 
 	if actualResourceGroupName != expectedResourceGroupName {
 		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
@@ -133,7 +135,7 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
 	}
 
-	if len(*expectedTags) != len(*actualTags) && *(*expectedTags)["tag01"] != *(*actualTags)["tag01"] {
+	if len(expectedTags) != len(actualTags) && expectedTags["tag01"] != actualTags["tag01"] {
 		t.Fatal("Expected the step to source 'constants.ArmTags' from the state bag, but it did not.")
 	}
 
@@ -145,10 +147,12 @@ func TestStepCreateResourceGroupShouldTakeStepArgumentsFromStateBag(t *testing.T
 
 func TestStepCreateResourceGroupMarkShouldFailIfTryingExistingButDoesntExist(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		create: func(context.Context, string, string, map[string]*string) error {
+			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return false, nil },
+		exists: func(context.Context, string) (bool, error) { return false, nil },
 	}
 
 	stateBag := createTestExistingStateBagStepCreateResourceGroup()
@@ -165,10 +169,12 @@ func TestStepCreateResourceGroupMarkShouldFailIfTryingExistingButDoesntExist(t *
 
 func TestStepCreateResourceGroupMarkShouldFailIfTryingTempButExist(t *testing.T) {
 	var testSubject = &StepCreateResourceGroup{
-		create: func(string, string, *map[string]*string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		create: func(context.Context, string, string, map[string]*string) error {
+			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
 		say:    func(message string) {},
 		error:  func(e error) {},
-		exists: func(string) (bool, error) { return true, nil },
+		exists: func(context.Context, string) (bool, error) { return true, nil },
 	}
 
 	stateBag := createTestStateBagStepCreateResourceGroup()
@@ -195,7 +201,7 @@ func createTestStateBagStepCreateResourceGroup() multistep.StateBag {
 		"tag01": &value,
 	}
 
-	stateBag.Put(constants.ArmTags, &tags)
+	stateBag.Put(constants.ArmTags, tags)
 	return stateBag
 }
 
@@ -211,6 +217,6 @@ func createTestExistingStateBagStepCreateResourceGroup() multistep.StateBag {
 		"tag01": &value,
 	}
 
-	stateBag.Put(constants.ArmTags, &tags)
+	stateBag.Put(constants.ArmTags, tags)
 	return stateBag
 }
