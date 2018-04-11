@@ -3,7 +3,7 @@ package template
 import (
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/approvals/go-approval-tests"
 )
 

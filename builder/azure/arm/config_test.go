@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/packer"
 )
@@ -86,7 +86,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 		t.Errorf("Expected 'vm_size' to be set to 'override_vm_size', but found %q!", c.VMSize)
 	}
 
-	if c.managedImageStorageAccountType != compute.PremiumLRS {
+	if c.managedImageStorageAccountType != compute.StorageAccountTypesPremiumLRS {
 		t.Errorf("Expected 'managed_image_storage_account_type' to be set to 'Premium_LRS', but found %q!", c.managedImageStorageAccountType)
 	}
 }

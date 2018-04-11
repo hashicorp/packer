@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -12,7 +11,7 @@ import (
 
 type StepPowerOffCompute struct {
 	client   *AzureClient
-	powerOff func(ctx context.Context, resourceGroupName string, computeName string, cancelCh <-chan struct{}) error
+	powerOff func(ctx context.Context, resourceGroupName string, computeName string) error
 	say      func(message string)
 	error    func(e error)
 }
@@ -28,7 +27,7 @@ func NewStepPowerOffCompute(client *AzureClient, ui packer.Ui) *StepPowerOffComp
 	return step
 }
 
-func (s *StepPowerOffCompute) powerOffCompute(ctx context.Context, resourceGroupName string, computeName string, cancelCh <-chan struct{}) error {
+func (s *StepPowerOffCompute) powerOffCompute(ctx context.Context, resourceGroupName string, computeName string) error {
 	f, err := s.client.VirtualMachinesClient.PowerOff(ctx, resourceGroupName, computeName)
 	if err == nil {
 		err = f.WaitForCompletion(ctx, s.client.VirtualMachinesClient.Client)
@@ -48,11 +47,9 @@ func (s *StepPowerOffCompute) Run(ctx context.Context, state multistep.StateBag)
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> ComputeName       : '%s'", computeName))
 
-	result := common.StartInterruptibleTask(
-		func() bool { return common.IsStateCancelled(state) },
-		func(cancelCh <-chan struct{}) error { return s.powerOff(ctx, resourceGroupName, computeName, cancelCh) })
+	err := s.powerOff(ctx, resourceGroupName, computeName)
 
-	return processInterruptibleResult(result, s.error, state)
+	return processStepResult(err, s.error, state)
 }
 
 func (*StepPowerOffCompute) Cleanup(multistep.StateBag) {

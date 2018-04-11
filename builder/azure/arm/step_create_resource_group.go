@@ -61,7 +61,7 @@ func (s *StepCreateResourceGroup) Run(ctx context.Context, state multistep.State
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var location = state.Get(constants.ArmLocation).(string)
-	var tags = *state.Get(constants.ArmTags).(*map[string]*string)
+	var tags = state.Get(constants.ArmTags).(map[string]*string)
 
 	exists, err := s.exists(ctx, resourceGroupName)
 	if err != nil {
