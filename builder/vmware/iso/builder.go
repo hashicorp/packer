@@ -319,11 +319,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Format: b.config.Format,
 		},
 		&vmwcommon.StepRun{
-			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
+			BootWait:    b.config.BootWait,
 			VNCEnabled:  !b.config.DisableVNC,
 			BootCommand: b.config.BootCommand,
 			VMName:      b.config.VMName,
