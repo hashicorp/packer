@@ -20,16 +20,6 @@ type bootCommandTemplateData struct {
 	Name     string
 }
 
-// This step "types" the boot command into the VM over VNC.
-//
-// Uses:
-//   driver Driver
-//   http_port int
-//   ui     packer.Ui
-//   vmName string
-//
-// Produces:
-//   <nothing>
 type StepTypeBootCommand struct {
 	BootCommand []string
 	BootWait    time.Duration
@@ -72,10 +62,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		args := []string{"controlvm", vmName, "keyboardputscancode"}
 		args = append(args, codes...)
 
-		if err := driver.VBoxManage(args...); err != nil {
-			return err
-		}
-		return nil
+		return driver.VBoxManage(args...)
 	}
 	d := bootcommand.NewPCATDriver(sendCodes)
 
@@ -97,10 +84,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 
-		// This executes vboxmanage once for each character code. This seems
-		// fine for now, but changes the prior behavior. If this becomes
-		// a problem, we can always have the driver cache scancodes, and then
-		// add a `Flush` method which we can call after this.
 		if err := seq.Do(ctx, d); err != nil {
 			err := fmt.Errorf("Error running boot command: %s", err)
 			state.Put("error", err)
@@ -111,7 +94,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		if pauseFn != nil {
 			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 		}
-
 	}
 
 	return multistep.ActionContinue
