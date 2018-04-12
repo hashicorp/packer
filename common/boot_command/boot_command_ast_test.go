@@ -17,7 +17,7 @@ func TestParse(t *testing.T) {
 	in := "<wait><wait20><wait3s><wait4m2ns>"
 	in += "foo/bar > one 界"
 	in += "<fOn> b<fOff>"
-	in += "<f3><f12><spacebar><leftalt><rightshift><rightsuper>"
+	in += "<foo><f3><f12><spacebar><leftalt><rightshift><rightsuper>"
 	got, err := ParseReader("", strings.NewReader(in))
 	if err != nil {
 		log.Fatal(err)
