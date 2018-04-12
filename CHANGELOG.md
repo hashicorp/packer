@@ -3,6 +3,7 @@
 ### BUG FIXES:
 
 * post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS X. [GH-6084]
+* builder/scaleway: Fix compilation issues on solaris/amd64. [GH-6069]
 
 ### IMPROVEMENTS:
 
