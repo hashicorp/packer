@@ -1,9 +1,6 @@
 package common
 
-import (
-	"testing"
-)
-
+/*
 func TestScancodes(t *testing.T) {
 	var bootcommand = []string{
 		"1234567890-=<enter><wait>",
@@ -41,3 +38,4 @@ func TestScancodes(t *testing.T) {
 		}
 	}
 }
+*/
