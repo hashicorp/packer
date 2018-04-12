@@ -12,8 +12,15 @@ import (
 	vnc "github.com/mitchellh/go-vnc"
 )
 
-const shiftedChars = "~!@#$%^&*()_+{}|:\"<>?"
 const KeyLeftShift uint32 = 0xFFE1
+
+type bcDriver struct {
+	c          *vnc.ClientConn
+	interval   time.Duration
+	specialMap map[string]uint32
+	// keyEvent can set this error which will prevent it from continuing
+	err error
+}
 
 func NewVNCDriver(c *vnc.ClientConn) *bcDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
@@ -67,14 +74,6 @@ func NewVNCDriver(c *vnc.ClientConn) *bcDriver {
 		interval:   keyInterval,
 		specialMap: sMap,
 	}
-}
-
-type bcDriver struct {
-	c          *vnc.ClientConn
-	interval   time.Duration
-	specialMap map[string]uint32
-	// keyEvent can set this error which will prevent it from continuing
-	err error
 }
 
 func (d *bcDriver) keyEvent(k uint32, down bool) error {
