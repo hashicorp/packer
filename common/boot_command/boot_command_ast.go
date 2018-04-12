@@ -12,14 +12,15 @@ import (
 TODO:
 	* tests
 	* comments
+	* lower-case specials
+	* check that `<del>` works on parallels. It's different now.
 */
 
-// Keys actions can take 3 states
-// we either want to
+// KeysAction represents what we want to do with a key press.
+// It can take 3 states. We either want to:
 // * press the key once
 // * press and hold
 // * press and release
-
 type KeyAction int
 
 const (
@@ -70,6 +71,8 @@ func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 	return nil
 }
 
+// GenerateExpressionSequence generates a sequence of expressions from the
+// given command.
 func GenerateExpressionSequence(command string) (expressionSequence, error) {
 	got, err := ParseReader("", strings.NewReader(command))
 	if err != nil {

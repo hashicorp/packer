@@ -147,7 +147,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-
 	}
 
 	return multistep.ActionContinue
