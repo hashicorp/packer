@@ -1,21 +1,6 @@
 {
 package bootcommand
 
-
-
-/*
-func main() {
-    in := "<wait><wait10><wait1s><wait1m2ns>"
-    in += "foo/bar > one"
-    in += "<fOn> b<fOff>"
-    in += "<f3><f12><spacebar><leftalt><rightshift><rightsuper>"
-    got, err := ParseReader("", strings.NewReader(in))
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("%s\n", got)
-}
-*/
 }
 
 Input <- expr:Expr EOF {
@@ -45,11 +30,9 @@ CharToggle = ExprStart lit:(Literal) t:(On / Off) ExprEnd {
 
 Special = ExprStart s:(SpecialKey) t:(On / Off)? ExprEnd {
     if t == nil {
-        //return fmt.Sprintf("S(%s)", s), nil
         return &specialExpression{string(s.([]byte)), KeyPress}, nil
     }
     return &specialExpression{string(s.([]byte)), t.(KeyAction)}, nil
-    //return fmt.Sprintf("S%s(%s)", t, s), nil
 }
 
 Number = '-'? Integer ( '.' Digit+ )? {
