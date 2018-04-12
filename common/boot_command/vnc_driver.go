@@ -1,6 +1,7 @@
 package bootcommand
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -118,7 +119,10 @@ func (d *bcDriver) SendKey(key rune, action KeyAction) error {
 }
 
 func (d *bcDriver) SendSpecial(special string, action KeyAction) error {
-	keyCode := d.specialMap[special]
+	keyCode, ok := d.specialMap[special]
+	if !ok {
+		return fmt.Errorf("special %s not found.", special)
+	}
 	log.Printf("Special code '<%s>' found, replacing with: 0x%X", special, keyCode)
 
 	switch action {
