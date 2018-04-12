@@ -129,12 +129,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 
-		// Check for interrupts between typing things so we can cancel
-		// since this isn't the fastest thing.
-		if _, ok := state.GetOk(multistep.StateCancelled); ok {
-			return multistep.ActionHalt
-		}
-
 		if pauseFn != nil {
 			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
 		}
