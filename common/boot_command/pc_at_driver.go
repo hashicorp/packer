@@ -8,18 +8,26 @@ import (
 	"unicode/utf8"
 )
 
+// This driver executes the driver once for each character code. This seems
+// fine for now, but changes the prior behavior. If this becomes a problem, we
+// can always have the driver cache scancodes, and then add a `Flush` method
+// which we can call after this.
+
+// SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 
 type pcATDriver struct {
-	//driver     Driver
-	//vmName     string
 	send        SendCodeFunc
 	specialMap  map[string][]string
 	scancodeMap map[rune]byte
 }
 
 func NewPCATDriver(send SendCodeFunc) *pcATDriver {
-	// sMap contains on/off tuples
+	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+	//
+	// Scancodes are recorded here in pairs. The first entry represents
+	// the key press and the second entry represents the key release and is
+	// derived from the first by the addition of 0x80.
 	sMap := make(map[string][]string)
 	sMap["bs"] = []string{"0e", "8e"}
 	sMap["del"] = []string{"e053", "e0d3"}

@@ -185,10 +185,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Commands: b.config.Prlctl,
 			Ctx:      b.config.ctx,
 		},
-		&parallelscommon.StepRun{
-			BootWait: b.config.BootWait,
-		},
+		&parallelscommon.StepRun{},
 		&parallelscommon.StepTypeBootCommand{
+			BootWait:       b.config.BootWait,
 			BootCommand:    b.config.BootCommand,
 			HostInterfaces: b.config.HostInterfaces,
 			VMName:         b.config.VMName,
