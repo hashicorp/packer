@@ -24,11 +24,11 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/Sirupsen/logrus"
-	log "github.com/Sirupsen/logrus"
 	"github.com/mattn/go-isatty"
 	"github.com/moul/gotty-client"
 	"github.com/scaleway/scaleway-cli/pkg/sshcommand"
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // SpawnRedirection is used to redirects the fluxes

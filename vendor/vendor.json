@@ -234,12 +234,6 @@
 			"revisionTime": "2018-01-10T05:50:12Z"
 		},
 		{
-			"checksumSHA1": "8dVO3L8yAdQ17X3lAhIziyF3OFk=",
-			"path": "github.com/Sirupsen/logrus",
-			"revision": "10f801ebc38b33738c9d17d50860f484a0988ff5",
-			"revisionTime": "2017-03-17T14:32:14Z"
-		},
-		{
 			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
 			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
 			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
@@ -1075,10 +1069,10 @@
 			"revisionTime": "2016-02-22T16:21:17Z"
 		},
 		{
-			"checksumSHA1": "WcXDSYIAP73RAvy22iD57nE/peI=",
+			"checksumSHA1": "nlJWlZ8NlDeKDaXoSFq1UM56RCs=",
 			"path": "github.com/moul/gotty-client",
-			"revision": "99224eea3278d662fce9124bb2bf6c2bb39f5160",
-			"revisionTime": "2017-02-05T09:54:39Z"
+			"revision": "b26a57ebc215d2d68945184bb7e88886dfd9c66c",
+			"revisionTime": "2018-03-27T18:02:12Z"
 		},
 		{
 			"checksumSHA1": "gcLub3oB+u4QrOJZcYmk/y2AP4k=",
@@ -1184,22 +1178,28 @@
 			"revisionTime": "2017-03-21T23:07:31Z"
 		},
 		{
-			"checksumSHA1": "FFhSGe3Y3J1laR/6rwSS7U2esrk=",
+			"checksumSHA1": "UvMjUbtTEF0wskLTpV8grtBUh7Q=",
 			"path": "github.com/scaleway/scaleway-cli/pkg/api",
-			"revision": "e50cb485747a4f25a361c90ef3ba05be79944c56",
-			"revisionTime": "2017-04-03T16:01:47Z"
+			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
+			"revisionTime": "2018-03-05T22:44:21Z"
 		},
 		{
 			"checksumSHA1": "kveaAmNlnvmIIuEkFcMlB+N7TqY=",
 			"path": "github.com/scaleway/scaleway-cli/pkg/sshcommand",
-			"revision": "e50cb485747a4f25a361c90ef3ba05be79944c56",
-			"revisionTime": "2017-04-03T16:01:47Z"
+			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
+			"revisionTime": "2018-03-05T22:44:21Z"
 		},
 		{
-			"checksumSHA1": "xM3G5ct9YYYnVIL3XMRrcf41xVw=",
+			"checksumSHA1": "elO1R+B5Ym3ZNA5Zht4cIE/8b0c=",
 			"path": "github.com/scaleway/scaleway-cli/pkg/utils",
-			"revision": "e50cb485747a4f25a361c90ef3ba05be79944c56",
-			"revisionTime": "2017-04-03T16:01:47Z"
+			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
+			"revisionTime": "2018-03-05T22:44:21Z"
+		},
+		{
+			"checksumSHA1": "ByFN6xh/YGP/D3DM9c8p0D9D1XM=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "90150a8ed11b6ce285e77e8af2b0109559ce4777",
+			"revisionTime": "2018-03-15T01:07:03Z"
 		},
 		{
 			"checksumSHA1": "iydUphwYqZRq3WhstEdGsbvBAKs=",
@@ -1354,10 +1354,10 @@
 			"revisionTime": "2017-02-08T20:51:15Z"
 		},
 		{
-			"checksumSHA1": "xiderUuvye8Kpn7yX3niiJg32bE=",
+			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
 			"path": "golang.org/x/crypto/ssh/terminal",
-			"revision": "c2303dcbe84172e0c0da4c9f083eeca54c06f298",
-			"revisionTime": "2017-01-17T19:20:27Z"
+			"revision": "88942b9c40a4c9d203b82b3731787b672d6e809b",
+			"revisionTime": "2018-03-21T23:38:19Z"
 		},
 		{
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
@@ -1427,10 +1427,16 @@
 			"revisionTime": "2017-03-17T17:13:11Z"
 		},
 		{
-			"checksumSHA1": "NzQ3QYllWwK+3GZliu11jMU6xwo=",
+			"checksumSHA1": "HUsOCUBC1i9oPZo0VvmawbuhGa4=",
 			"path": "golang.org/x/sys/unix",
-			"revision": "c84c1ab9fd18cdd4c23dd021c10f5f46dea95e46",
-			"revisionTime": "2017-08-11T22:05:22Z"
+			"revision": "13d03a9a82fba647c21a0ef8fba44a795d0f0835",
+			"revisionTime": "2018-03-26T12:16:02Z"
+		},
+		{
+			"checksumSHA1": "Dfz4tGItokMvHZENCsBmPPB8FGQ=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "13d03a9a82fba647c21a0ef8fba44a795d0f0835",
+			"revisionTime": "2018-03-26T12:16:02Z"
 		},
 		{
 			"checksumSHA1": "Mr4ur60bgQJnQFfJY0dGtwWwMPE=",
