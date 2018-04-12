@@ -24,7 +24,7 @@ TODO:
 type KeyAction int
 
 const (
-	KeyOn KeyAction = iota
+	KeyOn KeyAction = 1 << iota
 	KeyOff
 	KeyPress
 )
