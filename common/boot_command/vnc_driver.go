@@ -9,20 +9,23 @@ import (
 	"unicode"
 
 	"github.com/hashicorp/packer/common"
-	vnc "github.com/mitchellh/go-vnc"
 )
 
 const KeyLeftShift uint32 = 0xFFE1
 
+type VNCKeyEvent interface {
+	KeyEvent(uint32, bool) error
+}
+
 type vncDriver struct {
-	c          *vnc.ClientConn
+	c          VNCKeyEvent
 	interval   time.Duration
 	specialMap map[string]uint32
 	// keyEvent can set this error which will prevent it from continuing
 	err error
 }
 
-func NewVNCDriver(c *vnc.ClientConn) *vncDriver {
+func NewVNCDriver(c VNCKeyEvent) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
@@ -58,16 +61,16 @@ func NewVNCDriver(c *vnc.ClientConn) *vncDriver {
 	sMap["insert"] = 0xFF63
 	sMap["home"] = 0xFF50
 	sMap["end"] = 0xFF57
-	sMap["pageUp"] = 0xFF55
-	sMap["pageDown"] = 0xFF56
-	sMap["leftAlt"] = 0xFFE9
-	sMap["leftCtrl"] = 0xFFE3
-	sMap["leftShift"] = 0xFFE1
-	sMap["rightAlt"] = 0xFFEA
-	sMap["rightCtrl"] = 0xFFE4
-	sMap["rightShift"] = 0xFFE2
-	sMap["leftSuper"] = 0xFFEB
-	sMap["rightSuper"] = 0xFFEC
+	sMap["pageup"] = 0xFF55
+	sMap["pagedown"] = 0xFF56
+	sMap["leftalt"] = 0xFFE9
+	sMap["leftctrl"] = 0xFFE3
+	sMap["leftshift"] = 0xFFE1
+	sMap["leftsuper"] = 0xFFEB
+	sMap["rightalt"] = 0xFFEA
+	sMap["rightctrl"] = 0xFFE4
+	sMap["rightshift"] = 0xFFE2
+	sMap["rightsuper"] = 0xFFEC
 
 	return &vncDriver{
 		c:          c,
