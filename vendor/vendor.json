@@ -596,10 +596,13 @@
 			"revisionTime": "2018-02-10T03:43:46Z"
 		},
 		{
-			"checksumSHA1": "Lf3uUXTkKK5DJ37BxQvxO1Fq+K8=",
+			"checksumSHA1": "/5cvgU+J4l7EhMXTK76KaCAfOuU=",
 			"comment": "v1.0.0-3-g6d21280",
 			"path": "github.com/davecgh/go-spew/spew",
-			"revision": "6d212800a42e8ab5c146b8ace3490ee17e5225f9"
+			"revision": "346938d642f2ec3594ed81d874461961cd0faa76",
+			"revisionTime": "2016-10-29T20:57:26Z",
+			"version": "v1.1.0",
+			"versionExact": "v1.1.0"
 		},
 		{
 			"checksumSHA1": "5k4kiVJsn0CilLDx+gMjglXY6vs=",
@@ -1202,11 +1205,21 @@
 			"revisionTime": "2018-03-15T01:07:03Z"
 		},
 		{
-			"checksumSHA1": "iydUphwYqZRq3WhstEdGsbvBAKs=",
+			"checksumSHA1": "xqtDGN726+wHn43myII/VQ4vQn8=",
+			"path": "github.com/stretchr/objx",
+			"revision": "facf9a85c22f48d2f52f2380e4efce1768749a89",
+			"revisionTime": "2018-01-06T01:13:53Z",
+			"version": "v0.1",
+			"versionExact": "v0.1"
+		},
+		{
+			"checksumSHA1": "pbq5LYckA7/rqe03l9MtXDekmRg=",
 			"comment": "v1.1.4-4-g976c720",
 			"path": "github.com/stretchr/testify/assert",
-			"revision": "d77da356e56a7428ad25149ca77381849a6a5232",
-			"revisionTime": "2016-06-15T09:26:46Z"
+			"revision": "12b6f73e6084dad08a7c6e575284b177ecafbc71",
+			"revisionTime": "2018-01-31T22:23:50Z",
+			"version": "v1.2.1",
+			"versionExact": "v1.2.1"
 		},
 		{
 			"checksumSHA1": "GQ9bu6PuydK3Yor1JgtVKUfEJm8=",

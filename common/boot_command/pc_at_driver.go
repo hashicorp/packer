@@ -8,21 +8,19 @@ import (
 	"unicode/utf8"
 )
 
-// This driver executes the driver once for each character code. This seems
-// fine for now, but changes the prior behavior. If this becomes a problem, we
-// can always have the driver cache scancodes, and then add a `Flush` method
-// which we can call after this.
-
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 
 type pcATDriver struct {
-	send        SendCodeFunc
+	sendImpl    SendCodeFunc
 	specialMap  map[string][]string
 	scancodeMap map[rune]byte
+	buffer      [][]string
+	// TODO: set from env
+	scancodeChunkSize int
 }
 
-func NewPCATDriver(send SendCodeFunc) *pcATDriver {
+func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	//
 	// Scancodes are recorded here in pairs. The first entry represents
@@ -89,10 +87,28 @@ func NewPCATDriver(send SendCodeFunc) *pcATDriver {
 	}
 
 	return &pcATDriver{
-		send:        send,
-		specialMap:  sMap,
-		scancodeMap: scancodeMap,
+		sendImpl:          send,
+		specialMap:        sMap,
+		scancodeMap:       scancodeMap,
+		scancodeChunkSize: chunkSize,
 	}
+}
+
+// Finalize flushes all scanecodes.
+func (d *pcATDriver) Finalize() error {
+	defer func() {
+		d.buffer = nil
+	}()
+	sc, err := chunkScanCodes(d.buffer, d.scancodeChunkSize)
+	if err != nil {
+		return err
+	}
+	for _, b := range sc {
+		if err := d.sendImpl(b); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *pcATDriver) SendKey(key rune, action KeyAction) error {
@@ -121,10 +137,11 @@ func (d *pcATDriver) SendKey(key rune, action KeyAction) error {
 		log.Printf("Sending char '%c', code '%s', shift %v", key, sc, keyShift)
 	}
 
-	return d.send(scancode)
+	d.send(scancode)
+	return nil
 }
 
-func (d *pcATDriver) SendSpecial(special string, action KeyAction) (err error) {
+func (d *pcATDriver) SendSpecial(special string, action KeyAction) error {
 	keyCode, ok := d.specialMap[special]
 	if !ok {
 		return fmt.Errorf("special %s not found.", special)
@@ -132,11 +149,35 @@ func (d *pcATDriver) SendSpecial(special string, action KeyAction) (err error) {
 
 	switch action {
 	case KeyOn:
-		err = d.send([]string{keyCode[0]})
+		d.send([]string{keyCode[0]})
 	case KeyOff:
-		err = d.send([]string{keyCode[1]})
+		d.send([]string{keyCode[1]})
 	case KeyPress:
-		err = d.send(keyCode)
+		d.send(keyCode)
+	}
+	return nil
+}
+
+func (d *pcATDriver) send(codes []string) {
+	d.buffer = append(d.buffer, codes)
+}
+
+func chunkScanCodes(sc [][]string, size int) (out [][]string, err error) {
+	var running []string
+	for _, codes := range sc {
+		if size > 0 {
+			if len(codes) > size {
+				return nil, fmt.Errorf("chunkScanCodes: size cannot be smaller than sc width.")
+			}
+			if len(running)+len(codes) > size {
+				out = append(out, running)
+				running = nil
+			}
+		}
+		running = append(running, codes...)
+	}
+	if running != nil {
+		out = append(out, running)
 	}
 	return
 }

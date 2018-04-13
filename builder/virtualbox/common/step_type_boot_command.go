@@ -64,7 +64,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 		return driver.VBoxManage(args...)
 	}
-	d := bootcommand.NewPCATDriver(sendCodes)
+	d := bootcommand.NewPCATDriver(sendCodes, 20)
 
 	ui.Say("Typing the boot command...")
 	for i, command := range s.BootCommand {

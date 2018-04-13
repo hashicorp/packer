@@ -15,6 +15,8 @@ TODO:
 	* comments
 	* lower-case specials
 	* check that `<del>` works on parallels. It's different now.
+	* take `Finalize` out of the Driver interface. let builders that need it
+		* use it. also rename to `Flush`.
 */
 
 // KeysAction represents what we want to do with a key press.
@@ -63,7 +65,7 @@ func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 			return err
 		}
 	}
-	return nil
+	return b.Finalize()
 }
 
 // GenerateExpressionSequence generates a sequence of expressions from the
