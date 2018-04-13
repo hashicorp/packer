@@ -51,7 +51,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	vncPort := state.Get("vnc_port").(uint)
 	vncPassword := state.Get("vnc_password")
 
-	// ----------------
 	// Wait the for the vm to boot.
 	if int64(s.BootWait) > 0 {
 		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.BootWait.String()))
@@ -62,7 +61,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 	}
-	// ----------------
 
 	var pauseFn multistep.DebugPauseFn
 	if debug {
