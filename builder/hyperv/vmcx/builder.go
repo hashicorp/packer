@@ -434,12 +434,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchVlanId: b.config.SwitchVlanId,
 		},
 
-		&hypervcommon.StepRun{
-			BootWait: b.config.BootWait,
-		},
+		&hypervcommon.StepRun{},
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand: b.config.BootCommand,
+			BootWait:    b.config.BootWait,
 			SwitchName:  b.config.SwitchName,
 			Ctx:         b.config.ctx,
 		},
