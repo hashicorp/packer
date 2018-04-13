@@ -10,8 +10,6 @@ import (
 
 /*
 TODO:
-	* tests
-		* fix vbox tests
 	* pc-at abstraction
 		* check that `<del>` works. It's different now.
 		* parallels
