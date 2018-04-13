@@ -29,10 +29,11 @@ CharToggle = ExprStart lit:(Literal) t:(On / Off) ExprEnd {
 }
 
 Special = ExprStart s:(SpecialKey) t:(On / Off)? ExprEnd {
+    l := strings.ToLower(string(s.([]byte)))
     if t == nil {
-        return &specialExpression{string(s.([]byte)), KeyPress}, nil
+        return &specialExpression{l, KeyPress}, nil
     }
-    return &specialExpression{string(s.([]byte)), t.(KeyAction)}, nil
+    return &specialExpression{l, t.(KeyAction)}, nil
 }
 
 Number = '-'? Integer ( '.' Digit+ )? {
