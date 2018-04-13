@@ -11,8 +11,7 @@ import (
 /*
 TODO:
 	* tests
-	  * fix vbox tests
-	* comments
+		* fix vbox tests
 	* lower-case specials
 	* pc-at abstraction
 		* check that `<del>` works. It's different now.
@@ -33,15 +32,6 @@ const (
 	KeyPress
 )
 
-func onOffToAction(t string) KeyAction {
-	if strings.EqualFold(t, "on") {
-		return KeyOn
-	} else if strings.EqualFold(t, "off") {
-		return KeyOff
-	}
-	panic(fmt.Sprintf("Unknown state '%s'. Expecting On or Off.", t))
-}
-
 func (k KeyAction) String() string {
 	switch k {
 	case KeyOn:
@@ -60,6 +50,7 @@ type expression interface {
 
 type expressionSequence []expression
 
+// Do executes every expression in the sequence and then finalizes the driver.
 func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 	for _, exp := range s {
 		if err := exp.Do(ctx, b); err != nil {
@@ -70,7 +61,7 @@ func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 }
 
 // GenerateExpressionSequence generates a sequence of expressions from the
-// given command.
+// given command. This is the primary entry point to the boot command parser.
 func GenerateExpressionSequence(command string) (expressionSequence, error) {
 	got, err := ParseReader("", strings.NewReader(command))
 	if err != nil {
@@ -90,6 +81,8 @@ type waitExpression struct {
 	d time.Duration
 }
 
+// Do waits the amount of time described by the expression. It is cancellable
+// through the context.
 func (w *waitExpression) Do(ctx context.Context, _ BCDriver) error {
 	log.Printf("[INFO] Waiting %s", w.d)
 	select {
@@ -109,6 +102,7 @@ type specialExpression struct {
 	action KeyAction
 }
 
+// Do sends the special command to the driver, along with the key action.
 func (s *specialExpression) Do(ctx context.Context, driver BCDriver) error {
 	return driver.SendSpecial(s.s, s.action)
 }
@@ -122,6 +116,7 @@ type literal struct {
 	action KeyAction
 }
 
+// Do sends the key to the driver, along with the key action.
 func (l *literal) Do(ctx context.Context, driver BCDriver) error {
 	return driver.SendKey(l.s, l.action)
 }
