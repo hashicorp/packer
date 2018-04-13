@@ -67,16 +67,16 @@ func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 	sMap["insert"] = []string{"e052", "e0d2"}
 	sMap["home"] = []string{"e047", "e0c7"}
 	sMap["end"] = []string{"e04f", "e0cf"}
-	sMap["pageUp"] = []string{"e049", "e0c9"}
-	sMap["pageDown"] = []string{"e051", "e0d1"}
-	sMap["leftAlt"] = []string{"38", "b8"}
-	sMap["leftCtrl"] = []string{"1d", "9d"}
-	sMap["leftShift"] = []string{"2a", "aa"}
-	sMap["rightAlt"] = []string{"e038", "e0b8"}
-	sMap["rightCtrl"] = []string{"e01d", "e09d"}
-	sMap["rightShift"] = []string{"36", "b6"}
-	sMap["leftSuper"] = []string{"e05b", "e0db"}
-	sMap["rightSuper"] = []string{"e05c", "e0dc"}
+	sMap["pageup"] = []string{"e049", "e0c9"}
+	sMap["pagedown"] = []string{"e051", "e0d1"}
+	sMap["leftalt"] = []string{"38", "b8"}
+	sMap["leftctrl"] = []string{"1d", "9d"}
+	sMap["leftshift"] = []string{"2a", "aa"}
+	sMap["rightalt"] = []string{"e038", "e0b8"}
+	sMap["rightctrl"] = []string{"e01d", "e09d"}
+	sMap["rightshift"] = []string{"36", "b6"}
+	sMap["leftsuper"] = []string{"e05b", "e0db"}
+	sMap["rightsuper"] = []string{"e05c", "e0dc"}
 
 	scancodeIndex := make(map[string]byte)
 	scancodeIndex["1234567890-="] = 0x02

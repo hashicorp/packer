@@ -12,7 +12,6 @@ import (
 TODO:
 	* tests
 		* fix vbox tests
-	* lower-case specials
 	* pc-at abstraction
 		* check that `<del>` works. It's different now.
 		* parallels

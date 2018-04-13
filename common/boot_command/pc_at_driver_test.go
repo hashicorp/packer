@@ -1,7 +1,11 @@
 package bootcommand
 
-import "testing"
-import "github.com/stretchr/testify/assert"
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_chunkScanCodes(t *testing.T) {
 
@@ -65,4 +69,20 @@ func Test_chunkScanCodeError(t *testing.T) {
 
 	_, err := chunkScanCodes(in, 2)
 	assert.Error(t, err)
+}
+
+func Test_pcatSpecialLookup(t *testing.T) {
+	in := "<rightShift><rightshiftoff><RIGHTSHIFTON>"
+	expected := []string{"36", "b6", "b6", "36"}
+	var codes []string
+	sendCodes := func(c []string) error {
+		codes = c
+		return nil
+	}
+	d := NewPCATDriver(sendCodes, -1)
+	seq, err := GenerateExpressionSequence(in)
+	assert.NoError(t, err)
+	err = seq.Do(context.Background(), d)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, codes)
 }
