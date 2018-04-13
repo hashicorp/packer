@@ -3,15 +3,20 @@ package bootcommand
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/hashicorp/packer/common"
 )
 
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 
 type pcATDriver struct {
+	interval    time.Duration
 	sendImpl    SendCodeFunc
 	specialMap  map[string][]string
 	scancodeMap map[rune]byte
@@ -21,6 +26,12 @@ type pcATDriver struct {
 }
 
 func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
+	// We delay (default 100ms) between each input event to allow for CPU or
+	// network latency. See PackerKeyEnv for tuning.
+	keyInterval := common.PackerKeyDefault
+	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
+		keyInterval = delay
+	}
 	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	//
 	// Scancodes are recorded here in pairs. The first entry represents
@@ -87,6 +98,7 @@ func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 	}
 
 	return &pcATDriver{
+		interval:          keyInterval,
 		sendImpl:          send,
 		specialMap:        sMap,
 		scancodeMap:       scancodeMap,
@@ -107,6 +119,7 @@ func (d *pcATDriver) Finalize() error {
 		if err := d.sendImpl(b); err != nil {
 			return err
 		}
+		time.Sleep(d.interval)
 	}
 	return nil
 }
