@@ -129,10 +129,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			return multistep.ActionHalt
 		}
 
-		if pauseFn != nil {
-			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
-		}
-
 		seq, err := bootcommand.GenerateExpressionSequence(command)
 		if err != nil {
 			err := fmt.Errorf("Error generating boot command: %s", err)
@@ -147,6 +143,11 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+
+		if pauseFn != nil {
+			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
+		}
+
 	}
 
 	return multistep.ActionContinue
