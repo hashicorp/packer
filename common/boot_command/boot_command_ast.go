@@ -15,8 +15,6 @@ TODO:
 	* comments
 	* lower-case specials
 	* check that `<del>` works on parallels. It's different now.
-	* take `Finalize` out of the Driver interface. let builders that need it
-		* use it. also rename to `Flush`.
 */
 
 // KeysAction represents what we want to do with a key press.

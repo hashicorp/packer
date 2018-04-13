@@ -25,6 +25,9 @@ type pcATDriver struct {
 	scancodeChunkSize int
 }
 
+// NewPCATDriver creates a new boot command driver for VMs that expect PC-AT
+// keyboard codes. `send` should send its argument to the VM. `chunkSize` should
+// be the maximum number of keyboard codes to send to `send` at one time.
 func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 	// We delay (default 100ms) between each input event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
