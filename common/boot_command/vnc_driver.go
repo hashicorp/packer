@@ -14,7 +14,7 @@ import (
 
 const KeyLeftShift uint32 = 0xFFE1
 
-type bcDriver struct {
+type vncDriver struct {
 	c          *vnc.ClientConn
 	interval   time.Duration
 	specialMap map[string]uint32
@@ -22,7 +22,7 @@ type bcDriver struct {
 	err error
 }
 
-func NewVNCDriver(c *vnc.ClientConn) *bcDriver {
+func NewVNCDriver(c *vnc.ClientConn) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
@@ -69,14 +69,14 @@ func NewVNCDriver(c *vnc.ClientConn) *bcDriver {
 	sMap["leftSuper"] = 0xFFEB
 	sMap["rightSuper"] = 0xFFEC
 
-	return &bcDriver{
+	return &vncDriver{
 		c:          c,
 		interval:   keyInterval,
 		specialMap: sMap,
 	}
 }
 
-func (d *bcDriver) keyEvent(k uint32, down bool) error {
+func (d *vncDriver) keyEvent(k uint32, down bool) error {
 	if d.err != nil {
 		return nil
 	}
@@ -88,7 +88,12 @@ func (d *bcDriver) keyEvent(k uint32, down bool) error {
 	return nil
 }
 
-func (d *bcDriver) SendKey(key rune, action KeyAction) error {
+// Finalize does nothing here
+func (d *vncDriver) Finalize() error {
+	return nil
+}
+
+func (d *vncDriver) SendKey(key rune, action KeyAction) error {
 	keyShift := unicode.IsUpper(key) || strings.ContainsRune(shiftedChars, key)
 	keyCode := uint32(key)
 	log.Printf("Sending char '%c', code 0x%X, shift %v", key, keyCode, keyShift)
@@ -117,7 +122,7 @@ func (d *bcDriver) SendKey(key rune, action KeyAction) error {
 	return d.err
 }
 
-func (d *bcDriver) SendSpecial(special string, action KeyAction) error {
+func (d *vncDriver) SendSpecial(special string, action KeyAction) error {
 	keyCode, ok := d.specialMap[special]
 	if !ok {
 		return fmt.Errorf("special %s not found.", special)
