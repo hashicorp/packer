@@ -174,6 +174,7 @@ func (d *pcATDriver) SendSpecial(special string, action KeyAction) error {
 	return nil
 }
 
+// send stores the codes in an internal buffer. Use finalize to flush them.
 func (d *pcATDriver) send(codes []string) {
 	d.buffer = append(d.buffer, codes)
 }
