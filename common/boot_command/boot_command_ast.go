@@ -14,7 +14,10 @@ TODO:
 	  * fix vbox tests
 	* comments
 	* lower-case specials
-	* check that `<del>` works on parallels. It's different now.
+	* pc-at abstraction
+		* check that `<del>` works. It's different now.
+		* parallels
+		* hyperv-
 */
 
 // KeysAction represents what we want to do with a key press.
