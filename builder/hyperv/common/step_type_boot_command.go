@@ -84,7 +84,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		scanCodesToSendString := strings.Join(codes, " ")
 		return driver.TypeScanCodes(vmName, scanCodesToSendString)
 	}
-	d := bootcommand.NewPCATDriver(sendCodes, -1)
+	d := bootcommand.NewPCXTDriver(sendCodes, -1)
 
 	flatCommands := strings.Join(commands, "")
 	seq, err := bootcommand.GenerateExpressionSequence(flatCommands)
