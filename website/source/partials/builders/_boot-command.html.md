@@ -61,7 +61,7 @@ available variables are:
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
     blank!
-*   `Name` - The name of the VM.
+-   `Name` - The name of the VM.
 
 For more examples of various boot commands, see the sample projects from our
 [community templates page](/community-tools.html#templates).
