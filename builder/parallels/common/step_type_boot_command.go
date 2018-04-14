@@ -81,7 +81,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		log.Printf("Sending scancodes: %#v", codes)
 		return driver.SendKeyScanCodes(s.VMName, codes...)
 	}
-	d := bootcommand.NewPCATDriver(sendCodes, -1)
+	d := bootcommand.NewPCXTDriver(sendCodes, -1)
 
 	ui.Say("Typing the boot command...")
 	for i, command := range s.BootCommand {

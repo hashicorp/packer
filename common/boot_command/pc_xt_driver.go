@@ -15,7 +15,7 @@ import (
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 
-type pcATDriver struct {
+type pcXTDriver struct {
 	interval    time.Duration
 	sendImpl    SendCodeFunc
 	specialMap  map[string][]string
@@ -25,17 +25,18 @@ type pcATDriver struct {
 	scancodeChunkSize int
 }
 
-// NewPCATDriver creates a new boot command driver for VMs that expect PC-AT
+// NewPCXTDriver creates a new boot command driver for VMs that expect PC-XT
 // keyboard codes. `send` should send its argument to the VM. `chunkSize` should
 // be the maximum number of keyboard codes to send to `send` at one time.
-func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
+func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	// We delay (default 100ms) between each input event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
 	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
 		keyInterval = delay
 	}
-	// Scancodes reference: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+	// Scancodes reference: https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+	//						https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
 	//
 	// Scancodes are recorded here in pairs. The first entry represents
 	// the key press and the second entry represents the key release and is
@@ -100,7 +101,7 @@ func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 		}
 	}
 
-	return &pcATDriver{
+	return &pcXTDriver{
 		interval:          keyInterval,
 		sendImpl:          send,
 		specialMap:        sMap,
@@ -110,7 +111,7 @@ func NewPCATDriver(send SendCodeFunc, chunkSize int) *pcATDriver {
 }
 
 // Finalize flushes all scanecodes.
-func (d *pcATDriver) Finalize() error {
+func (d *pcXTDriver) Finalize() error {
 	defer func() {
 		d.buffer = nil
 	}()
@@ -127,7 +128,7 @@ func (d *pcATDriver) Finalize() error {
 	return nil
 }
 
-func (d *pcATDriver) SendKey(key rune, action KeyAction) error {
+func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {
 
 	keyShift := unicode.IsUpper(key) || strings.ContainsRune(shiftedChars, key)
 
@@ -157,7 +158,7 @@ func (d *pcATDriver) SendKey(key rune, action KeyAction) error {
 	return nil
 }
 
-func (d *pcATDriver) SendSpecial(special string, action KeyAction) error {
+func (d *pcXTDriver) SendSpecial(special string, action KeyAction) error {
 	keyCode, ok := d.specialMap[special]
 	if !ok {
 		return fmt.Errorf("special %s not found.", special)
@@ -175,7 +176,7 @@ func (d *pcATDriver) SendSpecial(special string, action KeyAction) error {
 }
 
 // send stores the codes in an internal buffer. Use finalize to flush them.
-func (d *pcATDriver) send(codes []string) {
+func (d *pcXTDriver) send(codes []string) {
 	d.buffer = append(d.buffer, codes)
 }
 
