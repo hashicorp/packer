@@ -50,6 +50,9 @@ type expressionSequence []expression
 // Do executes every expression in the sequence and then finalizes the driver.
 func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 	for _, exp := range s {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if err := exp.Do(ctx, b); err != nil {
 			return err
 		}
