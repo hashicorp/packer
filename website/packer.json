@@ -9,7 +9,7 @@
   "builders": [
     {
       "type": "docker",
-      "image": "hashicorp/middleman-hashicorp:0.3.32",
+      "image": "hashicorp/middleman-hashicorp:0.3.34",
       "discard": "true",
       "volumes": {
         "{{ pwd }}": "/website"
