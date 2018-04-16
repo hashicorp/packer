@@ -312,7 +312,7 @@ default port of `5985` or whatever value you have the service set to listen on.
 
 -   `use_default_display` (boolean) - If true, do not pass a `-display` option
     to qemu, allowing it to choose the default. This may be needed when running
-    under OS X.
+    under OS X, and getting errors about `sdl` not being available.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
