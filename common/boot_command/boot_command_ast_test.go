@@ -99,3 +99,18 @@ func Test_special(t *testing.T) {
 		}
 	}
 }
+
+func Test_negativeWait(t *testing.T) {
+	in := "<wait-1m>"
+	_, err := ParseReader("", strings.NewReader(in))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	/*
+		gL := toIfaceSlice(got)
+		for _, g := range gL {
+			assert.Equal(t, tt.out, g.(*specialExpression).String())
+		}
+	*/
+}
