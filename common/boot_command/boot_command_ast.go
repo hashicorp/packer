@@ -84,6 +84,12 @@ type waitExpression struct {
 // Do waits the amount of time described by the expression. It is cancellable
 // through the context.
 func (w *waitExpression) Do(ctx context.Context, _ BCDriver) error {
+	/*
+		// do I want this to not parse or to error?
+			if w.d < 0 {
+				panic("Was not expecting negative wait duration.")
+			}
+	*/
 	log.Printf("[INFO] Waiting %s", w.d)
 	select {
 	case <-time.After(w.d):
