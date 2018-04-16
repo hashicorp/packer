@@ -76,7 +76,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&parallelscommon.StepRun{},
 		&parallelscommon.StepTypeBootCommand{
-			BootCommand:    b.config.BootCommand,
+			BootCommand:    b.config.FlatBootCommand(),
 			BootWait:       b.config.BootWait,
 			HostInterfaces: []string{},
 			VMName:         b.config.VMName,

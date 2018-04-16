@@ -6,6 +6,7 @@ import (
 
 	parallelscommon "github.com/hashicorp/packer/builder/parallels/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/boot_command"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -19,15 +20,14 @@ type Config struct {
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
-	parallelscommon.RunConfig           `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
+	bootcommand.Config                  `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
-	BootCommand []string `mapstructure:"boot_command"`
-	SourcePath  string   `mapstructure:"source_path"`
-	VMName      string   `mapstructure:"vm_name"`
-	ReassignMAC bool     `mapstructure:"reassign_mac"`
+	SourcePath  string `mapstructure:"source_path"`
+	VMName      string `mapstructure:"vm_name"`
+	ReassignMAC bool   `mapstructure:"reassign_mac"`
 
 	ctx interpolate.Context
 }
@@ -61,7 +61,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.RunConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
