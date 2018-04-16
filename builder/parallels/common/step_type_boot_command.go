@@ -22,7 +22,7 @@ type bootCommandTemplateData struct {
 // StepTypeBootCommand is a step that "types" the boot command into the VM via
 // the prltype script, built on the Parallels Virtualization SDK - Python API.
 type StepTypeBootCommand struct {
-	BootCommand    []string
+	BootCommand    string
 	BootWait       time.Duration
 	HostInterfaces []string
 	VMName         string
@@ -84,33 +84,31 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	d := bootcommand.NewPCXTDriver(sendCodes, -1)
 
 	ui.Say("Typing the boot command...")
-	for i, command := range s.BootCommand {
-		command, err := interpolate.Render(command, &s.Ctx)
-		if err != nil {
-			err = fmt.Errorf("Error preparing boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
+	if err != nil {
+		err = fmt.Errorf("Error preparing boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		seq, err := bootcommand.GenerateExpressionSequence(command)
-		if err != nil {
-			err := fmt.Errorf("Error generating boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	seq, err := bootcommand.GenerateExpressionSequence(command)
+	if err != nil {
+		err := fmt.Errorf("Error generating boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		if err := seq.Do(ctx, d); err != nil {
-			err := fmt.Errorf("Error running boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	if err := seq.Do(ctx, d); err != nil {
+		err := fmt.Errorf("Error running boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		if pauseFn != nil {
-			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
-		}
+	if pauseFn != nil {
+		pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command: %s", command), state)
 	}
 
 	return multistep.ActionContinue
