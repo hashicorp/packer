@@ -36,8 +36,8 @@ command, they will be replaced by the proper key:
     for the UI to update before typing more.
 
 -   `<waitXX>` - Add an arbitrary pause before sending any additional keys. The
-    format of `XX` is a possibly signed sequence of decimal numbers, each with
-    optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`.
+    format of `XX` is a sequence of positive decimal numbers, each with
+    optional fraction and a unit suffix, such as `300ms`, `1.5h` or `2h45m`.
     Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`. For example
     `<wait10m>` or `<wait1m20s>`
 
