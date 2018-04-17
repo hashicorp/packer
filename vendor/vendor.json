@@ -234,12 +234,6 @@
 			"revisionTime": "2018-01-10T05:50:12Z"
 		},
 		{
-			"checksumSHA1": "2PBDgrQHH6ZDxBWs6Z4imBzdEjk=",
-			"path": "github.com/Sirupsen/logrus",
-			"revision": "90150a8ed11b6ce285e77e8af2b0109559ce4777",
-			"revisionTime": "2018-03-15T01:07:03Z"
-		},
-		{
 			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
 			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
 			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
@@ -1200,6 +1194,12 @@
 			"path": "github.com/scaleway/scaleway-cli/pkg/utils",
 			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
 			"revisionTime": "2018-03-05T22:44:21Z"
+		},
+		{
+			"checksumSHA1": "hU3ibLi5mZBayj0HPIVpcMSvRgU=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "90150a8ed11b6ce285e77e8af2b0109559ce4777",
+			"revisionTime": "2018-03-15T01:07:03Z"
 		},
 		{
 			"checksumSHA1": "iydUphwYqZRq3WhstEdGsbvBAKs=",
