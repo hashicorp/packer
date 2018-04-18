@@ -101,7 +101,9 @@ Optional parameters:
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the location of a temp file containing the list of
-    `environment_vars`, if configured.
+    `environment_vars`. The value of both `Path` and `Vars` can be
+    manually configured by setting the values for `remote_path` and
+    `remote_env_var_path` respectively.
 
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
