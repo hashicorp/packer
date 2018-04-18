@@ -37,6 +37,8 @@ func NewVNCDriver(c VNCKeyEvent) *vncDriver {
 	sMap := make(map[string]uint32)
 	sMap["bs"] = 0xFF08
 	sMap["del"] = 0xFFFF
+	sMap["down"] = 0xFF54
+	sMap["end"] = 0xFF57
 	sMap["enter"] = 0xFF0D
 	sMap["esc"] = 0xFF1B
 	sMap["f1"] = 0xFFBE
@@ -51,26 +53,24 @@ func NewVNCDriver(c VNCKeyEvent) *vncDriver {
 	sMap["f10"] = 0xFFC7
 	sMap["f11"] = 0xFFC8
 	sMap["f12"] = 0xFFC9
-	sMap["return"] = 0xFF0D
-	sMap["tab"] = 0xFF09
-	sMap["up"] = 0xFF52
-	sMap["down"] = 0xFF54
-	sMap["left"] = 0xFF51
-	sMap["right"] = 0xFF53
-	sMap["spacebar"] = 0x020
-	sMap["insert"] = 0xFF63
 	sMap["home"] = 0xFF50
-	sMap["end"] = 0xFF57
-	sMap["pageup"] = 0xFF55
-	sMap["pagedown"] = 0xFF56
+	sMap["insert"] = 0xFF63
+	sMap["left"] = 0xFF51
 	sMap["leftalt"] = 0xFFE9
 	sMap["leftctrl"] = 0xFFE3
 	sMap["leftshift"] = 0xFFE1
 	sMap["leftsuper"] = 0xFFEB
+	sMap["pagedown"] = 0xFF56
+	sMap["pageup"] = 0xFF55
+	sMap["return"] = 0xFF0D
+	sMap["right"] = 0xFF53
 	sMap["rightalt"] = 0xFFEA
 	sMap["rightctrl"] = 0xFFE4
 	sMap["rightshift"] = 0xFFE2
 	sMap["rightsuper"] = 0xFFEC
+	sMap["spacebar"] = 0x020
+	sMap["tab"] = 0xFF09
+	sMap["up"] = 0xFF52
 
 	return &vncDriver{
 		c:          c,

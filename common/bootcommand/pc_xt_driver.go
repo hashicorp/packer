@@ -44,6 +44,8 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	sMap := make(map[string][]string)
 	sMap["bs"] = []string{"0e", "8e"}
 	sMap["del"] = []string{"e053", "e0d3"}
+	sMap["down"] = []string{"e050", "e0d0"}
+	sMap["end"] = []string{"e04f", "e0cf"}
 	sMap["enter"] = []string{"1c", "9c"}
 	sMap["esc"] = []string{"01", "81"}
 	sMap["f1"] = []string{"3b", "bb"}
@@ -58,26 +60,24 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	sMap["f10"] = []string{"44", "c4"}
 	sMap["f11"] = []string{"57", "d7"}
 	sMap["f12"] = []string{"58", "d8"}
-	sMap["return"] = []string{"1c", "9c"}
-	sMap["tab"] = []string{"0f", "8f"}
-	sMap["up"] = []string{"e048", "e0c8"}
-	sMap["down"] = []string{"e050", "e0d0"}
-	sMap["left"] = []string{"e04b", "e0cb"}
-	sMap["right"] = []string{"e04d", "e0cd"}
-	sMap["spacebar"] = []string{"39", "b9"}
-	sMap["insert"] = []string{"e052", "e0d2"}
 	sMap["home"] = []string{"e047", "e0c7"}
-	sMap["end"] = []string{"e04f", "e0cf"}
-	sMap["pageup"] = []string{"e049", "e0c9"}
-	sMap["pagedown"] = []string{"e051", "e0d1"}
+	sMap["insert"] = []string{"e052", "e0d2"}
+	sMap["left"] = []string{"e04b", "e0cb"}
 	sMap["leftalt"] = []string{"38", "b8"}
 	sMap["leftctrl"] = []string{"1d", "9d"}
 	sMap["leftshift"] = []string{"2a", "aa"}
+	sMap["leftsuper"] = []string{"e05b", "e0db"}
+	sMap["pagedown"] = []string{"e051", "e0d1"}
+	sMap["pageup"] = []string{"e049", "e0c9"}
+	sMap["return"] = []string{"1c", "9c"}
+	sMap["right"] = []string{"e04d", "e0cd"}
 	sMap["rightalt"] = []string{"e038", "e0b8"}
 	sMap["rightctrl"] = []string{"e01d", "e09d"}
 	sMap["rightshift"] = []string{"36", "b6"}
-	sMap["leftsuper"] = []string{"e05b", "e0db"}
 	sMap["rightsuper"] = []string{"e05c", "e0dc"}
+	sMap["spacebar"] = []string{"39", "b9"}
+	sMap["tab"] = []string{"0f", "8f"}
+	sMap["up"] = []string{"e048", "e0c8"}
 
 	scancodeIndex := make(map[string]byte)
 	scancodeIndex["1234567890-="] = 0x02
