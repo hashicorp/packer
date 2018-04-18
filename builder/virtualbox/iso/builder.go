@@ -8,6 +8,7 @@ import (
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -27,6 +28,7 @@ type Config struct {
 	common.HTTPConfig               `mapstructure:",squash"`
 	common.ISOConfig                `mapstructure:",squash"`
 	common.FloppyConfig             `mapstructure:",squash"`
+	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.ExportOpts           `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
@@ -37,21 +39,20 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	BootCommand            []string `mapstructure:"boot_command"`
-	DiskSize               uint     `mapstructure:"disk_size"`
-	GuestAdditionsMode     string   `mapstructure:"guest_additions_mode"`
-	GuestAdditionsPath     string   `mapstructure:"guest_additions_path"`
-	GuestAdditionsSHA256   string   `mapstructure:"guest_additions_sha256"`
-	GuestAdditionsURL      string   `mapstructure:"guest_additions_url"`
-	GuestOSType            string   `mapstructure:"guest_os_type"`
-	HardDriveDiscard       bool     `mapstructure:"hard_drive_discard"`
-	HardDriveInterface     string   `mapstructure:"hard_drive_interface"`
-	SATAPortCount          int      `mapstructure:"sata_port_count"`
-	HardDriveNonrotational bool     `mapstructure:"hard_drive_nonrotational"`
-	ISOInterface           string   `mapstructure:"iso_interface"`
-	KeepRegistered         bool     `mapstructure:"keep_registered"`
-	SkipExport             bool     `mapstructure:"skip_export"`
-	VMName                 string   `mapstructure:"vm_name"`
+	DiskSize               uint   `mapstructure:"disk_size"`
+	GuestAdditionsMode     string `mapstructure:"guest_additions_mode"`
+	GuestAdditionsPath     string `mapstructure:"guest_additions_path"`
+	GuestAdditionsSHA256   string `mapstructure:"guest_additions_sha256"`
+	GuestAdditionsURL      string `mapstructure:"guest_additions_url"`
+	GuestOSType            string `mapstructure:"guest_os_type"`
+	HardDriveDiscard       bool   `mapstructure:"hard_drive_discard"`
+	HardDriveInterface     string `mapstructure:"hard_drive_interface"`
+	SATAPortCount          int    `mapstructure:"sata_port_count"`
+	HardDriveNonrotational bool   `mapstructure:"hard_drive_nonrotational"`
+	ISOInterface           string `mapstructure:"iso_interface"`
+	KeepRegistered         bool   `mapstructure:"keep_registered"`
+	SkipExport             bool   `mapstructure:"skip_export"`
+	VMName                 string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
@@ -94,6 +95,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
@@ -244,7 +246,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vboxcommon.StepTypeBootCommand{
 			BootWait:    b.config.BootWait,
-			BootCommand: b.config.BootCommand,
+			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
