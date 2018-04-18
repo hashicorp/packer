@@ -22,7 +22,7 @@ type Config struct {
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
 	parallelscommon.SSHConfig           `mapstructure:",squash"`
 	parallelscommon.ShutdownConfig      `mapstructure:",squash"`
-	bootcommand.Config                  `mapstructure:",squash"`
+	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
 	SourcePath  string `mapstructure:"source_path"`
@@ -61,7 +61,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.PrlctlConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlPostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.PrlctlVersionConfig.Prepare(&c.ctx)...)
-	errs = packer.MultiErrorAppend(errs, c.Config.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.SSHConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ToolsConfig.Prepare(&c.ctx)...)
