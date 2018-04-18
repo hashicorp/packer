@@ -602,10 +602,10 @@
 			"revision": "6d212800a42e8ab5c146b8ace3490ee17e5225f9"
 		},
 		{
-			"checksumSHA1": "2+1TPdvFj4W1QS5drkFr+ibM3G0=",
+			"checksumSHA1": "5k4kiVJsn0CilLDx+gMjglXY6vs=",
 			"path": "github.com/denverdino/aliyungo/common",
-			"revision": "ec0e57291175fc9b06c62977f384756642285aab",
-			"revisionTime": "2017-11-27T16:20:29Z"
+			"revision": "ebad04655e0385f021ed264c89ef4b93958e7204",
+			"revisionTime": "2018-04-17T07:55:37Z"
 		},
 		{
 			"checksumSHA1": "y4Ay4E5HqT25sweC/Bl9/odNWaI=",
