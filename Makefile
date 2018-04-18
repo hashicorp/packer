@@ -74,8 +74,8 @@ fmt-examples:
 # source files.
 generate: deps ## Generate dynamically generated code
 	go generate .
-	gofmt -w common/boot_command/boot_command.go
-	goimports -w common/boot_command/boot_command.go
+	gofmt -w common/bootcommand/boot_command.go
+	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
 test: deps fmt-check ## Run unit tests
