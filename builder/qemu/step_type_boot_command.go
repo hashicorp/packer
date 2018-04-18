@@ -42,11 +42,16 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 	vncPort := state.Get("vnc_port").(uint)
 
+	if config.VNCConfig.DisableVNC {
+		log.Println("Skipping boot command step...")
+		return multistep.ActionContinue
+	}
+
 	// Wait the for the vm to boot.
-	if int64(config.bootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.bootWait.String()))
+	if int64(config.BootConfig.BootWait) > 0 {
+		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait.String()))
 		select {
-		case <-time.After(config.bootWait):
+		case <-time.After(config.BootWait):
 			break
 		case <-ctx.Done():
 			return multistep.ActionHalt
@@ -92,33 +97,31 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	d := bootcommand.NewVNCDriver(c)
 
 	ui.Say("Typing the boot command over VNC...")
-	for i, command := range config.BootCommand {
-		command, err := interpolate.Render(command, &configCtx)
-		if err != nil {
-			err := fmt.Errorf("Error preparing boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	command, err := interpolate.Render(config.VNCConfig.FlatBootCommand(), &configCtx)
+	if err != nil {
+		err := fmt.Errorf("Error preparing boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		seq, err := bootcommand.GenerateExpressionSequence(command)
-		if err != nil {
-			err := fmt.Errorf("Error generating boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	seq, err := bootcommand.GenerateExpressionSequence(command)
+	if err != nil {
+		err := fmt.Errorf("Error generating boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		if err := seq.Do(ctx, d); err != nil {
-			err := fmt.Errorf("Error running boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+	if err := seq.Do(ctx, d); err != nil {
+		err := fmt.Errorf("Error running boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		if pauseFn != nil {
-			pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command[%d]: %s", i, command), state)
-		}
+	if pauseFn != nil {
+		pauseFn(multistep.DebugLocationAfterRun, fmt.Sprintf("boot_command: %s", command), state)
 	}
 
 	return multistep.ActionContinue
