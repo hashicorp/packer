@@ -530,7 +530,7 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	state.Put("vmName", "packer-foo")
 
 	step := &hypervcommon.StepTypeBootCommand{
-		BootCommand: b.config.BootCommand,
+		BootCommand: b.config.FlatBootCommand(),
 		SwitchName:  b.config.SwitchName,
 		Ctx:         b.config.ctx,
 	}
