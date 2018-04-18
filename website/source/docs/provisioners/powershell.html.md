@@ -117,9 +117,14 @@ Optional parameters:
     "elevated_password": "{{.WinRMPassword}}",
     ```
 
--   `remote_path` (string) - The path where the script will be uploaded to in
-    the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must
-    be a writable location and any parent directories must already exist.
+-   `remote_path` (string) - The path where the PowerShell script will be
+    uploaded to within the target build machine. This defaults to
+    `C:/Windows/Temp/script-UUID.ps1` where UUID is replaced with a
+    dynamically generated string that uniquely identifies the script.
+
+    This setting allows users to override the default upload location. The
+    value must be a writable location and any parent directories must
+    already exist.
 
 -   `remote_env_var_path` (string) - Environment variables required within
     the remote environment are uploaded within a PowerShell script and then
