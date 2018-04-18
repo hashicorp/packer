@@ -21,7 +21,7 @@ type bootCommandTemplateData struct {
 
 // This step "types" the boot command into the VM via the Hyper-V virtual keyboard
 type StepTypeBootCommand struct {
-	BootCommand []string
+	BootCommand string
 	BootWait    time.Duration
 	SwitchName  string
 	Ctx         interpolate.Context
@@ -62,32 +62,23 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		vmName,
 	}
 
-	ui.Say("Typing the boot command...")
-
-	// Flatten command so we send it all at once
-	commands := []string{}
-
-	for _, command := range s.BootCommand {
-		command, err := interpolate.Render(command, &s.Ctx)
-
-		if err != nil {
-			err := fmt.Errorf("Error preparing boot command: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-
-		commands = append(commands, command)
-	}
-
 	sendCodes := func(codes []string) error {
 		scanCodesToSendString := strings.Join(codes, " ")
 		return driver.TypeScanCodes(vmName, scanCodesToSendString)
 	}
 	d := bootcommand.NewPCXTDriver(sendCodes, -1)
 
-	flatCommands := strings.Join(commands, "")
-	seq, err := bootcommand.GenerateExpressionSequence(flatCommands)
+	ui.Say("Typing the boot command...")
+	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
+
+	if err != nil {
+		err := fmt.Errorf("Error preparing boot command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	seq, err := bootcommand.GenerateExpressionSequence(command)
 	if err != nil {
 		err := fmt.Errorf("Error generating boot command: %s", err)
 		state.Put("error", err)
