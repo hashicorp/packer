@@ -23,6 +23,8 @@ command, they will be replaced by the proper key:
 
 -   `<pageUp> <pageDown>` - Simulates pressing the page up and page down keys.
 
+-   `<menu>` - Simulates pressing the Menu key.
+
 -   `<leftAlt> <rightAlt>` - Simulates pressing the alt key.
 
 -   `<leftCtrl> <rightCtrl>` - Simulates pressing the ctrl key.
