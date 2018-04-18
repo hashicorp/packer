@@ -93,7 +93,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepTypeBootCommand{
 			BootWait:    b.config.BootWait,
 			VNCEnabled:  !b.config.DisableVNC,
-			BootCommand: b.config.BootCommand,
+			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
