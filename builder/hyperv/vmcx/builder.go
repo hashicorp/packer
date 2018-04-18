@@ -9,6 +9,7 @@ import (
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	powershell "github.com/hashicorp/packer/common/powershell"
 	"github.com/hashicorp/packer/common/powershell/hyperv"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -42,9 +43,9 @@ type Config struct {
 	common.HTTPConfig           `mapstructure:",squash"`
 	common.ISOConfig            `mapstructure:",squash"`
 	common.FloppyConfig         `mapstructure:",squash"`
+	bootcommand.BootConfig      `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.RunConfig      `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 
 	// The size, in megabytes, of the computer memory in the VM.
@@ -79,12 +80,11 @@ type Config struct {
 	// Use differencing disk
 	DifferencingDisk bool `mapstructure:"differencing_disk"`
 
-	BootCommand                    []string `mapstructure:"boot_command"`
-	SwitchName                     string   `mapstructure:"switch_name"`
-	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
-	MacAddress                     string   `mapstructure:"mac_address"`
-	VlanId                         string   `mapstructure:"vlan_id"`
-	Cpu                            uint     `mapstructure:"cpu"`
+	SwitchName                     string `mapstructure:"switch_name"`
+	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
+	MacAddress                     string `mapstructure:"mac_address"`
+	VlanId                         string `mapstructure:"vlan_id"`
+	Cpu                            uint   `mapstructure:"cpu"`
 	Generation                     uint
 	EnableMacSpoofing              bool `mapstructure:"enable_mac_spoofing"`
 	EnableDynamicMemory            bool `mapstructure:"enable_dynamic_memory"`
@@ -125,9 +125,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, isoErrs...)
 	}
 
+	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
@@ -437,7 +437,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepRun{},
 
 		&hypervcommon.StepTypeBootCommand{
-			BootCommand: b.config.BootCommand,
+			BootCommand: b.config.FlatBootCommand(),
 			BootWait:    b.config.BootWait,
 			SwitchName:  b.config.SwitchName,
 			Ctx:         b.config.ctx,
