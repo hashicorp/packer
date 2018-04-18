@@ -60,6 +60,7 @@ func NewVNCDriver(c VNCKeyEvent) *vncDriver {
 	sMap["leftctrl"] = 0xFFE3
 	sMap["leftshift"] = 0xFFE1
 	sMap["leftsuper"] = 0xFFEB
+	sMap["menu"] = 0xFF67
 	sMap["pagedown"] = 0xFF56
 	sMap["pageup"] = 0xFF55
 	sMap["return"] = 0xFF0D
