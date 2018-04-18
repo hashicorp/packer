@@ -6,6 +6,7 @@ import (
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -16,6 +17,7 @@ type Config struct {
 	common.PackerConfig             `mapstructure:",squash"`
 	common.HTTPConfig               `mapstructure:",squash"`
 	common.FloppyConfig             `mapstructure:",squash"`
+	bootcommand.BootConfig          `mapstructure:",squash"`
 	vboxcommon.ExportConfig         `mapstructure:",squash"`
 	vboxcommon.ExportOpts           `mapstructure:",squash"`
 	vboxcommon.OutputConfig         `mapstructure:",squash"`
@@ -26,7 +28,6 @@ type Config struct {
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
 
-	BootCommand          []string `mapstructure:"boot_command"`
 	Checksum             string   `mapstructure:"checksum"`
 	ChecksumType         string   `mapstructure:"checksum_type"`
 	GuestAdditionsMode   string   `mapstructure:"guest_additions_mode"`
@@ -90,6 +91,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VBoxManageConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxManagePostConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VBoxVersionConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare(&c.ctx)...)
 
 	c.ChecksumType = strings.ToLower(c.ChecksumType)
 	c.Checksum = strings.ToLower(c.Checksum)
