@@ -115,6 +115,20 @@ Optional parameters:
     the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must
     be a writable location and any parent directories must already exist.
 
+-   `remote_env_var_path` (string) - Environment variables required within
+    the remote environment are uploaded within a PowerShell script and then
+    enabled by 'dot sourcing' the script immediately prior to execution of
+    the main command or script.
+
+    The path the environment variables script will be uploaded to defaults to
+    `C:/Windows/Temp/packer-ps-env-vars-UUID.ps1` where UUID is replaced
+    with a dynamically generated string that uniquely identifies the
+    script.
+
+    This setting allows users to override the location the environment
+    variable script is uploaded to. The value must be a writable location
+    and any parent directories must already exist.
+
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is "5m" or 5 minutes. This setting
     exists in order to deal with times when SSH may restart, such as a
