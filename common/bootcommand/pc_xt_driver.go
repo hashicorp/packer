@@ -67,6 +67,7 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	sMap["leftctrl"] = []string{"1d", "9d"}
 	sMap["leftshift"] = []string{"2a", "aa"}
 	sMap["leftsuper"] = []string{"e05b", "e0db"}
+	sMap["menu"] = []string{"e05d", "e0dd"}
 	sMap["pagedown"] = []string{"e051", "e0d1"}
 	sMap["pageup"] = []string{"e049", "e0c9"}
 	sMap["return"] = []string{"1c", "9c"}
