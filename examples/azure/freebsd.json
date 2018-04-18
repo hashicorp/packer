@@ -40,7 +40,8 @@
     ],
     "inline_shebang": "/bin/sh -x",
     "type": "shell",
-    "skip_clean": "true"
+    "skip_clean": "true",
+    "expect_disconnect": "true"
   }]
 
 }
