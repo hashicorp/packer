@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/boot_command"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
