@@ -9,10 +9,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
-	"time"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/denverdino/aliyungo/util"
 )
@@ -43,7 +43,11 @@ type Client struct {
 // Initialize properties of a client instance
 func (client *Client) Init(endpoint, version, accessKeyId, accessKeySecret string) {
 	client.AccessKeyId = accessKeyId
-	client.AccessKeySecret = accessKeySecret + "&"
+	ak := accessKeySecret
+	if !strings.HasSuffix(ak, "&") {
+		ak += "&"
+	}
+	client.AccessKeySecret = ak
 	client.debug = false
 	handshakeTimeout, err := strconv.Atoi(os.Getenv("TLSHandshakeTimeout"))
 	if err != nil {
@@ -53,8 +57,8 @@ func (client *Client) Init(endpoint, version, accessKeyId, accessKeySecret strin
 		client.httpClient = &http.Client{}
 	} else {
 		t := &http.Transport{
-			TLSHandshakeTimeout: time.Duration(handshakeTimeout) * time.Second,}
-		client.httpClient = &http.Client{Transport: t,}
+			TLSHandshakeTimeout: time.Duration(handshakeTimeout) * time.Second}
+		client.httpClient = &http.Client{Transport: t}
 	}
 	client.endpoint = endpoint
 	client.version = version
@@ -65,7 +69,7 @@ func (client *Client) NewInit(endpoint, version, accessKeyId, accessKeySecret, s
 	client.Init(endpoint, version, accessKeyId, accessKeySecret)
 	client.serviceCode = serviceCode
 	client.regionID = regionID
-	client.setEndpointByLocation(regionID, serviceCode, accessKeyId, accessKeySecret)
+	client.setEndpointByLocation(regionID, serviceCode, accessKeyId, accessKeySecret, client.securityToken)
 }
 
 // Intialize client object when all properties are ready
@@ -79,16 +83,21 @@ func (client *Client) InitClient() *Client {
 		client.httpClient = &http.Client{}
 	} else {
 		t := &http.Transport{
-			TLSHandshakeTimeout: time.Duration(handshakeTimeout) * time.Second,}
-		client.httpClient = &http.Client{Transport: t,}
+			TLSHandshakeTimeout: time.Duration(handshakeTimeout) * time.Second}
+		client.httpClient = &http.Client{Transport: t}
 	}
-	client.setEndpointByLocation(client.regionID, client.serviceCode, client.AccessKeyId, client.AccessKeySecret)
+	client.setEndpointByLocation(client.regionID, client.serviceCode, client.AccessKeyId, client.AccessKeySecret, client.securityToken)
 	return client
 }
 
+func (client *Client) NewInitForAssumeRole(endpoint, version, accessKeyId, accessKeySecret, serviceCode string, regionID Region, securityToken string) {
+	client.NewInit(endpoint, version, accessKeyId, accessKeySecret, serviceCode, regionID)
+	client.securityToken = securityToken
+}
+
 //NewClient using location service
-func (client *Client) setEndpointByLocation(region Region, serviceCode, accessKeyId, accessKeySecret string) {
-	locationClient := NewLocationClient(accessKeyId, accessKeySecret)
+func (client *Client) setEndpointByLocation(region Region, serviceCode, accessKeyId, accessKeySecret, securityToken string) {
+	locationClient := NewLocationClient(accessKeyId, accessKeySecret, securityToken)
 	ep := locationClient.DescribeOpenAPIEndpoint(region, serviceCode)
 	if ep == "" {
 		ep = loadEndpointFromFile(region, serviceCode)
@@ -218,11 +227,6 @@ func (client *Client) SetAccessKeySecret(secret string) {
 	client.AccessKeySecret = secret + "&"
 }
 
-// SetAccessKeySecret sets securityToken
-func (client *Client) SetSecurityToken(securityToken string) {
-	client.securityToken = securityToken
-}
-
 // SetDebug sets debug mode to log the request/response message
 func (client *Client) SetDebug(debug bool) {
 	client.debug = debug
@@ -240,6 +244,11 @@ func (client *Client) SetBusinessInfo(businessInfo string) {
 // SetUserAgent sets user agent to the request/response message
 func (client *Client) SetUserAgent(userAgent string) {
 	client.userAgent = userAgent
+}
+
+//set SecurityToken
+func (client *Client) SetSecurityToken(securityToken string) {
+	client.securityToken = securityToken
 }
 
 // Invoke sends the raw HTTP request for ECS services
@@ -268,6 +277,7 @@ func (client *Client) Invoke(action string, args interface{}, response interface
 
 	// TODO move to util and add build val flag
 	httpReq.Header.Set("X-SDK-Client", `AliyunGO/`+Version+client.businessInfo)
+
 	httpReq.Header.Set("User-Agent", httpReq.UserAgent()+" "+client.userAgent)
 
 	t0 := time.Now()
@@ -341,6 +351,7 @@ func (client *Client) InvokeByFlattenMethod(action string, args interface{}, res
 
 	// TODO move to util and add build val flag
 	httpReq.Header.Set("X-SDK-Client", `AliyunGO/`+Version+client.businessInfo)
+
 	httpReq.Header.Set("User-Agent", httpReq.UserAgent()+" "+client.userAgent)
 
 	t0 := time.Now()
@@ -397,7 +408,6 @@ func (client *Client) InvokeByAnyMethod(method, action, path string, args interf
 
 	request := Request{}
 	request.init(client.version, action, client.AccessKeyId, client.securityToken, client.regionID)
-
 	data := util.ConvertToQueryValues(request)
 	util.SetQueryValues(args, &data)
 
