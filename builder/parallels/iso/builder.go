@@ -27,7 +27,7 @@ type Config struct {
 	common.HTTPConfig                   `mapstructure:",squash"`
 	common.ISOConfig                    `mapstructure:",squash"`
 	common.FloppyConfig                 `mapstructure:",squash"`
-	bootcommand.Config                  `mapstructure:",squash"`
+	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
@@ -82,7 +82,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.Config.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000

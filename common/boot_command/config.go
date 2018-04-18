@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-type Config struct {
+type BootConfig struct {
 	RawBootWait string   `mapstructure:"boot_wait"`
 	BootCommand []string `mapstructure:"boot_command"`
 
@@ -16,11 +16,11 @@ type Config struct {
 }
 
 type VNCConfig struct {
-	Config
+	BootConfig
 	DisableVNC bool `mapstructure:"disable_vnc"`
 }
 
-func (c *Config) Prepare(ctx *interpolate.Context) (errs []error) {
+func (c *BootConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
 	}
@@ -36,7 +36,7 @@ func (c *Config) Prepare(ctx *interpolate.Context) (errs []error) {
 	return
 }
 
-func (c *Config) FlatBootCommand() string {
+func (c *BootConfig) FlatBootCommand() string {
 	return strings.Join(c.BootCommand, "")
 }
 
@@ -45,6 +45,6 @@ func (c *VNCConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 		errs = append(errs,
 			fmt.Errorf("A boot command cannot be used when vnc is disabled."))
 	}
-	errs = append(errs, c.Config.Prepare(ctx)...)
+	errs = append(errs, c.BootConfig.Prepare(ctx)...)
 	return
 }
