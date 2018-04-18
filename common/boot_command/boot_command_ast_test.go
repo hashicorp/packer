@@ -109,8 +109,8 @@ func Test_negativeWait(t *testing.T) {
 
 	/*
 		gL := toIfaceSlice(got)
-		for _, g := range gL {
-			assert.Equal(t, tt.out, g.(*specialExpression).String())
-		}
+			for _, g := range gL {
+				assert.Equal(t, tt.out, g.(*specialExpression).String())
+			}
 	*/
 }
