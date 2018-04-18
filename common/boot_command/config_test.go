@@ -7,10 +7,10 @@ import (
 )
 
 func TestConfigPrepare(t *testing.T) {
-	var c *Config
+	var c *BootConfig
 
 	// Test a default boot_wait
-	c = new(Config)
+	c = new(BootConfig)
 	c.RawBootWait = ""
 	errs := c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
@@ -21,7 +21,7 @@ func TestConfigPrepare(t *testing.T) {
 	}
 
 	// Test with a bad boot_wait
-	c = new(Config)
+	c = new(BootConfig)
 	c.RawBootWait = "this is not good"
 	errs = c.Prepare(&interpolate.Context{})
 	if len(errs) == 0 {
@@ -29,7 +29,7 @@ func TestConfigPrepare(t *testing.T) {
 	}
 
 	// Test with a good one
-	c = new(Config)
+	c = new(BootConfig)
 	c.RawBootWait = "5s"
 	errs = c.Prepare(&interpolate.Context{})
 	if len(errs) > 0 {
