@@ -100,17 +100,41 @@ func Test_special(t *testing.T) {
 	}
 }
 
-func Test_negativeWait(t *testing.T) {
-	in := "<wait-1m>"
-	_, err := ParseReader("", strings.NewReader(in))
-	if err != nil {
-		log.Fatal(err)
+func Test_validation(t *testing.T) {
+	var expressions = []struct {
+		in    string
+		valid bool
+	}{
+		{
+			"<wait1m>",
+			true,
+		},
+		{
+			"<wait-1m>",
+			false,
+		},
+		{
+			"<f1>",
+			true,
+		},
+		{
+			"<",
+			true,
+		},
 	}
+	for _, tt := range expressions {
+		got, err := ParseReader("", strings.NewReader(tt.in))
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	/*
 		gL := toIfaceSlice(got)
-			for _, g := range gL {
-				assert.Equal(t, tt.out, g.(*specialExpression).String())
-			}
-	*/
+		assert.Len(t, gL, 1)
+		err = gL[0].(expression).Validate()
+		if tt.valid {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
+	}
 }
