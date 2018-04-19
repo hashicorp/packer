@@ -13,7 +13,11 @@ sidebar_current: 'docs-provisioners-powershell'
 Type: `powershell`
 
 The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
-It assumes that the communicator in use is WinRM.
+It assumes that the communicator in use is WinRM. However, the provisioner
+can work equally well (with a few caveats) when combined with the SSH
+communicator. See the [section
+below](/docs/provisioners/powershell.html#combining-the-powershell-provisioner-with-the-ssh-communicator)
+for details.
 
 ## Basic Example
 
@@ -160,6 +164,41 @@ commonly useful environmental variables:
     download large files over http. This may be useful if you're experiencing
     slower speeds using the default file provisioner. A file provisioner using
     the `winrm` communicator may experience these types of difficulties.
+
+## Combining the PowerShell Provisioner with the SSH Communicator
+
+The good news first. If you are using the
+[Microsoft port of OpenSSH](https://github.com/PowerShell/Win32-OpenSSH/wiki)
+then the provisioner should just work as expected - no extra configuration
+effort is required.
+
+Now the caveats. If you are using an alternative configuration, and your SSH
+connection lands you in a *nix shell on the remote host, then you will most
+likely need to manually set the `execute_command`; The default
+`execute_command` used by Packer will not work for you.
+When configuring the command you will need to ensure that any dollar signs
+or other characters that may be incorrectly interpreted by the remote shell
+are escaped accordingly.
+
+The following example shows how the standard `execute_command` can be
+reconfigured to work on a remote system with
+[Cygwin/OpenSSH](https://cygwin.com/) installed.
+The `execute_command` has each dollar sign backslash escaped so that it is
+not interpreted by the remote Bash shell - Bash being the default shell for
+Cygwin environments.
+
+```json
+  "provisioners": [
+    {
+      "type": "powershell",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
+      "inline": [
+        "Write-Host \"Hello from PowerShell\"",
+      ]
+    }
+  ]
+```
+
 
 ## Packer's Handling of Characters Special to PowerShell
 
