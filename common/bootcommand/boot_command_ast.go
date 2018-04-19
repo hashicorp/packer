@@ -8,14 +8,6 @@ import (
 	"time"
 )
 
-/*
-TODO:
-	* pc-at abstraction
-		* check that `<del>` works. It's different now.
-		* parallels
-		* hyperv-
-*/
-
 // KeysAction represents what we want to do with a key press.
 // It can take 3 states. We either want to:
 // * press the key once
