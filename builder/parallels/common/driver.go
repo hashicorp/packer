@@ -131,6 +131,7 @@ func NewDriver() (Driver, error) {
 	latestDriver := 11
 	version, _ := drivers[strconv.Itoa(latestDriver)].Version()
 	majVer, _ := strconv.Atoi(strings.SplitN(version, ".", 2)[0])
+	log.Printf("Parallels version: %s", version)
 	if majVer > latestDriver {
 		log.Printf("Your version of Parallels Desktop for Mac is %s, Packer will use driver for version %d.", version, latestDriver)
 		return drivers[strconv.Itoa(latestDriver)], nil
