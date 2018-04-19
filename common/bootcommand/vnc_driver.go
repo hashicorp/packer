@@ -92,8 +92,8 @@ func (d *vncDriver) keyEvent(k uint32, down bool) error {
 	return nil
 }
 
-// Finalize does nothing here
-func (d *vncDriver) Finalize() error {
+// Flush does nothing here
+func (d *vncDriver) Flush() error {
 	return nil
 }
 
