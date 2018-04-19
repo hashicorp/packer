@@ -42,7 +42,8 @@ type expression interface {
 
 type expressionSequence []expression
 
-// Do executes every expression in the sequence and then finalizes the driver.
+// Do executes every expression in the sequence and then flushes remaining
+// scancodes.
 func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 	// validate should never fail here, since it should be called before
 	// expressionSequence.Do. Only reason we don't panic is so we can clean up.
@@ -58,10 +59,10 @@ func (s expressionSequence) Do(ctx context.Context, b BCDriver) error {
 			return err
 		}
 	}
-	return b.Finalize()
+	return b.Flush()
 }
 
-// Do executes every expression in the sequence and then finalizes the driver.
+// Validate tells us if every expression in the sequence is valid.
 func (s expressionSequence) Validate() (errs []error) {
 	for _, exp := range s {
 		if err := exp.Validate(); err != nil {
@@ -91,7 +92,8 @@ type waitExpression struct {
 
 // Do waits the amount of time described by the expression. It is cancellable
 // through the context.
-func (w *waitExpression) Do(ctx context.Context, _ BCDriver) error {
+func (w *waitExpression) Do(ctx context.Context, driver BCDriver) error {
+	driver.Flush()
 	log.Printf("[INFO] Waiting %s", w.d)
 	select {
 	case <-time.After(w.d):

@@ -111,8 +111,8 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	}
 }
 
-// Finalize flushes all scanecodes.
-func (d *pcXTDriver) Finalize() error {
+// Flush send all scanecodes.
+func (d *pcXTDriver) Flush() error {
 	defer func() {
 		d.buffer = nil
 	}()
@@ -162,6 +162,7 @@ func (d *pcXTDriver) SendSpecial(special string, action KeyAction) error {
 	if !ok {
 		return fmt.Errorf("special %s not found.", special)
 	}
+	log.Printf("Special code '%s' '<%s>' found, replacing with: %v", action.String(), special, keyCode)
 
 	switch action {
 	case KeyOn:
@@ -174,7 +175,7 @@ func (d *pcXTDriver) SendSpecial(special string, action KeyAction) error {
 	return nil
 }
 
-// send stores the codes in an internal buffer. Use finalize to flush them.
+// send stores the codes in an internal buffer. Use Flush to send them.
 func (d *pcXTDriver) send(codes []string) {
 	d.buffer = append(d.buffer, codes)
 }
