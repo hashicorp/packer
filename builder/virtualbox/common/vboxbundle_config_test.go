@@ -13,8 +13,8 @@ func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if !reflect.DeepEqual(c, VBoxBundleConfig{BundleISO: false}) {
-		t.Fatalf("bad: %#v", c.BundleISO)
+	if !reflect.DeepEqual(*c, VBoxBundleConfig{BundleISO: false}) {
+		t.Fatalf("bad: %#v", c)
 	}
 
 	// Test with a good one
@@ -29,7 +29,7 @@ func TestVBoxBundleConfigPrepare_VBoxBundle(t *testing.T) {
 		BundleISO: true,
 	}
 
-	if !reflect.DeepEqual(c, expected) {
+	if !reflect.DeepEqual(*c, expected) {
 		t.Fatalf("bad: %#v", c)
 	}
 }
