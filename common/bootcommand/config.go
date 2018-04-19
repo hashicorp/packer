@@ -16,7 +16,7 @@ type BootConfig struct {
 }
 
 type VNCConfig struct {
-	BootConfig
+	BootConfig `mapstructure:",squash"`
 	DisableVNC bool `mapstructure:"disable_vnc"`
 }
 
