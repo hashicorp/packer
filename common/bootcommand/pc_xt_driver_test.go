@@ -86,3 +86,22 @@ func Test_pcxtSpecialLookup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, codes)
 }
+
+func Test_flushes(t *testing.T) {
+	in := "abc123<wait>098"
+	expected := [][]string{
+		{"1e", "9e", "30", "b0", "2e", "ae", "02", "82", "03", "83", "04", "84"},
+		{"0b", "8b", "0a", "8a", "09", "89"},
+	}
+	var actual [][]string
+	sendCodes := func(c []string) error {
+		actual = append(actual, c)
+		return nil
+	}
+	d := NewPCXTDriver(sendCodes, -1)
+	seq, err := GenerateExpressionSequence(in)
+	assert.NoError(t, err)
+	err = seq.Do(context.Background(), d)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual)
+}
