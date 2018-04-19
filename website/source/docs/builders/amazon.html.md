@@ -141,7 +141,7 @@ for Packer to work:
         "ec2:CreateSnapshot",
         "ec2:CreateTags",
         "ec2:CreateVolume",
-        "ec2:DeleteKeypair",
+        "ec2:DeleteKeyPair",
         "ec2:DeleteSecurityGroup",
         "ec2:DeleteSnapshot",
         "ec2:DeleteVolume",
