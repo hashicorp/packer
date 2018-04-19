@@ -130,7 +130,6 @@ func (d *pcXTDriver) Finalize() error {
 }
 
 func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {
-
 	keyShift := unicode.IsUpper(key) || strings.ContainsRune(shiftedChars, key)
 
 	var scancode []string
@@ -151,9 +150,8 @@ func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {
 		scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
 	}
 
-	for _, sc := range scancode {
-		log.Printf("Sending char '%c', code '%s', shift %v", key, sc, keyShift)
-	}
+	log.Printf("Sending char '%c', code '%s', shift %v",
+		key, strings.Join(scancode, ""), keyShift)
 
 	d.send(scancode)
 	return nil
