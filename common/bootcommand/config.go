@@ -33,6 +33,16 @@ func (c *BootConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 			c.BootWait = bw
 		}
 	}
+
+	if c.BootCommand != nil {
+		expSeq, err := GenerateExpressionSequence(c.FlatBootCommand())
+		if err != nil {
+			errs = append(errs, err)
+		} else if vErrs := expSeq.Validate(); vErrs != nil {
+			errs = append(errs, vErrs...)
+		}
+	}
+
 	return
 }
 
