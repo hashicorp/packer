@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	packer_common "github.com/hashicorp/packer/common"
@@ -78,7 +77,6 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	sendCodes := func(codes []string) error {
-		log.Printf("Sending scancodes: %#v", codes)
 		return driver.SendKeyScanCodes(s.VMName, codes...)
 	}
 	d := bootcommand.NewPCXTDriver(sendCodes, -1)
