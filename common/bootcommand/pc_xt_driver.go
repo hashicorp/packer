@@ -14,15 +14,25 @@ import (
 
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
+type scMap map[string]*scancode
 
 type pcXTDriver struct {
 	interval    time.Duration
 	sendImpl    SendCodeFunc
-	specialMap  map[string][]string
+	specialMap  scMap
 	scancodeMap map[rune]byte
 	buffer      [][]string
 	// TODO: set from env
 	scancodeChunkSize int
+}
+
+type scancode struct {
+	make   []string
+	break_ []string
+}
+
+func (sc *scancode) makeBreak() []string {
+	return append(sc.make, sc.break_...)
 }
 
 // NewPCXTDriver creates a new boot command driver for VMs that expect PC-XT
@@ -41,44 +51,44 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
 	// Scancodes are recorded here in pairs. The first entry represents
 	// the key press and the second entry represents the key release and is
 	// derived from the first by the addition of 0x80.
-	sMap := make(map[string][]string)
-	sMap["bs"] = []string{"0e", "8e"}
-	sMap["del"] = []string{"e053", "e0d3"}
-	sMap["down"] = []string{"e050", "e0d0"}
-	sMap["end"] = []string{"e04f", "e0cf"}
-	sMap["enter"] = []string{"1c", "9c"}
-	sMap["esc"] = []string{"01", "81"}
-	sMap["f1"] = []string{"3b", "bb"}
-	sMap["f2"] = []string{"3c", "bc"}
-	sMap["f3"] = []string{"3d", "bd"}
-	sMap["f4"] = []string{"3e", "be"}
-	sMap["f5"] = []string{"3f", "bf"}
-	sMap["f6"] = []string{"40", "c0"}
-	sMap["f7"] = []string{"41", "c1"}
-	sMap["f8"] = []string{"42", "c2"}
-	sMap["f9"] = []string{"43", "c3"}
-	sMap["f10"] = []string{"44", "c4"}
-	sMap["f11"] = []string{"57", "d7"}
-	sMap["f12"] = []string{"58", "d8"}
-	sMap["home"] = []string{"e047", "e0c7"}
-	sMap["insert"] = []string{"e052", "e0d2"}
-	sMap["left"] = []string{"e04b", "e0cb"}
-	sMap["leftalt"] = []string{"38", "b8"}
-	sMap["leftctrl"] = []string{"1d", "9d"}
-	sMap["leftshift"] = []string{"2a", "aa"}
-	sMap["leftsuper"] = []string{"e05b", "e0db"}
-	sMap["menu"] = []string{"e05d", "e0dd"}
-	sMap["pagedown"] = []string{"e051", "e0d1"}
-	sMap["pageup"] = []string{"e049", "e0c9"}
-	sMap["return"] = []string{"1c", "9c"}
-	sMap["right"] = []string{"e04d", "e0cd"}
-	sMap["rightalt"] = []string{"e038", "e0b8"}
-	sMap["rightctrl"] = []string{"e01d", "e09d"}
-	sMap["rightshift"] = []string{"36", "b6"}
-	sMap["rightsuper"] = []string{"e05c", "e0dc"}
-	sMap["spacebar"] = []string{"39", "b9"}
-	sMap["tab"] = []string{"0f", "8f"}
-	sMap["up"] = []string{"e048", "e0c8"}
+	sMap := make(scMap)
+	sMap["bs"] = &scancode{[]string{"0e"}, []string{"8e"}}
+	sMap["del"] = &scancode{[]string{"e0", "53"}, []string{"e0", "d3"}}
+	sMap["down"] = &scancode{[]string{"e0", "50"}, []string{"e0", "d0"}}
+	sMap["end"] = &scancode{[]string{"e0", "4f"}, []string{"e0", "cf"}}
+	sMap["enter"] = &scancode{[]string{"1c"}, []string{"9c"}}
+	sMap["esc"] = &scancode{[]string{"01"}, []string{"81"}}
+	sMap["f1"] = &scancode{[]string{"3b"}, []string{"bb"}}
+	sMap["f2"] = &scancode{[]string{"3c"}, []string{"bc"}}
+	sMap["f3"] = &scancode{[]string{"3d"}, []string{"bd"}}
+	sMap["f4"] = &scancode{[]string{"3e"}, []string{"be"}}
+	sMap["f5"] = &scancode{[]string{"3f"}, []string{"bf"}}
+	sMap["f6"] = &scancode{[]string{"40"}, []string{"c0"}}
+	sMap["f7"] = &scancode{[]string{"41"}, []string{"c1"}}
+	sMap["f8"] = &scancode{[]string{"42"}, []string{"c2"}}
+	sMap["f9"] = &scancode{[]string{"43"}, []string{"c3"}}
+	sMap["f10"] = &scancode{[]string{"44"}, []string{"c4"}}
+	sMap["f11"] = &scancode{[]string{"57"}, []string{"d7"}}
+	sMap["f12"] = &scancode{[]string{"58"}, []string{"d8"}}
+	sMap["home"] = &scancode{[]string{"e0", "47"}, []string{"e0", "c7"}}
+	sMap["insert"] = &scancode{[]string{"e0", "52"}, []string{"e0", "d2"}}
+	sMap["left"] = &scancode{[]string{"e0", "4b"}, []string{"e0", "cb"}}
+	sMap["leftalt"] = &scancode{[]string{"38"}, []string{"b8"}}
+	sMap["leftctrl"] = &scancode{[]string{"1d"}, []string{"9d"}}
+	sMap["leftshift"] = &scancode{[]string{"2a"}, []string{"aa"}}
+	sMap["leftsuper"] = &scancode{[]string{"e0", "5b"}, []string{"e0", "db"}}
+	sMap["menu"] = &scancode{[]string{"e0", "5d"}, []string{"e0", "dd"}}
+	sMap["pagedown"] = &scancode{[]string{"e0", "51"}, []string{"e0", "d1"}}
+	sMap["pageup"] = &scancode{[]string{"e0", "49"}, []string{"e0", "c9"}}
+	sMap["return"] = &scancode{[]string{"1c"}, []string{"9c"}}
+	sMap["right"] = &scancode{[]string{"e0", "4d"}, []string{"e0", "cd"}}
+	sMap["rightalt"] = &scancode{[]string{"e0", "38"}, []string{"e0", "b8"}}
+	sMap["rightctrl"] = &scancode{[]string{"e0", "1d"}, []string{"e0", "9d"}}
+	sMap["rightshift"] = &scancode{[]string{"36"}, []string{"b6"}}
+	sMap["rightsuper"] = &scancode{[]string{"e0", "5c"}, []string{"e0", "dc"}}
+	sMap["spacebar"] = &scancode{[]string{"39"}, []string{"b9"}}
+	sMap["tab"] = &scancode{[]string{"0f"}, []string{"8f"}}
+	sMap["up"] = &scancode{[]string{"e0", "48"}, []string{"e0", "c8"}}
 
 	scancodeIndex := make(map[string]byte)
 	scancodeIndex["1234567890-="] = 0x02
@@ -132,28 +142,28 @@ func (d *pcXTDriver) Flush() error {
 func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {
 	keyShift := unicode.IsUpper(key) || strings.ContainsRune(shiftedChars, key)
 
-	var scancode []string
+	var sc []string
 
 	if action&(KeyOn|KeyPress) != 0 {
-		scancodeInt := d.scancodeMap[key]
+		scInt := d.scancodeMap[key]
 		if keyShift {
-			scancode = append(scancode, "2a")
+			sc = append(sc, "2a")
 		}
-		scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
+		sc = append(sc, fmt.Sprintf("%02x", scInt))
 	}
 
 	if action&(KeyOff|KeyPress) != 0 {
-		scancodeInt := d.scancodeMap[key] + 0x80
+		scInt := d.scancodeMap[key] + 0x80
 		if keyShift {
-			scancode = append(scancode, "aa")
+			sc = append(sc, "aa")
 		}
-		scancode = append(scancode, fmt.Sprintf("%02x", scancodeInt))
+		sc = append(sc, fmt.Sprintf("%02x", scInt))
 	}
 
 	log.Printf("Sending char '%c', code '%s', shift %v",
-		key, strings.Join(scancode, ""), keyShift)
+		key, strings.Join(sc, ""), keyShift)
 
-	d.send(scancode)
+	d.send(sc)
 	return nil
 }
 
@@ -166,11 +176,11 @@ func (d *pcXTDriver) SendSpecial(special string, action KeyAction) error {
 
 	switch action {
 	case KeyOn:
-		d.send([]string{keyCode[0]})
+		d.send(keyCode.make)
 	case KeyOff:
-		d.send([]string{keyCode[1]})
+		d.send(keyCode.break_)
 	case KeyPress:
-		d.send(keyCode)
+		d.send(keyCode.makeBreak())
 	}
 	return nil
 }
