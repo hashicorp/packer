@@ -103,11 +103,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:      b.config.ctx,
 		},
 		&vboxcommon.StepRun{
-			BootWait: b.config.BootWait,
 			Headless: b.config.Headless,
 		},
 		&vboxcommon.StepTypeBootCommand{
-			BootCommand: b.config.BootCommand,
+			BootWait:    b.config.BootWait,
+			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
