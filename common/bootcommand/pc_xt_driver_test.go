@@ -89,7 +89,7 @@ func Test_pcxtSpecialOnOff(t *testing.T) {
 
 func Test_pcxtSpecial(t *testing.T) {
 	in := "<left>"
-	expected := []string{"0e", "4b", "e0", "cb"}
+	expected := []string{"e0", "4b", "e0", "cb"}
 	var codes []string
 	sendCodes := func(c []string) error {
 		codes = c
