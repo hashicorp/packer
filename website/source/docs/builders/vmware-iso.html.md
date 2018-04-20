@@ -485,7 +485,11 @@ available variables are:
 -   `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
     that is started serving the directory specified by the `http_directory`
     configuration parameter. If `http_directory` isn't specified, these will be
-    blank!
+    blank! Note that for the `HTTPIP` to be resolved correctly your VM's network 
+    configuration has to include a `host-only` or `nat` type network interface.
+    If you are using this feature, it is recommended to leave the default network
+    configuration while you are building the VM, and use the `vmx_data_post` hook 
+    to modify the network configuration after the VM is done building.
 
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
