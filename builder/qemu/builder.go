@@ -280,7 +280,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("unrecognized disk cache type"))
+			errs, errors.New("unrecognized disk discard type"))
 	}
 
 	if !b.config.PackerForce {
