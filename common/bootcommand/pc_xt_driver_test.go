@@ -71,9 +71,25 @@ func Test_chunkScanCodeError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_pcxtSpecialLookup(t *testing.T) {
+func Test_pcxtSpecialOnOff(t *testing.T) {
 	in := "<rightShift><rightshiftoff><RIGHTSHIFTON>"
 	expected := []string{"36", "b6", "b6", "36"}
+	var codes []string
+	sendCodes := func(c []string) error {
+		codes = c
+		return nil
+	}
+	d := NewPCXTDriver(sendCodes, -1)
+	seq, err := GenerateExpressionSequence(in)
+	assert.NoError(t, err)
+	err = seq.Do(context.Background(), d)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, codes)
+}
+
+func Test_pcxtSpecial(t *testing.T) {
+	in := "<left>"
+	expected := []string{"0e", "4b", "e0", "cb"}
 	var codes []string
 	sendCodes := func(c []string) error {
 		codes = c
