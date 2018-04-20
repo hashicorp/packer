@@ -429,6 +429,12 @@ e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
 
 <%= partial "partials/builders/boot-command" %>
 
+-&gt; **Note**: for the `HTTPIP` to be resolved correctly, your VM's network
+configuration has to include a `hostonly` or `nat` type network interface.
+If you are using this feature, it is recommended to leave the default network
+configuration while you are building the VM, and use the `vmx_data_post` hook
+to modify the network configuration after the VM is done building.
+
 Example boot command. This is actually a working boot command used to start an
 Ubuntu 12.04 installer:
 
