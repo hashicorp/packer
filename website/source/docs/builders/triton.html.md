@@ -95,6 +95,11 @@ builder.
     
 -   `triton_user` (string) - The username of a user who has access to your Triton
     account. 
+    
+-   `insecure_skip_tls_verify` - (bool) This allows skipping TLS verification of 
+    the Triton endpoint. It is useful when connecting to a temporary Triton 
+    installation such as Cloud-On-A-Laptop which does not generally use a 
+    certificate signed by a trusted root CA. The default is `false`.
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
