@@ -138,3 +138,9 @@ func Test_validation(t *testing.T) {
 		}
 	}
 }
+
+func Test_empty(t *testing.T) {
+	exp, err := GenerateExpressionSequence("")
+	assert.NoError(t, err, "should have parsed an empty input okay.")
+	assert.Len(t, exp, 0)
+}
