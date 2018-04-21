@@ -75,11 +75,14 @@ func (s expressionSequence) Validate() (errs []error) {
 // GenerateExpressionSequence generates a sequence of expressions from the
 // given command. This is the primary entry point to the boot command parser.
 func GenerateExpressionSequence(command string) (expressionSequence, error) {
+	seq := expressionSequence{}
+	if command == "" {
+		return seq, nil
+	}
 	got, err := ParseReader("", strings.NewReader(command))
 	if err != nil {
 		return nil, err
 	}
-	seq := expressionSequence{}
 	for _, exp := range got.([]interface{}) {
 		seq = append(seq, exp.(expression))
 	}
