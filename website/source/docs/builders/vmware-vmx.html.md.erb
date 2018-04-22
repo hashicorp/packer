@@ -69,12 +69,18 @@ builder.
 
 -   `boot_wait` (string) - The time to wait after booting the initial virtual
     machine before typing the `boot_command`. The value of this should be
-    a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+    a duration. Examples are `5s` and `1m30s` which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
-    specified, the default is 10 seconds.
+    specified, the default is `10s` or 10 seconds.
 
 *   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
     A `boot_command` cannot be used when this is `false`. Defaults to `false`.
+
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -86,41 +92,36 @@ builder.
     and \[\]) are allowed. Directory names are also allowed, which will add all
     the files found in the directory to the floppy.
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
-
 -   `fusion_app_path` (string) - Path to "VMware Fusion.app". By default this is
-    "/Applications/VMware Fusion.app" but this setting allows you to
+    `/Applications/VMware Fusion.app` but this setting allows you to
     customize this.
 
 -   `headless` (boolean) - Packer defaults to building VMware virtual machines
     by launching a GUI that shows the console of the machine being built. When
-    this value is set to true, the machine will start without a console. For
+    this value is set to `true`, the machine will start without a console. For
     VMware machines, Packer will output VNC connection information in case you
     need to connect to the console to debug the build process.
 
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
     will be requestable from the virtual machine. This is useful for hosting
-    kickstart files and so on. By default this is "", which means no HTTP server
-    will be started. The address and port of the HTTP server will be available
-    as variables in `boot_command`. This is covered in more detail below.
+    kickstart files and so on. By default this is an empty string, which means
+    no HTTP server will be started. The address and port of the HTTP server will
+    be available as variables in `boot_command`. This is covered in more detail
+    below.
 
 -   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
-    port the same. By default the values are 8000 and 9000, respectively.
+    port the same. By default the values are `8000` and `9000`, respectively.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running
-    the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
+    the builder. By default this is `output-BUILDNAME` where "BUILDNAME" is the
     name of the build.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
@@ -134,16 +135,16 @@ builder.
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
-    "5m", or five minutes.
+    `5m` or five minutes.
 
 -   `skip_compaction` (boolean) - VMware-created disks are defragmented and
     compacted at the end of the build process using `vmware-vdiskmanager`. In
     certain rare cases, this might actually end up making the resulting disks
     slightly larger. If you find this to be the case, you can disable compaction
-    using this configuration value.
+    using this configuration value. Defaults to `false`.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
-    upload into the VM. Valid values are "darwin", "linux", and "windows". By
+    upload into the VM. Valid values are `darwin`, `linux`, and `windows`. By
     default, this is empty, which means VMware tools won't be uploaded.
 
 -   `tools_upload_path` (string) - The path in the VM to upload the
@@ -154,7 +155,7 @@ builder.
     By default the upload path is set to `{{.Flavor}}.iso`.
 
 -   `vm_name` (string) - This is the name of the VMX file for the new virtual
-    machine, without the file extension. By default this is "packer-BUILDNAME",
+    machine, without the file extension. By default this is `packer-BUILDNAME`,
     where "BUILDNAME" is the name of the build.
 
 -   `vmx_data` (object of key/value strings) - Arbitrary key/values to enter
@@ -165,22 +166,25 @@ builder.
     except that it is run after the virtual machine is shutdown, and before the
     virtual machine is exported.
 
--   `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces from
-    the VMX file after building. This is for advanced users who understand the
-    ramifications, but is useful for building Vagrant boxes since Vagrant will
-    create ethernet interfaces when provisioning a box.
+-   `vmx_remove_ethernet_interfaces` (boolean) - Remove all ethernet interfaces
+    from the VMX file after building. This is for advanced users who understand
+    the ramifications, but is useful for building Vagrant boxes since Vagrant
+    will create ethernet interfaces when provisioning a box. Defaults to
+    `false`.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-    to for VNC. By default packer will use 127.0.0.1 for this.
+-   `vnc_bind_address` (string / IP address) - The IP address that should be
+    binded to for VNC. By default packer will use `127.0.0.1` for this. If you
+    wish to bind to all interfaces use `0.0.0.0`.
 
--   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that is
-    used to secure the VNC communication with the VM.
+-   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
+    is used to secure the VNC communication with the VM.
 
 -   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
-    default this is 5900 to 6000. The minimum and maximum ports are inclusive.
+    default this is `5900` to `6000`. The minimum and maximum ports are
+    inclusive.
 
 ## Boot Command
 
