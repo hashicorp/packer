@@ -92,8 +92,8 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     over `iso_checksum_url` type.
 
 -   `iso_checksum_type` (string) - The type of the checksum specified in
-    `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
-    "sha512" currently. While "none" will skip checksumming, this is not
+    `iso_checksum`. Valid values are `none`, `md5`, `sha1`, `sha256`, or
+    `sha512` currently. While `none` will skip checksumming, this is not
     recommended since ISO files are generally large and corruption does happen
     from time to time.
 
@@ -107,15 +107,15 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     this is an HTTP URL, Packer will download it and cache it between runs.
     This can also be a URL to an IMG or QCOW2 file, in which case QEMU will
     boot directly from it. When passing a path to an IMG or QCOW2 file, you
-    should set `disk_image` to "true".
+    should set `disk_image` to `true`.
 
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
     This may be `none`, `kvm`, `tcg`, `hax`, or `xen`. The appropriate software
-    must have already been installed on your build machine to use the accelerator
-    you specified. When no accelerator is specified, Packer will try to use `kvm`
-    if it is available but will default to `tcg` otherwise.
+    must have already been installed on your build machine to use the
+    accelerator you specified. When no accelerator is specified, Packer will try
+    to use `kvm` if it is available but will default to `tcg` otherwise.
 
     -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
     upstream issue which can be tracked
@@ -130,19 +130,19 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `boot_wait` (string) - The time to wait after booting the initial virtual
     machine before typing the `boot_command`. The value of this should be
-    a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
+    a duration. Examples are `5s` and `1m30s` which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
-    specified, the default is 10 seconds.
+    specified, the default is `10s` or 10 seconds.
 
 -   `disk_cache` (string) - The cache mode to use for disk. Allowed values
-    include any of "writethrough", "writeback", "none", "unsafe"
-    or "directsync". By default, this is set to "writeback".
+    include any of `writethrough`, `writeback`, `none`, `unsafe`
+    or `directsync`. By default, this is set to `writeback`.
 
 -   `disk_compression` (boolean) - Apply compression to the QCOW2 disk file
     using `qemu-img convert`. Defaults to `false`.
 
 -   `disk_discard` (string) - The discard mode to use for disk. Allowed values
-    include any of "unmap" or "ignore". By default, this is set to "ignore".
+    include any of `unmap` or `ignore`. By default, this is set to `ignore`.
 
 -   `disk_image` (boolean) - Packer defaults to building from an ISO file, this
     parameter controls whether the ISO URL supplied is actually a bootable
@@ -150,20 +150,28 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     source, resize it according to `disk_size` and boot the image.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
-    values include any of "ide", "scsi", "virtio" or "virtio-scsi"^\* . Note also
-    that any boot commands or kickstart type scripts must have proper
-    adjustments for resulting device names. The Qemu builder uses "virtio" by
+    values include any of `ide`, `scsi`, `virtio` or `virtio-scsi`^\*. Note
+    also that any boot commands or kickstart type scripts must have proper
+    adjustments for resulting device names. The Qemu builder uses `virtio` by
     default.
 
-    ^\* Please be aware that use of the "scsi" disk interface has been disabled
+    ^\* Please be aware that use of the `scsi` disk interface has been disabled
     by Red Hat due to a bug described
     [here](https://bugzilla.redhat.com/show_bug.cgi?id=1019220).
     If you are running Qemu on RHEL or a RHEL variant such as CentOS, you
-    *must* choose one of the other listed interfaces. Using the "scsi"
+    *must* choose one of the other listed interfaces. Using the `scsi`
     interface under these circumstances will cause the build to fail.
 
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
-    for the VM. By default, this is 40960 (40 GB).
+    for the VM. By default, this is `40960` (40 GB).
+
+-   `floppy_dirs` (array of strings) - A list of directories to place onto
+    the floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
+    The maximum summary size of all files in the listed directories are the
+    same as in `floppy_files`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -177,20 +185,12 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     listed files must not exceed 1.44 MB. The supported ways to move large
     files into the OS are using `http_directory` or [the file provisioner](https://www.packer.io/docs/provisioners/file.html).
 
--   `floppy_dirs` (array of strings) - A list of directories to place onto
-    the floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are allowed.
-    The maximum summary size of all files in the listed directories are the
-    same as in `floppy_files`.
-
--   `format` (string) - Either "qcow2" or "raw", this specifies the output
+-   `format` (string) - Either `qcow2` or `raw`, this specifies the output
     format of the virtual machine image. This defaults to `qcow2`.
 
 -   `headless` (boolean) - Packer defaults to building QEMU virtual machines by
     launching a GUI that shows the console of the machine being built. When this
-    value is set to true, the machine will start without a console.
+    value is set to `true`, the machine will start without a console.
 
     You can still see the console if you make a note of the VNC display
     number chosen, and then connect using `vncviewer -Shared <host>:<display>`
@@ -198,22 +198,23 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `http_directory` (string) - Path to a directory to serve using an
     HTTP server. The files in this directory will be available over HTTP that
     will be requestable from the virtual machine. This is useful for hosting
-    kickstart files and so on. By default this is "", which means no HTTP server
-    will be started. The address and port of the HTTP server will be available
-    as variables in `boot_command`. This is covered in more detail below.
+    kickstart files and so on. By default this is an empty string, which means
+    no HTTP server will be started. The address and port of the HTTP server will
+    be available as variables in `boot_command`. This is covered in more detail
+    below.
 
 -   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want
     to force the HTTP server to be on one port, make this minimum and maximum
-    port the same. By default the values are 8000 and 9000, respectively.
+    port the same. By default the values are `8000` and `9000`, respectively.
 
 -   `iso_skip_cache` (boolean) - Use iso from provided url. Qemu must support
     curl block device. This defaults to `false`.
 
 -   `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to "iso".
+    download. This defaults to `iso`.
 
 -   `iso_target_path` (string) - The path where the iso should be saved after
     download. By default will go in the packer cache, with a hash of the
@@ -227,25 +228,25 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `machine_type` (string) - The type of machine emulation to use. Run your
     qemu binary with the flags `-machine help` to list available types for
-    your system. This defaults to "pc".
+    your system. This defaults to `pc`.
 
 -   `net_device` (string) - The driver to use for the network interface. Allowed
-    values "ne2k\_pci", "i82551", "i82557b", "i82559er", "rtl8139", "e1000",
-    "pcnet", "virtio", "virtio-net", "virtio-net-pci", "usb-net", "i82559a",
-    "i82559b", "i82559c", "i82550", "i82562", "i82557a", "i82557c", "i82801",
-    "vmxnet3", "i82558a" or "i82558b". The Qemu builder uses "virtio-net" by
+    values `ne2k_pci`, `i82551`, `i82557b`, `i82559er`, `rtl8139`, `e1000`,
+    `pcnet`, `virtio`, `virtio-net`, `virtio-net-pci`, `usb-net`, `i82559a`,
+    `i82559b`, `i82559c`, `i82550`, `i82562`, `i82557a`, `i82557c`, `i82801`,
+    `vmxnet3`, `i82558a` or `i82558b`. The Qemu builder uses `virtio-net` by
     default.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
     is executed. This directory must not exist or be empty prior to running
-    the builder. By default this is "output-BUILDNAME" where "BUILDNAME" is the
+    the builder. By default this is `output-BUILDNAME` where "BUILDNAME" is the
     name of the build.
 
 -   `qemu_binary` (string) - The name of the Qemu binary to look for. This
-    defaults to "qemu-system-x86\_64", but may need to be changed for
-    some platforms. For example "qemu-kvm", or "qemu-system-i386" may be a
+    defaults to `qemu-system-x86_64`, but may need to be changed for
+    some platforms. For example `qemu-kvm`, or `qemu-system-i386` may be a
     better choice for some systems.
 
 -   `qemuargs` (array of array of strings) - Allows complete control over the
@@ -314,7 +315,7 @@ default port of `5985` or whatever value you have the service set to listen on.
 
 -   `use_default_display` (boolean) - If true, do not pass a `-display` option
     to qemu, allowing it to choose the default. This may be needed when running
-    under OS X, and getting errors about `sdl` not being available.
+    under macOS, and getting errors about `sdl` not being available.
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
@@ -327,31 +328,32 @@ default port of `5985` or whatever value you have the service set to listen on.
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
-    `5m`, or five minutes.
+    `5m` or five minutes.
 
--   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using `qemu-img convert`.
-    Set this option to `true` to disable compacting. Defaults to `false`.
+-   `skip_compaction` (boolean) - Packer compacts the QCOW2 image using
+    `qemu-img convert`.  Set this option to `true` to disable compacting.
+    Defaults to `false`.
 
 -   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
     Packer will choose a randomly available port in this range to use as the
-    host port. By default this is 2222 to 4444.
+    host port. By default this is `2222` to `4444`.
 
 -   `vm_name` (string) - This is the name of the image (QCOW2 or IMG) file for
-    the new virtual machine. By default this is "packer-BUILDNAME", where
-    `BUILDNAME` is the name of the build. Currently, no file extension will be
+    the new virtual machine. By default this is `packer-BUILDNAME`, where
+    "BUILDNAME" is the name of the build. Currently, no file extension will be
     used unless it is specified in this option.
 
--   `vnc_bind_address` (string / IP address) - The IP address that should be binded
-    to for VNC. By default packer will use 127.0.0.1 for this. If you wish to bind
-    to all interfaces use 0.0.0.0
+-   `vnc_bind_address` (string / IP address) - The IP address that should be
+    binded to for VNC. By default packer will use `127.0.0.1` for this. If you
+    wish to bind to all interfaces use `0.0.0.0`.
 
 -   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
     the initial `boot_command`. Because Packer generally runs in parallel,
     Packer uses a randomly chosen port in this range that appears available. By
-    default this is 5900 to 6000. The minimum and maximum ports are inclusive.
+    default this is `5900` to `6000`. The minimum and maximum ports are inclusive.
 
 ## Boot Command
 
