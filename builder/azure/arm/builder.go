@@ -177,7 +177,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
 			&StepSaveWinRMPassword{
-				Password: b.config.tmpAdminPassword,
+				Password:  b.config.tmpAdminPassword,
+				BuildName: b.config.PackerBuildName,
 			},
 			&communicator.StepConnectWinRM{
 				Config: &b.config.Comm,
