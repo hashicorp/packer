@@ -18,14 +18,70 @@ type StepCloneVMX struct {
 	VMName    string
 }
 
+type vmxAdapter struct {
+	// The string portion of the address used in the vmx file
+	strAddr string
+	// Max address for adapter, controller, or controller channel
+	aAddrMax int
+	// Max address for device or channel supported by adapter
+	dAddrMax int
+}
+
+const (
+	// VMware Configuration Maximums - Virtual Hardware Versions 13/14
+	//
+	// Specifying the max numbers for the adapter/controller:bus/channel
+	// *address* as opposed to specifying the maximums as per the VMware
+	// documentation allows consistent (inclusive) treatment when looping
+	// over each adapter/controller type
+	//
+	// SCSI - Address range: scsi0:0 to scsi3:15
+	scsiAddrName       = "scsi" // String part of address used in the vmx file
+	maxSCSIAdapterAddr = 3      // Max 4 adapters
+	maxSCSIDeviceAddr  = 15     // Max 15 devices per adapter; ID 7 is the HBA
+	// SATA - Address range: sata0:0 to scsi3:29
+	sataAddrName       = "sata" // String part of address used in the vmx file
+	maxSATAAdapterAddr = 3      // Max 4 controllers
+	maxSATADeviceAddr  = 29     // Max 30 devices per controller
+	// NVMe - Address range: nvme0:0 to nvme3:14
+	nvmeAddrName       = "nvme" // String part of address used in the vmx file
+	maxNVMeAdapterAddr = 3      // Max 4 adapters
+	maxNVMeDeviceAddr  = 14     // Max 15 devices per adapter
+	// IDE - Address range: ide0:0 to ide1:1
+	ideAddrName       = "ide" // String part of address used in the vmx file
+	maxIDEAdapterAddr = 1     // One controller with primary/secondary channels
+	maxIDEDeviceAddr  = 1     // Each channel supports master and slave
+)
+
+var (
+	scsiAdapter = vmxAdapter{
+		strAddr:  scsiAddrName,
+		aAddrMax: maxSCSIAdapterAddr,
+		dAddrMax: maxSCSIDeviceAddr,
+	}
+	sataAdapter = vmxAdapter{
+		strAddr:  sataAddrName,
+		aAddrMax: maxSATAAdapterAddr,
+		dAddrMax: maxSATADeviceAddr,
+	}
+	nvmeAdapter = vmxAdapter{
+		strAddr:  nvmeAddrName,
+		aAddrMax: maxNVMeAdapterAddr,
+		dAddrMax: maxNVMeDeviceAddr,
+	}
+	ideAdapter = vmxAdapter{
+		strAddr:  ideAddrName,
+		aAddrMax: maxIDEAdapterAddr,
+		dAddrMax: maxIDEDeviceAddr,
+	}
+)
+
 func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	// initially we need to stash the path to the original .vmx file
+	// Set the path we want for the new .vmx file and clone
 	vmxPath := filepath.Join(s.OutputDir, s.VMName+".vmx")
-
-	// so first, let's clone the source path to the vmxPath
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
@@ -33,34 +89,44 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	ui.Say(fmt.Sprintf("Successfully cloned source VM to: %s", vmxPath))
 
-	// now we read the .vmx so we can determine what else to stash
+	// Read in the machine configuration from the cloned VMX file
+	//
+	// * The main driver needs the path to the vmx (set above) and the
+	// network type so that it can work out things like IP's and MAC
+	// addresses
+	// * The disk compaction step needs the paths to all attached disks
 	vmxData, err := vmwcommon.ReadVMX(vmxPath)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
-	// figure out the disk filename by walking through all device types
-	var diskName string
-	if _, ok := vmxData["scsi0:0.filename"]; ok {
-		diskName = vmxData["scsi0:0.filename"]
+	// Search across all adapter types to get the filenames of attached disks
+	allDiskAdapters := []vmxAdapter{
+		scsiAdapter,
+		sataAdapter,
+		nvmeAdapter,
+		ideAdapter,
 	}
-	if _, ok := vmxData["sata0:0.filename"]; ok {
-		diskName = vmxData["sata0:0.filename"]
+	var diskFilenames []string
+	for _, adapter := range allDiskAdapters {
+		diskFilenames = append(diskFilenames, getAttachedDisks(adapter, vmxData)...)
 	}
-	if _, ok := vmxData["ide0:0.filename"]; ok {
-		diskName = vmxData["ide0:0.filename"]
+
+	// Write out the relative, host filesystem paths to the disks
+	var diskFullPaths []string
+	for _, diskFilename := range diskFilenames {
+		log.Printf("Found attached disk with filename: %s", diskFilename)
+		diskFullPaths = append(diskFullPaths, filepath.Join(s.OutputDir, diskFilename))
 	}
-	if diskName == "" {
-		err := fmt.Errorf("Root disk filename could not be found!")
-		state.Put("error", err)
+
+	if len(diskFullPaths) == 0 {
+		state.Put("error", fmt.Errorf("Could not enumerate disk info from the vmx file"))
 		return multistep.ActionHalt
 	}
-	log.Printf("Found root disk filename: %s", diskName)
 
-	// determine the network type by reading out of the .vmx
+	// Determine the network type by reading out of the .vmx
 	var networkType string
 	if _, ok := vmxData["ethernet0.connectiontype"]; ok {
 		networkType = vmxData["ethernet0.connectiontype"]
@@ -70,15 +136,31 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		networkType = "nat"
 		log.Printf("Defaulting to network type: %s", networkType)
 	}
-	ui.Say(fmt.Sprintf("Using network type: %s", networkType))
 
-	// we were able to find everything, so stash it in our state.
+	// Stash all required information in our state bag
 	state.Put("vmx_path", vmxPath)
-	state.Put("full_disk_path", filepath.Join(s.OutputDir, diskName))
+	// What disks get assigned to what key doesn't actually matter here
+	// since it's unimportant to the way the disk compaction step works
+	state.Put("full_disk_path", diskFullPaths[0])
+	state.Put("additional_disk_paths", diskFullPaths[1:])
 	state.Put("vmnetwork", networkType)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepCloneVMX) Cleanup(state multistep.StateBag) {
+}
+
+func getAttachedDisks(a vmxAdapter, data map[string]string) (attachedDisks []string) {
+	// Loop over possible adapter, controller or controller channel
+	for x := 0; x <= a.aAddrMax; x++ {
+		// Loop over possible addresses for attached devices
+		for y := 0; y <= a.dAddrMax; y++ {
+			address := fmt.Sprintf("%s%d:%d.filename", a.strAddr, x, y)
+			if device, _ := data[address]; filepath.Ext(device) == ".vmdk" {
+				attachedDisks = append(attachedDisks, device)
+			}
+		}
+	}
+	return
 }
