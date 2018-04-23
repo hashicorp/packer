@@ -50,7 +50,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	if running, _ := driver.IsRunning(s.vmName); running {
-		if err := driver.Prlctl("stop", s.vmName); err != nil {
+		if err := driver.Stop(s.vmName); err != nil {
 			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 		}
 	}
