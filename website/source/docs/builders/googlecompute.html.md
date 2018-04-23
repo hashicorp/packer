@@ -120,8 +120,12 @@ is assumed to be the path to the file containing the JSON.
 
 ### Windows Example
 
-Running WinRM requires that it is opened in the firewall and that the VM enables WinRM for the
-user used to connect in a startup-script.
+Before you can provision using the winrm communicator, you need to navigate to
+https://console.cloud.google.com/networking/firewalls/list to allow traffic
+through google's firewall on the winrm port (tcp:5986).
+
+Once this is set up, the following is a complete working packer config after
+setting a valid `account_file` and `project_id`:
 
 ``` {.json}
 {
