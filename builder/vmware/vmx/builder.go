@@ -32,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 // Run executes a Packer build and returns a packer.Artifact representing
-// a VirtualBox appliance.
+// a VMware image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig)
 	if err != nil {
