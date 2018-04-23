@@ -3,18 +3,10 @@ package bootcommand
 import (
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func toIfaceSlice(v interface{}) []interface{} {
-	if v == nil {
-		return nil
-	}
-	return v.([]interface{})
-}
 
 func Test_parse(t *testing.T) {
 	in := "<wait><wait20><wait3s><wait4m2ns>"
@@ -58,14 +50,13 @@ func Test_parse(t *testing.T) {
 		"Spec-Press(rightsuper)",
 	}
 
-	got, err := ParseReader("", strings.NewReader(in))
+	seq, err := GenerateExpressionSequence(in)
 	if err != nil {
 		log.Fatal(err)
 	}
-	gL := toIfaceSlice(got)
-	for i, g := range gL {
-		assert.Equal(t, expected[i], fmt.Sprintf("%s", g))
-		log.Printf("%s\n", g)
+	for i, exp := range seq {
+		assert.Equal(t, expected[i], fmt.Sprintf("%s", exp))
+		log.Printf("%s\n", exp)
 	}
 }
 
@@ -88,14 +79,12 @@ func Test_special(t *testing.T) {
 		},
 	}
 	for _, tt := range specials {
-		got, err := ParseReader("", strings.NewReader(tt.in))
+		seq, err := GenerateExpressionSequence(tt.in)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		gL := toIfaceSlice(got)
-		for _, g := range gL {
-			assert.Equal(t, tt.out, g.(*specialExpression).String())
+		for _, exp := range seq {
+			assert.Equal(t, tt.out, exp.(*specialExpression).String())
 		}
 	}
 }
@@ -123,14 +112,13 @@ func Test_validation(t *testing.T) {
 		},
 	}
 	for _, tt := range expressions {
-		got, err := ParseReader("", strings.NewReader(tt.in))
+		exp, err := GenerateExpressionSequence(tt.in)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		gL := toIfaceSlice(got)
-		assert.Len(t, gL, 1)
-		err = gL[0].(expression).Validate()
+		assert.Len(t, exp, 1)
+		err = exp[0].Validate()
 		if tt.valid {
 			assert.NoError(t, err)
 		} else {
