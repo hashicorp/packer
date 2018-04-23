@@ -16,7 +16,7 @@ type StepStopEBSBackedInstance struct {
 	DisableStopInstance bool
 }
 
-func (s *StepStopEBSBackedInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
@@ -78,7 +78,7 @@ func (s *StepStopEBSBackedInstance) Run(_ context.Context, state multistep.State
 
 	// Wait for the instance to actually stop
 	ui.Say("Waiting for the instance to stop...")
-	err = ec2conn.WaitUntilInstanceStopped(&ec2.DescribeInstancesInput{
+	err = ec2conn.WaitUntilInstanceStoppedWithContext(ctx, &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{instance.InstanceId},
 	})
 
