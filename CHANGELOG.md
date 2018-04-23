@@ -11,6 +11,7 @@
 * builder/amazon: Setting `force_delete` will only delete AMIs owned by the
   user. This should prevent failures where we try to delete an AMI with
   a matching name, but owned by someone else. [GH-6111]
+* builder/openstack: Add configuration option for `instance_name`. [GH-6041]
 
 ## 1.2.2 (March 26, 2018)
 
