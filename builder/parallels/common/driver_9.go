@@ -222,7 +222,7 @@ func (d *Parallels9Driver) IsRunning(name string) (bool, error) {
 
 // Stop forcibly stops the VM.
 func (d *Parallels9Driver) Stop(name string) error {
-	if err := d.Prlctl("stop", name); err != nil {
+	if err := d.Prlctl("stop", name, "--kill"); err != nil {
 		return err
 	}
 
@@ -275,7 +275,6 @@ func (d *Parallels9Driver) Version() (string, error) {
 	}
 
 	version := matches[1]
-	log.Printf("Parallels Desktop version: %s", version)
 	return version, nil
 }
 
