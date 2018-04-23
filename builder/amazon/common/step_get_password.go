@@ -21,9 +21,10 @@ import (
 // StepGetPassword reads the password from a Windows server and sets it
 // on the WinRM config.
 type StepGetPassword struct {
-	Debug   bool
-	Comm    *communicator.Config
-	Timeout time.Duration
+	Debug     bool
+	Comm      *communicator.Config
+	Timeout   time.Duration
+	BuildName string
 }
 
 func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -94,13 +95,13 @@ WaitLoop:
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
 	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword)
+	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepGetPassword) Cleanup(multistep.StateBag) {
-	commonhelper.RemoveSharedStateFile("winrm_password")
+	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
 }
 
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
