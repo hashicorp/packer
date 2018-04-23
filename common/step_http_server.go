@@ -76,20 +76,20 @@ func (s *StepHTTPServer) Run(_ context.Context, state multistep.StateBag) multis
 }
 
 func SetHTTPPort(port string) error {
-	return common.SetSharedState("port", port)
+	return common.SetSharedState("port", port, "")
 }
 
 func SetHTTPIP(ip string) error {
-	return common.SetSharedState("ip", ip)
+	return common.SetSharedState("ip", ip, "")
 }
 
 func GetHTTPAddr() string {
-	ip, err := common.RetrieveSharedState("ip")
+	ip, err := common.RetrieveSharedState("ip", "")
 	if err != nil {
 		return ""
 	}
 
-	port, err := common.RetrieveSharedState("port")
+	port, err := common.RetrieveSharedState("port", "")
 	if err != nil {
 		return ""
 	}
@@ -101,6 +101,6 @@ func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 		// Close the listener so that the HTTP server stops
 		s.l.Close()
 	}
-	common.RemoveSharedStateFile("port")
-	common.RemoveSharedStateFile("ip")
+	common.RemoveSharedStateFile("port", "")
+	common.RemoveSharedStateFile("ip", "")
 }
