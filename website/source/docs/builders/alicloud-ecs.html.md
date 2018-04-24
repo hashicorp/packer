@@ -67,7 +67,7 @@ builder.
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with `http://` or `https://`.
 
--   `image_disk_mappings` (array of image disk mappings) - Add one or more data disks
+-   `image_disk_mappings` (array of image disk mappings) - Add one or more data disks
     to the image.
 
     -   `disk_category` (string) - Category of the data disk. Optional values are:
@@ -77,7 +77,7 @@ builder.
 
         Default value: cloud.
 
-    -   `disk_delete_with_instance` (string) - Whether or not the disk is released along with the instance:
+    -   `disk_delete_with_instance` (boolean) - Whether or not the disk is released along with the instance:
         -   True indicates that when the instance is released, this disk will be released with it
         -   False indicates that when the instance is released, this disk will be retained.
 
