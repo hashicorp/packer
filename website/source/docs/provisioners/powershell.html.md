@@ -73,7 +73,7 @@ Optional parameters:
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the
     environment, as well, which are covered in the section below.
-    If you are running on AWS or Azure and would like to access the generated
+    If you are running on AWS, Azure or Google Compute and would like to access the generated
     password that Packer uses to connect to the instance via
     WinRM, you can use the template variable `{{.WinRMPassword}}` to set this
     as an environment variable. For example:
@@ -101,8 +101,8 @@ Optional parameters:
 
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
-    Windows user. If you are running a build on AWS and would like to run using
-    the AWS-generated password that Packer uses to connect to the instance via,
+    Windows user. If you are running a build on AWS, Azure or Google Compute and would like to run using
+    the generated password that Packer uses to connect to the instance via,
     WinRM, you may do so by using the template variable {{.WinRMPassword}}.
     For example:
 
