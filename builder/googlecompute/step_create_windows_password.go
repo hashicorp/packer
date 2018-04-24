@@ -113,7 +113,7 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 	}
 
 	state.Put("winrm_password", data.password)
-	commonhelper.SetSharedState("winrm_password", data.password)
+	commonhelper.SetSharedState("winrm_password", data.password, c.PackerConfig.PackerBuildName)
 
 	return multistep.ActionContinue
 }
