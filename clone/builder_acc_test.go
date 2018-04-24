@@ -441,7 +441,7 @@ func sshKeyConfig() string {
 	config := defaultConfig()
 	config["communicator"] = "ssh"
 	config["ssh_username"] = "root"
-	config["ssh_private_key_file"] = "../test-key.pem"
+	config["ssh_private_key_file"] = "../test/test-key.pem"
 	return commonT.RenderConfig(config)
 }
 
