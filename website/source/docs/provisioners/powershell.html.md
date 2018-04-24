@@ -102,7 +102,7 @@ Optional parameters:
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
     Windows user. If you are running a build on AWS, Azure or Google Compute and would like to run using
-    the generated password that Packer uses to connect to the instance via,
+    the generated password that Packer uses to connect to the instance via 
     WinRM, you may do so by using the template variable {{.WinRMPassword}}.
     For example:
 
