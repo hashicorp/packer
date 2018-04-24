@@ -6,33 +6,32 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-
-	client "github.com/hashicorp/packer/builder/oracle/oci/client"
 )
 
 // TODO(apryde): It would be good not to have to write a key file to disk to
 // load the config.
 func baseTestConfig() *Config {
-	_, keyFile, err := client.BaseTestConfig()
+	_, keyFile, err := baseTestConfigWithTmpKeyFile()
 	if err != nil {
 		panic(err)
 	}
 
 	cfg, err := NewConfig(map[string]interface{}{
-		"availability_domain": "aaaa:PHX-AD-3",
+		"availability_domain": "aaaa:US-ASHBURN-AD-1",
 
 		// Image
-		"base_image_ocid": "ocd1...",
+		"base_image_ocid": "ocid1.image.oc1.iad.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 		"shape":           "VM.Standard1.1",
 		"image_name":      "HelloWorld",
+		"region":          "us-ashburn-1",
 
 		// Networking
-		"subnet_ocid": "ocd1...",
+		"subnet_ocid": "ocid1.subnet.oc1.iad.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 
 		// AccessConfig
-		"user_ocid":    "ocid1...",
-		"tenancy_ocid": "ocid1...",
-		"fingerprint":  "00:00...",
+		"user_ocid":    "ocid1.user.oc1..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		"tenancy_ocid": "ocid1.tenancy.oc1..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		"fingerprint":  "70:04:5z:b3:19:ab:90:75:a4:1f:50:d4:c7:c3:33:20",
 		"key_file":     keyFile.Name(),
 
 		// Comm
