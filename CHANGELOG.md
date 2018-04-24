@@ -4,12 +4,14 @@
 
 * post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS X. [GH-6084]
 * builder/scaleway: Fix compilation issues on solaris/amd64. [GH-6069]
+* common/bootcommand: Fix numerous bugs in the boot command code, and make supported features consistent across builders. [GH-6129]
 
 ### IMPROVEMENTS:
 
 * builder/amazon: Setting `force_delete` will only delete AMIs owned by the
   user. This should prevent failures where we try to delete an AMI with
   a matching name, but owned by someone else. [GH-6111]
+* builder/openstack: Add configuration option for `instance_name`. [GH-6041]
 
 ## 1.2.2 (March 26, 2018)
 

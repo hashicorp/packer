@@ -359,7 +359,7 @@ func setRuntimeValues(c *Config) {
 
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword)
+	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
 
 	c.tmpCertificatePassword = tempName.CertificatePassword
 	if c.TempComputeName == "" {
