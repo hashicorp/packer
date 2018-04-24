@@ -85,9 +85,9 @@ askSubscription() {
     if [ "$azure_subscription_id" != "" ]; then
         az account set --subscription $azure_subscription_id
     else
-        azure_subscription_id=$(az account list | jq -r '.[] | select(.isDefault==true) | .id')
+        azure_subscription_id=$(az account list --output json | jq -r '.[] | select(.isDefault==true) | .id')
     fi
-    azure_tenant_id=$(az account list | jq -r '.[] | select(.id=="'$azure_subscription_id'") |  .tenantId')
+    azure_tenant_id=$(az account list --output json | jq -r '.[] | select(.id=="'$azure_subscription_id'") |  .tenantId')
     echo "Using subscription_id: $azure_subscription_id"
     echo "Using tenant_id: $azure_tenant_id"
 }
@@ -152,14 +152,14 @@ createStorageAccount() {
 createApplication() {
     echo "==> Creating application"
     echo "==> Does application exist?"
-    azure_client_id=$(az ad app list | jq -r '.[] | select(.displayName | contains("'$meta_name'")) ')
-    
+    azure_client_id=$(az ad app list --output json | jq -r '.[] | select(.displayName | contains("'$meta_name'")) ')
+
     if [ "$azure_client_id" != "" ]; then
         echo "==> application already exist, grab appId"
-        azure_client_id=$(az ad app list | jq -r '.[] | select(.displayName | contains("'$meta_name'")) .appId')
+        azure_client_id=$(az ad app list az ad app list --output json | jq -r '.[] | select(.displayName | contains("'$meta_name'")) .appId')
     else
         echo "==> application does not exist"
-        azure_client_id=$(az ad app create --display-name $meta_name --identifier-uris http://$meta_name --homepage http://$meta_name --password $azure_client_secret | jq -r .appId)
+        azure_client_id=$(az ad app create --display-name $meta_name --identifier-uris http://$meta_name --homepage http://$meta_name --password $azure_client_secret --output json | jq -r .appId)
     fi
 
     if [ $? -ne 0 ]; then
@@ -170,7 +170,7 @@ createApplication() {
 
 createServicePrincipal() {
     echo "==> Creating service principal"
-    azure_object_id=$(az ad sp create --id $azure_client_id | jq -r .objectId)
+    azure_object_id=$(az ad sp create --id $azure_client_id --output json | jq -r .objectId)
     echo $azure_object_id "was selected."
 
     if [ $? -ne 0 ]; then

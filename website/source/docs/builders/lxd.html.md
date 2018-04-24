@@ -30,7 +30,7 @@ Below is a fully functioning example.
       "type": "lxd",
       "name": "lxd-xenial",
       "image": "ubuntu-daily:xenial",
-      "output_image": "ubuntu-xenial"
+      "output_image": "ubuntu-xenial",
       "publish_properties": {
         "description": "Trivial repackage with Packer"
       }

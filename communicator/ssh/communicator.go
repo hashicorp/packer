@@ -410,27 +410,6 @@ func (c *comm) sftpUploadSession(path string, input io.Reader, fi *os.FileInfo) 
 
 func (c *comm) sftpUploadFile(path string, input io.Reader, client *sftp.Client, fi *os.FileInfo) error {
 	log.Printf("[DEBUG] sftp: uploading %s", path)
-
-	// find out if destination is a directory (this is to replicate rsync behavior)
-	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
-
-	cmd := &packer.RemoteCmd{
-		Command: testDirectoryCommand,
-	}
-
-	err := c.Start(cmd)
-
-	if err != nil {
-		log.Printf("[ERROR] Unable to check whether remote path is a dir: %s", err)
-		return err
-	}
-	cmd.Wait()
-	if cmd.ExitStatus == 0 {
-		return fmt.Errorf(
-			"Destination path (%s) is a directory that already exists. "+
-				"Please ensure the destination is writable.", path)
-	}
-
 	f, err := client.Create(path)
 	if err != nil {
 		return err
@@ -585,34 +564,6 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
-
-	// find out if destination is a directory (this is to replicate rsync behavior)
-	testDirectoryCommand := fmt.Sprintf(`test -d "%s"`, path)
-	var stdout, stderr bytes.Buffer
-	cmd := &packer.RemoteCmd{
-		Command: testDirectoryCommand,
-		Stdout:  &stdout,
-		Stderr:  &stderr,
-	}
-
-	err := c.Start(cmd)
-
-	if err != nil {
-		log.Printf("[ERROR] Unable to check whether remote path is a dir: %s", err)
-		return err
-	}
-	cmd.Wait()
-	if stdout.Len() > 0 {
-		return fmt.Errorf("%s", stdout.Bytes())
-	}
-	if stderr.Len() > 0 {
-		return fmt.Errorf("%s", stderr.Bytes())
-	}
-	if cmd.ExitStatus == 0 {
-		return fmt.Errorf(
-			"Destination path (%s) is a directory that already exists. "+
-				"Please ensure the destination is writable.", path)
-	}
 
 	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
