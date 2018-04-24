@@ -15,7 +15,8 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	state.Put("full_disk_path", "foo")
+	diskPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -41,7 +42,8 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.Skip = true
 
-	state.Put("full_disk_path", "foo")
+	diskPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
