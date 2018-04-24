@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -18,8 +17,6 @@ import (
 //
 // Produces:
 type StepRun struct {
-	BootWait time.Duration
-
 	vmName string
 }
 
@@ -40,22 +37,6 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 	s.vmName = vmName
 
-	if int64(s.BootWait) > 0 {
-		ui.Say(fmt.Sprintf("Waiting %s for boot...", s.BootWait))
-		wait := time.After(s.BootWait)
-	WAITLOOP:
-		for {
-			select {
-			case <-wait:
-				break WAITLOOP
-			case <-time.After(1 * time.Second):
-				if _, ok := state.GetOk(multistep.StateCancelled); ok {
-					return multistep.ActionHalt
-				}
-			}
-		}
-	}
-
 	return multistep.ActionContinue
 }
 
@@ -69,7 +50,7 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 
 	if running, _ := driver.IsRunning(s.vmName); running {
-		if err := driver.Prlctl("stop", s.vmName); err != nil {
+		if err := driver.Stop(s.vmName); err != nil {
 			ui.Error(fmt.Sprintf("Error stopping VM: %s", err))
 		}
 	}

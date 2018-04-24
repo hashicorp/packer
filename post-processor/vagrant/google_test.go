@@ -1,9 +1,10 @@
 package vagrant
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestGoogleProvider_impl(t *testing.T) {

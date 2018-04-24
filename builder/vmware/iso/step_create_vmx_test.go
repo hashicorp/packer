@@ -12,10 +12,11 @@ import (
 	"strconv"
 	"strings"
 
+	"testing"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/shell"
 	"github.com/hashicorp/packer/template"
-	"testing"
 )
 
 var vmxTestBuilderConfig = map[string]string{
