@@ -1089,6 +1089,13 @@
 			"revisionTime": "2018-01-05T11:11:33Z"
 		},
 		{
+			"checksumSHA1": "/LfGOK58LAN5bN/kVhyjw6prFuw=",
+			"path": "github.com/oracle/oci-go-sdk",
+			"revision": "36126af3da60f6d2053487efed8801aa794f7605",
+			"revisionTime": "2018-03-02T19:49:46Z",
+			"tree": true
+		},
+		{
 			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
 			"revision": "81144009af586de8e7729b829266f09dd0d59701",
