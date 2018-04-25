@@ -10,9 +10,8 @@ import (
 )
 
 type StepRemoveFloppy struct {
-	Datastore          string
-	Host               string
-	UploadedFloppyPath string
+	Datastore string
+	Host      string
 }
 
 func (s *StepRemoveFloppy) Run(state multistep.StateBag) multistep.StepAction {
@@ -20,25 +19,35 @@ func (s *StepRemoveFloppy) Run(state multistep.StateBag) multistep.StepAction {
 	vm := state.Get("vm").(*driver.VirtualMachine)
 	d := state.Get("driver").(*driver.Driver)
 
+	var UploadedFloppyPath string
+	switch s := state.Get("uploaded_floppy_path").(type) {
+	case string:
+		UploadedFloppyPath = s
+	case nil:
+		UploadedFloppyPath = ""
+	}
+
+	ui.Say("Deleting Floppy drives...")
 	devices, err := vm.Devices()
 	if err != nil {
 		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
 		return multistep.ActionHalt
 	}
-	cdroms := devices.SelectByType((*types.VirtualFloppy)(nil))
-	if err = vm.RemoveDevice(false, cdroms...); err != nil {
+	floppies := devices.SelectByType((*types.VirtualFloppy)(nil))
+	if err = vm.RemoveDevice(false, floppies...); err != nil {
 		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
 		return multistep.ActionHalt
 	}
 
-	if s.UploadedFloppyPath != "" {
+	if UploadedFloppyPath != "" {
+		ui.Say("Deleting Floppy image...")
 		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-		if err := ds.Delete(s.UploadedFloppyPath); err != nil {
-			ui.Error(fmt.Sprintf("Error deleting floppy image '%v': %v", s.UploadedFloppyPath, err.Error()))
+		if err := ds.Delete(UploadedFloppyPath); err != nil {
+			ui.Error(fmt.Sprintf("Error deleting floppy image '%v': %v", UploadedFloppyPath, err.Error()))
 			return multistep.ActionHalt
 		}
 	}

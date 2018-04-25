@@ -30,8 +30,6 @@ type StepAddFloppy struct {
 	Config    *FloppyConfig
 	Datastore string
 	Host      string
-
-	uploadedFloppyPath string
 }
 
 func (s *StepAddFloppy) Run(state multistep.StateBag) multistep.StepAction {
@@ -65,9 +63,8 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 		if err := ds.UploadFile(tmpFloppy.(string), uploadPath); err != nil {
 			return fmt.Errorf("error uploading floppy image: %v", err)
 		}
+		state.Put("uploaded_floppy_path", uploadPath)
 
-		// remember the path to the temporary floppy image to remove it after the build is finished
-		s.uploadedFloppyPath = uploadPath
 		floppyIMGPath := ds.ResolvePath(uploadPath)
 		ui.Say("Adding generated Floppy...")
 		err = vm.AddFloppy(floppyIMGPath)

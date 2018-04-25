@@ -32,12 +32,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 
-	var stepAddFloppy = &StepAddFloppy{
-		Config:    &b.config.FloppyConfig,
-		Datastore: b.config.Datastore,
-		Host:      b.config.Host,
-	}
-
 	steps = append(steps,
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
@@ -52,7 +46,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyDirectories,
 		},
-		stepAddFloppy,
+		&StepAddFloppy{
+			Config:    &b.config.FloppyConfig,
+			Datastore: b.config.Datastore,
+			Host:      b.config.Host,
+		},
 		&StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
@@ -82,9 +80,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		&StepRemoveCDRom{},
 		&StepRemoveFloppy{
-			Datastore:          b.config.Datastore,
-			Host:               b.config.Host,
-			UploadedFloppyPath: stepAddFloppy.uploadedFloppyPath,
+			Datastore: b.config.Datastore,
+			Host:      b.config.Host,
 		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
