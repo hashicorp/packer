@@ -85,6 +85,12 @@ func TestStepShutdown_command(t *testing.T) {
 	if comm.StartCmd.Command != "foo" {
 		t.Fatalf("bad: %#v", comm.StartCmd.Command)
 	}
+
+	// Clean up the created test output directory
+	dir := state.Get("dir").(*LocalOutputDir)
+	if err := dir.RemoveAll(); err != nil {
+		t.Fatalf("Error cleaning up directory: %s", err)
+	}
 }
 
 func TestStepShutdown_noCommand(t *testing.T) {
@@ -112,6 +118,12 @@ func TestStepShutdown_noCommand(t *testing.T) {
 
 	if comm.StartCalled {
 		t.Fatal("start should not be called")
+	}
+
+	// Clean up the created test output directory
+	dir := state.Get("dir").(*LocalOutputDir)
+	if err := dir.RemoveAll(); err != nil {
+		t.Fatalf("Error cleaning up directory: %s", err)
 	}
 }
 
