@@ -30,6 +30,8 @@ func TestStepOutputDir(t *testing.T) {
 	step := new(StepOutputDir)
 
 	dir := testOutputDir(t)
+	// Delete the test output directory when done
+	defer os.RemoveAll(dir.dir)
 	state.Put("dir", dir)
 
 	// Test the run
@@ -61,6 +63,7 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.RemoveAll(dir.dir)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
@@ -89,6 +92,7 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.RemoveAll(dir.dir)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
