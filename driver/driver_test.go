@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 	"math/rand"
+	"context"
 )
 
 // Defines whether acceptance tests should be run
 const TestHostName = "esxi-1.vsphere65.test"
 
 func newTestDriver(t *testing.T) *Driver {
-	d, err := NewDriver(&ConnectConfig{
+	d, err := NewDriver(context.TODO(), &ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           "root",
 		Password:           "jetbrains",

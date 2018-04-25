@@ -3,8 +3,9 @@ package iso
 import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"fmt"
+	"context"
 )
 
 type ConfigParamsConfig struct {
@@ -19,7 +20,7 @@ type StepConfigParams struct {
 	Config *ConfigParamsConfig
 }
 
-func (s *StepConfigParams) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigParams) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

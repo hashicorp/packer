@@ -1,12 +1,13 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"strings"
 	"time"
+	"context"
 )
 
 type RunConfig struct {
@@ -35,7 +36,7 @@ type StepRun struct {
 	Config *RunConfig
 }
 
-func (s *StepRun) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

@@ -1,11 +1,11 @@
 package iso
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
+	"fmt"
+	"context"
 )
 
 type CDRomConfig struct {
@@ -20,7 +20,7 @@ type StepAddCDRom struct {
 	Config *CDRomConfig
 }
 
-func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

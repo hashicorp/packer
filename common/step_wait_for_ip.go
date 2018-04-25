@@ -1,16 +1,17 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"fmt"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"time"
+	"context"
 )
 
 type StepWaitForIp struct{}
 
-func (s *StepWaitForIp) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

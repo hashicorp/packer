@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"errors"
 )
 

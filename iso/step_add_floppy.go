@@ -1,11 +1,11 @@
 package iso
 
 import (
-	"fmt"
-
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"fmt"
+	"context"
 )
 
 type FloppyConfig struct {
@@ -32,7 +32,7 @@ type StepAddFloppy struct {
 	Host      string
 }
 
-func (s *StepAddFloppy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	err := s.runImpl(state)
 	if err != nil {
 		state.Put("error", fmt.Errorf("error adding floppy: %v", err))
