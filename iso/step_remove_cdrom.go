@@ -5,13 +5,14 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/vmware/govmomi/vim25/types"
+	"context"
 )
 
 type StepRemoveCDRom struct{}
 
-func (s *StepRemoveCDRom) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

@@ -4,14 +4,15 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
+	"context"
 )
 
 type StepConfigureHardware struct {
 	config *common.HardwareConfig
 }
 
-func (s *StepConfigureHardware) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 

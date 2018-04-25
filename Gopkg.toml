@@ -1,6 +1,6 @@
 [[constraint]]
   name = "github.com/hashicorp/packer"
-  version = "=1.0.2"
+  version = "=1.2.2"
 
 [[override]]
   name = "github.com/masterzen/azure-sdk-for-go"

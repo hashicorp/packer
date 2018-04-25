@@ -1,13 +1,14 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"fmt"
 	"log"
 	"time"
 	"bytes"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"context"
 )
 
 type ShutdownConfig struct {
@@ -37,7 +38,7 @@ type StepShutdown struct {
 	Config *ShutdownConfig
 }
 
-func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
 	vm := state.Get("vm").(*driver.VirtualMachine)

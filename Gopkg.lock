@@ -80,8 +80,10 @@
     "communicator/ssh",
     "communicator/winrm",
     "helper/builder/testing",
+    "helper/common",
     "helper/communicator",
     "helper/config",
+    "helper/multistep",
     "packer",
     "packer/plugin",
     "packer/rpc",
@@ -89,8 +91,8 @@
     "template/interpolate",
     "version"
   ]
-  revision = "6a8ae4b258d1bb0beece05c9fc3bbc1c186a0480"
-  version = "v1.0.2"
+  revision = "ab8811dca8f375344f36dfc32710b9790b2ec03e"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
@@ -135,7 +137,7 @@
     ".",
     "fat"
   ]
-  revision = "7bae45d9a684750e82b97ff320c82556614e621b"
+  revision = "b7b9ca407ffff465de12fc37ccbb81ea8b428c43"
 
 [[projects]]
   branch = "master"
@@ -148,12 +150,6 @@
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/multistep"
-  packages = ["."]
-  revision = "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d"
 
 [[projects]]
   branch = "master"
@@ -182,14 +178,14 @@
 [[projects]]
   name = "github.com/pkg/sftp"
   packages = ["."]
-  revision = "49488377fa2f14143ba3067cf7555f60f6c7b550"
-  version = "1.5.0"
+  revision = "43ec6c679d353f6e077d3965dc74f6d996eb4a09"
+  version = "1.5.1"
 
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
-  version = "v1.1"
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/vmware/govmomi"
@@ -226,13 +222,13 @@
     "ssh",
     "ssh/agent"
   ]
-  revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
+  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/mobile"
   packages = ["event/key"]
-  revision = "598bfe4b20d39a660581f014b68e60c5ad425336"
+  revision = "1f177cbe4ddf911017472e9532c6ca3a99949d53"
 
 [[projects]]
   branch = "master"
@@ -240,9 +236,11 @@
   packages = [
     "html",
     "html/atom",
-    "html/charset"
+    "html/charset",
+    "internal/socks",
+    "proxy"
   ]
-  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
+  revision = "500e7a4f953ddaf55d316b4d3adc516aa0379622"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -271,6 +269,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "edb4fc0cd7c29895ef0cb47e8323311bacdba397dd57f12217ac8ea9dce6a31d"
+  inputs-digest = "20177d3d587549d23b3ddea4eefc1fc03aa3436c372843bc76f98052b25432b7"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -5,7 +5,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
+	"context"
 )
 
 type CreateConfig struct {
@@ -55,7 +56,7 @@ type StepCreateVM struct {
 	Config *CreateConfig
 }
 
-func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
 

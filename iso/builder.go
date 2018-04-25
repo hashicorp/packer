@@ -2,11 +2,11 @@ package iso
 
 import (
 	packerCommon "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 type Builder struct {

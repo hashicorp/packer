@@ -28,8 +28,7 @@ type ConnectConfig struct {
 	Datacenter         string
 }
 
-func NewDriver(config *ConnectConfig) (*Driver, error) {
-	ctx := context.TODO()
+func NewDriver(ctx context.Context, config *ConnectConfig) (*Driver, error) {
 
 	vcenter_url, err := url.Parse(fmt.Sprintf("https://%v/sdk", config.VCenterServer))
 	if err != nil {

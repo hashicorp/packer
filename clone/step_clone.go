@@ -1,11 +1,12 @@
 package clone
 
 import (
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
+	"context"
 )
 
 type CloneConfig struct {
@@ -28,7 +29,7 @@ type StepCloneVM struct {
 	config *CloneConfig
 }
 
-func (s *StepCloneVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
 

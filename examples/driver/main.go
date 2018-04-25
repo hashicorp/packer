@@ -3,10 +3,11 @@ package main
 import (
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"fmt"
+	"context"
 )
 
 func main() {
-	d, err := driver.NewDriver(&driver.ConnectConfig{
+	d, err := driver.NewDriver(context.TODO(), &driver.ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           "root",
 		Password:           "jetbrains",
