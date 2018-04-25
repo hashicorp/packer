@@ -60,6 +60,7 @@ func TestDownloadClient_basic(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	})
+	defer os.Remove(tf.Name())
 
 	path, err := client.Get()
 	if err != nil {
@@ -96,6 +97,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		Checksum:   checksum,
 		CopyFile:   true,
 	})
+	defer os.Remove(tf.Name())
 	if _, err := client.Get(); err == nil {
 		t.Fatal("should error")
 	}
@@ -121,6 +123,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		Checksum:   checksum,
 		CopyFile:   true,
 	})
+	defer os.Remove(tf.Name())
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -191,6 +194,7 @@ func TestDownloadClient_resume(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	})
+	defer os.Remove(tf.Name())
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -211,7 +215,8 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
 	}
-	defer os.Remove(tf.Name())
+	tf.Close()
+	os.Remove(tf.Name())
 
 	defaultUserAgent := ""
 	asserted := false
@@ -249,6 +254,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	}
+	defer os.Remove(tf.Name())
 
 	client := NewDownloadClient(config)
 	_, err = client.Get()
@@ -266,7 +272,8 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
 	}
-	defer os.Remove(tf.Name())
+	tf.Close()
+	os.Remove(tf.Name())
 
 	asserted := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -281,6 +288,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		UserAgent:  "fancy user agent",
 		CopyFile:   true,
 	}
+	defer os.Remove(tf.Name())
 
 	client := NewDownloadClient(config)
 	_, err = client.Get()

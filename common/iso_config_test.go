@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"runtime"
 	"testing"
@@ -90,6 +91,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i = testISOConfig()
 	i.ISOChecksum = ""
 	cs_file, _ := ioutil.TempFile("", "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style), 0666)
 	filePrefix := "file://"
 	if runtime.GOOS == "windows" {
@@ -112,6 +115,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i = testISOConfig()
 	i.ISOChecksum = ""
 	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	warns, err = i.Prepare(nil)
@@ -130,6 +135,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i = testISOConfig()
 	i.ISOChecksum = ""
 	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style_no_newline), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
 	warns, err = i.Prepare(nil)
@@ -150,6 +157,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 
 	cs_dir, _ := ioutil.TempDir("", "packer-testdir-")
 	cs_file, _ = ioutil.TempFile(cs_dir, "packer-test-")
+	defer os.RemoveAll(cs_dir) // Removes the file as well
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_bsd_style_subdir), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	i.RawSingleISOUrl = fmt.Sprintf("%s%s", cs_dir, "/subdir/the-OS.iso")
@@ -169,6 +178,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i = testISOConfig()
 	i.ISOChecksum = ""
 	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style_no_newline), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("file://%s", cs_file.Name())
 	warns, err = i.Prepare(nil)
@@ -189,6 +200,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i.RawSingleISOUrl = "http://www.packer.io/the-OS.iso?stuff=boo"
 
 	cs_file, _ = ioutil.TempFile("", "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	warns, err = i.Prepare(nil)
@@ -208,6 +221,8 @@ func TestISOConfigPrepare_ISOChecksumURL(t *testing.T) {
 	i.ISOChecksum = ""
 
 	cs_file, _ = ioutil.TempFile(cs_dir, "packer-test-")
+	defer os.Remove(cs_file.Name())
+	defer cs_file.Close()
 	ioutil.WriteFile(cs_file.Name(), []byte(cs_gnu_style_subdir), 0666)
 	i.ISOChecksumURL = fmt.Sprintf("%s%s", filePrefix, cs_file.Name())
 	i.RawSingleISOUrl = fmt.Sprintf("%s%s", cs_dir, "/subdir/the-OS.iso")
