@@ -1,11 +1,11 @@
 package iso
 
 import (
-	"github.com/mitchellh/multistep"
+	"fmt"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"fmt"
-	"github.com/vmware/govmomi/vim25/types"
+	"github.com/mitchellh/multistep"
 )
 
 type FloppyConfig struct {
@@ -29,7 +29,7 @@ func (c *FloppyConfig) Prepare() []error {
 type StepAddFloppy struct {
 	Config    *FloppyConfig
 	Datastore string
-	Host string
+	Host      string
 
 	uploadedFloppyPath string
 }
@@ -88,29 +88,4 @@ func (s *StepAddFloppy) runImpl(state multistep.StateBag) error {
 	return nil
 }
 
-func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
-	d := state.Get("driver").(*driver.Driver)
-
-	devices, err := vm.Devices()
-	if err != nil {
-		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
-	}
-	cdroms := devices.SelectByType((*types.VirtualFloppy)(nil))
-	if err = vm.RemoveDevice(false, cdroms...); err != nil {
-		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
-	}
-
-	if s.uploadedFloppyPath != "" {
-		ds, err := d.FindDatastore(s.Datastore, s.Host)
-		if err != nil {
-			ui.Error(err.Error())
-			return
-		}
-		if err := ds.Delete(s.uploadedFloppyPath); err != nil {
-			ui.Error(fmt.Sprintf("Error deleting floppy image '%v': %v", s.uploadedFloppyPath, err.Error()))
-			return
-		}
-	}
-}
+func (s *StepAddFloppy) Cleanup(state multistep.StateBag) {}

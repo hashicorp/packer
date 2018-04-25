@@ -2,11 +2,11 @@ package iso
 
 import (
 	packerCommon "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/mitchellh/multistep"
-	"github.com/hashicorp/packer/helper/communicator"
 )
 
 type Builder struct {
@@ -32,6 +32,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 
+	var stepAddFloppy = &StepAddFloppy{
+		Config:    &b.config.FloppyConfig,
+		Datastore: b.config.Datastore,
+		Host:      b.config.Host,
+	}
+
 	steps = append(steps,
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
@@ -46,13 +52,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Files:       b.config.FloppyFiles,
 			Directories: b.config.FloppyDirectories,
 		},
-		&StepAddFloppy{
-			Config:    &b.config.FloppyConfig,
-			Datastore: b.config.Datastore,
-			Host: b.config.Host,
-		},
+		stepAddFloppy,
 		&StepConfigParams{
-			Config:    &b.config.ConfigParamsConfig,
+			Config: &b.config.ConfigParamsConfig,
 		},
 	)
 
@@ -78,6 +80,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps = append(steps,
+		&StepRemoveCDRom{},
+		&StepRemoveFloppy{
+			Datastore:          b.config.Datastore,
+			Host:               b.config.Host,
+			UploadedFloppyPath: stepAddFloppy.uploadedFloppyPath,
+		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},
