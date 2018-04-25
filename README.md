@@ -1,3 +1,8 @@
+[![Team project](http://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+[![Github All Releases](https://img.shields.io/github/downloads/jetbrains-infra/packer-builder-vsphere/total.svg)](https://github.com/jetbrains-infra/packer-builder-vsphere/releases)
+[![TeamCity build status](https://img.shields.io/teamcity/http/teamcity.jetbrains.com/s/PackerVSphere_Build.svg)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=PackerVSphere_Build&guest=1)
+
+
 # Packer Builder for VMware vSphere
 
 This a plugin for [HashiCorp Packer](https://www.packer.io/). It uses native vSphere API, and creates virtual machines remotely.
