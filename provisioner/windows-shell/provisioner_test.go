@@ -25,6 +25,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	file, err := extractScript(p)
+	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
 	}
@@ -104,6 +105,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["script"] = tf.Name()
 	p = new(Provisioner)
@@ -130,6 +132,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["script"] = tf.Name()
@@ -149,6 +152,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["scripts"] = []string{tf.Name()}
@@ -175,6 +179,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["scripts"] = []string{tf.Name()}
 	p = new(Provisioner)
@@ -322,11 +327,16 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 }
 
 func TestProvisionerProvision_Scripts(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
-	defer os.Remove(tempFile.Name())
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
 	config := testConfig()
 	delete(config, "inline")
-	config["scripts"] = []string{tempFile.Name()}
+	config["scripts"] = []string{tf.Name()}
 	config["packer_build_name"] = "foobuild"
 	config["packer_builder_type"] = "footype"
 	ui := testUi()
@@ -334,7 +344,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err = p.Provision(ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -349,13 +359,18 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+	defer tf.Close()
+
 	config := testConfig()
 	ui := testUi()
-	defer os.Remove(tempFile.Name())
 	delete(config, "inline")
 
-	config["scripts"] = []string{tempFile.Name()}
+	config["scripts"] = []string{tf.Name()}
 	config["packer_build_name"] = "foobuild"
 	config["packer_builder_type"] = "footype"
 
@@ -368,7 +383,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packer.MockCommunicator)
 	p.Prepare(config)
-	err := p.Provision(ui, comm)
+	err = p.Provision(ui, comm)
 	if err != nil {
 		t.Fatal("should not have error")
 	}
