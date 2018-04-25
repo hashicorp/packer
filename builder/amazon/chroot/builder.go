@@ -35,7 +35,7 @@ type Config struct {
 	DevicePath        string                     `mapstructure:"device_path"`
 	FromScratch       bool                       `mapstructure:"from_scratch"`
 	MountOptions      []string                   `mapstructure:"mount_options"`
-	MountPartition    int                        `mapstructure:"mount_partition"`
+	MountPartition    string                     `mapstructure:"mount_partition"`
 	MountPath         string                     `mapstructure:"mount_path"`
 	PostMountCommands []string                   `mapstructure:"post_mount_commands"`
 	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
@@ -112,8 +112,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
 	}
 
-	if b.config.MountPartition == 0 {
-		b.config.MountPartition = 1
+	if b.config.MountPartition == "" {
+		b.config.MountPartition = "1"
 	}
 
 	// Accumulate any errors or warnings

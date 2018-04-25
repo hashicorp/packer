@@ -26,7 +26,7 @@ type mountPathData struct {
 //   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
 	MountOptions   []string
-	MountPartition int
+	MountPartition string
 
 	mountPath string
 }
@@ -75,8 +75,9 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	deviceMount := device
-	if virtualizationType == "hvm" {
-		deviceMount = fmt.Sprintf("%s%d", device, s.MountPartition)
+
+	if virtualizationType == "hvm" && s.MountPartition != "0" {
+		deviceMount = fmt.Sprintf("%s%s", device, s.MountPartition)
 	}
 	state.Put("deviceMount", deviceMount)
 
