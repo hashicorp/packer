@@ -1,17 +1,67 @@
-## (UNRELEASED)
+## 1.2.3 (April 25, 2018)
 
 ### BUG FIXES:
 
-* post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS X. [GH-6084]
+* builder/azure: Azure CLI may now be logged into several accounts. [GH-6087]
+* builder/ebssurrogate: Snapshot all launch devices. [GH-6056]
+* builder/hyper-v: Fix CopyExportedVirtualMachine script so it works with
+    links. [GH-6082]
+* builder/oracle-classic: Fix panics when cleaning up resources that haven't
+    been created. [GH-6095]
+* builder/parallels: Allow user to cancel build while the OS is starting up.
+    [GH-6166]
+* builder/qemu: Avoid warning when using raw format. [GH-6080]
 * builder/scaleway: Fix compilation issues on solaris/amd64. [GH-6069]
-* common/bootcommand: Fix numerous bugs in the boot command code, and make supported features consistent across builders. [GH-6129]
+* builder/virtualbox: Fix broken scancodes in boot_command. [GH-6067]
+* builder/vmware-iso: Fail in validation if user gives wrong remote_type value.
+    [GH-4563]
+* builder/vmware: Fixed a case-sensitivity issue when determing the network
+    type during the cloning step in the vmware-vmx builder. [GH-6057]
+* builder/vmware: Fixes the DHCP lease and configuration pathfinders for VMware
+    Player. [GH-6096]
+* builder/vmware: Multi-disk VM's can be properly handled by the compacting
+    stage. [GH-6074]
+* common/bootcommand: Fix numerous bugs in the boot command code, and make
+    supported features consistent across builders. [GH-6129]
+* communicator/ssh: Stop trying to discover whether destination is a directory
+    from uploader. [GH-6124]
+* post-processor/vagrant: Large VMDKs should no longer show a 0-byte size on OS
+    X. [GH-6084]
+* post-processor/vsphere: Fix encoding of spaces in passwords for upload.
+    [GH-6110]
+* provisioner/ansible: Pass the inventory_directory configuration option to
+    ansible -i when it is set. [GH-6065]
+* provisioner/powershell: fix bug with SSH communicator + cygwin. [GH-6160]
+* provisioner/powershell: The {{.WinRMPassword}} template variable now works
+    with parallel builders. [GH-6144]
 
 ### IMPROVEMENTS:
 
+* builder/alicloud: Update aliyungo common package. [GH-6157]
+* builder/amazon: Expose more source ami data as template variables. [GH-6088]
 * builder/amazon: Setting `force_delete` will only delete AMIs owned by the
-  user. This should prevent failures where we try to delete an AMI with
-  a matching name, but owned by someone else. [GH-6111]
+    user. This should prevent failures where we try to delete an AMI with a
+    matching name, but owned by someone else. [GH-6111]
+* builder/azure: Users of Powershell provisioner may access the randomly-
+    generated winrm password using the template variable {{.WinRMPassword}}.
+    [GH-6113]
+* builder/google: Users of Powershell provisioner may access the randomly-
+    generated winrm password using the template variable {{.WinRMPassword}}.
+    [GH-6141]
+* builder/hyper-v: User can now configure hyper-v disk block size. [GH-5941]
 * builder/openstack: Add configuration option for `instance_name`. [GH-6041]
+* builder/oracle-classic: Better validation of destination image name.
+    [GH-6089]
+* builder/oracle-oci: New config options for user data and user data file.
+    [GH-6079]
+* builder/oracle-oci: use the official OCI sdk instead of handcrafted client.
+    [GH-6142]
+* builder/triton: Add support to Skip TLS Verification of Triton Certificate.
+    [GH-6039]
+* provisioner/ansible: Ansible users may provide a custom inventory file.
+    [GH-6107]
+* provisioner/file: New `generated` tag allows users to upload files created
+    during Packer run. [GH-3891]
 
 ## 1.2.2 (March 26, 2018)
 
