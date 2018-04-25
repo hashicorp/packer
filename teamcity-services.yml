@@ -10,4 +10,6 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     dns: 10.0.0.1
-    entrypoint: "sh -c 'echo ${VPN_PASSWORD} | openvpn --cd /vpn/ --config lab.ovpn --askpass /dev/stdin'"
+    environment:
+      - VPN_PASSWORD
+    entrypoint: "sh -c 'echo $$VPN_PASSWORD | openvpn --cd /vpn/ --config lab.ovpn --askpass /dev/stdin'"
