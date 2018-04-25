@@ -1,11 +1,11 @@
 package iso
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/mitchellh/multistep"
-	"fmt"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type CDRomConfig struct {
@@ -40,16 +40,4 @@ func (s *StepAddCDRom) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *StepAddCDRom) Cleanup(state multistep.StateBag) {
-	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
-
-	devices, err := vm.Devices()
-	if err != nil {
-		ui.Error(fmt.Sprintf("error removing cdroms: %v", err))
-	}
-	cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
-	if err = vm.RemoveDevice(false, cdroms...); err != nil {
-		ui.Error(fmt.Sprintf("error removing cdroms: %v", err))
-	}
-}
+func (s *StepAddCDRom) Cleanup(state multistep.StateBag) {}
