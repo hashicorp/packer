@@ -37,6 +37,7 @@ func (c *HardwareConfig) ToDriverHardwareConfig() driver.HardwareConfig {
 		RAMReservation:      c.RAMReservation,
 		RAMReserveAll:       c.RAMReserveAll,
 		DiskSize:            c.DiskSize,
+		NestedHV:            c.NestedHV,
 		CpuHotAddEnabled:    c.CpuHotAddEnabled,
 		MemoryHotAddEnabled: c.MemoryHotAddEnabled,
 	}
