@@ -15,6 +15,7 @@ func (s *StepRemoveCDRom) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
+	ui.Say("Deleting CD-ROM drives...")
 	devices, err := vm.Devices()
 	if err != nil {
 		ui.Error(fmt.Sprintf("error removing cdroms: %v", err))
