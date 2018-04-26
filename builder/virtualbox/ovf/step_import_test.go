@@ -1,9 +1,11 @@
 package ovf
 
 import (
-	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
-	"github.com/mitchellh/multistep"
+	"context"
 	"testing"
+
+	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepImport_impl(t *testing.T) {
@@ -12,14 +14,17 @@ func TestStepImport_impl(t *testing.T) {
 
 func TestStepImport(t *testing.T) {
 	state := testState(t)
+	c := testConfig(t)
+	config, _, _ := NewConfig(c)
 	state.Put("vm_path", "foo")
+	state.Put("config", config)
 	step := new(StepImport)
 	step.Name = "bar"
 
 	driver := state.Get("driver").(*vboxcommon.DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -42,6 +47,14 @@ func TestStepImport(t *testing.T) {
 	}
 
 	// Test cleanup
+	config.KeepRegistered = true
+	step.Cleanup(state)
+
+	if driver.DeleteCalled {
+		t.Fatal("delete should not be called")
+	}
+
+	config.KeepRegistered = false
 	step.Cleanup(state)
 	if !driver.DeleteCalled {
 		t.Fatal("delete should be called")

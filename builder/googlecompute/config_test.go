@@ -170,6 +170,32 @@ func TestConfigPrepare(t *testing.T) {
 			[]string{"https://www.googleapis.com/auth/cloud-platform"},
 			false,
 		},
+
+		{
+			"disable_default_service_account",
+			"",
+			false,
+		},
+		{
+			"disable_default_service_account",
+			nil,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			false,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			true,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			"NOT A BOOL",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -220,6 +246,55 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 		{
 			[]string{"accelerator_count", "on_host_maintenance", "accelerator_type"},
 			[]interface{}{1, "TERMINATE", "something_valid"},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw := testConfig(t)
+
+		errStr := ""
+		for k := range tc.Keys {
+
+			// Create the string for error reporting
+			// convert value to string if it can be converted
+			errStr += fmt.Sprintf("%s:%v, ", tc.Keys[k], tc.Values[k])
+			if tc.Values[k] == nil {
+				delete(raw, tc.Keys[k])
+			} else {
+				raw[tc.Keys[k]] = tc.Values[k]
+			}
+		}
+
+		_, warns, errs := NewConfig(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
+func TestConfigPrepareServiceAccount(t *testing.T) {
+	cases := []struct {
+		Keys   []string
+		Values []interface{}
+		Err    bool
+	}{
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, "service@account.email.com"},
+			true,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{false, "service@account.email.com"},
+			false,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, ""},
 			false,
 		},
 	}
@@ -308,6 +383,9 @@ func testConfig(t *testing.T) map[string]interface{} {
 		"image_labels": map[string]string{
 			"label-1": "value-1",
 			"label-2": "value-2",
+		},
+		"image_licenses": []string{
+			"test-license",
 		},
 		"zone": "us-east1-a",
 	}

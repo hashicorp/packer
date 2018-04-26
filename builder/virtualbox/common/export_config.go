@@ -7,7 +7,7 @@ import (
 )
 
 type ExportConfig struct {
-	Format string `mapstruture:"format"`
+	Format string `mapstructure:"format"`
 }
 
 func (c *ExportConfig) Prepare(ctx *interpolate.Context) []error {

@@ -35,3 +35,7 @@ func (d *Player6Driver) Verify() error {
 
 	return playerVerifyVersion(VMWARE_PLAYER_VERSION)
 }
+
+func (d *Player6Driver) GetVmwareDriver() VmwareDriver {
+	return d.Player5Driver.VmwareDriver
+}

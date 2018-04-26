@@ -34,6 +34,7 @@ type Config struct {
 	Users       []string          `mapstructure:"ami_users"`
 	Groups      []string          `mapstructure:"ami_groups"`
 	LicenseType string            `mapstructure:"license_type"`
+	RoleName    string            `mapstructure:"role_name"`
 
 	ctx interpolate.Context
 }
@@ -91,7 +92,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey))
+	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey, p.config.Token))
 	return nil
 }
 
@@ -164,6 +165,10 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 				},
 			},
 		},
+	}
+
+	if p.config.RoleName != "" {
+		params.SetRoleName(p.config.RoleName)
 	}
 
 	if p.config.LicenseType != "" {
@@ -369,7 +374,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			*config.Region: createdami,
 		},
 		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+		Session:        session,
 	}
 
 	if !p.config.SkipClean {

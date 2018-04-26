@@ -1,6 +1,7 @@
 package communicator
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,10 +12,11 @@ import (
 
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
+	"golang.org/x/net/proxy"
 )
 
 // StepConnectSSH is a step that only connects to SSH.
@@ -28,7 +30,7 @@ type StepConnectSSH struct {
 	SSHPort   func(multistep.StateBag) (int, error)
 }
 
-func (s *StepConnectSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var comm packer.Communicator
@@ -88,6 +90,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	// do this one before entering the retry loop.
 	var bProto, bAddr string
 	var bConf *gossh.ClientConfig
+	var pAddr string
+	var pAuth *proxy.Auth
 	if s.Config.SSHBastionHost != "" {
 		// The protocol is hardcoded for now, but may be configurable one day
 		bProto = "tcp"
@@ -99,6 +103,16 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			return nil, fmt.Errorf("Error configuring bastion: %s", err)
 		}
 		bConf = conf
+	}
+
+	if s.Config.SSHProxyHost != "" {
+		pAddr = fmt.Sprintf("%s:%d", s.Config.SSHProxyHost, s.Config.SSHProxyPort)
+		if s.Config.SSHProxyUsername != "" {
+			pAuth = new(proxy.Auth)
+			pAuth.User = s.Config.SSHBastionUsername
+			pAuth.Password = s.Config.SSHBastionPassword
+		}
+
 	}
 
 	handshakeAttempts := 0
@@ -146,6 +160,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			// We're using a bastion host, so use the bastion connfunc
 			connFunc = ssh.BastionConnectFunc(
 				bProto, bAddr, bConf, "tcp", address)
+		} else if pAddr != "" {
+			// Connect via SOCKS5 proxy
+			connFunc = ssh.ProxyConnectFunc(pAddr, pAuth, "tcp", address)
 		} else {
 			// No bastion host, connect directly
 			connFunc = ssh.ConnectFunc("tcp", address)
@@ -165,6 +182,8 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			Pty:        s.Config.SSHPty,
 			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
+			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
+			Timeout:                s.Config.SSHReadWriteTimeout,
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")

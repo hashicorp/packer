@@ -12,7 +12,7 @@ description: |-
 # Build an Image
 
 With Packer installed, let's just dive right into it and build our first image.
-Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/) 
+Our first image will be an [Amazon EC2 AMI](https://aws.amazon.com/ec2/).
 This is just an example. Packer can create images for [many platforms][platforms].
 
 If you don't have an AWS account, [create one now](https://aws.amazon.com/free/).
@@ -114,7 +114,7 @@ installing Redis.
 
 ## Your First Image
 
-With a properly validated template. It is time to build your first image. This
+With a properly validated template, it is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
@@ -160,7 +160,7 @@ typically represent an ID (such as in the case of an AMI) or a set of files
 (such as for a VMware virtual machine). In this example, we only have a single
 artifact: the AMI in us-east-1 that was created.
 
-This AMI is ready to use. If you wanted you could go and launch this AMI right 
+This AMI is ready to use. If you wanted you could go and launch this AMI right
 now and it would work great.
 
 -> **Note:** Your AMI ID will surely be different than the one above. If you
@@ -186,10 +186,10 @@ want to store and namespace images for quick reference, you can use [Atlas by
 HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
 storing images at the end of this getting started guide.
 
-After running the above example, your AWS account now has an AMI associated with
-it. AMIs are stored in S3 by Amazon, so unless you want to be charged about
-$0.01 per month, you'll probably want to remove it. Remove the AMI by first
-deregistering it on the [AWS AMI management
+After running the above example, your AWS account now has an AMI associated
+with it. AMIs are stored in S3 by Amazon, so unless you want to be charged
+about &#36;0.01 per month, you'll probably want to remove it. Remove the AMI by
+first deregistering it on the [AWS AMI management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Next,
 delete the associated snapshot on the [AWS snapshot management
 page](https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Snapshots).
@@ -201,20 +201,24 @@ how to validate and build templates into machine images.
 
 ## Some more examples:
 
-### Another Linux Example, with provisioners:
+### Another GNU/Linux Example, with provisioners:
 Create a file named `welcome.txt` and add the following:
+
 ```
 WELCOME TO PACKER!
 ```
 
 Create a file named `example.sh` and add the following:
-```
+
+
+```bash
 #!/bin/bash
-echo "hello
+echo "hello"
 ```
 
-Set your access key and id as environment variables, so we don't need to pass 
+Set your access key and id as environment variables, so we don't need to pass
 them in through the command line:
+
 ```
 export AWS_ACCESS_KEY_ID=MYACCESSKEYID
 export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
@@ -222,7 +226,7 @@ export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
 
 Now save the following text in a file named `firstrun.json`:
 
-```
+```json
 {
     "variables": {
         "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
@@ -272,10 +276,10 @@ Now save the following text in a file named `firstrun.json`:
 
 and to build, run `packer build firstrun.json`
 
-Note that if you wanted to use a `source_ami` instead of a `source_ami_filter` 
+Note that if you wanted to use a `source_ami` instead of a `source_ami_filter`
 it might look something like this: `"source_ami": "ami-fce3c696",`
 
-Your output will look like this: 
+Your output will look like this:
 
 ```
 amazon-ebs output will be in this color.
@@ -314,29 +318,75 @@ amazon-ebs output will be in this color.
 ==> amazon-ebs: Waiting for AMI to become ready...
 ```
 
-### A windows example
+### A Windows Example
 
-Note that this uses a larger instance.  You will be charged for it. Also keep 
-in mind that using windows AMIs incurs a fee that you don't get when you use 
-linux AMIs.
+As with the GNU/Linux example above, should you decide to follow along and
+build an AMI from the example template, provided you qualify for free tier
+usage, you should not be charged for actually building the AMI.
+However, please note that you will be charged for storage of the snapshot
+associated with any AMI that you create.
+If you wish to avoid further charges, follow the steps in the [Managing the
+Image](/intro/getting-started/build-image.html#managing-the-image) section
+above to deregister the created AMI and delete the associated snapshot once
+you're done.
 
-You'll need to have a boostrapping file to enable ssh or winrm; here's a basic 
-example of that file.
+Again, in this example, we are making use of an existing AMI available from
+the Amazon marketplace as the *source* or starting point for building our
+own AMI. In brief, Packer will spin up the source AMI, connect to it and then
+run whatever commands or scripts we've configured in our build template to
+customize the image. Finally, when all is done, Packer will wrap the whole
+customized package up into a brand new AMI that will be available from the
+[AWS AMI management page](
+https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
+instances we subsequently create from this AMI will have our all of our
+customizations baked in. This is the core benefit we are looking to
+achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
+in this example.
 
-```
-# set administrator password
+Now, all this sounds simple enough right? Well, actually it turns out we
+need to put in just a *bit* more effort to get things working as we'd like...
+
+Here's the issue: Out of the box, the instance created from our source AMI
+is not configured to allow Packer to connect to it. So how do we fix it so
+that Packer can connect in and customize our instance?
+
+Well, it turns out that Amazon provides a mechanism that allows us to run a
+set of *pre-supplied* commands within the instance shortly after the instance
+starts. Even better, Packer is aware of this mechanism. This gives us the
+ability to supply Packer with the commands required to configure the instance
+for a remote connection *in advance*. Once the commands are run, Packer
+will be able to connect directly in to the instance and make the
+customizations we need.
+
+Here's a basic example of a file that will configure the instance to allow
+Packer to connect in over WinRM. As you will see, we will tell Packer about
+our intentions by referencing this file and the commands within it from
+within the `"builders"` section of our
+[build template](/docs/templates/index.html) that we will create later.
+
+Note the `<powershell>` and `</powershell>` tags at the top and bottom of
+the file. These tags tell Amazon we'd like to run the enclosed code with
+PowerShell. You can also use `<script></script>` tags to enclose any commands
+that you would normally run in a Command Prompt window. See
+[Running Commands on Your Windows Instance at Launch](
+http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-windows-user-data.html)
+for more info about what's going on behind the scenes here.
+
+```powershell
+<powershell>
+# Set administrator password
 net user Administrator SuperS3cr3t!
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
 
-# First, make sure WinRM doesn't run and can't be connected to
-netsh advfirewall firewall add rule name="WinRM" protocol=TCP dir=in localport=5985 action=block
-net stop winrm
+# First, make sure WinRM can't be connected to
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=block
 
-# turn off PowerShell execution policy restrictions
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine
+# Delete any existing WinRM listeners
+winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
+winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
 
-# configure WinRM
-winrm quickconfig -q
+# Create a new WinRM listener and configure
+winrm create winrm/config/listener?Address=*+Transport=HTTP
 winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="0"}'
 winrm set winrm/config '@{MaxTimeoutms="7200000"}'
 winrm set winrm/config/service '@{AllowUnencrypted="true"}'
@@ -344,75 +394,137 @@ winrm set winrm/config/service '@{MaxConcurrentOperationsPerUser="12000"}'
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/client/auth '@{Basic="true"}'
 
-net stop winrm
-set-service winrm -startupType automatic
+# Configure UAC to allow privilege elevation in remote shells
+$Key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+$Setting = 'LocalAccountTokenFilterPolicy'
+Set-ItemProperty -Path $Key -Name $Setting -Value 1 -Force
 
-# Finally, allow WinRM connections and start the service
-netsh advfirewall firewall set rule name="WinRM" new action=allow
-net start winrm
+# Configure and restart the WinRM Service; Enable the required firewall exception
+Stop-Service -Name WinRM
+Set-Service -Name WinRM -StartupType Automatic
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new action=allow localip=any remoteip=any
+Start-Service -Name WinRM
+</powershell>
 ```
 
+Save the above code in a file named `bootstrap_win.txt`.
 
-Save the above code in a file named `bootstrap_win.txt`.  
+-> **A quick aside/warning:**<br />
+Windows administrators in the know might be wondering why we haven't simply
+used a `winrm quickconfig -q` command in the script above, as this would
+*automatically* set up all of the required elements necessary for connecting
+over WinRM. Why all the extra effort to configure things manually?<br />
+Well, long and short, use of the `winrm quickconfig -q` command can sometimes
+cause the Packer build to fail shortly after the WinRM connection is
+established. How?<br />
+1. Among other things, as well as setting up the listener for WinRM, the
+quickconfig command also configures the firewall to allow management messages
+to be sent over HTTP.<br />
+2. This undoes the previous command in the script that configured the
+firewall to prevent this access.<br />
+3. The upshot is that the system is configured and ready to accept WinRM
+connections earlier than intended.<br />
+4. If Packer establishes its WinRM connection immediately after execution of
+the 'winrm quickconfig -q' command, the later commands within the script that
+restart the WinRM service will unceremoniously pull the rug out from under
+the connection.<br />
+5. While Packer does *a lot* to ensure the stability of its connection in to
+your instance, this sort of abuse can prove to be too much and *may* cause
+your Packer build to stall irrecoverably or fail!
 
-The example config below shows the two different ways of using the powershell 
-provisioner: `inline` and `script`.  
-The first example, `inline`, allows you to provide short snippets of code, and 
-will create the script file for you.  The second example allows you to run more 
-complex code by providing the path to a script to run on the guest vm.  
+Now we've got the business of getting Packer connected to our instance
+taken care of, let's get on with the *real* reason we're doing all this,
+which is actually configuring and customizing the instance. Again, we do this
+with [Provisioners](/docs/provisioners/index.html).
 
-Here's an example of a `sample_script.ps1` that will work with the environment 
-variables we will set in our packer config; copy the contents into your own 
-`sample_script.ps1` and provide the path to it in your packer config:
+The example config below shows the two different ways of using the [PowerShell
+provisioner](/docs/provisioners/powershell.html): `inline` and `script`.
+The first example, `inline`, allows you to provide short snippets of code, and
+will create the script file for you.  The second example allows you to run more
+complex code by providing the path to a script to run on the guest VM.
 
+Here's an example of a `sample_script.ps1` that will work with the environment
+variables we will set in our build template; copy the contents into your own
+`sample_script.ps1` and provide the path to it in your build template:
+
+```powershell
+Write-Host "PACKER_BUILD_NAME is an env var Packer automatically sets for you."
+Write-Host "...or you can set it in your builder variables."
+Write-Host "The default for this builder is:" $Env:PACKER_BUILD_NAME
+
+Write-Host "The PowerShell provisioner will automatically escape characters"
+Write-Host "considered special to PowerShell when it encounters them in"
+Write-Host "your environment variables or in the PowerShell elevated"
+Write-Host "username/password fields."
+Write-Host "For example, VAR1 from our config is:" $Env:VAR1
+Write-Host "Likewise, VAR2 is:" $Env:VAR2
+Write-Host "VAR3 is:" $Env:VAR3
+Write-Host "Finally, VAR4 is:" $Env:VAR4
+Write-Host "None of the special characters needed escaping in the template"
 ```
-Write-Output("PACKER_BUILD_NAME is automatically set for you,)
-Write-Output("or you can set it in your builder variables; )
-Write-Output("the default for this builder is: " + $Env:PACKER_BUILD_NAME )
-Write-Output("Remember that escaping variables in powershell requires backticks: )
-Write-Output("for example, VAR1 from our config is " + $Env:VAR1 )
-Write-Output("Likewise, VAR2 is " + $Env:VAR2 )
-Write-Output("and VAR3 is " + $Env:VAR3 )
-```
 
-Next you need to create a packer config that will use this bootstrap file. See 
-the example below, which contains examples of using source_ami_filter for 
-windows in addition to the powershell and windows-restart provisioners:
+Finally, we need to create the actual [build template](
+/docs/templates/index.html).
+Remember, this template is the core configuration file that Packer uses to
+understand what you want to build, and how you want to build it.
 
-```
+As mentioned earlier, the specific builder we are using in this example
+is the [Amazon EBS builder](/docs/builders/amazon-ebs.html).
+The template below demonstrates use of the [`source_ami_filter`](
+/docs/builders/amazon-ebs.html#source_ami_filter) configuration option
+available within the builder for automatically selecting the *latest*
+suitable source Windows AMI provided by Amazon.
+We also use the `user_data_file` configuration option provided by the builder
+to reference the bootstrap file we created earlier. As you will recall, our
+bootstrap file contained all the commands we needed to supply in advance of
+actually spinning up the instance, so that later on, our instance is
+configured to allow Packer to connect in to it.
+
+The `"provisioners"` section of the template demonstrates use of the
+[powershell](/docs/provisioners/powershell.html) and
+[windows-restart](/docs/provisioners/windows-restart.html) provisioners to
+customize and control the build process:
+
+```json
 {
   "variables": {
-        "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
-        "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
-        "region":         "us-east-1"
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region":         "us-east-1"
   },
   "builders": [
-  {
-    "type": "amazon-ebs",
-    "access_key": "{{ user `aws_access_key` }}",
-    "secret_key": "{{ user `aws_secret_key` }}",
-    "region": "us-east-1",
-    "instance_type": "m3.medium",
-    "source_ami_filter": {
-      "filters": {
-        "virtualization-type": "hvm",
-        "name": "*WindowsServer2012R2*",
-        "root-device-type": "ebs"
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{ user `aws_access_key` }}",
+      "secret_key": "{{ user `aws_secret_key` }}",
+      "region": "{{ user `region` }}",
+      "instance_type": "t2.micro",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "*Windows_Server-2012-R2*English-64Bit-Base*",
+          "root-device-type": "ebs"
+        },
+        "most_recent": true,
+        "owners": "amazon"
       },
-      "most_recent": true,
-      "owners": "amazon"
-    },    
-    "ami_name": "packer-demo-{{timestamp}}",
-    "user_data_file": "./bootstrap_win.txt",
-    "communicator": "winrm",
-    "winrm_username": "Administrator",
-    "winrm_password": "SuperS3cr3t!"
-  }],
+      "ami_name": "packer-demo-{{timestamp}}",
+      "user_data_file": "./bootstrap_win.txt",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_password": "SuperS3cr3t!"
+    }
+  ],
   "provisioners": [
     {
       "type": "powershell",
       "environment_vars": ["DEVOPS_LIFE_IMPROVER=PACKER"],
-      "inline": "Write-Output(\"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\")"
+      "inline": [
+        "Write-Host \"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\"",
+        "Write-Host \"You need to use backtick escapes when using\"",
+        "Write-Host \"characters such as DOLLAR`$ directly in a command\"",
+        "Write-Host \"or in your own scripts.\""
+      ]
     },
     {
       "type": "windows-restart"
@@ -421,54 +533,77 @@ windows in addition to the powershell and windows-restart provisioners:
       "script": "./sample_script.ps1",
       "type": "powershell",
       "environment_vars": [
-        "VAR1=A`$Dollar",
-        "VAR2=A``Backtick",
-        "VAR3=A`'SingleQuote"
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote"
       ]
     }
   ]
 }
 ```
 
-Then `packer build firstrun.json`
+Save the build template as `firstrun.json`.
+
+Next we need to set things up so that Packer is able to access and use our
+AWS account. Set your access key and id as environment variables, so we
+don't need to pass them in through the command line:
+
+```
+export AWS_ACCESS_KEY_ID=MYACCESSKEYID
+export AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEY
+```
+
+Finally, we can create our new AMI by running `packer build firstrun.json`
 
 You should see output like this:
 
 ```
 amazon-ebs output will be in this color.
 
-==> amazon-ebs: Prevalidating AMI Name: packer-demo-1507234504
-    amazon-ebs: Found Image ID: ami-d79776ad
-==> amazon-ebs: Creating temporary keypair: packer_59d692c8-81f9-6a15-2502-0ca730980bed
-==> amazon-ebs: Creating temporary security group for this instance: packer_59d692f0-dd01-6879-d8f8-7765327f5365
-==> amazon-ebs: Authorizing access to port 5985 on the temporary security group...
+==> amazon-ebs: Prevalidating AMI Name: packer-demo-1518111383
+    amazon-ebs: Found Image ID: ami-013e197b
+==> amazon-ebs: Creating temporary keypair: packer_5a7c8a97-f27f-6708-cc3c-6ab9b4688b13
+==> amazon-ebs: Creating temporary security group for this instance: packer_5a7c8ab5-444c-13f2-0aa1-18d124cdb975
+==> amazon-ebs: Authorizing access to port 5985 from 0.0.0.0/0 in the temporary security group...
 ==> amazon-ebs: Launching a source AWS instance...
 ==> amazon-ebs: Adding tags to source instance
     amazon-ebs: Adding tag: "Name": "Packer Builder"
-    amazon-ebs: Instance ID: i-04467596029d0a2ff
-==> amazon-ebs: Waiting for instance (i-04467596029d0a2ff) to become ready...
+    amazon-ebs: Instance ID: i-0c8c808a3b945782a
+==> amazon-ebs: Waiting for instance (i-0c8c808a3b945782a) to become ready...
 ==> amazon-ebs: Skipping waiting for password since WinRM password set...
 ==> amazon-ebs: Waiting for WinRM to become available...
     amazon-ebs: WinRM connected.
 ==> amazon-ebs: Connected to WinRM!
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/8t/0yb5q0_x6mb2jldqq_vjn3lr0000gn/T/packer-powershell-provisioner079851514
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner943573503
     amazon-ebs: HELLO NEW USER; WELCOME TO PACKER
+    amazon-ebs: You need to use backtick escapes when using
+    amazon-ebs: characters such as DOLLAR$ directly in a command
+    amazon-ebs: or in your own scripts.
 ==> amazon-ebs: Restarting Machine
 ==> amazon-ebs: Waiting for machine to restart...
-    amazon-ebs: WIN-164614OO21O restarted.
+    amazon-ebs: WIN-NI8N45RPJ23 restarted.
 ==> amazon-ebs: Machine successfully restarted, moving on
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: ./scripts/sample_script.ps1
-    amazon-ebs: PACKER_BUILD_NAME is automatically set for you, or you can set it in your builder variables; the default for this builder is: amazon-ebs
-    amazon-ebs: Remember that escaping variables in powershell requires backticks; for example VAR1 from our config is A$Dollar
-    amazon-ebs: Likewise, VAR2 is A`Backtick
-    amazon-ebs: and VAR3 is A'SingleQuote
+==> amazon-ebs: Provisioning with powershell script: ./sample_script.ps1
+    amazon-ebs: PACKER_BUILD_NAME is an env var Packer automatically sets for you.
+    amazon-ebs: ...or you can set it in your builder variables.
+    amazon-ebs: The default for this builder is: amazon-ebs
+    amazon-ebs: The PowerShell provisioner will automatically escape characters
+    amazon-ebs: considered special to PowerShell when it encounters them in
+    amazon-ebs: your environment variables or in the PowerShell elevated
+    amazon-ebs: username/password fields.
+    amazon-ebs: For example, VAR1 from our config is: A$Dollar
+    amazon-ebs: Likewise, VAR2 is: A`Backtick
+    amazon-ebs: VAR3 is: A'SingleQuote
+    amazon-ebs: Finally, VAR4 is: A"DoubleQuote
+    amazon-ebs: None of the special characters needed escaping in the template
 ==> amazon-ebs: Stopping the source instance...
     amazon-ebs: Stopping instance, attempt 1
 ==> amazon-ebs: Waiting for the instance to stop...
-==> amazon-ebs: Creating the AMI: packer-demo-1507234504
-    amazon-ebs: AMI: ami-2970b753
+==> amazon-ebs: Creating the AMI: packer-demo-1518111383
+    amazon-ebs: AMI: ami-f0060c8a
 ==> amazon-ebs: Waiting for AMI to become ready...
 ==> amazon-ebs: Terminating the source AWS instance...
 ==> amazon-ebs: Cleaning up any extra volumes...
@@ -479,10 +614,31 @@ Build 'amazon-ebs' finished.
 
 ==> Builds finished. The artifacts of successful builds are:
 --> amazon-ebs: AMIs were created:
-us-east-1: ami-2970b753
+us-east-1: ami-f0060c8a
 ```
 
-And if you navigate to your EC2 dashboard you should see your shiny new AMI.
+And if you navigate to your EC2 dashboard you should see your shiny new AMI
+listed in the main window of the Images -> AMIs section.
 
+Why stop there though?
+
+As you'll see, with one simple change to the template above, it's
+just as easy to create your own Windows 2008 or Windows 2016 AMIs. Just
+set the value for the name field within `source_ami_filter` as required:
+
+For Windows 2008 SP2:
+
+```
+          "name": "*Windows_Server-2008-SP2*English-64Bit-Base*",
+```
+
+For Windows 2016:
+
+```
+          "name": "*Windows_Server-2016-English-Full-Base*",
+```
+
+The bootstrapping and sample provisioning should work the same across all
+Windows server versions.
 
 [platforms]: /docs/builders/index.html

@@ -35,7 +35,7 @@ you will need to specify the `output` option.
 -   `format` (string) - Disable archive format autodetection and use provided
     string.
 
--   `compression_level` (integer) - Specify the compression level, for
+-   `compression_level` (number) - Specify the compression level, for
     algorithms that support it, from 1 through 9 inclusive. Typically higher
     compression levels take longer but produce smaller files. Defaults to `6`
 

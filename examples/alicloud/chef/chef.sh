@@ -1,5 +1,5 @@
 #!/bin/sh
-#if the related deb pkg not found, please replace with it other avaiable repository url
+#if the related deb pkg not found, please replace with it other available repository url
 HOSTNAME=`ifconfig eth1|grep 'inet addr'|cut -d ":" -f2|cut -d " " -f1`
 if [ not $HOSTNAME ] ; then
     HOSTNAME=`ifconfig eth0|grep 'inet addr'|cut -d ":" -f2|cut -d " " -f1`

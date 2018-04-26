@@ -1,10 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"path/filepath"
+	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the actual virtual machine.
@@ -14,29 +18,56 @@ import (
 type StepCreateVM struct {
 	VMName                         string
 	SwitchName                     string
+	HarddrivePath                  string
 	RamSize                        uint
 	DiskSize                       uint
+	DiskBlockSize                  uint
 	Generation                     uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
 	EnableVirtualizationExtensions bool
+	AdditionalDiskSize             []uint
+	DifferencingDisk               bool
+	MacAddress                     string
+	SkipExport                     bool
+	OutputDir                      string
 }
 
-func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")
 
 	path := state.Get("packerTempDir").(string)
+
+	// Determine if we even have an existing virtual harddrive to attach
+	harddrivePath := ""
+	if harddrivePathRaw, ok := state.GetOk("iso_path"); ok {
+		extension := strings.ToLower(filepath.Ext(harddrivePathRaw.(string)))
+		if extension == ".vhd" || extension == ".vhdx" {
+			harddrivePath = harddrivePathRaw.(string)
+		} else {
+			log.Println("No existing virtual harddrive, not attaching.")
+		}
+	} else {
+		log.Println("No existing virtual harddrive, not attaching.")
+	}
+
 	vhdPath := state.Get("packerVhdTempDir").(string)
+
+	// inline vhd path if export is skipped
+	if s.SkipExport {
+		vhdPath = filepath.Join(s.OutputDir, "Virtual Hard Disks")
+	}
 
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 	diskSize := int64(s.DiskSize * 1024 * 1024)
+	diskBlockSize := int64(s.DiskBlockSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, vhdPath, ramSize, diskSize, s.SwitchName, s.Generation)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, diskBlockSize, s.SwitchName, s.Generation, s.DifferencingDisk)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
@@ -91,6 +122,30 @@ func (s *StepCreateVM) Run(state multistep.StateBag) multistep.StepAction {
 		}
 	}
 
+	if len(s.AdditionalDiskSize) > 0 {
+		for index, size := range s.AdditionalDiskSize {
+			diskSize := int64(size * 1024 * 1024)
+			diskFile := fmt.Sprintf("%s-%d.vhdx", s.VMName, index)
+			err = driver.AddVirtualMachineHardDrive(s.VMName, vhdPath, diskFile, diskSize, diskBlockSize, "SCSI")
+			if err != nil {
+				err := fmt.Errorf("Error creating and attaching additional disk drive: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	}
+
+	if s.MacAddress != "" {
+		err = driver.SetVmNetworkAdapterMacAddress(s.VMName, s.MacAddress)
+		if err != nil {
+			err := fmt.Errorf("Error setting MAC address: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	// Set the final name in the state bag so others can use it
 	state.Put("vmName", s.VMName)
 
@@ -110,4 +165,6 @@ func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting virtual machine: %s", err))
 	}
+
+	// TODO: Clean up created VHDX
 }

@@ -59,10 +59,6 @@ Optional parameters:
     variables](/docs/templates/engine.html) available. See
     below for more information.
 
--   `guest_os_type` (string) - The target guest OS type, either "unix" or
-    "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
-
 -   `extra_arguments` (array of strings) - This is an array of additional options to
     pass to the puppet command when executing puppet. This allows for
     customization of the `execute_command` without having to completely replace
@@ -72,6 +68,10 @@ Optional parameters:
 -   `facter` (object of key/value strings) - Additional
     [facts](https://puppetlabs.com/facter) to make
     available when Puppet is running.
+
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or
+    "windows". Setting this to "windows" will cause the provisioner to use
+     Windows friendly paths and commands. By default, this is "unix".
 
 -   `hiera_config_path` (string) - The path to a local file with hiera
     configuration to be uploaded to the remote machine. Hiera data directories
@@ -90,11 +90,6 @@ Optional parameters:
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
--   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
-    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
-    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
-    not run profile-setup scripts, therefore the path is usually empty.
-
 -   `module_paths` (array of strings) - This is an array of paths to module
     directories on your local filesystem. These will be uploaded to the
     remote machine. By default, this is empty.
@@ -102,6 +97,11 @@ multiple manifests you should use `manifest_file` instead.
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to run Puppet are executed with `sudo`. If this is true, then the
     sudo will be omitted.
+
+-   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
+    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
+    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
+    not run profile-setup scripts, therefore the path is usually empty.
 
 -   `staging_directory` (string) - This is the directory where all the configuration
     of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-masterless"

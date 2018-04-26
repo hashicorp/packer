@@ -4,13 +4,14 @@ import (
 	"archive/tar"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type VBoxProvider struct{}

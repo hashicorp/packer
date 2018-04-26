@@ -1,13 +1,14 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -20,7 +21,7 @@ type stepKeypair struct {
 	TemporaryKeyPairName string
 }
 
-func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {

@@ -72,7 +72,7 @@ Optional parameters:
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the list of `environment_vars`, if configured.
 
--   `expect_disconnect` (bool) - Defaults to `false`. Whether to error if the
+-   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if the
     server disconnects us. A disconnect might happen if you restart the ssh
     server or reboot the host.
 
@@ -150,7 +150,8 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
--   `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+-   `PACKER_BUILD_NAME` is set to the
+    [name of the build](/docs/templates/builders.html#named-builds) that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 

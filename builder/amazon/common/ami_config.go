@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -16,7 +17,7 @@ type AMIConfig struct {
 	AMIProductCodes         []string          `mapstructure:"ami_product_codes"`
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
-	AMITags                 map[string]string `mapstructure:"tags"`
+	AMITags                 TagMap            `mapstructure:"tags"`
 	AMIENASupport           bool              `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
@@ -24,7 +25,7 @@ type AMIConfig struct {
 	AMIEncryptBootVolume    bool              `mapstructure:"encrypt_boot"`
 	AMIKmsKeyId             string            `mapstructure:"kms_key_id"`
 	AMIRegionKMSKeyIDs      map[string]string `mapstructure:"region_kms_key_ids"`
-	SnapshotTags            map[string]string `mapstructure:"snapshot_tags"`
+	SnapshotTags            TagMap            `mapstructure:"snapshot_tags"`
 	SnapshotUsers           []string          `mapstructure:"snapshot_users"`
 	SnapshotGroups          []string          `mapstructure:"snapshot_groups"`
 }
@@ -38,10 +39,21 @@ func stringInSlice(s []string, searchstr string) bool {
 	return false
 }
 
-func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
+func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context) []error {
 	var errs []error
+
 	if c.AMIName == "" {
 		errs = append(errs, fmt.Errorf("ami_name must be specified"))
+	}
+
+	// Make sure that if we have region_kms_key_ids defined,
+	//  the regions in region_kms_key_ids are also in ami_regions
+	if len(c.AMIRegionKMSKeyIDs) > 0 {
+		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
+			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
+				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
+			}
+		}
 	}
 
 	if len(c.AMIRegions) > 0 {
@@ -61,7 +73,6 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 				// Verify the region is real
 				if valid := ValidateRegion(region); !valid {
 					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-					continue
 				}
 			}
 
@@ -72,20 +83,16 @@ func (c *AMIConfig) Prepare(ctx *interpolate.Context) []error {
 					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
 				}
 			}
-
+			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
+				// make sure we don't try to copy to the region we originally
+				// create the AMI in.
+				log.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
+				continue
+			}
 			regions = append(regions, region)
 		}
 
 		c.AMIRegions = regions
-	}
-	// Make sure that if we have region_kms_key_ids defined,
-	//  the regions in region_kms_key_ids are also in ami_regions
-	if len(c.AMIRegionKMSKeyIDs) > 0 {
-		for kmsKeyRegion := range c.AMIRegionKMSKeyIDs {
-			if !stringInSlice(c.AMIRegions, kmsKeyRegion) {
-				errs = append(errs, fmt.Errorf("Region %s is in region_kms_key_ids but not in ami_regions", kmsKeyRegion))
-			}
-		}
 	}
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {

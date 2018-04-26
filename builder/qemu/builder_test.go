@@ -94,46 +94,6 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_BootWait(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test a default boot_wait
-	delete(config, "boot_wait")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.RawBootWait != "10s" {
-		t.Fatalf("bad value: %s", b.config.RawBootWait)
-	}
-
-	// Test with a bad boot_wait
-	config["boot_wait"] = "this is not good"
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	config["boot_wait"] = "5s"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -208,7 +168,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 
-	if b.config.DiskSize != 40000 {
+	if b.config.DiskSize != 40960 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
 

@@ -57,12 +57,27 @@ func playerDhcpLeasesPath(device string) string {
 	} else if _, err := os.Stat(path); err == nil {
 		return path
 	}
-
 	return findFile("vmnetdhcp.leases", playerDataFilePaths())
 }
 
-func playerVmnetnatConfPath() string {
+func playerVmDhcpConfPath(device string) string {
+	// the device isn't actually used on windows hosts
+	path, err := playerDhcpConfigPathRegistry()
+	if err != nil {
+		log.Printf("Error finding configuration in registry: %s", err)
+	} else if _, err := os.Stat(path); err == nil {
+		return path
+	}
+	return findFile("vmnetdhcp.conf", playerDataFilePaths())
+}
+
+func playerVmnetnatConfPath(device string) string {
+	// the device isn't actually used on windows hosts
 	return findFile("vmnetnat.conf", playerDataFilePaths())
+}
+
+func playerNetmapConfPath() string {
+	return findFile("netmap.conf", playerDataFilePaths())
 }
 
 // This reads the VMware installation path from the Windows registry.
@@ -87,7 +102,18 @@ func playerDhcpLeasesPathRegistry() (s string, err error) {
 		log.Printf(`Unable to read registry key %s\%s`, key, subkey)
 		return
 	}
+	return normalizePath(s), nil
+}
 
+// This reads the VMware DHCP configuration path from the Windows registry.
+func playerDhcpConfigPathRegistry() (s string, err error) {
+	key := "SYSTEM\\CurrentControlSet\\services\\VMnetDHCP\\Parameters"
+	subkey := "ConfFile"
+	s, err = readRegString(syscall.HKEY_LOCAL_MACHINE, key, subkey)
+	if err != nil {
+		log.Printf(`Unable to read registry key %s\%s`, key, subkey)
+		return
+	}
 	return normalizePath(s), nil
 }
 
