@@ -382,6 +382,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		NVME_Present:         "FALSE",
 
 		DiskType:              "scsi",
+		HDD_BootOrder:         "scsi0:0",
 		CDROMType:             "ide",
 		CDROMType_MasterSlave: "0",
 
@@ -404,17 +405,20 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "ide"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_MasterSlave = "1"
+		templateData.HDD_BootOrder = "ide0:0"
 	case "sata":
 		templateData.SATA_Present = "TRUE"
 		templateData.DiskType = "sata"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_MasterSlave = "1"
+		templateData.HDD_BootOrder = "sata0:0"
 	case "nvme":
 		templateData.NVME_Present = "TRUE"
 		templateData.DiskType = "nvme"
 		templateData.SATA_Present = "TRUE"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_MasterSlave = "0"
+		templateData.HDD_BootOrder = "nvme0:0"
 	case "scsi":
 		diskAdapterType = "lsilogic"
 		fallthrough
@@ -424,6 +428,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "scsi"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_MasterSlave = "0"
+		templateData.HDD_BootOrder = "scsi0:0"
 	}
 
 	/// Handle the cdrom adapter type. If the disk adapter type and the
@@ -643,7 +648,8 @@ func (s *stepCreateVMX) Cleanup(multistep.StateBag) {
 // do so by specifying in the builder configuration.
 const DefaultVMXTemplate = `
 .encoding = "UTF-8"
-bios.bootOrder = "hdd,CDROM"
+bios.bootOrder = "hdd,cdrom"
+bios.hddOrder = "{{ .HDD_BootOrder }}"
 checkpoint.vmState = ""
 cleanShutdown = "TRUE"
 config.version = "8"
