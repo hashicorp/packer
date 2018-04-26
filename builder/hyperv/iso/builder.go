@@ -378,6 +378,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DifferencingDisk:               b.config.DifferencingDisk,
 			SkipExport:                     b.config.SkipExport,
 			OutputDir:                      b.config.OutputDir,
+			MacAddress:                     b.config.MacAddress,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
