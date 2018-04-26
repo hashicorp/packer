@@ -25,9 +25,10 @@ type Config struct {
 	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.ToolsConfig         `mapstructure:",squash"`
 
-	SourcePath  string `mapstructure:"source_path"`
-	VMName      string `mapstructure:"vm_name"`
-	ReassignMAC bool   `mapstructure:"reassign_mac"`
+	SourcePath     string `mapstructure:"source_path"`
+	SkipCompaction bool   `mapstructure:"skip_compaction"`
+	VMName         string `mapstructure:"vm_name"`
+	ReassignMAC    bool   `mapstructure:"reassign_mac"`
 
 	ctx interpolate.Context
 }
