@@ -105,6 +105,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Commands: b.config.PrlctlPost,
 			Ctx:      b.config.ctx,
 		},
+		&parallelscommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
+		},
 	}
 
 	// Run the steps.
