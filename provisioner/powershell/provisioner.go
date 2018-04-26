@@ -269,6 +269,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
 		scripts = append(scripts, temp)
+		// Remove temp script containing the inline commands when done
+		defer os.Remove(temp)
 	}
 
 	for _, path := range scripts {
