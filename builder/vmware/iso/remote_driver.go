@@ -12,6 +12,9 @@ type RemoteDriver interface {
 	// exists.
 	UploadISO(string, string, string) (string, error)
 
+	// RemoveCache deletes localPath from the remote cache.
+	RemoveCache(localPath string) error
+
 	// Adds a VM to inventory specified by the path to the VMX given.
 	Register(string) error
 
@@ -26,9 +29,6 @@ type RemoteDriver interface {
 
 	// Uploads a local file to remote side.
 	upload(dst, src string) error
-
-	// Forcefully remove a path from the remote side.
-	remove(path string) error
 
 	// Reload VM on remote side.
 	ReloadVM() error
