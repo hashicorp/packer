@@ -1,3 +1,9 @@
+## (UNRELEASED)
+
+### BUG FIXES:
+
+* builder/vmware-esxi: Remove floppy files from the remote server on cleanup. [GH-6206]
+
 ## 1.2.3 (April 25, 2018)
 
 ### BUG FIXES:
