@@ -21,6 +21,8 @@ type vmxTemplateData struct {
 	ISOPath string
 	Version string
 
+	HDD_BootOrder string
+
 	SCSI_Present         string
 	SCSI_diskAdapterType string
 	SATA_Present         string
