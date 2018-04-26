@@ -396,6 +396,8 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// Use the disk adapter type that the user specified to tweak the .vmx
 	//  Also sync the cdrom adapter type according to what's common for that disk type.
+	//  XXX: If the cdrom type is modified, make sure to update common/step_clean_vmx.go
+	//       so that it will regex the correct cdrom device for removal.
 	diskAdapterType := strings.ToLower(config.DiskAdapterType)
 	switch diskAdapterType {
 	case "ide":
