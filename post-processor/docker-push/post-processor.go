@@ -16,7 +16,6 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Login                  bool
-	LoginEmail             string `mapstructure:"login_email"`
 	LoginUsername          string `mapstructure:"login_username"`
 	LoginPassword          string `mapstructure:"login_password"`
 	LoginServer            string `mapstructure:"login_server"`
@@ -81,7 +80,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		ui.Message("Logging in...")
 		err := driver.Login(
 			p.config.LoginServer,
-			p.config.LoginEmail,
 			p.config.LoginUsername,
 			p.config.LoginPassword)
 		if err != nil {

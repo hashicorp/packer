@@ -1,8 +1,9 @@
 package ram
 
 import (
-	"github.com/denverdino/aliyungo/common"
 	"os"
+
+	"github.com/denverdino/aliyungo/common"
 )
 
 const (
@@ -16,15 +17,29 @@ type RamClient struct {
 }
 
 func NewClient(accessKeyId string, accessKeySecret string) RamClientInterface {
+	return NewClientWithSecurityToken(accessKeyId, accessKeySecret, "")
+}
+
+func NewClientWithSecurityToken(accessKeyId string, accessKeySecret string, securityToken string) RamClientInterface {
 	endpoint := os.Getenv("RAM_ENDPOINT")
 	if endpoint == "" {
 		endpoint = RAMDefaultEndpoint
 	}
-	return NewClientWithEndpoint(endpoint, accessKeyId, accessKeySecret)
+
+	return NewClientWithEndpointAndSecurityToken(endpoint, accessKeyId, accessKeySecret, securityToken)
 }
 
 func NewClientWithEndpoint(endpoint string, accessKeyId string, accessKeySecret string) RamClientInterface {
+	return NewClientWithEndpointAndSecurityToken(endpoint, accessKeyId, accessKeySecret, "")
+}
+
+func NewClientWithEndpointAndSecurityToken(endpoint string, accessKeyId string, accessKeySecret string, securityToken string) RamClientInterface {
 	client := &RamClient{}
-	client.Init(endpoint, RAMAPIVersion, accessKeyId, accessKeySecret)
+	client.WithEndpoint(endpoint).
+		WithVersion(RAMAPIVersion).
+		WithAccessKeyId(accessKeyId).
+		WithAccessKeySecret(accessKeySecret).
+		WithSecurityToken(securityToken).
+		InitClient()
 	return client
 }

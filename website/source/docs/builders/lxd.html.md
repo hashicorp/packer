@@ -30,11 +30,15 @@ Below is a fully functioning example.
       "type": "lxd",
       "name": "lxd-xenial",
       "image": "ubuntu-daily:xenial",
-      "output_image": "ubuntu-xenial"
+      "output_image": "ubuntu-xenial",
+      "publish_properties": {
+        "description": "Trivial repackage with Packer"
+      }
     }
   ]
 }
 ```
+
 
 ## Configuration Reference
 
@@ -50,11 +54,20 @@ Below is a fully functioning example.
 
 ### Optional:
 
+-  `init_sleep` (string) - The number of seconds to sleep between launching the
+   LXD instance and provisioning it; defaults to 3 seconds.
+
 -  `name` (string) - The name of the started container. Defaults to
    `packer-$PACKER_BUILD_NAME`.
 
 -  `output_image` (string) - The name of the output artifact. Defaults to
    `name`.
 
--  `command_wrapper` (string) - lets you prefix all builder commands, such as
+-  `command_wrapper` (string) - Lets you prefix all builder commands, such as
    with `ssh` for a remote build host. Defaults to `""`.
+
+- `publish_properties` (map[string]string) - Pass key values to the publish
+   step to be set as properties on the output image. This is most helpful to
+   set the description, but can be used to set anything needed.
+   See https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/
+   for more properties.

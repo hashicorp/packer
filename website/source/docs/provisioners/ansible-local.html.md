@@ -1,8 +1,10 @@
 ---
 description: |
-    The ansible-local Packer provisioner configures Ansible to run on the
-    machine by Packer from local Playbook and Role files. Playbooks and Roles can
-    be uploaded from your local machine to the remote machine.
+    The ansible-local Packer provisioner will run ansible in ansible's "local"
+    mode on the remote/guest VM using Playbook and Role files that exist on the
+    guest VM. This means ansible must be installed on the remote/guest VM.
+    Playbooks and Roles can be uploaded from your build machine
+    (the one running Packer) to the vm.
 layout: docs
 page_title: 'Ansible Local - Provisioners'
 sidebar_current: 'docs-provisioners-ansible-local'
@@ -12,15 +14,17 @@ sidebar_current: 'docs-provisioners-ansible-local'
 
 Type: `ansible-local`
 
-The `ansible-local` Packer provisioner configures Ansible to run on the machine
-by Packer from local Playbook and Role files. Playbooks and Roles can be
-uploaded from your local machine to the remote machine. Ansible is run in [local
-mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks) via the
+The `ansible-local` Packer provisioner will run ansible in ansible's "local"
+    mode on the remote/guest VM using Playbook and Role files that exist on the
+    guest VM. This means ansible must be installed on the remote/guest VM.
+    Playbooks and Roles can be uploaded from your build machine
+    (the one running Packer) to the vm. Ansible is then run on the guest machine
+    in [local mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks) via the
 `ansible-playbook` command.
 
 -&gt; **Note:** Ansible will *not* be installed automatically by this
 provisioner. This provisioner expects that Ansible is already installed on the
-machine. It is common practice to use the [shell
+guest/remote machine. It is common practice to use the [shell
 provisioner](/docs/provisioners/shell.html) before the Ansible provisioner to do
 this.
 
@@ -114,7 +118,7 @@ chi-appservers
     cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
     on the remote machine. By default, this is empty.
 
--   `galaxycommand` (string) - The command to invoke ansible-galaxy. 
+-   `galaxycommand` (string) - The command to invoke ansible-galaxy.
     By default, this is ansible-galaxy.
 
 -   `group_vars` (string) - a path to the directory containing ansible group
@@ -139,6 +143,10 @@ chi-appservers
     able to create directories and write into this folder. If the permissions
     are not correct, use a shell provisioner prior to this to configure it
     properly.
+
+-   `clean_staging_directory` (boolean) - If set to `true`, the content of
+     the `staging_directory` will be removed after executing ansible. By
+     default, this is set to `false`.
 
 ## Default Extra Variables
 

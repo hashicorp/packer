@@ -6,18 +6,23 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/joyent/triton-go"
+	tgo "github.com/joyent/triton-go"
 	"github.com/joyent/triton-go/authentication"
+	"github.com/joyent/triton-go/compute"
+	"github.com/joyent/triton-go/network"
 )
 
 // AccessConfig is for common configuration related to Triton access
 type AccessConfig struct {
-	Endpoint    string `mapstructure:"triton_url"`
-	Account     string `mapstructure:"triton_account"`
-	KeyID       string `mapstructure:"triton_key_id"`
-	KeyMaterial string `mapstructure:"triton_key_material"`
+	Endpoint              string `mapstructure:"triton_url"`
+	Account               string `mapstructure:"triton_account"`
+	Username              string `mapstructure:"triton_user"`
+	KeyID                 string `mapstructure:"triton_key_id"`
+	KeyMaterial           string `mapstructure:"triton_key_material"`
+	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
 
 	signer authentication.Signer
 }
@@ -62,7 +67,12 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 }
 
 func (c *AccessConfig) createSSHAgentSigner() (authentication.Signer, error) {
-	signer, err := authentication.NewSSHAgentSigner(c.KeyID, c.Account)
+	input := authentication.SSHAgentSignerInput{
+		KeyID:       c.KeyID,
+		AccountName: c.Account,
+		Username:    c.Username,
+	}
+	signer, err := authentication.NewSSHAgentSigner(input)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating Triton request signer: %s", err)
 	}
@@ -91,8 +101,14 @@ func (c *AccessConfig) createPrivateKeySigner() (authentication.Signer, error) {
 		}
 	}
 
-	// Create signer
-	signer, err := authentication.NewPrivateKeySigner(c.KeyID, privateKeyMaterial, c.Account)
+	input := authentication.PrivateKeySignerInput{
+		KeyID:              c.KeyID,
+		AccountName:        c.Account,
+		Username:           c.Username,
+		PrivateKeyMaterial: privateKeyMaterial,
+	}
+
+	signer, err := authentication.NewPrivateKeySigner(input)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating Triton request signer: %s", err)
 	}
@@ -106,8 +122,50 @@ func (c *AccessConfig) createPrivateKeySigner() (authentication.Signer, error) {
 	return signer, nil
 }
 
-func (c *AccessConfig) CreateTritonClient() (*triton.Client, error) {
-	return triton.NewClient(c.Endpoint, c.Account, c.signer)
+func (c *AccessConfig) CreateTritonClient() (*Client, error) {
+
+	config := &tgo.ClientConfig{
+		AccountName: c.Account,
+		TritonURL:   c.Endpoint,
+		Username:    c.Username,
+		Signers:     []authentication.Signer{c.signer},
+	}
+
+	return &Client{
+		config:                config,
+		insecureSkipTLSVerify: c.InsecureSkipTLSVerify,
+	}, nil
+}
+
+type Client struct {
+	config                *tgo.ClientConfig
+	insecureSkipTLSVerify bool
+}
+
+func (c *Client) Compute() (*compute.ComputeClient, error) {
+	computeClient, err := compute.NewClient(c.config)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error Creating Triton Compute Client: {{err}}", err)
+	}
+
+	if c.insecureSkipTLSVerify {
+		computeClient.Client.InsecureSkipTLSVerify()
+	}
+
+	return computeClient, nil
+}
+
+func (c *Client) Network() (*network.NetworkClient, error) {
+	networkClient, err := network.NewClient(c.config)
+	if err != nil {
+		return nil, errwrap.Wrapf("Error Creating Triton Network Client: {{err}}", err)
+	}
+
+	if c.insecureSkipTLSVerify {
+		networkClient.Client.InsecureSkipTLSVerify()
+	}
+
+	return networkClient, nil
 }
 
 func (c *AccessConfig) Comm() communicator.Config {

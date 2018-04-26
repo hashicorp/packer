@@ -1,15 +1,17 @@
 package lxd
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"regexp"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type stepPublish struct{}
 
-func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPublish) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -30,6 +32,10 @@ func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
 
 	publish_args := []string{
 		"publish", name, "--alias", config.OutputImage,
+	}
+
+	for k, v := range config.PublishProperties {
+		publish_args = append(publish_args, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	ui.Say("Publishing container...")

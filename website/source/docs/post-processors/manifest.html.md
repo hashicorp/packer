@@ -24,7 +24,7 @@ You can specify manifest more than once and write each build to its own file, or
 ### Optional:
 
 -   `output` (string) The manifest will be written to this file. This defaults to `packer-manifest.json`.
--   `strip_path` (bool) Write only filename without the path to the manifest file. This defaults to false.
+-   `strip_path` (boolean) Write only filename without the path to the manifest file. This defaults to false.
 
 ### Example Configuration
 
@@ -65,10 +65,11 @@ An example manifest file looks like:
 }
 ```
 
-If I run the build again, my new build will be added to the manifest file rather than replacing it, so you can always grab specific builds from the manifest by uuid.
+If the build is run again, the new build artifacts will be added to the manifest file rather than replacing it. It is possible to grab specific build artifacts from the manifest by using `packer_run_uuid`.
 
-The mainfest above was generated from this packer.json:
-```
+The above manifest was generated with this packer.json:
+
+```json
 {
   "builders": [
     {

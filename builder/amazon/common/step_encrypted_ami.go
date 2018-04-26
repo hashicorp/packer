@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreateEncryptedAMICopy struct {
@@ -18,7 +19,7 @@ type StepCreateEncryptedAMICopy struct {
 	AMIMappings       []BlockDevice
 }
 
-func (s *StepCreateEncryptedAMICopy) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateEncryptedAMICopy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	kmsKeyId := s.KeyID

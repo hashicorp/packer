@@ -2,7 +2,7 @@ package file
 
 /*
 The File builder creates an artifact from a file. Because it does not require
-any virutalization or network resources, it's very fast and useful for testing.
+any virtualization or network resources, it's very fast and useful for testing.
 */
 
 import (
@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderId = "packer.file"

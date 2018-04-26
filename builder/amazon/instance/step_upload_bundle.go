@@ -1,11 +1,12 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type uploadCmdData struct {
@@ -22,24 +23,17 @@ type StepUploadBundle struct {
 	Debug bool
 }
 
-func (s *StepUploadBundle) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepUploadBundle) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	config := state.Get("config").(*Config)
 	manifestName := state.Get("manifest_name").(string)
 	manifestPath := state.Get("manifest_path").(string)
 	ui := state.Get("ui").(packer.Ui)
 
-	region, err := config.Region()
-	if err != nil {
-		err := fmt.Errorf("Error retrieving region: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
 	accessKey := config.AccessKey
 	secretKey := config.SecretKey
 	session, err := config.AccessConfig.Session()
+	region := *session.Config.Region
 	accessConfig := session.Config
 	var token string
 	if err == nil && accessKey == "" && secretKey == "" {

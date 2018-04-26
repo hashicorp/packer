@@ -48,6 +48,9 @@ type Config struct {
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
 
+	// If true, staging directory is removed after executing ansible.
+	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
+
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
 
@@ -260,6 +263,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if err := p.executeAnsible(ui, comm); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
+
+	if p.config.CleanStagingDir {
+		ui.Message("Removing staging directory...")
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing staging directory: %s", err)
+		}
+	}
 	return nil
 }
 
@@ -367,15 +377,33 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
+
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
+
 	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status.")
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
+	}
+	return nil
+}
+
+func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("rm -rf '%s'", dir),
+	}
+
+	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
 	}
 	return nil
 }

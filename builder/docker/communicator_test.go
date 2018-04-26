@@ -67,11 +67,10 @@ func TestUploadDownload(t *testing.T) {
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				upload,
-				download,
+			Provisioners: []*packer.HookedProvisioner{
+				{upload, nil, ""},
+				{download, nil, ""},
 			},
-			ProvisionerTypes: []string{"", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
@@ -157,12 +156,11 @@ func TestLargeDownload(t *testing.T) {
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				shell,
-				downloadCupcake,
-				downloadBigcake,
+			Provisioners: []*packer.HookedProvisioner{
+				{shell, nil, ""},
+				{downloadCupcake, nil, ""},
+				{downloadBigcake, nil, ""},
 			},
-			ProvisionerTypes: []string{"", "", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
@@ -203,10 +201,85 @@ func TestLargeDownload(t *testing.T) {
 	// or ui output to do this because we use /dev/urandom to create the file.
 
 	// if sha256.Sum256(inputFile) != sha256.Sum256(outputFile) {
-	// 	t.Fatalf("Input and output files do not match\n"+
-	// 		"Input:\n%s\nOutput:\n%s\n", inputFile, outputFile)
+	//	t.Fatalf("Input and output files do not match\n"+
+	//		"Input:\n%s\nOutput:\n%s\n", inputFile, outputFile)
 	// }
 
+}
+
+// TestFixUploadOwner verifies that owner of uploaded files is the user the container is running as.
+func TestFixUploadOwner(t *testing.T) {
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+
+	tpl, err := template.Parse(strings.NewReader(testFixUploadOwnerTemplate))
+	if err != nil {
+		t.Fatalf("Unable to parse config: %s", err)
+	}
+
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1")
+	}
+	cmd := exec.Command("docker", "-v")
+	cmd.Run()
+	if !cmd.ProcessState.Success() {
+		t.Error("docker command not found; please make sure docker is installed")
+	}
+
+	// Setup the builder
+	builder := &Builder{}
+	warnings, err := builder.Prepare(tpl.Builders["docker"].Config)
+	if err != nil {
+		t.Fatalf("Error preparing configuration %s", err)
+	}
+	if len(warnings) > 0 {
+		t.Fatal("Encountered configuration warnings; aborting")
+	}
+
+	// Setup the provisioners
+	fileProvisioner := &file.Provisioner{}
+	err = fileProvisioner.Prepare(tpl.Provisioners[0].Config)
+	if err != nil {
+		t.Fatalf("Error preparing single file upload provisioner: %s", err)
+	}
+
+	dirProvisioner := &file.Provisioner{}
+	err = dirProvisioner.Prepare(tpl.Provisioners[1].Config)
+	if err != nil {
+		t.Fatalf("Error preparing directory upload provisioner: %s", err)
+	}
+
+	shellProvisioner := &shell.Provisioner{}
+	err = shellProvisioner.Prepare(tpl.Provisioners[2].Config)
+	if err != nil {
+		t.Fatalf("Error preparing shell provisioner: %s", err)
+	}
+
+	verifyProvisioner := &shell.Provisioner{}
+	err = verifyProvisioner.Prepare(tpl.Provisioners[3].Config)
+	if err != nil {
+		t.Fatalf("Error preparing verification provisioner: %s", err)
+	}
+
+	// Add hooks so the provisioners run during the build
+	hooks := map[string][]packer.Hook{}
+	hooks[packer.HookProvision] = []packer.Hook{
+		&packer.ProvisionHook{
+			Provisioners: []*packer.HookedProvisioner{
+				{fileProvisioner, nil, ""},
+				{dirProvisioner, nil, ""},
+				{shellProvisioner, nil, ""},
+				{verifyProvisioner, nil, ""},
+			},
+		},
+	}
+	hook := &packer.DispatchHook{Mapping: hooks}
+
+	artifact, err := builder.Run(ui, hook, cache)
+	if err != nil {
+		t.Fatalf("Error running build %s", err)
+	}
+	defer artifact.Destroy()
 }
 
 const dockerBuilderConfig = `
@@ -265,6 +338,43 @@ const dockerLargeBuilderConfig = `
       "source": "/tmp/bigcake",
       "destination": "bigcake",
       "direction": "download"
+    }
+  ]
+}
+`
+
+const testFixUploadOwnerTemplate = `
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "ubuntu",
+      "discard": true,
+      "run_command": ["-d", "-i", "-t", "-u", "42", "{{.Image}}", "/bin/sh"]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "test-fixtures/onecakes/strawberry",
+      "destination": "/tmp/strawberry-cake"
+    },
+    {
+      "type": "file",
+      "source": "test-fixtures/manycakes",
+      "destination": "/tmp/"
+    },
+    {
+      "type": "shell",
+      "inline": "touch /tmp/testUploadOwner"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "[ $(stat -c %u /tmp/strawberry-cake) -eq 42 ] || (echo 'Invalid owner of /tmp/strawberry-cake' && exit 1)",
+        "[ $(stat -c %u /tmp/testUploadOwner) -eq 42 ] || (echo 'Invalid owner of /tmp/testUploadOwner' && exit 1)",
+        "find /tmp/manycakes | xargs -n1 -IFILE /bin/sh -c '[ $(stat -c %u FILE) -eq 42 ] || (echo \"Invalid owner of FILE\" && exit 1)'"
+      ]
     }
   ]
 }

@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VRDP server
@@ -26,7 +27,7 @@ type StepConfigureVRDP struct {
 	VRDPPortMax     uint
 }
 
-func (s *StepConfigureVRDP) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVRDP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)

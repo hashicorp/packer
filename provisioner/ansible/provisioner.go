@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -55,7 +56,7 @@ type Config struct {
 	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
-	inventoryFile        string
+	InventoryFile        string   `mapstructure:"inventory_file"`
 }
 
 type Provisioner struct {
@@ -141,7 +142,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
-		p.config.User = os.Getenv("USER")
+		usr, err := user.Current()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		} else {
+			p.config.User = usr.Username
+		}
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
@@ -260,7 +266,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	go p.adapter.Serve()
 
-	if len(p.config.inventoryFile) == 0 {
+	if len(p.config.InventoryFile) == 0 {
 		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
@@ -289,9 +295,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		tf.Close()
-		p.config.inventoryFile = tf.Name()
+		p.config.InventoryFile = tf.Name()
 		defer func() {
-			p.config.inventoryFile = ""
+			p.config.InventoryFile = ""
 		}()
 	}
 
@@ -314,14 +320,21 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.inventoryFile
+	inventory := p.config.InventoryFile
+	if len(p.config.InventoryDirectory) > 0 {
+		inventory = p.config.InventoryDirectory
+	}
 	var envvars []string
 
 	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
-		args = append(args, "--private-key", privKeyFile)
+		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
+		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
+		// as seen in #5852
+		// args = append(args, "--private-key", privKeyFile)
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {

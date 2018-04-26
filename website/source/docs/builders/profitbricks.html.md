@@ -25,13 +25,13 @@ builder.
 
 -   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image).
 
--   `password` (string) - ProfitBricks password. This can be specified via environment variable \`PROFITBRICKS\_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
+-   `password` (string) - ProfitBricks password. This can be specified via environment variable \`PROFITBRICKS\_PASSWORD', if provided. The value defined in the config has precedence over environemnt variable.
 
--   `username` (string) - ProfitBricks username. This can be specified via environment variable \`PROFITBRICKS\_USERNAME', if provided. The value definded in the config has precedence over environemnt variable.
+-   `username` (string) - ProfitBricks username. This can be specified via environment variable \`PROFITBRICKS\_USERNAME', if provided. The value defined in the config has precedence over environemnt variable.
 
 ### Optional
 
--   `cores` (integer) - Amount of CPU cores to use for this build. Defaults to "4".
+-   `cores` (number) - Amount of CPU cores to use for this build. Defaults to "4".
 
 -   `disk_size` (string) - Amount of disk space for this image in GB. Defaults to "50"
 
@@ -39,7 +39,7 @@ builder.
 
 -   `location` (string) - Defaults to "us/las".
 
--   `ram` (integer) - Amount of RAM to use for this image. Defaults to "2048".
+-   `ram` (number) - Amount of RAM to use for this image. Defaults to "2048".
 
 -   `retries` (string) - Number of retries Packer will make status requests while waiting for the build to complete. Default value 120 seconds.
 

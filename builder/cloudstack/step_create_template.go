@@ -1,17 +1,18 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
 type stepCreateTemplate struct{}
 
-func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)

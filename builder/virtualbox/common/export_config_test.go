@@ -10,7 +10,7 @@ func TestExportConfigPrepare_BootWait(t *testing.T) {
 
 	// Bad
 	c = new(ExportConfig)
-	c.Format = "illega"
+	c.Format = "illegal"
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) == 0 {
 		t.Fatalf("bad: %#v", errs)

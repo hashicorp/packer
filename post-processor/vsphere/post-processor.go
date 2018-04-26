@@ -1,10 +1,10 @@
 package vsphere
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -110,9 +110,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, fmt.Errorf("VMX, OVF or OVA file not found")
 	}
 
-	password := url.QueryEscape(p.config.Password)
+	password := escapeWithSpaces(p.config.Password)
 	ovftool_uri := fmt.Sprintf("vi://%s:%s@%s/%s/host/%s",
-		url.QueryEscape(p.config.Username),
+		escapeWithSpaces(p.config.Username),
 		password,
 		p.config.Host,
 		p.config.Datacenter,
@@ -129,20 +129,25 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to vSphere", source))
 
-	log.Printf("Starting ovftool with parameters: %s",
-		strings.Replace(
-			strings.Join(args, " "),
-			password,
-			"<password>",
-			-1))
+	log.Printf("Starting ovftool with parameters: %s", p.filterLog(strings.Join(args, " ")))
+
+	var out bytes.Buffer
 	cmd := exec.Command("ovftool", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		return nil, false, fmt.Errorf("Failed: %s\n", err)
+		return nil, false, fmt.Errorf("Failed: %s\n%s\n", err, p.filterLog(out.String()))
 	}
 
+	ui.Message(p.filterLog(out.String()))
+
+	artifact = NewArtifact(p.config.Datastore, p.config.VMFolder, p.config.VMName, artifact.Files())
+
 	return artifact, false, nil
+}
+
+func (p *PostProcessor) filterLog(s string) string {
+	password := escapeWithSpaces(p.config.Password)
+	return strings.Replace(s, password, "<password>", -1)
 }
 
 func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) {
@@ -180,4 +185,11 @@ func (p *PostProcessor) BuildArgs(source, ovftool_uri string) ([]string, error) 
 	args = append(args, fmt.Sprintf(`%s`, ovftool_uri))
 
 	return args, nil
+}
+
+// Encode everything except for + signs
+func escapeWithSpaces(stringToEscape string) string {
+	escapedString := url.QueryEscape(stringToEscape)
+	escapedString = strings.Replace(escapedString, "+", `%20`, -1)
+	return escapedString
 }

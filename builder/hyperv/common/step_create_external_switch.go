@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/common/uuid"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates switch for VM.
@@ -17,12 +18,12 @@ type StepCreateExternalSwitch struct {
 	oldSwitchName string
 }
 
-func (s *StepCreateExternalSwitch) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	vmName := state.Get("vmName").(string)
-	errorMsg := "Error createing external switch: %s"
+	errorMsg := "Error creating external switch: %s"
 	var err error
 
 	ui.Say("Creating external switch...")

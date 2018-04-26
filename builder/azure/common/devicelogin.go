@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/hashicorp/packer/version"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -21,8 +21,6 @@ var (
 	clientIDs = map[string]string{
 		azure.PublicCloud.Name: "04cc58ec-51ab-4833-ac0d-ce3a7912414b",
 	}
-
-	userAgent = fmt.Sprintf("packer/%s", version.FormattedVersion())
 )
 
 // NOTE(ahmetalpbalkan): Azure Active Directory implements OAuth 2.0 Device Flow
@@ -138,7 +136,7 @@ func tokenFromFile(say func(string), oauthCfg adal.OAuthConfig, tokenPath, clien
 // endpoint is polled until user gives consent, denies or the flow times out.
 // Returned token must be saved.
 func tokenFromDeviceFlow(say func(string), oauthCfg adal.OAuthConfig, clientID, resource string) (*adal.ServicePrincipalToken, error) {
-	cl := autorest.NewClientWithUserAgent(userAgent)
+	cl := autorest.NewClientWithUserAgent(useragent.String())
 	deviceCode, err := adal.InitiateDeviceAuth(&cl, oauthCfg, clientID, resource)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start device auth: %v", err)

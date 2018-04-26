@@ -10,6 +10,7 @@ func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"ami_name":   "foo",
 		"source_ami": "foo",
+		"region":     "us-east-1",
 	}
 }
 
@@ -70,11 +71,16 @@ func TestBuilderPrepare_ChrootMounts(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %s", err)
 	}
+}
+
+func TestBuilderPrepare_ChrootMountsBadDefaults(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
 
 	config["chroot_mounts"] = [][]string{
 		{"bad"},
 	}
-	warnings, err = b.Prepare(config)
+	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}
@@ -134,9 +140,14 @@ func TestBuilderPrepare_CopyFiles(t *testing.T) {
 	if len(b.config.CopyFiles) != 1 && b.config.CopyFiles[0] != "/etc/resolv.conf" {
 		t.Errorf("Was expecting default value for copy_files.")
 	}
+}
+
+func TestBuilderPrepare_CopyFilesNoDefault(t *testing.T) {
+	b := &Builder{}
+	config := testConfig()
 
 	config["copy_files"] = []string{}
-	warnings, err = b.Prepare(config)
+	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
 	}

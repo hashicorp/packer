@@ -30,6 +30,7 @@ type RunConfig struct {
 	Networks         []string          `mapstructure:"networks"`
 	UserData         string            `mapstructure:"user_data"`
 	UserDataFile     string            `mapstructure:"user_data_file"`
+	InstanceName     string            `mapstructure:"instance_name"`
 	InstanceMetadata map[string]string `mapstructure:"instance_metadata"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`

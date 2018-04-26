@@ -67,7 +67,9 @@ builder.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
-    -   `iops` (integer) - The number of I/O operations per second (IOPS) that the
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
+        specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+    -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
@@ -78,16 +80,15 @@ builder.
         [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
-    -   `volume_size` (integer) - The size of the volume, in GiB. Required if not
+    -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
     -   `tags` (map) - Tags to apply to the volume. These are retained after the
-        builder completes. This is a \[template engine\]
-        (/docs/templates/engine.html) where the `SourceAMI`
-        variable is replaced with the source AMI ID and `BuildRegion` variable
-        is replaced with the value of `region`.
+        builder completes. This is a
+        [template engine](/docs/templates/engine.html),
+        see [Build template data](#build-template-data) for more information.
 
 -   `associate_public_ip_address` (boolean) - If using a non-default VPC, public
     IP addresses are not provided by default. If this is toggled, your new
@@ -96,9 +97,9 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
--   `custom_endpoint_ec2` (string) - this option is useful if you use
-    another cloud provider that provide a compatible API with aws EC2,
-    specify another endpoint like this "<https://ec2.another.endpoint>..com"
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -121,21 +122,11 @@ builder.
     profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
     for more details.
 
--   `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
-    along with the custom kms key id to use for encryption for that region.
-    Keys must match the regions provided in `ami_regions`. If you just want to
-    encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
-    If you want a region to be encrypted with that region's default key ID, you can
-    use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
-    However, you cannot use default key IDs if you are using this in conjunction with
-    `snapshot_users` -- in that situation you must use custom keys.
-
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
     to assign to the instance. By default this is not set and Packer will
@@ -161,7 +152,7 @@ builder.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -196,8 +187,14 @@ builder.
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
         This is helpful to limit the AMIs to a trusted third party, or to your own account.
 
-    -   `most_recent` (bool) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
+
+    You may set this in place of `source_ami` or in conjunction with it. If you
+    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    the filter. The provided `source_ami` must meet all of the filtering criteria
+    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
+    but will cause Packer to fail if the `source_ami` does not exist.        
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
@@ -225,8 +222,19 @@ builder.
     [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
     must be specified with this.
 
--   `ssh_private_ip` (boolean) - If `true`, then SSH will always use the private
-    IP if available. Also works for WinRM.
+-   `ssh_private_ip` (boolean) - No longer supported. See
+    [`ssh_interface`](#ssh_interface). A fixer exists to migrate.
+
+-   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
+    `public_dns` or `private_dns`. If set, either the public IP address,
+    private IP address, public DNS name or private DNS name will used as the host for SSH.
+    The default behaviour if inside a VPC is to use the public IP address if available,
+    otherwise the private IP address will be used. If not in a VPC the public DNS name
+    will be used. Also works for WinRM.
+
+    Where Packer is configured for an outbound proxy but WinRM traffic should be direct,
+    `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included
+    in the `NO_PROXY` environment variable.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
@@ -317,6 +325,15 @@ If you need to access the instance to debug for some reason, run the builder
 with the `-debug` flag. In debug mode, the Amazon builder will save the private
 key in the current directory and will output the DNS or IP information as well.
 You can use this information to access the instance as it is running.
+
+## Build template data
+
+The available variables are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
+- `SourceAMIName` - The source AMI Name (for example `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to build the AMI.
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
 
 -&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on

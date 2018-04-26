@@ -1,11 +1,12 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type EndpointType int
@@ -76,7 +77,7 @@ func (s *StepGetIPAddress) getPublicIPInPrivateNetwork(resourceGroupName string,
 	return s.getPublicIP(resourceGroupName, ipAddressName, interfaceName)
 }
 
-func (s *StepGetIPAddress) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetIPAddress) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Getting the VM's IP address ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)

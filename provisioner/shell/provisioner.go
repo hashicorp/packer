@@ -230,6 +230,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
 		defer f.Close()
+		info, _ := f.Stat()
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
@@ -257,7 +258,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				r = &UnixReader{Reader: r}
 			}
 
-			if err := comm.Upload(p.config.RemotePath, r, nil); err != nil {
+			if err := comm.Upload(p.config.RemotePath, r, &info); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
@@ -283,7 +284,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		// we were expecting it.
 		if cmd.ExitStatus == packer.CmdDisconnect {
 			if !p.config.ExpectDisconnect {
-				return fmt.Errorf("Script disconnected unexpectedly.")
+				return fmt.Errorf("Script disconnected unexpectedly. " +
+					"If you expected your script to disconnect, i.e. from a " +
+					"restart, you can try adding `\"expect_disconnect\": true` " +
+					"to the shell provisioner parameters.")
 			}
 		} else if cmd.ExitStatus != 0 {
 			return fmt.Errorf("Script exited with non-zero exit status: %d", cmd.ExitStatus)

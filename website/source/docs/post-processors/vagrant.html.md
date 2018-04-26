@@ -32,7 +32,9 @@ providers.
 
 -   AWS
 -   DigitalOcean
+-   Google
 -   Hyper-V
+-   LXC
 -   Parallels
 -   QEMU
 -   VirtualBox
@@ -52,7 +54,7 @@ However, if you want to configure things a bit more, the post-processor does
 expose some configuration options. The available options are listed below, with
 more details about certain options in following sections.
 
--   `compression_level` (integer) - An integer representing the compression
+-   `compression_level` (number) - An integer representing the compression
     level to use when creating the Vagrant box. Valid values range from 0 to 9,
     with 0 being no compression and 9 being the best compression. By default,
     compression is enabled at level 6.
@@ -100,8 +102,18 @@ Specify overrides within the `override` configuration by provider name:
 In the example above, the compression level will be set to 1 except for VMware,
 where it will be set to 0.
 
-The available provider names are: `aws`, `digitalocean`, `virtualbox`, `vmware`,
-and `parallels`.
+The available provider names are:
+
+- `aws`
+- `digitalocean`
+- `google`
+- `hyperv`
+- `parallels`
+- `libvirt`
+- `lxc`
+- `scaleway`
+- `virtualbox`
+- `vmware`
 
 ## Input Artifacts
 
