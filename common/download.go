@@ -290,6 +290,8 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 			}
 		}
+	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
+		return fmt.Errorf("%s", resp.Status)
 	}
 
 	// Set the request to GET now, and redo the query to download
@@ -298,6 +300,8 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	resp, err = httpClient.Do(req)
 	if err != nil {
 		return err
+	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
+		return fmt.Errorf("%s", resp.Status)
 	}
 
 	d.total = d.current + uint64(resp.ContentLength)
