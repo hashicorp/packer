@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCleanVMX_impl(t *testing.T) {
@@ -21,7 +22,7 @@ func TestStepCleanVMX(t *testing.T) {
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -42,7 +43,7 @@ func TestStepCleanVMX_floppyPath(t *testing.T) {
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -91,7 +92,7 @@ func TestStepCleanVMX_isoPath(t *testing.T) {
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -143,7 +144,7 @@ func TestStepCleanVMX_ethernet(t *testing.T) {
 	state.Put("vmx_path", vmxPath)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

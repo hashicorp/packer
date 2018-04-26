@@ -90,3 +90,5 @@ Optional:
 
 -   `salt_bin_dir` (string) - Path to the `salt-call` executable. Useful if it is not
     on the PATH.
+
+-   `guest_os_type` (string) - The target guest OS type, either "unix" or "windows".

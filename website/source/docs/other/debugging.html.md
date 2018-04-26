@@ -10,6 +10,9 @@ sidebar_current: 'docs-other-debugging'
 
 # Debugging Packer Builds
 
+Using `packer build -on-error=ask` allows you to inspect failures and try out
+solutions before restarting the build.
+
 For remote builds with cloud providers like Amazon Web Services AMIs, debugging
 a Packer build can be eased greatly with `packer build -debug`. This disables
 parallelization and enables debug mode.
@@ -28,7 +31,7 @@ ephemeral key will be deleted at the end of the packer run during cleanup.
 For a local builder, the SSH session initiated will be visible in the detail
 provided when `PACKER_LOG=1` environment variable is set prior to a build,
 and you can connect to the local machine using the userid and password defined
-in the kickstart or preseed associated with initialzing the local VM.
+in the kickstart or preseed associated with initializing the local VM.
 
 ### Windows
 

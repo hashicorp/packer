@@ -1,10 +1,12 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"context"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestStepShutdown_impl(t *testing.T) {
@@ -22,7 +24,7 @@ func TestStepShutdown_noShutdownCommand(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -59,7 +61,7 @@ func TestStepShutdown_shutdownCommand(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -96,7 +98,7 @@ func TestStepShutdown_shutdownTimeout(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -128,7 +130,7 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 
 	// Test the run
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	testDuration := time.Since(start).Seconds()
@@ -153,7 +155,7 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 	}()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	testDuration = time.Since(start).Seconds()

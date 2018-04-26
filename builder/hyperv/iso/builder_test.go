@@ -1,10 +1,16 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 
+	"os"
+
+	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -17,7 +23,9 @@ func testConfig() map[string]interface{} {
 		"ssh_username":            "foo",
 		"ram_size":                64,
 		"disk_size":               256,
+		"disk_block_size":         1,
 		"guest_additions_mode":    "none",
+		"disk_additional_size":    "50000,40000,30000",
 		packer.BuildNameConfigKey: "foo",
 	}
 }
@@ -76,6 +84,58 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 256 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	expected_default_block_size := uint(32)
+	expected_min_block_size := uint(0)
+	expected_max_block_size := uint(256)
+
+	// Test default with empty disk_block_size
+	delete(config, "disk_block_size")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+	if b.config.DiskBlockSize != expected_default_block_size {
+		t.Fatalf("bad default block size with empty config: %d. Expected %d", b.config.DiskBlockSize, expected_default_block_size)
+	}
+
+	test_sizes := []uint{0, 1, 32, 256, 512, 1 * 1024, 32 * 1024}
+	for _, test_size := range test_sizes {
+		config["disk_block_size"] = test_size
+		b = Builder{}
+		warns, err = b.Prepare(config)
+		if test_size > expected_max_block_size || test_size < expected_min_block_size {
+			if len(warns) > 0 {
+				t.Fatalf("bad, should have no warns: %#v", warns)
+			}
+			if err == nil {
+				t.Fatalf("bad, should have error but didn't. disk_block_size=%d outside expected valid range [%d,%d]", test_size, expected_min_block_size, expected_max_block_size)
+			}
+		} else {
+			if len(warns) > 0 {
+				t.Fatalf("bad: %#v", warns)
+			}
+			if err != nil {
+				t.Fatalf("bad, should not have error: %s", err)
+			}
+			if test_size == 0 {
+				if b.config.DiskBlockSize != expected_default_block_size {
+					t.Fatalf("bad default block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+				}
+			} else {
+				if b.config.DiskBlockSize != test_size {
+					t.Fatalf("bad block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+				}
+			}
+		}
 	}
 }
 
@@ -235,7 +295,7 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	delete(config, "iso_url")
 	delete(config, "iso_urls")
 
-	// Test both epty
+	// Test both empty
 	config["iso_url"] = ""
 	b = Builder{}
 	warns, err := b.Prepare(config)
@@ -296,5 +356,219 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	}
 	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
 		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_SizeNotRequiredWhenUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected := []string{
+		"http://www.packer.io/hdd.vhdx",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+
+	// Test just iso_urls set but with vhd
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Errorf("should not have error: %s", err)
+	}
+
+	expected = []string{
+		"http://www.packer.io/hdd.vhd",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_SizeIsRequiredWhenNotUsingExistingHarddrive(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	delete(config, "iso_url")
+	delete(config, "iso_urls")
+	delete(config, "disk_size")
+
+	config["disk_size"] = 1
+
+	// Test just iso_urls set but with vhdx
+	delete(config, "iso_url")
+	config["iso_urls"] = []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	expected := []string{
+		"http://www.packer.io/os.iso",
+		"http://www.hashicorp.com/dvd.iso",
+	}
+	if !reflect.DeepEqual(b.config.ISOUrls, expected) {
+		t.Fatalf("bad: %#v", b.config.ISOUrls)
+	}
+}
+
+func TestBuilderPrepare_MaximumOfSixtyFourAdditionalDisks(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	disks := make([]string, 65)
+	for i := range disks {
+		disks[i] = strconv.Itoa(i)
+	}
+	config["disk_additional_size"] = disks
+
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+}
+
+func TestBuilderPrepare_CommConfig(t *testing.T) {
+	// Test Winrm
+	{
+		config := testConfig()
+		config["communicator"] = "winrm"
+		config["winrm_username"] = "username"
+		config["winrm_password"] = "password"
+		config["winrm_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.Comm.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.Comm.WinRMUser)
+		}
+		if b.config.Comm.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.Comm.WinRMPassword)
+		}
+		if host := b.config.Comm.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
+	// Test SSH
+	{
+		config := testConfig()
+		config["communicator"] = "ssh"
+		config["ssh_username"] = "username"
+		config["ssh_password"] = "password"
+		config["ssh_host"] = "1.2.3.4"
+
+		var b Builder
+		warns, err := b.Prepare(config)
+		if len(warns) > 0 {
+			t.Fatalf("bad: %#v", warns)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.Comm.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.Comm.SSHUsername)
+		}
+		if b.config.Comm.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.Comm.SSHPassword)
+		}
+		if host := b.config.Comm.Host(); host != "1.2.3.4" {
+			t.Errorf("bad host: %s", host)
+		}
+	}
+
+}
+
+func TestUserVariablesInBootCommand(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
+	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	hook := &packer.MockHook{}
+	driver := &hypervcommon.DriverMock{}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
+	state.Put("config", &b.config)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("http_port", uint(0))
+	state.Put("ui", ui)
+	state.Put("vmName", "packer-foo")
+
+	step := &hypervcommon.StepTypeBootCommand{
+		BootCommand: b.config.FlatBootCommand(),
+		SwitchName:  b.config.SwitchName,
+		Ctx:         b.config.ctx,
+	}
+
+	ret := step.Run(context.Background(), state)
+	if ret != multistep.ActionContinue {
+		t.Fatalf("should not have error: %#v", ret)
 	}
 }

@@ -37,7 +37,7 @@
       "ssh_password": "vagrant",
       "ssh_port": 22,
       "ssh_username": "root",
-      "ssh_wait_timeout": "10000s",
+      "ssh_timeout": "10000s",
       "type": "qemu",
       "vm_name": "{{ user `template` }}.raw",      
       "net_device": "virtio-net",

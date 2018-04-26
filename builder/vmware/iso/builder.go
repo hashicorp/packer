@@ -6,15 +6,17 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderIdESX = "mitchellh.vmware-esx"
@@ -29,6 +31,7 @@ type Config struct {
 	common.HTTPConfig        `mapstructure:",squash"`
 	common.ISOConfig         `mapstructure:",squash"`
 	common.FloppyConfig      `mapstructure:",squash"`
+	bootcommand.VNCConfig    `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
@@ -37,21 +40,43 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
-	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	DiskName            string   `mapstructure:"vmdk_name"`
-	DiskSize            uint     `mapstructure:"disk_size"`
-	DiskTypeId          string   `mapstructure:"disk_type_id"`
-	Format              string   `mapstructure:"format"`
-	GuestOSType         string   `mapstructure:"guest_os_type"`
+	// disk drives
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
+	DiskAdapterType    string `mapstructure:"disk_adapter_type"`
+	DiskName           string `mapstructure:"vmdk_name"`
+	DiskSize           uint   `mapstructure:"disk_size"`
+	DiskTypeId         string `mapstructure:"disk_type_id"`
+	Format             string `mapstructure:"format"`
+
+	// cdrom drive
+	CdromAdapterType string `mapstructure:"cdrom_adapter_type"`
+
+	// platform information
+	GuestOSType string `mapstructure:"guest_os_type"`
+	Version     string `mapstructure:"version"`
+	VMName      string `mapstructure:"vm_name"`
+
+	// Network adapter and type
+	NetworkAdapterType string `mapstructure:"network_adapter_type"`
+	Network            string `mapstructure:"network"`
+
+	// device presence
+	Sound bool `mapstructure:"sound"`
+	USB   bool `mapstructure:"usb"`
+
+	// communication ports
+	Serial   string `mapstructure:"serial"`
+	Parallel string `mapstructure:"parallel"`
+
+	// booting a guest
 	KeepRegistered      bool     `mapstructure:"keep_registered"`
 	OVFToolOptions      []string `mapstructure:"ovftool_options"`
 	SkipCompaction      bool     `mapstructure:"skip_compaction"`
 	SkipExport          bool     `mapstructure:"skip_export"`
-	VMName              string   `mapstructure:"vm_name"`
 	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
-	Version             string   `mapstructure:"version"`
 
+	// remote vsphere
 	RemoteType           string `mapstructure:"remote_type"`
 	RemoteDatastore      string `mapstructure:"remote_datastore"`
 	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
@@ -99,6 +124,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -106,6 +132,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
+	}
+
+	if b.config.DiskAdapterType == "" {
+		// Default is lsilogic
+		b.config.DiskAdapterType = "lsilogic"
 	}
 
 	if b.config.DiskTypeId == "" {
@@ -157,11 +188,27 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	}
 
+	if b.config.Network == "" {
+		b.config.Network = "nat"
+	}
+
+	if !b.config.Sound {
+		b.config.Sound = false
+	}
+
+	if !b.config.USB {
+		b.config.USB = false
+	}
+
 	// Remote configuration validation
 	if b.config.RemoteType != "" {
 		if b.config.RemoteHost == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("remote_host must be specified"))
+		}
+		if b.config.RemoteType != "esx5" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
 		}
 	}
 
@@ -275,13 +322,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Format: b.config.Format,
 		},
 		&vmwcommon.StepRun{
-			BootWait:           b.config.BootWait,
 			DurationBeforeStop: 5 * time.Second,
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
+			BootWait:    b.config.BootWait,
 			VNCEnabled:  !b.config.DisableVNC,
-			BootCommand: b.config.BootCommand,
+			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
 		},
@@ -343,7 +390,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Compile the artifact list
 	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" {
+	if b.config.RemoteType != "" && b.config.Format != "" && !b.config.SkipExport {
 		dir = new(vmwcommon.LocalOutputDir)
 		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
@@ -360,11 +407,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		builderId = BuilderIdESX
 	}
 
+	config := make(map[string]string)
+	config[ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
+	config[ArtifactConfFormat] = b.config.Format
+	config[ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
+
 	return &Artifact{
 		builderId: builderId,
 		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
+		config:    config,
 	}, nil
 }
 

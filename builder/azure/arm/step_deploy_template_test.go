@@ -1,11 +1,12 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepDeployTemplateShouldFailIfDeployFails(t *testing.T) {
@@ -19,7 +20,7 @@ func TestStepDeployTemplateShouldFailIfDeployFails(t *testing.T) {
 
 	stateBag := createTestStateBagStepDeployTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -38,7 +39,7 @@ func TestStepDeployTemplateShouldPassIfDeployPasses(t *testing.T) {
 
 	stateBag := createTestStateBagStepDeployTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -61,24 +62,49 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 		},
 		say:   func(message string) {},
 		error: func(e error) {},
+		name:  "--deployment-name--",
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	var expectedDeploymentName = stateBag.Get(constants.ArmDeploymentName).(string)
 	var expectedResourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
 
-	if actualDeploymentName != expectedDeploymentName {
+	if actualDeploymentName != "--deployment-name--" {
 		t.Fatal("Expected StepValidateTemplate to source 'constants.ArmDeploymentName' from the state bag, but it did not.")
 	}
 
 	if actualResourceGroupName != expectedResourceGroupName {
 		t.Fatal("Expected the step to source 'constants.ArmResourceGroupName' from the state bag, but it did not.")
+	}
+}
+
+func TestStepDeployTemplateDeleteImageShouldFailWhenImageUrlCannotBeParsed(t *testing.T) {
+	var testSubject = &StepDeployTemplate{
+		say:   func(message string) {},
+		error: func(e error) {},
+		name:  "--deployment-name--",
+	}
+	// Invalid URL per https://golang.org/src/net/url/url_test.go
+	err := testSubject.deleteImage("image", "http://[fe80::1%en0]/", "Unit Test: ResourceGroupName")
+	if err == nil {
+		t.Fatal("Expected a failure because of the failed image name")
+	}
+}
+
+func TestStepDeployTemplateDeleteImageShouldFailWithInvalidImage(t *testing.T) {
+	var testSubject = &StepDeployTemplate{
+		say:   func(message string) {},
+		error: func(e error) {},
+		name:  "--deployment-name--",
+	}
+	err := testSubject.deleteImage("image", "storage.blob.core.windows.net/abc", "Unit Test: ResourceGroupName")
+	if err == nil {
+		t.Fatal("Expected a failure because of the failed image name")
 	}
 }
 

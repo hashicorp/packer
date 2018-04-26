@@ -53,7 +53,7 @@ on Vagrant Cloud, as well as authentication and version information.
 
 -   `access_token` (string) - Your access token for the Vagrant Cloud API. This
     can be generated on your [tokens
-    page](https://vagrantcloud.com/account/tokens). If not specified, the
+    page](https://app.vagrantup.com/settings/security). If not specified, the
     environment will be searched. First, `VAGRANT_CLOUD_TOKEN` is checked, and
     if nothing is found, finally `ATLAS_TOKEN` will be used.
 

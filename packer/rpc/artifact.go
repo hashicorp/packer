@@ -1,8 +1,9 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"net/rpc"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Artifact where the artifact is actually

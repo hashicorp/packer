@@ -87,6 +87,27 @@ func TestBlockDevice(t *testing.T) {
 		{
 			Config: &BlockDevice{
 				DeviceName:          "/dev/sdb",
+				VolumeType:          "gp2",
+				VolumeSize:          8,
+				DeleteOnTermination: true,
+				Encrypted:           true,
+				KmsKeyId:            "2Fa48a521f-3aff-4b34-a159-376ac5d37812",
+			},
+
+			Result: &ec2.BlockDeviceMapping{
+				DeviceName: aws.String("/dev/sdb"),
+				Ebs: &ec2.EbsBlockDevice{
+					VolumeType:          aws.String("gp2"),
+					VolumeSize:          aws.Int64(8),
+					DeleteOnTermination: aws.Bool(true),
+					Encrypted:           aws.Bool(true),
+					KmsKeyId:            aws.String("2Fa48a521f-3aff-4b34-a159-376ac5d37812"),
+				},
+			},
+		},
+		{
+			Config: &BlockDevice{
+				DeviceName:          "/dev/sdb",
 				VolumeType:          "standard",
 				DeleteOnTermination: true,
 			},

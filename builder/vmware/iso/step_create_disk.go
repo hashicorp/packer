@@ -1,11 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"path/filepath"
+
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step creates the virtual disks for the VM.
@@ -19,14 +21,14 @@ import (
 //   full_disk_path (string) - The full path to the created disk.
 type stepCreateDisk struct{}
 
-func (stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating virtual machine disk")
 	full_disk_path := filepath.Join(config.OutputDir, config.DiskName+".vmdk")
-	if err := driver.CreateDisk(full_disk_path, fmt.Sprintf("%dM", config.DiskSize), config.DiskTypeId); err != nil {
+	if err := driver.CreateDisk(full_disk_path, fmt.Sprintf("%dM", config.DiskSize), config.DiskAdapterType, config.DiskTypeId); err != nil {
 		err := fmt.Errorf("Error creating disk: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -44,7 +46,7 @@ func (stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 			additionalpath := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.vmdk", config.DiskName, i+1))
 			size := fmt.Sprintf("%dM", uint64(additionalsize))
 
-			if err := driver.CreateDisk(additionalpath, size, config.DiskTypeId); err != nil {
+			if err := driver.CreateDisk(additionalpath, size, config.DiskAdapterType, config.DiskTypeId); err != nil {
 				err := fmt.Errorf("Error creating additional disk: %s", err)
 				state.Put("error", err)
 				ui.Error(err.Error())

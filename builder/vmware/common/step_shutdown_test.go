@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 func testStepShutdownState(t *testing.T) multistep.StateBag {
@@ -49,7 +50,7 @@ func TestStepShutdown_command(t *testing.T) {
 
 	resultCh := make(chan multistep.StepAction, 1)
 	go func() {
-		resultCh <- step.Run(state)
+		resultCh <- step.Run(context.Background(), state)
 	}()
 
 	select {
@@ -94,7 +95,7 @@ func TestStepShutdown_noCommand(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -115,6 +116,10 @@ func TestStepShutdown_noCommand(t *testing.T) {
 }
 
 func TestStepShutdown_locks(t *testing.T) {
+	if os.Getenv("PACKER_ACC") == "" {
+		t.Skip("This test is only run with PACKER_ACC=1 due to the requirement of access to the VMware binaries.")
+	}
+
 	state := testStepShutdownState(t)
 	step := new(StepShutdown)
 	step.Testing = true
@@ -138,7 +143,7 @@ func TestStepShutdown_locks(t *testing.T) {
 
 	resultCh := make(chan multistep.StepAction, 1)
 	go func() {
-		resultCh <- step.Run(state)
+		resultCh <- step.Run(context.Background(), state)
 	}()
 
 	select {

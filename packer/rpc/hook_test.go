@@ -1,11 +1,12 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestHookRPC(t *testing.T) {

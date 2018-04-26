@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -10,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepSecurityGroup struct {
@@ -23,7 +24,7 @@ type StepSecurityGroup struct {
 	createdGroupId string
 }
 
-func (s *StepSecurityGroup) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -158,6 +159,7 @@ func waitUntilSecurityGroupExists(c *ec2.EC2, input *ec2.DescribeSecurityGroupsI
 	w := request.Waiter{
 		Name:        "DescribeSecurityGroups",
 		MaxAttempts: 40,
+		Delay:       request.ConstantWaiterDelay(5 * time.Second),
 		Acceptors: []request.WaiterAcceptor{
 			{
 				State:    request.SuccessWaiterState,
