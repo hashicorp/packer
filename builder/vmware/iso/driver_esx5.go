@@ -139,7 +139,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 }
 
 func (d *ESX5Driver) RemoveCache(localPath string) error {
-	finalPath := filepath.ToSlash(filepath.Dir(d.cachePath(localPath)))
+	finalPath := d.cachePath(localPath)
 	log.Printf("Removing remote cache path %s (local %s)", finalPath, localPath)
 	return d.sh("rm", "-rf", finalPath)
 }
