@@ -56,7 +56,6 @@ func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
 	}
 
 	driver := state.Get("driver").(vmwcommon.Driver)
-	// ui := state.Get("ui").(packer.Ui)
 
 	remote, ok := driver.(RemoteDriver)
 	if !ok {
@@ -69,9 +68,8 @@ func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
 	}
 
 	log.Printf("Cleaning up remote path: %s", path)
-	err := remote.remove(path)
+	err := remote.RemoveCache(path)
 	if err != nil {
 		log.Printf("Error cleaning up: %s", err)
 	}
-
 }

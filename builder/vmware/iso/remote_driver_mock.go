@@ -61,11 +61,11 @@ func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
 }
 
 func (d *RemoteDriverMock) upload(dst, src string) error {
-	return nil
+	return d.uploadErr
 }
 
-func (d *RemoteDriverMock) remove(path string) error {
-	return d.uploadErr
+func (d *RemoteDriverMock) RemoveCache(localPath string) error {
+	return nil
 }
 
 func (d *RemoteDriverMock) ReloadVM() error {

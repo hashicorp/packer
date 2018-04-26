@@ -138,6 +138,12 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 	return finalPath, nil
 }
 
+func (d *ESX5Driver) RemoveCache(localPath string) error {
+	finalPath := filepath.ToSlash(filepath.Dir(d.cachePath(localPath)))
+	log.Printf("Removing remote cache path %s (local %s)", finalPath, localPath)
+	return d.sh("rm", "-rf", finalPath)
+}
+
 func (d *ESX5Driver) ToolsIsoPath(string) string {
 	return ""
 }
@@ -567,10 +573,6 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 
 func (d *ESX5Driver) mkdir(path string) error {
 	return d.sh("mkdir", "-p", path)
-}
-
-func (d *ESX5Driver) remove(path string) error {
-	return d.sh("rm", "-rf", path)
 }
 
 func (d *ESX5Driver) upload(dst, src string) error {
