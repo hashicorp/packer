@@ -170,6 +170,24 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 	}
 }
 
+func TestDownloadClient_notFound(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/not-found.txt",
+		TargetPath: tf.Name(),
+	})
+
+	if _, err := client.Get(); err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func TestDownloadClient_resume(t *testing.T) {
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Write([]byte("w"))
