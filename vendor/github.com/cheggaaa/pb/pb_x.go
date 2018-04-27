@@ -48,21 +48,21 @@ func terminalWidth() (int, error) {
 	return int(ws.Col), nil
 }
 
-func lockEcho() (quit chan int, err error) {
+func lockEcho() (shutdownCh chan struct{}, err error) {
 	echoLockMutex.Lock()
 	defer echoLockMutex.Unlock()
 	if origTermStatePtr != nil {
-		return quit, ErrPoolWasStarted
+		return shutdownCh, ErrPoolWasStarted
 	}
 
 	fd := int(tty.Fd())
 
-	oldTermStatePtr, err := unix.IoctlGetTermios(fd, ioctlReadTermios)
+	origTermStatePtr, err = unix.IoctlGetTermios(fd, ioctlReadTermios)
 	if err != nil {
 		return nil, fmt.Errorf("Can't get terminal settings: %v", err)
 	}
 
-	oldTermios := *oldTermStatePtr
+	oldTermios := *origTermStatePtr
 	newTermios := oldTermios
 	newTermios.Lflag &^= syscall.ECHO
 	newTermios.Lflag |= syscall.ICANON | syscall.ISIG
@@ -71,8 +71,8 @@ func lockEcho() (quit chan int, err error) {
 		return nil, fmt.Errorf("Can't set terminal settings: %v", err)
 	}
 
-	quit = make(chan int, 1)
-	go catchTerminate(quit)
+	shutdownCh = make(chan struct{})
+	go catchTerminate(shutdownCh)
 	return
 }
 
@@ -95,12 +95,12 @@ func unlockEcho() error {
 }
 
 // listen exit signals and restore terminal state
-func catchTerminate(quit chan int) {
+func catchTerminate(shutdownCh chan struct{}) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGKILL)
 	defer signal.Stop(sig)
 	select {
-	case <-quit:
+	case <-shutdownCh:
 		unlockEcho()
 	case <-sig:
 		unlockEcho()
