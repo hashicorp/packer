@@ -43,9 +43,9 @@ func TestStepCloneVMX(t *testing.T) {
 
 	// Set up expected mock disk file paths
 	diskFilenames := []string{scsiFilename, sataFilename, ideFilename, nvmeFilename}
-	var diskPaths []string
+	var diskFullPaths []string
 	for _, diskFilename := range diskFilenames {
-		diskPaths = append(diskPaths, filepath.Join(td, diskFilename))
+		diskFullPaths = append(diskFullPaths, filepath.Join(td, diskFilename))
 	}
 
 	// Create the source
@@ -91,8 +91,8 @@ func TestStepCloneVMX(t *testing.T) {
 	if stateDiskPaths, ok := state.GetOk("disk_full_paths"); !ok {
 		t.Fatal("should set disk_full_paths")
 	} else {
-		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskPaths,
-			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskPaths)
+		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskFullPaths,
+			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskFullPaths)
 	}
 
 	// Test we got the network type
