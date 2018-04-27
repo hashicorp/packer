@@ -13,7 +13,11 @@ sidebar_current: 'docs-provisioners-powershell'
 Type: `powershell`
 
 The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
-It assumes that the communicator in use is WinRM.
+It assumes that the communicator in use is WinRM. However, the provisioner
+can work equally well (with a few caveats) when combined with the SSH
+communicator. See the [section
+below](/docs/provisioners/powershell.html#combining-the-powershell-provisioner-with-the-ssh-communicator)
+for details.
 
 ## Basic Example
 
@@ -73,7 +77,7 @@ Optional parameters:
     inject prior to the execute\_command. The format should be `key=value`.
     Packer injects some environmental variables by default into the
     environment, as well, which are covered in the section below.
-    If you are running on AWS or Azure and would like to access the generated
+    If you are running on AWS, Azure or Google Compute and would like to access the generated
     password that Packer uses to connect to the instance via
     WinRM, you can use the template variable `{{.WinRMPassword}}` to set this
     as an environment variable. For example:
@@ -97,12 +101,14 @@ Optional parameters:
     template](/docs/templates/engine.html). There are two
     available variables: `Path`, which is the path to the script to run, and
     `Vars`, which is the location of a temp file containing the list of
-    `environment_vars`, if configured.
+    `environment_vars`. The value of both `Path` and `Vars` can be
+    manually configured by setting the values for `remote_path` and
+    `remote_env_var_path` respectively.
 
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
-    Windows user. If you are running a build on AWS and would like to run using
-    the AWS-generated password that Packer uses to connect to the instance via,
+    Windows user. If you are running a build on AWS, Azure or Google Compute and would like to run using
+    the generated password that Packer uses to connect to the instance via 
     WinRM, you may do so by using the template variable {{.WinRMPassword}}.
     For example:
 
@@ -111,9 +117,28 @@ Optional parameters:
     "elevated_password": "{{.WinRMPassword}}",
     ```
 
--   `remote_path` (string) - The path where the script will be uploaded to in
-    the machine. This defaults to "c:/Windows/Temp/script.ps1". This value must
-    be a writable location and any parent directories must already exist.
+-   `remote_path` (string) - The path where the PowerShell script will be
+    uploaded to within the target build machine. This defaults to
+    `C:/Windows/Temp/script-UUID.ps1` where UUID is replaced with a
+    dynamically generated string that uniquely identifies the script.
+
+    This setting allows users to override the default upload location. The
+    value must be a writable location and any parent directories must
+    already exist.
+
+-   `remote_env_var_path` (string) - Environment variables required within
+    the remote environment are uploaded within a PowerShell script and then
+    enabled by 'dot sourcing' the script immediately prior to execution of
+    the main command or script.
+
+    The path the environment variables script will be uploaded to defaults to
+    `C:/Windows/Temp/packer-ps-env-vars-UUID.ps1` where UUID is replaced
+    with a dynamically generated string that uniquely identifies the
+    script.
+
+    This setting allows users to override the location the environment
+    variable script is uploaded to. The value must be a writable location
+    and any parent directories must already exist.
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is "5m" or 5 minutes. This setting
@@ -146,6 +171,41 @@ commonly useful environmental variables:
     download large files over http. This may be useful if you're experiencing
     slower speeds using the default file provisioner. A file provisioner using
     the `winrm` communicator may experience these types of difficulties.
+
+## Combining the PowerShell Provisioner with the SSH Communicator
+
+The good news first. If you are using the
+[Microsoft port of OpenSSH](https://github.com/PowerShell/Win32-OpenSSH/wiki)
+then the provisioner should just work as expected - no extra configuration
+effort is required.
+
+Now the caveats. If you are using an alternative configuration, and your SSH
+connection lands you in a *nix shell on the remote host, then you will most
+likely need to manually set the `execute_command`; The default
+`execute_command` used by Packer will not work for you.
+When configuring the command you will need to ensure that any dollar signs
+or other characters that may be incorrectly interpreted by the remote shell
+are escaped accordingly.
+
+The following example shows how the standard `execute_command` can be
+reconfigured to work on a remote system with
+[Cygwin/OpenSSH](https://cygwin.com/) installed.
+The `execute_command` has each dollar sign backslash escaped so that it is
+not interpreted by the remote Bash shell - Bash being the default shell for
+Cygwin environments.
+
+```json
+  "provisioners": [
+    {
+      "type": "powershell",
+      "execute_command": "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\"",
+      "inline": [
+        "Write-Host \"Hello from PowerShell\"",
+      ]
+    }
+  ]
+```
+
 
 ## Packer's Handling of Characters Special to PowerShell
 

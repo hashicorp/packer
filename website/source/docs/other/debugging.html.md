@@ -10,6 +10,9 @@ sidebar_current: 'docs-other-debugging'
 
 # Debugging Packer Builds
 
+Using `packer build -on-error=ask` allows you to inspect failures and try out
+solutions before restarting the build.
+
 For remote builds with cloud providers like Amazon Web Services AMIs, debugging
 a Packer build can be eased greatly with `packer build -debug`. This disables
 parallelization and enables debug mode.

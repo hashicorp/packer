@@ -66,9 +66,9 @@ type Driver interface {
 
 	DeleteVirtualSwitch(string) error
 
-	CreateVirtualMachine(string, string, string, string, int64, int64, string, uint, bool) error
+	CreateVirtualMachine(string, string, string, string, int64, int64, int64, string, uint, bool) error
 
-	AddVirtualMachineHardDrive(string, string, string, int64, string) error
+	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
 	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
 

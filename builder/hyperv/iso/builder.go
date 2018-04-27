@@ -10,6 +10,7 @@ import (
 
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	powershell "github.com/hashicorp/packer/common/powershell"
 	"github.com/hashicorp/packer/common/powershell/hyperv"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -23,6 +24,10 @@ const (
 	DefaultDiskSize = 40 * 1024        // ~40GB
 	MinDiskSize     = 256              // 256MB
 	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
+
+	DefaultDiskBlockSize = 32  // 32MB
+	MinDiskBlockSize     = 1   // 1MB
+	MaxDiskBlockSize     = 256 // 256MB
 
 	DefaultRamSize                 = 1 * 1024  // 1GB
 	MinRamSize                     = 32        // 32MB
@@ -47,17 +52,23 @@ type Config struct {
 	common.HTTPConfig           `mapstructure:",squash"`
 	common.ISOConfig            `mapstructure:",squash"`
 	common.FloppyConfig         `mapstructure:",squash"`
+	bootcommand.BootConfig      `mapstructure:",squash"`
 	hypervcommon.OutputConfig   `mapstructure:",squash"`
 	hypervcommon.SSHConfig      `mapstructure:",squash"`
-	hypervcommon.RunConfig      `mapstructure:",squash"`
 	hypervcommon.ShutdownConfig `mapstructure:",squash"`
 
 	// The size, in megabytes, of the hard disk to create for the VM.
 	// By default, this is 130048 (about 127 GB).
 	DiskSize uint `mapstructure:"disk_size"`
+
+	// The size, in megabytes, of the block size used to create the hard disk.
+	// By default, this is 32768 (about 32 MB)
+	DiskBlockSize uint `mapstructure:"disk_block_size"`
+
 	// The size, in megabytes, of the computer memory in the VM.
 	// By default, this is 1024 (about 1 GB).
 	RamSize uint `mapstructure:"ram_size"`
+
 	//
 	SecondaryDvdImages []string `mapstructure:"secondary_iso_images"`
 
@@ -71,18 +82,17 @@ type Config struct {
 	// By default this is "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
 	VMName string `mapstructure:"vm_name"`
 
-	BootCommand                    []string `mapstructure:"boot_command"`
-	SwitchName                     string   `mapstructure:"switch_name"`
-	SwitchVlanId                   string   `mapstructure:"switch_vlan_id"`
-	MacAddress                     string   `mapstructure:"mac_address"`
-	VlanId                         string   `mapstructure:"vlan_id"`
-	Cpu                            uint     `mapstructure:"cpu"`
-	Generation                     uint     `mapstructure:"generation"`
-	EnableMacSpoofing              bool     `mapstructure:"enable_mac_spoofing"`
-	EnableDynamicMemory            bool     `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool     `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool     `mapstructure:"enable_virtualization_extensions"`
-	TempPath                       string   `mapstructure:"temp_path"`
+	SwitchName                     string `mapstructure:"switch_name"`
+	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
+	MacAddress                     string `mapstructure:"mac_address"`
+	VlanId                         string `mapstructure:"vlan_id"`
+	Cpu                            uint   `mapstructure:"cpu"`
+	Generation                     uint   `mapstructure:"generation"`
+	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
+	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
+	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
+	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
+	TempPath                       string `mapstructure:"temp_path"`
 
 	// A separate path can be used for storing the VM's disk image. The purpose is to enable
 	// reading and writing to take place on different physical disks (read from VHD temp path
@@ -126,9 +136,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 
+	errs = packer.MultiErrorAppend(errs, b.config.BootConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
@@ -139,6 +149,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
+	}
+
+	err = b.checkDiskBlockSize()
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
 	}
 
 	err = b.checkRamSize()
@@ -352,6 +367,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName:                     b.config.SwitchName,
 			RamSize:                        b.config.RamSize,
 			DiskSize:                       b.config.DiskSize,
+			DiskBlockSize:                  b.config.DiskBlockSize,
 			Generation:                     b.config.Generation,
 			Cpu:                            b.config.Cpu,
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
@@ -362,6 +378,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DifferencingDisk:               b.config.DifferencingDisk,
 			SkipExport:                     b.config.SkipExport,
 			OutputDir:                      b.config.OutputDir,
+			MacAddress:                     b.config.MacAddress,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
@@ -388,12 +405,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchVlanId: b.config.SwitchVlanId,
 		},
 
-		&hypervcommon.StepRun{
-			BootWait: b.config.BootWait,
-		},
+		&hypervcommon.StepRun{},
 
 		&hypervcommon.StepTypeBootCommand{
-			BootCommand: b.config.BootCommand,
+			BootCommand: b.config.FlatBootCommand(),
+			BootWait:    b.config.BootWait,
 			SwitchName:  b.config.SwitchName,
 			Ctx:         b.config.ctx,
 		},
@@ -487,6 +503,22 @@ func (b *Builder) checkDiskSize() error {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxDiskSize {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+	}
+
+	return nil
+}
+
+func (b *Builder) checkDiskBlockSize() error {
+	if b.config.DiskBlockSize == 0 {
+		b.config.DiskBlockSize = DefaultDiskBlockSize
+	}
+
+	log.Println(fmt.Sprintf("%s: %v", "DiskBlockSize", b.config.DiskBlockSize))
+
+	if b.config.DiskBlockSize < MinDiskBlockSize {
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size >= %v MB, but defined: %v", MinDiskBlockSize, b.config.DiskBlockSize)
+	} else if b.config.DiskBlockSize > MaxDiskBlockSize {
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size <= %v MB, but defined: %v", MaxDiskBlockSize, b.config.DiskBlockSize)
 	}
 
 	return nil

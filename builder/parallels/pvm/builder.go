@@ -74,11 +74,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Commands: b.config.Prlctl,
 			Ctx:      b.config.ctx,
 		},
-		&parallelscommon.StepRun{
-			BootWait: b.config.BootWait,
-		},
+		&parallelscommon.StepRun{},
 		&parallelscommon.StepTypeBootCommand{
-			BootCommand:    b.config.BootCommand,
+			BootCommand:    b.config.FlatBootCommand(),
+			BootWait:       b.config.BootWait,
 			HostInterfaces: []string{},
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
@@ -105,6 +104,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.PrlctlPost,
 			Ctx:      b.config.ctx,
+		},
+		&parallelscommon.StepCompactDisk{
+			Skip: b.config.SkipCompaction,
 		},
 	}
 

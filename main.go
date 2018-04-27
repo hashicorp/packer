@@ -1,6 +1,7 @@
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
+//go:generate go generate ./common/bootcommand/...
 package main
 
 import (
@@ -208,11 +209,13 @@ func wrappedMain() int {
 	}
 
 	cli := &cli.CLI{
-		Args:       args,
-		Commands:   Commands,
-		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
-		HelpWriter: os.Stdout,
-		Version:    version.Version,
+		Args:         args,
+		Autocomplete: true,
+		Commands:     Commands,
+		HelpFunc:     excludeHelpFunc(Commands, []string{"plugin"}),
+		HelpWriter:   os.Stdout,
+		Name:         "packer",
+		Version:      version.Version,
 	}
 
 	exitCode, err := cli.Run()

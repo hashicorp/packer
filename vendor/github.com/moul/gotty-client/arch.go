@@ -5,10 +5,10 @@ package gottyclient
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/sys/unix"
 	"os"
 	"os/signal"
 	"syscall"
-	"unsafe"
 )
 
 func notifySignalSIGWINCH(c chan<- os.Signal) {
@@ -20,12 +20,10 @@ func resetSignalSIGWINCH() {
 }
 
 func syscallTIOCGWINSZ() ([]byte, error) {
-	ws := winsize{}
-
-	syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(0), uintptr(syscall.TIOCGWINSZ),
-		uintptr(unsafe.Pointer(&ws)))
-
+	ws, err := unix.IoctlGetWinsize(0, 0)
+	if err != nil {
+		return nil, fmt.Errorf("ioctl error: %v", err)
+	}
 	b, err := json.Marshal(ws)
 	if err != nil {
 		return nil, fmt.Errorf("json.Marshal error: %v", err)

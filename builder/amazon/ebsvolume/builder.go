@@ -186,9 +186,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:           b.config.ctx,
 		},
 		&awscommon.StepGetPassword{
-			Debug:   b.config.PackerDebug,
-			Comm:    &b.config.RunConfig.Comm,
-			Timeout: b.config.WindowsPasswordTimeout,
+			Debug:     b.config.PackerDebug,
+			Comm:      &b.config.RunConfig.Comm,
+			Timeout:   b.config.WindowsPasswordTimeout,
+			BuildName: b.config.PackerBuildName,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,

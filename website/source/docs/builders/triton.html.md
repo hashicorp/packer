@@ -50,6 +50,7 @@ builder.
 
 -   `triton_account` (string) - The username of the Triton account to use when
     using the Triton Cloud API.
+
 -   `triton_key_id` (string) - The fingerprint of the public key of the SSH key
     pair to use for authentication with the Triton Cloud API. If
     `triton_key_material` is not set, it is assumed that the SSH agent has the
@@ -95,6 +96,11 @@ builder.
     
 -   `triton_user` (string) - The username of a user who has access to your Triton
     account. 
+    
+-   `insecure_skip_tls_verify` - (bool) This allows skipping TLS verification of 
+    the Triton endpoint. It is useful when connecting to a temporary Triton 
+    installation such as Cloud-On-A-Laptop which does not generally use a 
+    certificate signed by a trusted root CA. The default is `false`.
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
     the VM used to create an image of is enabled. The Triton firewall only
