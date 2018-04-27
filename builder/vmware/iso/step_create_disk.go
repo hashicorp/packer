@@ -31,26 +31,26 @@ func (stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep
 
 	// Users can configure disks at several locations in the template so
 	// first collate all the disk requirements
-	var diskPaths, diskSizes []string
+	var diskFullPaths, diskSizes []string
 	// The 'main' or 'default' disk
-	diskPaths = append(diskPaths, filepath.Join(config.OutputDir, config.DiskName+".vmdk"))
+	diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, config.DiskName+".vmdk"))
 	diskSizes = append(diskSizes, fmt.Sprintf("%dM", uint64(config.DiskSize)))
 	// Additional disks
 	if len(config.AdditionalDiskSize) > 0 {
 		for i, diskSize := range config.AdditionalDiskSize {
 			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.vmdk", config.DiskName, i+1))
-			diskPaths = append(diskPaths, path)
+			diskFullPaths = append(diskFullPaths, path)
 			size := fmt.Sprintf("%dM", uint64(diskSize))
 			diskSizes = append(diskSizes, size)
 		}
 	}
 
 	// Create all required disks
-	for i, diskPath := range diskPaths {
-		log.Printf("[INFO] Creating disk with Path: %s and Size: %s", diskPath, diskSizes[i])
+	for i, diskFullPath := range diskFullPaths {
+		log.Printf("[INFO] Creating disk with Path: %s and Size: %s", diskFullPath, diskSizes[i])
 		// Additional disks currently use the same adapter type and disk
 		// type as specified for the main disk
-		if err := driver.CreateDisk(diskPath, diskSizes[i], config.DiskAdapterType, config.DiskTypeId); err != nil {
+		if err := driver.CreateDisk(diskFullPath, diskSizes[i], config.DiskAdapterType, config.DiskTypeId); err != nil {
 			err := fmt.Errorf("Error creating disk: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
@@ -59,7 +59,7 @@ func (stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 
 	// Stash the disk paths so we can retrieve later e.g. when compacting
-	state.Put("disk_full_paths", diskPaths)
+	state.Put("disk_full_paths", diskFullPaths)
 	return multistep.ActionContinue
 }
 

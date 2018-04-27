@@ -28,7 +28,7 @@ type StepCompactDisk struct {
 func (s StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	diskPaths := state.Get("disk_full_paths").([]string)
+	diskFullPaths := state.Get("disk_full_paths").([]string)
 
 	if s.Skip {
 		log.Println("Skipping disk compaction step...")
@@ -36,22 +36,22 @@ func (s StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multis
 	}
 
 	ui.Say("Compacting all attached virtual disks...")
-	for i, diskPath := range diskPaths {
+	for i, diskFullPath := range diskFullPaths {
 		ui.Message(fmt.Sprintf("Compacting virtual disk %d", i+1))
 		// Get the file size of the virtual disk prior to compaction
-		fi, err := os.Stat(diskPath)
+		fi, err := os.Stat(diskFullPath)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error getting virtual disk file info pre compaction: %s", err))
 			return multistep.ActionHalt
 		}
 		diskFileSizeStart := fi.Size()
 		// Defragment and compact the disk
-		if err := driver.CompactDisk(diskPath); err != nil {
+		if err := driver.CompactDisk(diskFullPath); err != nil {
 			state.Put("error", fmt.Errorf("Error compacting disk: %s", err))
 			return multistep.ActionHalt
 		}
 		// Get the file size of the virtual disk post compaction
-		fi, err = os.Stat(diskPath)
+		fi, err = os.Stat(diskFullPath)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error getting virtual disk file info post compaction: %s", err))
 			return multistep.ActionHalt
