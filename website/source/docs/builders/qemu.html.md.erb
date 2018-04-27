@@ -112,14 +112,20 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 ### Optional:
 
 -   `accelerator` (string) - The accelerator type to use when running the VM.
-    This may be `none`, `kvm`, `tcg`, `hax`, or `xen`. The appropriate software
-    must have already been installed on your build machine to use the
+    This may be `none`, `kvm`, `tcg`, `hax`, `hvf`, or `xen`. The appropriate
+    software must have already been installed on your build machine to use the
     accelerator you specified. When no accelerator is specified, Packer will try
     to use `kvm` if it is available but will default to `tcg` otherwise.
 
     -&gt; The `hax` accelerator has issues attaching CDROM ISOs. This is an
     upstream issue which can be tracked
     [here](https://github.com/intel/haxm/issues/20).
+
+    -&gt; The `hvf` accelerator is new and experimental as of 
+    [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
+    You may encounter issues unrelated to Packer when using it.  You may need to
+    add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
+    guest operating system.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands should
