@@ -115,13 +115,13 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	// Write out the relative, host filesystem paths to the disks
-	var diskFullPaths []string
+	var diskPaths []string
 	for _, diskFilename := range diskFilenames {
 		log.Printf("Found attached disk with filename: %s", diskFilename)
-		diskFullPaths = append(diskFullPaths, filepath.Join(s.OutputDir, diskFilename))
+		diskPaths = append(diskPaths, filepath.Join(s.OutputDir, diskFilename))
 	}
 
-	if len(diskFullPaths) == 0 {
+	if len(diskPaths) == 0 {
 		state.Put("error", fmt.Errorf("Could not enumerate disk info from the vmx file"))
 		return multistep.ActionHalt
 	}
@@ -139,10 +139,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 
 	// Stash all required information in our state bag
 	state.Put("vmx_path", vmxPath)
-	// What disks get assigned to what key doesn't actually matter here
-	// since it's unimportant to the way the disk compaction step works
-	state.Put("full_disk_path", diskFullPaths[0])
-	state.Put("additional_disk_paths", diskFullPaths[1:])
+	state.Put("disk_full_paths", diskPaths)
 	state.Put("vmnetwork", networkType)
 
 	return multistep.ActionContinue

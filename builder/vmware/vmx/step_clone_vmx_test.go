@@ -88,17 +88,11 @@ func TestStepCloneVMX(t *testing.T) {
 		t.Fatalf("bad path to vmx: %#v", vmxPath)
 	}
 
-	if diskPath, ok := state.GetOk("full_disk_path"); !ok {
-		t.Fatal("should set full_disk_path")
-	} else if diskPath != diskPaths[0] {
-		t.Fatalf("bad disk path: %#v", diskPath)
-	}
-
-	if stateDiskPaths, ok := state.GetOk("additional_disk_paths"); !ok {
-		t.Fatal("should set additional_disk_paths")
+	if stateDiskPaths, ok := state.GetOk("disk_full_paths"); !ok {
+		t.Fatal("should set disk_full_paths")
 	} else {
-		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskPaths[1:],
-			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskPaths[1:])
+		assert.ElementsMatchf(t, stateDiskPaths.([]string), diskPaths,
+			"%s\nshould contain the same elements as:\n%s", stateDiskPaths.([]string), diskPaths)
 	}
 
 	// Test we got the network type
