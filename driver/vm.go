@@ -251,7 +251,7 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 			return err
 		}
 
-		disk.CapacityInKB = convertGiBToKiB(config.DiskSize)
+		disk.CapacityInKB = convertMiBToKiB(config.DiskSize)
 
 		confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
 			&types.VirtualDeviceConfigSpec{
@@ -427,7 +427,7 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 				ThinProvisioned: types.NewBool(config.DiskThinProvisioned),
 			},
 		},
-		CapacityInKB: convertGiBToKiB(config.DiskSize),
+		CapacityInKB: convertMiBToKiB(config.DiskSize),
 	}
 
 	devices.AssignController(disk, controller)
@@ -540,8 +540,8 @@ func (vm *VirtualMachine) addDevice(device types.BaseVirtualDevice) error {
 	return err
 }
 
-func convertGiBToKiB(gib int64) int64 {
-	return gib * 1024 * 1024
+func convertMiBToKiB(mib int64) int64 {
+	return mib * 1024
 }
 
 func (vm *VirtualMachine) AddConfigParams(params map[string]string) error {
