@@ -32,7 +32,7 @@ func defaultConfig() map[string]interface{} {
 		"ssh_password": "jetbrains",
 
 		"vm_name":   commonT.NewVMName(),
-		"disk_size": 2,
+		"disk_size": 2048,
 
 		"communicator": "none", // do not start the VM without any bootable devices
 	}
