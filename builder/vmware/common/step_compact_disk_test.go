@@ -23,8 +23,8 @@ func TestStepCompactDisk(t *testing.T) {
 		t.Fatalf("Error creating fake vmdk file: %s", err)
 	}
 
-	diskPath := diskFile.Name()
-	defer os.Remove(diskPath)
+	diskFullPath := diskFile.Name()
+	defer os.Remove(diskFullPath)
 
 	content := []byte("I am the fake vmdk's contents")
 	if _, err := diskFile.Write(content); err != nil {
@@ -35,7 +35,7 @@ func TestStepCompactDisk(t *testing.T) {
 	}
 
 	// Set up required state
-	state.Put("disk_full_paths", []string{diskPath})
+	state.Put("disk_full_paths", []string{diskFullPath})
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -51,7 +51,7 @@ func TestStepCompactDisk(t *testing.T) {
 	if !driver.CompactDiskCalled {
 		t.Fatal("should've called")
 	}
-	if driver.CompactDiskPath != diskPath {
+	if driver.CompactDiskPath != diskFullPath {
 		t.Fatal("should call with right path")
 	}
 }
@@ -61,8 +61,8 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.Skip = true
 
-	diskPaths := []string{"foo"}
-	state.Put("disk_full_paths", diskPaths)
+	diskFullPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskFullPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
