@@ -130,4 +130,4 @@ Failed to initialize build 'docker': error initializing builder 'docker': plugin
 ```
 
 you should try setting your temp directory to something shorter. This can be
-done through the `TMPDIR` environment variable.
+done through the `PACKER_TMP_DIR` environment variable.

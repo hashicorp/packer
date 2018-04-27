@@ -249,14 +249,14 @@ func (c *CLI) Run() (int, error) {
 			"Invalid flags before the subcommand. If these flags are for\n" +
 				"the subcommand, please put them after the subcommand.\n\n"))
 		c.commandHelp(command)
-		return 1, nil
+		return 2, nil
 	}
 
 	code := command.Run(c.SubcommandArgs())
 	if code == RunResultHelp {
 		// Requesting help
 		c.commandHelp(command)
-		return 1, nil
+		return 0, nil
 	}
 
 	return code, nil
