@@ -14,44 +14,6 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-type guestOSTypeConfig struct {
-	executeCommand   string
-	facterVarsFmt    string
-	facterVarsJoiner string
-	stagingDir       string
-}
-
-var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
-		executeCommand: "{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}" +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "FACTER_%s='%s'",
-		facterVarsJoiner: " ",
-		stagingDir:       "/tmp/packer-puppet-server",
-	},
-	provisioner.WindowsOSType: {
-		executeCommand: "{{.FacterVars}} " +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
-		facterVarsJoiner: " & ",
-		stagingDir:       "C:/Windows/Temp/packer-puppet-server",
-	},
-}
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
