@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -115,7 +116,7 @@ func TestGuestOSConfig_empty_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless && puppet apply --detailed-exitcodes /r/m/f"
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && puppet apply --detailed-exitcodes /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
@@ -150,7 +151,7 @@ func TestGuestOSConfig_full_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless && " +
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && " +
 		"SET \"FACTER_lhs=rhs\" & SET \"FACTER_foo=bar\" && " +
 		"puppet apply --detailed-exitcodes --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
 		"--manifestdir='/r/m/d' /r/m/f"
