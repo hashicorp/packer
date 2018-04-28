@@ -61,7 +61,6 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 	}
 
 	imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
-
 	if err != nil {
 		err := fmt.Errorf("Error searching for AMI: %s", err)
 		state.Put("error", err)
