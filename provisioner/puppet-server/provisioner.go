@@ -5,6 +5,7 @@ package puppetserver
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
@@ -13,44 +14,6 @@ import (
 	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
 )
-
-type guestOSTypeConfig struct {
-	executeCommand   string
-	facterVarsFmt    string
-	facterVarsJoiner string
-	stagingDir       string
-}
-
-var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
-		executeCommand: "{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}" +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "FACTER_%s='%s'",
-		facterVarsJoiner: " ",
-		stagingDir:       "/tmp/packer-puppet-server",
-	},
-	provisioner.WindowsOSType: {
-		executeCommand: "{{.FacterVars}} " +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
-		facterVarsJoiner: " & ",
-		stagingDir:       "C:/Windows/Temp/packer-puppet-server",
-	},
-}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -87,6 +50,10 @@ type Config struct {
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
 
+	// The directory from which the command will be executed.
+	// Packer requires the directory to exist when running puppet.
+	WorkingDir string `mapstructure:"working_directory"`
+
 	// The directory that contains the puppet binary.
 	// E.g. if it can't be found on the standard path.
 	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
@@ -103,12 +70,13 @@ type guestOSTypeConfig struct {
 	facterVarsJoiner string
 }
 
+// FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
-		tempDir: "/tmp",
+		tempDir:    "/tmp",
 		stagingDir: "/tmp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}}" +
+			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
 			"{{if .Sudo}}sudo -E {{end}}" +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
 			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
@@ -122,10 +90,10 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		facterVarsJoiner: " ",
 	},
 	provisioner.WindowsOSType: {
-		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
-		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
+		tempDir:    filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			"{{.FacterVars}} " +
+			`{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}` +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
 			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
 			"{{if .Debug}}--debug {{end}}" +
@@ -151,9 +119,11 @@ type ExecuteTemplate struct {
 	ClientPrivateKeyPath string
 	PuppetNode           string
 	PuppetServer         string
-	ExtraArguments       string
 	PuppetBinDir         string
 	Sudo                 bool
+	WorkingDir           string
+	Debug                bool
+	ExtraArguments       string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -274,7 +244,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
 		PuppetNode:           p.config.PuppetNode,
 		PuppetServer:         p.config.PuppetServer,
-		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
 		WorkingDir:           p.config.WorkingDir,
