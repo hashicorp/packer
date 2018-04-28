@@ -107,9 +107,9 @@ type guestOSTypeConfig struct {
 	facterVarsJoiner string
 }
 
+#FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
-		#FIXME assumes both Packer host and target are same OS
 		tempDir: "/tmp",
 		stagingDir: "/tmp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
@@ -127,7 +127,6 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		facterVarsJoiner: " ",
 	},
 	provisioner.WindowsOSType: {
-		#FIXME assumes both Packer host and target are same OS
 		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
 		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
