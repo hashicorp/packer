@@ -170,10 +170,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
-	}
-
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}

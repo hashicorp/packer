@@ -165,6 +165,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
+	if p.config.WorkingDir == "" {
+		p.config.WorkingDir = p.config.StagingDir
+	}
+
 	if p.config.Facter == nil {
 		p.config.Facter = make(map[string]string)
 	}
