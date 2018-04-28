@@ -79,7 +79,7 @@ type guestOSTypeConfig struct {
 	modulePathJoiner string
 }
 
-#FIXME assumes both Packer host and target are same OS
+// FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		tempDir: "/tmp",
