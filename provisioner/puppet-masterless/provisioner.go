@@ -73,7 +73,7 @@ type Config struct {
 type guestOSTypeConfig struct {
 	tempDir          string
 	stagingDir       string
-	executeCommand	 string
+	executeCommand   string
 	facterVarsFmt    string
 	facterVarsJoiner string
 	modulePathJoiner string
@@ -82,7 +82,7 @@ type guestOSTypeConfig struct {
 // FIXME assumes both Packer host and target are same OS
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
-		tempDir: "/tmp",
+		tempDir:    "/tmp",
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
@@ -100,7 +100,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
-		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
+		tempDir:    path.filepath.ToSlash(os.Getenv("TEMP")),
 		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			`{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}` +
@@ -125,23 +125,23 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
-	FacterVars	string
+	FacterVars      string
 	HieraConfigPath string
-	ModulePath	string
-	ManifestFile	string
-	ManifestDir	string
-	PuppetBinDir	string
-	Sudo		bool
-	WorkingDir	string
-	Debug		bool
-	ExtraArguments	string
+	ModulePath      string
+	ManifestFile    string
+	ManifestDir     string
+	PuppetBinDir    string
+	Sudo            bool
+	WorkingDir      string
+	Debug           bool
+	ExtraArguments  string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
-		InterpolateFilter:  &interpolate.RenderFilter{
+		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
 				"extra_arguments",
