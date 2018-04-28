@@ -5,6 +5,7 @@ package puppetserver
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
@@ -14,50 +15,15 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
-type guestOSTypeConfig struct {
-	executeCommand   string
-	facterVarsFmt    string
-	facterVarsJoiner string
-	stagingDir       string
-}
-
-var guestOSTypeConfigs = map[string]guestOSTypeConfig{
-	provisioner.UnixOSType: {
-		executeCommand: "{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}" +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "FACTER_%s='%s'",
-		facterVarsJoiner: " ",
-		stagingDir:       "/tmp/packer-puppet-server",
-	},
-	provisioner.WindowsOSType: {
-		executeCommand: "{{.FacterVars}} " +
-			"{{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet agent " +
-			"--onetime --no-daemonize " +
-			"{{if ne .PuppetServer \"\"}}--server='{{.PuppetServer}}' {{end}}" +
-			"{{if ne .Options \"\"}}{{.Options}} {{end}}" +
-			"{{if ne .PuppetNode \"\"}}--certname={{.PuppetNode}} {{end}}" +
-			"{{if ne .ClientCertPath \"\"}}--certdir='{{.ClientCertPath}}' {{end}}" +
-			"{{if ne .ClientPrivateKeyPath \"\"}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}" +
-			"--detailed-exitcodes",
-		facterVarsFmt:    "SET \"FACTER_%s=%s\"",
-		facterVarsJoiner: " & ",
-		stagingDir:       "C:/Windows/Temp/packer-puppet-server",
-	},
-}
-
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
 
 	// The command used to execute Puppet.
 	ExecuteCommand string `mapstructure:"execute_command"`
+
+	// Additional argument to pass when executing Puppet.
+	ExtraArguments string `mapstructure:"extra_arguments"`
 
 	// The Guest OS Type (unix or windows)
 	GuestOSType string `mapstructure:"guest_os_type"`
@@ -77,9 +43,6 @@ type Config struct {
 	// The hostname of the Puppet server.
 	PuppetServer string `mapstructure:"puppet_server"`
 
-	// Additional options to be passed to `puppet agent`.
-	Options string `mapstructure:"options"`
-
 	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
 
@@ -87,12 +50,63 @@ type Config struct {
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_dir"`
 
+	// If true, staging directory is removed after executing puppet.
+	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
+
+	// The directory from which the command will be executed.
+	// Packer requires the directory to exist when running puppet.
+	WorkingDir string `mapstructure:"working_directory"`
+
 	// The directory that contains the puppet binary.
 	// E.g. if it can't be found on the standard path.
 	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
 
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
+}
+
+type guestOSTypeConfig struct {
+	tempDir          string
+	stagingDir       string
+	executeCommand   string
+	facterVarsFmt    string
+	facterVarsJoiner string
+}
+
+var guestOSTypeConfigs = map[string]guestOSTypeConfig{
+	provisioner.UnixOSType: {
+		tempDir: "/tmp",
+		stagingDir: "/tmp/packer-puppet-server",
+		executeCommand: "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}}" +
+			"{{if .Sudo}}sudo -E {{end}}" +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
+			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+		facterVarsFmt:    "FACTER_%s='%s'",
+		facterVarsJoiner: " ",
+	},
+	provisioner.WindowsOSType: {
+		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
+		executeCommand: "cd {{.WorkingDir}} && " +
+			"{{.FacterVars}} " +
+			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
+			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
+			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+		facterVarsFmt:    `SET "FACTER_%s=%s"`,
+		facterVarsJoiner: " & ",
+	},
 }
 
 type Provisioner struct {
@@ -107,9 +121,11 @@ type ExecuteTemplate struct {
 	ClientPrivateKeyPath string
 	PuppetNode           string
 	PuppetServer         string
-	Options              string
+	ExtraArguments       string
 	PuppetBinDir         string
 	Sudo                 bool
+	WorkingDir           string
+	Debug                bool
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -119,6 +135,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -126,6 +143,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
+	// Set some defaults
 	if p.config.GuestOSType == "" {
 		p.config.GuestOSType = provisioner.DefaultOSType
 	}
@@ -148,6 +166,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.StagingDir == "" {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
+	}
+
+	if p.config.WorkingDir == "" {
+		p.config.WorkingDir = p.config.StagingDir
 	}
 
 	if p.config.Facter == nil {
@@ -223,33 +245,48 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:           strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		ClientCertPath:       remoteClientCertPath,
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
 		PuppetNode:           p.config.PuppetNode,
 		PuppetServer:         p.config.PuppetServer,
-		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
+		WorkingDir:           p.config.WorkingDir,
+		ExtraArguments:       "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
 
+	// Execute Puppet
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
 
 	ui.Message(fmt.Sprintf("Running Puppet: %s", command))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
-		return err
+		return fmt.Errorf("Got an error starting command: %s", err)
 	}
 
 	if cmd.ExitStatus != 0 && cmd.ExitStatus != 2 && !p.config.IgnoreExitCodes {
 		return fmt.Errorf("Puppet exited with a non-zero exit status: %d", cmd.ExitStatus)
+	}
+
+	if p.config.CleanStagingDir {
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing staging directory: %s", err)
+		}
 	}
 
 	return nil
@@ -297,3 +334,4 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 
 	return comm.UploadDir(dst, src, nil)
 }
+

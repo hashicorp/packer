@@ -26,6 +26,9 @@ type Config struct {
 	// Additional arguments to pass when executing Puppet
 	ExtraArguments []string `mapstructure:"extra_arguments"`
 
+	// The Guest OS Type (unix or windows)
+	GuestOSType string `mapstructure:"guest_os_type"`
+
 	// Additional facts to set when executing Puppet
 	Facter map[string]string
 
@@ -62,50 +65,49 @@ type Config struct {
 
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
-
-	// The Guest OS Type (unix or windows)
-	GuestOSType string `mapstructure:"guest_os_type"`
 }
 
 type guestOSTypeConfig struct {
+	tempDir          string
 	stagingDir       string
 	executeCommand   string
 	facterVarsFmt    string
 	facterVarsJoiner string
-	modulePathJoiner string
 }
 
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
+		tempDir: "/tmp",
 		stagingDir: "/tmp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
-			`{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}` +
+			"{{.FacterVars}}" +
 			"{{if .Sudo}}sudo -E {{end}}" +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			"puppet apply --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"--detailed-exitcodes " +
 			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
-		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
-		stagingDir: "C:/Windows/Temp/packer-puppet-masterless",
+		tempDir: path.filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			"{{.FacterVars}} && " +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
-			`puppet apply --verbose --modulepath='{{.ModulePath}}' ` +
+			"puppet apply --detailed-exitcodes " +
+			"{{if .Debug}}--debug {{end}}" +
+			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"--detailed-exitcodes " +
 			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
-		modulePathJoiner: ";",
 	},
 }
 
@@ -116,7 +118,6 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
-	WorkingDir      string
 	FacterVars      string
 	HieraConfigPath string
 	ModulePath      string
@@ -124,6 +125,8 @@ type ExecuteTemplate struct {
 	ManifestDir     string
 	PuppetBinDir    string
 	Sudo            bool
+	WorkingDir      string
+	Debug           bool
 	ExtraArguments  string
 }
 
@@ -134,6 +137,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"execute_command",
+				"extra_arguments",
 			},
 		},
 	}, raws...)
@@ -156,10 +160,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.guestCommands, err = provisioner.NewGuestCommands(p.config.GuestOSType, !p.config.PreventSudo)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.guestOSTypeConfig.executeCommand
 	}
 
 	if p.config.ExecuteCommand == "" {
@@ -286,23 +286,31 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		facterVars = append(facterVars, fmt.Sprintf(p.guestOSTypeConfig.facterVarsFmt, k, v))
 	}
 
-	// Execute Puppet
-	p.config.ctx.Data = &ExecuteTemplate{
+	data := ExecuteTemplate{
 		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
 		HieraConfigPath: remoteHieraConfigPath,
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
-		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		ModulePath:      strings.Join(modulePaths, os.PathListSeparator),
 		PuppetBinDir:    p.config.PuppetBinDir,
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
-		ExtraArguments:  strings.Join(p.config.ExtraArguments, " "),
+		ExtraArguments:  "",
 	}
+
+	p.config.ctx.Data = &data
+	_ExtraArguments, err := interpolate.Render(strings.Join(p.config.ExtraArguments, " "), &p.config.ctx)
+	if err != nil {
+		return err
+	}
+	data.ExtraArguments = _ExtraArguments
+
 	command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 	if err != nil {
 		return err
 	}
 
+	// Execute command
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
