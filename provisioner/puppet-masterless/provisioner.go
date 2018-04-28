@@ -65,9 +65,6 @@ type Config struct {
 
 	// If true, packer will ignore all exit-codes from a puppet run
 	IgnoreExitCodes bool `mapstructure:"ignore_exit_codes"`
-
-	// The Guest OS Type (unix or windows)
-	GuestOSType string `mapstructure:"guest_os_type"`
 }
 
 type guestOSTypeConfig struct {
@@ -100,8 +97,8 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		modulePathJoiner: ":",
 	},
 	provisioner.WindowsOSType: {
-		tempDir:    path.filepath.ToSlash(os.Getenv("TEMP")),
-		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
+		tempDir:    filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			`{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}` +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +

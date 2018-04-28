@@ -5,6 +5,7 @@ package puppetserver
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
@@ -89,8 +90,8 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		facterVarsJoiner: " ",
 	},
 	provisioner.WindowsOSType: {
-		tempDir:    path.filepath.ToSlash(os.Getenv("TEMP")),
-		stagingDir: path.filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
+		tempDir:    filepath.ToSlash(os.Getenv("TEMP")),
+		stagingDir: filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-server",
 		executeCommand: "cd {{.WorkingDir}} && " +
 			`{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}` +
 			`{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}` +
@@ -243,7 +244,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ClientPrivateKeyPath: remoteClientPrivateKeyPath,
 		PuppetNode:           p.config.PuppetNode,
 		PuppetServer:         p.config.PuppetServer,
-		Options:              p.config.Options,
 		PuppetBinDir:         p.config.PuppetBinDir,
 		Sudo:                 !p.config.PreventSudo,
 		WorkingDir:           p.config.WorkingDir,
