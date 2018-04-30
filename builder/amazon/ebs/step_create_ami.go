@@ -52,9 +52,15 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 
 	ui.Say("Waiting for AMI to become ready...")
 	if _, err := awscommon.WaitForState(&stateChange); err != nil {
-		imagesResp, _ := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
-		stateReason := imagesResp.Images[0].StateReason.Message
-		err := fmt.Errorf("Error waiting for AMI: %s. Root cause: %s", err, *stateReason)
+		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
+		if err != nil {
+			stateReason := imagesResp.Images[0].StateReason.Message
+			if stateReason != nil {
+				err = fmt.Errorf("%s. Root cause: %s", err.Error(), *stateReason)
+			}
+		}
+
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
