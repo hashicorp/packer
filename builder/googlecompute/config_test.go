@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -199,7 +200,8 @@ func TestConfigPrepare(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		if tc.Value == nil {
 			delete(raw, tc.Key)
@@ -251,7 +253,8 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		errStr := ""
 		for k := range tc.Keys {
@@ -300,7 +303,8 @@ func TestConfigPrepareServiceAccount(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		errStr := ""
 		for k := range tc.Keys {
@@ -342,7 +346,8 @@ func TestConfigDefaults(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		c, warns, errs := NewConfig(raw)
 		testConfigOk(t, warns, errs)
@@ -355,7 +360,10 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestImageName(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, _, _ := NewConfig(raw)
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -365,7 +373,10 @@ func TestImageName(t *testing.T) {
 }
 
 func TestRegion(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, _, _ := NewConfig(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
 	}
@@ -373,9 +384,11 @@ func TestRegion(t *testing.T) {
 
 // Helper stuff below
 
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
-		"account_file": testAccountFile(t),
+func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile string) {
+	tempAccountFile = testAccountFile(t)
+
+	config = map[string]interface{}{
+		"account_file": tempAccountFile,
 		"project_id":   "hashicorp",
 		"source_image": "foo",
 		"ssh_username": "root",
@@ -389,10 +402,15 @@ func testConfig(t *testing.T) map[string]interface{} {
 		},
 		"zone": "us-east1-a",
 	}
+
+	return config, tempAccountFile
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, warns, errs := NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
