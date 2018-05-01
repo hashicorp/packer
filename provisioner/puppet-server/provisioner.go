@@ -320,6 +320,22 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 	return nil
 }
 
+func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("rm -fr '%s'", dir),
+	}
+
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status.")
+	}
+
+	return nil
+}
+
 func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, dst string, src string) error {
 	if err := p.createDir(ui, comm, dst); err != nil {
 		return err
