@@ -217,6 +217,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.NetDevice == "" {
 		b.config.NetDevice = "virtio-net"
