@@ -8,13 +8,13 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func testConfig() map[string]interface{} {
+func testConfig() (config map[string]interface{}, tf *os.File) {
 	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		panic(err)
 	}
 
-	return map[string]interface{}{
+	config = map[string]interface{}{
 		"account_id":       "foo",
 		"ami_name":         "foo",
 		"instance_type":    "m1.small",
@@ -26,6 +26,8 @@ func testConfig() map[string]interface{} {
 		"x509_key_path":    tf.Name(),
 		"x509_upload_path": "/foo",
 	}
+
+	return config, tf
 }
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {
@@ -38,7 +40,9 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 
 func TestBuilderPrepare_AccountId(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["account_id"] = ""
 	warnings, err := b.Prepare(config)
@@ -74,7 +78,9 @@ func TestBuilderPrepare_AccountId(t *testing.T) {
 
 func TestBuilderPrepare_AMIName(t *testing.T) {
 	var b Builder
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	// Test good
 	config["ami_name"] = "foo"
@@ -111,7 +117,9 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 func TestBuilderPrepare_BundleDestination(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["bundle_destination"] = ""
 	warnings, err := b.Prepare(config)
@@ -129,7 +137,9 @@ func TestBuilderPrepare_BundleDestination(t *testing.T) {
 
 func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -146,7 +156,9 @@ func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 
 func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
@@ -161,7 +173,9 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 
 func TestBuilderPrepare_S3Bucket(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["s3_bucket"] = ""
 	warnings, err := b.Prepare(config)
@@ -184,7 +198,9 @@ func TestBuilderPrepare_S3Bucket(t *testing.T) {
 
 func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["x509_cert_path"] = ""
 	warnings, err := b.Prepare(config)
@@ -209,6 +225,7 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["x509_cert_path"] = tf.Name()
 	warnings, err = b.Prepare(config)
@@ -222,7 +239,9 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 
 func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["x509_key_path"] = ""
 	warnings, err := b.Prepare(config)
@@ -247,6 +266,7 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["x509_key_path"] = tf.Name()
 	warnings, err = b.Prepare(config)
@@ -260,7 +280,9 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 
 func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 	b := &Builder{}
-	config := testConfig()
+	config, tempfile := testConfig()
+	defer os.Remove(tempfile.Name())
+	defer tempfile.Close()
 
 	config["x509_upload_path"] = ""
 	warnings, err := b.Prepare(config)
