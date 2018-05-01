@@ -4,7 +4,7 @@ VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
-GOFMT_FILES?=find . -path ./vendor -prune -o -name "*.go"
+GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
@@ -58,13 +58,10 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@$(GOFMT_FILES) | xargs gofmt -w -s
+	@gofmt -w -s $(GOFMT_FILES)
 
 fmt-check: ## Check go code formatting
-	@echo "==> Checking that code complies with gofmt requirements..."
-	@echo "You can use the command: \`make fmt\` to reformat code."
-	@$(GOFMT_FILES) | xargs $(CURDIR)/scripts/gofmtcheck.sh
-	@echo "Check complete."
+	$(CURDIR)/scripts/gofmtcheck.sh $(GOFMT_FILES)
 
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
