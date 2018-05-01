@@ -55,6 +55,7 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.Remove(tf.Name())
 	tf.Close()
 
 	state := testState(t)
