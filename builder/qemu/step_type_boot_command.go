@@ -48,7 +48,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Wait the for the vm to boot.
-	if int64(config.BootConfig.BootWait) > 0 {
+	if int64(config.BootWait) > 0 {
 		ui.Say(fmt.Sprintf("Waiting %s for boot...", config.BootWait.String()))
 		select {
 		case <-time.After(config.BootWait):
