@@ -54,7 +54,7 @@ type Config struct {
 	// If true, `sudo` will NOT be used to execute Puppet.
 	PreventSudo bool `mapstructure:"prevent_sudo"`
 
-   	// The directory that contains the puppet binary.
+	// The directory that contains the puppet binary.
 	// E.g. if it can't be found on the standard path.
 	PuppetBinDir string `mapstructure:"puppet_bin_dir"`
 
