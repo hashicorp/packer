@@ -5,6 +5,7 @@ GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
+BAD_FILES=$(shell echo $(GOFMT_FILES) | xargs gofmt -s -l)
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
@@ -61,7 +62,15 @@ fmt: ## Format Go code
 	@gofmt -w -s $(GOFMT_FILES)
 
 fmt-check: ## Check go code formatting
-	$(CURDIR)/scripts/gofmtcheck.sh $(GOFMT_FILES)
+	@echo "==> Checking that code complies with gofmt requirements..."
+	@if [ ! -z "$(BAD_FILES)" ]; then \
+		echo "gofmt needs to be run on the following files:"; \
+		echo "$(BAD_FILES)" | xargs -n1; \
+		echo "You can use the command: \`make fmt\` to reformat code."; \
+		exit 1; \
+	else \
+		echo "Check passed."; \
+	fi
 
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
