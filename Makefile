@@ -4,11 +4,12 @@ VET?=$(shell ls -d */ | grep -v vendor | grep -v website)
 GITSHA:=$(shell git rev-parse HEAD)
 # Get the current local branch name from git (if we can, this may be blank)
 GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
-GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
-BAD_FILES=$(shell echo $(GOFMT_FILES) | xargs gofmt -s -l)
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
+
+# gofmt
+UNFORMATTED_FILES=$(shell find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
 
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
@@ -59,13 +60,13 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s $(GOFMT_FILES)
+	@gofmt -w -s $(UNFORMATTED_FILES)
 
 fmt-check: ## Check go code formatting
 	@echo "==> Checking that code complies with gofmt requirements..."
-	@if [ ! -z "$(BAD_FILES)" ]; then \
+	@if [ ! -z "$(UNFORMATTED_FILES)" ]; then \
 		echo "gofmt needs to be run on the following files:"; \
-		echo "$(BAD_FILES)" | xargs -n1; \
+		echo "$(UNFORMATTED_FILES)" | xargs -n1; \
 		echo "You can use the command: \`make fmt\` to reformat code."; \
 		exit 1; \
 	else \
