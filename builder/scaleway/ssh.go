@@ -46,7 +46,7 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	}
 
 	if config.Comm.SSHPrivateKey != "" {
-		if priv, ok := state.GetOk("privateKey"); ok {
+		if priv, ok := state.GetOk("private_key"); ok {
 			privateKey = priv.(string)
 		}
 		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
