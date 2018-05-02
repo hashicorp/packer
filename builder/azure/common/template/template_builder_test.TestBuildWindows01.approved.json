@@ -183,7 +183,7 @@
             "managedDisk": {
               "storageAccountType": "Premium_LRS"
             },
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "osType": "Windows"
           }
         }
