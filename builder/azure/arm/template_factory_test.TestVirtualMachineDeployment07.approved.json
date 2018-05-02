@@ -142,7 +142,7 @@
             "image": {
               "uri": "https://localhost/custom.vhd"
             },
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "osType": "Linux",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
