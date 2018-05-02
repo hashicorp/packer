@@ -224,6 +224,49 @@ func TestBuilderPrepare_Format(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_UseBackingFile(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["use_backing_file"] = true
+
+	// Bad: iso_url is not a disk_image
+	config["disk_image"] = false
+	config["format"] = "qcow2"
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad: format is not 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "raw"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good: iso_url is a disk image and format is 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "qcow2"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()
