@@ -99,6 +99,7 @@ type Config struct {
 	Format            string     `mapstructure:"format"`
 	Headless          bool       `mapstructure:"headless"`
 	DiskImage         bool       `mapstructure:"disk_image"`
+	UseBackingFile    bool       `mapstructure:"use_backing_file"`
 	MachineType       string     `mapstructure:"machine_type"`
 	NetDevice         string     `mapstructure:"net_device"`
 	OutputDir         string     `mapstructure:"output_directory"`
@@ -253,6 +254,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.Format != "qcow2" {
 		b.config.SkipCompaction = true
 		b.config.DiskCompression = false
+	}
+
+	if b.config.UseBackingFile && !(b.config.DiskImage && b.config.Format == "qcow2") {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
 	}
 
 	if _, ok := accels[b.config.Accelerator]; !ok {

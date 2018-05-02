@@ -23,11 +23,19 @@ func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multis
 	command := []string{
 		"create",
 		"-f", config.Format,
-		path,
-		fmt.Sprintf("%vM", config.DiskSize),
 	}
 
-	if config.DiskImage == true {
+	if config.UseBackingFile {
+		isoPath := state.Get("iso_path").(string)
+		command = append(command, "-b", isoPath)
+	}
+
+	command = append(command,
+		path,
+		fmt.Sprintf("%vM", config.DiskSize),
+	)
+
+	if config.DiskImage && !config.UseBackingFile {
 		return multistep.ActionContinue
 	}
 
