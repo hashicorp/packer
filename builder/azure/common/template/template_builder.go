@@ -111,7 +111,6 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccoun
 	profile.ImageReference = &compute.ImageReference{
 		ID: &managedImageId,
 	}
-	profile.OsDisk.Name = to.StringPtr("osdisk")
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
@@ -136,7 +135,6 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 		Version:   &version,
 		//ID:        &imageID,
 	}
-	profile.OsDisk.Name = to.StringPtr("osdisk")
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.FromImage
 	profile.OsDisk.Vhd = nil
@@ -583,7 +581,7 @@ const BasicTemplate = `{
         },
         "storageProfile": {
           "osDisk": {
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             },
