@@ -125,7 +125,7 @@
             "managedDisk": {
               "storageAccountType": "Standard_LRS"
             },
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "osType": "Linux"
           }
         }
