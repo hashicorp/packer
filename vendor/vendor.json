@@ -1013,7 +1013,6 @@
 		{
 			"checksumSHA1": "UIqCj7qI0hhIMpAhS9YYqs2jD48=",
 			"path": "github.com/mitchellh/cli",
-      
 			"revision": "65fcae5817c8600da98ada9d7edf26dd1a84837b",
 			"revisionTime": "2017-09-08T18:10:43Z"
 		},
