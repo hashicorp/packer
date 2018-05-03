@@ -3,6 +3,7 @@ package ebs
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
@@ -52,13 +53,14 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 
 	ui.Say("Waiting for AMI to become ready...")
 	if _, err := awscommon.WaitForState(&stateChange); err != nil {
-		err := fmt.Errorf("Error waiting for AMI: %s", err)
+		log.Printf("Error waiting for AMI: %s", err)
 		imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 		if err != nil {
-			stateReason := imagesResp.Images[0].StateReason.Message
-			if stateReason != nil {
-				err = fmt.Errorf("%s. Root cause: %s", err.Error(), *stateReason)
-			}
+			log.Printf("Unable to determine reason waiting for AMI failed: %s", err)
+			err = fmt.Errorf("Unknown error waiting for AMI.")
+		} else {
+			stateReason := imagesResp.Images[0].StateReason
+			err = fmt.Errorf("Error waiting for AMI. Reason: %s", stateReason)
 		}
 
 		state.Put("error", err)
