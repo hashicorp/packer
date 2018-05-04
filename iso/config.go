@@ -19,10 +19,10 @@ type Config struct {
 	CreateSnapshot    bool                `mapstructure:"create_snapshot"`
 	ConvertToTemplate bool                `mapstructure:"convert_to_template"`
 
-	CreateConfig `mapstructure:",squash"`
-	CDRomConfig  `mapstructure:",squash"`
-	FloppyConfig `mapstructure:",squash"`
-	ConfigParamsConfig `mapstructure:",squash"`
+	CreateConfig              `mapstructure:",squash"`
+	CDRomConfig               `mapstructure:",squash"`
+	FloppyConfig              `mapstructure:",squash"`
+	common.ConfigParamsConfig `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }

@@ -18,6 +18,7 @@ type Config struct {
 	common.ShutdownConfig                 `mapstructure:",squash"`
 	CreateSnapshot    bool                `mapstructure:"create_snapshot"`
 	ConvertToTemplate bool                `mapstructure:"convert_to_template"`
+	common.ConfigParamsConfig             `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }

@@ -2,11 +2,11 @@ package clone
 
 import (
 	packerCommon "github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/communicator"
 )
 
 type Builder struct {
@@ -26,7 +26,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
 	state.Put("comm", &b.config.Comm)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -42,6 +41,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepConfigureHardware{
 			config: &b.config.HardwareConfig,
+		},
+		&common.StepConfigParams{
+			Config: &b.config.ConfigParamsConfig,
 		},
 	)
 
@@ -72,7 +74,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 	)
 
-	// Run!
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
