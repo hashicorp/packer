@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
@@ -189,7 +189,7 @@ func (c *Config) toImageParameters() *compute.Image {
 			},
 		},
 		Location: to.StringPtr(c.Location),
-		Tags:     &c.AzureTags,
+		Tags:     c.AzureTags,
 	}
 }
 
@@ -450,7 +450,7 @@ func provideDefaultValues(c *Config) {
 	}
 
 	if c.ManagedImageStorageAccountType == "" {
-		c.managedImageStorageAccountType = compute.StandardLRS
+		c.managedImageStorageAccountType = compute.StorageAccountTypesStandardLRS
 	}
 
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
@@ -697,10 +697,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	switch c.ManagedImageStorageAccountType {
-	case "", string(compute.StandardLRS):
-		c.managedImageStorageAccountType = compute.StandardLRS
-	case string(compute.PremiumLRS):
-		c.managedImageStorageAccountType = compute.PremiumLRS
+	case "", string(compute.StorageAccountTypesStandardLRS):
+		c.managedImageStorageAccountType = compute.StorageAccountTypesStandardLRS
+	case string(compute.StorageAccountTypesPremiumLRS):
+		c.managedImageStorageAccountType = compute.StorageAccountTypesPremiumLRS
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
