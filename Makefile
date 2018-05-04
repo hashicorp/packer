@@ -65,10 +65,10 @@ fmt: ## Format Go code
 fmt-check: UNFORMATTED_FILES=$(shell $(GOFMT_FILES) | xargs gofmt -s -l)
 fmt-check: ## Check go code formatting
 	@echo -n "==> Checking that code complies with gofmt requirements... "
-	@[ -z "$(UNFORMATTED_FILES)" ] && echo "passed" || \
+	@[ $(words $(UNFORMATTED_FILES)) -eq 0 ] && echo "passed" || \
 		echo -e "failed\nRun \`make fmt\` to reformat the following files:"
-	@$(foreach item, $(UNFORMATTED_FILES), echo $(item); )
-	@[ -z "$(UNFORMATTED_FILES)" ] || exit 1
+	@$(foreach item, $(UNFORMATTED_FILES), echo "  $(item)"; )
+	@[ $(words $(UNFORMATTED_FILES)) -eq 0 ] || exit 1
 
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
