@@ -16,7 +16,7 @@ package arm
 //
 // In addition, the PACKER_ACC variable should also be set to
 // a non-empty value to enable Packer acceptance tests and the
-// options "-v -timeout 30m" should be provided to the test
+// options "-v -timeout 90m" should be provided to the test
 // command, e.g.:
 //   go test -v -timeout 90m -run TestBuilderAcc_.*
 
