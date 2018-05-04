@@ -18,7 +18,7 @@ package arm
 // a non-empty value to enable Packer acceptance tests and the
 // options "-v -timeout 30m" should be provided to the test
 // command, e.g.:
-//   go test -v -timeout 30m -run TestBuilderAcc_.*
+//   go test -v -timeout 90m -run TestBuilderAcc_.*
 
 import (
 	"testing"

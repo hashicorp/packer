@@ -43,10 +43,9 @@ func (s *StepDeleteAdditionalDisk) deleteBlob(storageContainerName string, blobN
 	return err
 }
 
-func (s *StepDeleteAdditionalDisk) deleteManagedDisk(ctx context.Context, resourceGroupName string, imageName string) error {
-	xs := strings.Split(imageName, "/")
-	// TODO(paulmey): verify if this is right, imagename is passed in, *disk* is deleted... is this a copy/paste error?
-	diskName := xs[len(xs)-1]
+func (s *StepDeleteAdditionalDisk) deleteManagedDisk(ctx context.Context, resourceGroupName string, diskName string) error {
+	xs := strings.Split(diskName, "/")
+	diskName = xs[len(xs)-1]
 	f, err := s.client.DisksClient.Delete(ctx, resourceGroupName, diskName)
 	if err == nil {
 		err = f.WaitForCompletion(ctx, s.client.DisksClient.Client)
