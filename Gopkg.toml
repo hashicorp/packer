@@ -7,12 +7,12 @@
   version = "=0.15.0"
 
 [[override]]
-  name = "github.com/masterzen/winrm"
-  source = "github.com/mkuzmin/winrm"
-  branch = "non-strict"
-
-[[override]]
   name = "github.com/masterzen/azure-sdk-for-go"
+  branch = "master"
+
+# need commit https://github.com/ChrisTrenkamp/goxpath/commit/e2e5bcefc4e07f4a0c587a1200c22665dd39bd0e
+[[override]]
+  name = "github.com/ChrisTrenkamp/goxpath"
   branch = "master"
 
 [prune]

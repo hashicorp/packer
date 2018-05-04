@@ -8,25 +8,25 @@
   revision = "c92175d540060095c69ced311f76aea56c83ecdb"
 
 [[projects]]
+  branch = "master"
   name = "github.com/ChrisTrenkamp/goxpath"
   packages = [
     ".",
     "internal/execxp",
-    "internal/lexer",
-    "internal/parser",
-    "internal/parser/findutil",
-    "internal/parser/intfns",
-    "internal/parser/pathexpr",
-    "internal/xconst",
+    "internal/execxp/findutil",
+    "internal/execxp/intfns",
     "internal/xsort",
+    "lexer",
+    "parser",
+    "parser/pathexpr",
     "tree",
     "tree/xmltree",
     "tree/xmltree/xmlbuilder",
     "tree/xmltree/xmlele",
-    "tree/xmltree/xmlnode"
+    "tree/xmltree/xmlnode",
+    "xconst"
   ]
-  revision = "2ad3b31cf4a21db70fc0cacd0e0120eaae566f98"
-  version = "v1.0-alpha3"
+  revision = "c385f95c6022e7756e91beac5f5510872f7dcb7d"
 
 [[projects]]
   name = "github.com/dylanmei/iso8601"
@@ -122,14 +122,13 @@
   revision = "4572e39b1ab9fe03ee513ce6fc7e289e98482190"
 
 [[projects]]
-  branch = "non-strict"
+  branch = "master"
   name = "github.com/masterzen/winrm"
   packages = [
     ".",
     "soap"
   ]
-  revision = "d179cf2678135ef005309663bceee2058384917c"
-  source = "github.com/mkuzmin/winrm"
+  revision = "7e40f93ae939004a1ef3bd5ff5c88c756ee762bb"
 
 [[projects]]
   branch = "master"
@@ -270,6 +269,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e6e9304a6bd19a02a4b36af24d1e3195e19d459012ecb863bc685a90aab9f2ed"
+  inputs-digest = "8a4e7f25a3386ca66a780d534df46b4d94a4a369e8c1784ce07bd2075c529a4a"
   solver-name = "gps-cdcl"
   solver-version = 1
