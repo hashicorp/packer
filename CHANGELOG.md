@@ -51,6 +51,7 @@
 * builder/azure: Users of Powershell provisioner may access the randomly-
     generated winrm password using the template variable {{.WinRMPassword}}.
     [GH-6113]
+* builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
 * builder/google: Users of Powershell provisioner may access the randomly-
     generated winrm password using the template variable {{.WinRMPassword}}.
     [GH-6141]
