@@ -62,13 +62,14 @@ dev: deps ## Build and install a development build
 fmt: ## Format Go code
 	@$(GOFMT_FILES) | xargs gofmt -w -s
 
-fmt-check: UNFORMATTED_FILES=$(shell $(GOFMT_FILES) | xargs gofmt -s -l)
 fmt-check: ## Check go code formatting
+	$(eval UNFORMATTED_FILES := $(shell $(GOFMT_FILES) | xargs gofmt -s -l))
+	$(eval UNFORMATTED_COUNT := $(words $(UNFORMATTED_FILES)))
 	@echo -n "==> Checking that code complies with gofmt requirements... "
-	@[ $(words $(UNFORMATTED_FILES)) -eq 0 ] && echo "passed" || \
+	@[ $(UNFORMATTED_COUNT) -eq 0 ] && echo "passed" || \
 		echo -e "failed\nRun \`make fmt\` to reformat the following files:"
 	@$(foreach item, $(UNFORMATTED_FILES), echo "  $(item)"; )
-	@[ $(words $(UNFORMATTED_FILES)) -eq 0 ] || exit 1
+	@[ $(UNFORMATTED_COUNT) -eq 0 ] || exit 1
 
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
