@@ -122,13 +122,14 @@
   revision = "4572e39b1ab9fe03ee513ce6fc7e289e98482190"
 
 [[projects]]
-  branch = "master"
+  branch = "non-strict"
   name = "github.com/masterzen/winrm"
   packages = [
     ".",
     "soap"
   ]
-  revision = "7e40f93ae939004a1ef3bd5ff5c88c756ee762bb"
+  revision = "d179cf2678135ef005309663bceee2058384917c"
+  source = "github.com/mkuzmin/winrm"
 
 [[projects]]
   branch = "master"
@@ -269,6 +270,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "20177d3d587549d23b3ddea4eefc1fc03aa3436c372843bc76f98052b25432b7"
+  inputs-digest = "e6e9304a6bd19a02a4b36af24d1e3195e19d459012ecb863bc685a90aab9f2ed"
   solver-name = "gps-cdcl"
   solver-version = 1
