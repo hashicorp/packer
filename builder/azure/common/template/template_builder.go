@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -112,7 +112,7 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccoun
 		ID: &managedImageId,
 	}
 	profile.OsDisk.OsType = s.osType
-	profile.OsDisk.CreateOption = compute.FromImage
+	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
@@ -136,7 +136,7 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 		//ID:        &imageID,
 	}
 	profile.OsDisk.OsType = s.osType
-	profile.OsDisk.CreateOption = compute.FromImage
+	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
