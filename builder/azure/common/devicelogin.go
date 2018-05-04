@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 
-	"github.com/Azure/azure-sdk-for-go/arm/resources/subscriptions"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -100,7 +101,7 @@ func Authenticate(env azure.Environment, tenantID string, say func(string)) (*ad
 		return nil, err
 	}
 	say("Obtained service principal token.")
-	if err := saveToken(spt.Token); err != nil {
+	if err := saveToken(spt.Token()); err != nil {
 		say("Error occurred saving token to cache file.")
 		return nil, err
 	}
@@ -186,9 +187,9 @@ func mkTokenCallback(path string) adal.TokenRefreshCallback {
 // automatically refresh the token using refresh_token (which might have
 // expired). This check is essentially to make sure refresh_token is good.
 func validateToken(env azure.Environment, token *adal.ServicePrincipalToken) error {
-	c := subscriptionsClient(env.ResourceManagerEndpoint)
+	c := subscriptions.NewClientWithBaseURI(env.ResourceManagerEndpoint)
 	c.Authorizer = autorest.NewBearerAuthorizer(token)
-	_, err := c.List()
+	_, err := c.List(context.TODO())
 	if err != nil {
 		return fmt.Errorf("Token validity check failed: %v", err)
 	}
@@ -200,12 +201,12 @@ func validateToken(env azure.Environment, token *adal.ServicePrincipalToken) err
 // the value from WWW-Authenticate header.
 func FindTenantID(env azure.Environment, subscriptionID string) (string, error) {
 	const hdrKey = "WWW-Authenticate"
-	c := subscriptionsClient(env.ResourceManagerEndpoint)
+	c := subscriptions.NewClientWithBaseURI(env.ResourceManagerEndpoint)
 
 	// we expect this request to fail (err != nil), but we are only interested
 	// in headers, so surface the error if the Response is not present (i.e.
 	// network error etc)
-	subs, err := c.Get(subscriptionID)
+	subs, err := c.Get(context.TODO(), subscriptionID)
 	if subs.Response.Response == nil {
 		return "", fmt.Errorf("Request failed: %v", err)
 	}
@@ -227,9 +228,4 @@ func FindTenantID(env azure.Environment, subscriptionID string) (string, error) 
 		return "", fmt.Errorf("Could not find the tenant ID in header: %s %q", hdrKey, hdr)
 	}
 	return m[1], nil
-}
-
-func subscriptionsClient(baseURI string) subscriptions.GroupClient {
-	client := subscriptions.NewGroupClientWithBaseURI(baseURI)
-	return client
 }

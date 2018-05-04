@@ -11,7 +11,7 @@ import (
 
 func TestStepDeployTemplateShouldFailIfDeployFails(t *testing.T) {
 	var testSubject = &StepDeployTemplate{
-		deploy: func(string, string, <-chan struct{}) error {
+		deploy: func(context.Context, string, string) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		say:   func(message string) {},
@@ -32,7 +32,7 @@ func TestStepDeployTemplateShouldFailIfDeployFails(t *testing.T) {
 
 func TestStepDeployTemplateShouldPassIfDeployPasses(t *testing.T) {
 	var testSubject = &StepDeployTemplate{
-		deploy: func(string, string, <-chan struct{}) error { return nil },
+		deploy: func(context.Context, string, string) error { return nil },
 		say:    func(message string) {},
 		error:  func(e error) {},
 	}
@@ -54,7 +54,7 @@ func TestStepDeployTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualDeploymentName string
 
 	var testSubject = &StepDeployTemplate{
-		deploy: func(resourceGroupName string, deploymentName string, cancelCh <-chan struct{}) error {
+		deploy: func(_ context.Context, resourceGroupName string, deploymentName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
 
@@ -90,7 +90,7 @@ func TestStepDeployTemplateDeleteImageShouldFailWhenImageUrlCannotBeParsed(t *te
 		name:  "--deployment-name--",
 	}
 	// Invalid URL per https://golang.org/src/net/url/url_test.go
-	err := testSubject.deleteImage("image", "http://[fe80::1%en0]/", "Unit Test: ResourceGroupName")
+	err := testSubject.deleteImage(context.TODO(), "image", "http://[fe80::1%en0]/", "Unit Test: ResourceGroupName")
 	if err == nil {
 		t.Fatal("Expected a failure because of the failed image name")
 	}
@@ -102,7 +102,7 @@ func TestStepDeployTemplateDeleteImageShouldFailWithInvalidImage(t *testing.T) {
 		error: func(e error) {},
 		name:  "--deployment-name--",
 	}
-	err := testSubject.deleteImage("image", "storage.blob.core.windows.net/abc", "Unit Test: ResourceGroupName")
+	err := testSubject.deleteImage(context.TODO(), "image", "storage.blob.core.windows.net/abc", "Unit Test: ResourceGroupName")
 	if err == nil {
 		t.Fatal("Expected a failure because of the failed image name")
 	}

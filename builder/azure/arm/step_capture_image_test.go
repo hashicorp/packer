@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error {
+		captureVhd: func(context.Context, string, string, *compute.VirtualMachineCaptureParameters) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		generalizeVM: func(string, string) error {
@@ -39,7 +39,7 @@ func TestStepCaptureImageShouldFailIfCaptureFails(t *testing.T) {
 
 func TestStepCaptureImageShouldPassIfCapturePasses(t *testing.T) {
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(string, string, *compute.VirtualMachineCaptureParameters, <-chan struct{}) error { return nil },
+		captureVhd: func(context.Context, string, string, *compute.VirtualMachineCaptureParameters) error { return nil },
 		generalizeVM: func(string, string) error {
 			return nil
 		},
@@ -74,7 +74,7 @@ func TestStepCaptureImageShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	var testSubject = &StepCaptureImage{
-		captureVhd: func(resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters, cancelCh <-chan struct{}) error {
+		captureVhd: func(_ context.Context, resourceGroupName string, computeName string, parameters *compute.VirtualMachineCaptureParameters) error {
 			actualResourceGroupName = resourceGroupName
 			actualComputeName = computeName
 			actualVirtualMachineCaptureParameters = parameters
