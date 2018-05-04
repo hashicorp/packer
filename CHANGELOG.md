@@ -4,6 +4,10 @@
 
 * builder/vmware-esxi: Remove floppy files from the remote server on cleanup. [GH-6206]
 
+### IMPROVEMENTS:
+
+* builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
+
 ## 1.2.3 (April 25, 2018)
 
 ### BUG FIXES:
@@ -51,7 +55,6 @@
 * builder/azure: Users of Powershell provisioner may access the randomly-
     generated winrm password using the template variable {{.WinRMPassword}}.
     [GH-6113]
-* builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
 * builder/google: Users of Powershell provisioner may access the randomly-
     generated winrm password using the template variable {{.WinRMPassword}}.
     [GH-6141]
