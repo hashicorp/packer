@@ -18,7 +18,6 @@ func commHost(state multistep.StateBag) (string, error) {
 
 func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 	config := state.Get("config").(Config)
-	var privateKey string
 
 	var auth []ssh.AuthMethod
 
@@ -45,11 +44,9 @@ func sshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		)
 	}
 
-	if config.Comm.SSHPrivateKey != "" {
-		if priv, ok := state.GetOk("privateKey"); ok {
-			privateKey = priv.(string)
-		}
-		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+	// Use key based auth if there is a private key in the state bag
+	if privateKey, ok := state.GetOk("private_key"); ok {
+		signer, err := ssh.ParsePrivateKey([]byte(privateKey.(string)))
 		if err != nil {
 			return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 		}

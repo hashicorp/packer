@@ -28,6 +28,7 @@ func TestStepOutputDir_impl(t *testing.T) {
 func TestStepOutputDir(t *testing.T) {
 	state := testState(t)
 	step := testStepOutputDir(t)
+	defer os.RemoveAll(step.Path)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
@@ -55,6 +56,7 @@ func TestStepOutputDir_exists(t *testing.T) {
 	if err := os.MkdirAll(step.Path, 0755); err != nil {
 		t.Fatalf("bad: %s", err)
 	}
+	defer os.RemoveAll(step.Path)
 
 	// Test the run
 	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {

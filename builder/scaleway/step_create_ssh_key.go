@@ -36,7 +36,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		state.Put("privateKey", string(privateKeyBytes))
+		state.Put("private_key", string(privateKeyBytes))
 		state.Put("ssh_pubkey", "")
 
 		return multistep.ActionContinue
@@ -61,7 +61,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	// Set the private key in the statebag for later
-	state.Put("privateKey", string(pem.EncodeToMemory(&priv_blk)))
+	state.Put("private_key", string(pem.EncodeToMemory(&priv_blk)))
 
 	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
 	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
