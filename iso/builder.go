@@ -39,7 +39,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateVM{
 			Config: &b.config.CreateConfig,
 		},
-		&StepConfigParams{
+		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
 	)

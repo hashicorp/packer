@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"github.com/hashicorp/packer/packer"
