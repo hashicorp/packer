@@ -37,9 +37,18 @@ func GetVirtualMachineNetworkAdapterAddress(vmName string) (string, error) {
 param([string]$vmName, [int]$addressIndex)
 try {
   $adapter = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
-  $ip = $adapter.IPAddresses[$addressIndex]
-  if($ip -eq $null) {
-    return $false
+  if ($adapter.IPAddresses) {
+    $ip = $adapter.IPAddresses[$addressIndex]
+  } else {
+    $vm = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$vmName'"
+    $ip_details = (Get-CimAssociatedInstance -InputObject $vm -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
+
+    if ($null -eq $ip_details) {
+      return $false
+    }
+
+    $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
+    $ip = ($ip_addresses -split ";")[0]
   }
 } catch {
   return $false
@@ -982,10 +991,19 @@ func IpAddress(mac string) (string, error) {
 	var script = `
 param([string]$mac, [int]$addressIndex)
 try {
-  $ip = Hyper-V\Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
+  $vm = Hyper-V\Get-VM | ?{$_.NetworkAdapters.MacAddress -eq $mac}
+  if ($vm.NetworkAdapters.IpAddresses) {
+    $ip = $vm.NetworkAdapters.IpAddresses[$addressIndex]
+  } else {
+    $vm_info = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$($vm.Name)'"
+    $ip_details = (Get-CimAssociatedInstance -InputObject $vm_info -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
 
-  if($ip -eq $null) {
-    return ""
+    if ($null -eq $ip_details) {
+      return ""
+    }
+
+    $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
+    $ip = ($ip_addresses -split ";")[0]
   }
 } catch {
   return ""
