@@ -230,7 +230,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error opening shell script: %s", err)
 		}
 		defer f.Close()
-		info, _ := f.Stat()
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
@@ -258,7 +257,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 				r = &UnixReader{Reader: r}
 			}
 
-			if err := comm.Upload(p.config.RemotePath, r, &info); err != nil {
+			if err := comm.Upload(p.config.RemotePath, r, nil); err != nil {
 				return fmt.Errorf("Error uploading script: %s", err)
 			}
 
