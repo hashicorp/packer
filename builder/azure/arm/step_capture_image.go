@@ -103,9 +103,7 @@ func (s *StepCaptureImage) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// HACK(chrboum): I do not like this.  The capture method should be returning this value
-	// instead having to pass in another lambda.  I'm in this pickle because I am using
-	// common.StartInterruptibleTask which is not parametric, and only returns a type of error.
-	// I could change it to interface{}, but I do not like that solution either.
+	// instead having to pass in another lambda.
 	//
 	// Having to resort to capturing the template via an inspector is hack, and once I can
 	// resolve that I can cleanup this code too.  See the comments in azure_client.go for more
