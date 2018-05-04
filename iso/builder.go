@@ -39,18 +39,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCreateVM{
 			Config: &b.config.CreateConfig,
 		},
-		&StepAddCDRom{
-			Config: &b.config.CDRomConfig,
-		},
-		&packerCommon.StepCreateFloppy{
-			Files:       b.config.FloppyFiles,
-			Directories: b.config.FloppyDirectories,
-		},
-		&StepAddFloppy{
-			Config:    &b.config.FloppyConfig,
-			Datastore: b.config.Datastore,
-			Host:      b.config.Host,
-		},
 		&StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
@@ -58,6 +46,18 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
+			&StepAddCDRom{
+				Config: &b.config.CDRomConfig,
+			},
+			&packerCommon.StepCreateFloppy{
+				Files:       b.config.FloppyFiles,
+				Directories: b.config.FloppyDirectories,
+			},
+			&StepAddFloppy{
+				Config:    &b.config.FloppyConfig,
+				Datastore: b.config.Datastore,
+				Host:      b.config.Host,
+			},
 			&common.StepRun{
 				Config: &b.config.RunConfig,
 			},
@@ -74,15 +74,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&common.StepShutdown{
 				Config: &b.config.ShutdownConfig,
 			},
+			&StepRemoveCDRom{},
+			&StepRemoveFloppy{
+				Datastore: b.config.Datastore,
+				Host:      b.config.Host,
+			},
 		)
 	}
 
 	steps = append(steps,
-		&StepRemoveCDRom{},
-		&StepRemoveFloppy{
-			Datastore: b.config.Datastore,
-			Host:      b.config.Host,
-		},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},
@@ -91,7 +91,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 	)
 
-	// Run!
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
