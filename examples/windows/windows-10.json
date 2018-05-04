@@ -33,7 +33,7 @@
       ],
 
       "floppy_files": [
-        "setup/"
+        "{{template_dir}}/setup/"
       ],
       "floppy_img_path": "[datastore1] ISO/VMware Tools/10.2.0/pvscsi-Windows8.flp",
       "boot_order": "disk,cdrom"
