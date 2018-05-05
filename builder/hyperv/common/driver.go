@@ -1,5 +1,9 @@
 package common
 
+import (
+	"context"
+)
+
 // A driver is able to talk to HyperV and perform certain
 // operations with it. Some of the operations on here may seem overly
 // specific, but they were built specifically in mind to handle features
@@ -109,4 +113,10 @@ type Driver interface {
 	MountFloppyDrive(string, string) error
 
 	UnmountFloppyDrive(string) error
+
+	// Connect connects to a VM specified by the name given.
+	Connect(string) context.CancelFunc
+
+	// Disconnect disconnects to a VM specified by the context cancel function.
+	Disconnect(context.CancelFunc)
 }
