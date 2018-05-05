@@ -10,9 +10,10 @@ import (
 )
 
 type CloneConfig struct {
-	Template     string `mapstructure:"template"`
-	common.VMConfig     `mapstructure:",squash"`
-	LinkedClone  bool   `mapstructure:"linked_clone"`
+	Template    string `mapstructure:"template"`
+	common.VMConfig    `mapstructure:",squash"`
+	LinkedClone bool   `mapstructure:"linked_clone"`
+	DiskSize    int64  `mapstructure:"disk_size"`
 }
 
 func (c *CloneConfig) Prepare() []error {
@@ -44,7 +45,7 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	vm, err := template.Clone(&driver.CloneConfig{
 		Name:         s.config.VMName,
 		Folder:       s.config.Folder,
-		Cluster:	  s.config.Cluster,
+		Cluster:      s.config.Cluster,
 		Host:         s.config.Host,
 		ResourcePool: s.config.ResourcePool,
 		Datastore:    s.config.Datastore,
@@ -54,8 +55,16 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-
 	state.Put("vm", vm)
+
+	if s.config.DiskSize > 0 {
+		err = vm.ResizeDisk(s.config.DiskSize)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+	}
+
 	return multistep.ActionContinue
 }
 

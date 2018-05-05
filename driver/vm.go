@@ -18,7 +18,7 @@ type VirtualMachine struct {
 type CloneConfig struct {
 	Name         string
 	Folder       string
-	Cluster 	 string
+	Cluster      string
 	Host         string
 	ResourcePool string
 	Datastore    string
@@ -32,22 +32,20 @@ type HardwareConfig struct {
 	RAM                 int64
 	RAMReservation      int64
 	RAMReserveAll       bool
-	DiskSize            int64
 	NestedHV            bool
 	CpuHotAddEnabled    bool
 	MemoryHotAddEnabled bool
 }
 
 type CreateConfig struct {
-	HardwareConfig
-
 	DiskThinProvisioned bool
 	DiskControllerType  string // example: "scsi", "pvscsi"
+	DiskSize            int64
 
 	Annotation    string
 	Name          string
 	Folder        string
-	Cluster		  string
+	Cluster       string
 	Host          string
 	ResourcePool  string
 	Datastore     string
@@ -77,7 +75,14 @@ func (d *Driver) FindVM(name string) (*VirtualMachine, error) {
 }
 
 func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
-	createSpec := config.toConfigSpec()
+	createSpec := types.VirtualMachineConfigSpec{
+		Name:       config.Name,
+		Annotation: config.Annotation,
+		GuestId:    config.GuestOS,
+	}
+	if config.Version != 0 {
+		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
+	}
 
 	folder, err := d.FindFolder(config.Folder)
 	if err != nil {
@@ -238,27 +243,54 @@ func (vm *VirtualMachine) Destroy() error {
 }
 
 func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
-	confSpec := config.toConfigSpec()
+	var confSpec types.VirtualMachineConfigSpec
+	confSpec.NumCPUs = config.CPUs
+	confSpec.MemoryMB = config.RAM
 
-	if config.DiskSize > 0 {
-		devices, err := vm.vm.Device(vm.driver.ctx)
-		if err != nil {
-			return err
-		}
+	var cpuSpec types.ResourceAllocationInfo
+	cpuSpec.Reservation = config.CPUReservation
+	cpuSpec.Limit = config.CPULimit
+	confSpec.CpuAllocation = &cpuSpec
 
-		disk, err := findDisk(devices)
-		if err != nil {
-			return err
-		}
+	var ramSpec types.ResourceAllocationInfo
+	ramSpec.Reservation = config.RAMReservation
+	confSpec.MemoryAllocation = &ramSpec
 
-		disk.CapacityInKB = config.DiskSize * 1024
+	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
+	confSpec.NestedHVEnabled = &config.NestedHV
 
-		confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
-			&types.VirtualDeviceConfigSpec{
-				Device:    disk,
-				Operation: types.VirtualDeviceConfigSpecOperationEdit,
-			},
-		}
+	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
+	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
+
+	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
+	if err != nil {
+		return err
+	}
+
+	_, err = task.WaitForResult(vm.driver.ctx, nil)
+	return err
+}
+
+func (vm *VirtualMachine) ResizeDisk(diskSize int64) error {
+	var confSpec types.VirtualMachineConfigSpec
+
+	devices, err := vm.vm.Device(vm.driver.ctx)
+	if err != nil {
+		return err
+	}
+
+	disk, err := findDisk(devices)
+	if err != nil {
+		return err
+	}
+
+	disk.CapacityInKB = diskSize * 1024
+
+	confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
+		&types.VirtualDeviceConfigSpec{
+			Device:    disk,
+			Operation: types.VirtualDeviceConfigSpecOperationEdit,
+		},
 	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
@@ -372,40 +404,6 @@ func (vm *VirtualMachine) GetDir() (string, error) {
 		}
 	}
 	return "", fmt.Errorf("cannot find '%s'", vmxName)
-}
-
-func (config HardwareConfig) toConfigSpec() types.VirtualMachineConfigSpec {
-	var confSpec types.VirtualMachineConfigSpec
-	confSpec.NumCPUs = config.CPUs
-	confSpec.MemoryMB = config.RAM
-
-	var cpuSpec types.ResourceAllocationInfo
-	cpuSpec.Reservation = config.CPUReservation
-	cpuSpec.Limit = config.CPULimit
-	confSpec.CpuAllocation = &cpuSpec
-
-	var ramSpec types.ResourceAllocationInfo
-	ramSpec.Reservation = config.RAMReservation
-	confSpec.MemoryAllocation = &ramSpec
-
-	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll
-	confSpec.NestedHVEnabled = &config.NestedHV
-
-	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
-	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
-
-	return confSpec
-}
-
-func (config CreateConfig) toConfigSpec() types.VirtualMachineConfigSpec {
-	confSpec := config.HardwareConfig.toConfigSpec()
-	confSpec.Name = config.Name
-	confSpec.Annotation = config.Annotation
-	confSpec.GuestId = config.GuestOS
-	if config.Version != 0 {
-		confSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
-	}
-	return confSpec
 }
 
 func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
