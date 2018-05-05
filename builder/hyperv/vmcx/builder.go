@@ -98,6 +98,8 @@ type Config struct {
 
 	SkipExport bool `mapstructure:"skip_export"`
 
+	Headless bool `mapstructure:"headless"`
+
 	ctx interpolate.Context
 }
 
@@ -436,7 +438,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchVlanId: b.config.SwitchVlanId,
 		},
 
-		&hypervcommon.StepRun{},
+		&hypervcommon.StepRun{
+			Headless: b.config.Headless,
+		},
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand: b.config.FlatBootCommand(),

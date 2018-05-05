@@ -1,5 +1,9 @@
 package common
 
+import (
+	"context"
+)
+
 type DriverMock struct {
 	IsRunning_Called bool
 	IsRunning_VmName string
@@ -240,6 +244,13 @@ type DriverMock struct {
 	UnmountFloppyDrive_Called bool
 	UnmountFloppyDrive_VmName string
 	UnmountFloppyDrive_Err    error
+
+	Connect_Called bool
+	Connect_VmName string
+	Connect_Cancel context.CancelFunc
+
+	Disconnect_Called bool
+	Disconnect_Cancel context.CancelFunc
 }
 
 func (d *DriverMock) IsRunning(vmName string) (bool, error) {
@@ -552,4 +563,15 @@ func (d *DriverMock) UnmountFloppyDrive(vmName string) error {
 	d.UnmountFloppyDrive_Called = true
 	d.UnmountFloppyDrive_VmName = vmName
 	return d.UnmountFloppyDrive_Err
+}
+
+func (d *DriverMock) Connect(vmName string) context.CancelFunc {
+	d.Connect_Called = true
+	d.Connect_VmName = vmName
+	return d.Connect_Cancel
+}
+
+func (d *DriverMock) Disconnect(cancel context.CancelFunc) {
+	d.Disconnect_Called = true
+	d.Disconnect_Cancel = cancel
 }
