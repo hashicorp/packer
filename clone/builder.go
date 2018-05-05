@@ -39,8 +39,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCloneVM{
 			config: &b.config.CloneConfig,
 		},
-		&StepConfigureHardware{
-			config: &b.config.HardwareConfig,
+		&common.StepConfigureHardware{
+			Config: &b.config.HardwareConfig,
 		},
 		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,

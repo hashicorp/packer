@@ -11,10 +11,10 @@ import (
 
 type CreateConfig struct {
 	common.VMConfig `mapstructure:",squash"`
-	common.HardwareConfig `mapstructure:",squash"`
 
 	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
 	DiskControllerType  string `mapstructure:"disk_controller_type"`
+	DiskSize            int64  `mapstructure:"disk_size"`
 
 	GuestOSType   string `mapstructure:"guest_os_type"`
 	Network       string `mapstructure:"network"`
@@ -31,11 +31,15 @@ func (c *CreateConfig) Prepare() []error {
 
 	// do recursive calls
 	errs = append(errs, tmp.VMConfig.Prepare()...)
-	errs = append(errs, tmp.HardwareConfig.Prepare()...)
 
 	if tmp.Version < 0 {
 		errs = append(errs, fmt.Errorf("'vm_version' cannot be a negative number"))
 	}
+
+	if tmp.DiskSize == 0 {
+		errs = append(errs, fmt.Errorf("'disk_size' must be provided"))
+	}
+
 
 	if len(errs) > 0 {
 		return errs
@@ -63,10 +67,9 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Say("Creating VM...")
 
 	vm, err := d.CreateVM(&driver.CreateConfig{
-		HardwareConfig: s.Config.HardwareConfig.ToDriverHardwareConfig(),
-
 		DiskThinProvisioned: s.Config.DiskThinProvisioned,
 		DiskControllerType:  s.Config.DiskControllerType,
+		DiskSize:            s.Config.DiskSize,
 		Name:                s.Config.VMName,
 		Folder:              s.Config.Folder,
 		Cluster:             s.Config.Cluster,
