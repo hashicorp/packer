@@ -17,10 +17,25 @@ import (
 
 type BootConfig struct {
 	BootCommand []string `mapstructure:"boot_command"`
+	RawBootWait string   `mapstructure:"boot_wait"` // example: "1m30s"; default: "10s"
+
+	bootWait time.Duration
 }
 
 func (c *BootConfig) Prepare() []error {
-	return nil
+	var errs []error
+
+	if c.RawBootWait == "" {
+		c.RawBootWait = "10s"
+	}
+
+	var err error
+	c.bootWait, err = time.ParseDuration(c.RawBootWait)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("failed parsing boot_wait: %s", err))
+	}
+
+	return errs
 }
 
 type StepBootCommand struct {
@@ -67,6 +82,24 @@ func init() {
 func (s *StepBootCommand) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
+
+	if s.Config.BootCommand == nil {
+		return multistep.ActionContinue
+	}
+
+	ui.Say(fmt.Sprintf("Waiting %s for boot...", s.Config.bootWait))
+	wait := time.After(s.Config.bootWait)
+WAITLOOP:
+	for {
+		select {
+		case <-wait:
+			break WAITLOOP
+		case <-time.After(1 * time.Second):
+			if _, ok := state.GetOk(multistep.StateCancelled); ok {
+				return multistep.ActionHalt
+			}
+		}
+	}
 
 	ui.Say("Typing boot command...")
 
