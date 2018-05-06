@@ -3,7 +3,6 @@ package common
 import (
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"fmt"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"strings"
 	"context"
@@ -29,10 +28,11 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	ui.Say("Set boot order...")
 	if s.Config.BootOrder != "" {
-		if err := vm.SetBootOrder(strings.Split(s.Config.BootOrder, ",")); err != nil {
-			state.Put("error", fmt.Errorf("error selecting boot order: %v", err))
+		ui.Say("Set boot order...")
+		order := strings.Split(s.Config.BootOrder, ",")
+		if err := vm.SetBootOrder(order); err != nil {
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 	}
@@ -40,7 +40,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 	ui.Say("Power on VM...")
 	err := vm.PowerOn()
 	if err != nil {
-		state.Put("error", fmt.Errorf("error powering on VM: %v", err))
+		state.Put("error",err)
 		return multistep.ActionHalt
 	}
 

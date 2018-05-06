@@ -1,8 +1,6 @@
 package iso
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,12 +17,12 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 	ui.Say("Deleting CD-ROM drives...")
 	devices, err := vm.Devices()
 	if err != nil {
-		ui.Error(fmt.Sprintf("error removing cdroms: %v", err))
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 	cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
-	if err = vm.RemoveDevice(false, cdroms...); err != nil {
-		ui.Error(fmt.Sprintf("error removing cdroms: %v", err))
+	if err = vm.RemoveDevice(true, cdroms...); err != nil {
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 

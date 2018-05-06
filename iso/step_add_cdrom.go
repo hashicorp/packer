@@ -12,10 +12,6 @@ type CDRomConfig struct {
 	ISOPaths []string `mapstructure:"iso_paths"`
 }
 
-func (c *CDRomConfig) Prepare() []error {
-	return nil
-}
-
 type StepAddCDRom struct {
 	Config *CDRomConfig
 }
@@ -24,7 +20,7 @@ func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multiste
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	ui.Say("Adding CDRoms...")
+	ui.Say("Adding CD-ROM drives...")
 	if err := vm.AddSATAController(); err != nil {
 		state.Put("error", fmt.Errorf("error adding SATA controller: %v", err))
 		return multistep.ActionHalt

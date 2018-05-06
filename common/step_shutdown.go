@@ -14,6 +14,7 @@ import (
 type ShutdownConfig struct {
 	Command    string `mapstructure:"shutdown_command"`
 	RawTimeout string `mapstructure:"shutdown_timeout"`
+
 	Timeout    time.Duration
 }
 
@@ -75,7 +76,6 @@ func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	ui.Say("VM stopped")
 	return multistep.ActionContinue
 }
 

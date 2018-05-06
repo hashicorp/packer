@@ -10,54 +10,35 @@ import (
 )
 
 type CreateConfig struct {
-	common.VMConfig `mapstructure:",squash"`
+	Version     uint   `mapstructure:"vm_version"`
+	GuestOSType string `mapstructure:"guest_os_type"`
 
-	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
 	DiskControllerType  string `mapstructure:"disk_controller_type"`
 	DiskSize            int64  `mapstructure:"disk_size"`
+	DiskThinProvisioned bool   `mapstructure:"disk_thin_provisioned"`
 
-	GuestOSType   string `mapstructure:"guest_os_type"`
 	Network       string `mapstructure:"network"`
 	NetworkCard   string `mapstructure:"network_card"`
 	USBController bool   `mapstructure:"usb_controller"`
-	Version       int    `mapstructure:"vm_version"`
 }
 
 func (c *CreateConfig) Prepare() []error {
 	var errs []error
 
-	// needed to avoid changing the original config in case of errors
-	tmp := *c
-
-	// do recursive calls
-	errs = append(errs, tmp.VMConfig.Prepare()...)
-
-	if tmp.Version < 0 {
-		errs = append(errs, fmt.Errorf("'vm_version' cannot be a negative number"))
+	if c.DiskSize == 0 {
+		errs = append(errs, fmt.Errorf("'disk_size' is required"))
 	}
 
-	if tmp.DiskSize == 0 {
-		errs = append(errs, fmt.Errorf("'disk_size' must be provided"))
+	if c.GuestOSType == "" {
+		c.GuestOSType = "otherGuest"
 	}
 
-
-	if len(errs) > 0 {
-		return errs
-	}
-
-	// set default values
-	if tmp.GuestOSType == "" {
-		tmp.GuestOSType = "otherGuest"
-	}
-
-	// change the original config
-	*c = tmp
-
-	return []error{}
+	return errs
 }
 
 type StepCreateVM struct {
-	Config *CreateConfig
+	Config   *CreateConfig
+	Location *common.LocationConfig
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -65,30 +46,28 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	d := state.Get("driver").(*driver.Driver)
 
 	ui.Say("Creating VM...")
-
 	vm, err := d.CreateVM(&driver.CreateConfig{
 		DiskThinProvisioned: s.Config.DiskThinProvisioned,
 		DiskControllerType:  s.Config.DiskControllerType,
 		DiskSize:            s.Config.DiskSize,
-		Name:                s.Config.VMName,
-		Folder:              s.Config.Folder,
-		Cluster:             s.Config.Cluster,
-		Host:                s.Config.Host,
-		ResourcePool:        s.Config.ResourcePool,
-		Datastore:           s.Config.Datastore,
+		Name:                s.Location.VMName,
+		Folder:              s.Location.Folder,
+		Cluster:             s.Location.Cluster,
+		Host:                s.Location.Host,
+		ResourcePool:        s.Location.ResourcePool,
+		Datastore:           s.Location.Datastore,
 		GuestOS:             s.Config.GuestOSType,
 		Network:             s.Config.Network,
 		NetworkCard:         s.Config.NetworkCard,
 		USBController:       s.Config.USBController,
 		Version:             s.Config.Version,
 	})
-
 	if err != nil {
 		state.Put("error", fmt.Errorf("error creating vm: %v", err))
 		return multistep.ActionHalt
 	}
-
 	state.Put("vm", vm)
+
 	return multistep.ActionContinue
 }
 
@@ -108,7 +87,6 @@ func (s *StepCreateVM) Cleanup(state multistep.StateBag) {
 	vm := st.(*driver.VirtualMachine)
 
 	ui.Say("Destroying VM...")
-
 	err := vm.Destroy()
 	if err != nil {
 		ui.Error(err.Error())

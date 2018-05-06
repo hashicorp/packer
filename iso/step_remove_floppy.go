@@ -1,8 +1,6 @@
 package iso
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -20,35 +18,28 @@ func (s *StepRemoveFloppy) Run(_ context.Context, state multistep.StateBag) mult
 	vm := state.Get("vm").(*driver.VirtualMachine)
 	d := state.Get("driver").(*driver.Driver)
 
-	var UploadedFloppyPath string
-	switch s := state.Get("uploaded_floppy_path").(type) {
-	case string:
-		UploadedFloppyPath = s
-	case nil:
-		UploadedFloppyPath = ""
-	}
-
 	ui.Say("Deleting Floppy drives...")
 	devices, err := vm.Devices()
 	if err != nil {
-		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 	floppies := devices.SelectByType((*types.VirtualFloppy)(nil))
-	if err = vm.RemoveDevice(false, floppies...); err != nil {
-		ui.Error(fmt.Sprintf("error removing floppy: %v", err))
+	if err = vm.RemoveDevice(true, floppies...); err != nil {
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 
+	UploadedFloppyPath := state.Get("uploaded_floppy_path").(string)
 	if UploadedFloppyPath != "" {
 		ui.Say("Deleting Floppy image...")
 		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
-			ui.Error(err.Error())
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 		if err := ds.Delete(UploadedFloppyPath); err != nil {
-			ui.Error(fmt.Sprintf("Error deleting floppy image '%v': %v", UploadedFloppyPath, err.Error()))
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 	}

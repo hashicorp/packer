@@ -12,12 +12,14 @@ type HardwareConfig struct {
 	CPUs                int32 `mapstructure:"CPUs"`
 	CPUReservation      int64 `mapstructure:"CPU_reservation"`
 	CPULimit            int64 `mapstructure:"CPU_limit"`
+	CpuHotAddEnabled    bool  `mapstructure:"CPU_hot_plug"`
+
 	RAM                 int64 `mapstructure:"RAM"`
 	RAMReservation      int64 `mapstructure:"RAM_reservation"`
 	RAMReserveAll       bool  `mapstructure:"RAM_reserve_all"`
-	NestedHV            bool  `mapstructure:"NestedHV"`
-	CpuHotAddEnabled    bool  `mapstructure:"CPU_hot_plug"`
 	MemoryHotAddEnabled bool  `mapstructure:"RAM_hot_plug"`
+
+	NestedHV            bool  `mapstructure:"NestedHV"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -39,7 +41,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	if *s.Config != (HardwareConfig{}) {
-		ui.Say("Customizing hardware parameters...")
+		ui.Say("Customizing hardware...")
 
 		err := vm.Configure(&driver.HardwareConfig{
 			CPUs:                s.Config.CPUs,

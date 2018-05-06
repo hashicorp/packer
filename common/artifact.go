@@ -32,9 +32,5 @@ func (a *Artifact) State(name string) interface{} {
 }
 
 func (a *Artifact) Destroy() error {
-	err := a.VM.Destroy()
-	if err != nil {
-		return err
-	}
-	return nil
+	return a.VM.Destroy()
 }
