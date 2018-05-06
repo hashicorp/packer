@@ -53,7 +53,7 @@ type CreateConfig struct {
 	Network       string // "" for default network
 	NetworkCard   string // example: vmxnet3
 	USBController bool
-	Version       int // example: 10
+	Version       uint // example: 10
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {

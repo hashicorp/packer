@@ -45,6 +45,4 @@ func (s *StepWaitForIp) Run(_ context.Context, state multistep.StateBag) multist
 	}
 }
 
-func (s *StepWaitForIp) Cleanup(state multistep.StateBag) {
-	// nothing
-}
+func (s *StepWaitForIp) Cleanup(state multistep.StateBag) {}

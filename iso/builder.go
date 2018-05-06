@@ -37,7 +37,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.ConnectConfig,
 		},
 		&StepCreateVM{
-			Config: &b.config.CreateConfig,
+			Config:   &b.config.CreateConfig,
+			Location: &b.config.LocationConfig,
 		},
 		&common.StepConfigureHardware{
 			Config: &b.config.HardwareConfig,
@@ -97,10 +98,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.runner = packerCommon.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
 
-	if err := common.CheckRunStatus(state); err != nil {
-		return nil, err
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
 	}
 
+	if _, ok := state.GetOk("vm"); !ok {
+		return nil, nil
+	}
 	artifact := &common.Artifact{
 		Name: b.config.VMName,
 		VM:   state.Get("vm").(*driver.VirtualMachine),
