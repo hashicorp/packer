@@ -33,8 +33,6 @@
         "[datastore-mac] ISO/VMware Tools/10.2.0/darwin.iso"
       ],
 
-      "boot_order": "disk,cdrom",
-
       "boot_wait": "4m",
       "boot_command": [
         "<enter><wait5>",

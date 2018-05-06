@@ -10,13 +10,15 @@ import (
 )
 
 type RunConfig struct {
-	BootOrder   string        `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
+	BootOrder string `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
 }
 
 func (c *RunConfig) Prepare() []error {
-	var errs []error
+	if c.BootOrder == "" {
+		c.BootOrder = "disk,cdrom"
+	}
 
-	return errs
+	return nil
 }
 
 type StepRun struct {

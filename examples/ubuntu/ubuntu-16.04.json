@@ -49,8 +49,7 @@
         " locale=en_US",
         " file=/media/preseed.cfg",
         "<enter>"
-      ],
-      "boot_order": "disk,cdrom"
+      ]
     }
   ],
 
