@@ -104,6 +104,9 @@ configuration is actually required.
 -   `skip_clean_node` (boolean) - If true, Packer won't remove the node from the
     Chef server after it is done running. By default, this is false.
 
+-   `skip_clean_staging_directory` (boolean) - If true, Packer won't remove the Chef staging
+    directory from the machine after it is done running. By default, this is false.
+
 -   `skip_install` (boolean) - If true, Chef will not automatically be installed
     on the machine using the Chef omnibus installers.
 

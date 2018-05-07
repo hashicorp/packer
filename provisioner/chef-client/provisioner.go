@@ -63,6 +63,7 @@ type Config struct {
 	ServerUrl                  string   `mapstructure:"server_url"`
 	SkipCleanClient            bool     `mapstructure:"skip_clean_client"`
 	SkipCleanNode              bool     `mapstructure:"skip_clean_node"`
+	SkipCleanStagingDirectory  bool     `mapstructure:"skip_clean_staging_directory"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	SslVerifyMode              string   `mapstructure:"ssl_verify_mode"`
 	TrustedCertsDir            string   `mapstructure:"trusted_certs_dir"`
@@ -319,8 +320,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error executing Chef: %s", err)
 	}
 
-	if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+	if !p.config.SkipCleanStagingDirectory {
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+		}
 	}
 
 	return nil
