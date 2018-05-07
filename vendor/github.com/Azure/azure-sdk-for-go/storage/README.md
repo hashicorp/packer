@@ -15,3 +15,4 @@ at [github.com/Azure/azure-sdk-for-go/services/storage](https://github.com/Azure
 This package also supports the [Azure Storage
 Emulator](https://azure.microsoft.com/documentation/articles/storage-use-emulator/)
 (Windows only).
+
