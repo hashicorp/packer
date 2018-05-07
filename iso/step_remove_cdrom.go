@@ -26,6 +26,13 @@ func (s *StepRemoveCDRom) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
+	ui.Say("Deleting SATA controller...")
+	sata := devices.SelectByType((*types.VirtualAHCIController)(nil))
+	if err = vm.RemoveDevice(true, sata...); err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
 	return multistep.ActionContinue
 }
 
