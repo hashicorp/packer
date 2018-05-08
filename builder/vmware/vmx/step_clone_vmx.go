@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"regexp"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,60 +20,38 @@ type StepCloneVMX struct {
 }
 
 type vmxAdapter struct {
-	// The string portion of the address used in the vmx file
-	strAddr string
-	// Max address for adapter, controller, or controller channel
-	aAddrMax int
-	// Max address for device or channel supported by adapter
-	dAddrMax int
+	diskPathKeyRe string
 }
 
-const (
-	// VMware Configuration Maximums - Virtual Hardware Versions 13/14
-	//
-	// Specifying the max numbers for the adapter/controller:bus/channel
-	// *address* as opposed to specifying the maximums as per the VMware
-	// documentation allows consistent (inclusive) treatment when looping
-	// over each adapter/controller type
-	//
-	// SCSI - Address range: scsi0:0 to scsi3:15
-	scsiAddrName       = "scsi" // String part of address used in the vmx file
-	maxSCSIAdapterAddr = 3      // Max 4 adapters
-	maxSCSIDeviceAddr  = 15     // Max 15 devices per adapter; ID 7 is the HBA
-	// SATA - Address range: sata0:0 to scsi3:29
-	sataAddrName       = "sata" // String part of address used in the vmx file
-	maxSATAAdapterAddr = 3      // Max 4 controllers
-	maxSATADeviceAddr  = 29     // Max 30 devices per controller
-	// NVMe - Address range: nvme0:0 to nvme3:14
-	nvmeAddrName       = "nvme" // String part of address used in the vmx file
-	maxNVMeAdapterAddr = 3      // Max 4 adapters
-	maxNVMeDeviceAddr  = 14     // Max 15 devices per adapter
-	// IDE - Address range: ide0:0 to ide1:1
-	ideAddrName       = "ide" // String part of address used in the vmx file
-	maxIDEAdapterAddr = 1     // One controller with primary/secondary channels
-	maxIDEDeviceAddr  = 1     // Each channel supports master and slave
-)
-
 var (
+	// The VMX file stores the path to a configured disk, and information
+	// about that disks attachment to a virtual adapter/controller, as a
+	// key/value pair.
+	// For a virtual disk attached to bus ID 3 of the virtual machines
+	// first SCSI adapter the key/value pair would look something like:
+	// scsi0:3.fileName = "relative/path/to/scsiDisk.vmdk"
+	// The supported adapter types and configuration maximums for each type
+	// vary according to the VMware platform type and version, and the
+	// Virtual Machine Hardware version used. See the 'Virtual Machine
+	// Maximums' section within VMware's 'Configuration Maximums'
+	// documentation for each platform:
+	// https://kb.vmware.com/s/article/1003497
+	// Information about the supported Virtual Machine Hardware versions:
+	// https://kb.vmware.com/s/article/1003746
+	// The following regexp's are used to match all possible disk attachment
+	// points that may be found in the VMX file across all VMware
+	// platforms/versions and Virtual Machine Hardware versions
 	scsiAdapter = vmxAdapter{
-		strAddr:  scsiAddrName,
-		aAddrMax: maxSCSIAdapterAddr,
-		dAddrMax: maxSCSIDeviceAddr,
+		diskPathKeyRe: `(?i)^scsi[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
 	}
 	sataAdapter = vmxAdapter{
-		strAddr:  sataAddrName,
-		aAddrMax: maxSATAAdapterAddr,
-		dAddrMax: maxSATADeviceAddr,
+		diskPathKeyRe: `(?i)^sata[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
 	}
 	nvmeAdapter = vmxAdapter{
-		strAddr:  nvmeAddrName,
-		aAddrMax: maxNVMeAdapterAddr,
-		dAddrMax: maxNVMeDeviceAddr,
+		diskPathKeyRe: `(?i)^nvme[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
 	}
 	ideAdapter = vmxAdapter{
-		strAddr:  ideAddrName,
-		aAddrMax: maxIDEAdapterAddr,
-		dAddrMax: maxIDEDeviceAddr,
+		diskPathKeyRe: `(?i)^ide[[:digit:]]:[[:digit:]]\.fileName`,
 	}
 )
 
@@ -149,14 +128,11 @@ func (s *StepCloneVMX) Cleanup(state multistep.StateBag) {
 }
 
 func getAttachedDisks(a vmxAdapter, data map[string]string) (attachedDisks []string) {
-	// Loop over possible adapter, controller or controller channel
-	for x := 0; x <= a.aAddrMax; x++ {
-		// Loop over possible addresses for attached devices
-		for y := 0; y <= a.dAddrMax; y++ {
-			address := fmt.Sprintf("%s%d:%d.filename", a.strAddr, x, y)
-			if device, _ := data[address]; filepath.Ext(device) == ".vmdk" {
-				attachedDisks = append(attachedDisks, device)
-			}
+	pathKeyRe := regexp.MustCompile(a.diskPathKeyRe)
+	for k, v := range data {
+		match := pathKeyRe.FindString(k)
+		if match != "" && filepath.Ext(v) == ".vmdk" {
+			attachedDisks = append(attachedDisks, v)
 		}
 	}
 	return
