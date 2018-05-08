@@ -73,7 +73,7 @@ func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.
 func (s abortStep) Cleanup(state multistep.StateBag) {
 	err, ok := state.GetOk("error")
 	if ok {
-		s.ui.Error(err.(error).Error())
+		s.ui.Error(fmt.Sprintf("%s", err))
 	}
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
 		s.ui.Error("Interrupted, aborting...")
@@ -105,7 +105,7 @@ func (s askStep) Run(ctx context.Context, state multistep.StateBag) (action mult
 
 		err, ok := state.GetOk("error")
 		if ok {
-			s.ui.Error(err.(error).Error())
+			s.ui.Error(fmt.Sprintf("%s", err))
 		}
 
 		switch ask(s.ui, typeName(s.step), state) {
