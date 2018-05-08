@@ -41,6 +41,10 @@ Exactly *one* of the following is required:
 
 -   `command` (string) - This is a single command to execute. It will be written
     to a temporary file and run using the `execute_command` call below.
+    If you are building a windows vm on AWS, Azure or Google Compute and would
+    like to access the generated password that Packer uses to connect to the
+    instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
+    to set this as an environment variable.
 
 -   `inline` (array of strings) - This is an array of commands to execute. The
     commands are concatenated by newlines and turned into a single file, so they
@@ -60,24 +64,22 @@ Exactly *one* of the following is required:
 
 Optional parameters:
 
--   `execute_command` (array of strings) - The command to use to execute
-    the script. By default this is `["/bin/sh", "-c", "{{.Command}}"]`. The value
-    is an array of arguments executed directly by the OS. The value of this is
-    treated as [configuration
-    template](/docs/templates/engine.html). The only available
-    variable is `Command` which is the command to execute.
-
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the `execute_command`. The format should be `key=value`.
     Packer injects some environmental variables by default into the environment,
-    as well, which are covered in the section below.
+    as well, which are covered in the section below. If you are building a
+    windows vm on AWS, Azure or Google Compute and would like to access the
+    generated password that Packer uses to connect to the instance via WinRM,
+    you can use the template variable `{{.WinRMPassword}}` to set this as an
+    environment variable. For example:
+    `"environment_vars": "WINRMPASS={{.WinRMPassword}}"`
 
 -   `execute_command` (array of strings) - The command used to execute the script.
     By default this is `["/bin/sh", "-c", "{{.Vars}}, "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
     This is treated as a [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
-    to run, and `Vars`, which is the list of `environment_vars`, if configured
+    to run, and `Vars`, which is the list of `environment_vars`, if configured.
 
     If you choose to set this option, make sure that the first element in the
     array is the shell program you want to use (for example, "sh"), and a later
@@ -93,6 +95,11 @@ Optional parameters:
     decoded the same way as {{.Script}}. We recommend using {{.Script}} for the
     sake of clarity, as even when you set only a single `command` to run,
     Packer writes it to a temporary file and then runs it as a script.
+
+    If you are building a windows vm on AWS, Azure or Google Compute and would
+    like to access the generated password that Packer uses to connect to the
+    instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
+    to set this as an environment variable.
 
 -   `inline_shebang` (string) - The
     [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
