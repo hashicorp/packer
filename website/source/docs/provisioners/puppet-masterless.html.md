@@ -140,7 +140,7 @@ cd {{.WorkingDir}} &&
 	{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
 	{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
 	{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
-	{{.ExtraArguments}}
+	{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 	{{.ManifestFile}}
 ```
 
@@ -155,7 +155,7 @@ cd {{.WorkingDir}} &&
 	{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
 	{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
 	{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
-	{{.ExtraArguments}}
+	{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 	{{.ManifestFile}}
 ```
 
