@@ -88,7 +88,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			`{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}` +
 			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
 			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
-			"{{.ExtraArguments}} ",
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
 	},
@@ -104,7 +104,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			`{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}` +
 			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
 			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
-			"{{.ExtraArguments}} ",
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
 	},
