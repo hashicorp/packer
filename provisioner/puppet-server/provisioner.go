@@ -85,10 +85,10 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
 			"{{if .Debug}}--debug {{end}}" +
 			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
-			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}` +
 			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
 			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
-			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+			"{{.ExtraArguments}} ",
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
 	},
@@ -101,10 +101,10 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			"puppet agent --onetime --no-daemonize --detailed-exitcodes " +
 			"{{if .Debug}}--debug {{end}}" +
 			`{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}` +
-			`{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}` +
+			`{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}` +
 			`{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}` +
 			`{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}` +
-			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}`,
+			"{{.ExtraArguments}} ",
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
 	},
