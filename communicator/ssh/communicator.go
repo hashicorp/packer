@@ -335,7 +335,6 @@ func (c *comm) reconnect() (err error) {
 	}
 
 	if err != nil {
-		log.Printf("[ERROR] handshake error: %s", err)
 		return
 	}
 	log.Printf("[DEBUG] handshake complete!")
