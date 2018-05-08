@@ -54,76 +54,64 @@ Required parameters:
 
 Optional parameters:
 
--   `execute_command` (string) - The command used to execute Puppet. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+-   `execute_command` (string) - The command-line to execute Puppet. This also has
+    various [configuration template variables](/docs/templates/engine.html) available.
 
 -   `extra_arguments` (array of strings) - Additional options to
-    pass to the Puppet command. This allows for customization of the 
+    pass to the Puppet command. This allows for customization of  
     `execute_command` without having to completely replace
     or subsume its contents, making forward-compatible customizations much
     easier to maintain.
     
-    This string is lazy-evaluated so one can incorporate logic driven by other parameters.
+    This string is lazy-evaluated so one can incorporate logic driven by template variables as 
+    well as private elements of ExecuteTemplate (see source: provisioner/puppet-masterless/provisioner.go).
 ```
 [
   {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}},
-  {{if ne ".ModulePath" ""}}--modulepath='{{.ModulePath}}:$({{.PuppetBinDir}}/puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)'{{end}}
+  {{if ne ".ModulePath" ""}}--modulepath="{{.ModulePath}}{{.ModulePathJoiner}}$(puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)"{{end}}
 ]
 ```
 
--   `facter` (object of key/value strings) - Additional
+-   `facter` (object of key:value strings) - Additional
     [facts](https://puppetlabs.com/facter) to make
-    available when Puppet is running.
+    available to the Puppet run.
 
--   `guest_os_type` (string) - The target guest OS type, either "unix" or
-    "windows". Setting this to "windows" will cause the provisioner to use
-    Windows friendly paths and commands. By default, this is "unix".
+-   `guest_os_type` (string) - The remote host's OS type ('windows' or 'unix') to
+    tailor command-line and path separators. (default: unix).
 
--   `hiera_config_path` (string) - The path to a local file with hiera
-    configuration to be uploaded to the remote machine. Hiera data directories
-    must be uploaded using the file provisioner separately.
+-   `hiera_config_path` (string) - Local path to self-contained Hiera
+    data to be uploaded. NOTE: If you need data directories
+    they must be previously transferred with a File provisioner.
 
--   `ignore_exit_codes` (boolean) - If true, Packer will never consider the
-    provisioner a failure.
+-   `ignore_exit_codes` (boolean) - If true, Packer will ignore failures.
 
--   `manifest_dir` (string) - The path to a local directory with manifests to be
-    uploaded to the remote machine. This is useful if your main manifest file
-    uses imports. This directory doesn't necessarily contain the
-    `manifest_file`. It is a separate directory that will be set as the
-    "manifestdir" setting on Puppet.
+-   `manifest_dir` (string) - Local directory with manifests to be
+    uploaded. This is useful if your main manifest uses imports, but the
+    directory might not contain the `manifest_file` itself.
 
-~&gt; `manifest_dir` is passed to `puppet apply` as the `--manifestdir` option.
+~&gt; `manifest_dir` is passed to Puppet as `--manifestdir` option.
 This option was deprecated in puppet 3.6, and removed in puppet 4.0. If you have
 multiple manifests you should use `manifest_file` instead.
 
--   `module_paths` (array of strings) - This is an array of paths to module
-    directories on your local filesystem. These will be uploaded to the
-    remote machine. By default, this is empty.
+-   `module_paths` (array of strings) - Array of local module
+    directories to be uploaded.
 
--   `prevent_sudo` (boolean) - By default, the configured commands that are
-    executed to run Puppet are executed with `sudo`. If this is true, then the
-    sudo will be omitted.
+-   `prevent_sudo` (boolean) - On Unix platforms Puppet is typically invoked with `sudo`. If true,
+    it will be omitted. (default: false)
 
--   `puppet_bin_dir` (string) - The path to the directory that contains the puppet
-    binary for running `puppet apply`. Usually, this would be found via the `$PATH`
-    or `%PATH%` environment variable, but some builders (notably, the Docker one) do
-    not run profile-setup scripts, therefore the path is usually empty.
+-   `puppet_bin_dir` (string) - Path to the Puppet binary. Ideally the program
+    should be on the system (unix: `$PATH`, windows: `%PATH%`), but some builders (eg. Docker) do
+    not run profile-setup scripts and therefore PATH might be empty or minimal.
 
--   `staging_directory` (string) - This is the directory where all the configuration
-    of Puppet by Packer will be placed. By default this is "/tmp/packer-puppet-masterless"
-    when guest OS type is unix and "C:/Windows/Temp/packer-puppet-masterless" when windows.
-    This directory doesn't need to exist but must have proper permissions so that the SSH
-    user that Packer uses is able to create directories and write into this folder.
-    If the permissions are not correct, use a shell provisioner prior to this to configure
-    it properly.
+-   `staging_directory` (string) - Directory to where uploaded files
+    will be placed (unix: "/tmp/packer-puppet-masterless",
+    windows: "%SYSTEMROOT%/Temp/packer-puppet-masterless").
+    It doesn't need to pre-exist, but the parent must have permissions sufficient
+    for the account Packer connects as to create directories and write files.
+    Use a Shell provisioner to prepare the way if needed.
 
--   `working_directory` (string) - This is the directory from which the puppet
-    command will be run. When using hiera with a relative path, this option
-    allows to ensure that the paths are working properly. If not specified,
-    defaults to the value of specified `staging_directory` (or its default value
-    if not specified either).
+-   `working_directory` (string) - Directory from which `execute_command` will be run.
+    If using Hiera files with relative paths, this option can be helpful. (default: `staging_directory`)
 
 ## Execute Command
 
