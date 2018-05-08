@@ -54,6 +54,20 @@ listed below:
     various [configuration template variables](/docs/templates/engine.html) available.
     See below for more information.
 
+-   `extra_arguments` (array of strings) - Additional options to
+    pass to the puppet command. This allows for customization of the 
+    `execute_command` without having to completely replace
+    or subsume its contents, making forward-compatible customizations much
+    easier to maintain.
+    
+    This string is lazy-evaluated so one can incorporate logic driven by other parameters.
+```
+[
+  {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}}
+  {{if ne ".ModulePath" ""}}--modulepath='{{.ModulePath}}:$({{.PuppetBinDir}}/puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)'{{end}}
+]
+```
+
 -   `facter` (object of key/value strings) - Additional Facter facts to make
     available to the Puppet run.
 
@@ -95,29 +109,32 @@ By default, Packer uses the following command (broken across multiple lines for
 readability) to execute Puppet:
 
 ```
-{{.FacterVars}} {{if .Sudo}}sudo -E {{end}}
-{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
---onetime --no-daemonize
-{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
-{{if ne .Options ""}}{{.Options}} {{end}}
-{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
-{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
-{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
---detailed-exitcodes
+cd {{.WorkingDir}} &&
+	{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+	{{if .Sudo}}sudo -E {{end}}
+	{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+	{{if .Debug}}--debug {{end}}
+	{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+	{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+	{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+	{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+	"{{.ExtraArguments}} "
 ```
 
 The following command is used if guest OS type is windows:
 
 ```
-{{.FacterVars}}
-{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}puppet agent
---onetime --no-daemonize
-{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
-{{if ne .Options ""}}{{.Options}} {{end}}
-{{if ne .PuppetNode ""}}--certname={{.PuppetNode}} {{end}}
-{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
-{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
---detailed-exitcodes
+cd {{.WorkingDir}} &&
+	{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
+	{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet agent --onetime --no-daemonize --detailed-exitcodes
+	{{if .Debug}}--debug {{end}}
+	{{if ne .PuppetServer ""}}--server='{{.PuppetServer}}' {{end}}
+	{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
+	{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
+	{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
+	"{{.ExtraArguments}} "
 ```
 
 ## Default Facts

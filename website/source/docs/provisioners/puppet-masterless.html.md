@@ -59,11 +59,19 @@ Optional parameters:
     variables](/docs/templates/engine.html) available. See
     below for more information.
 
--   `extra_arguments` (array of strings) - This is an array of additional options to
-    pass to the puppet command when executing puppet. This allows for
-    customization of the `execute_command` without having to completely replace
-    or include it's contents, making forward-compatible customizations much
-    easier.
+-   `extra_arguments` (array of strings) - Additional options to
+    pass to the Puppet command. This allows for customization of the 
+    `execute_command` without having to completely replace
+    or subsume its contents, making forward-compatible customizations much
+    easier to maintain.
+    
+    This string is lazy-evaluated so one can incorporate logic driven by other parameters.
+```
+[
+  {{if ne "{{user environment}}" ""}}--environment={{user environment}}{{end}},
+  {{if ne ".ModulePath" ""}}--modulepath='{{.ModulePath}}:$({{.PuppetBinDir}}/puppet config print {{if ne "{{user `environment`}}" ""}}--environment={{user `environment`}}{{end}} modulepath)'{{end}}
+]
+```
 
 -   `facter` (object of key/value strings) - Additional
     [facts](https://puppetlabs.com/facter) to make
@@ -71,7 +79,7 @@ Optional parameters:
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
-     Windows friendly paths and commands. By default, this is "unix".
+    Windows friendly paths and commands. By default, this is "unix".
 
 -   `hiera_config_path` (string) - The path to a local file with hiera
     configuration to be uploaded to the remote machine. Hiera data directories
@@ -124,44 +132,32 @@ readability) to execute Puppet:
 
 ```
 cd {{.WorkingDir}} &&
- {{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
-{{if .Sudo}}sudo -E {{end}}
-{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-puppet apply --verbose --modulepath='{{.ModulePath}}'
- {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
-{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
---detailed-exitcodes
- {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
-{{.ManifestFile}}
+	{{if ne .FacterVars ""}}{{.FacterVars}} {{end}}
+	{{if .Sudo}}sudo -E {{end}}
+	{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet apply --detailed-exitcodes
+	{{if .Debug}}--debug {{end}}
+	{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
+	{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+	{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+	{{.ExtraArguments}}
+	{{.ManifestFile}}
 ```
 
 The following command is used if guest OS type is windows:
 
 ```
 cd {{.WorkingDir}} &&
- {{.FacterVars}} &&
- {{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
-puppet apply --verbose --modulepath='{{.ModulePath}}'
- {{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
-{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
---detailed-exitcodes
- {{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
-{{.ManifestFile}}
+	{{if ne .FacterVars ""}}{{.FacterVars}} && {{end}}
+	{{if ne .PuppetBinDir ""}}{{.PuppetBinDir}}/{{end}}
+  puppet apply --detailed-exitcodes
+	{{if .Debug}}--debug {{end}}
+	{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}
+	{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}
+	{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}
+	{{.ExtraArguments}}
+	{{.ManifestFile}}
 ```
-
-This command can be customized using the `execute_command` configuration. As you
-can see from the default value above, the value of this configuration can
-contain various template variables, defined below:
-
--   `WorkingDir` - The path from which Puppet will be executed.
--   `FacterVars` - Shell-friendly string of environmental variables used to set
-    custom facts configured for this provisioner.
--   `HieraConfigPath` - The path to a hiera configuration file.
--   `ManifestFile` - The path on the remote machine to the manifest file for
-    Puppet to use.
--   `ModulePath` - The paths to the module directories.
--   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
-    value of the `prevent_sudo` configuration.
 
 ## Default Facts
 
