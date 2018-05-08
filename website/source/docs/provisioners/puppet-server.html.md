@@ -119,7 +119,7 @@ cd {{.WorkingDir}} &&
 	{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
 	{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
 	{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
-	"{{.ExtraArguments}} "
+	{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 ```
 
 The following command is used if guest OS type is windows:
@@ -134,7 +134,7 @@ cd {{.WorkingDir}} &&
 	{{if ne .PuppetNode ""}}--certname='{{.PuppetNode}}' {{end}}
 	{{if ne .ClientCertPath ""}}--certdir='{{.ClientCertPath}}' {{end}}
 	{{if ne .ClientPrivateKeyPath ""}}--privatekeydir='{{.ClientPrivateKeyPath}}' {{end}}
-	"{{.ExtraArguments}} "
+	{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}
 ```
 
 ## Default Facts

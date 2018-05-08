@@ -90,7 +90,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"{{.ExtraArguments}} " +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    "FACTER_%s='%s'",
 		facterVarsJoiner: " ",
@@ -107,7 +107,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 			`{{if ne .ModulePath ""}}--modulepath='{{.ModulePath}}' {{end}}` +
 			`{{if ne .HieraConfigPath ""}}--hiera_config='{{.HieraConfigPath}}' {{end}}` +
 			`{{if ne .ManifestDir ""}}--manifestdir='{{.ManifestDir}}' {{end}}` +
-			"{{.ExtraArguments}} " +
+			`{{if ne .ExtraArguments ""}}{{.ExtraArguments}} {{end}}` +
 			"{{.ManifestFile}}",
 		facterVarsFmt:    `SET "FACTER_%s=%s"`,
 		facterVarsJoiner: " & ",
