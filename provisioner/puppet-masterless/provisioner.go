@@ -122,17 +122,17 @@ type Provisioner struct {
 }
 
 type ExecuteTemplate struct {
-	Debug           bool
-	ExtraArguments  string
-	FacterVars      string
-	HieraConfigPath string
-	ModulePath      string
+	Debug            bool
+	ExtraArguments   string
+	FacterVars       string
+	HieraConfigPath  string
+	ModulePath       string
 	ModulePathJoiner string
-	ManifestFile    string
-	ManifestDir     string
-	PuppetBinDir    string
-	Sudo            bool
-	WorkingDir      string
+	ManifestFile     string
+	ManifestDir      string
+	PuppetBinDir     string
+	Sudo             bool
+	WorkingDir       string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -292,16 +292,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	data := ExecuteTemplate{
-		ExtraArguments:  "",
-		FacterVars:      strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
-		HieraConfigPath: remoteHieraConfigPath,
-		ManifestDir:     remoteManifestDir,
-		ManifestFile:    remoteManifestFile,
-		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		ExtraArguments:   "",
+		FacterVars:       strings.Join(facterVars, p.guestOSTypeConfig.facterVarsJoiner),
+		HieraConfigPath:  remoteHieraConfigPath,
+		ManifestDir:      remoteManifestDir,
+		ManifestFile:     remoteManifestFile,
+		ModulePath:       strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
 		ModulePathJoiner: p.guestOSTypeConfig.modulePathJoiner,
-		PuppetBinDir:    p.config.PuppetBinDir,
-		Sudo:            !p.config.PreventSudo,
-		WorkingDir:      p.config.WorkingDir,
+		PuppetBinDir:     p.config.PuppetBinDir,
+		Sudo:             !p.config.PreventSudo,
+		WorkingDir:       p.config.WorkingDir,
 	}
 
 	p.config.ctx.Data = &data
