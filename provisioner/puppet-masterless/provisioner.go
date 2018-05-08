@@ -127,6 +127,7 @@ type ExecuteTemplate struct {
 	FacterVars      string
 	HieraConfigPath string
 	ModulePath      string
+	ModulePathJoiner string
 	ManifestFile    string
 	ManifestDir     string
 	PuppetBinDir    string
@@ -297,6 +298,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		ManifestDir:     remoteManifestDir,
 		ManifestFile:    remoteManifestFile,
 		ModulePath:      strings.Join(modulePaths, p.guestOSTypeConfig.modulePathJoiner),
+		ModulePathJoiner: p.guestOSTypeConfig.modulePathJoiner,
 		PuppetBinDir:    p.config.PuppetBinDir,
 		Sudo:            !p.config.PreventSudo,
 		WorkingDir:      p.config.WorkingDir,
