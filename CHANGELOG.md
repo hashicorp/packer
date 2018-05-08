@@ -3,6 +3,7 @@
 ### BUG FIXES:
 
 * builder/vmware-esxi: Remove floppy files from the remote server on cleanup. [GH-6206]
+* core: When using `-on-error=[abort|ask]`, output the error to the user. [GH-6252]
 
 ### IMPROVEMENTS:
 
