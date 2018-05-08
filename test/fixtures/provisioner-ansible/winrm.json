@@ -6,7 +6,7 @@
         "playbook_file": "./win-playbook.yml",
         "extra_arguments": [
           "--connection", "packer",
-          "--extra-vars", "ansible_shell_type=powershell ansible_shell_executable=None"
+          "--extra-vars", "ansible_shell_executable=None"
         ]
       }
     ],
