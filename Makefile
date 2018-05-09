@@ -8,8 +8,7 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-# gofmt
-UNFORMATTED_FILES=$(shell find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
+GOFMT_FILES=$(shell find . -not -path './vendor/*' -name '*.go')
 
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
@@ -60,18 +59,20 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s $(UNFORMATTED_FILES)
+	$(foreach item, $(GOFMT_FILES), $(shell gofmt -w -s $(item)); )
+
+#UNFORMATTED_FILES:=
 
 fmt-check: ## Check go code formatting
-	@echo "==> Checking that code complies with gofmt requirements..."
-	@if [ ! -z "$(UNFORMATTED_FILES)" ]; then \
-		echo "gofmt needs to be run on the following files:"; \
-		echo "$(UNFORMATTED_FILES)" | xargs -n1; \
-		echo "You can use the command: \`make fmt\` to reformat code."; \
-		exit 1; \
-	else \
-		echo "Check passed."; \
-	fi
+	@echo -n "==> Checking that code complies with gofmt requirements... "
+
+# works but very slow
+	$(eval UNFORMATTED_FILES := $(foreach item, $(GOFMT_FILES), $(shell gofmt -l -s $(item))))
+	$(eval UNFORMATTED_COUNT := $(words $(UNFORMATTED_FILES)))
+	@[ $(UNFORMATTED_COUNT) -eq 0 ] && echo "passed" || \
+		echo -e "failed\nRun \`make fmt\` to reformat the following files:"
+	@$(foreach item, $(UNFORMATTED_FILES), echo '  '$(item);)
+	@[ $(UNFORMATTED_COUNT) -eq 0 ] || exit 1
 
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
