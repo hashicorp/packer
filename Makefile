@@ -8,8 +8,7 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-# gofmt
-GOFMT_FILES?=find . -not -path './vendor/*' -name '*.go'
+GOFMT_FILES=$(shell find . -not -path './vendor/*' -name '*.go')
 
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
@@ -60,15 +59,19 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@$(GOFMT_FILES) | xargs gofmt -w -s
+	$(foreach item, $(GOFMT_FILES), $(shell gofmt -w -s $(item)); )
+
+#UNFORMATTED_FILES:=
 
 fmt-check: ## Check go code formatting
-	$(eval UNFORMATTED_FILES := $(shell $(GOFMT_FILES) | xargs gofmt -s -l))
-	$(eval UNFORMATTED_COUNT := $(words $(UNFORMATTED_FILES)))
 	@echo -n "==> Checking that code complies with gofmt requirements... "
+
+# works but very slow
+	$(eval UNFORMATTED_FILES := $(foreach item, $(GOFMT_FILES), $(shell gofmt -l -s $(item))))
+	$(eval UNFORMATTED_COUNT := $(words $(UNFORMATTED_FILES)))
 	@[ $(UNFORMATTED_COUNT) -eq 0 ] && echo "passed" || \
 		echo -e "failed\nRun \`make fmt\` to reformat the following files:"
-	@$(foreach item, $(UNFORMATTED_FILES), echo "  $(item)"; )
+	@$(foreach item, $(UNFORMATTED_FILES), echo '  '$(item);)
 	@[ $(UNFORMATTED_COUNT) -eq 0 ] || exit 1
 
 fmt-docs:
