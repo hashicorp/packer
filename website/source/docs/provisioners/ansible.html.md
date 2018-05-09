@@ -260,3 +260,7 @@ To unload all keys from your `ssh-agent`, run:
 ```console
 $ ssh-add -D
 ```
+
+### Become: yes
+
+We recommend against running Packer as root; if you do then you won't be able to successfully run your ansible playbook as root; `become: yes` will fail.
