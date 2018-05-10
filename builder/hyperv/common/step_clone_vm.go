@@ -27,6 +27,7 @@ type StepCloneVM struct {
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
+	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	MacAddress                     string
 }
@@ -99,7 +100,8 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 
 	if generation == 2 {
-		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
+
+		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot, s.SecureBootTemplate)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
 			state.Put("error", err)
