@@ -350,7 +350,7 @@ func (d *HypervPS4Driver) verifyHypervPermissions() error {
 }
 
 // Connect connects to a VM specified by the name given.
-func (d *HypervPS4Driver) Connect(vmName string) context.CancelFunc {
+func (d *HypervPS4Driver) Connect(vmName string) (context.CancelFunc, error) {
 	return hyperv.ConnectVirtualMachine(vmName)
 }
 

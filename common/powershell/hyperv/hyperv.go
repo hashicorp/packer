@@ -1247,11 +1247,15 @@ param([string]$vmName, [string]$scanCodes)
 	return err
 }
 
-func ConnectVirtualMachine(vmName string) context.CancelFunc {
+func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(ctx, "vmconnect.exe", "localhost", vmName)
-	cmd.Start()
-	return cancel
+	err := cmd.Start()
+	if err != nil {
+		// Failed to start so cancel function not required
+		cancel = nil
+	}
+	return cancel, err
 }
 
 func DisconnectVirtualMachine(cancel context.CancelFunc) {

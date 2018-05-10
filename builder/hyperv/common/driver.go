@@ -115,7 +115,7 @@ type Driver interface {
 	UnmountFloppyDrive(string) error
 
 	// Connect connects to a VM specified by the name given.
-	Connect(string) context.CancelFunc
+	Connect(string) (context.CancelFunc, error)
 
 	// Disconnect disconnects to a VM specified by the context cancel function.
 	Disconnect(context.CancelFunc)
