@@ -160,10 +160,11 @@ type DriverMock struct {
 	SetVirtualMachineDynamicMemory_Enable bool
 	SetVirtualMachineDynamicMemory_Err    error
 
-	SetVirtualMachineSecureBoot_Called bool
-	SetVirtualMachineSecureBoot_VmName string
-	SetVirtualMachineSecureBoot_Enable bool
-	SetVirtualMachineSecureBoot_Err    error
+	SetVirtualMachineSecureBoot_Called       bool
+	SetVirtualMachineSecureBoot_VmName       string
+	SetVirtualMachineSecureBoot_TemplateName string
+	SetVirtualMachineSecureBoot_Enable       bool
+	SetVirtualMachineSecureBoot_Err          error
 
 	SetVirtualMachineVirtualizationExtensions_Called bool
 	SetVirtualMachineVirtualizationExtensions_VmName string
@@ -446,10 +447,11 @@ func (d *DriverMock) SetVirtualMachineDynamicMemory(vmName string, enable bool) 
 	return d.SetVirtualMachineDynamicMemory_Err
 }
 
-func (d *DriverMock) SetVirtualMachineSecureBoot(vmName string, enable bool) error {
+func (d *DriverMock) SetVirtualMachineSecureBoot(vmName string, enable bool, templateName string) error {
 	d.SetVirtualMachineSecureBoot_Called = true
 	d.SetVirtualMachineSecureBoot_VmName = vmName
 	d.SetVirtualMachineSecureBoot_Enable = enable
+	d.SetVirtualMachineSecureBoot_TemplateName = templateName
 	return d.SetVirtualMachineSecureBoot_Err
 }
 
