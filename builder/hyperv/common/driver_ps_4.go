@@ -202,8 +202,8 @@ func (d *HypervPS4Driver) SetVirtualMachineDynamicMemory(vmName string, enable b
 	return hyperv.SetVirtualMachineDynamicMemory(vmName, enable)
 }
 
-func (d *HypervPS4Driver) SetVirtualMachineSecureBoot(vmName string, enable bool) error {
-	return hyperv.SetVirtualMachineSecureBoot(vmName, enable)
+func (d *HypervPS4Driver) SetVirtualMachineSecureBoot(vmName string, enable bool, templateName string) error {
+	return hyperv.SetVirtualMachineSecureBoot(vmName, enable, templateName)
 }
 
 func (d *HypervPS4Driver) SetVirtualMachineVirtualizationExtensions(vmName string, enable bool) error {
