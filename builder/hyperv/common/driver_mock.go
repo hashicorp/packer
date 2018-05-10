@@ -248,6 +248,7 @@ type DriverMock struct {
 	Connect_Called bool
 	Connect_VmName string
 	Connect_Cancel context.CancelFunc
+	Connect_Err    error
 
 	Disconnect_Called bool
 	Disconnect_Cancel context.CancelFunc
@@ -565,10 +566,10 @@ func (d *DriverMock) UnmountFloppyDrive(vmName string) error {
 	return d.UnmountFloppyDrive_Err
 }
 
-func (d *DriverMock) Connect(vmName string) context.CancelFunc {
+func (d *DriverMock) Connect(vmName string) (context.CancelFunc, error) {
 	d.Connect_Called = true
 	d.Connect_VmName = vmName
-	return d.Connect_Cancel
+	return d.Connect_Cancel, d.Connect_Err
 }
 
 func (d *DriverMock) Disconnect(cancel context.CancelFunc) {
