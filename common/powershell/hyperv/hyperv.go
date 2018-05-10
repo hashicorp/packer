@@ -504,7 +504,7 @@ Hyper-V\Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoof
 	return err
 }
 
-func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool) error {
+func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateName string) error {
 	var script = `
 param([string]$vmName, $enableSecureBoot)
 Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
@@ -517,7 +517,11 @@ Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
 		enableSecureBootString = "On"
 	}
 
-	err := ps.Run(script, vmName, enableSecureBootString)
+	if templateName == "" {
+		templateName = "MicrosoftWindows"
+	}
+
+	err := ps.Run(script, vmName, enableSecureBootString, templateName)
 	return err
 }
 
@@ -594,12 +598,12 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
     # SCSI controllers are stored in the scsi XML container
     if ((Hyper-V\Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
     {
-      $config.configuration.secure_boot_enabled.'#text' = 'True'
-    }
+	  $config.configuration.secure_boot_enabled.'#text' = 'True'
+	}
     else
     {
       $config.configuration.secure_boot_enabled.'#text' = 'False'
-    }
+	}
   }
 
   $vm_controllers | ForEach {

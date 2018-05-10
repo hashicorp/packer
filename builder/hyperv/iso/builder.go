@@ -91,6 +91,7 @@ type Config struct {
 	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
 	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
 	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
+	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
 
@@ -373,6 +374,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
+			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
