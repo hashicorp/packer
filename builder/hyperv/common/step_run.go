@@ -3,14 +3,16 @@ package common
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepRun struct {
-	Headless bool
-	vmName   string
+	GuiCancelFunc context.CancelFunc
+	Headless      bool
+	vmName        string
 }
 
 func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -32,8 +34,10 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 
 	if !s.Headless {
 		ui.Say("Connecting to vmconnect...")
-		cancel := driver.Connect(vmName)
-		state.Put("guiCancelFunc", cancel)
+		s.GuiCancelFunc, err = driver.Connect(vmName)
+		if err != nil {
+			log.Printf(fmt.Sprintf("Non-fatal error starting vmconnect: %s. continuing...", err))
+		}
 	}
 	return multistep.ActionContinue
 }
@@ -45,11 +49,10 @@ func (s *StepRun) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	guiCancelFunc := state.Get("guiCancelFunc").(context.CancelFunc)
 
-	if guiCancelFunc != nil {
+	if !s.Headless && s.GuiCancelFunc != nil {
 		ui.Say("Disconnecting from vmconnect...")
-		guiCancelFunc()
+		s.GuiCancelFunc()
 	}
 
 	if running, _ := driver.IsRunning(s.vmName); running {
