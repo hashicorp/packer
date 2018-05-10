@@ -64,27 +64,37 @@ builder.
 
     -   `device_name` (string) - The device name exposed to the instance (for
         example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
-        deleted on instance termination
+        deleted on instance termination.
+
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+
     -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
         specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
         for more information
+
     -   `no_device` (boolean) - Suppresses the specified device included in the
         block device mapping of the AMI
+
     -   `snapshot_id` (string) - The ID of the snapshot
+
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
         for more information
+
     -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
+
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
+
     -   `tags` (map) - Tags to apply to the volume. These are retained after the
         builder completes. This is a
         [template engine](/docs/templates/engine.html),
@@ -191,10 +201,10 @@ builder.
         This is most useful for selecting a daily distro build.
 
     You may set this in place of `source_ami` or in conjunction with it. If you
-    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    set this in conjunction with `source_ami`, the `source_ami` will be added to
     the filter. The provided `source_ami` must meet all of the filtering criteria
-    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
-    but will cause Packer to fail if the `source_ami` does not exist.        
+    provided in `source_ami_filter`; this pins the AMI returned by the filter,
+    but will cause Packer to fail if the `source_ami` does not exist.
 
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
