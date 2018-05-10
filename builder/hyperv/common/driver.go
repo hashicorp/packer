@@ -82,7 +82,7 @@ type Driver interface {
 
 	SetVirtualMachineDynamicMemory(string, bool) error
 
-	SetVirtualMachineSecureBoot(string, bool) error
+	SetVirtualMachineSecureBoot(string, bool, string) error
 
 	SetVirtualMachineVirtualizationExtensions(string, bool) error
 

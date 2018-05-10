@@ -86,10 +86,11 @@ type Config struct {
 	VlanId                         string `mapstructure:"vlan_id"`
 	Cpu                            uint   `mapstructure:"cpu"`
 	Generation                     uint
-	EnableMacSpoofing              bool `mapstructure:"enable_mac_spoofing"`
-	EnableDynamicMemory            bool `mapstructure:"enable_dynamic_memory"`
-	EnableSecureBoot               bool `mapstructure:"enable_secure_boot"`
-	EnableVirtualizationExtensions bool `mapstructure:"enable_virtualization_extensions"`
+	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
+	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
+	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
+	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
+	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -405,6 +406,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
 			EnableDynamicMemory:            b.config.EnableDynamicMemory,
 			EnableSecureBoot:               b.config.EnableSecureBoot,
+			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			MacAddress:                     b.config.MacAddress,
 		},
