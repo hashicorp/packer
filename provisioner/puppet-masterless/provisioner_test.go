@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -58,7 +59,7 @@ func TestGuestOSConfig_empty_unix(t *testing.T) {
 	}
 
 	expected := "cd /tmp/packer-puppet-masterless && " +
-		"sudo -E puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+		"sudo -E puppet apply --detailed-exitcodes /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
@@ -97,8 +98,8 @@ func TestGuestOSConfig_full_unix(t *testing.T) {
 
 	expected := "cd /tmp/packer-puppet-masterless && FACTER_lhs='rhs' FACTER_foo='bar' " +
 		"sudo -E puppet apply " +
-		"--verbose --modulepath='/m/p:/a/b' --hiera_config='/h/c/p' " +
-		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+		"--detailed-exitcodes --modulepath='/m/p:/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
@@ -126,7 +127,7 @@ func TestGuestOSConfig_empty_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless &&  && puppet apply --verbose --modulepath='' --detailed-exitcodes /r/m/f"
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && puppet apply --detailed-exitcodes /r/m/f"
 	assert.Equal(t, expected, command)
 }
 
@@ -164,10 +165,10 @@ func TestGuestOSConfig_full_windows(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	expected := "cd C:/Windows/Temp/packer-puppet-masterless && " +
+	expected := "cd " + filepath.ToSlash(os.Getenv("SYSTEMROOT")) + "/Temp/packer-puppet-masterless && " +
 		"SET \"FACTER_lhs=rhs\" & SET \"FACTER_foo=bar\" && " +
-		"puppet apply --verbose --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
-		"--manifestdir='/r/m/d' --detailed-exitcodes /r/m/f"
+		"puppet apply --detailed-exitcodes --modulepath='/m/p;/a/b' --hiera_config='/h/c/p' " +
+		"--manifestdir='/r/m/d' /r/m/f"
 	assert.Equal(t, expected, command)
 }
 

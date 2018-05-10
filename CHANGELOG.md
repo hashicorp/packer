@@ -3,6 +3,11 @@
 ### BUG FIXES:
 
 * builder/vmware-esxi: Remove floppy files from the remote server on cleanup. [GH-6206]
+* core: When using `-on-error=[abort|ask]`, output the error to the user. [GH-6252]
+
+### IMPROVEMENTS:
+
+* builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
 
 ## 1.2.3 (April 25, 2018)
 

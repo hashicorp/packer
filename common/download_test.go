@@ -50,7 +50,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 func TestDownloadClient_basic(t *testing.T) {
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -60,7 +60,6 @@ func TestDownloadClient_basic(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	})
-	defer os.Remove(tf.Name())
 
 	path, err := client.Get()
 	if err != nil {
@@ -85,7 +84,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -97,7 +96,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		Checksum:   checksum,
 		CopyFile:   true,
 	})
-	defer os.Remove(tf.Name())
+
 	if _, err := client.Get(); err == nil {
 		t.Fatal("should error")
 	}
@@ -111,7 +110,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -123,7 +122,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		Checksum:   checksum,
 		CopyFile:   true,
 	})
-	defer os.Remove(tf.Name())
+
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -173,10 +172,29 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 	}
 }
 
+func TestDownloadClient_notFound(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	defer os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/not-found.txt",
+		TargetPath: tf.Name(),
+	})
+
+	if _, err := client.Get(); err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func TestDownloadClient_resume(t *testing.T) {
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Write([]byte("w"))
 	tf.Close()
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method == "HEAD" {
@@ -194,7 +212,7 @@ func TestDownloadClient_resume(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	})
-	defer os.Remove(tf.Name())
+
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -216,7 +234,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 		t.Fatalf("tempfile error: %s", err)
 	}
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	defaultUserAgent := ""
 	asserted := false
@@ -254,7 +272,6 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 		TargetPath: tf.Name(),
 		CopyFile:   true,
 	}
-	defer os.Remove(tf.Name())
 
 	client := NewDownloadClient(config)
 	_, err = client.Get()
@@ -273,7 +290,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		t.Fatalf("tempfile error: %s", err)
 	}
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	asserted := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -288,7 +305,6 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		UserAgent:  "fancy user agent",
 		CopyFile:   true,
 	}
-	defer os.Remove(tf.Name())
 
 	client := NewDownloadClient(config)
 	_, err = client.Get()

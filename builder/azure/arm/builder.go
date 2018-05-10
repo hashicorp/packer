@@ -1,6 +1,7 @@
 package arm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,11 +12,11 @@ import (
 
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 
+	armstorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
+	"github.com/Azure/azure-sdk-for-go/storage"
+	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
-
-	"github.com/Azure/azure-sdk-for-go/arm/storage"
-	"github.com/Azure/go-autorest/autorest/adal"
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -23,15 +24,15 @@ import (
 )
 
 type Builder struct {
-	config   *Config
-	stateBag multistep.StateBag
-	runner   multistep.Runner
+	config    *Config
+	stateBag  multistep.StateBag
+	runner    multistep.Runner
+	ctxCancel context.CancelFunc
 }
 
 const (
-	DefaultSasBlobContainer  = "system/Microsoft.Compute"
-	DefaultSasBlobPermission = "r"
-	DefaultSecretName        = "packerKeyVaultSecret"
+	DefaultSasBlobContainer = "system/Microsoft.Compute"
+	DefaultSecretName       = "packerKeyVaultSecret"
 )
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
@@ -52,6 +53,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	ui.Say("Running builder ...")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	b.ctxCancel = cancel
+	defer cancel()
 
 	if err := newConfigRetriever().FillParameters(b.config); err != nil {
 		return nil, err
@@ -87,7 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if b.config.isManagedImage() {
-		group, err := azureClient.GroupsClient.Get(b.config.ManagedImageResourceGroupName)
+		group, err := azureClient.GroupsClient.Get(ctx, b.config.ManagedImageResourceGroupName)
 		if err != nil {
 			return nil, fmt.Errorf("Cannot locate the managed image resource group %s.", b.config.ManagedImageResourceGroupName)
 		}
@@ -95,12 +100,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.manageImageLocation = *group.Location
 
 		// If a managed image already exists it cannot be overwritten.
-		_, err = azureClient.ImagesClient.Get(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
+		_, err = azureClient.ImagesClient.Get(ctx, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, "")
 		if err == nil {
 			if b.config.PackerForce {
-				_, errChan := azureClient.ImagesClient.Delete(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, nil)
 				ui.Say(fmt.Sprintf("the managed image named %s already exists, but deleting it due to -force flag", b.config.ManagedImageName))
-				err = <-errChan
+				f, err := azureClient.ImagesClient.Delete(ctx, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
+				if err == nil {
+					err = f.WaitForCompletion(ctx, azureClient.ImagesClient.Client)
+				}
 				if err != nil {
 					return nil, fmt.Errorf("failed to delete the managed image named %s : %s", b.config.ManagedImageName, azureClient.LastError.Error())
 				}
@@ -111,7 +118,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if b.config.BuildResourceGroupName != "" {
-		group, err := azureClient.GroupsClient.Get(b.config.BuildResourceGroupName)
+		group, err := azureClient.GroupsClient.Get(ctx, b.config.BuildResourceGroupName)
 		if err != nil {
 			return nil, fmt.Errorf("Cannot locate the existing build resource resource group %s.", b.config.BuildResourceGroupName)
 		}
@@ -120,7 +127,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if b.config.StorageAccount != "" {
-		account, err := b.getBlobAccount(azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
+		account, err := b.getBlobAccount(ctx, azureClient, b.config.ResourceGroupName, b.config.StorageAccount)
 		if err != nil {
 			return nil, err
 		}
@@ -240,9 +247,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return NewArtifact(
 			template.(*CaptureTemplate),
 			func(name string) string {
-				month := time.Now().AddDate(0, 1, 0).UTC()
 				blob := azureClient.BlobStorageClient.GetContainerReference(DefaultSasBlobContainer).GetBlobReference(name)
-				sasUrl, _ := blob.GetSASURI(month, DefaultSasBlobPermission)
+				options := storage.BlobSASOptions{}
+				options.BlobServiceSASPermissions.Read = true
+				options.Expiry = time.Now().AddDate(0, 1, 0).UTC() // one month
+				sasUrl, _ := blob.GetSASURI(options)
 				return sasUrl
 			})
 	}
@@ -280,6 +289,10 @@ func (b *Builder) isPrivateNetworkCommunication() bool {
 }
 
 func (b *Builder) Cancel() {
+	if b.ctxCancel != nil {
+		log.Printf("Cancelling Azure builder...")
+		b.ctxCancel()
+	}
 	if b.runner != nil {
 		log.Println("Cancelling the step runner...")
 		b.runner.Cancel()
@@ -294,8 +307,8 @@ func canonicalizeLocation(location string) string {
 	return strings.Replace(location, " ", "", -1)
 }
 
-func (b *Builder) getBlobAccount(client *AzureClient, resourceGroupName string, storageAccountName string) (*storage.Account, error) {
-	account, err := client.AccountsClient.GetProperties(resourceGroupName, storageAccountName)
+func (b *Builder) getBlobAccount(ctx context.Context, client *AzureClient, resourceGroupName string, storageAccountName string) (*armstorage.Account, error) {
+	account, err := client.AccountsClient.GetProperties(ctx, resourceGroupName, storageAccountName)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +320,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
 	stateBag.Put(constants.PrivateKey, b.config.sshPrivateKey)
 
-	stateBag.Put(constants.ArmTags, &b.config.AzureTags)
+	stateBag.Put(constants.ArmTags, b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)
 	stateBag.Put(constants.ArmDeploymentName, b.config.tmpDeploymentName)
 	if b.config.OSType == constants.Target_Windows {
