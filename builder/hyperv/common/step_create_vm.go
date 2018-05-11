@@ -34,6 +34,7 @@ type StepCreateVM struct {
 	MacAddress                     string
 	SkipExport                     bool
 	OutputDir                      string
+	FixedVHD                       bool
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -68,7 +69,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 	diskBlockSize := int64(s.DiskBlockSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, diskBlockSize, s.SwitchName, s.Generation, s.DifferencingDisk)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, diskBlockSize, s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
