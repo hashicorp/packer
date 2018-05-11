@@ -127,6 +127,7 @@ type DriverMock struct {
 	CreateVirtualMachine_SwitchName       string
 	CreateVirtualMachine_Generation       uint
 	CreateVirtualMachine_DifferentialDisk bool
+	CreateVirtualMachine_FixedVHD         bool
 	CreateVirtualMachine_Err              error
 
 	CloneVirtualMachine_Called                bool
@@ -391,7 +392,7 @@ func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, v
 	return d.AddVirtualMachineHardDrive_Err
 }
 
-func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool) error {
+func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
 	d.CreateVirtualMachine_Path = path

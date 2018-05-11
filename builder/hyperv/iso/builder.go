@@ -24,6 +24,7 @@ const (
 	DefaultDiskSize = 40 * 1024        // ~40GB
 	MinDiskSize     = 256              // 256MB
 	MaxDiskSize     = 64 * 1024 * 1024 // 64TB
+	MaxVHDSize      = 2040 * 1024      // 2040GB
 
 	DefaultDiskBlockSize = 32  // 32MB
 	MinDiskBlockSize     = 1   // 1MB
@@ -110,6 +111,9 @@ type Config struct {
 
 	// Use differencing disk
 	DifferencingDisk bool `mapstructure:"differencing_disk"`
+
+	// Create the VM with a Fixed VHD format disk instead of Dynamic VHDX
+	FixedVHD bool `mapstructure:"use_fixed_vhd_format"`
 
 	ctx interpolate.Context
 }
@@ -271,6 +275,21 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
+	if b.config.Generation > 1 && b.config.FixedVHD {
+		err = errors.New("Fixed VHD disks are only supported on Generation 1 virtual machines.")
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	if !b.config.SkipCompaction && b.config.FixedVHD {
+		err = errors.New("Fixed VHD disks do not support compaction.")
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	if b.config.DifferencingDisk && b.config.FixedVHD {
+		err = errors.New("Fixed VHD disks are not supported with differencing disks.")
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
 	// Warnings
 
 	if b.config.ShutdownCommand == "" {
@@ -381,6 +400,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipExport:                     b.config.SkipExport,
 			OutputDir:                      b.config.OutputDir,
 			MacAddress:                     b.config.MacAddress,
+			FixedVHD:                       b.config.FixedVHD,
 		},
 		&hypervcommon.StepEnableIntegrationService{},
 
@@ -503,8 +523,10 @@ func (b *Builder) checkDiskSize() error {
 
 	if b.config.DiskSize < MinDiskSize {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
-	} else if b.config.DiskSize > MaxDiskSize {
+	} else if b.config.DiskSize > MaxDiskSize && !b.config.FixedVHD {
 		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+	} else if b.config.DiskSize > MaxVHDSize && b.config.FixedVHD {
+		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxVHDSize/1024, b.config.DiskSize/1024)
 	}
 
 	return nil
