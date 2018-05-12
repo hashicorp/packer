@@ -134,12 +134,12 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 		t.Errorf("VM should have %v CPU sockets, got %v", hwConfig.CPUs, cpuSockets)
 	}
 
-	cpuReservation := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Reservation
+	cpuReservation := *vmInfo.Config.CpuAllocation.Reservation
 	if cpuReservation != hwConfig.CPUReservation {
 		t.Errorf("VM should have CPU reservation for %v Mhz, got %v", hwConfig.CPUReservation, cpuReservation)
 	}
 
-	cpuLimit := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Limit
+	cpuLimit := *vmInfo.Config.CpuAllocation.Limit
 	if cpuLimit != hwConfig.CPULimit {
 		t.Errorf("VM should have CPU reservation for %v Mhz, got %v", hwConfig.CPULimit, cpuLimit)
 	}
@@ -149,7 +149,7 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 		t.Errorf("VM should have %v MB of RAM, got %v", hwConfig.RAM, ram)
 	}
 
-	ramReservation := vmInfo.Config.MemoryAllocation.GetResourceAllocationInfo().Reservation
+	ramReservation := *vmInfo.Config.MemoryAllocation.Reservation
 	if ramReservation != hwConfig.RAMReservation {
 		t.Errorf("VM should have RAM reservation for %v MB, got %v", hwConfig.RAMReservation, ramReservation)
 	}

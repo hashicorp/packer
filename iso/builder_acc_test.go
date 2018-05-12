@@ -130,12 +130,12 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 			t.Errorf("VM should have 2 CPU sockets, got %v", cpuSockets)
 		}
 
-		cpuReservation := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Reservation
+		cpuReservation := *vmInfo.Config.CpuAllocation.Reservation
 		if cpuReservation != 1000 {
 			t.Errorf("VM should have CPU reservation for 1000 Mhz, got %v", cpuReservation)
 		}
 
-		cpuLimit := vmInfo.Config.CpuAllocation.GetResourceAllocationInfo().Limit
+		cpuLimit := *vmInfo.Config.CpuAllocation.Limit
 		if cpuLimit != 1500 {
 			t.Errorf("VM should have CPU reservation for 1500 Mhz, got %v", cpuLimit)
 		}
@@ -145,7 +145,7 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 			t.Errorf("VM should have 2048 MB of RAM, got %v", ram)
 		}
 
-		ramReservation := vmInfo.Config.MemoryAllocation.GetResourceAllocationInfo().Reservation
+		ramReservation := *vmInfo.Config.MemoryAllocation.Reservation
 		if ramReservation != 1024 {
 			t.Errorf("VM should have RAM reservation for 1024 MB, got %v", ramReservation)
 		}
