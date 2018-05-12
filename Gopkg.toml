@@ -1,6 +1,6 @@
 [[constraint]]
   name = "github.com/hashicorp/packer"
-  version = "=1.2.2"
+  version = "~1.2"
 
 [[constraint]]
   name = "github.com/vmware/govmomi"

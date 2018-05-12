@@ -84,6 +84,7 @@
     "helper/communicator",
     "helper/config",
     "helper/multistep",
+    "helper/useragent",
     "packer",
     "packer/plugin",
     "packer/rpc",
@@ -91,8 +92,8 @@
     "template/interpolate",
     "version"
   ]
-  revision = "ab8811dca8f375344f36dfc32710b9790b2ec03e"
-  version = "v1.2.2"
+  revision = "b4df69af04373ef28caef3601befcaec1f909216"
+  version = "v1.2.3"
 
 [[projects]]
   branch = "master"
@@ -269,6 +270,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8a4e7f25a3386ca66a780d534df46b4d94a4a369e8c1784ce07bd2075c529a4a"
+  inputs-digest = "adae0b19fa6fd48440ded469329ce77fcaf433c61f699d2405d87ad75650f551"
   solver-name = "gps-cdcl"
   solver-version = 1
