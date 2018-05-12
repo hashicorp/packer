@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/common/uuid"
@@ -140,6 +141,18 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.InstanceInitiatedShutdownBehavior = "stop"
 	} else if !reShutdownBehavior.MatchString(c.InstanceInitiatedShutdownBehavior) {
 		errs = append(errs, fmt.Errorf("shutdown_behavior only accepts 'stop' or 'terminate' values."))
+	}
+
+	if c.EnableT2Unlimited {
+		if c.SpotPrice != "" {
+			errs = append(errs, fmt.Errorf("Error: T2 Unlimited cannot be used in conjuction with Spot Instances"))
+		}
+		firstDotIndex := strings.Index(c.InstanceType, ".")
+		if firstDotIndex == -1 {
+			errs = append(errs, fmt.Errorf("Error determining main Instance Type from: %s", c.InstanceType))
+		} else if c.InstanceType[0:firstDotIndex] != "t2" {
+			errs = append(errs, fmt.Errorf("Error: T2 Unlimited enabled with a non-T2 Instance Type: %s", c.InstanceType))
+		}
 	}
 
 	return errs
