@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/Azure/go-ntlmssp"
   packages = ["."]
-  revision = "c92175d540060095c69ced311f76aea56c83ecdb"
+  revision = "4b934ac9dad38d389d34f0b98d98b2467c422012"
 
 [[projects]]
   branch = "master"
@@ -101,10 +101,10 @@
   revision = "2658be15c5f05e76244154714161f17e3e77de2e"
 
 [[projects]]
-  branch = "master"
   name = "github.com/kr/fs"
   packages = ["."]
-  revision = "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
+  revision = "1455def202f6e05b95cc7bfc7e8ae67ae5141eba"
+  version = "v0.1.0"
 
 [[projects]]
   branch = "master"
@@ -149,7 +149,7 @@
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   branch = "master"
@@ -178,8 +178,8 @@
 [[projects]]
   name = "github.com/pkg/sftp"
   packages = ["."]
-  revision = "43ec6c679d353f6e077d3965dc74f6d996eb4a09"
-  version = "1.5.1"
+  revision = "d2aa419835609d317c34baae11bc345d1f9971a7"
+  version = "1.7.0"
 
 [[projects]]
   name = "github.com/ugorji/go"
@@ -222,13 +222,13 @@
     "ssh",
     "ssh/agent"
   ]
-  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
+  revision = "2d027ae1dddd4694d54f7a8b6cbe78dca8720226"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/mobile"
   packages = ["event/key"]
-  revision = "1f177cbe4ddf911017472e9532c6ca3a99949d53"
+  revision = "274da161099df258cb919e10e9fd0ae401e143a8"
 
 [[projects]]
   branch = "master"
@@ -240,7 +240,7 @@
     "internal/socks",
     "proxy"
   ]
-  revision = "500e7a4f953ddaf55d316b4d3adc516aa0379622"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   name = "golang.org/x/text"
