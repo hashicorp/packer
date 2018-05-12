@@ -248,12 +248,12 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 	confSpec.MemoryMB = config.RAM
 
 	var cpuSpec types.ResourceAllocationInfo
-	cpuSpec.Reservation = config.CPUReservation
-	cpuSpec.Limit = config.CPULimit
+	cpuSpec.Reservation = &config.CPUReservation
+	cpuSpec.Limit = &config.CPULimit
 	confSpec.CpuAllocation = &cpuSpec
 
 	var ramSpec types.ResourceAllocationInfo
-	ramSpec.Reservation = config.RAMReservation
+	ramSpec.Reservation = &config.RAMReservation
 	confSpec.MemoryAllocation = &ramSpec
 
 	confSpec.MemoryReservationLockedToMax = &config.RAMReserveAll

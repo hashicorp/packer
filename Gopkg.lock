@@ -194,6 +194,7 @@
     ".",
     "find",
     "list",
+    "nfc",
     "object",
     "property",
     "session",
@@ -207,8 +208,8 @@
     "vim25/types",
     "vim25/xml"
   ]
-  revision = "b63044e5f833781eb7b305bc035392480ee06a82"
-  version = "v0.15.0"
+  revision = "123ed177021588bac57b5c87c1a84270ddf2eca8"
+  version = "v0.17.1"
 
 [[projects]]
   branch = "master"
@@ -270,6 +271,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "adae0b19fa6fd48440ded469329ce77fcaf433c61f699d2405d87ad75650f551"
+  inputs-digest = "4e43d31e08e37dfb7449ddb1cc361b739f2b65e95d3e560d4e31d40fbabab044"
   solver-name = "gps-cdcl"
   solver-version = 1
