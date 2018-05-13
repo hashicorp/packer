@@ -112,6 +112,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
+	if c.SpotPriceAutoProduct != "" {
+		if c.SpotPrice != "auto" {
+			errs = append(errs, errors.New(
+				"spot_price should be set to auto when spot_price_auto_product is specified"))
+		}
+	}
+
 	if c.UserData != "" && c.UserDataFile != "" {
 		errs = append(errs, fmt.Errorf("Only one of user_data or user_data_file can be specified."))
 	} else if c.UserDataFile != "" {
