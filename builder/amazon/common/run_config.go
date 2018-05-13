@@ -32,6 +32,7 @@ type RunConfig struct {
 	AvailabilityZone                  string            `mapstructure:"availability_zone"`
 	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
 	EbsOptimized                      bool              `mapstructure:"ebs_optimized"`
+	EnableT2Unlimited                 bool              `mapstructure:"enable_t2_unlimited"`
 	IamInstanceProfile                string            `mapstructure:"iam_instance_profile"`
 	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behavior"`
 	InstanceType                      string            `mapstructure:"instance_type"`
