@@ -25,8 +25,7 @@ func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multist
 	vm := state.Get("vm").(*driver.VirtualMachine)
 	d := state.Get("driver").(*driver.Driver)
 
-	tmpFloppy := state.Get("floppy_path").(string)
-	if tmpFloppy != "" {
+	if floppyPath, ok := state.GetOk("floppy_path"); ok {
 		ui.Say("Uploading created floppy image")
 
 		ds, err := d.FindDatastore(s.Datastore, s.Host)
@@ -41,7 +40,7 @@ func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multist
 		}
 
 		uploadPath := fmt.Sprintf("%v/packer-tmp-created-floppy.flp", vmDir)
-		if err := ds.UploadFile(tmpFloppy, uploadPath); err != nil {
+		if err := ds.UploadFile(floppyPath.(string), uploadPath); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}

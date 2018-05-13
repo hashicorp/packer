@@ -30,15 +30,14 @@ func (s *StepRemoveFloppy) Run(_ context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	UploadedFloppyPath := state.Get("uploaded_floppy_path").(string)
-	if UploadedFloppyPath != "" {
+	if UploadedFloppyPath, ok := state.GetOk("uploaded_floppy_path"); ok {
 		ui.Say("Deleting Floppy image...")
 		ds, err := d.FindDatastore(s.Datastore, s.Host)
 		if err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
-		if err := ds.Delete(UploadedFloppyPath); err != nil {
+		if err := ds.Delete(UploadedFloppyPath.(string)); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
