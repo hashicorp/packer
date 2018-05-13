@@ -118,12 +118,18 @@ func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 	c := testConfig()
 	c.SpotPrice = "auto"
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("spot_price_auto_product should be set when spot_price is set to auto")
 	}
 
+	// Good - SpotPrice and SpotPriceAutoProduct are correctly set
 	c.SpotPriceAutoProduct = "foo"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
+	}
+
+	c.SpotPrice = ""
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("spot_price should be set to auto when spot_price_auto_product is set")
 	}
 }
 
