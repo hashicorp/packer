@@ -79,6 +79,41 @@ func TestRunConfigPrepare_SourceAmiFilterGood(t *testing.T) {
 	}
 }
 
+func TestRunConfigPrepare_EnableT2UnlimitedGood(t *testing.T) {
+	c := testConfig()
+	// Must have a T2 instance type if T2 Unlimited is enabled
+	c.InstanceType = "t2.micro"
+	c.EnableT2Unlimited = true
+	err := c.Prepare(nil)
+	if len(err) > 0 {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestRunConfigPrepare_EnableT2UnlimitedBadInstanceType(t *testing.T) {
+	c := testConfig()
+	// T2 Unlimited cannot be used with instance types other than T2
+	c.InstanceType = "m5.large"
+	c.EnableT2Unlimited = true
+	err := c.Prepare(nil)
+	if len(err) != 1 {
+		t.Fatalf("T2 Unlimited should not work with non-T2 instance types")
+	}
+}
+
+func TestRunConfigPrepare_EnableT2UnlimitedBadWithSpotInstanceRequest(t *testing.T) {
+	c := testConfig()
+	// T2 Unlimited cannot be used with Spot Instances
+	c.InstanceType = "t2.micro"
+	c.EnableT2Unlimited = true
+	c.SpotPrice = "auto"
+	c.SpotPriceAutoProduct = "Linux/UNIX"
+	err := c.Prepare(nil)
+	if len(err) != 1 {
+		t.Fatalf("T2 Unlimited cannot be used in conjuntion with Spot Price requests")
+	}
+}
+
 func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 	c := testConfig()
 	c.SpotPrice = "auto"
