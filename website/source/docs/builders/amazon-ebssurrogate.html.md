@@ -162,6 +162,30 @@ builder.
     Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
+-   `enable_t2_unlimited` (boolean) - Enabling T2 Unlimited allows the source
+    instance to burst additional CPU beyond its available [CPU Credits]
+    (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html)
+    for as long as the demand exists.
+    This is in contrast to the standard configuration that only allows an
+    instance to consume up to its available CPU Credits.
+    See the AWS documentation for [T2 Unlimited]
+    (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html)
+    and the 'T2 Unlimited Pricing' section of the [Amazon EC2 On-Demand
+    Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
+    information.
+    By default this option is disabled and Packer will set up a [T2
+    Standard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
+    instance instead.
+
+    To use T2 Unlimited you must use a T2 instance type e.g. t2.micro.
+    Additionally, T2 Unlimited cannot be used in conjunction with Spot
+    Instances e.g. when the `spot_price` option has been configured.
+    Attempting to do so will cause an error.
+
+    !&gt; **Warning!** Additional costs may be incurred by enabling T2
+    Unlimited - even for instances that would usually qualify for the
+    [AWS Free Tier](https://aws.amazon.com/free/).
+
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
