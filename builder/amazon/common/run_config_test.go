@@ -48,7 +48,7 @@ func TestRunConfigPrepare_InstanceType(t *testing.T) {
 	c := testConfig()
 	c.InstanceType = ""
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Should error if an instance_type is not specified")
 	}
 }
 
@@ -56,14 +56,14 @@ func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	c := testConfig()
 	c.SourceAmi = ""
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Should error if a source_ami (or source_ami_filter) is not specified")
 	}
 }
 
 func TestRunConfigPrepare_SourceAmiFilterBlank(t *testing.T) {
 	c := testConfigFilter()
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Should error if source_ami_filter is empty or not specified (and source_ami is not specified)")
 	}
 }
 
@@ -97,7 +97,7 @@ func TestRunConfigPrepare_EnableT2UnlimitedBadInstanceType(t *testing.T) {
 	c.EnableT2Unlimited = true
 	err := c.Prepare(nil)
 	if len(err) != 1 {
-		t.Fatalf("T2 Unlimited should not work with non-T2 instance types")
+		t.Fatalf("Should error if T2 Unlimited is enabled with non-T2 instance_type")
 	}
 }
 
@@ -110,7 +110,7 @@ func TestRunConfigPrepare_EnableT2UnlimitedBadWithSpotInstanceRequest(t *testing
 	c.SpotPriceAutoProduct = "Linux/UNIX"
 	err := c.Prepare(nil)
 	if len(err) != 1 {
-		t.Fatalf("T2 Unlimited cannot be used in conjuntion with Spot Price requests")
+		t.Fatalf("Should error if T2 Unlimited has been used in conjuntion with a Spot Price request")
 	}
 }
 
@@ -118,7 +118,7 @@ func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 	c := testConfig()
 	c.SpotPrice = "auto"
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("spot_price_auto_product should be set when spot_price is set to auto")
+		t.Fatalf("Should error if spot_price_auto_product is not set and spot_price is set to auto")
 	}
 
 	// Good - SpotPrice and SpotPriceAutoProduct are correctly set
@@ -129,7 +129,7 @@ func TestRunConfigPrepare_SpotAuto(t *testing.T) {
 
 	c.SpotPrice = ""
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("spot_price should be set to auto when spot_price_auto_product is set")
+		t.Fatalf("Should error if spot_price is not set to auto and spot_price_auto_product is set")
 	}
 }
 
@@ -166,7 +166,7 @@ func TestRunConfigPrepare_UserData(t *testing.T) {
 	c.UserData = "foo"
 	c.UserDataFile = tf.Name()
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Should error if user_data string and user_data_file have both been specified")
 	}
 }
 
@@ -178,7 +178,7 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 
 	c.UserDataFile = "idontexistidontthink"
 	if err := c.Prepare(nil); len(err) != 1 {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Should error if the file specified by user_data_file does not exist")
 	}
 
 	tf, err := ioutil.TempFile("", "packer")
