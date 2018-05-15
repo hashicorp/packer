@@ -153,7 +153,7 @@ type Config struct {
 	ctx  *interpolate.Context
 
 	//Cleanup
-	AsyncRGDelete bool `mapstructure:"async_resourcegroup_delete"`
+	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
 }
 
 type keyVaultCertificate struct {

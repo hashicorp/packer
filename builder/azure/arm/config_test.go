@@ -1264,6 +1264,73 @@ func TestConfigShouldAllowTempNameOverrides(t *testing.T) {
 	}
 }
 
+func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"async_resourcegroup_delete":        "true",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.AsyncResourceGroupDelete != true {
+		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+}
+func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Errorf("newConfig failed with %q", err)
+	}
+
+	if c.AsyncResourceGroupDelete != false {
+		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+}
+func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"os_type":                           "linux",
+		"managed_image_name":                "ignore",
+		"managed_image_resource_group_name": "ignore",
+		"async_resourcegroup_delete":        "asdasda",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil && c == nil {
+		t.Log("newConfig failed  which is expected ", err)
+
+	}
+
+}
+
 func getArmBuilderConfiguration() map[string]string {
 	m := make(map[string]string)
 	for _, v := range requiredConfigValues {
