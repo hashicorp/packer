@@ -151,6 +151,9 @@ type Config struct {
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  *interpolate.Context
+
+	//Cleanup
+	AsyncRGDelete bool `mapstructure:"async_resourcegroup_delete"`
 }
 
 type keyVaultCertificate struct {

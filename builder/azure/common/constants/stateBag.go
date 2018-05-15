@@ -35,4 +35,5 @@ const (
 	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
 	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
 	ArmManagedImageName              string = "arm.ManagedImageName"
+	ArmAsyncRGDelete                 string = "arm.AsyncRGDelete"
 )

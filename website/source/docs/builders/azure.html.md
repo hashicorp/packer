@@ -221,6 +221,10 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
 
     CLI example `azure vm sizes -l westus`
 
+-   `async_resourcegroup_delete` (boolean) If you want packer to delete the temporary resource group asynchronously. Its a boolean value
+     and defaults to false. **Important** Setting this true would mean that your builds are faster however this is a very
+     small chance that the temporary resource group is not deleted by Azure.
+
 ## Basic Example
 
 Here is a basic example for Azure.
