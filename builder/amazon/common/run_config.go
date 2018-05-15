@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -86,35 +85,35 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.SSHInterface != "public_dns" &&
 		c.SSHInterface != "private_dns" &&
 		c.SSHInterface != "" {
-		errs = append(errs, errors.New(fmt.Sprintf("Unknown interface type: %s", c.SSHInterface)))
+		errs = append(errs, fmt.Errorf(fmt.Sprintf("Unknown interface type: %s", c.SSHInterface)))
 	}
 
 	if c.SSHKeyPairName != "" {
 		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
-			errs = append(errs, errors.New("ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
+			errs = append(errs, fmt.Errorf("ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
 		} else if c.Comm.SSHPrivateKey == "" && !c.Comm.SSHAgentAuth {
-			errs = append(errs, errors.New("ssh_private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
+			errs = append(errs, fmt.Errorf("ssh_private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
 		}
 	}
 
 	if c.SourceAmi == "" && c.SourceAmiFilter.Empty() {
-		errs = append(errs, errors.New("A source_ami or source_ami_filter must be specified"))
+		errs = append(errs, fmt.Errorf("A source_ami or source_ami_filter must be specified"))
 	}
 
 	if c.InstanceType == "" {
-		errs = append(errs, errors.New("An instance_type must be specified"))
+		errs = append(errs, fmt.Errorf("An instance_type must be specified"))
 	}
 
 	if c.SpotPrice == "auto" {
 		if c.SpotPriceAutoProduct == "" {
-			errs = append(errs, errors.New(
+			errs = append(errs, fmt.Errorf(
 				"spot_price_auto_product must be specified when spot_price is auto"))
 		}
 	}
 
 	if c.SpotPriceAutoProduct != "" {
 		if c.SpotPrice != "auto" {
-			errs = append(errs, errors.New(
+			errs = append(errs, fmt.Errorf(
 				"spot_price should be set to auto when spot_price_auto_product is specified"))
 		}
 	}
