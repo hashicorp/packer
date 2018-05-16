@@ -77,12 +77,6 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
--   `ssh_password` (string) - The password to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -201,7 +195,7 @@ builder.
 
 -   `sata_port_count` (integer) - The number of ports available on any SATA
     controller created, defaults to 1. VirtualBox supports up to 30 ports on a
-    maxiumum of 1 SATA controller. Increasing this value can be useful if you
+    maximum of 1 SATA controller. Increasing this value can be useful if you
     want to attach additional drives.
 
 -   `hard_drive_nonrotational` (boolean) - Forces some guests (i.e. Windows 7+)
@@ -419,6 +413,9 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## Guest Additions
 

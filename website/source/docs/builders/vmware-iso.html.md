@@ -42,6 +42,7 @@ self-install. Still, the example serves to show the basic configuration:
   "iso_checksum": "af5f788aee1b32c4b2634734309cc9e9",
   "iso_checksum_type": "md5",
   "ssh_username": "packer",
+  "ssh_password": "packer",
   "shutdown_command": "shutdown -P now"
 }
 ```
@@ -80,9 +81,6 @@ builder.
     This URL can be either an HTTP URL or a file URL (or path to a file). If
     this is an HTTP URL, Packer will download it and cache it between runs.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -115,6 +113,9 @@ builder.
     you're doing. For more information, please consult the [Virtual Disk Manager
     User's Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
+
+*   `disable_vnc` (bool) - Whether to create a VNC connection or not.
+    A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -401,6 +402,9 @@ Ubuntu 12.04 installer:
 ]
 ```
 
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
+
 ## VMX Template
 
 The heart of a VMware machine is the "vmx" file. This contains all the virtual
@@ -448,7 +452,8 @@ point, the vSphere API may be used.
 Packer also requires VNC to issue boot commands during a build, which may be
 disabled on some remote VMware Hypervisors. Please consult the appropriate
 documentation on how to update VMware Hypervisor's firewall to allow these
-connections.
+connections. VNC can be disabled by not setting a `boot_command` and setting
+`disable_vnc` to `true`.
 
 To use a remote VMware vSphere Hypervisor to build your virtual machine, fill in
 the required `remote_*` configurations:
@@ -480,7 +485,8 @@ modify as well:
 
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
-    Before using this option, you need to install `ovftool`.
+    Before using this option, you need to install `ovftool`. This option
+    works currently only with option remote_type set to "esx5".
 
 ### VNC port discovery
 

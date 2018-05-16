@@ -67,8 +67,7 @@ The SSH communicator has the following options:
 -   `ssh_bastion_password` (string) - The password to use to authenticate
     with the bastion host.
 
--   `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to
-    1.  
+-   `ssh_bastion_port` (integer) - The port of the bastion host. Defaults to 1.  
 
 -   `ssh_bastion_private_key_file` (string) - A private key file to use
     to authenticate with the bastion host.
@@ -76,8 +75,8 @@ The SSH communicator has the following options:
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
 
--   `ssh_disable_agent` (boolean) - If true, SSH agent forwarding will be
-    disabled. Defaults to false.
+-   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
+    will be disabled. Defaults to false.
 
 -   `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
     copy (default) or SSH File Transfer Protocol.
@@ -94,7 +93,7 @@ The SSH communicator has the following options:
 -   `ssh_port` (integer) - The port to connect to SSH. This defaults to 22.
 
 -   `ssh_private_key_file` (string) - Path to a PEM encoded private key
-    file to use to authentiate with SSH.
+    file to use to authenticate with SSH.
 
 -   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
     connection. This defaults to false.

@@ -213,9 +213,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if !b.config.FromScratch {
 		steps = append(steps,
 			&awscommon.StepSourceAMIInfo{
-				SourceAmi:          b.config.SourceAmi,
-				EnhancedNetworking: b.config.AMIEnhancedNetworking,
-				AmiFilters:         b.config.SourceAmiFilter,
+				SourceAmi:                b.config.SourceAmi,
+				EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+				EnableAMIENASupport:      b.config.AMIENASupport,
+				AmiFilters:               b.config.SourceAmiFilter,
 			},
 			&StepCheckRootDevice{},
 		)
@@ -245,17 +246,22 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepEarlyCleanup{},
 		&StepSnapshot{},
 		&awscommon.StepDeregisterAMI{
+			AccessConfig:        &b.config.AccessConfig,
 			ForceDeregister:     b.config.AMIForceDeregister,
 			ForceDeleteSnapshot: b.config.AMIForceDeleteSnapshot,
 			AMIName:             b.config.AMIName,
+			Regions:             b.config.AMIRegions,
 		},
 		&StepRegisterAMI{
-			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeSize:           b.config.RootVolumeSize,
+			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
+			EnableAMIENASupport:      b.config.AMIENASupport,
 		},
 		&awscommon.StepCreateEncryptedAMICopy{
 			KeyID:             b.config.AMIKmsKeyId,
 			EncryptBootVolume: b.config.AMIEncryptBootVolume,
 			Name:              b.config.AMIName,
+			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
 		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,

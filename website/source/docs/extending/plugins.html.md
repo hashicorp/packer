@@ -1,7 +1,7 @@
 ---
 description: |
     Packer Plugins allow new functionality to be added to Packer without modifying
-    the core source code. Packer plugins are able to add new commands, builders,
+    the core source code. Packer plugins are able to add new builders,
     provisioners, hooks, and more.
 layout: docs
 page_title: 'Plugins - Extending'
@@ -11,10 +11,10 @@ sidebar_current: 'docs-extending-plugins'
 # Plugins
 
 Packer Plugins allow new functionality to be added to Packer without modifying
-the core source code. Packer plugins are able to add new commands, builders,
+the core source code. Packer plugins are able to add new builders,
 provisioners, hooks, and more. In fact, much of Packer itself is implemented by
 writing plugins that are simply distributed with Packer. For example, all the
-commands, builders, provisioners, and more that ship with Packer are implemented
+builders, provisioners, and more that ship with Packer are implemented
 as Plugins that are simply hardcoded to load with Packer.
 
 This page will cover how to install and use plugins. If you're interested in
@@ -59,8 +59,6 @@ later, it will take precedence over one found earlier.
 The valid types for plugins are:
 
 -   `builder` - Plugins responsible for building images for a specific platform.
-
--   `command` - A CLI sub-command for `packer`.
 
 -   `post-processor` - A post-processor responsible for taking an artifact from
     a builder and turning it into something else.
@@ -126,7 +124,7 @@ There are two steps involved in creating a plugin:
     plugin, implement the `packer.Builder` interface.
 
 2.  Serve the interface by calling the appropriate plugin serving method in your
-    main method. In the case of a builder, this is `plugin.ServeBuilder`.
+    main method. In the case of a builder, this is `plugin.RegisterBuilder`.
 
 A basic example is shown below. In this example, assume the `Builder` struct
 implements the `packer.Builder` interface:
@@ -140,11 +138,11 @@ import (
 type Builder struct{}
 
 func main() {
-  plugin.ServeBuilder(new(Builder))
+  plugin.RegisterBuilder(new(Builder))
 }
 ```
 
-**That's it!** `plugin.ServeBuilder` handles all the nitty gritty of
+**That's it!** `plugin.RegisterBuilder` handles all the nitty gritty of
 communicating with Packer core and serving your builder over RPC. It can't get
 much easier than that.
 
@@ -172,15 +170,14 @@ Packer will prefix any logs from plugins with the path to that plugin to make it
 identifiable where the logs come from. Some example logs are shown below:
 
 ``` text
-2013/06/10 21:44:43 ui: Available commands are:
-2013/06/10 21:44:43 Loading command: build
-2013/06/10 21:44:43 packer-command-build: 2013/06/10 21:44:43 Plugin minimum port: 10000
-2013/06/10 21:44:43 packer-command-build: 2013/06/10 21:44:43 Plugin maximum port: 25000
-2013/06/10 21:44:43 packer-command-build: 2013/06/10 21:44:43 Plugin address: :10000
+2013/06/10 21:44:43 Loading builder: custom
+2013/06/10 21:44:43 packer-builder-custom: 2013/06/10 21:44:43 Plugin minimum port: 10000
+2013/06/10 21:44:43 packer-builder-custom: 2013/06/10 21:44:43 Plugin maximum port: 25000
+2013/06/10 21:44:43 packer-builder-custom: 2013/06/10 21:44:43 Plugin address: :10000
 ```
 
-As you can see, the log messages from the "build" command plugin are prefixed
-with "packer-command-build". Log output is *extremely* helpful in debugging
+As you can see, the log messages from the custom builder plugin are prefixed
+with "packer-builder-custom". Log output is *extremely* helpful in debugging
 issues and you're encouraged to be as verbose as you need to be in order for the
 logs to be helpful.
 

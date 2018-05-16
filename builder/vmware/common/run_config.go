@@ -8,8 +8,10 @@ import (
 )
 
 type RunConfig struct {
-	Headless    bool   `mapstructure:"headless"`
-	RawBootWait string `mapstructure:"boot_wait"`
+	Headless    bool     `mapstructure:"headless"`
+	RawBootWait string   `mapstructure:"boot_wait"`
+	DisableVNC  bool     `mapstructure:"disable_vnc"`
+	BootCommand []string `mapstructure:"boot_command"`
 
 	VNCBindAddress     string `mapstructure:"vnc_bind_address"`
 	VNCPortMin         uint   `mapstructure:"vnc_port_min"`
@@ -38,6 +40,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	var errs []error
 	var err error
+	if len(c.BootCommand) > 0 && c.DisableVNC {
+		errs = append(errs,
+			fmt.Errorf("A boot command cannot be used when vnc is disabled."))
+	}
+
 	if c.RawBootWait != "" {
 		c.BootWait, err = time.ParseDuration(c.RawBootWait)
 		if err != nil {

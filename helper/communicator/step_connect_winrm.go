@@ -1,13 +1,17 @@
 package communicator
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/communicator/winrm"
 	"github.com/hashicorp/packer/packer"
+	winrmcmd "github.com/masterzen/winrm"
 	"github.com/mitchellh/multistep"
 )
 
@@ -139,6 +143,39 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 			continue
 		}
 
+		break
+	}
+	// run an "echo" command to make sure winrm is actually connected before moving on.
+	var connectCheckCommand = winrmcmd.Powershell(`if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; echo "WinRM connected."`)
+	var retryableSleep = 5 * time.Second
+	// run an "echo" command to make sure that the winrm is connected
+	for {
+		cmd := &packer.RemoteCmd{Command: connectCheckCommand}
+		var buf, buf2 bytes.Buffer
+		cmd.Stdout = &buf
+		cmd.Stdout = io.MultiWriter(cmd.Stdout, &buf2)
+		select {
+		case <-cancel:
+			log.Println("WinRM wait canceled, exiting loop")
+			return comm, fmt.Errorf("WinRM wait canceled")
+		case <-time.After(retryableSleep):
+		}
+
+		log.Printf("Checking that WinRM is connected with: '%s'", connectCheckCommand)
+		ui := state.Get("ui").(packer.Ui)
+		err := cmd.StartWithUi(comm, ui)
+
+		if err != nil {
+			log.Printf("Communication connection err: %s", err)
+			continue
+		}
+
+		log.Printf("Connected to machine")
+		stdoutToRead := buf2.String()
+		if !strings.Contains(stdoutToRead, "WinRM connected.") {
+			log.Printf("echo didn't succeed; retrying...")
+			continue
+		}
 		break
 	}
 

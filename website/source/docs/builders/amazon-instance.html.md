@@ -189,11 +189,10 @@ builder.
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
     Default `false`.
 
--   `enhanced_networking` (boolean) - Enable enhanced
-    networking (SriovNetSupport and ENA) on HVM-compatible AMIs. If true, add
-    `ec2:ModifyInstanceAttribute` to your AWS IAM policy. Note: you must make
-    sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking)
+-   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Defaults to `false`.
@@ -244,6 +243,11 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Defaults to `false`.
 
@@ -263,7 +267,7 @@ builder.
       "source_ami_filter": {
         "filters": {
           "virtualization-type": "hvm",
-          "name": "*ubuntu-xenial-16.04-amd64-server-*",
+          "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
           "root-device-type": "ebs"
         },
         "owners": ["099720109477"],
@@ -302,6 +306,12 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
+    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
+    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
+    Default `false`.
 
 -   `ssh_keypair_name` (string) - If specified, this is the key that will be
     used for SSH with the machine. The key must match a key pair name loaded
@@ -457,3 +467,6 @@ sudo -i -n ec2-upload-bundle \
 
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-upload-bundle` command.
+Additionally, `{{.Token}}` is available when overriding this command. You must
+create your own bundle command with the addition of `-t {{.Token}} ` if you are
+assuming a role.
