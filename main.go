@@ -1,6 +1,7 @@
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
+//go:generate go generate ./common/bootcommand/...
 package main
 
 import (
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/hashicorp/go-uuid"
@@ -88,6 +90,7 @@ func realMain() int {
 		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
 		wrapConfig.Stdout = outW
 		wrapConfig.DetectDuration = 500 * time.Millisecond
+		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
 		exitStatus, err := panicwrap.Wrap(&wrapConfig)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Couldn't start Packer: %s", err)
@@ -206,11 +209,13 @@ func wrappedMain() int {
 	}
 
 	cli := &cli.CLI{
-		Args:       args,
-		Commands:   Commands,
-		HelpFunc:   excludeHelpFunc(Commands, []string{"plugin"}),
-		HelpWriter: os.Stdout,
-		Version:    version.Version,
+		Args:         args,
+		Autocomplete: true,
+		Commands:     Commands,
+		HelpFunc:     excludeHelpFunc(Commands, []string{"plugin"}),
+		HelpWriter:   os.Stdout,
+		Name:         "packer",
+		Version:      version.Version,
 	}
 
 	exitCode, err := cli.Run()
@@ -275,7 +280,9 @@ func loadConfig() (*config, error) {
 	}
 
 	configFilePath := os.Getenv("PACKER_CONFIG")
-	if configFilePath == "" {
+	if configFilePath != "" {
+		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
+	} else {
 		var err error
 		configFilePath, err = packer.ConfigFile()
 

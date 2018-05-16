@@ -90,7 +90,7 @@
             "image": {
               "uri": "https://localhost/custom.vhd"
             },
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "osType": "Linux",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
@@ -105,8 +105,6 @@
     "addressPrefix": "10.0.0.0/16",
     "apiVersion": "2015-06-15",
     "location": "[resourceGroup().location]",
-    "nicName": "packerNic",
-    "publicIPAddressName": "packerPublicIP",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
     "subnetAddressPrefix": "10.0.0.0/24",

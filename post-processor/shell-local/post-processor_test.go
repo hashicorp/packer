@@ -1,10 +1,11 @@
 package shell_local
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {

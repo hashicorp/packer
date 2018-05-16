@@ -30,13 +30,13 @@ type guestOSTypeConfig struct {
 var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 	provisioner.UnixOSType: {
 		executeCommand: "{{if .Sudo}}sudo {{end}}chef-client --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "curl -L https://www.chef.io/chef/install.sh | {{if .Sudo}}sudo {{end}}bash",
+		installCommand: "curl -L https://omnitruck.chef.io/install.sh | {{if .Sudo}}sudo {{end}}bash",
 		knifeCommand:   "{{if .Sudo}}sudo {{end}}knife {{.Args}} {{.Flags}}",
 		stagingDir:     "/tmp/packer-chef-client",
 	},
 	provisioner.WindowsOSType: {
 		executeCommand: "c:/opscode/chef/bin/chef-client.bat --no-color -c {{.ConfigPath}} -j {{.JsonPath}}",
-		installCommand: "powershell.exe -Command \"(New-Object System.Net.WebClient).DownloadFile('http://chef.io/chef/install.msi', 'C:\\Windows\\Temp\\chef.msi');Start-Process 'msiexec' -ArgumentList '/qb /i C:\\Windows\\Temp\\chef.msi' -NoNewWindow -Wait\"",
+		installCommand: "powershell.exe -Command \". { iwr -useb https://omnitruck.chef.io/install.ps1 } | iex; install\"",
 		knifeCommand:   "c:/opscode/chef/bin/knife.bat {{.Args}} {{.Flags}}",
 		stagingDir:     "C:/Windows/Temp/packer-chef-client",
 	},
@@ -56,13 +56,17 @@ type Config struct {
 	InstallCommand             string   `mapstructure:"install_command"`
 	KnifeCommand               string   `mapstructure:"knife_command"`
 	NodeName                   string   `mapstructure:"node_name"`
+	PolicyGroup                string   `mapstructure:"policy_group"`
+	PolicyName                 string   `mapstructure:"policy_name"`
 	PreventSudo                bool     `mapstructure:"prevent_sudo"`
 	RunList                    []string `mapstructure:"run_list"`
 	ServerUrl                  string   `mapstructure:"server_url"`
 	SkipCleanClient            bool     `mapstructure:"skip_clean_client"`
 	SkipCleanNode              bool     `mapstructure:"skip_clean_node"`
+	SkipCleanStagingDirectory  bool     `mapstructure:"skip_clean_staging_directory"`
 	SkipInstall                bool     `mapstructure:"skip_install"`
 	SslVerifyMode              string   `mapstructure:"ssl_verify_mode"`
+	TrustedCertsDir            string   `mapstructure:"trusted_certs_dir"`
 	StagingDir                 string   `mapstructure:"staging_directory"`
 	ValidationClientName       string   `mapstructure:"validation_client_name"`
 	ValidationKeyPath          string   `mapstructure:"validation_key_path"`
@@ -81,8 +85,11 @@ type ConfigTemplate struct {
 	ClientKey                  string
 	EncryptedDataBagSecretPath string
 	NodeName                   string
+	PolicyGroup                string
+	PolicyName                 string
 	ServerUrl                  string
 	SslVerifyMode              string
+	TrustedCertsDir            string
 	ValidationClientName       string
 	ValidationKeyPath          string
 }
@@ -190,6 +197,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if (p.config.PolicyName != "") != (p.config.PolicyGroup != "") {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If either policy_name or policy_group are set, they must both be set."))
+	}
+
 	jsonValid := true
 	for k, v := range p.config.Json {
 		p.config.Json[k], err = p.deepJsonFix(k, v)
@@ -268,7 +279,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		remoteValidationKeyPath,
 		p.config.ValidationClientName,
 		p.config.ChefEnvironment,
-		p.config.SslVerifyMode)
+		p.config.PolicyGroup,
+		p.config.PolicyName,
+		p.config.SslVerifyMode,
+		p.config.TrustedCertsDir)
 	if err != nil {
 		return fmt.Errorf("Error creating Chef config file: %s", err)
 	}
@@ -283,7 +297,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if !(p.config.SkipCleanNode && p.config.SkipCleanClient) {
 
 		knifeConfigPath, knifeErr := p.createKnifeConfig(
-			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode)
+			ui, comm, nodeName, serverUrl, p.config.ClientKey, p.config.SslVerifyMode, p.config.TrustedCertsDir)
 
 		if knifeErr != nil {
 			return fmt.Errorf("Error creating knife config on node: %s", knifeErr)
@@ -306,8 +320,10 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return fmt.Errorf("Error executing Chef: %s", err)
 	}
 
-	if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
-		return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+	if !p.config.SkipCleanStagingDirectory {
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing %s: %s", p.config.StagingDir, err)
+		}
 	}
 
 	return nil
@@ -341,7 +357,10 @@ func (p *Provisioner) createConfig(
 	remoteKeyPath string,
 	validationClientName string,
 	chefEnvironment string,
-	sslVerifyMode string) (string, error) {
+	policyGroup string,
+	policyName string,
+	sslVerifyMode string,
+	trustedCertsDir string) (string, error) {
 
 	ui.Message("Creating configuration file 'client.rb'")
 
@@ -370,7 +389,10 @@ func (p *Provisioner) createConfig(
 		ValidationKeyPath:          remoteKeyPath,
 		ValidationClientName:       validationClientName,
 		ChefEnvironment:            chefEnvironment,
+		PolicyGroup:                policyGroup,
+		PolicyName:                 policyName,
 		SslVerifyMode:              sslVerifyMode,
+		TrustedCertsDir:            trustedCertsDir,
 		EncryptedDataBagSecretPath: encryptedDataBagSecretPath,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
@@ -386,7 +408,7 @@ func (p *Provisioner) createConfig(
 	return remotePath, nil
 }
 
-func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string) (string, error) {
+func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, nodeName string, serverUrl string, clientKey string, sslVerifyMode string, trustedCertsDir string) (string, error) {
 	ui.Message("Creating configuration file 'knife.rb'")
 
 	// Read the template
@@ -394,10 +416,11 @@ func (p *Provisioner) createKnifeConfig(ui packer.Ui, comm packer.Communicator, 
 
 	ctx := p.config.ctx
 	ctx.Data = &ConfigTemplate{
-		NodeName:      nodeName,
-		ServerUrl:     serverUrl,
-		ClientKey:     clientKey,
-		SslVerifyMode: sslVerifyMode,
+		NodeName:        nodeName,
+		ServerUrl:       serverUrl,
+		ClientKey:       clientKey,
+		SslVerifyMode:   sslVerifyMode,
+		TrustedCertsDir: trustedCertsDir,
 	}
 	configString, err := interpolate.Render(tpl, &ctx)
 	if err != nil {
@@ -682,8 +705,17 @@ node_name "{{.NodeName}}"
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
 {{end}}
+{{if ne .PolicyGroup ""}}
+policy_group "{{.PolicyGroup}}"
+{{end}}
+{{if ne .PolicyName ""}}
+policy_name "{{.PolicyName}}"
+{{end}}
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
+{{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir "{{.TrustedCertsDir}}"
 {{end}}
 `
 
@@ -695,5 +727,8 @@ client_key       "{{.ClientKey}}"
 node_name "{{.NodeName}}"
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
+{{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir "{{.TrustedCertsDir}}"
 {{end}}
 `

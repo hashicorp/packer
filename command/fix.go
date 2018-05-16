@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type FixCommand struct {
@@ -85,7 +87,7 @@ func (c *FixCommand) Run(args []string) int {
 	c.Ui.Say(result)
 
 	if flagValidate {
-		// Attemot to parse and validate the template
+		// Attempt to parse and validate the template
 		tpl, err := template.Parse(strings.NewReader(result))
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf(
@@ -139,4 +141,14 @@ Options:
 
 func (c *FixCommand) Synopsis() string {
 	return "fixes templates from old versions of packer"
+}
+
+func (c *FixCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (c *FixCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-validate": complete.PredictNothing,
+	}
 }

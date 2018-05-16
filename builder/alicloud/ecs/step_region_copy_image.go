@@ -1,12 +1,13 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type setpRegionCopyAlicloudImage struct {
@@ -15,7 +16,7 @@ type setpRegionCopyAlicloudImage struct {
 	RegionId                        string
 }
 
-func (s *setpRegionCopyAlicloudImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *setpRegionCopyAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.AlicloudImageDestinationRegions) == 0 {
 		return multistep.ActionContinue
 	}
@@ -59,11 +60,11 @@ func (s *setpRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 		client := state.Get("client").(*ecs.Client)
 		alicloudImages := state.Get("alicloudimages").(map[string]string)
 		ui.Say(fmt.Sprintf("Stopping copy image because cancellation or error..."))
-		for copyedRegionId, copyedImageId := range alicloudImages {
-			if copyedRegionId == s.RegionId {
+		for copiedRegionId, copiedImageId := range alicloudImages {
+			if copiedRegionId == s.RegionId {
 				continue
 			}
-			if err := client.CancelCopyImage(common.Region(copyedRegionId), copyedImageId); err != nil {
+			if err := client.CancelCopyImage(common.Region(copiedRegionId), copiedImageId); err != nil {
 				ui.Say(fmt.Sprintf("Error cancelling copy image: %v", err))
 			}
 		}

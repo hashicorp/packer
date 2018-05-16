@@ -17,12 +17,12 @@ func TestFixerAmazonEnhancedNetworking(t *testing.T) {
 		// Attach field == false
 		{
 			Input: map[string]interface{}{
-				"type":                "ebs",
+				"type":                "amazon-ebs",
 				"enhanced_networking": false,
 			},
 
 			Expected: map[string]interface{}{
-				"type":        "ebs",
+				"type":        "amazon-ebs",
 				"ena_support": false,
 			},
 		},
@@ -30,12 +30,12 @@ func TestFixerAmazonEnhancedNetworking(t *testing.T) {
 		// Attach field == true
 		{
 			Input: map[string]interface{}{
-				"type":                "ebs",
+				"type":                "amazon-ebs",
 				"enhanced_networking": true,
 			},
 
 			Expected: map[string]interface{}{
-				"type":        "ebs",
+				"type":        "amazon-ebs",
 				"ena_support": true,
 			},
 		},

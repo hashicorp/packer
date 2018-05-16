@@ -76,6 +76,16 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.Remove(playbook_file.Name())
+
+	err = os.Unsetenv("USER")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
 }
 
 func TestProvisionerPrepare_PlaybookFile(t *testing.T) {

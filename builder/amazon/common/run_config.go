@@ -53,7 +53,7 @@ type RunConfig struct {
 	// Communicator settings
 	Comm           communicator.Config `mapstructure:",squash"`
 	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
-	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
+	SSHInterface   string              `mapstructure:"ssh_interface"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -77,11 +77,21 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Validation
 	errs := c.Comm.Prepare(ctx)
+
+	// Validating ssh_interface
+	if c.SSHInterface != "public_ip" &&
+		c.SSHInterface != "private_ip" &&
+		c.SSHInterface != "public_dns" &&
+		c.SSHInterface != "private_dns" &&
+		c.SSHInterface != "" {
+		errs = append(errs, errors.New(fmt.Sprintf("Unknown interface type: %s", c.SSHInterface)))
+	}
+
 	if c.SSHKeyPairName != "" {
 		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
-			errs = append(errs, errors.New("A private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
+			errs = append(errs, errors.New("ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
 		} else if c.Comm.SSHPrivateKey == "" && !c.Comm.SSHAgentAuth {
-			errs = append(errs, errors.New("A private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
+			errs = append(errs, errors.New("ssh_private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
 		}
 	}
 
@@ -132,4 +142,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return errs
+}
+
+func (c *RunConfig) IsSpotInstance() bool {
+	return c.SpotPrice != "" && c.SpotPrice != "0"
 }

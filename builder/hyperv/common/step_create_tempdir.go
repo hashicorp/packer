@@ -1,16 +1,17 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepCreateTempDir struct {
-	// The user-supplied root directores into which we create subdirectories.
+	// The user-supplied root directories into which we create subdirectories.
 	TempPath    string
 	VhdTempPath string
 	// The subdirectories with the randomly generated name.
@@ -18,7 +19,7 @@ type StepCreateTempDir struct {
 	vhdDirPath string
 }
 
-func (s *StepCreateTempDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateTempDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	ui.Say("Creating temporary directory...")

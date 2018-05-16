@@ -80,6 +80,12 @@ configuration is actually required.
 -   `node_name` (string) - The name of the node to register with the
     Chef Server. This is optional and by default is packer-{{uuid}}.
 
+*   `policy_group` (string) - The name of a policy group that exists on the
+    Chef server. `policy_name` must also be specified.
+
+*   `policy_name` (string) - The name of a policy, as identified by the name
+    setting in a `Policyfile.rb` file. `policy_group` must also be specified.
+
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
     executed to install and run Chef are executed with `sudo`. If this is true,
     then the sudo will be omitted. This has no effect when guest\_os\_type is
@@ -98,12 +104,20 @@ configuration is actually required.
 -   `skip_clean_node` (boolean) - If true, Packer won't remove the node from the
     Chef server after it is done running. By default, this is false.
 
+-   `skip_clean_staging_directory` (boolean) - If true, Packer won't remove the Chef staging
+    directory from the machine after it is done running. By default, this is false.
+
 -   `skip_install` (boolean) - If true, Chef will not automatically be installed
     on the machine using the Chef omnibus installers.
 
 -   `ssl_verify_mode` (string) - Set to "verify\_none" to skip validation of
     SSL certificates. If not set, this defaults to "verify\_peer" which validates
     all SSL certifications.
+
+-   `trusted_certs_dir` (string) -  This is a directory that contains additional
+    SSL certificates to trust. Any certificates in this directory will be added to
+    whatever CA bundle ruby is using. Use this to add self-signed certs for your
+    Chef Server or local HTTP file servers.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
@@ -155,8 +169,17 @@ node_name "{{.NodeName}}"
 {{if ne .ChefEnvironment ""}}
 environment "{{.ChefEnvironment}}"
 {{end}}
+{{if ne .PolicyGroup ""}}
+policy_group "{{.PolicyGroup}}"
+{{end}}
+{{if ne .PolicyName ""}}
+policy_name "{{.PolicyName}}"
+{{end}}
 {{if ne .SslVerifyMode ""}}
 ssl_verify_mode :{{.SslVerifyMode}}
+{{end}}
+{{if ne .TrustedCertsDir ""}}
+trusted_certs_dir :{{.TrustedCertsDir}}
 {{end}}
 ```
 
@@ -170,6 +193,7 @@ variables available to use:
 -   `NodeName` - The node name set in the configuration.
 -   `ServerUrl` - The URL of the Chef Server set in the configuration.
 -   `SslVerifyMode` - Whether Chef SSL verify mode is on or off.
+-   `TrustedCertsDir` - Path to dir with trusted certificates.
 -   `ValidationClientName` - The name of the client used for validation.
 -   `ValidationKeyPath` - Path to the validation key, if it is set.
 
@@ -212,7 +236,7 @@ readability) to install Chef. This command can be customized if you want to
 install Chef in another way.
 
 ``` text
-curl -L https://www.chef.io/chef/install.sh | \
+curl -L https://omnitruck.chef.io/chef/install.sh | \
   {{if .Sudo}}sudo{{end}} bash
 ```
 
@@ -265,7 +289,65 @@ directories, append a shell provisioner after Chef to modify them.
 
 ## Examples
 
-### Chef Client Local Mode
+### Chef Client Local Mode - Simple
+
+The following example shows how to run the `chef-client` provisioner in local
+mode.
+
+**Packer variables**
+
+Set the necessary Packer variables using environment variables or provide a [var
+file](/docs/templates/user-variables.html).
+
+``` json
+"variables": {
+  "chef_dir": "/tmp/packer-chef-client"
+}
+```
+
+**Setup the** `chef-client` **provisioner**
+
+Make sure we have the correct directories and permissions for the `chef-client`
+provisioner. You will need to bootstrap the Chef run by providing the necessary
+cookbooks using Berkshelf or some other means.
+
+``` json
+  "provisioners": [
+    ...
+    { "type": "shell", "inline": [ "mkdir -p {{user `chef_dir`}}" ] },
+    { "type": "file",  "source": "./roles",        "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./cookbooks",    "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./data_bags",    "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./environments", "destination": "{{user `chef_dir`}}" },
+    { "type": "file",  "source": "./scripts/install_chef.sh", "destination": "{{user `chef_dir`}}/install_chef.sh" },
+    {
+      "type":              "chef-client",
+      "install_command":   "sudo bash {{user `chef_dir`}}/install_chef.sh",
+      "server_url":        "http://localhost:8889",
+      "config_template":   "./config/client.rb.template",
+      "run_list":          [ "role[testing]" ],
+      "skip_clean_node":   true,
+      "skip_clean_client": true
+    }
+    ...
+  ]
+```
+
+And ./config/client.rb.template referenced by the above configuration:
+
+```ruby
+log_level         :info
+log_location      STDOUT
+local_mode        true
+chef_zero.enabled true
+ssl_verify_mode   "verify_peer"
+role_path         "{{user `chef_dir`}}/roles"
+data_bag_path     "{{user `chef_dir`}}/data_bags"
+environment_path  "{{user `chef_dir`}}/environments"
+cookbook_path     [ "{{user `chef_dir`}}/cookbooks" ]
+```
+
+### Chef Client Local Mode - Passing variables
 
 The following example shows how to run the `chef-client` provisioner in local
 mode, while passing a `run_list` using a variable.

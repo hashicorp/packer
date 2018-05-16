@@ -105,7 +105,6 @@ func (c *Communicator) uploadReader(dst string, src io.Reader) error {
 
 // uploadFile uses docker cp to copy the file from the host to the container
 func (c *Communicator) uploadFile(dst string, src io.Reader, fi *os.FileInfo) error {
-
 	// command format: docker cp /path/to/infile containerid:/path/to/outfile
 	log.Printf("Copying to %s on container %s.", dst, c.ContainerID)
 

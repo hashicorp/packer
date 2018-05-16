@@ -17,6 +17,14 @@ const (
 	powerShellTrue  = "True"
 )
 
+func IsTrue(s string) bool {
+	return strings.TrimSpace(s) == powerShellTrue
+}
+
+func IsFalse(s string) bool {
+	return strings.TrimSpace(s) == powerShellFalse
+}
+
 type PowerShellCmd struct {
 	Stdout io.Writer
 	Stderr io.Writer
@@ -232,7 +240,7 @@ param([string]$moduleName)
 func HasVirtualMachineVirtualizationExtensions() (bool, error) {
 
 	var script = `	
-(GET-Command Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
+(GET-Command Hyper-V\Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
 `
 
 	var ps PowerShellCmd
@@ -250,7 +258,7 @@ func DoesVirtualMachineExist(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-return (Get-VM | ?{$_.Name -eq $vmName}) -ne $null
+return (Hyper-V\Get-VM | ?{$_.Name -eq $vmName}) -ne $null
 `
 
 	var ps PowerShellCmd
@@ -268,7 +276,7 @@ func DoesVirtualMachineSnapshotExist(vmName string, snapshotName string) (bool, 
 
 	var script = `
 param([string]$vmName, [string]$snapshotName)
-return (Get-VMSnapshot -VMName $vmName | ?{$_.Name -eq $snapshotName}) -ne $null
+return (Hyper-V\Get-VMSnapshot -VMName $vmName | ?{$_.Name -eq $snapshotName}) -ne $null
 `
 
 	var ps PowerShellCmd
@@ -286,7 +294,7 @@ func IsVirtualMachineOn(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 `
 
@@ -304,7 +312,7 @@ $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 func GetVirtualMachineGeneration(vmName string) (uint, error) {
 	var script = `
 param([string]$vmName)
-$generation = Get-Vm -Name $vmName | %{$_.Generation}
+$generation = Hyper-V\Get-Vm -Name $vmName | %{$_.Generation}
 if (!$generation){
     $generation = 1
 }
