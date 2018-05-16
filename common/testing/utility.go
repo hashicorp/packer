@@ -9,7 +9,6 @@ import (
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"testing"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"context"
 )
 
 func NewVMName() string {
@@ -35,7 +34,7 @@ func RenderConfig(config map[string]interface{}) string {
 
 
 func TestConn(t *testing.T) *driver.Driver {
-	d, err := driver.NewDriver(context.TODO(), &driver.ConnectConfig{
+	d, err := driver.NewDriver(&driver.ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
 		Username:           "root",
 		Password:           "jetbrains",
