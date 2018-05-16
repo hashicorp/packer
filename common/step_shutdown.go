@@ -39,7 +39,7 @@ type StepShutdown struct {
 	Config *ShutdownConfig
 }
 
-func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
 	vm := state.Get("vm").(*driver.VirtualMachine)
@@ -70,7 +70,7 @@ func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	log.Printf("Waiting max %s for shutdown to complete", s.Config.Timeout)
-	err := vm.WaitForShutdown(s.Config.Timeout)
+	err := vm.WaitForShutdown(ctx, s.Config.Timeout)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt

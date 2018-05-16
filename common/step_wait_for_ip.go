@@ -11,7 +11,7 @@ import (
 
 type StepWaitForIp struct{}
 
-func (s *StepWaitForIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitForIp) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
@@ -20,7 +20,7 @@ func (s *StepWaitForIp) Run(_ context.Context, state multistep.StateBag) multist
 	ipChan := make(chan string)
 	errChan := make(chan error)
 	go func() {
-		ip, err := vm.WaitForIP()
+		ip, err := vm.WaitForIP(ctx)
 		if err != nil {
 			errChan <- err
 		} else {
@@ -32,6 +32,8 @@ func (s *StepWaitForIp) Run(_ context.Context, state multistep.StateBag) multist
 		select {
 		case err := <-errChan:
 			state.Put("error", err)
+			return multistep.ActionHalt
+		case <-ctx.Done():
 			return multistep.ActionHalt
 		case ip := <-ipChan:
 			state.Put("ip", ip)
