@@ -62,9 +62,6 @@ builder.
 -   `source_path` (string) - The path to a PVM directory that acts as the source
     of this build.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -233,6 +230,9 @@ proper key:
 In addition to the special keys, each command to type is treated as a
 [template engine](/docs/templates/engine.html). The
 available variables are:
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## prlctl Commands
 

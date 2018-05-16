@@ -7,6 +7,7 @@ GITBRANCH:=$(shell git symbolic-ref --short HEAD 2>/dev/null)
 GOFMT_FILES?=$$(find . -not -path "./vendor/*" -name "*.go")
 GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
+GOPATH=$(shell go env GOPATH)
 
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
@@ -50,8 +51,9 @@ dev: deps ## Build and install a development build
 		exit 1; \
 	fi
 	@mkdir -p pkg/$(GOOS)_$(GOARCH)
+	@mkdir -p bin
 	@go install -ldflags '$(GOLDFLAGS)'
-	@cp $(GOPATH)/bin/packer bin
+	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code

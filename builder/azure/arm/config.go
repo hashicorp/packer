@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See the LICENSE file in builder/azure for license information.
-
 package arm
 
 import (
@@ -34,10 +31,11 @@ import (
 )
 
 const (
-	DefaultCloudEnvironmentName = "Public"
-	DefaultImageVersion         = "latest"
-	DefaultUserName             = "packer"
-	DefaultVMSize               = "Standard_A1"
+	DefaultCloudEnvironmentName              = "Public"
+	DefaultImageVersion                      = "latest"
+	DefaultUserName                          = "packer"
+	DefaultPrivateVirtualNetworkWithPublicIp = false
+	DefaultVMSize                            = "Standard_A1"
 )
 
 var (
@@ -73,24 +71,27 @@ type Config struct {
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
 
-	ManagedImageResourceGroupName string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName              string `mapstructure:"managed_image_name"`
-	manageImageLocation           string
+	ManagedImageResourceGroupName  string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName               string `mapstructure:"managed_image_name"`
+	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type"`
+	managedImageStorageAccountType compute.StorageAccountTypes
+	manageImageLocation            string
 
 	// Deployment
-	AzureTags                       map[string]*string `mapstructure:"azure_tags"`
-	ResourceGroupName               string             `mapstructure:"resource_group_name"`
-	StorageAccount                  string             `mapstructure:"storage_account"`
-	TempComputeName                 string             `mapstructure:"temp_compute_name"`
-	TempResourceGroupName           string             `mapstructure:"temp_resource_group_name"`
-	storageAccountBlobEndpoint      string
-	CloudEnvironmentName            string `mapstructure:"cloud_environment_name"`
-	cloudEnvironment                *azure.Environment
-	VirtualNetworkName              string `mapstructure:"virtual_network_name"`
-	VirtualNetworkSubnetName        string `mapstructure:"virtual_network_subnet_name"`
-	VirtualNetworkResourceGroupName string `mapstructure:"virtual_network_resource_group_name"`
-	CustomDataFile                  string `mapstructure:"custom_data_file"`
-	customData                      string
+	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
+	ResourceGroupName                 string             `mapstructure:"resource_group_name"`
+	StorageAccount                    string             `mapstructure:"storage_account"`
+	TempComputeName                   string             `mapstructure:"temp_compute_name"`
+	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
+	storageAccountBlobEndpoint        string
+	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
+	cloudEnvironment                  *azure.Environment
+	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip"`
+	VirtualNetworkName                string `mapstructure:"virtual_network_name"`
+	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name"`
+	VirtualNetworkResourceGroupName   string `mapstructure:"virtual_network_resource_group_name"`
+	CustomDataFile                    string `mapstructure:"custom_data_file"`
+	customData                        string
 
 	// OS
 	OSType       string `mapstructure:"os_type"`
@@ -403,6 +404,10 @@ func provideDefaultValues(c *Config) {
 		c.VMSize = DefaultVMSize
 	}
 
+	if c.ManagedImageStorageAccountType == "" {
+		c.managedImageStorageAccountType = compute.StandardLRS
+	}
+
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
@@ -526,6 +531,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name"))
 	}
 
+	if isImageUrl && c.ManagedImageResourceGroupName != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
+	}
+
 	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
@@ -595,5 +604,14 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("An os_type must be specified"))
 	} else {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
+	}
+
+	switch c.ManagedImageStorageAccountType {
+	case "", string(compute.StandardLRS):
+		c.managedImageStorageAccountType = compute.StandardLRS
+	case string(compute.PremiumLRS):
+		c.managedImageStorageAccountType = compute.PremiumLRS
+	default:
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
 }

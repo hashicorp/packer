@@ -21,7 +21,9 @@ func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	// Retrieve the instance ID from the previously saved state.
 	instanceID, ok := state.Get("instance_id").(string)
 	if !ok || instanceID == "" {
-		ui.Error("Could not retrieve instance_id from state!")
+		err := fmt.Errorf("Could not retrieve instance_id from state!")
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -50,6 +52,7 @@ func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Message("Retrieving the ROOT volume ID...")
 	volumeID, err := getRootVolumeID(client, instanceID)
 	if err != nil {
+		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
@@ -60,7 +63,9 @@ func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	ui.Message("Creating the new template...")
 	template, err := client.Template.CreateTemplate(p)
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error creating the new template %s: %s", config.TemplateName, err))
+		err := fmt.Errorf("Error creating the new template %s: %s", config.TemplateName, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
@@ -72,7 +77,7 @@ func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Message("Template has been created!")
 
-	// Store the template ID.
+	// Store the template.
 	state.Put("template", template)
 
 	return multistep.ActionContinue

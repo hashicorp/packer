@@ -13,11 +13,11 @@ type RamClientInterface interface {
 	DeleteUser(userQuery UserQueryRequest) (RamCommonResponse, error)
 	ListUsers(listParams ListUserRequest) (ListUserResponse, error)
 
-	//TODO login ram console
-	CreateLoginProfile()
-	GetLoginProfile()
-	DeleteLoginProfile()
-	UpdateLoginProfile()
+	//ram login profile
+	CreateLoginProfile(req ProfileRequest) (ProfileResponse, error)
+	GetLoginProfile(req UserQueryRequest) (ProfileResponse, error)
+	DeleteLoginProfile(req UserQueryRequest) (RamCommonResponse, error)
+	UpdateLoginProfile(req ProfileRequest) (ProfileResponse, error)
 
 	//ram ak
 	CreateAccessKey(userQuery UserQueryRequest) (AccessKeyResponse, error)
@@ -25,23 +25,24 @@ type RamClientInterface interface {
 	DeleteAccessKey(accessKeyRequest UpdateAccessKeyRequest) (RamCommonResponse, error)
 	ListAccessKeys(userQuery UserQueryRequest) (AccessKeyListResponse, error)
 
-	//TODO MFA
-	CreateVirtualMFADevices()
-	ListVirtualMFADevices()
-	DeleteVirtualMFADevices()
-	BindMFADevice()
-	GetUserMFAInfo()
+	//ram mfa
+	CreateVirtualMFADevice(req MFARequest) (MFAResponse, error)
+	ListVirtualMFADevices() (MFAListResponse, error)
+	DeleteVirtualMFADevice(req MFADeleteRequest) (RamCommonResponse, error)
+	BindMFADevice(req MFABindRequest) (RamCommonResponse, error)
+	UnbindMFADevice(req UserQueryRequest) (MFAUserResponse, error)
+	GetUserMFAInfo(req UserQueryRequest) (MFAUserResponse, error)
 
-	//TODO group
-	CreateGroup()
-	GetGroup()
-	UpdateGroup()
-	ListGroup()
-	DeleteGroup()
-	AddUserToGroup()
-	RemoveUserFromGroup()
-	ListGroupsForUser()
-	ListUsersForGroup()
+	//ram group
+	CreateGroup(req GroupRequest) (GroupResponse, error)
+	GetGroup(req GroupQueryRequest) (GroupResponse, error)
+	UpdateGroup(req GroupUpdateRequest) (GroupResponse, error)
+	ListGroup(req GroupListRequest) (GroupListResponse, error)
+	DeleteGroup(req GroupQueryRequest) (RamCommonResponse, error)
+	AddUserToGroup(req UserRelateGroupRequest) (RamCommonResponse, error)
+	RemoveUserFromGroup(req UserRelateGroupRequest) (RamCommonResponse, error)
+	ListGroupsForUser(req UserQueryRequest) (GroupListResponse, error)
+	ListUsersForGroup(req GroupQueryRequest) (ListUserResponse, error)
 
 	CreateRole(role RoleRequest) (RoleResponse, error)
 	GetRole(roleQuery RoleQueryRequest) (RoleResponse, error)
@@ -56,24 +57,28 @@ type RamClientInterface interface {
 	ListPolicies(policyQuery PolicyQueryRequest) (PolicyQueryResponse, error)
 	ListPoliciesForUser(userQuery UserQueryRequest) (PolicyListResponse, error)
 
-	//TODO policy
+	//ram policy version
 	CreatePolicyVersion(policyReq PolicyRequest) (PolicyVersionResponse, error)
 	GetPolicyVersion(policyReq PolicyRequest) (PolicyVersionResponse, error)
+	GetPolicyVersionNew(policyReq PolicyRequest) (PolicyVersionResponseNew, error)
 	DeletePolicyVersion(policyReq PolicyRequest) (RamCommonResponse, error)
 	ListPolicyVersions(policyReq PolicyRequest) (PolicyVersionResponse, error)
+	ListPolicyVersionsNew(policyReq PolicyRequest) (PolicyVersionsResponse, error)
 	AttachPolicyToUser(attachPolicyRequest AttachPolicyRequest) (RamCommonResponse, error)
 	DetachPolicyFromUser(attachPolicyRequest AttachPolicyRequest) (RamCommonResponse, error)
-	ListEnitiesForPolicy()
-	SetDefaultPolicyVersion()
-	ListPoliciesForGroup()
+	ListEntitiesForPolicy(policyReq PolicyRequest) (PolicyListEntitiesResponse, error)
+	SetDefaultPolicyVersion(policyReq PolicyRequest) (RamCommonResponse, error)
+	ListPoliciesForGroup(groupQuery GroupQueryRequest) (PolicyListResponse, error)
+	AttachPolicyToGroup(attachPolicyRequest AttachPolicyToGroupRequest) (RamCommonResponse, error)
+	DetachPolicyFromGroup(attachPolicyRequest AttachPolicyToGroupRequest) (RamCommonResponse, error)
 	AttachPolicyToRole(attachPolicyRequest AttachPolicyToRoleRequest) (RamCommonResponse, error)
 	DetachPolicyFromRole(attachPolicyRequest AttachPolicyToRoleRequest) (RamCommonResponse, error)
 	ListPoliciesForRole(roleQuery RoleQueryRequest) (PolicyListResponse, error)
 
-	//TODO security apis
-	SetAccountAlias(accountAlias AccountAlias) (RamCommonResponse, error)
+	//ram security
+	SetAccountAlias(accountAlias AccountAliasRequest) (RamCommonResponse, error)
 	GetAccountAlias() (AccountAliasResponse, error)
 	ClearAccountAlias() (RamCommonResponse, error)
 	SetPasswordPolicy(passwordPolicy PasswordPolicyRequest) (PasswordPolicyResponse, error)
-	GetPasswordPolicy(accountAlias AccountAlias) (PasswordPolicyResponse, error)
+	GetPasswordPolicy() (PasswordPolicyResponse, error)
 }

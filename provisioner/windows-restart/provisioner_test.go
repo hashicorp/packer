@@ -242,6 +242,7 @@ func TestProvision_waitForCommunicator(t *testing.T) {
 	p.comm = comm
 	p.ui = ui
 	comm.StartStderr = "WinRM terminated"
+	comm.StartStdout = "WIN-V4CEJ7MC5SN restarted."
 	comm.StartExitStatus = 1
 	p.Prepare(config)
 	err := waitForCommunicator(p)

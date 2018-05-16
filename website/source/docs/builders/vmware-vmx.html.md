@@ -56,9 +56,6 @@ builder.
 
 -   `source_path` (string) - Path to the source VMX file to clone.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -73,6 +70,9 @@ builder.
     a duration. Examples are "5s" and "1m30s" which will cause Packer to wait
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
+
+*   `disable_vnc` (bool) - Whether to create a VNC connection or not.
+    A `boot_command` cannot be used when this is `false`. Defaults to `false`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -272,3 +272,6 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
