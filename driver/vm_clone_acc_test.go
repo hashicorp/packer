@@ -5,6 +5,7 @@ import (
 	"net"
 	"testing"
 	"time"
+	"context"
 )
 
 func TestVMAcc_clone(t *testing.T) {
@@ -38,7 +39,7 @@ func TestVMAcc_clone(t *testing.T) {
 			}
 
 			log.Printf("[DEBUG] Clonning VM")
-			vm, err := template.Clone(tc.config)
+			vm, err := template.Clone(context.TODO(), tc.config)
 			if err != nil {
 				t.Fatalf("Cannot clone vm '%v': %v", templateName, err)
 			}
@@ -227,7 +228,7 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 	stopper := startVM(t, vm, config.Name)
 	defer stopper()
 
-	switch ip, err := vm.WaitForIP(); {
+	switch ip, err := vm.WaitForIP(context.TODO()); {
 	case err != nil:
 		t.Errorf("Cannot obtain IP address from created vm '%v': %v", config.Name, err)
 	case net.ParseIP(ip) == nil:
@@ -236,7 +237,7 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 
 	vm.StartShutdown()
 	log.Printf("[DEBUG] Waiting max 1m0s for shutdown to complete")
-	vm.WaitForShutdown(1 * time.Minute)
+	vm.WaitForShutdown(context.TODO(), 1 * time.Minute)
 }
 
 func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
