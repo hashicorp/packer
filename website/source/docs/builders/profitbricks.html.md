@@ -39,7 +39,7 @@ builder.
 
 -   `location` (string) - Defaults to "us/las".
 
--   `ram` (integer) - Amount of RAM to use for this image. Defalts to "2048".
+-   `ram` (integer) - Amount of RAM to use for this image. Defaults to "2048".
 
 -   `retries` (string) - Number of retries Packer will make status requests while waiting for the build to complete. Default value 120 seconds.
 

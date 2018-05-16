@@ -318,6 +318,43 @@ func TestVirtualMachineDeployment09(t *testing.T) {
 	}
 }
 
+// Ensure the VM template is correct when building with PublicIp and connect to Private Network
+func TestVirtualMachineDeployment10(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
+		"image_publisher": "--image-publisher--",
+		"image_offer":     "--image-offer--",
+		"image_sku":       "--image-sku--",
+		"image_version":   "--version--",
+
+		"virtual_network_resource_group_name":    "--virtual_network_resource_group_name--",
+		"virtual_network_name":                   "--virtual_network_name--",
+		"virtual_network_subnet_name":            "--virtual_network_subnet_name--",
+		"private_virtual_network_with_public_ip": true,
+
+		"managed_image_name":                "ManagedImageName",
+		"managed_image_resource_group_name": "ManagedImageResourceGroupName",
+	}
+
+	c, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deployment, err := GetVirtualMachineDeployment(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONStruct(t, deployment.Properties.Template)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Ensure the link values are not set, and the concrete values are set.
 func TestKeyVaultDeployment00(t *testing.T) {
 	c, _, _ := newConfig(getArmBuilderConfiguration(), getPackerConfiguration())

@@ -76,16 +76,25 @@ type DescribeRouteTablesResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/routertable&describeroutetables
 func (client *Client) DescribeRouteTables(args *DescribeRouteTablesArgs) (routeTables []RouteTableSetType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeRouteTablesResponse{}
-
-	err = client.Invoke("DescribeRouteTables", args, &response)
-
+	response, err := client.DescribeRouteTablesWithRaw(args)
 	if err == nil {
 		return response.RouteTables.RouteTable, &response.PaginationResult, nil
 	}
 
 	return nil, nil, err
+}
+
+func (client *Client) DescribeRouteTablesWithRaw(args *DescribeRouteTablesArgs) (response *DescribeRouteTablesResponse, err error) {
+	args.Validate()
+	response = &DescribeRouteTablesResponse{}
+
+	err = client.Invoke("DescribeRouteTables", args, &response)
+
+	if err == nil {
+		return response, nil
+	}
+
+	return nil, err
 }
 
 type NextHopType string

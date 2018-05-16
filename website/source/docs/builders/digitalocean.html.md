@@ -82,6 +82,7 @@ builder.
     default state timeout is "6m".
 
 -   `user_data` (string) - User data to launch with the Droplet.
+
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
 

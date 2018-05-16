@@ -26,6 +26,8 @@ type Config struct {
 	AccountFile string `mapstructure:"account_file"`
 	ProjectId   string `mapstructure:"project_id"`
 
+	AcceleratorType      string            `mapstructure:"accelerator_type"`
+	AcceleratorCount     int64             `mapstructure:"accelerator_count"`
 	Address              string            `mapstructure:"address"`
 	DiskName             string            `mapstructure:"disk_name"`
 	DiskSizeGb           int64             `mapstructure:"disk_size"`
@@ -33,7 +35,9 @@ type Config struct {
 	ImageName            string            `mapstructure:"image_name"`
 	ImageDescription     string            `mapstructure:"image_description"`
 	ImageFamily          string            `mapstructure:"image_family"`
+	ImageLabels          map[string]string `mapstructure:"image_labels"`
 	InstanceName         string            `mapstructure:"instance_name"`
+	Labels               map[string]string `mapstructure:"labels"`
 	MachineType          string            `mapstructure:"machine_type"`
 	Metadata             map[string]string `mapstructure:"metadata"`
 	Network              string            `mapstructure:"network"`
@@ -203,6 +207,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	if c.OmitExternalIP && !c.UseInternalIP {
 		errs = packer.MultiErrorAppend(fmt.Errorf("'use_internal_ip' must be true if 'omit_external_ip' is true"))
+	}
+
+	if c.AcceleratorCount > 0 && len(c.AcceleratorType) == 0 {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'accelerator_type' must be set when 'accelerator_count' is more than 0"))
+	}
+
+	if c.AcceleratorCount > 0 && c.OnHostMaintenance != "TERMINATE" {
+		errs = packer.MultiErrorAppend(fmt.Errorf("'on_host_maintenance' must be set to 'TERMINATE' when 'accelerator_count' is more than 0"))
 	}
 
 	// Check for any errors.

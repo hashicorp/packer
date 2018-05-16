@@ -79,17 +79,25 @@ func (client *Client) CreateForwardEntry(args *CreateForwardEntryArgs) (resp *Cr
 
 func (client *Client) DescribeForwardTableEntries(args *DescribeForwardTableEntriesArgs) (forwardTableEntries []ForwardTableEntrySetType,
 	pagination *common.PaginationResult, err error) {
-
-	args.Validate()
-	response := DescribeForwardTableEntriesResponse{}
-
-	err = client.Invoke("DescribeForwardTableEntries", args, &response)
-
+	response, err := client.DescribeForwardTableEntriesWithRaw(args)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return response.ForwardTableEntries.ForwardTableEntry, &response.PaginationResult, nil
+}
+
+func (client *Client) DescribeForwardTableEntriesWithRaw(args *DescribeForwardTableEntriesArgs) (response *DescribeForwardTableEntriesResponse, err error) {
+	args.Validate()
+	response = &DescribeForwardTableEntriesResponse{}
+
+	err = client.Invoke("DescribeForwardTableEntries", args, response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func (client *Client) ModifyForwardEntry(args *ModifyForwardEntryArgs) error {

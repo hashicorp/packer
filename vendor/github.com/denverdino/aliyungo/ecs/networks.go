@@ -146,16 +146,25 @@ type DescribeEipAddressesResponse struct {
 //
 // You can read doc at http://docs.aliyun.com/#/pub/ecs/open-api/network&describeeipaddresses
 func (client *Client) DescribeEipAddresses(args *DescribeEipAddressesArgs) (eipAddresses []EipAddressSetType, pagination *common.PaginationResult, err error) {
-	args.Validate()
-	response := DescribeEipAddressesResponse{}
-
-	err = client.Invoke("DescribeEipAddresses", args, &response)
-
+	response, err := client.DescribeEipAddressesWithRaw(args)
 	if err == nil {
 		return response.EipAddresses.EipAddress, &response.PaginationResult, nil
 	}
 
 	return nil, nil, err
+}
+
+func (client *Client) DescribeEipAddressesWithRaw(args *DescribeEipAddressesArgs) (response *DescribeEipAddressesResponse, err error) {
+	args.Validate()
+	response = &DescribeEipAddressesResponse{}
+
+	err = client.Invoke("DescribeEipAddresses", args, response)
+
+	if err == nil {
+		return response, nil
+	}
+
+	return nil, err
 }
 
 type ModifyEipAddressAttributeArgs struct {

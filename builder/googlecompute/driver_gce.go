@@ -98,11 +98,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description: description,
 		Name:        name,
 		Family:      family,
+		Labels:      image_labels,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
@@ -380,6 +381,15 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		})
 	}
 
+	var guestAccelerators []*compute.AcceleratorConfig
+	if c.AcceleratorCount > 0 {
+		ac := &compute.AcceleratorConfig{
+			AcceleratorCount: c.AcceleratorCount,
+			AcceleratorType:  c.AcceleratorType,
+		}
+		guestAccelerators = append(guestAccelerators, ac)
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -397,7 +407,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 				},
 			},
 		},
-		MachineType: machineType.SelfLink,
+		GuestAccelerators: guestAccelerators,
+		Labels:            c.Labels,
+		MachineType:       machineType.SelfLink,
 		Metadata: &compute.Metadata{
 			Items: metadata,
 		},

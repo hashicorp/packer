@@ -38,7 +38,6 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
 	AdditionalDiskSize  []uint   `mapstructure:"disk_additional_size"`
-	BootCommand         []string `mapstructure:"boot_command"`
 	DiskName            string   `mapstructure:"vmdk_name"`
 	DiskSize            uint     `mapstructure:"disk_size"`
 	DiskTypeId          string   `mapstructure:"disk_type_id"`
@@ -149,6 +148,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.RemotePort == 0 {
 		b.config.RemotePort = 22
 	}
+
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -179,6 +179,12 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"will forcibly halt the virtual machine, which may result in data loss.")
 	}
 
+	if b.config.Headless && b.config.DisableVNC {
+		warnings = append(warnings,
+			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
+				"you won't be able to see any output.")
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return warnings, errs
 	}
@@ -200,6 +206,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
+
+	exportOutputPath := b.config.OutputDir
+
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		b.config.OutputDir = b.config.VMName
 	}
@@ -256,6 +265,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&vmwcommon.StepConfigureVNC{
+			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
@@ -270,6 +280,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless:           b.config.Headless,
 		},
 		&vmwcommon.StepTypeBootCommand{
+			VNCEnabled:  !b.config.DisableVNC,
 			BootCommand: b.config.BootCommand,
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
@@ -300,6 +311,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
+			VNCEnabled:               !b.config.DisableVNC,
 		},
 		&StepUploadVMX{
 			RemoteType: b.config.RemoteType,
@@ -307,6 +319,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepExport{
 			Format:     b.config.Format,
 			SkipExport: b.config.SkipExport,
+			OutputDir:  exportOutputPath,
 		},
 	}
 
@@ -332,7 +345,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var files []string
 	if b.config.RemoteType != "" && b.config.Format != "" {
 		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
+		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()
 	} else {
 		files, err = state.Get("dir").(OutputDir).ListFiles()
@@ -349,6 +362,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	return &Artifact{
 		builderId: builderId,
+		id:        b.config.VMName,
 		dir:       dir,
 		f:         files,
 	}, nil

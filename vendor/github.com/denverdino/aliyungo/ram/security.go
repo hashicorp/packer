@@ -22,19 +22,51 @@ type PasswordPolicyRequest struct {
 	PasswordPolicy
 }
 
-func (client *RamClient) SetAccountAlias(accountalias AccountAlias) (RamCommonResponse, error) {
-	return RamCommonResponse{}, nil
+type AccountAliasRequest struct {
+	AccountAlias string
+}
+
+func (client *RamClient) SetAccountAlias(accountalias AccountAliasRequest) (RamCommonResponse, error) {
+	var resp RamCommonResponse
+	err := client.Invoke("SetAccountAlias", accountalias, &resp)
+	if err != nil {
+		return RamCommonResponse{}, err
+	}
+	return resp, nil
 }
 
 func (client *RamClient) GetAccountAlias() (AccountAliasResponse, error) {
-	return AccountAliasResponse{}, nil
+	var resp AccountAliasResponse
+	err := client.Invoke("GetAccountAlias", struct{}{}, &resp)
+	if err != nil {
+		return AccountAliasResponse{}, err
+	}
+	return resp, nil
 }
+
 func (client *RamClient) ClearAccountAlias() (RamCommonResponse, error) {
-	return RamCommonResponse{}, nil
+	var resp RamCommonResponse
+	err := client.Invoke("ClearAccountAlias", struct{}{}, &resp)
+	if err != nil {
+		return RamCommonResponse{}, err
+	}
+	return resp, nil
 }
+
 func (client *RamClient) SetPasswordPolicy(passwordPolicy PasswordPolicyRequest) (PasswordPolicyResponse, error) {
-	return PasswordPolicyResponse{}, nil
+	var resp PasswordPolicyResponse
+	err := client.Invoke("SetPasswordPolicy", passwordPolicy, &resp)
+	if err != nil {
+		return PasswordPolicyResponse{}, err
+	}
+	return resp, nil
 }
-func (client *RamClient) GetPasswordPolicy(accountAlias AccountAlias) (PasswordPolicyResponse, error) {
-	return PasswordPolicyResponse{}, nil
+
+func (client *RamClient) GetPasswordPolicy() (PasswordPolicyResponse, error) {
+	var resp PasswordPolicyResponse
+	err := client.Invoke("GetPasswordPolicy", struct{}{}, &resp)
+	if err != nil {
+		return PasswordPolicyResponse{}, err
+	}
+	return resp, nil
 }

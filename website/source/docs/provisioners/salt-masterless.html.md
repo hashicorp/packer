@@ -28,7 +28,13 @@ The example below is fully functional.
 ## Configuration Reference
 
 The reference of available configuration options is listed below. The only
-required argument is the path to your local salt state tree.
+required element is "local_state_tree".
+
+Required:
+
+-   `local_state_tree` (string) - The path to your local [state
+    tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
+    This will be uploaded to the `remote_state_tree` on the remote.
 
 Optional:
 
@@ -53,10 +59,6 @@ Optional:
 -   `local_pillar_roots` (string) - The path to your local [pillar
     roots](http://docs.saltstack.com/ref/configuration/master.html#pillar-configuration).
     This will be uploaded to the `remote_pillar_roots` on the remote.
-
--   `local_state_tree` (string) - The path to your local [state
-    tree](http://docs.saltstack.com/ref/states/highstate.html#the-salt-state-tree).
-    This will be uploaded to the `remote_state_tree` on the remote.
 
 -   `custom_state` (string) - A state to be run instead of `state.highstate`.
     Defaults to `state.highstate` if unspecified.

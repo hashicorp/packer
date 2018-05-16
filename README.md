@@ -34,6 +34,7 @@ comes out of the box with support for the following platforms:
 * Hyper-V
 * 1&1
 * OpenStack
+* Oracle Bare Metal Cloud Services
 * Parallels
 * ProfitBricks
 * QEMU. Both KVM and Xen images.

@@ -65,9 +65,6 @@ builder.
 -   `source_path` (string) - The path to an OVF or OVA file that acts as the
     source of this build. It can also be a URL.
 
--   `ssh_username` (string) - The username to use to SSH into the machine once
-    the OS is installed.
-
 ### Optional:
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -204,6 +201,9 @@ builder.
 -   `import_opts` (string) - Additional options to pass to the
     `VBoxManage import`. This can be useful for passing "keepallmacs" or
     "keepnatmacs" options for existing ovf images.
+
+-   `keep_registered` (boolean) - Set this to `true` if you would like to keep
+    the VM registered with virtualbox. Defaults to `false`.
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
@@ -369,6 +369,9 @@ Ubuntu 12.04 installer:
   "initrd=/install/initrd.gz -- <enter>"
 ]
 ```
+
+For more examples of various boot commands, see the sample projects from our
+[community templates page](/community-tools.html#templates).
 
 ## Guest Additions
 

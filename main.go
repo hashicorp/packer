@@ -78,7 +78,9 @@ func realMain() int {
 
 		// Enable checkpoint for panic reporting
 		if config, _ := loadConfig(); config != nil && !config.DisableCheckpoint {
-			packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
+			packer.CheckpointReporter = packer.NewCheckpointReporter(
+				config.DisableCheckpointSignature,
+			)
 		}
 
 		// Create the configuration for panicwrap and wrap our executable
@@ -144,7 +146,9 @@ func wrappedMain() int {
 	// Fire off the checkpoint.
 	go runCheckpoint(config)
 	if !config.DisableCheckpoint {
-		packer.CheckpointReporter.Enable(config.DisableCheckpointSignature)
+		packer.CheckpointReporter = packer.NewCheckpointReporter(
+			config.DisableCheckpointSignature,
+		)
 	}
 
 	cacheDir := os.Getenv("PACKER_CACHE_DIR")

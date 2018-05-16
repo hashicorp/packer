@@ -153,7 +153,7 @@ readability) to execute Chef:
 
 When guest\_os\_type is set to "windows", Packer uses the following command to
 execute Chef. The full path to Chef is required because the PATH environment
-variable changes don't immediately propogate to running processes.
+variable changes don't immediately propagate to running processes.
 
 ``` liquid
 c:/opscode/chef/bin/chef-solo.bat \

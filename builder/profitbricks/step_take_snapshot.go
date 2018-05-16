@@ -22,7 +22,7 @@ func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 	dcId := state.Get("datacenter_id").(string)
 	volumeId := state.Get("volume_id").(string)
 
-	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName)
+	snapshot := profitbricks.CreateSnapshot(dcId, volumeId, c.SnapshotName, "")
 
 	state.Put("snapshotname", c.SnapshotName)
 

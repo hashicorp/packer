@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -204,6 +205,12 @@ func Check(p *CheckParams) (*CheckResponse, error) {
 		return &CheckResponse{}, nil
 	}
 
+	// set a default timeout of 3 sec for the check request (in milliseconds)
+	timeout := 3000
+	if _, err := strconv.Atoi(os.Getenv("CHECKPOINT_TIMEOUT")); err == nil {
+		timeout, _ = strconv.Atoi(os.Getenv("CHECKPOINT_TIMEOUT"))
+	}
+
 	// If we have a cached result, then use that
 	if r, err := checkCache(p.Version, p.CacheFile, p.CacheDuration); err != nil {
 		return nil, err
@@ -250,6 +257,11 @@ func Check(p *CheckParams) (*CheckResponse, error) {
 	req.Header.Add("User-Agent", "HashiCorp/go-checkpoint")
 
 	client := cleanhttp.DefaultClient()
+
+	// We use a short timeout since checking for new versions is not critical
+	// enough to block on if checkpoint is broken/slow.
+	client.Timeout = time.Duration(timeout) * time.Millisecond
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
