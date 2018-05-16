@@ -102,6 +102,7 @@ func TestProvisionerPrepare_PlaybookFiles(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
+	p = Provisioner{}
 	config["playbook_file"] = playbook_file.Name()
 	config["playbook_files"] = []string{}
 	err = p.Prepare(config)
@@ -417,11 +418,10 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				ansible,
-				download,
+			Provisioners: []*packer.HookedProvisioner{
+				{ansible, nil, ""},
+				{download, nil, ""},
 			},
-			ProvisionerTypes: []string{tpl.Provisioners[0].Type, tpl.Provisioners[1].Type},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
