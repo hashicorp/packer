@@ -118,14 +118,20 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 		ctx := context.TODO()
 		f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
 		if err == nil {
-			err = f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+				s.say(fmt.Sprintf("\n Not waiting for Resource Group delete as requested by user. Resource Group Name is %s", resourceGroupName))
+			} else {
+				err = f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+			}
 		}
 		if err != nil {
 			ui.Error(fmt.Sprintf("Error deleting resource group.  Please delete it manually.\n\n"+
 				"Name: %s\n"+
 				"Error: %s", resourceGroupName, err))
+			return
 		}
-
-		ui.Say("Resource group has been deleted.")
+		if !state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+			ui.Say("Resource group has been deleted.")
+		}
 	}
 }
