@@ -42,6 +42,7 @@ package:
 
 deps:
 	@go get golang.org/x/tools/cmd/stringer
+	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
 	@govendor sync
 
@@ -73,6 +74,8 @@ fmt-examples:
 # source files.
 generate: deps ## Generate dynamically generated code
 	go generate .
+	gofmt -w common/bootcommand/boot_command.go
+	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
 test: deps fmt-check ## Run unit tests
@@ -91,7 +94,7 @@ testrace: deps ## Test for race conditions
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
-	@echo "INFO: Packer deps are managed by govendor. See CONTRIBUTING.md"
+	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

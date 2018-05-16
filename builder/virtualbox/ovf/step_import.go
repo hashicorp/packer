@@ -1,10 +1,12 @@
 package ovf
 
 import (
+	"context"
 	"fmt"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step imports an OVF VM into VirtualBox.
@@ -15,7 +17,7 @@ type StepImport struct {
 	vmName string
 }
 
-func (s *StepImport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepImport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmPath := state.Get("vm_path").(string)
@@ -49,7 +51,7 @@ func (s *StepImport) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Say("Unregistering and deleting imported VM...")
+	ui.Say("Deregistering and deleting imported VM...")
 	if err := driver.Delete(s.vmName); err != nil {
 		ui.Error(fmt.Sprintf("Error deleting VM: %s", err))
 	}

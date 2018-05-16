@@ -19,7 +19,7 @@ func processPrivateKeyFile(privateKeyFile, passphrase string) ([]byte, error) {
 	PEMBlock, _ := pem.Decode(rawPrivateKeyBytes)
 	if PEMBlock == nil {
 		return nil, fmt.Errorf(
-			"%s does not contain a vaild private key", privateKeyFile)
+			"%s does not contain a valid private key", privateKeyFile)
 	}
 
 	if x509.IsEncryptedPEMBlock(PEMBlock) {

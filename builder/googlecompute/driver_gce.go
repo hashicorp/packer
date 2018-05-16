@@ -10,16 +10,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
-	"runtime"
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -82,14 +80,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 
 	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(client)
-	// Set UserAgent
-	versionString := version.FormattedVersion()
-	service.UserAgent = fmt.Sprintf(
-		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
-
 	if err != nil {
 		return nil, err
 	}
+
+	// Set UserAgent
+	service.UserAgent = useragent.String()
 
 	return &driverGCE{
 		projectId: p,
@@ -98,12 +94,13 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description: description,
 		Name:        name,
 		Family:      family,
 		Labels:      image_labels,
+		Licenses:    image_licenses,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
@@ -171,7 +168,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme", "windows-sql-cloud"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
@@ -299,56 +296,9 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 	}
 	// TODO(mitchellh): deprecation warnings
 
-	networkSelfLink := ""
-	subnetworkSelfLink := ""
-
-	if u, err := url.Parse(c.Network); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
-		// Network is a full server URL
-		// Parse out Network and NetworkProjectId from URL
-		// https://www.googleapis.com/compute/v1/projects/<ProjectId>/global/networks/<Network>
-		networkSelfLink = c.Network
-		parts := strings.Split(u.String(), "/")
-		if len(parts) >= 10 {
-			c.NetworkProjectId = parts[6]
-			c.Network = parts[9]
-		}
-	}
-	if u, err := url.Parse(c.Subnetwork); err == nil && (u.Scheme == "https" || u.Scheme == "http") {
-		// Subnetwork is a full server URL
-		subnetworkSelfLink = c.Subnetwork
-	}
-
-	// If subnetwork is ID's and not full service URL's look them up.
-	if subnetworkSelfLink == "" {
-
-		// Get the network
-		if c.NetworkProjectId == "" {
-			c.NetworkProjectId = d.projectId
-		}
-		d.ui.Message(fmt.Sprintf("Loading network: %s", c.Network))
-		network, err := d.service.Networks.Get(c.NetworkProjectId, c.Network).Do()
-		if err != nil {
-			return nil, err
-		}
-		networkSelfLink = network.SelfLink
-
-		// Subnetwork
-		// Validate Subnetwork config now that we have some info about the network
-		if !network.AutoCreateSubnetworks && len(network.Subnetworks) > 0 {
-			// Network appears to be in "custom" mode, so a subnetwork is required
-			if c.Subnetwork == "" {
-				return nil, fmt.Errorf("a subnetwork must be specified")
-			}
-		}
-		// Get the subnetwork
-		if c.Subnetwork != "" {
-			d.ui.Message(fmt.Sprintf("Loading subnetwork: %s for region: %s", c.Subnetwork, c.Region))
-			subnetwork, err := d.service.Subnetworks.Get(c.NetworkProjectId, c.Region, c.Subnetwork).Do()
-			if err != nil {
-				return nil, err
-			}
-			subnetworkSelfLink = subnetwork.SelfLink
-		}
+	networkId, subnetworkId, err := getNetworking(c)
+	if err != nil {
+		return nil, err
 	}
 
 	var accessconfig *compute.AccessConfig
@@ -390,6 +340,20 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		guestAccelerators = append(guestAccelerators, ac)
 	}
 
+	// Configure the instance's service account. If the user has set
+	// disable_default_service_account, then the default service account
+	// will not be used. If they also do not set service_account_email, then
+	// the instance will be created with no service account or scopes.
+	serviceAccount := &compute.ServiceAccount{}
+	if !c.DisableDefaultServiceAccount {
+		serviceAccount.Email = "default"
+		serviceAccount.Scopes = c.Scopes
+	}
+	if c.ServiceAccountEmail != "" {
+		serviceAccount.Email = c.ServiceAccountEmail
+		serviceAccount.Scopes = c.Scopes
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -417,8 +381,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
-				Network:       networkSelfLink,
-				Subnetwork:    subnetworkSelfLink,
+				Network:       networkId,
+				Subnetwork:    subnetworkId,
 			},
 		},
 		Scheduling: &compute.Scheduling{
@@ -426,10 +390,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Preemptible:       c.Preemptible,
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
-			{
-				Email:  "default",
-				Scopes: c.Scopes,
-			},
+			serviceAccount,
 		},
 		Tags: &compute.Tags{
 			Items: c.Tags,
@@ -611,7 +572,6 @@ func (d *driverGCE) refreshZoneOp(zone string, op *compute.Operation) stateRefre
 	}
 }
 
-// stateRefreshFunc is used to refresh the state of a thing and is
 // used in conjunction with waitForState.
 type stateRefreshFunc func() (string, error)
 

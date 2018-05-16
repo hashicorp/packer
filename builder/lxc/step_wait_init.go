@@ -1,20 +1,22 @@
 package lxc
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepWaitInit struct {
 	WaitTimeout time.Duration
 }
 
-func (s *StepWaitInit) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepWaitInit) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	var err error
@@ -76,6 +78,7 @@ func (s *StepWaitInit) waitForInit(state multistep.StateBag, cancel <-chan struc
 
 		comm := &LxcAttachCommunicator{
 			ContainerName: config.ContainerName,
+			AttachOptions: config.AttachOptions,
 			RootFs:        mountPath,
 			CmdWrapper:    wrappedCommand,
 		}

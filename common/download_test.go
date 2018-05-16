@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -48,7 +50,7 @@ func TestDownloadClientVerifyChecksum(t *testing.T) {
 func TestDownloadClient_basic(t *testing.T) {
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -56,6 +58,7 @@ func TestDownloadClient_basic(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -81,7 +84,7 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -91,7 +94,9 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+		CopyFile:   true,
 	})
+
 	if _, err := client.Get(); err == nil {
 		t.Fatal("should error")
 	}
@@ -105,7 +110,7 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Close()
-	os.Remove(tf.Name())
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
 	defer ts.Close()
@@ -115,7 +120,9 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+		CopyFile:   true,
 	})
+
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -145,6 +152,7 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		TargetPath: "./test-fixtures/root/another.txt",
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
+		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -164,10 +172,29 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 	}
 }
 
+func TestDownloadClient_notFound(t *testing.T) {
+	tf, _ := ioutil.TempFile("", "packer")
+	tf.Close()
+	defer os.Remove(tf.Name())
+
+	ts := httptest.NewServer(http.FileServer(http.Dir("./test-fixtures/root")))
+	defer ts.Close()
+
+	client := NewDownloadClient(&DownloadConfig{
+		Url:        ts.URL + "/not-found.txt",
+		TargetPath: tf.Name(),
+	})
+
+	if _, err := client.Get(); err == nil {
+		t.Fatal("should error")
+	}
+}
+
 func TestDownloadClient_resume(t *testing.T) {
 	tf, _ := ioutil.TempFile("", "packer")
 	tf.Write([]byte("w"))
 	tf.Close()
+	defer os.Remove(tf.Name())
 
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method == "HEAD" {
@@ -183,7 +210,9 @@ func TestDownloadClient_resume(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL,
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	})
+
 	path, err := client.Get()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -204,6 +233,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
 	}
+	tf.Close()
 	defer os.Remove(tf.Name())
 
 	defaultUserAgent := ""
@@ -240,6 +270,7 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	config := &DownloadConfig{
 		Url:        server.URL,
 		TargetPath: tf.Name(),
+		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -258,6 +289,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tempfile error: %s", err)
 	}
+	tf.Close()
 	defer os.Remove(tf.Name())
 
 	asserted := false
@@ -271,6 +303,7 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		Url:        server.URL,
 		TargetPath: tf.Name(),
 		UserAgent:  "fancy user agent",
+		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -351,6 +384,7 @@ func TestDownloadFileUrl(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to detect working directory: %s", err)
 	}
+	cwd = filepath.ToSlash(cwd)
 
 	// source_path is a file path and source is a network path
 	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
@@ -376,11 +410,116 @@ func TestDownloadFileUrl(t *testing.T) {
 	// Verify that we fail to match the checksum
 	_, err = client.Get()
 	if err.Error() != "checksums didn't match expected: 6e6f7065" {
-		t.Fatalf("Unexpected failure; expected checksum not to match")
+		t.Fatalf("Unexpected failure; expected checksum not to match. Error was \"%v\"", err)
 	}
 
 	if _, err = os.Stat(sourcePath); err != nil {
 		t.Errorf("Could not stat source file: %s", sourcePath)
 	}
+}
 
+// SimulateFileUriDownload is a simple utility function that converts a uri
+// into a testable file path whilst ignoring a correct checksum match, stripping
+// UNC path info, and then calling stat to ensure the correct file exists.
+//    (used by TestFileUriTransforms)
+func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
+	// source_path is a file path and source is a network path
+	source := fmt.Sprintf(uri)
+	t.Logf("Trying to download %s", source)
+
+	config := &DownloadConfig{
+		Url: source,
+		// This should be wrong. We want to make sure we don't delete
+		Checksum: []byte("nope"),
+		Hash:     HashForType("sha256"),
+		CopyFile: false,
+	}
+
+	// go go go
+	client := NewDownloadClient(config)
+	path, err := client.Get()
+
+	// ignore any non-important checksum errors if it's not a unc path
+	if !strings.HasPrefix(path, "\\\\") && err.Error() != "checksums didn't match expected: 6e6f7065" {
+		t.Fatalf("Unexpected failure; expected checksum not to match")
+	}
+
+	// if it's a unc path, then remove the host and share name so we don't have
+	// to force the user to enable ADMIN$ and Windows File Sharing
+	if strings.HasPrefix(path, "\\\\") {
+		res := strings.SplitN(path, "/", 3)
+		path = "/" + res[2]
+	}
+
+	if _, err = os.Stat(path); err != nil {
+		t.Errorf("Could not stat source file: %s", path)
+	}
+	return path, err
+}
+
+// TestFileUriTransforms tests the case where we use a local file uri
+// for iso_url. There's a few different formats that a file uri can exist as
+// and so we try to test the most useful and common ones.
+func TestFileUriTransforms(t *testing.T) {
+	const testpath = /* have your */ "test-fixtures/fileurl/cake" /* and eat it too */
+	const host = "localhost"
+
+	var cwd string
+	var volume string
+	var share string
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unable to detect working directory: %s", err)
+		return
+	}
+	cwd = filepath.ToSlash(cwd)
+	volume = filepath.VolumeName(cwd)
+	share = volume
+
+	// if a volume was found (on windows), replace the ':' from
+	// C: to C$ to convert it into a hidden windows share.
+	if len(share) > 1 && share[len(share)-1] == ':' {
+		share = share[:len(share)-1] + "$"
+	}
+	cwd = cwd[len(volume):]
+
+	t.Logf("TestFileUriTransforms : Running with cwd : '%s'", cwd)
+	t.Logf("TestFileUriTransforms : Running with volume : '%s'", volume)
+
+	// ./relative/path -> ./relative/path
+	// /absolute/path -> /absolute/path
+	// c:/windows/absolute -> c:/windows/absolute
+	testcases := []string{
+		"./%s",
+		cwd + "/%s",
+		volume + cwd + "/%s",
+	}
+
+	// all regular slashed testcases
+	for _, testcase := range testcases {
+		uri := "file://" + fmt.Sprintf(testcase, testpath)
+		t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
+		res, err := SimulateFileUriDownload(t, uri)
+		if err != nil {
+			t.Errorf("Unable to transform uri '%s' into a path : %v", uri, err)
+		}
+		t.Logf("TestFileUriTransforms : Result Path '%s'", res)
+	}
+
+	// smb protocol depends on platform support which currently
+	// only exists on windows.
+	if runtime.GOOS == "windows" {
+		// ...and finally the oddball windows native path
+		// smb://host/sharename/file -> \\host\sharename\file
+		testcase := host + "/" + share + "/" + cwd[1:] + "/%s"
+		uri := "smb://" + fmt.Sprintf(testcase, testpath)
+		t.Logf("TestFileUriTransforms : Trying Uri '%s'", uri)
+		res, err := SimulateFileUriDownload(t, uri)
+		if err != nil {
+			t.Errorf("Unable to transform uri '%s' into a path", uri)
+			return
+		}
+		t.Logf("TestFileUriTransforms : Result Path '%s'", res)
+	}
 }

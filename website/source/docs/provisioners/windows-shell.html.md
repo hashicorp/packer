@@ -81,7 +81,8 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
--   `PACKER_BUILD_NAME` is set to the name of the build that Packer is running.
+-   `PACKER_BUILD_NAME` is set to the
+    [name of the build](/docs/templates/builders.html#named-builds) that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 func newRunner(steps []multistep.Step, config PackerConfig, ui packer.Ui) (multistep.Runner, multistep.DebugPauseFn) {
@@ -65,11 +66,15 @@ func (s abortStep) InnerStepName() string {
 	return typeName(s.step)
 }
 
-func (s abortStep) Run(state multistep.StateBag) multistep.StepAction {
-	return s.step.Run(state)
+func (s abortStep) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	return s.step.Run(ctx, state)
 }
 
 func (s abortStep) Cleanup(state multistep.StateBag) {
+	err, ok := state.GetOk("error")
+	if ok {
+		s.ui.Error(fmt.Sprintf("%s", err))
+	}
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
 		s.ui.Error("Interrupted, aborting...")
 		os.Exit(1)
@@ -90,12 +95,17 @@ func (s askStep) InnerStepName() string {
 	return typeName(s.step)
 }
 
-func (s askStep) Run(state multistep.StateBag) (action multistep.StepAction) {
+func (s askStep) Run(ctx context.Context, state multistep.StateBag) (action multistep.StepAction) {
 	for {
-		action = s.step.Run(state)
+		action = s.step.Run(ctx, state)
 
 		if action != multistep.ActionHalt {
 			return
+		}
+
+		err, ok := state.GetOk("error")
+		if ok {
+			s.ui.Error(fmt.Sprintf("%s", err))
 		}
 
 		switch ask(s.ui, typeName(s.step), state) {
