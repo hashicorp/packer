@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type ValidateCommand struct {
@@ -135,4 +137,18 @@ Options:
 
 func (*ValidateCommand) Synopsis() string {
 	return "check that a template is valid"
+}
+
+func (*ValidateCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (*ValidateCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-syntax-only": complete.PredictNothing,
+		"-except":      complete.PredictNothing,
+		"-only":        complete.PredictNothing,
+		"-var":         complete.PredictNothing,
+		"-var-file":    complete.PredictNothing,
+	}
 }

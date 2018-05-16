@@ -1,8 +1,9 @@
 package fix
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"regexp"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 // FixerCreateTime is a Fixer that replaces the ".CreateTime" template

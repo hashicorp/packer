@@ -1,16 +1,17 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepValidateTemplate struct {
 	client   *AzureClient
-	validate func(resourceGroupName string, deploymentName string) error
+	validate func(ctx context.Context, resourceGroupName string, deploymentName string) error
 	say      func(message string)
 	error    func(e error)
 	config   *Config
@@ -30,20 +31,20 @@ func NewStepValidateTemplate(client *AzureClient, ui packer.Ui, config *Config, 
 	return step
 }
 
-func (s *StepValidateTemplate) validateTemplate(resourceGroupName string, deploymentName string) error {
+func (s *StepValidateTemplate) validateTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
 	deployment, err := s.factory(s.config)
 	if err != nil {
 		return err
 	}
 
-	_, err = s.client.Validate(resourceGroupName, deploymentName, *deployment)
+	_, err = s.client.DeploymentsClient.Validate(ctx, resourceGroupName, deploymentName, *deployment)
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
 	return err
 }
 
-func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepValidateTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.say("Validating deployment template ...")
 
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
@@ -52,7 +53,7 @@ func (s *StepValidateTemplate) Run(state multistep.StateBag) multistep.StepActio
 	s.say(fmt.Sprintf(" -> ResourceGroupName : '%s'", resourceGroupName))
 	s.say(fmt.Sprintf(" -> DeploymentName    : '%s'", deploymentName))
 
-	err := s.validate(resourceGroupName, deploymentName)
+	err := s.validate(ctx, resourceGroupName, deploymentName)
 	return processStepResult(err, s.error, state)
 }
 

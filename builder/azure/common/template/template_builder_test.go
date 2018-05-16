@@ -3,7 +3,7 @@ package template
 import (
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/approvals/go-approval-tests"
 )
 
@@ -106,6 +106,67 @@ func TestBuildWindows00(t *testing.T) {
 	}
 
 	err = testSubject.SetMarketPlaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Windows build with additional disk for an managed build
+func TestBuildWindows01(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.BuildWindows("--test-key-vault-name", "--test-winrm-certificate-url--")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.SetManagedMarketplaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest", "2015-1", "1", "Premium_LRS")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.SetAdditionalDisks([]int32{32, 64}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Windows build with additional disk for an unmanaged build
+func TestBuildWindows02(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.BuildWindows("--test-key-vault-name", "--test-winrm-certificate-url--")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.SetAdditionalDisks([]int32{32, 64}, false)
 	if err != nil {
 		t.Fatal(err)
 	}

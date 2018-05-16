@@ -1,27 +1,28 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepStopEBSBackedInstance struct {
-	SpotPrice           string
+	Skip                bool
 	DisableStopInstance bool
 }
 
-func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip when it is a spot instance
-	if s.SpotPrice != "" && s.SpotPrice != "0" {
+	if s.Skip {
 		return multistep.ActionContinue
 	}
 
@@ -75,15 +76,12 @@ func (s *StepStopEBSBackedInstance) Run(state multistep.StateBag) multistep.Step
 		ui.Say("Automatic instance stop disabled. Please stop instance manually.")
 	}
 
-	// Wait for the instance to actual stop
+	// Wait for the instance to actually stop
 	ui.Say("Waiting for the instance to stop...")
-	stateChange := StateChangeConf{
-		Pending:   []string{"running", "pending", "stopping"},
-		Target:    "stopped",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, *instance.InstanceId),
-		StepState: state,
-	}
-	_, err = WaitForState(&stateChange)
+	err = ec2conn.WaitUntilInstanceStoppedWithContext(ctx, &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{instance.InstanceId},
+	})
+
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
 		state.Put("error", err)

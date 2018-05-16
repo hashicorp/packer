@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"net/rpc"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Hook where the hook is actually executed

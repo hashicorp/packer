@@ -24,3 +24,4 @@ packer-test*.log
 *.iml
 Thumbs.db
 /packer.exe
+.project

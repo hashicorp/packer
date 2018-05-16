@@ -1,8 +1,8 @@
 package template
 
 import (
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/Azure/azure-sdk-for-go/arm/network"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
 )
 
 /////////////////////////////////////////////////
@@ -30,9 +30,17 @@ type Resource struct {
 	Type       *string             `json:"type"`
 	Location   *string             `json:"location,omitempty"`
 	DependsOn  *[]string           `json:"dependsOn,omitempty"`
+	Plan       *Plan               `json:"plan,omitempty"`
 	Properties *Properties         `json:"properties,omitempty"`
 	Tags       *map[string]*string `json:"tags,omitempty"`
 	Resources  *[]Resource         `json:"resources,omitempty"`
+}
+
+type Plan struct {
+	Name          *string `json:"name"`
+	Product       *string `json:"product"`
+	Publisher     *string `json:"publisher"`
+	PromotionCode *string `json:"promotionCode,omitempty"`
 }
 
 type OSDiskUnion struct {
@@ -48,10 +56,23 @@ type OSDiskUnion struct {
 	ManagedDisk  *compute.ManagedDiskParameters    `json:"managedDisk,omitempty"`
 }
 
+type DataDiskUnion struct {
+	Lun          *int                           `json:"lun,omitempty"`
+	BlobURI      *string                        `json:"blobUri,omitempty"`
+	Name         *string                        `json:"name,omitempty"`
+	Vhd          *compute.VirtualHardDisk       `json:"vhd,omitempty"`
+	Image        *compute.VirtualHardDisk       `json:"image,omitempty"`
+	Caching      compute.CachingTypes           `json:"caching,omitempty"`
+	CreateOption compute.DiskCreateOptionTypes  `json:"createOption,omitempty"`
+	DiskSizeGB   *int32                         `json:"diskSizeGB,omitempty"`
+	ManagedDisk  *compute.ManagedDiskParameters `json:"managedDisk,omitempty"`
+}
+
 // Union of the StorageProfile and ImageStorageProfile types.
 type StorageProfileUnion struct {
 	ImageReference *compute.ImageReference `json:"imageReference,omitempty"`
 	OsDisk         *OSDiskUnion            `json:"osDisk,omitempty"`
+	DataDisks      *[]DataDiskUnion        `json:"dataDisks,omitempty"`
 }
 
 /////////////////////////////////////////////////

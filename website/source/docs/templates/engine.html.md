@@ -43,12 +43,35 @@ Here is a full list of the available functions for reference.
 -   `uuid` - Returns a random UUID.
 -   `upper` - Uppercases the string.
 -   `user` - Specifies a user variable.
+-   `packer_version` - Returns Packer version.
 
 #### Specific to Amazon builders:
 
 -   `clean_ami_name` - AMI names can only contain certain characters. This
     function will replace illegal characters with a '-" character. Example usage
     since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
+
+#### Specific to Google Compute builders:
+
+-   `clean_image_name` - GCE image names can only contain certain characters and
+    the maximum length is 63. This function will convert upper cases to lower cases
+    and replace illegal characters with a "-" character.
+    Example:
+
+    `"mybuild-{{isotime | clean_image_name}}"`
+    will become
+    `mybuild-2017-10-18t02-06-30z`.
+
+    Note: Valid GCE image names must match the regex
+    `(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)`
+
+    This engine does not guarantee that the final image name will match the
+    regex; it will not truncate your name if it exceeds 63 characters, and it
+    will not validate that the beginning and end of the engine's output are
+    valid. For example,
+    `"image_name": {{isotime | clean_image_name}}"` will cause your build to
+    fail because the image name will start with a number, which is why in the
+    above example we prepend the isotime with "mybuild".
 
 ## Template variables
 

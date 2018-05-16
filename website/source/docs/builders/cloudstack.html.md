@@ -66,7 +66,7 @@ builder.
 
 ### Optional:
 
--   `async_timeout` (int) - The time duration to wait for async calls to
+-   `async_timeout` (number) - The time duration to wait for async calls to
     finish. Defaults to 30m.
 
 -   `cidr_list` (array) - List of CIDR's that will have access to the new
@@ -83,7 +83,7 @@ builder.
     instance. This option is only available (and also required) when using
     `source_iso`.
 
--   `disk_size` (int) - The size (in GB) of the root disk of the new instance.
+-   `disk_size` (number) - The size (in GB) of the root disk of the new instance.
     This option is only available when using `source_template`.
 
 -   `expunge` (boolean) - Set to `true` to expunge the instance when it is
@@ -100,7 +100,7 @@ builder.
     their CloudStack API. If using such a provider, you need to set this to `true`
     in order for the provider to only make GET calls and no POST calls.
 
--   `http_port_min` and `http_port_max` (integer) - These are the minimum and
+-   `http_port_min` and `http_port_max` (number) - These are the minimum and
     maximum port to use for the HTTP server started to serve the
     `http_directory`. Because Packer often runs in parallel, Packer will choose
     a randomly available port in this range to run the HTTP server. If you want

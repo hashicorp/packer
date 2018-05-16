@@ -103,7 +103,7 @@
         "storageProfile": {
           "osDisk": {
             "osType": "Linux",
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             },

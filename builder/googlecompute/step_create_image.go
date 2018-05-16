@@ -1,12 +1,13 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCreateImage represents a Packer build step that creates GCE machine
@@ -17,7 +18,7 @@ type StepCreateImage int
 //
 // The image is created from the persistent disk used by the instance. The
 // instance must be deleted and the disk retained before doing this step.
-func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -39,7 +40,7 @@ func (s *StepCreateImage) Run(state multistep.StateBag) multistep.StepAction {
 
 	imageCh, errCh := driver.CreateImage(
 		config.ImageName, config.ImageDescription, config.ImageFamily, config.Zone,
-		config.DiskName, config.ImageLabels)
+		config.DiskName, config.ImageLabels, config.ImageLicenses)
 	var err error
 	select {
 	case err = <-errCh:

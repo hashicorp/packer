@@ -18,6 +18,6 @@ virtual machines and export them.
     an image. This is best for people who want to start from scratch.
 
 -   [hyperv-vmcx](/docs/builders/hyperv-vmcx.html) - Clones an
-    an existing virtual machine, provisions software within the OS, 
-    then exports that machine to create an image. This is best for 
+    an existing virtual machine, provisions software within the OS,
+    then exports that machine to create an image. This is best for
     people who have existing base images and want to customize them.

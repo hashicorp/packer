@@ -1,9 +1,12 @@
 package common
 
 import (
+	"context"
+	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCompactDisk_impl(t *testing.T) {
@@ -14,12 +17,30 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	state.Put("full_disk_path", "foo")
+	// Create a fake vmdk file for disk file size operations
+	diskFile, err := ioutil.TempFile("", "disk.vmdk")
+	if err != nil {
+		t.Fatalf("Error creating fake vmdk file: %s", err)
+	}
+
+	diskFullPath := diskFile.Name()
+	defer os.Remove(diskFullPath)
+
+	content := []byte("I am the fake vmdk's contents")
+	if _, err := diskFile.Write(content); err != nil {
+		t.Fatalf("Error writing to fake vmdk file: %s", err)
+	}
+	if err := diskFile.Close(); err != nil {
+		t.Fatalf("Error closing fake vmdk file: %s", err)
+	}
+
+	// Set up required state
+	state.Put("disk_full_paths", []string{diskFullPath})
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -30,7 +51,7 @@ func TestStepCompactDisk(t *testing.T) {
 	if !driver.CompactDiskCalled {
 		t.Fatal("should've called")
 	}
-	if driver.CompactDiskPath != "foo" {
+	if driver.CompactDiskPath != diskFullPath {
 		t.Fatal("should call with right path")
 	}
 }
@@ -40,12 +61,13 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.Skip = true
 
-	state.Put("full_disk_path", "foo")
+	diskFullPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskFullPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

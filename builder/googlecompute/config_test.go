@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 )
@@ -170,10 +171,37 @@ func TestConfigPrepare(t *testing.T) {
 			[]string{"https://www.googleapis.com/auth/cloud-platform"},
 			false,
 		},
+
+		{
+			"disable_default_service_account",
+			"",
+			false,
+		},
+		{
+			"disable_default_service_account",
+			nil,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			false,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			true,
+			false,
+		},
+		{
+			"disable_default_service_account",
+			"NOT A BOOL",
+			true,
+		},
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		if tc.Value == nil {
 			delete(raw, tc.Key)
@@ -225,7 +253,58 @@ func TestConfigPrepareAccelerator(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
+
+		errStr := ""
+		for k := range tc.Keys {
+
+			// Create the string for error reporting
+			// convert value to string if it can be converted
+			errStr += fmt.Sprintf("%s:%v, ", tc.Keys[k], tc.Values[k])
+			if tc.Values[k] == nil {
+				delete(raw, tc.Keys[k])
+			} else {
+				raw[tc.Keys[k]] = tc.Values[k]
+			}
+		}
+
+		_, warns, errs := NewConfig(raw)
+
+		if tc.Err {
+			testConfigErr(t, warns, errs, strings.TrimRight(errStr, ", "))
+		} else {
+			testConfigOk(t, warns, errs)
+		}
+	}
+}
+
+func TestConfigPrepareServiceAccount(t *testing.T) {
+	cases := []struct {
+		Keys   []string
+		Values []interface{}
+		Err    bool
+	}{
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, "service@account.email.com"},
+			true,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{false, "service@account.email.com"},
+			false,
+		},
+		{
+			[]string{"disable_default_service_account", "service_account_email"},
+			[]interface{}{true, ""},
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		errStr := ""
 		for k := range tc.Keys {
@@ -267,7 +346,8 @@ func TestConfigDefaults(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		raw := testConfig(t)
+		raw, tempfile := testConfig(t)
+		defer os.Remove(tempfile)
 
 		c, warns, errs := NewConfig(raw)
 		testConfigOk(t, warns, errs)
@@ -280,7 +360,10 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestImageName(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, _, _ := NewConfig(raw)
 	if !strings.HasPrefix(c.ImageName, "packer-") {
 		t.Fatalf("ImageName should have 'packer-' prefix, found %s", c.ImageName)
 	}
@@ -290,7 +373,10 @@ func TestImageName(t *testing.T) {
 }
 
 func TestRegion(t *testing.T) {
-	c, _, _ := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, _, _ := NewConfig(raw)
 	if c.Region != "us-east1" {
 		t.Fatalf("Region should be 'us-east1' given Zone of 'us-east1-a', but is %s", c.Region)
 	}
@@ -298,9 +384,11 @@ func TestRegion(t *testing.T) {
 
 // Helper stuff below
 
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
-		"account_file": testAccountFile(t),
+func testConfig(t *testing.T) (config map[string]interface{}, tempAccountFile string) {
+	tempAccountFile = testAccountFile(t)
+
+	config = map[string]interface{}{
+		"account_file": tempAccountFile,
 		"project_id":   "hashicorp",
 		"source_image": "foo",
 		"ssh_username": "root",
@@ -309,12 +397,20 @@ func testConfig(t *testing.T) map[string]interface{} {
 			"label-1": "value-1",
 			"label-2": "value-2",
 		},
+		"image_licenses": []string{
+			"test-license",
+		},
 		"zone": "us-east1-a",
 	}
+
+	return config, tempAccountFile
 }
 
 func testConfigStruct(t *testing.T) *Config {
-	c, warns, errs := NewConfig(testConfig(t))
+	raw, tempfile := testConfig(t)
+	defer os.Remove(tempfile)
+
+	c, warns, errs := NewConfig(raw)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", len(warns))
 	}
