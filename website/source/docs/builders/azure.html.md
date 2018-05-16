@@ -260,23 +260,7 @@ Please refer to the Azure [examples](https://github.com/hashicorp/packer/tree/ma
 
 ### Windows
 
-The following provisioner snippet shows how to sysprep a Windows VM. Deprovision should be the last operation executed by a build.
-
-``` json
-{
-  "provisioners": [
-    {
-      "type": "powershell",
-      "inline": [
-        "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
-        "& $Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet"
-      ]
-    }
-  ]
-}
-```
-
-In some circumstances the above isn't enough to reliably know that the sysprep is actually finished generalizing the image, the code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
+The following provisioner snippet shows how to sysprep a Windows VM. The code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 
 ``` json
 {
@@ -290,8 +274,6 @@ In some circumstances the above isn't enough to reliably know that the sysprep i
     }
   ]
 }
-
-
 ```
 
 ### Linux
