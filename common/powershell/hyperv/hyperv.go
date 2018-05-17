@@ -900,7 +900,7 @@ Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter 
 func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
 
 	var script = `
-param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes,[string]$vhdBlockSizeInByte [string]$controllerType)
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
 Hyper-V\New-VHD -path $vhdPath -SizeBytes $vhdSizeInBytes -BlockSizeBytes $vhdBlockSizeInByte
 Hyper-V\Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
