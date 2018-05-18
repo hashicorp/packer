@@ -92,15 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	claims := jwt.MapClaims{}
-	var p jwt.Parser
-
-	_, _, err = p.ParseUnverified(spnCloud.OAuthToken(), claims)
-
-	if err != nil {
-		return nil, err
-	}
-	b.config.ObjectID = claims["oid"].(string)
+	b.config.ObjectID = getObjectIdFromToken(spnCloud)
 
 	if b.config.ObjectID == "" && b.config.OSType != constants.Target_Linux {
 		return nil, fmt.Errorf("could not determined the ObjectID for the user, which is required for Windows builds")
@@ -424,4 +416,19 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 	}
 
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
+}
+
+func getObjectIdFromToken(token *adal.ServicePrincipalToken) (oid string) {
+	claims := jwt.MapClaims{}
+	var p jwt.Parser
+
+	var err error
+
+	_, _, err = p.ParseUnverified(token.OAuthToken(), claims)
+
+	if err != nil {
+		return ""
+	}
+	return claims["oid"].(string)
+
 }
