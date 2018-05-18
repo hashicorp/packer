@@ -203,7 +203,7 @@ func validateToken(env string, token *adal.ServicePrincipalToken) error {
 	err := token.EnsureFresh()
 
 	if err != nil {
-		return fmt.Errorf("%s token validity check failed: %v", env,err)
+		return fmt.Errorf("%s token validity check failed: %v", env, err)
 	}
 	return nil
 }
