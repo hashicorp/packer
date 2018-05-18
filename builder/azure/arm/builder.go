@@ -83,8 +83,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.ResourceGroupName,
 		b.config.StorageAccount,
 		b.config.cloudEnvironment,
-		b.config.TenantID,
-		b.config.useDeviceLogin,
 		spnCloud,
 		spnKeyVault)
 	if err != nil {

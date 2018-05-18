@@ -122,7 +122,7 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 }
 
 func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string,
-	cloud *azure.Environment, tenantID string, isDeviceLogin bool,
+	cloud *azure.Environment,
 	servicePrincipalToken, servicePrincipalTokenVault *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
