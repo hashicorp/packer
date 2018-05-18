@@ -24,7 +24,11 @@ import (
 	"testing"
 
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"os"
+	"fmt"
 )
+
+const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"
 
 func TestBuilderAcc_ManagedDisk_Windows(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
@@ -35,6 +39,12 @@ func TestBuilderAcc_ManagedDisk_Windows(t *testing.T) {
 }
 
 func TestBuilderAcc_ManagedDisk_Windows_DeviceLogin(t *testing.T) {
+	if os.Getenv(DeviceLoginAcceptanceTest) == "" {
+		t.Skip(fmt.Sprintf(
+			"Device Login Acceptance tests skipped unless env '%s' set, as its requires manual step during execution",
+			DeviceLoginAcceptanceTest))
+		return
+	}
 	builderT.Test(t, builderT.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		Builder:  &Builder{},
@@ -49,6 +59,21 @@ func TestBuilderAcc_ManagedDisk_Linux(t *testing.T) {
 		Template: testBuilderAccManagedDiskLinux,
 	})
 }
+
+func TestBuilderAcc_ManagedDisk_Linux_DeviceLogin(t *testing.T) {
+	if os.Getenv(DeviceLoginAcceptanceTest) == "" {
+		t.Skip(fmt.Sprintf(
+			"Device Login Acceptance tests skipped unless env '%s' set, as its requires manual step during execution",
+			DeviceLoginAcceptanceTest))
+		return
+	}
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		Builder:  &Builder{},
+		Template: testBuilderAccManagedDiskLinuxDeviceLogin,
+	})
+}
+
 
 func TestBuilderAcc_Blob_Windows(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
@@ -154,6 +179,30 @@ const testBuilderAccManagedDiskLinux = `
 	  "image_publisher": "Canonical",
 	  "image_offer": "UbuntuServer",
 	  "image_sku": "16.04-LTS",
+
+	  "location": "South Central US",
+	  "vm_size": "Standard_DS2_v2"
+	}]
+}
+`
+const testBuilderAccManagedDiskLinuxDeviceLogin = `
+{
+	"variables": {
+	  "subscription_id": "{{env ` + "`ARM_SUBSCRIPTION_ID`" + `}}"
+	},
+	"builders": [{
+	  "type": "test",
+
+	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
+
+	  "managed_image_resource_group_name": "packer-acceptance-test",
+	  "managed_image_name": "testBuilderAccManagedDiskLinuxDeviceLogin-{{timestamp}}",
+
+	  "os_type": "Linux",
+	  "image_publisher": "Canonical",
+	  "image_offer": "UbuntuServer",
+	  "image_sku": "16.04-LTS",
+      "async_resourcegroup_delete": "true",
 
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
