@@ -390,7 +390,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 		if err != nil {
 			return nil, nil, err
 		}
-		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, b.config.cloudEnvironment.KeyVaultEndpoint)
+		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
 		if err != nil {
 			return nil, nil, err
 		}
