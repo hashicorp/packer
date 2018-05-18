@@ -115,6 +115,8 @@ type Config struct {
 	// Create the VM with a Fixed VHD format disk instead of Dynamic VHDX
 	FixedVHD bool `mapstructure:"use_fixed_vhd_format"`
 
+	Headless bool `mapstructure:"headless"`
+
 	ctx interpolate.Context
 }
 
@@ -427,7 +429,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchVlanId: b.config.SwitchVlanId,
 		},
 
-		&hypervcommon.StepRun{},
+		&hypervcommon.StepRun{
+			Headless: b.config.Headless,
+		},
 
 		&hypervcommon.StepTypeBootCommand{
 			BootCommand: b.config.FlatBootCommand(),
