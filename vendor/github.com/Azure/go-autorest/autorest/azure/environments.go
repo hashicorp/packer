@@ -67,7 +67,7 @@ var (
 		ResourceManagerEndpoint:      "https://management.azure.com/",
 		ActiveDirectoryEndpoint:      "https://login.microsoftonline.com/",
 		GalleryEndpoint:              "https://gallery.azure.com/",
-		KeyVaultEndpoint:             "https://vault.azure.net/",
+		KeyVaultEndpoint:             "https://vault.azure.net",
 		GraphEndpoint:                "https://graph.windows.net/",
 		ServiceBusEndpoint:           "https://servicebus.windows.net/",
 		BatchManagementEndpoint:      "https://batch.core.windows.net/",
