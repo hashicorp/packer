@@ -10,7 +10,7 @@ package arm
 // * ARM_STORAGE_ACCOUNT
 //
 // The subscription in question should have a resource group
-// called "packer-acceptance-test" in "West US" region. The
+// called "packer-acceptance-test" in "South Central US" region. The
 // storage account refered to in the above variable should
 // be inside this resource group and in "South Central US" as well.
 //
