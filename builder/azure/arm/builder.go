@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"log"
 	"os"
 	"runtime"
@@ -15,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/dgrijalva/jwt-go"
+	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 	packerCommon "github.com/hashicorp/packer/common"
@@ -52,9 +52,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-
-	claims := jwt.MapClaims{}
-	var p jwt.Parser
 
 	ui.Say("Running builder ...")
 
@@ -95,6 +92,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
+	claims := jwt.MapClaims{}
+	var p jwt.Parser
+
 	_, _, err = p.ParseUnverified(spnCloud.OAuthToken(), claims)
 
 	if err != nil {
@@ -103,8 +103,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	b.config.ObjectID = claims["oid"].(string)
 
 	if b.config.ObjectID == "" && b.config.OSType != constants.Target_Linux {
-		ui.Error("\n Got empty Object ID in the OAuth token , we need this for Key vault Access, bailing")
-		return nil, err
+		return nil, fmt.Errorf("could not determined the ObjectID for the user, which is required for Windows builds")
 	}
 
 	if b.config.isManagedImage() {
@@ -403,16 +402,25 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 		if err != nil {
 			return nil, nil, err
 		}
-		servicePrincipalToken.EnsureFresh()
 
 		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
 			strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
-
 		if err != nil {
 			return nil, nil, err
 		}
-		servicePrincipalTokenVault.EnsureFresh()
 
+	}
+
+	err = servicePrincipalToken.EnsureFresh()
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = servicePrincipalTokenVault.EnsureFresh()
+
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
