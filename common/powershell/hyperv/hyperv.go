@@ -1,7 +1,9 @@
 package hyperv
 
 import (
+	"context"
 	"errors"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -1243,4 +1245,19 @@ param([string]$vmName, [string]$scanCodes)
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, scanCodes)
 	return err
+}
+
+func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, "vmconnect.exe", "localhost", vmName)
+	err := cmd.Start()
+	if err != nil {
+		// Failed to start so cancel function not required
+		cancel = nil
+	}
+	return cancel, err
+}
+
+func DisconnectVirtualMachine(cancel context.CancelFunc) {
+	cancel()
 }
