@@ -23,9 +23,9 @@ package arm
 import (
 	"testing"
 
+	"fmt"
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	"os"
-	"fmt"
 )
 
 const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"
@@ -73,7 +73,6 @@ func TestBuilderAcc_ManagedDisk_Linux_DeviceLogin(t *testing.T) {
 		Template: testBuilderAccManagedDiskLinuxDeviceLogin,
 	})
 }
-
 
 func TestBuilderAcc_Blob_Windows(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{

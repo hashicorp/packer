@@ -85,7 +85,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		b.config.cloudEnvironment,
 		spnCloud,
 		spnKeyVault)
-	
+
 	if err != nil {
 		return nil, err
 	}
