@@ -12,7 +12,7 @@ package arm
 // The subscription in question should have a resource group
 // called "packer-acceptance-test" in "West US" region. The
 // storage account refered to in the above variable should
-// be inside this resource group and in "West US" as well.
+// be inside this resource group and in "South Central US" as well.
 //
 // In addition, the PACKER_ACC variable should also be set to
 // a non-empty value to enable Packer acceptance tests and the
