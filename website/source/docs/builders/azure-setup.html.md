@@ -17,8 +17,6 @@ In order to build VMs in Azure Packer needs 6 configuration options to be specif
 
 -   `client_secret` - service principal secret / password
 
--   `object_id` - service principal object id (OSType = Windows Only)
-
 -   `resource_group_name` - name of the resource group where your VHD(s) will be stored
 
 -   `storage_account` - name of the storage account where your VHD(s) will be stored
