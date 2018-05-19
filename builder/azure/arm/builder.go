@@ -418,7 +418,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
 }
 
-func getObjectIdFromToken(token *adal.ServicePrincipalToken) (oid string) {
+func getObjectIdFromToken(token *adal.ServicePrincipalToken) string {
 	claims := jwt.MapClaims{}
 	var p jwt.Parser
 
