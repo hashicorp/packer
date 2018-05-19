@@ -119,7 +119,7 @@ const testBuilderAccManagedDiskWindows = `
 	  "winrm_insecure": "true",
 	  "winrm_timeout": "3m",
 	  "winrm_username": "packer",
-      "async_resourcegroup_delete": "true",
+	  "async_resourcegroup_delete": "true",
 
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
@@ -201,7 +201,7 @@ const testBuilderAccManagedDiskLinuxDeviceLogin = `
 	  "image_publisher": "Canonical",
 	  "image_offer": "UbuntuServer",
 	  "image_sku": "16.04-LTS",
-      "async_resourcegroup_delete": "true",
+	  "async_resourcegroup_delete": "true",
 
 	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
