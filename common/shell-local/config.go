@@ -153,7 +153,11 @@ func Validate(config *Config) error {
 	}
 	if config.UseLinuxPathing {
 		for index, script := range config.Scripts {
-			converted, err := ConvertToLinuxPath(script)
+			scriptAbsPath, err := filepath.Abs(script)
+			if err != nil {
+				return fmt.Errorf("Error converting %s to absolute path: %s", script, err.Error())
+			}
+			converted, err := ConvertToLinuxPath(scriptAbsPath)
 			if err != nil {
 				return err
 			}
@@ -202,12 +206,8 @@ func Validate(config *Config) error {
 }
 
 // C:/path/to/your/file becomes /mnt/c/path/to/your/file
-func ConvertToLinuxPath(winPath string) (string, error) {
+func ConvertToLinuxPath(winAbsPath string) (string, error) {
 	// get absolute path of script, and morph it into the bash path
-	winAbsPath, err := filepath.Abs(winPath)
-	if err != nil {
-		return "", fmt.Errorf("Error converting %s to absolute path: %s", winPath, err.Error())
-	}
 	winAbsPath = strings.Replace(winAbsPath, "\\", "/", -1)
 	splitPath := strings.SplitN(winAbsPath, ":/", 2)
 	winBashPath := fmt.Sprintf("/mnt/%s/%s", strings.ToLower(splitPath[0]), splitPath[1])

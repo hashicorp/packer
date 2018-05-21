@@ -89,7 +89,7 @@ Optional parameters:
     these commands are not officially supported and things like environment
     variables may not work if you use a different shell than the default.
 
-    For backwards compatability, you may also use {{.Command}}, but it is
+    For backwards compatibility, you may also use {{.Command}}, but it is
     decoded the same way as {{.Script}}. We recommend using {{.Script}} for the
     sake of clarity, as even when you set only a single `command` to run,
     Packer writes it to a temporary file and then runs it as a script.
