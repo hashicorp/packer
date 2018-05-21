@@ -21,11 +21,11 @@ type ExecuteCommandTemplate struct {
 
 func Run(ui packer.Ui, config *Config) (bool, error) {
 	scripts := make([]string, len(config.Scripts))
-	copy(scripts, config.Scripts)
-
-	// If we have an inline script, then turn that into a temporary
-	// shell script and use that.
-	if config.Inline != nil {
+	if len(config.Scripts) > 0 {
+		copy(scripts, config.Scripts)
+	} else if config.Inline != nil {
+		// If we have an inline script, then turn that into a temporary
+		// shell script and use that.
 		tempScriptFileName, err := createInlineScriptFile(config)
 		if err != nil {
 			return false, err
