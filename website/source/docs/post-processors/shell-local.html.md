@@ -73,7 +73,7 @@ Optional parameters:
     choose to try to use shell-local for Powershell or other Windows commands,
     the environment variables will not be set properly for your environment.
 
-    For backwards compatibility, `execute_command` will accept a string insetad
+    For backwards compatibility, `execute_command` will accept a string instead
     of an array of strings. If a single string or an array of strings with only
     one element is provided, Packer will replicate past behavior by appending
     your `execute_command` to the array of strings `["sh", "-c"]`. For example,
