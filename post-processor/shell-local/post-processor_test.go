@@ -4,10 +4,10 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
@@ -116,9 +116,8 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("should handle backwards compatibility: %s", err)
 	}
-	if strings.Compare(strings.Join(p.config.ExecuteCommand, " "), strings.Join(expected, " ")) != 0 {
-		t.Fatalf("Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
-	}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
 
 	// Check that passing a list will work
 	p = new(PostProcessor)
@@ -129,9 +128,8 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 		t.Fatalf("should handle backwards compatibility: %s", err)
 	}
 	expected = []string{"foo", "bar"}
-	if strings.Compare(strings.Join(p.config.ExecuteCommand, " "), strings.Join(expected, " ")) != 0 {
-		t.Fatalf("Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
-	}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected execute_command: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
 
 	// Check that default is as expected
 	raws = testConfig()
@@ -139,13 +137,12 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 	p = new(PostProcessor)
 	p.Configure(raws)
 	if runtime.GOOS != "windows" {
-		expected = []string{"/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"}
+		expected = []string{"/bin/sh", "-c", "{{.Vars}} {{.Script}}"}
 	} else {
 		expected = []string{"cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"}
 	}
-	if strings.Compare(strings.Join(p.config.ExecuteCommand, " "), strings.Join(expected, " ")) != 0 {
-		t.Fatalf("Did not get expected default: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
-	}
+	assert.Equal(t, p.config.ExecuteCommand, expected,
+		"Did not get expected default: expected: %#v; received %#v", expected, p.config.ExecuteCommand)
 }
 
 func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
