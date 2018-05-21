@@ -62,7 +62,7 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		// buffers and for reading the final exit status.
 		flattenedCmd := strings.Join(interpolatedCmds, " ")
 		cmd := &packer.RemoteCmd{Command: flattenedCmd}
-		log.Printf("starting local command: %s", flattenedCmd)
+		log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
 
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return false, fmt.Errorf(
@@ -92,7 +92,7 @@ func createInlineScriptFile(config *Config) (string, error) {
 	writer := bufio.NewWriter(tf)
 	if config.InlineShebang != "" {
 		shebang := fmt.Sprintf("#!%s\n", config.InlineShebang)
-		log.Printf("Prepending inline script with %s", shebang)
+		log.Printf("[INFO] (shell-local): Prepending inline script with %s", shebang)
 		writer.WriteString(shebang)
 	}
 	for _, command := range config.Inline {
@@ -108,7 +108,7 @@ func createInlineScriptFile(config *Config) (string, error) {
 	tf.Close()
 	err = os.Chmod(tf.Name(), 0555)
 	if err != nil {
-		log.Printf("error modifying permissions of temp script file: %s", err.Error())
+		log.Printf("[ERROR] (shell-local): error modifying permissions of temp script file: %s", err.Error())
 	}
 	return tf.Name(), nil
 }
