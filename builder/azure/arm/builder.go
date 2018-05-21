@@ -378,10 +378,12 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 	var err error
 
 	if b.config.useDeviceLogin {
+		say("Getting auth token for Service management endpoint")
 		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, b.config.cloudEnvironment.ServiceManagementEndpoint)
 		if err != nil {
 			return nil, nil, err
 		}
+		say("Getting token for Vault resource")
 		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
 		if err != nil {
 			return nil, nil, err

@@ -46,7 +46,8 @@ There are three pieces of information you must provide to enable device login mo
 The device login flow asks that you open a web browser, navigate to <http://aka.ms/devicelogin>, and input the supplied
 code. This authorizes the Packer for Azure application to act on your behalf. An OAuth token will be created, and stored
 in the user's home directory (~/.azure/packer/oauth-TenantID.json). This token is used if the token file exists, and it
-is refreshed as necessary. The token file prevents the need to continually execute the device login flow.
+is refreshed as necessary. The token file prevents the need to continually execute the device login flow. Packer will ask
+for two device login auth, one for service management endpoint and another for accessing temp keyvault secrets that it creates.
 
 ## Install the Azure CLI
 
