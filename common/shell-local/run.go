@@ -32,11 +32,12 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		}
 		scripts = append(scripts, tempScriptFileName)
 
-		defer os.Remove(tempScriptFileName)
 		// figure out what extension the file should have, and rename it.
 		if config.TempfileExtension != "" {
 			os.Rename(tempScriptFileName, fmt.Sprintf("%s.%s", tempScriptFileName, config.TempfileExtension))
+			tempScriptFileName = fmt.Sprintf("%s.%s", tempScriptFileName, config.TempfileExtension)
 		}
+		defer os.Remove(tempScriptFileName)
 	}
 
 	// Create environment variables to set before executing the command
@@ -83,7 +84,7 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 }
 
 func createInlineScriptFile(config *Config) (string, error) {
-	tf, err := ioutil.TempFile(os.TempDir(), "packer-shell")
+	tf, err := ioutil.TempFile("", "packer-shell")
 	if err != nil {
 		return "", fmt.Errorf("Error preparing shell script: %s", err)
 	}
@@ -105,8 +106,7 @@ func createInlineScriptFile(config *Config) (string, error) {
 		return "", fmt.Errorf("Error preparing shell script: %s", err)
 	}
 
-	tf.Close()
-	err = os.Chmod(tf.Name(), 0555)
+	err = os.Chmod(tf.Name(), 0700)
 	if err != nil {
 		log.Printf("[ERROR] (shell-local): error modifying permissions of temp script file: %s", err.Error())
 	}
