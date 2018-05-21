@@ -213,8 +213,10 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (number) - The partition number containing the
-    / partition. By default this is the first partition of the volume.
+-   `mount_partition` (string) - The partition number containing the
+    / partition. By default this is the first partition of the volume, (for
+    example, `xvda1`) but you can designate the entire block device by setting
+    `"mount_partition": "0"` in your config, which will mount `xvda` instead.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
@@ -291,9 +293,9 @@ each category, the available configuration keys are alphabetized.
         This is most useful for selecting a daily distro build.
 
     You may set this in place of `source_ami` or in conjunction with it. If you
-    set this in conjunction with `source_ami`, the `source_ami` will be added to 
+    set this in conjunction with `source_ami`, the `source_ami` will be added to
     the filter. The provided `source_ami` must meet all of the filtering criteria
-    provided in `source_ami_filter`; this pins the AMI returned by the filter, 
+    provided in `source_ami_filter`; this pins the AMI returned by the filter,
     but will cause Packer to fail if the `source_ami` does not exist.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
