@@ -92,7 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	if b.config.ObjectID == "" {
-		b.config.ObjectID = getObjectIdFromToken(spnCloud)
+		b.config.ObjectID = getObjectIdFromToken(ui, spnCloud)
 	} else {
 		ui.Message("You have provided Object_ID which is no longer needed, azure packer builder determines this dynamically from the authentication token")
 	}
@@ -423,7 +423,7 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
 }
 
-func getObjectIdFromToken(token *adal.ServicePrincipalToken) string {
+func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) string {
 	claims := jwt.MapClaims{}
 	var p jwt.Parser
 
@@ -432,6 +432,7 @@ func getObjectIdFromToken(token *adal.ServicePrincipalToken) string {
 	_, _, err = p.ParseUnverified(token.OAuthToken(), claims)
 
 	if err != nil {
+		ui.Error(fmt.Sprintf("Failed to parse the token,Error: %s", err.Error()))
 		return ""
 	}
 	return claims["oid"].(string)
