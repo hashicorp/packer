@@ -629,10 +629,11 @@
 			"revisionTime": "2017-11-27T16:20:29Z"
 		},
 		{
-			"checksumSHA1": "D37uI+U+FYvTJIdG2TTozXe7i7U=",
-			"comment": "v3.0.0",
+			"checksumSHA1": "4772zXrOaPVeDeSgdiV7Vp4KEjk=",
+			"comment": "v3.2.0",
 			"path": "github.com/dgrijalva/jwt-go",
-			"revision": "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
+			"revision": "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e",
+			"revisionTime": "2018-03-08T23:13:08Z"
 		},
 		{
 			"checksumSHA1": "W1LGm0UNirwMDVCMFv5vZrOpUJI=",

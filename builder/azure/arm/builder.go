@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
-
 	armstorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/dgrijalva/jwt-go"
+	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
 	packerCommon "github.com/hashicorp/packer/common"
@@ -52,6 +52,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+
 	ui.Say("Running builder ...")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -89,6 +90,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	resolver := newResourceResolver(azureClient)
 	if err := resolver.Resolve(b.config); err != nil {
 		return nil, err
+	}
+	if b.config.ObjectID == "" {
+		b.config.ObjectID = getObjectIdFromToken(ui, spnCloud)
+	} else {
+		ui.Message("You have provided Object_ID which is no longer needed, azure packer builder determines this dynamically from the authentication token")
+	}
+
+	if b.config.ObjectID == "" && b.config.OSType != constants.Target_Linux {
+		return nil, fmt.Errorf("could not determine the ObjectID for the user, which is required for Windows builds")
 	}
 
 	if b.config.isManagedImage() {
@@ -371,10 +381,17 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 	var err error
 
 	if b.config.useDeviceLogin {
-		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say)
+		say("Getting auth token for Service management endpoint")
+		servicePrincipalToken, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, b.config.cloudEnvironment.ServiceManagementEndpoint)
 		if err != nil {
 			return nil, nil, err
 		}
+		say("Getting token for Vault resource")
+		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(*b.config.cloudEnvironment, b.config.TenantID, say, strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
+		if err != nil {
+			return nil, nil, err
+		}
+
 	} else {
 		auth := NewAuthenticate(*b.config.cloudEnvironment, b.config.ClientID, b.config.ClientSecret, b.config.TenantID)
 
@@ -385,11 +402,39 @@ func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrin
 
 		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
 			strings.TrimRight(b.config.cloudEnvironment.KeyVaultEndpoint, "/"))
-
 		if err != nil {
 			return nil, nil, err
 		}
+
+	}
+
+	err = servicePrincipalToken.EnsureFresh()
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = servicePrincipalTokenVault.EnsureFresh()
+
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return servicePrincipalToken, servicePrincipalTokenVault, nil
+}
+
+func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) string {
+	claims := jwt.MapClaims{}
+	var p jwt.Parser
+
+	var err error
+
+	_, _, err = p.ParseUnverified(token.OAuthToken(), claims)
+
+	if err != nil {
+		ui.Error(fmt.Sprintf("Failed to parse the token,Error: %s", err.Error()))
+		return ""
+	}
+	return claims["oid"].(string)
+
 }
