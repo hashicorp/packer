@@ -15,6 +15,11 @@
   name = "github.com/ChrisTrenkamp/goxpath"
   branch = "master"
 
+# Plugin's RPC client uses the same version of a codec as a server in Packer core
+[[override]]
+  name = "github.com/ugorji/go"
+  revision = "646ae4a518c1c3be0739df898118d9bccf993858"
+
 [prune]
   go-tests = true
   unused-packages = true
