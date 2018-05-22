@@ -1,5 +1,6 @@
 #!/bin/sh
-set -eu
+set -eux
+# debug output in /var/log/install.log
 
 # Create user account
 USERNAME=jetbrains
