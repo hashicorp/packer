@@ -8,6 +8,7 @@
 ### IMPROVEMENTS:
 
 * builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
+* builder/azure: Devicelogin Support for Windows [GH-6285]
 
 ## 1.2.3 (April 25, 2018)
 
