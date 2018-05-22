@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eux
 
 # Format partition
 diskutil eraseDisk JHFS+ Disk disk0

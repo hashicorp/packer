@@ -7,134 +7,115 @@
 
 This a plugin for [HashiCorp Packer](https://www.packer.io/). It uses native vSphere API, and creates virtual machines remotely.
 
-- VMware Player is not required
-- Builds are incremental, VMs are not created from scratch but cloned from base templates - similar to [amazon-ebs](https://www.packer.io/docs/builders/amazon-ebs.html) builder
-- Official vCenter API is used, no ESXi host [modification](https://www.packer.io/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor) is required 
+`vsphere-iso` builder creates new VMs from scratch.
+`vsphere-clone` builder clones VMs from existing templates.
 
-## Usage
-* Download the plugin from [Releases](https://github.com/jetbrains-infra/packer-builder-vsphere/releases) page.
-* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugin, or simply put it into the same directory with configuration files. On Linux and macOS run `chmod +x` on the plugin binary.
+- VMware Player is not required.
+- Official vCenter API is used, no ESXi host [modification](https://www.packer.io/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor) is required.
 
-## Minimal Example
+## Installation
+* Download binaries from the [releases page](https://github.com/jetbrains-infra/packer-builder-vsphere/releases).
+* [Install](https://www.packer.io/docs/extending/plugins.html#installing-plugins) the plugins, or simply put them into the same directory with JSON templates. On Linux and macOS run `chmod +x` on the files.
 
-```json
-{
-  "builders": [
-    {
-      "type": "vsphere",
+## Examples
 
-      "vcenter_server": "vcenter.domain.com",
-      "username": "root",
-      "password": "secret",
+See complete Ubuntu, Windows, and macOS templates in the [examples folder](https://github.com/jetbrains-infra/packer-builder-vsphere/tree/master/examples/).
 
-      "template": "ubuntu",
-      "vm_name":  "vm-1",
-      "host":     "esxi-1.domain.com",
+## Parameter Reference
 
-      "ssh_username": "root",
-      "ssh_password": "secret"
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "shell",
-      "inline": [ "echo hello" ]
-    }
-  ]
-}
+### Connection
+
+* `vcenter_server`(string) - vCenter server hostname.
+* `username`(string) - vSphere username.
+* `password`(string) - vSphere password.
+* `insecure_connection`(boolean) - Do not validate vCenter server's TLS certificate. Defaults to `false`.
+* `datacenter`(string) - VMware datacenter name. Required if there is more than one datacenter in vCenter.
+
+### VM Location
+
+* `vm_name`(string) - Name of the new VM to create.
+* `folder`(string) - VM folder to create the VM in.
+* `host`(string) - ESXi host where target VM is created. A full path must be specified if the host is in a folder. For example `folder/host`. See the `Specifying Clusters and Hosts` section above for more details.
+* `cluster`(string)  - ESXi cluster where target VM is created. See [Working with Clusters](#working-with-clusters) section.
+* `resource_pool`(string) - VMWare resource pool. Defaults to the root resource pool of the `host` or `cluster`.
+* `datastore`(string) - VMWare datastore. Required if `host` is a cluster, or if `host` has multiple datastores.
+
+### VM Location (`vsphere-clone` only)
+
+* `template`(string) - Name of source VM. Path is optional.
+* `linked_clone`(boolean) - Create VM as a linked clone from latest snapshot. Defaults to `false`.
+
+### Hardware
+
+* `CPUs`(number) - Number of CPU sockets.
+* `CPU_limit`(number) - Upper limit of available CPU resources in MHz.
+* `CPU_reservation`(number) - Amount of reserved CPU resources in MHz.
+* `CPU_hot_plug`(boolean) - Enable CPU hot plug setting for virtual machine. Defaults to `false`.
+* `RAM`(number) - Amount of RAM in MB.
+* `RAM_reservation`(number) - Amount of reserved RAM in MB.
+* `RAM_reserve_all`(boolean) - Reserve all available RAM. Defaults to `false`. Cannot be used together with `RAM_reservation`.
+* `RAM_hot_plug`(boolean) - Enable RAM hot plug setting for virtual machine. Defaults to `false`.
+* `disk_size`(number) - The size of the disk in MB.
+* `NestedHV`(boolean) - Enable nested hardware virtualization for VM. Defaults to `false`.
+* `configuration_parameters`(map) - Custom parameters.
+* `boot_order`(string) - Priority of boot devices. Defaults to `disk,cdrom`
+
+### Hardware (`vsphere-iso` only)
+
+* `vm_version`(number) - Set VM hardware version. Defaults to the most current VM hardware version supported by vCenter. See [VMWare article 1003746](https://kb.vmware.com/s/article/1003746) for the full list of supported VM hardware versions.
+* `guest_os_type`(string) - Set VM OS type. Defaults to `otherGuest`. See [here](https://pubs.vmware.com/vsphere-6-5/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestOsDescriptor.GuestOsIdentifier.html) for a full list of possible values.
+* `disk_controller_type`(string) - Set VM disk controller type. Example `pvscsi`.
+* `disk_thin_provisioned`(boolean) - Enable VMDK thin provisioning for VM. Defaults to `false`.
+* `network`(string) - Set network VM will be connected to.
+* `network_card`(string) - Set VM network card type. Example `vmxnet3`.
+* `usb_controller`(boolean) - Create US controller for virtual machine. Defaults to `false`.
+
+### Boot (`vsphere-iso` only)
+
+* `boot_wait`(string) Amount of time to wait for the VM to boot. Examples 45s and 10m. Defaults to 10 seconds. See the Go Lang [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation for full details.
+* `boot_command`(array of strings) - List of commands to type when the VM is first booted. Used to initalize the operating system installer.
+* `floppy_dirs`(array of strings) - Seems to not do anything useful yet. Not implemented.
+* `floppy_files`(array of strings) - List of local files to be mounted to the VM floppy drive. Can be used to make Debian preseed or RHEL kickstart files available to the VM.
+* `floppy_img_path`(string) - Data store path to a floppy image that will be mounted to the VM. Cannot be used with `floppy_files` or `floppy_dir` options. Example `[datastore1] ISO/VMware Tools/10.2.0/pvscsi-Windows8.flp`.
+* `iso_paths`(array of strings) - List of data store paths to ISO files that will be mounted to the VM. Example `"[datastore1] ISO/ubuntu-16.04.3-server-amd64.iso"`.
+
+### Provision
+
+* `communicator` - `ssh` (default), `winrm`, or `none`.
+
+* `ssh_username`(string) - Username in guest OS.
+* `ssh_password`(string) - Password to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
+* `ssh_private_key_file`(string) - Path to the SSH private key file to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
+
+* `winrm_username`(string) - Username in guest OS.
+* `winrm_password`(string) - Password to access guest OS.
+
+* `shutdown_command`(string) - Specify a VM guest shutdown command. VMware guest tools are used by default.
+* `shutdown_timeout`(string) - Amount of time to wait for graceful VM shutdown. Examples 45s and 10m. Defaults to 5m(5 minutes). See the Go Lang [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation for full details.
+
+### Postprocessing
+
+* `create_snapshot`(boolean) - Create a snapshot when set to `true`, so the VM can be used as a base for linked clones. Defaults to `false`.
+* `convert_to_template`(boolean) - Convert VM to a template. Defaults to `false`.
+
+## Working with Clusters
+#### Standalone Hosts
+Only use the `host` option. Optionally specify a `resource_pool`:
+```
+"host": "esxi-1.vsphere65.test",
+"resource_pool": "pool1",
 ```
 
-## Parameters
+#### Clusters Without DRS
+Use the `cluster` and `host `parameters:
+```
+"cluster": "cluster1",
+"host": "esxi-2.vsphere65.test",
+```
 
-Connection:
-* `vcenter_server` - [**mandatory**] vCenter server hostname.
-* `username` - [**mandatory**] vSphere username.
-* `password` - [**mandatory**] vSphere password.
-* `insecure_connection` - do not validate server's TLS certificate. `false` by default.
-* `datacenter` - required if there are several datacenters.
-
-Location:
-* `template` - [**mandatory**] name of source VM. Path is optional.
-* `vm_name` - [**mandatory**] name of target VM.
-* `folder` - VM folder where target VM is created.
-* `host` - [**mandatory**] vSphere host or cluster where target VM is created. If hosts are groupped into folders, full path should be specified: `folder/host`.
-* `resource_pool` - by default a root of vSphere host.
-* `datastore` - required if target is a cluster, or a host with multiple datastores.
-* `linked_clone` - create VM as a linked clone from latest snapshot. `false` by default.
-
-Hardware customization:
-* `CPUs` - number of CPU sockets. Inherited from source VM by default.
-* `CPU_reservation` - Amount of reserved CPU resources in MHz. Inherited from source VM by default.
-* `CPU_limit` - Upper limit of available CPU resources in MHz. Inherited from source VM by default, set to `-1` for reset.
-* `RAM` - Amount of RAM in megabytes. Inherited from source VM by default.
-* `RAM_reservation` - Amount of reserved RAM in MB. Inherited from source VM by default.
-* `RAM_reserve_all` - Reserve all available RAM (bool). `false` by default. Cannot be used together with `RAM_reservation`.
-* `disk_size` - Change the disk size (in GB). VM should have a single disk. Cannot be used together with `linked_clone`.
-* `NestedHV` - Allows to enable nested hardware virtualization for VM.
-
-Provisioning:
-* `ssh_username` - [**mandatory**] username in guest OS.
-* `ssh_password` or `ssh_private_key_file` - [**mandatory**] password or SSH-key filename to access a guest OS.
-
-Post-processing:
-* `shutdown_command` - VMware guest tools are used by default.
-* `shutdown_timeout` - [Duration](https://golang.org/pkg/time/#ParseDuration) how long to wait for a graceful shutdown. 5 minutes by default.
-* `create_snapshot` - add a snapshot, so VM can be used as a base for linked clones. `false` by default.
-* `convert_to_template` - convert VM to a template. `false` by default.
-
-## Complete Example
-```json
-{
-  "variables": {
-    "vsphere_password": "secret",
-    "guest_password": "secret"
-  },
-
-  "builders": [
-    {
-      "type": "vsphere",
-
-      "vcenter_server": "vcenter.domain.com",
-      "username": "root",
-      "password": "{{user `vsphere_password`}}",
-      "insecure_connection": true,
-      "datacenter": "dc1",
-
-      "template": "folder/ubuntu",
-      "vm_name": "vm-1",
-      "folder": "folder1/folder2",
-      "host": "folder/esxi-1.domain.com",
-      "resource_pool": "pool1/pool2",
-      "datastore": "datastore1",
-      "linked_clone": true,
-
-      "CPUs": 2,
-      "CPU_reservation": 1000,
-      "CPU_limit": 2000,
-      "RAM": 8192,
-      "RAM_reservation": 2048,
-
-      "ssh_username": "root",
-      "ssh_password": "{{user `guest_password`}}",
-
-      "shutdown_command": "echo '{{user `guest_password`}}' | sudo -S shutdown -P now",
-      "shutdown_timeout": "5m",
-      "create_snapshot": true,
-      "convert_to_template": true
-    }
-  ],
-
-  "provisioners": [
-    {
-      "type": "shell",
-      "environment_vars": [
-        "DEBIAN_FRONTEND=noninteractive"
-      ],
-      "execute_command": "echo '{{user `guest_password`}}' | {{.Vars}} sudo -ES bash -eux '{{.Path}}'",
-      "inline": [
-        "apt-get install -y zip"
-      ]
-    }
-  ]
-}
+#### Clusters With DRS
+Only use the `cluster` option. Optionally specify a `resource_pool`:
+```
+"cluster": "cluster2",
+"resource_pool": "pool1",
 ```
