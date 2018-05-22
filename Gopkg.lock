@@ -185,8 +185,7 @@
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
-  version = "v1.1.1"
+  revision = "646ae4a518c1c3be0739df898118d9bccf993858"
 
 [[projects]]
   name = "github.com/vmware/govmomi"
@@ -271,6 +270,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4e43d31e08e37dfb7449ddb1cc361b739f2b65e95d3e560d4e31d40fbabab044"
+  inputs-digest = "9f89755514c7933bbbdc65648a5a6058d1387bc47aa717bae8772c9f7037a542"
   solver-name = "gps-cdcl"
   solver-version = 1
