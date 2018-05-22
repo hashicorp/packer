@@ -2,13 +2,11 @@ package arm
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/hashicorp/packer/packer"
 )
 
 // List of configuration parameters that are required by the ARM builder.
@@ -445,39 +443,6 @@ func TestUserDeviceLoginIsEnabledForLinux(t *testing.T) {
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err != nil {
 		t.Fatalf("failed to use device login for Linux: %s", err)
-	}
-}
-
-func TestUseDeviceLoginIsDisabledForWindows(t *testing.T) {
-	config := map[string]string{
-		"capture_name_prefix":    "ignore",
-		"capture_container_name": "ignore",
-		"image_offer":            "ignore",
-		"image_publisher":        "ignore",
-		"image_sku":              "ignore",
-		"location":               "ignore",
-		"storage_account":        "ignore",
-		"resource_group_name":    "ignore",
-		"subscription_id":        "ignore",
-		"os_type":                constants.Target_Windows,
-		"communicator":           "none",
-	}
-
-	_, _, err := newConfig(config, getPackerConfiguration())
-	if err == nil {
-		t.Fatal("Expected test to fail, but it succeeded")
-	}
-
-	multiError, _ := err.(*packer.MultiError)
-	if len(multiError.Errors) != 2 {
-		t.Errorf("Expected to find 2 errors, but found %d errors", len(multiError.Errors))
-	}
-
-	if !strings.Contains(err.Error(), "client_id must be specified") {
-		t.Error("Expected to find error for 'client_id must be specified")
-	}
-	if !strings.Contains(err.Error(), "client_secret must be specified") {
-		t.Error("Expected to find error for 'client_secret must be specified")
 	}
 }
 

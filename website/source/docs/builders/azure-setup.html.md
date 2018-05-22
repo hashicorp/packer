@@ -17,8 +17,6 @@ In order to build VMs in Azure Packer needs 6 configuration options to be specif
 
 -   `client_secret` - service principal secret / password
 
--   `object_id` - service principal object id (OSType = Windows Only)
-
 -   `resource_group_name` - name of the resource group where your VHD(s) will be stored
 
 -   `storage_account` - name of the storage account where your VHD(s) will be stored
@@ -31,8 +29,7 @@ In order to get all of the items above, you will need a username and password fo
 
 Device login is an alternative way to authorize in Azure Packer. Device login only requires you to know your
 Subscription ID. (Device login is only supported for Linux based VMs.) Device login is intended for those who are first
-time users, and just want to ''kick the tires.'' We recommend the SPN approach if you intend to automate Packer, or for
-deploying Windows VMs.
+time users, and just want to ''kick the tires.'' We recommend the SPN approach if you intend to automate Packer.
 
 > Device login is for **interactive** builds, and SPN is **automated** builds.
 
@@ -44,12 +41,13 @@ There are three pieces of information you must provide to enable device login mo
 
 > Device login mode is enabled by not setting client\_id and client\_secret.
 
-> Device login mode is for the Public and US Gov clouds only, and Linux VMs only.
+> Device login mode is for the Public and US Gov clouds only.
 
 The device login flow asks that you open a web browser, navigate to <http://aka.ms/devicelogin>, and input the supplied
 code. This authorizes the Packer for Azure application to act on your behalf. An OAuth token will be created, and stored
 in the user's home directory (~/.azure/packer/oauth-TenantID.json). This token is used if the token file exists, and it
-is refreshed as necessary. The token file prevents the need to continually execute the device login flow.
+is refreshed as necessary. The token file prevents the need to continually execute the device login flow. Packer will ask
+for two device login auth, one for service management endpoint and another for accessing temp keyvault secrets that it creates.
 
 ## Install the Azure CLI
 
