@@ -91,11 +91,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if err := resolver.Resolve(b.config); err != nil {
 		return nil, err
 	}
-
-	b.config.ObjectID = getObjectIdFromToken(spnCloud)
+	if b.config.ObjectID == "" {
+		b.config.ObjectID = getObjectIdFromToken(spnCloud)
+	} else {
+		ui.Message("You have provided Object_ID which is no longer needed, azure packer builder determines this dynamically from the authentication token")
+	}
 
 	if b.config.ObjectID == "" && b.config.OSType != constants.Target_Linux {
-		return nil, fmt.Errorf("could not determined the ObjectID for the user, which is required for Windows builds")
+		return nil, fmt.Errorf("could not determine the ObjectID for the user, which is required for Windows builds")
 	}
 
 	if b.config.isManagedImage() {
