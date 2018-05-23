@@ -231,8 +231,7 @@ each category, the available configuration keys are alphabetized.
     that command will be something like `/dev/sdf1`, mirroring the attached
     device name. This assumption works for most instances but will fail with c5
     and m5 instances. In order to use the chroot builder with c5 and m5
-    instances, you must manually set `nvme_device_path`, `device_path`, and
-    `mount_path`.
+    instances, you must manually set `nvme_device_path` and `device_path`.
 
 -   `pre_mount_commands` (array of strings) - A series of commands to execute
     after attaching the root volume and before mounting the chroot. This is not
@@ -437,7 +436,6 @@ A working example for mounting an NVMe device is below:
       },
       "ena_support": true,
       "ami_name": "amazon-chroot-test-{{timestamp}}",
-      "mount_path": "/mnt/my/mount/path/",
       "nvme_device_path": "/dev/nvme1n1p",
       "device_path": "/dev/sdf"
     }
