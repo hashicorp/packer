@@ -33,6 +33,7 @@ type Config struct {
 	CommandWrapper    string                     `mapstructure:"command_wrapper"`
 	CopyFiles         []string                   `mapstructure:"copy_files"`
 	DevicePath        string                     `mapstructure:"device_path"`
+	NVMEDevicePath    string                     `mapstructure:"nvme_device_path"`
 	FromScratch       bool                       `mapstructure:"from_scratch"`
 	MountOptions      []string                   `mapstructure:"mount_options"`
 	MountPartition    string                     `mapstructure:"mount_partition"`
