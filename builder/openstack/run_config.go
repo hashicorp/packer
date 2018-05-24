@@ -96,10 +96,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.UseBlockStorageVolume {
-		if c.VolumeType == "" {
-			errs = append(errs, errors.New("A volume_type must be provided when use_blockstorage_volume is set to true"))
-		}
-
 		// Use Compute instance availability zone for the Block Storage volume if
 		// it's not provided.
 		if c.VolumeAvailabilityZone == "" {
