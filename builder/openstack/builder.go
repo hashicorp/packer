@@ -132,6 +132,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&common.StepProvision{},
 		&StepStopServer{},
+		&StepDetachVolume{
+			UseBlockStorageVolume: b.config.UseBlockStorageVolume,
+		},
 		&stepCreateImage{},
 		&stepUpdateImageVisibility{},
 		&stepAddImageMembers{},
