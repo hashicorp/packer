@@ -36,6 +36,11 @@ type RunConfig struct {
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 
+	UseBlockStorageVolume  bool   `mapstructure:"use_blockstorage_volume"`
+	VolumeName             string `mapstructure:"volume_name"`
+	VolumeType             string `mapstructure:"volume_type"`
+	VolumeAvailabilityZone string `mapstructure:"volume_availability_zone"`
+
 	// Not really used, but here for BC
 	OpenstackProvider string `mapstructure:"openstack_provider"`
 	UseFloatingIp     bool   `mapstructure:"use_floating_ip"`
@@ -87,6 +92,23 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 		if len(value) > 255 {
 			errs = append(errs, fmt.Errorf("Instance metadata value too long (max 255 bytes): %s", value))
+		}
+	}
+
+	if c.UseBlockStorageVolume {
+		if c.VolumeType == "" {
+			errs = append(errs, errors.New("A volume_type must be provided when use_blockstorage_volume is set to true"))
+		}
+
+		// Use Compute instance availability zone for the Block Storage volume if
+		// it's not provided.
+		if c.VolumeAvailabilityZone == "" {
+			c.VolumeAvailabilityZone = c.AvailabilityZone
+		}
+
+		// Use random name for the Block Storage volume if it's not provided.
+		if c.VolumeName == "" {
+			c.VolumeName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 		}
 	}
 
