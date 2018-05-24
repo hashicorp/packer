@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -13,7 +15,9 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepCreateImage struct{}
+type stepCreateImage struct {
+	UseBlockStorageVolume bool
+}
 
 func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
@@ -28,17 +32,41 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	// Create the image
+	// Create the image.
+	// Image source depends on the type of the Compute instance. It can be
+	// Block Storage service volume or regular Compute service local volume.
 	ui.Say(fmt.Sprintf("Creating the image: %s", config.ImageName))
-	imageId, err := servers.CreateImage(client, server.ID, servers.CreateImageOpts{
-		Name:     config.ImageName,
-		Metadata: config.ImageMetadata,
-	}).ExtractImageID()
-	if err != nil {
-		err := fmt.Errorf("Error creating image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	var imageId string
+	if s.UseBlockStorageVolume {
+		// We need the v3 block storage client.
+		blockStorageClient, err := config.blockStorageV3Client()
+		if err != nil {
+			err = fmt.Errorf("Error initializing block storage client: %s", err)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		volume := state.Get("volume_id").(string)
+		image, err := volumeactions.UploadImage(blockStorageClient, volume, volumeactions.UploadImageOpts{
+			ImageName: config.ImageName,
+		}).Extract()
+		if err != nil {
+			err := fmt.Errorf("Error creating image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		imageId = image.ImageID
+	} else {
+		imageId, err = servers.CreateImage(client, server.ID, servers.CreateImageOpts{
+			Name:     config.ImageName,
+			Metadata: config.ImageMetadata,
+		}).ExtractImageID()
+		if err != nil {
+			err := fmt.Errorf("Error creating image: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Set the Image ID in the state
