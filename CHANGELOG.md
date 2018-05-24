@@ -7,6 +7,7 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon: Amazon builders other than `chroot` now support T2 unlimited instances [GH-6265]
 * builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
 * builder/azure: Devicelogin Support for Windows [GH-6285]
 
