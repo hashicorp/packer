@@ -230,6 +230,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                      b.config.ctx,
 			Debug:                    b.config.PackerDebug,
 			EbsOptimized:             b.config.EbsOptimized,
+			EnableT2Unlimited:        b.config.EnableT2Unlimited,
 			IamInstanceProfile:       b.config.IamInstanceProfile,
 			InstanceType:             b.config.InstanceType,
 			IsRestricted:             b.config.IsChinaCloud() || b.config.IsGovCloud(),
