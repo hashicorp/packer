@@ -738,6 +738,12 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
+			"checksumSHA1": "8YtBD+Um7I8ee1Xf1ZAWu74eP7w=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions",
+			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
+			"revisionTime": "2018-05-15T01:47:05Z"
+		},
+		{
 			"checksumSHA1": "vqXNCd2My0y/5tPC/Bs79uf6Q4E=",
 			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes",
 			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
