@@ -112,6 +112,17 @@ func (d *driverOCI) GetInstanceIP(id string) (string, error) {
 	return *vnic.PublicIp, nil
 }
 
+func (d *driverOCI) GetInstanceInitialCredentials(id string) (string, string, error) {
+	credentials, err := d.computeClient.GetWindowsInstanceInitialCredentials(context.TODO(), core.GetWindowsInstanceInitialCredentialsRequest{
+		InstanceId: &id,
+	})
+	if err != nil {
+		return "", "", err
+	}
+
+	return *credentials.InstanceCredentials.Username, *credentials.InstanceCredentials.Password, err
+}
+
 // TerminateInstance terminates a compute instance.
 func (d *driverOCI) TerminateInstance(id string) error {
 	_, err := d.computeClient.TerminateInstance(context.TODO(), core.TerminateInstanceRequest{
