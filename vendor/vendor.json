@@ -756,6 +756,12 @@
 			"revisionTime": "2017-06-23T01:44:30Z"
 		},
 		{
+			"checksumSHA1": "kCHEEeRVZeR1LhbvNP+WyvB8z2s=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume",
+			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
+			"revisionTime": "2018-05-15T01:47:05Z"
+		},
+		{
 			"checksumSHA1": "e7AW3YDVYJPKUjpqsB4AL9RRlTw=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
