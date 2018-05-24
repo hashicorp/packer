@@ -83,7 +83,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	if s.UseBlockStorageVolume {
 		volume := state.Get("volume_id").(string)
 		blockDeviceMappingV2 := []bootfromvolume.BlockDevice{
-			bootfromvolume.BlockDevice{
+			{
 				BootIndex:       0,
 				DestinationType: bootfromvolume.DestinationVolume,
 				SourceType:      bootfromvolume.SourceVolume,
