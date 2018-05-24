@@ -85,7 +85,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.SSHInterface != "public_dns" &&
 		c.SSHInterface != "private_dns" &&
 		c.SSHInterface != "" {
-		errs = append(errs, fmt.Errorf(fmt.Sprintf("Unknown interface type: %s", c.SSHInterface)))
+		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
 	}
 
 	if c.SSHKeyPairName != "" {
