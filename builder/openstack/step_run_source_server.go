@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -13,18 +14,19 @@ import (
 )
 
 type StepRunSourceServer struct {
-	Name             string
-	SourceImage      string
-	SourceImageName  string
-	SecurityGroups   []string
-	Networks         []string
-	Ports            []string
-	AvailabilityZone string
-	UserData         string
-	UserDataFile     string
-	ConfigDrive      bool
-	InstanceMetadata map[string]string
-	server           *servers.Server
+	Name                  string
+	SourceImage           string
+	SourceImageName       string
+	SecurityGroups        []string
+	Networks              []string
+	Ports                 []string
+	AvailabilityZone      string
+	UserData              string
+	UserDataFile          string
+	ConfigDrive           bool
+	InstanceMetadata      map[string]string
+	UseBlockStorageVolume bool
+	server                *servers.Server
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -74,18 +76,40 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		ServiceClient:    computeClient,
 		Metadata:         s.InstanceMetadata,
 	}
-
 	var serverOptsExt servers.CreateOptsBuilder
-	keyName, hasKey := state.GetOk("keyPair")
-	if hasKey {
-		serverOptsExt = keypairs.CreateOptsExt{
+
+	// Create root volume in the Block Storage service if required.
+	// Add block device mapping v2 to the server create options if required.
+	if s.UseBlockStorageVolume {
+		volume := state.Get("volume_id").(string)
+		blockDeviceMappingV2 := []bootfromvolume.BlockDevice{
+			bootfromvolume.BlockDevice{
+				BootIndex:       0,
+				DestinationType: bootfromvolume.DestinationVolume,
+				SourceType:      bootfromvolume.SourceVolume,
+				UUID:            volume,
+			},
+		}
+		// ImageRef and block device mapping is an invalid options combination.
+		serverOpts.ImageRef = ""
+		serverOptsExt = bootfromvolume.CreateOptsExt{
 			CreateOptsBuilder: serverOpts,
-			KeyName:           keyName.(string),
+			BlockDevice:       blockDeviceMappingV2,
 		}
 	} else {
 		serverOptsExt = serverOpts
 	}
 
+	// Add keypair to the server create options.
+	keyName, hasKey := state.GetOk("keyPair")
+	if hasKey {
+		serverOptsExt = keypairs.CreateOptsExt{
+			CreateOptsBuilder: serverOptsExt,
+			KeyName:           keyName.(string),
+		}
+	}
+
+	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, serverOptsExt).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
