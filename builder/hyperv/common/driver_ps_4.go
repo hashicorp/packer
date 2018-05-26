@@ -55,6 +55,11 @@ func (d *HypervPS4Driver) Stop(vmName string) error {
 	return hyperv.StopVirtualMachine(vmName)
 }
 
+// Reboot softly reboots a VM specified by the name given.
+func (d *HypervPS4Driver) Reboot(vmName string) error {
+	return hyperv.RebootVirtualMachine(vmName)
+}
+
 func (d *HypervPS4Driver) Verify() error {
 
 	if err := d.verifyPSVersion(); err != nil {

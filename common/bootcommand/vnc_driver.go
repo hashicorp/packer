@@ -18,6 +18,7 @@ type VNCKeyEvent interface {
 }
 
 type vncDriver struct {
+	reboot     func() error
 	c          VNCKeyEvent
 	interval   time.Duration
 	specialMap map[string]uint32
@@ -25,7 +26,7 @@ type vncDriver struct {
 	err error
 }
 
-func NewVNCDriver(c VNCKeyEvent, interval time.Duration) *vncDriver {
+func NewVNCDriver(reboot func() error, c VNCKeyEvent, interval time.Duration) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
@@ -78,6 +79,7 @@ func NewVNCDriver(c VNCKeyEvent, interval time.Duration) *vncDriver {
 	sMap["up"] = 0xFF52
 
 	return &vncDriver{
+		reboot:     reboot,
 		c:          c,
 		interval:   keyInterval,
 		specialMap: sMap,
@@ -99,6 +101,10 @@ func (d *vncDriver) keyEvent(k uint32, down bool) error {
 // Flush does nothing here
 func (d *vncDriver) Flush() error {
 	return nil
+}
+
+func (d *vncDriver) Reboot() error {
+	return d.reboot()
 }
 
 func (d *vncDriver) SendKey(key rune, action KeyAction) error {

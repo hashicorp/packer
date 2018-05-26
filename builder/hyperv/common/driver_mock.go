@@ -200,6 +200,10 @@ type DriverMock struct {
 	CompactDisks_Result string
 	CompactDisks_Err    error
 
+	RebootVirtualMachine_Called bool
+	RebootVirtualMachine_VmName string
+	RebootVirtualMachine_Err error
+
 	RestartVirtualMachine_Called bool
 	RestartVirtualMachine_VmName string
 	RestartVirtualMachine_Err    error
@@ -514,6 +518,12 @@ func (d *DriverMock) CompactDisks(path string) (result string, err error) {
 	d.CompactDisks_Path = path
 	d.CompactDisks_Result = "Mock compact result msg: mockdisk.vhdx. Disk size reduced by 20%"
 	return d.CompactDisks_Result, d.CompactDisks_Err
+}
+
+func (d *DriverMock) RebootVirtualMachine(vmName string) error {
+	d.RebootVirtualMachine_Called = true
+	d.RebootVirtualMachine_VmName = vmName
+	return d.RebootVirtualMachine_Err
 }
 
 func (d *DriverMock) RestartVirtualMachine(vmName string) error {

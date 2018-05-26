@@ -33,7 +33,9 @@ type bootCommandTemplateData struct {
 //
 // Produces:
 //   <nothing>
-type stepTypeBootCommand struct{}
+type stepTypeBootCommand struct {
+	Driver Driver
+}
 
 func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
@@ -95,7 +97,10 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		config.VMName,
 	}
 
-	d := bootcommand.NewVNCDriver(c, config.VNCConfig.BootKeyInterval)
+	reboot := func() error {
+		return s.Driver.Reboot()
+	}
+	d := bootcommand.NewVNCDriver(reboot, c, config.VNCConfig.BootKeyInterval)
 
 	ui.Say("Typing the boot command over VNC...")
 	command, err := interpolate.Render(config.VNCConfig.FlatBootCommand(), &configCtx)

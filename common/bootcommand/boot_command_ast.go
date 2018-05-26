@@ -118,6 +118,18 @@ func (w *waitExpression) String() string {
 	return fmt.Sprintf("Wait<%s>", w.d)
 }
 
+type rebootExpression struct {}
+
+func (r *rebootExpression) Do(ctx context.Context, driver BCDriver) error {
+	log.Print("[INFO] Rebooting")
+	return driver.Reboot()
+}
+
+// Validate always passes
+func (r *rebootExpression) Validate() error {
+	return nil
+}
+
 type specialExpression struct {
 	s      string
 	action KeyAction

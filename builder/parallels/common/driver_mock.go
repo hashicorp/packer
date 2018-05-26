@@ -33,6 +33,9 @@ type DriverMock struct {
 	StopName string
 	StopErr  error
 
+	RebootName string
+	RebootErr error
+
 	PrlctlCalls [][]string
 	PrlctlErrs  []error
 
@@ -101,6 +104,11 @@ func (d *DriverMock) IsRunning(name string) (bool, error) {
 func (d *DriverMock) Stop(name string) error {
 	d.StopName = name
 	return d.StopErr
+}
+
+func (d *DriverMock) Reboot(name string) error {
+	d.RebootName = name
+	return d.RebootErr
 }
 
 func (d *DriverMock) Prlctl(args ...string) error {

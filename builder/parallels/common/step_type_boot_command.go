@@ -77,10 +77,14 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		s.VMName,
 	}
 
+	reboot := func() error {
+		return driver.Reboot(s.VMName)
+	}
 	sendCodes := func(codes []string) error {
 		return driver.SendKeyScanCodes(s.VMName, codes...)
 	}
-	d := bootcommand.NewPCXTDriver(sendCodes, -1, s.GroupInterval)
+
+	d := bootcommand.NewPCXTDriver(reboot, sendCodes, -1, s.GroupInterval)
 
 	ui.Say("Typing the boot command...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)

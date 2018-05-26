@@ -40,6 +40,9 @@ type Driver interface {
 	// Stop stops a VM specified by the path to the VMX given.
 	Stop(string) error
 
+	// Reboot reboots a VM specified by the path to the VMX given.
+	Reboot(string) error
+
 	// SuppressMessages modifies the VMX or surrounding directory so that
 	// VMware doesn't show any annoying messages.
 	SuppressMessages(string) error

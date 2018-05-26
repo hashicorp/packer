@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -24,6 +25,9 @@ type DriverCancelCallback func(state multistep.StateBag) bool
 type Driver interface {
 	// Stop stops a running machine, forcefully.
 	Stop() error
+
+	// Reboot reboots a running machine, softly.
+	Reboot() error
 
 	// Qemu executes the given command via qemu-system-x86_64
 	Qemu(qemuArgs ...string) error
@@ -46,6 +50,7 @@ type Driver interface {
 type QemuDriver struct {
 	QemuPath    string
 	QemuImgPath string
+	VirshPath string
 
 	vmCmd   *exec.Cmd
 	vmEndCh <-chan int
@@ -63,6 +68,17 @@ func (d *QemuDriver) Stop() error {
 	}
 
 	return nil
+}
+
+func (d *QemuDriver) Reboot() error {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
+	domain := strings.TrimSuffix(d.QemuImgPath, filepath.Ext(d.QemuImgPath))
+
+	cmd := exec.Command(d.VirshPath, "-c", "qemu:///system", "reboot", domain)
+
+	return cmd.Run()
 }
 
 func (d *QemuDriver) Qemu(qemuArgs ...string) error {

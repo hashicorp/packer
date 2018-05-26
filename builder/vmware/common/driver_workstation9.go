@@ -99,6 +99,12 @@ func (d *Workstation9Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Workstation9Driver) Reboot(vmxPath string) error {
+	cmd := exec.Command(d.VmrunPath, "-T", "ws", "reset", vmxPath, "soft")
+	_, _, err := runAndLog(cmd)
+	return err
+}
+
 func (d *Workstation9Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }

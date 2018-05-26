@@ -401,7 +401,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
-		&stepTypeBootCommand{},
+		&stepTypeBootCommand{
+			Driver: driver,
+		},
 	)
 
 	if b.config.Comm.Type != "none" {
@@ -509,10 +511,16 @@ func (b *Builder) newDriver(qemuBinary string) (Driver, error) {
 		return nil, err
 	}
 
-	log.Printf("Qemu path: %s, Qemu Image page: %s", qemuPath, qemuImgPath)
+	virshPath, err := exec.LookPath("virsh")
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Qemu path: %s, Qemu Image page: %s, Virsh path: %s", qemuPath, qemuImgPath, virshPath)
 	driver := &QemuDriver{
 		QemuPath:    qemuPath,
 		QemuImgPath: qemuImgPath,
+		VirshPath: virshPath,
 	}
 
 	if err := driver.Verify(); err != nil {

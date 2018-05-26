@@ -870,6 +870,18 @@ if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
 	return err
 }
 
+func RebootVirtualMachine(vmName string) error {
+
+		var script = `
+	param([string]$vmName)
+	Hyper-V\Restart-VM $vmName -Confirm:$false
+	`
+
+		var ps powershell.PowerShellCmd
+		err := ps.Run(script, vmName)
+		return err
+}
+
 func RestartVirtualMachine(vmName string) error {
 
 	var script = `

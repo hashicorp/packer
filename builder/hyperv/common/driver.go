@@ -27,6 +27,9 @@ type Driver interface {
 	// Stop stops a VM specified by the name given.
 	Stop(string) error
 
+	// Reboot softly reboots a VM specified by the name given.
+	Reboot(string) error
+
 	// Verify checks to make sure that this driver should function
 	// properly. If there is any indication the driver can't function,
 	// this will return an error.

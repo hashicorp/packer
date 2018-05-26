@@ -105,6 +105,12 @@ func (d *Fusion5Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Fusion5Driver) Reboot(vmxPath string) error {
+	cmd := exec.Command(d.vmrunPath(), "-T", "fusion", "reset", vmxPath, "soft")
+	_, _, err := runAndLog(cmd)
+	return err
+}
+
 func (d *Fusion5Driver) SuppressMessages(vmxPath string) error {
 	dir := filepath.Dir(vmxPath)
 	base := filepath.Base(vmxPath)

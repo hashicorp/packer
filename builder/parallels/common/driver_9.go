@@ -232,6 +232,18 @@ func (d *Parallels9Driver) Stop(name string) error {
 	return nil
 }
 
+// Reboot softly reboots the VM.
+func (d *Parallels9Driver) Reboot(name string) error {
+	if err := d.Prlctl("restart", name); err != nil {
+		return err
+	}
+
+	// We sleep here for a little bit to let the session "unlock"
+	time.Sleep(2 * time.Second)
+
+	return nil
+}
+
 // Prlctl executes the specified "prlctl" command.
 func (d *Parallels9Driver) Prlctl(args ...string) error {
 	var stdout, stderr bytes.Buffer

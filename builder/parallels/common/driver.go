@@ -34,6 +34,9 @@ type Driver interface {
 	// Stop stops a running machine, forcefully.
 	Stop(string) error
 
+	// Reboot reboots a running machine, softly.
+	Reboot(string) error
+
 	// Prlctl executes the given Prlctl command
 	Prlctl(...string) error
 

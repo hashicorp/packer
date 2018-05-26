@@ -12,12 +12,16 @@ import (
 	"github.com/hashicorp/packer/common"
 )
 
+// RebootFunc will be called to reboot the VM
+type RebootFunc func() error
+
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 type scMap map[string]*scancode
 
 type pcXTDriver struct {
 	interval    time.Duration
+	rebootImpl  RebootFunc
 	sendImpl    SendCodeFunc
 	specialMap  scMap
 	scancodeMap map[rune]byte
@@ -36,9 +40,11 @@ func (sc *scancode) makeBreak() []string {
 }
 
 // NewPCXTDriver creates a new boot command driver for VMs that expect PC-XT
-// keyboard codes. `send` should send its argument to the VM. `chunkSize` should
+// keyboard codes.
+// `reboot` should reboot the VM.
+// `send` should send its argument to the VM. `chunkSize` should
 // be the maximum number of keyboard codes to send to `send` at one time.
-func NewPCXTDriver(send SendCodeFunc, chunkSize int, interval time.Duration) *pcXTDriver {
+func NewPCXTDriver(reboot RebootFunc, send SendCodeFunc, chunkSize int, interval time.Duration) *pcXTDriver {
 	// We delay (default 100ms) between each input event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
@@ -118,6 +124,7 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int, interval time.Duration) *pc
 
 	return &pcXTDriver{
 		interval:          keyInterval,
+		rebootImpl:        reboot,
 		sendImpl:          send,
 		specialMap:        sMap,
 		scancodeMap:       scancodeMap,
@@ -141,6 +148,10 @@ func (d *pcXTDriver) Flush() error {
 		time.Sleep(d.interval)
 	}
 	return nil
+}
+
+func (d *pcXTDriver) Reboot() error {
+	return d.rebootImpl()
 }
 
 func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {

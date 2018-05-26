@@ -126,6 +126,12 @@ func (d *Player5Driver) Stop(vmxPath string) error {
 	return nil
 }
 
+func (d *Player5Driver) Reboot(vmxPath string) error {
+	cmd := exec.Command(d.VmrunPath, "-T", "player", "reset", vmxPath, "soft")
+	_, _, err := runAndLog(cmd)
+	return err
+}
+
 func (d *Player5Driver) SuppressMessages(vmxPath string) error {
 	return nil
 }
