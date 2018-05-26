@@ -114,8 +114,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
-		} else {
-			p.playbookFiles = append(p.playbookFiles, p.config.PlaybookFile)
 		}
 	}
 
@@ -202,7 +200,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	if err := p.provisionPlaybookFiles(ui, comm); err != nil {
+	if p.config.PlaybookFile != "" {
+		ui.Message("Uploading main Playbook file...")
+		src := p.config.PlaybookFile
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+		if err := p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading main playbook: %s", err)
+		}
+	} else if err := p.provisionPlaybookFiles(ui, comm); err != nil {
 		return err
 	}
 
@@ -381,6 +386,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 	if len(p.config.GalaxyFile) > 0 {
 		if err := p.executeGalaxy(ui, comm); err != nil {
 			return fmt.Errorf("Error executing Ansible Galaxy: %s", err)
+		}
+	}
+
+	if p.config.PlaybookFile != "" {
+		playbookFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
+		if err := p.executeAnsiblePlaybook(ui, comm, playbookFile, extraArgs, inventory); err != nil {
+			return err
 		}
 	}
 
