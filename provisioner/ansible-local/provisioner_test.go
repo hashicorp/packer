@@ -118,58 +118,6 @@ func TestProvisionerPrepare_PlaybookFiles(t *testing.T) {
 	}
 }
 
-func TestProvisionerProvision_PlaybookFile(t *testing.T) {
-	var p Provisioner
-	config := testConfig()
-
-	playbook := createTempFile("")
-	defer os.Remove(playbook)
-
-	config["playbook_file"] = playbook
-	err := p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	comm := &communicatorMock{}
-	if err := p.Provision(&uiStub{}, comm); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	assertPlaybooksUploaded(comm, []string{playbook})
-	assertPlaybooksExecuted(comm, []string{playbook})
-}
-
-func TestProvisionerProvision_PlaybookFileWithPlaybookDir(t *testing.T) {
-	var p Provisioner
-	config := testConfig()
-
-	playbook_dir, err := ioutil.TempDir("", "")
-	if err != nil {
-		t.Fatalf("Failed to create playbook_dir: %s", err)
-	}
-	defer os.RemoveAll(playbook_dir)
-	playbook := createTempFile(playbook_dir)
-
-	playbookName := filepath.Base(playbook)
-	playbookInPlaybookDir := strings.TrimPrefix(playbook, playbook_dir)
-
-	config["playbook_file"] = playbook
-	config["playbook_dir"] = playbook_dir
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	comm := &communicatorMock{}
-	if err := p.Provision(&uiStub{}, comm); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	assertPlaybooksNotUploaded(comm, []string{playbookName})
-	assertPlaybooksExecuted(comm, []string{playbookInPlaybookDir})
-}
-
 func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
@@ -413,6 +361,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	if err != nil {
 		t.Fatalf("Error preparing download: %s", err)
 	}
+	defer os.Remove("hello_world")
 
 	// Add hooks so the provisioners run during the build
 	hooks := map[string][]packer.Hook{}
@@ -431,7 +380,6 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 		t.Fatalf("Error running build %s", err)
 	}
 	defer artifact.Destroy()
-	defer os.Remove("hello_world")
 
 	actualContent, err := ioutil.ReadFile("hello_world")
 	if err != nil {
@@ -461,6 +409,7 @@ func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
 }
 
 func assertPlaybooksUploaded(comm *communicatorMock, playbooks []string) {
+	fmt.Println(comm.uploadDestination)
 	uploadIndex := 0
 	for _, playbook := range playbooks {
 		playbook = filepath.ToSlash(playbook)
