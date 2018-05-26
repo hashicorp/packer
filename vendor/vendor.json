@@ -629,10 +629,11 @@
 			"revisionTime": "2017-11-27T16:20:29Z"
 		},
 		{
-			"checksumSHA1": "D37uI+U+FYvTJIdG2TTozXe7i7U=",
-			"comment": "v3.0.0",
+			"checksumSHA1": "4772zXrOaPVeDeSgdiV7Vp4KEjk=",
+			"comment": "v3.2.0",
 			"path": "github.com/dgrijalva/jwt-go",
-			"revision": "d2709f9f1f31ebcda9651b03077758c1f3a0018c"
+			"revision": "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e",
+			"revisionTime": "2018-03-08T23:13:08Z"
 		},
 		{
 			"checksumSHA1": "W1LGm0UNirwMDVCMFv5vZrOpUJI=",
@@ -988,16 +989,16 @@
 			"revision": "95ba30457eb1121fa27753627c774c7cd4e90083"
 		},
 		{
-			"checksumSHA1": "8z5kCCFRsBkhXic9jxxeIV3bBn8=",
+			"checksumSHA1": "dVQEUn5TxdIAXczK7rh6qUrq44Q=",
 			"path": "github.com/masterzen/winrm",
-			"revision": "a2df6b1315e6fd5885eb15c67ed259e85854125f",
-			"revisionTime": "2017-08-14T13:39:27Z"
+			"revision": "7e40f93ae939004a1ef3bd5ff5c88c756ee762bb",
+			"revisionTime": "2018-02-24T16:03:50Z"
 		},
 		{
 			"checksumSHA1": "XFSXma+KmkhkIPsh4dTd/eyja5s=",
 			"path": "github.com/masterzen/winrm/soap",
-			"revision": "a2df6b1315e6fd5885eb15c67ed259e85854125f",
-			"revisionTime": "2017-08-14T13:39:27Z"
+			"revision": "7e40f93ae939004a1ef3bd5ff5c88c756ee762bb",
+			"revisionTime": "2018-02-24T16:03:50Z"
 		},
 		{
 			"checksumSHA1": "NkbetqlpWBi3gP08JDneC+axTKw=",

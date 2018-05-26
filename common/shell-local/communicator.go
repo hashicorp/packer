@@ -1,36 +1,27 @@
-package shell
+package shell_local
 
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"syscall"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Communicator struct {
 	ExecuteCommand []string
-	Ctx            interpolate.Context
 }
 
 func (c *Communicator) Start(cmd *packer.RemoteCmd) error {
-	// Render the template so that we know how to execute the command
-	c.Ctx.Data = &ExecuteCommandTemplate{
-		Command: cmd.Command,
-	}
-	for i, field := range c.ExecuteCommand {
-		command, err := interpolate.Render(field, &c.Ctx)
-		if err != nil {
-			return fmt.Errorf("Error processing command: %s", err)
-		}
-
-		c.ExecuteCommand[i] = command
+	if len(c.ExecuteCommand) == 0 {
+		return fmt.Errorf("Error launching command via shell-local communicator: No ExecuteCommand provided")
 	}
 
 	// Build the local command to execute
+	log.Printf("[INFO] (shell-local communicator): Executing local shell command %s", c.ExecuteCommand)
 	localCmd := exec.Command(c.ExecuteCommand[0], c.ExecuteCommand[1:]...)
 	localCmd.Stdin = cmd.Stdin
 	localCmd.Stdout = cmd.Stdout
@@ -78,8 +69,4 @@ func (c *Communicator) Download(string, io.Writer) error {
 
 func (c *Communicator) DownloadDir(string, string, []string) error {
 	return fmt.Errorf("downloadDir not supported")
-}
-
-type ExecuteCommandTemplate struct {
-	Command string
 }

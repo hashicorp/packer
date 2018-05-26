@@ -1,7 +1,9 @@
 package hyperv
 
 import (
+	"context"
 	"errors"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -900,7 +902,7 @@ Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter 
 func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
 
 	var script = `
-param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes,[string]$vhdBlockSizeInByte [string]$controllerType)
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
 Hyper-V\New-VHD -path $vhdPath -SizeBytes $vhdSizeInBytes -BlockSizeBytes $vhdBlockSizeInByte
 Hyper-V\Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
@@ -1243,4 +1245,19 @@ param([string]$vmName, [string]$scanCodes)
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, scanCodes)
 	return err
+}
+
+func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, "vmconnect.exe", "localhost", vmName)
+	err := cmd.Start()
+	if err != nil {
+		// Failed to start so cancel function not required
+		cancel = nil
+	}
+	return cancel, err
+}
+
+func DisconnectVirtualMachine(cancel context.CancelFunc) {
+	cancel()
 }
