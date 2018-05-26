@@ -4,10 +4,34 @@
 
 * builder/vmware-esxi: Remove floppy files from the remote server on cleanup. [GH-6206]
 * core: When using `-on-error=[abort|ask]`, output the error to the user. [GH-6252]
+* builder/amazon: Can now force the chroot builder to mount an entire block device instead of a partition [GH-6194]
+* builder/chroot: A new template option, `nvme_device_path` has been added to provide a workaround for users who need the amazon-chroot builder to mount a NVMe volume on their instances. [GH-6295]
+* communicator/winrm: Updated dependencies to fix a race condition [GH-6261]
+* builder/hyper-v: Fix command for mounting multiple disks [GH-6267]
+* provisioner/shell: Remove file stat that was causing problems uploading files [GH-6239]
+* provisioner/puppet: Extra-Arguments are no longer prematurely interpolated.[GH-6215]
+* builder/azure: windows-sql-cloud is now in the default list of projects to check for provided images. [GH-6210]
+* builder/hyperv: Enable IP retrieval for Server 2008 R2 hosts. [GH-6219]
+* builder/hyperv: Fix bug in MAC address specification on Hyper-V. [GH-6187]
+* builder/parallels-pvm: Add missing disk compaction step. [GH-6202]
 
 ### IMPROVEMENTS:
 
+* builder/amazon: Amazon builders other than `chroot` now support T2 unlimited instances [GH-6265]
 * builder/azure: Updated Azure SDK to v15.0.0 [GH-6224]
+* builder/azure: Devicelogin Support for Windows [GH-6285]
+* builder/hyper-v: Hyper-V builds now connect to vnc display by default when building [GH-6243]
+* provisoner/shell-local: New options have been added to create feature parity with the shell-local post-processor. This feature now works on Windows hosts. [GH-5956]
+* post-processor/shell-local: New options have been added to create feature parity with the shell-local provisioner. This feature now works on Windows hosts. [GH-5956]
+* builder/hyper-v: New `use_fixed_vhd_format` allows vm export in an Azure-compatible format [GH-6101]
+* builder/azure: Faster deletion of Azure Resource Groups. [GH-6269]
+* builder/hyperv: New config option for specifying what secure boot template to use, allowing secure boot of linux vms. [GH-5883]
+* provisioner/chef: New config option allows user to skip cleanup of chef client staging directory. [GH-4300]
+* builder/azure: Allow device login for US government cloud. [GH-6105]
+* builder/qemu: Add support for hvf accelerator. [GH-6193]
+* builder/azure: Enable simultaneous builds within one resource group. [GH-6231]
+* builder/scaleway: Fix SSH communicator connection issue. [GH-6238]
+* core: Add opt-in Packer top-level command autocomplete [GH-5454]
 
 ## 1.2.3 (April 25, 2018)
 

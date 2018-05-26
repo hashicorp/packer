@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"runtime"
@@ -346,4 +347,15 @@ func (d *HypervPS4Driver) verifyHypervPermissions() error {
 	}
 
 	return nil
+}
+
+// Connect connects to a VM specified by the name given.
+func (d *HypervPS4Driver) Connect(vmName string) (context.CancelFunc, error) {
+	return hyperv.ConnectVirtualMachine(vmName)
+}
+
+// Disconnect disconnects to a VM specified by calling the context cancel function returned
+// from Connect.
+func (d *HypervPS4Driver) Disconnect(cancel context.CancelFunc) {
+	hyperv.DisconnectVirtualMachine(cancel)
 }
