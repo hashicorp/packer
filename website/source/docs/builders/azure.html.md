@@ -140,11 +140,6 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     account type for a managed image.  Valid values are Standard_LRS
     and Premium\_LRS.  The default is Standard\_LRS.
 
--   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
-    created at runtime. This variable is required when creating images based on
-    Windows; this variable is not used by non-Windows builds. See `Windows`
-    behavior for `os_type`, below.
-
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
 
@@ -219,6 +214,9 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information. Defaults to `Standard_A1`.
 
     CLI example `azure vm sizes -l westus`
+
+-   `async_resourcegroup_delete` (boolean) If you want packer to delete the temporary resource group asynchronously set this value. It's a boolean value
+     and defaults to false. **Important** Setting this true means that your builds are faster, however any failed deletes are not reported.
 
 ## Basic Example
 
@@ -409,8 +407,6 @@ A Windows build requires two templates and two deployments. Unfortunately, the K
 the same time hence the need for two templates and deployments. The time required to deploy a KeyVault template is
 minimal, so overall impact is small.
 
-> The KeyVault certificate is protected using the object\_id of the SPN. This is why Windows builds require object\_id,
-> and an SPN. The KeyVault is deleted when the resource group is deleted.
 
 See the [examples/azure](https://github.com/hashicorp/packer/tree/master/examples/azure) folder in the packer project
 for more examples.
