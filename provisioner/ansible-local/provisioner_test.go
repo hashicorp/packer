@@ -361,7 +361,6 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	if err != nil {
 		t.Fatalf("Error preparing download: %s", err)
 	}
-	defer os.Remove("hello_world")
 
 	// Add hooks so the provisioners run during the build
 	hooks := map[string][]packer.Hook{}
@@ -379,6 +378,7 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	if err != nil {
 		t.Fatalf("Error running build %s", err)
 	}
+	defer os.Remove("hello_world")
 	defer artifact.Destroy()
 
 	actualContent, err := ioutil.ReadFile("hello_world")
@@ -409,7 +409,6 @@ func assertPlaybooksExecuted(comm *communicatorMock, playbooks []string) {
 }
 
 func assertPlaybooksUploaded(comm *communicatorMock, playbooks []string) {
-	fmt.Println(comm.uploadDestination)
 	uploadIndex := 0
 	for _, playbook := range playbooks {
 		playbook = filepath.ToSlash(playbook)
