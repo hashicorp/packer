@@ -58,6 +58,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepCreateInstance{},
 		&stepInstanceInfo{},
+		&stepGetDefaultCredentials{
+			Debug:     b.config.PackerDebug,
+			Comm:      &b.config.Comm,
+			BuildName: b.config.PackerBuildName,
+		},
 		&communicator.StepConnect{
 			Config: &b.config.Comm,
 			Host:   ocommon.CommHost,
