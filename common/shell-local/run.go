@@ -9,14 +9,20 @@ import (
 	"sort"
 	"strings"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type ExecuteCommandTemplate struct {
-	Vars    string
-	Script  string
-	Command string
+	Vars          string
+	Script        string
+	Command       string
+	WinRMPassword string
+}
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
 }
 
 func Run(ui packer.Ui, config *Config) (bool, error) {
@@ -63,8 +69,12 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		// buffers and for reading the final exit status.
 		flattenedCmd := strings.Join(interpolatedCmds, " ")
 		cmd := &packer.RemoteCmd{Command: flattenedCmd}
-		log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
-
+		sanitized := flattenedCmd
+		if len(getWinRMPassword(config.PackerBuildName)) > 0 {
+			sanitized = strings.Replace(flattenedCmd,
+				getWinRMPassword(config.PackerBuildName), "*****", -1)
+		}
+		log.Printf("[INFO] (shell-local): starting local command: %s", sanitized)
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return false, fmt.Errorf(
 				"Error executing script: %s\n\n"+
@@ -96,7 +106,19 @@ func createInlineScriptFile(config *Config) (string, error) {
 		log.Printf("[INFO] (shell-local): Prepending inline script with %s", shebang)
 		writer.WriteString(shebang)
 	}
+
+	// generate context so you can interpolate the command
+	config.Ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(config.PackerBuildName),
+	}
+
 	for _, command := range config.Inline {
+		// interpolate command to check for template variables.
+		command, err := interpolate.Render(command, &config.Ctx)
+		if err != nil {
+			return "", err
+		}
+
 		if _, err := writer.WriteString(command + "\n"); err != nil {
 			return "", fmt.Errorf("Error preparing shell script: %s", err)
 		}
@@ -118,9 +140,10 @@ func createInlineScriptFile(config *Config) (string, error) {
 // the host OS
 func createInterpolatedCommands(config *Config, script string, flattenedEnvVars string) ([]string, error) {
 	config.Ctx.Data = &ExecuteCommandTemplate{
-		Vars:    flattenedEnvVars,
-		Script:  script,
-		Command: script,
+		Vars:          flattenedEnvVars,
+		Script:        script,
+		Command:       script,
+		WinRMPassword: getWinRMPassword(config.PackerBuildName),
 	}
 
 	interpolatedCmds := make([]string, len(config.ExecuteCommand))
@@ -142,8 +165,17 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", config.PackerBuildName)
 	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", config.PackerBuilderType)
 
+	// interpolate environment variables
+	config.Ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(config.PackerBuildName),
+	}
 	// Split vars into key/value components
 	for _, envVar := range config.Vars {
+		envVar, err := interpolate.Render(envVar, &config.Ctx)
+		if err != nil {
+			return "", err
+		}
+		// Split vars into key/value components
 		keyValue := strings.SplitN(envVar, "=", 2)
 		// Store pair, replacing any single quotes in value so they parse
 		// correctly with required environment variable format
@@ -161,4 +193,9 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 		flattened += fmt.Sprintf(config.EnvVarFormat, key, envVars[key])
 	}
 	return flattened, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	return winRMPass
 }
