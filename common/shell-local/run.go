@@ -106,9 +106,6 @@ func createInlineScriptFile(config *Config) (string, error) {
 		log.Printf("[INFO] (shell-local): Prepending inline script with %s", shebang)
 		writer.WriteString(shebang)
 	}
-	config.Ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: getWinRMPassword(config.PackerBuildName),
-	}
 
 	// generate context so you can interpolate the command
 	config.Ctx.Data = &EnvVarsTemplate{
