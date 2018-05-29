@@ -35,17 +35,19 @@ In addition to the options listed here, a
 builder.
 
 ### Required:
+    
 
--   `api_access_key` (string) - The api\_access\_key to use to access your
-    account. It can also be specified via environment variable
+-   `api_access_key` (string) - The organization access key to use to identify your
+    organization. It can also be specified via environment variable
     `SCALEWAY_API_ACCESS_KEY`. Your access key is available in the
     ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the
     control panel.
 
--   `api_token` (string) - The organization TOKEN to use to access your
+-   `api_token` (string) - The token to use to authenticate with your
     account. It can also be specified via environment variable
-    `SCALEWAY_API_TOKEN`. Your tokens are available in the ["Credentials"
-    section](https://cloud.scaleway.com/#/credentials) of the control panel.
+    `SCALEWAY_API_TOKEN`. You can see and generate tokens in the
+    ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the
+    control panel.
 
 -   `image` (string) - The UUID of the base image to use. This is the image
     that will be used to launch a new server and provision it. See
