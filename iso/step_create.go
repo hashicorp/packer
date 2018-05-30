@@ -3,10 +3,13 @@ package iso
 import (
 	"context"
 	"fmt"
+	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
+	"net"
+	"os"
 )
 
 type CreateConfig struct {
@@ -23,6 +26,29 @@ type CreateConfig struct {
 	USBController bool   `mapstructure:"usb_controller"`
 
 	Notes string `mapstructure:"notes"`
+
+	HTTPIP string `mapstructure:"http_ip"`
+}
+
+func getHostIP(s string) string {
+	if net.ParseIP(s) != nil {
+		return s
+	}
+
+	var ipaddr string
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	for _, a := range addrs {
+		if ip, ok := a.(*net.IPNet); ok && !ip.IP.IsLoopback() {
+			ipaddr = ip.IP.String()
+			break
+		}
+	}
+	return ipaddr
 }
 
 func (c *CreateConfig) Prepare() []error {
@@ -65,6 +91,8 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 			state.Put("error", fmt.Errorf("error destroying %s: %v", s.Location.VMName, err))
 		}
 	}
+
+	packerCommon.SetHTTPIP(getHostIP(s.Config.HTTPIP))
 
 	ui.Say("Creating VM...")
 	vm, err := d.CreateVM(&driver.CreateConfig{

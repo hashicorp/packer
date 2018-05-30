@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	packerCommon.PackerConfig `mapstructure:",squash"`
+	packerCommon.HTTPConfig   `mapstructure:",squash"`
 
 	common.ConnectConfig      `mapstructure:",squash"`
 	CreateConfig              `mapstructure:",squash"`
@@ -46,6 +47,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.CreateConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.LocationConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
+	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
 
 	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare()...)
