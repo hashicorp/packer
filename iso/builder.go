@@ -63,6 +63,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Datastore: b.config.Datastore,
 				Host:      b.config.Host,
 			},
+			&packerCommon.StepHTTPServer{
+				HTTPDir:     b.config.HTTPDir,
+				HTTPPortMin: b.config.HTTPPortMin,
+				HTTPPortMax: b.config.HTTPPortMax,
+			},
 			&common.StepRun{
 				Config:   &b.config.RunConfig,
 				SetOrder: true,
