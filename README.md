@@ -109,6 +109,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 ### Provision
 
 * `communicator` - `ssh` (default), `winrm`, or `none` (create/clone, customize hardware, but do not boot).
+* `ip_settle_timeout`(string) - Amount of time to wait for VM's IP to settle down, sometimes VM may report incorrect IP initially, then its recommended to set that parameter to apx. 2 minutes. Examples 45s and 10m. Defaults to 5s(5 seconds). See the Go Lang [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation for full details.
 * `ssh_username`(string) - Username in guest OS.
 * `ssh_password`(string) - Password to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
 * `ssh_private_key_file`(string) - Path to the SSH private key file to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
