@@ -99,7 +99,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Ctx:    b.config.ctx,
 				VMName: b.config.VMName,
 			},
-			&common.StepWaitForIp{},
+			&common.StepWaitForIp{
+				Config: &b.config.WaitIpConfig,
+			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
 				Host:      common.CommHost(b.config.Comm.SSHHost),
