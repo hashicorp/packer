@@ -2,7 +2,6 @@ package ebssurrogate
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -52,29 +51,8 @@ func (s *StepSnapshotVolumes) snapshotVolume(deviceName string, state multistep.
 	// Set the snapshot ID so we can delete it later
 	s.snapshotIds[deviceName] = *createSnapResp.SnapshotId
 
-	// Wait for the snapshot to be ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		StepState: state,
-		Target:    "completed",
-		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{
-				SnapshotIds: []*string{createSnapResp.SnapshotId},
-			})
-			if err != nil {
-				return nil, "", err
-			}
-
-			if len(resp.Snapshots) == 0 {
-				return nil, "", errors.New("No snapshots found.")
-			}
-
-			s := resp.Snapshots[0]
-			return s, *s.State, nil
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	// Wait for snapshot to be created
+	err = awscommon.WaitUntilSnapshotDone(ec2conn, *createSnapResp.SnapshotId)
 	return err
 }
 
