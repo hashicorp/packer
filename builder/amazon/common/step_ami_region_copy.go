@@ -116,14 +116,8 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 			imageId, target, err)
 	}
 
-	stateChange := StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   AMIStateRefreshFunc(regionconn, *resp.ImageId),
-		StepState: state,
-	}
-
-	if _, err := WaitForState(&stateChange); err != nil {
+	// Wait for the image to become ready
+	if err := WaitUntilAMIAvailable(regionconn, *resp.ImageId); err != nil {
 		return "", snapshotIds, fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
 			*resp.ImageId, target, err)
 	}

@@ -18,7 +18,7 @@ type StepRegisterAMI struct {
 	EnableAMISriovNetSupport bool
 }
 
-func (s *StepRegisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	snapshotId := state.Get("snapshot_id").(string)
@@ -103,20 +103,14 @@ func (s *StepRegisterAMI) Run(_ context.Context, state multistep.StateBag) multi
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
-		StepState: state,
-	}
-
-	ui.Say("Waiting for AMI to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
+	if err := awscommon.WaitUntilAMIAvailable(ec2conn, *registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	ui.Say("Waiting for AMI to become ready...")
 
 	return multistep.ActionContinue
 }
