@@ -202,13 +202,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	spotRequestId := s.spotRequest.SpotInstanceRequestId
 	ui.Message(fmt.Sprintf("Waiting for spot request (%s) to become active...", *spotRequestId))
-	stateChange := StateChangeConf{
-		Pending:   []string{"open"},
-		Target:    "active",
-		Refresh:   SpotRequestStateRefreshFunc(ec2conn, *spotRequestId),
-		StepState: state,
-	}
-	_, err = WaitForState(&stateChange)
+	err = WaitUntilSpotRequestFulfilled(ec2conn, *spotRequestId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", *spotRequestId, err)
 		state.Put("error", err)
@@ -344,13 +338,8 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
 			return
 		}
-		stateChange := StateChangeConf{
-			Pending: []string{"active", "open"},
-			Refresh: SpotRequestStateRefreshFunc(ec2conn, *s.spotRequest.SpotInstanceRequestId),
-			Target:  "cancelled",
-		}
 
-		_, err := WaitForState(&stateChange)
+		err := WaitUntilSpotRequestFulfilled(ec2conn, *s.spotRequest.SpotInstanceRequestId)
 		if err != nil {
 			ui.Error(err.Error())
 		}
@@ -364,14 +353,8 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
 			return
 		}
-		stateChange := StateChangeConf{
-			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instanceId),
-			Target:  "terminated",
-		}
 
-		_, err := WaitForState(&stateChange)
-		if err != nil {
+		if err := WaitUntilInstanceTerminated(ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

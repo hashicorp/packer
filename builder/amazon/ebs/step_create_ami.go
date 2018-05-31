@@ -44,15 +44,8 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *createResp.ImageId),
-		StepState: state,
-	}
-
 	ui.Say("Waiting for AMI to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
+	if err := awscommon.WaitUntilAMIAvailable(ec2conn, *createResp.ImageId); err != nil {
 		log.Printf("Error waiting for AMI: %s", err)
 		imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 		if err != nil {

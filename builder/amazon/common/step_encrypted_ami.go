@@ -65,15 +65,8 @@ func (s *StepCreateEncryptedAMICopy) Run(_ context.Context, state multistep.Stat
 	}
 
 	// Wait for the copy to become ready
-	stateChange := StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   AMIStateRefreshFunc(ec2conn, *copyResp.ImageId),
-		StepState: state,
-	}
-
 	ui.Say("Waiting for AMI copy to become ready...")
-	if _, err := WaitForState(&stateChange); err != nil {
+	if err := WaitUntilAMIAvailable(ec2conn, *copyResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI Copy: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

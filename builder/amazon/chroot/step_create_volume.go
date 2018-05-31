@@ -84,22 +84,7 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	// Wait for the volume to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"creating"},
-		StepState: state,
-		Target:    "available",
-		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
-			if err != nil {
-				return nil, "", err
-			}
-
-			v := resp.Volumes[0]
-			return v, *v.State, nil
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	err = awscommon.WaitUntilVolumeAvailable(ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
