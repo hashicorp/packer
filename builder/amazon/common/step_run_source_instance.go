@@ -304,7 +304,7 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		if err := WaitUntilInstanceTerminated(ec2conn, s.instanceId); err != nil {
+		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

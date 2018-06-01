@@ -20,7 +20,7 @@ type StepAMIRegionCopy struct {
 	Name              string
 }
 
-func (s *StepAMIRegionCopy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	amis := state.Get("amis").(map[string]string)
@@ -53,7 +53,7 @@ func (s *StepAMIRegionCopy) Run(_ context.Context, state multistep.StateBag) mul
 
 		go func(region string) {
 			defer wg.Done()
-			id, snapshotIds, err := amiRegionCopy(state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region, regKeyID)
+			id, snapshotIds, err := amiRegionCopy(ctx, state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region, regKeyID)
 			lock.Lock()
 			defer lock.Unlock()
 			amis[region] = id
@@ -85,7 +85,7 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID and snapshot IDs, or error.
-func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, imageId string,
+func amiRegionCopy(ctx context.Context, state multistep.StateBag, config *AccessConfig, name string, imageId string,
 	target string, source string, keyID string) (string, []string, error) {
 	snapshotIds := []string{}
 	isEncrypted := false
@@ -117,7 +117,7 @@ func amiRegionCopy(state multistep.StateBag, config *AccessConfig, name string, 
 	}
 
 	// Wait for the image to become ready
-	if err := WaitUntilAMIAvailable(regionconn, *resp.ImageId); err != nil {
+	if err := WaitUntilAMIAvailable(ctx, regionconn, *resp.ImageId); err != nil {
 		return "", snapshotIds, fmt.Errorf("Error waiting for AMI (%s) in region (%s): %s",
 			*resp.ImageId, target, err)
 	}
