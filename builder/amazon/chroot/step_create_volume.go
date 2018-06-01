@@ -22,7 +22,7 @@ type StepCreateVolume struct {
 	RootVolumeSize int64
 }
 
-func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -84,7 +84,7 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	// Wait for the volume to become ready
-	err = awscommon.WaitUntilVolumeAvailable(ec2conn, s.volumeId)
+	err = awscommon.WaitUntilVolumeAvailable(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)

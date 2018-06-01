@@ -19,7 +19,7 @@ type StepSnapshot struct {
 	snapshotId string
 }
 
-func (s *StepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	volumeId := state.Get("volume_id").(string)
@@ -43,7 +43,7 @@ func (s *StepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Message(fmt.Sprintf("Snapshot ID: %s", s.snapshotId))
 
 	// Wait for the snapshot to be ready
-	err = awscommon.WaitUntilSnapshotDone(ec2conn, s.snapshotId)
+	err = awscommon.WaitUntilSnapshotDone(ctx, ec2conn, s.snapshotId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)

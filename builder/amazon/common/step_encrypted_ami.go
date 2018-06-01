@@ -19,7 +19,7 @@ type StepCreateEncryptedAMICopy struct {
 	AMIMappings       []BlockDevice
 }
 
-func (s *StepCreateEncryptedAMICopy) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateEncryptedAMICopy) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	kmsKeyId := s.KeyID
@@ -66,7 +66,7 @@ func (s *StepCreateEncryptedAMICopy) Run(_ context.Context, state multistep.Stat
 
 	// Wait for the copy to become ready
 	ui.Say("Waiting for AMI copy to become ready...")
-	if err := WaitUntilAMIAvailable(ec2conn, *copyResp.ImageId); err != nil {
+	if err := WaitUntilAMIAvailable(ctx, ec2conn, *copyResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI Copy: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
