@@ -202,7 +202,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	spotRequestId := s.spotRequest.SpotInstanceRequestId
 	ui.Message(fmt.Sprintf("Waiting for spot request (%s) to become active...", *spotRequestId))
-	err = WaitUntilSpotRequestFulfilled(ec2conn, *spotRequestId)
+	err = WaitUntilSpotRequestFulfilled(ctx, ec2conn, *spotRequestId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", *spotRequestId, err)
 		state.Put("error", err)
@@ -339,7 +339,7 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		err := WaitUntilSpotRequestFulfilled(ec2conn, *s.spotRequest.SpotInstanceRequestId)
+		err := WaitUntilSpotRequestFulfilled(aws.BackgroundContext(), ec2conn, *s.spotRequest.SpotInstanceRequestId)
 		if err != nil {
 			ui.Error(err.Error())
 		}
@@ -354,7 +354,7 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			return
 		}
 
-		if err := WaitUntilInstanceTerminated(ec2conn, s.instanceId); err != nil {
+		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

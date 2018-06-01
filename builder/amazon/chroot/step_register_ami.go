@@ -102,15 +102,13 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 	amis[*ec2conn.Config.Region] = *registerResp.ImageId
 	state.Put("amis", amis)
 
-	// Wait for the image to become ready
-	if err := awscommon.WaitUntilAMIAvailable(ec2conn, *registerResp.ImageId); err != nil {
+	ui.Say("Waiting for AMI to become ready...")
+	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	ui.Say("Waiting for AMI to become ready...")
 
 	return multistep.ActionContinue
 }

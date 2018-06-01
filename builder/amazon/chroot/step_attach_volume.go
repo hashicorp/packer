@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -22,7 +23,7 @@ type StepAttachVolume struct {
 	volumeId string
 }
 
-func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepAttachVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	device := state.Get("device").(string)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -50,7 +51,7 @@ func (s *StepAttachVolume) Run(_ context.Context, state multistep.StateBag) mult
 	s.volumeId = volumeId
 
 	// Wait for the volume to become attached
-	err = awscommon.WaitUntilVolumeAttached(ec2conn, s.volumeId)
+	err = awscommon.WaitUntilVolumeAttached(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)
@@ -86,7 +87,7 @@ func (s *StepAttachVolume) CleanupFunc(state multistep.StateBag) error {
 	s.attached = false
 
 	// Wait for the volume to detach
-	err = awscommon.WaitUntilVolumeDetached(ec2conn, s.volumeId)
+	err = awscommon.WaitUntilVolumeDetached(aws.BackgroundContext(), ec2conn, s.volumeId)
 	if err != nil {
 		return fmt.Errorf("Error waiting for volume: %s", err)
 	}

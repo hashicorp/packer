@@ -35,58 +35,63 @@ type StateChangeConf struct {
 // Following are wrapper functions that use Packer's environment-variables to
 // determing retry logic, then call the AWS SDK's built-in waiters.
 
-func WaitUntilAMIAvailable(conn *ec2.EC2, imageId string) error {
+func WaitUntilAMIAvailable(ctx aws.Context, conn *ec2.EC2, imageId string) error {
 	imageInput := ec2.DescribeImagesInput{
 		ImageIds: []*string{&imageId},
 	}
 
-	err := conn.WaitUntilImageAvailableWithContext(aws.BackgroundContext(),
+	err := conn.WaitUntilImageAvailableWithContext(
+		ctx,
 		&imageInput,
 		getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilInstanceTerminated(conn *ec2.EC2, instanceId string) error {
+func WaitUntilInstanceTerminated(ctx aws.Context, conn *ec2.EC2, instanceId string) error {
 
 	instanceInput := ec2.DescribeInstancesInput{
 		InstanceIds: []*string{&instanceId},
 	}
 
-	err := conn.WaitUntilInstanceTerminatedWithContext(aws.BackgroundContext(),
+	err := conn.WaitUntilInstanceTerminatedWithContext(
+		ctx,
 		&instanceInput,
 		getWaiterOptions()...)
 	return err
 }
 
 // This function works for both requesting and cancelling spot instances.
-func WaitUntilSpotRequestFulfilled(conn *ec2.EC2, spotRequestId string) error {
+func WaitUntilSpotRequestFulfilled(ctx aws.Context, conn *ec2.EC2, spotRequestId string) error {
 	spotRequestInput := ec2.DescribeSpotInstanceRequestsInput{
 		SpotInstanceRequestIds: []*string{&spotRequestId},
 	}
 
-	err := conn.WaitUntilSpotInstanceRequestFulfilledWithContext(aws.BackgroundContext(),
+	err := conn.WaitUntilSpotInstanceRequestFulfilledWithContext(
+		ctx,
 		&spotRequestInput,
 		getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilVolumeAvailable(conn *ec2.EC2, volumeId string) error {
+func WaitUntilVolumeAvailable(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
 
-	err := conn.WaitUntilVolumeAvailableWithContext(aws.BackgroundContext(),
+	err := conn.WaitUntilVolumeAvailableWithContext(
+		ctx,
 		&volumeInput,
 		getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilSnapshotDone(conn *ec2.EC2, snapshotID string) error {
+func WaitUntilSnapshotDone(ctx aws.Context, conn *ec2.EC2, snapshotID string) error {
 	snapInput := ec2.DescribeSnapshotsInput{
 		SnapshotIds: []*string{&snapshotID},
 	}
 
-	err := conn.WaitUntilSnapshotCompletedWithContext(aws.BackgroundContext(),
+	err := conn.WaitUntilSnapshotCompletedWithContext(
+		ctx,
 		&snapInput,
 		getWaiterOptions()...)
 	return err
@@ -94,37 +99,37 @@ func WaitUntilSnapshotDone(conn *ec2.EC2, snapshotID string) error {
 
 // Wrappers for our custom AWS waiters
 
-func WaitUntilVolumeAttached(conn *ec2.EC2, volumeId string) error {
+func WaitUntilVolumeAttached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
 
 	err := WaitForVolumeToBeAttached(conn,
-		aws.BackgroundContext(),
+		ctx,
 		&volumeInput,
 		getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilVolumeDetached(conn *ec2.EC2, volumeId string) error {
+func WaitUntilVolumeDetached(ctx aws.Context, conn *ec2.EC2, volumeId string) error {
 	volumeInput := ec2.DescribeVolumesInput{
 		VolumeIds: []*string{&volumeId},
 	}
 
-	err := WaitForVolumeToBeAttached(conn,
-		aws.BackgroundContext(),
+	err := WaitForVolumeToBeDetached(conn,
+		ctx,
 		&volumeInput,
 		getWaiterOptions()...)
 	return err
 }
 
-func WaitUntilImageImported(conn *ec2.EC2, taskID string) error {
+func WaitUntilImageImported(ctx aws.Context, conn *ec2.EC2, taskID string) error {
 	importInput := ec2.DescribeImportImageTasksInput{
 		ImportTaskIds: []*string{&taskID},
 	}
 
 	err := WaitForImageToBeImported(conn,
-		aws.BackgroundContext(),
+		ctx,
 		&importInput,
 		getWaiterOptions()...)
 	return err

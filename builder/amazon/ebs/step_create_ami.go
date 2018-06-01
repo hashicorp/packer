@@ -15,7 +15,7 @@ type stepCreateAMI struct {
 	image *ec2.Image
 }
 
-func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
@@ -45,7 +45,7 @@ func (s *stepCreateAMI) Run(_ context.Context, state multistep.StateBag) multist
 
 	// Wait for the image to become ready
 	ui.Say("Waiting for AMI to become ready...")
-	if err := awscommon.WaitUntilAMIAvailable(ec2conn, *createResp.ImageId); err != nil {
+	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *createResp.ImageId); err != nil {
 		log.Printf("Error waiting for AMI: %s", err)
 		imagesResp, err := ec2conn.DescribeImages(&ec2.DescribeImagesInput{ImageIds: []*string{createResp.ImageId}})
 		if err != nil {
