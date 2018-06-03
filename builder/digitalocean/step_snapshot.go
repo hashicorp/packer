@@ -111,6 +111,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	snapshotRegions = append(snapshotRegions, c.Region)
 
 	log.Printf("Snapshot image ID: %d", imageId)
 	state.Put("snapshot_image_id", imageId)
