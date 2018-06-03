@@ -28,7 +28,7 @@ accessible from your network.
 ``` json
 {
    "type": "puppet-server",
-   "options": "--test --pluginsync",
+   "extra_arguments": "--test --pluginsync",
    "facter": {
      "server_role": "webserver"
    }
