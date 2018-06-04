@@ -62,6 +62,9 @@ type Config struct {
 	// Networking
 	SubnetID string `mapstructure:"subnet_ocid"`
 
+	// Tagging
+	Tags map[string]string `mapstructure:"tags"`
+
 	ctx interpolate.Context
 }
 
