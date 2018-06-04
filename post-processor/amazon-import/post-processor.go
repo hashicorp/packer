@@ -187,6 +187,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	// Wait for import process to complete, this takes a while
 	ui.Message(fmt.Sprintf("Waiting for task %s to complete (may take a while)", *import_start.ImportTaskId))
 	err = awscommon.WaitUntilImageImported(aws.BackgroundContext(), ec2conn, *import_start.ImportTaskId)
+	if err != nil {
+		return nil, false, fmt.Errorf("Import task %s failed with error: %s", *import_start.ImportTaskId, err)
+	}
 
 	// Retrieve what the outcome was for the import task
 	import_result, err := ec2conn.DescribeImportImageTasks(&ec2.DescribeImportImageTasksInput{
@@ -200,6 +203,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Check it was actually completed
+	log.Printf("MEGAN result was %s", *import_result.ImportImageTasks[0].Status)
 	if *import_result.ImportImageTasks[0].Status != "completed" {
 		// The most useful error message is from the job itself
 		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, *import_result.ImportImageTasks[0].StatusMessage)

@@ -146,14 +146,8 @@ func WaitForVolumeToBeAttached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 			{
 				State:    request.SuccessWaiterState,
 				Matcher:  request.PathAllWaiterMatch,
-				Argument: "Volumes[].State",
+				Argument: "Volumes[].Attachments[].State",
 				Expected: "attached",
-			},
-			{
-				State:    request.FailureWaiterState,
-				Matcher:  request.PathAnyWaiterMatch,
-				Argument: "Volumes[].State",
-				Expected: "deleted",
 			},
 		},
 		Logger: c.Config.Logger,
@@ -181,8 +175,8 @@ func WaitForVolumeToBeDetached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 			{
 				State:    request.SuccessWaiterState,
 				Matcher:  request.PathAllWaiterMatch,
-				Argument: "Volumes[].State",
-				Expected: "detached",
+				Argument: "length(Volumes[].Attachments[]) == `0`",
+				Expected: true,
 			},
 		},
 		Logger: c.Config.Logger,
@@ -204,19 +198,14 @@ func WaitForVolumeToBeDetached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeImportImageTasksInput, opts ...request.WaiterOption) error {
 	w := request.Waiter{
 		Name:        "DescribeImages",
-		MaxAttempts: 40,
+		MaxAttempts: 300,
 		Delay:       request.ConstantWaiterDelay(5 * time.Second),
 		Acceptors: []request.WaiterAcceptor{
 			{
 				State:    request.SuccessWaiterState,
 				Matcher:  request.PathAllWaiterMatch,
-				Argument: "ImportImageTasks[].State",
+				Argument: "ImportImageTasks[].Status",
 				Expected: "completed",
-			},
-			{
-				State:    request.RetryWaiterState,
-				Matcher:  request.ErrorWaiterMatch,
-				Expected: "InvalidConversionTaskId",
 			},
 		},
 		Logger: c.Config.Logger,
@@ -239,57 +228,75 @@ func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeIm
 // AWS_POLL_DELAY_SECONDS to generate waiter options that can be passed into any
 // request.Waiter function. These options will control how many times the waiter
 // will retry the request, as well as how long to wait between the retries.
+
+// DEFAULTING BEHAVIOR:
+// if AWS_POLL_DELAY_SECONDS is set but the others are not, Packer will set this
+// poll delay and use the waiter-specific default
+
+// if AWS_TIMEOUT_SECONDS is set but AWS_MAX_ATTEMPTS is not, Packer will use
+// AWS_TIMEOUT_SECONDS and _either_ AWS_POLL_DELAY_SECONDS _or_ 2 if the user has not set AWS_POLL_DELAY_SECONDS, to determine a max number of attempts to make.
+
+// if AWS_TIMEOUT_SECONDS, _and_ AWS_MAX_ATTEMPTS are both set,
+// AWS_TIMEOUT_SECONDS will be ignored.
+
+// if AWS_MAX_ATTEMPTS is set but AWS_POLL_DELAY_SECONDS is not, then we will
+// use waiter-specific defaults.
+
 func getWaiterOptions() []request.WaiterOption {
-	// use env vars to read in the wait delay and the max amount of time to wait
-	delay := SleepSeconds()
-	timeoutSeconds := TimeoutSeconds()
-	// AWS sdk uses max attempts instead of a timeout; convert timeout into
-	// max attempts
-	maxAttempts := timeoutSeconds / delay
-	delaySeconds := request.ConstantWaiterDelay(time.Duration(delay) * time.Second)
+	waitOpts := make([]request.WaiterOption, 0)
+	// If user has set poll delay seconds, overwrite it. If user has NOT,
+	// default to a poll delay of 2 seconds
+	delayOverridden, delay := getEnvOverrides(2, "AWS_POLL_DELAY_SECONDS")
+	if delayOverridden {
+		delaySeconds := request.ConstantWaiterDelay(time.Duration(delay) * time.Second)
+		waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
+	}
 
-	return []request.WaiterOption{
-		request.WithWaiterDelay(delaySeconds),
-		request.WithWaiterMaxAttempts(maxAttempts)}
+	// If user has set max attempts, overwrite it. If user hasn't set max
+	// attempts, default to whatever the waiter has set as a default.
+	maxAttemptsOverridden, maxAttempts := getEnvOverrides(0, "AWS_MAX_ATTEMPTS")
+	if maxAttemptsOverridden {
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
+	}
+
+	timeoutOverridden, timeoutSeconds := getEnvOverrides(300, "AWS_TIMEOUT_SECONDS")
+	if maxAttemptsOverridden {
+		log.Printf("WARNING: AWS_MAX_ATTEMPTS and AWS_TIMEOUT_SECONDS are" +
+			" both set. Packer will be using AWS_MAX_ATTEMPTS and discarding " +
+			"AWS_TIMEOUT_SECONDS. If you have not set AWS_POLL_DELAY_SECONDS, " +
+			"Packer will default to a 2 second poll delay.")
+	} else if timeoutOverridden {
+		log.Printf("DEPRECATION WARNING: env var AWS_TIMEOUT_SECONDS is " +
+			"deprecated in favor of AWS_MAX_ATTEMPTS. If you have not " +
+			"explicitly set AWS_POLL_DELAY_SECONDS, we are defaulting to a " +
+			"poll delay of 2 seconds, regardless of the AWS waiter's default.")
+		maxAttempts := timeoutSeconds / delay
+		// override the delay so we can get the timeout right
+		if !delayOverridden {
+			delaySeconds := request.ConstantWaiterDelay(time.Duration(delay) * time.Second)
+			waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
+		}
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
+	}
+
+	return waitOpts
 }
 
-// Returns 300 seconds (5 minutes) by default
-// Some AWS operations, like copying an AMI to a distant region, take a very long time
-// Allow user to override with AWS_TIMEOUT_SECONDS environment variable
-func TimeoutSeconds() (seconds int) {
-	seconds = 300
-
-	override := os.Getenv("AWS_TIMEOUT_SECONDS")
+func getEnvOverrides(defaultValue int, envVarName string) (bool, int) {
+	// "AWS_POLL_DELAY_SECONDS"
+	retVal := defaultValue
+	overridden := false
+	override := os.Getenv(envVarName)
 	if override != "" {
 		n, err := strconv.Atoi(override)
 		if err != nil {
-			log.Printf("Invalid timeout seconds '%s', using default", override)
+			log.Printf("Invalid %s '%s', using default", envVarName, override)
 		} else {
-			seconds = n
+			overridden = true
+			retVal = n
 		}
 	}
 
-	log.Printf("Allowing %ds to complete (change with AWS_TIMEOUT_SECONDS)", seconds)
-	return seconds
-}
-
-// Returns 2 seconds by default
-// AWS async operations sometimes takes long times, if there are multiple parallel builds,
-// polling at 2 second frequency will exceed the request limit. Allow 2 seconds to be
-// overwritten with AWS_POLL_DELAY_SECONDS
-func SleepSeconds() (seconds int) {
-	seconds = 2
-
-	override := os.Getenv("AWS_POLL_DELAY_SECONDS")
-	if override != "" {
-		n, err := strconv.Atoi(override)
-		if err != nil {
-			log.Printf("Invalid sleep seconds '%s', using default", override)
-		} else {
-			seconds = n
-		}
-	}
-
-	log.Printf("Using %ds as polling delay (change with AWS_POLL_DELAY_SECONDS)", seconds)
-	return seconds
+	log.Printf("Using %ds for %s", retVal, envVarName)
+	return overridden, retVal
 }
