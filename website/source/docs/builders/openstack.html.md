@@ -33,7 +33,8 @@ builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
 installed *if you are using temporary key pairs*, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
 [`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
-OS'es have OpenSSL installed by default except Windows.
+OS'es have OpenSSL installed by default except Windows. This have been
+resolved in OpenStack Ocata(Feb 2017).
 
 
 ## Configuration Reference
@@ -177,8 +178,8 @@ builder.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
-    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
-    is also called Project in later versions of OpenStack.
+    Packer will use the environment variable `OS_TENANT_NAME` or `OS_TENANT_ID`,
+    if set. Tenant is also called Project in later versions of OpenStack.
 
 -   `use_floating_ip` (boolean) - *Deprecated* use `floating_ip` or `floating_ip_pool`
     instead.
