@@ -790,6 +790,12 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
+			"checksumSHA1": "ujo1JDey6cxwnGs4HXVCJNVrhHw=",
+			"path": "github.com/gophercloud/utils/openstack/clientconfig",
+			"revision": "afce78e977c56ca5407957bf67e8ecc56aab601d",
+			"revisionTime": "2018-05-22T20:53:45Z"
+		},
+		{
 			"checksumSHA1": "xSmii71kfQASGNG2C8ttmHx9KTE=",
 			"path": "github.com/gorilla/websocket",
 			"revision": "a91eba7f97777409bc2c443f5534d41dd20c5720",
@@ -1672,6 +1678,12 @@
 			"checksumSHA1": "U7dGDNwEHORvJFMoNSXErKE7ITg=",
 			"path": "google.golang.org/cloud/internal",
 			"revision": "5a3b06f8b5da3b7c3a93da43163b872c86c509ef"
+		},
+		{
+			"checksumSHA1": "ZSWoOPUNRr5+3dhkLK3C4cZAQPk=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "5420a8b6744d3b0345ab293f6fcba19c978f1183",
+			"revisionTime": "2018-03-28T19:50:20Z"
 		}
 	],
 	"rootPath": "github.com/hashicorp/packer"
