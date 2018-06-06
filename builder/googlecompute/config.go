@@ -43,6 +43,7 @@ type Config struct {
 	MachineType                  string            `mapstructure:"machine_type"`
 	Metadata                     map[string]string `mapstructure:"metadata"`
 	Network                      string            `mapstructure:"network"`
+	NetworkIP                    string            `mapstructure:"network_ip"`
 	NetworkProjectId             string            `mapstructure:"network_project_id"`
 	OmitExternalIP               bool              `mapstructure:"omit_external_ip"`
 	OnHostMaintenance            string            `mapstructure:"on_host_maintenance"`

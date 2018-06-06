@@ -71,6 +71,7 @@ type InstanceConfig struct {
 	Metadata                     map[string]string
 	Name                         string
 	Network                      string
+	NetworkIP                    string
 	NetworkProjectId             string
 	OmitExternalIP               bool
 	OnHostMaintenance            string
