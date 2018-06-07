@@ -278,6 +278,14 @@ func getWaiterOptions() []request.WaiterOption {
 		}
 		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
 	}
+	if len(waitOpts) == 0 {
+		log.Printf("No AWS timeout and polling overrides have been set. " +
+			"Packer will defalt to waiter-specific delays and timeouts. If you would " +
+			"like to customize the length of time between retries and max " +
+			"number of retries you may do so by setting the environment " +
+			"variables AWS_POLL_DELAY_SECONDS and AWS_MAX_ATTEMPTS to your " +
+			"desired values.")
+	}
 
 	return waitOpts
 }
