@@ -185,6 +185,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 			deploymentOperation := deploymentOperations.Value()
 			// Sometimes an empty operation is added to the list by Azure
 			if deploymentOperation.Properties.TargetResource == nil {
+				deploymentOperations.Next()
 				continue
 			}
 			ui.Say(fmt.Sprintf(" -> %s : '%s'",
