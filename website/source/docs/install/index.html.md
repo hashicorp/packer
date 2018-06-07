@@ -30,7 +30,7 @@ inside is all that is necessary to run Packer (or `packer.exe` for Windows). Any
 additional files, if any, aren't required to run Packer.
 
 Copy the binary to anywhere on your system. If you intend to access it from the
-command-line, make sure to place it somewhere on your `PATH`.
+command-line, make sure to place it somewhere on your `PATH` before /usr/sbin.
 
 ## Compiling from Source
 
