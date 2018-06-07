@@ -152,7 +152,6 @@ func (c *Core) Build(n string) (Build, error) {
 				Provisioner: provisioner,
 			}
 		}
-		if config.PackerDebug
 
 		provisioners = append(provisioners, coreBuildProvisioner{
 			pType:       rawP.Type,

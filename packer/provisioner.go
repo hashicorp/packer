@@ -170,8 +170,8 @@ func (p *PausedProvisioner) provision(result chan<- error, ui Ui, comm Communica
 	result <- p.Provisioner.Provision(ui, comm)
 }
 
-// DebuggedProvisioner is a Provisioner implementation that wait key press before
-// the provisioner is actually run.
+// DebuggedProvisioner is a Provisioner implementation that waits until a key
+// press before the provisioner is actually run.
 type DebuggedProvisioner struct {
 	Provisioner Provisioner
 
