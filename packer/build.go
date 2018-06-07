@@ -200,10 +200,18 @@ func (b *coreBuild) Run(originalUi Ui, cache Cache) ([]Artifact, error) {
 			if len(p.config) > 0 {
 				pConfig = p.config[0]
 			}
-			hookedProvisioners[i] = &HookedProvisioner{
-				p.provisioner,
-				pConfig,
-				p.pType,
+			if b.debug {
+				hookedProvisioners[i] = &HookedProvisioner{
+					&DebuggedProvisioner{Provisioner: p.provisioner},
+					pConfig,
+					p.pType,
+				}
+			} else {
+				hookedProvisioners[i] = &HookedProvisioner{
+					p.provisioner,
+					pConfig,
+					p.pType,
+				}
 			}
 		}
 

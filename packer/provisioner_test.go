@@ -197,3 +197,67 @@ func TestPausedProvisionerCancel(t *testing.T) {
 		t.Fatal("cancel should be called")
 	}
 }
+
+func TestDebuggedProvisioner_impl(t *testing.T) {
+	var _ Provisioner = new(DebuggedProvisioner)
+}
+
+func TestDebuggedProvisionerPrepare(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
+		Provisioner: mock,
+	}
+
+	prov.Prepare(42)
+	if !mock.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if mock.PrepConfigs[0] != 42 {
+		t.Fatal("should have proper configs")
+	}
+}
+
+func TestDebuggedProvisionerProvision(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	writeReader(ui, "\n")
+	prov.Provision(ui, comm)
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+}
+
+func TestDebuggedProvisionerCancel(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
+		Provisioner: mock,
+	}
+
+	provCh := make(chan struct{})
+	mock.ProvFunc = func() error {
+		close(provCh)
+		time.Sleep(10 * time.Millisecond)
+		return nil
+	}
+
+	// Start provisioning and wait for it to start
+	go prov.Provision(testUi(), new(MockCommunicator))
+	<-provCh
+
+	// Cancel it
+	prov.Cancel()
+	if !mock.CancelCalled {
+		t.Fatal("cancel should be called")
+	}
+}
