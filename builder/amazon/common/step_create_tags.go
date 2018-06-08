@@ -101,6 +101,10 @@ func (s *StepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 					awsErr.Code() == "InvalidSnapshot.NotFound" {
 					return false, nil
 				}
+			} else if awsErr.Code() == "RequestError" {
+				ui.Message(fmt.Sprintf("Network Error when creating "+
+					"tags; will retry ... Error: %s", err))
+				return false, nil
 			}
 
 			// Override tags on snapshots

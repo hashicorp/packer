@@ -62,6 +62,7 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 				} else if awsErr.Code() == "RequestError" {
 					ui.Message(fmt.Sprintf("Network Error when stopping "+
 						"instance; will retry ... Error: %s", err))
+					return false, nil
 				}
 			}
 			// errored, but not in expected way. Don't want to retry
