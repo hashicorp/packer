@@ -168,10 +168,15 @@ for Packer to work:
       "Resource" : "*"
   }]
 }
-```
+``` 
 
-Note that if you'd like to create a spot instance, you must also add  
-`ec2:RequestSpotInstances` and `ec2:CancelSpotInstanceRequests`
+Note that if you'd like to create a spot instance, you must also add:
+
+``` json
+ec2:RequestSpotInstances,
+ec2:CancelSpotInstanceRequests,
+ec2:DescribeSpotInstanceRequests
+```  
 
 ## Troubleshooting
 
