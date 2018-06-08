@@ -30,6 +30,7 @@ var FuncGens = map[string]FuncGenerator{
 	"env":            funcGenEnv,
 	"isotime":        funcGenIsotime,
 	"pwd":            funcGenPwd,
+	"split":          funcGenSplitter,
 	"template_dir":   funcGenTemplateDir,
 	"timestamp":      funcGenTimestamp,
 	"uuid":           funcGenUuid,
@@ -58,6 +59,17 @@ func Funcs(ctx *Context) template.FuncMap {
 	}
 
 	return template.FuncMap(result)
+}
+
+func funcGenSplitter(ctx *Context) interface{} {
+	return func(k string, s string, i int) (string, error) {
+		// return func(s string) (string, error) {
+		split := strings.Split(k, s)
+		if len(split) <= i {
+			return "", fmt.Errorf("the substring %d was unavailable using the separator value, %s, only %d values were found", i, s, len(split))
+		}
+		return split[i], nil
+	}
 }
 
 func funcGenBuildName(ctx *Context) interface{} {
