@@ -60,7 +60,7 @@ builder.
 
 -   `commercial_type` (string) - The name of the server commercial type:
       `ARM64-128GB`,`ARM64-16GB`,`ARM64-2GB`,`ARM64-32GB`,`ARM64-4GB`, `ARM64-64GB`,
-      `ARM64-8GB`,`C1`,`C2L`,`C2M`,`C2S`,`VC1L`,`VC1M`,`VC1S`,
+      `ARM64-8GB`,`C1`,`C2L`,`C2M`,`C2S`,`START1-L`,`START1-M`,`START1-S`,`START1-XS`,
       `X64-120GB`,`X64-15GB`,`X64-30GB`,`X64-60GB`
 
 ### Optional:
@@ -86,7 +86,7 @@ access tokens:
   "api_token": "YOUR TOKEN",
   "image": "UUID OF THE BASE IMAGE",
   "region": "par1",
-  "commercial_type": "VC1S",
+  "commercial_type": "START1-S",
   "ssh_username": "root",
   "ssh_private_key_file": "~/.ssh/id_rsa"
 }

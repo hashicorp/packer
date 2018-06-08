@@ -12,7 +12,7 @@ func testConfig() map[string]interface{} {
 		"api_access_key":  "foo",
 		"api_token":       "bar",
 		"region":          "ams1",
-		"commercial_type": "VC1S",
+		"commercial_type": "START1-S",
 		"ssh_username":    "root",
 		"image":           "image-uuid",
 	}
@@ -98,7 +98,7 @@ func TestBuilderPrepare_CommercialType(t *testing.T) {
 		t.Fatalf("should error")
 	}
 
-	expected := "VC1S"
+	expected := "START1-S"
 
 	config["commercial_type"] = expected
 	b = Builder{}
