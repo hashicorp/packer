@@ -182,6 +182,34 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_RemoteExport(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["remote_type"] = "esx5"
+	config["remote_host"] = "foobar.example.com"
+	// Bad
+	config["remote_password"] = ""
+	warns, err := b.Prepare(config)
+	if len(warns) != 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good
+	config["remote_password"] = "supersecret"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
 func TestBuilderPrepare_Format(t *testing.T) {
 	var b Builder
 	config := testConfig()
