@@ -50,13 +50,13 @@ contains instructions for setting the PATH on Windows.
 ## Compiling from Source
 
 To compile from source, you will need [Go](https://golang.org) installed and
-configured properly (including a `GOPATH` environment variable set), as well
-as a copy of [`git`](https://www.git-scm.com/) in your `PATH`.
+configured properly as well as a copy of [`git`](https://www.git-scm.com/)
+in your `PATH`.
 
 1.  Clone the Packer repository from GitHub into your `GOPATH`:
 
     ``` shell
-    $ mkdir -p $GOPATH/src/github.com/hashicorp && cd $_
+    $ mkdir -p $(go enc GOPATH)/src/github.com/hashicorp && cd $_
     $ git clone https://github.com/hashicorp/packer.git
     $ cd packer
     ```
