@@ -774,6 +774,12 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
+			"checksumSHA1": "lW+ldKF07Zz/C7WYPTchfr1USrQ=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces",
+			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
+			"revisionTime": "2018-06-10T02:06:14Z"
+		},
+		{
 			"checksumSHA1": "lAQuKIqTuQ9JuMgN0pPkNtRH2RM=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
