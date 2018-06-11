@@ -104,8 +104,10 @@ can be configured for this builder.
 -   `enable_mac_spoofing` (boolean) - If true enable mac spoofing for virtual
     machine. This defaults to false.
 
--   `enable_secure_boot` (boolean) - If true enable secure boot for virtual
-    machine. This defaults to false.
+-   `enable_secure_boot` (boolean) - If true enable secure boot for virtual machine. This defaults to false.
+
+-    `secure_boot_template` (string) - The secure boot template to be configured. Valid values are "MicrosoftWindows" (Windows) or 
+     "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if enable_secure_boot is set to "true". This defaults to "MicrosoftWindows".
 
 -   `enable_virtualization_extensions` (boolean) - If true enable virtualization
     extensions for virtual machine. This defaults to false. For nested
@@ -136,6 +138,11 @@ can be configured for this builder.
 
 -   `guest_additions_path` (string) - The path to the iso image for guest
     additions.
+
+-   `headless` (boolean) - Packer defaults to building Hyper-V virtual
+    machines by launching a GUI that shows the console of the machine
+    being built. When this value is set to true, the machine will start without
+    a console.
 
 -   `http_directory` (string) - Path to a directory to serve using an HTTP
     server. The files in this directory will be available over HTTP that will

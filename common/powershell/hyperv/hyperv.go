@@ -1,7 +1,9 @@
 package hyperv
 
 import (
+	"context"
 	"errors"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -196,7 +198,7 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
 
 	if generation == 2 {
 		var script = `
@@ -223,8 +225,13 @@ if ($harddrivePath){
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks)
-$vhdx = $vmName + '.vhdx'
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
+if($fixedVHD -eq "true"){
+	$vhdx = $vmName + '.vhd'
+}
+else{
+	$vhdx = $vmName + '.vhdx'
+}
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 if ($harddrivePath){
 	if($diffDisks -eq "true"){
@@ -235,12 +242,17 @@ if ($harddrivePath){
 	}
 	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
 } else {
-	Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
+	if($fixedVHD -eq "true"){
+		Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes $newVHDSizeBytes
+	}
+	else {
+		Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
+	}
 	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
 			return err
 		}
 
@@ -504,7 +516,7 @@ Hyper-V\Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoof
 	return err
 }
 
-func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool) error {
+func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateName string) error {
 	var script = `
 param([string]$vmName, $enableSecureBoot)
 Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
@@ -517,7 +529,11 @@ Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
 		enableSecureBootString = "On"
 	}
 
-	err := ps.Run(script, vmName, enableSecureBootString)
+	if templateName == "" {
+		templateName = "MicrosoftWindows"
+	}
+
+	err := ps.Run(script, vmName, enableSecureBootString, templateName)
 	return err
 }
 
@@ -594,12 +610,12 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
     # SCSI controllers are stored in the scsi XML container
     if ((Hyper-V\Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
     {
-      $config.configuration.secure_boot_enabled.'#text' = 'True'
-    }
+	  $config.configuration.secure_boot_enabled.'#text' = 'True'
+	}
     else
     {
       $config.configuration.secure_boot_enabled.'#text' = 'False'
-    }
+	}
   }
 
   $vm_controllers | ForEach {
@@ -886,7 +902,7 @@ Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter 
 func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
 
 	var script = `
-param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes,[string]$vhdBlockSizeInByte [string]$controllerType)
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
 Hyper-V\New-VHD -path $vhdPath -SizeBytes $vhdSizeInBytes -BlockSizeBytes $vhdBlockSizeInByte
 Hyper-V\Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
@@ -1229,4 +1245,19 @@ param([string]$vmName, [string]$scanCodes)
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, scanCodes)
 	return err
+}
+
+func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, "vmconnect.exe", "localhost", vmName)
+	err := cmd.Start()
+	if err != nil {
+		// Failed to start so cancel function not required
+		cancel = nil
+	}
+	return cancel, err
+}
+
+func DisconnectVirtualMachine(cancel context.CancelFunc) {
+	cancel()
 }

@@ -139,6 +139,59 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	config["use_fixed_vhd_format"] = true
+	config["generation"] = 1
+	config["skip_compaction"] = true
+	config["differencing_disk"] = false
+
+	//use_fixed_vhd_format should work with generation = 1, skip_compaction = true, and differencing_disk = false
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	//use_fixed_vhd_format should not work with differencing_disk = true
+	config["differencing_disk"] = true
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	config["differencing_disk"] = false
+
+	//use_fixed_vhd_format should not work with skip_compaction = false
+	config["skip_compaction"] = false
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	config["skip_compaction"] = true
+
+	//use_fixed_vhd_format should not work with generation = 2
+	config["generation"] = 2
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()

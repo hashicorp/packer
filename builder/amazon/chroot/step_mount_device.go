@@ -26,7 +26,7 @@ type mountPathData struct {
 //   mount_device_cleanup CleanupFunc - To perform early cleanup
 type StepMountDevice struct {
 	MountOptions   []string
-	MountPartition int
+	MountPartition string
 
 	mountPath string
 }
@@ -35,6 +35,10 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	device := state.Get("device").(string)
+	if config.NVMEDevicePath != "" {
+		// customizable device path for mounting NVME block devices on c5 and m5 HVM
+		device = config.NVMEDevicePath
+	}
 	wrappedCommand := state.Get("wrappedCommand").(CommandWrapper)
 
 	var virtualizationType string
@@ -47,6 +51,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	ctx := config.ctx
+
 	ctx.Data = &mountPathData{Device: filepath.Base(device)}
 	mountPath, err := interpolate.Render(config.MountPath, &ctx)
 
@@ -75,8 +80,9 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	deviceMount := device
-	if virtualizationType == "hvm" {
-		deviceMount = fmt.Sprintf("%s%d", device, s.MountPartition)
+
+	if virtualizationType == "hvm" && s.MountPartition != "0" {
+		deviceMount = fmt.Sprintf("%s%s", device, s.MountPartition)
 	}
 	state.Put("deviceMount", deviceMount)
 
@@ -97,7 +103,7 @@ func (s *StepMountDevice) Run(_ context.Context, state multistep.StateBag) multi
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
+	log.Printf("[DEBUG] (step mount) mount command is %s", mountCommand)
 	cmd := ShellCommand(mountCommand)
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {

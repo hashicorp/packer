@@ -102,6 +102,11 @@ can be configured for this builder.
 -   `differencing_disk` (boolean) - If true enables differencing disks. Only the changes will be written to the new disk. This is especially useful if your
     source is a vhd/vhdx. This defaults to false.
 
+-   `headless` (boolean) - Packer defaults to building Hyper-V virtual
+    machines by launching a GUI that shows the console of the machine
+    being built. When this value is set to true, the machine will start without
+    a console.
+
 -   `skip_export` (boolean) - If true skips VM export. If you are interested only in the vhd/vhdx files, you can enable this option. This will create
     inline disks which improves the build performance. There will not be any copying of source vhds to temp directory. This defaults to false.
 
@@ -111,8 +116,11 @@ can be configured for this builder.
 -   `enable_mac_spoofing` (boolean) - If true enable mac spoofing for virtual machine.
     This defaults to false.
 
--   `enable_secure_boot` (boolean) - If true enable secure boot for virtual machine.
-    This defaults to false.
+-   `enable_secure_boot` (boolean) - If true enable secure boot for virtual machine. This defaults to false.
+
+-    `secure_boot_template` (string) - The secure boot template to be configured. Valid values are "MicrosoftWindows" (Windows) or 
+     "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if enable_secure_boot is set to "true". This defaults to "MicrosoftWindows".
+
 
 -   `enable_virtualization_extensions` (boolean) - If true enable virtualization extensions for virtual machine.
     This defaults to false. For nested virtualization you need to enable mac spoofing, disable dynamic memory
@@ -211,6 +219,12 @@ can be configured for this builder.
 -   `switch_vlan_id` (string) - This is the vlan of the virtual switch's network card.
     By default none is set. If none is set then a vlan is not set on the switch's network card.
     If this value is set it should match the vlan specified in by `vlan_id`.
+
+-   `use_fixed_vhd_format` (boolean) - If true, creates the boot disk on the virtual machine as
+    a fixed VHD format disk. The default is false, which creates a dynamic VHDX format disk. This
+    option requires setting `generation` to 1, `skip_compaction` to true, and `differencing_disk` to false.
+    Additionally, any value entered for `disk_block_size` will be ignored. The most likely use case for this
+    option is outputing a disk that is in the format required for upload to Azure.
 
 -   `vhd_temp_path` (string) - A separate path to be used for storing the VM's
     disk image. The purpose is to enable reading and writing to take place on

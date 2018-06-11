@@ -27,12 +27,14 @@ type StepCreateVM struct {
 	EnableMacSpoofing              bool
 	EnableDynamicMemory            bool
 	EnableSecureBoot               bool
+	SecureBootTemplate             string
 	EnableVirtualizationExtensions bool
 	AdditionalDiskSize             []uint
 	DifferencingDisk               bool
 	MacAddress                     string
 	SkipExport                     bool
 	OutputDir                      string
+	FixedVHD                       bool
 }
 
 func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -67,7 +69,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	diskSize := int64(s.DiskSize * 1024 * 1024)
 	diskBlockSize := int64(s.DiskBlockSize * 1024 * 1024)
 
-	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, diskBlockSize, s.SwitchName, s.Generation, s.DifferencingDisk)
+	err := driver.CreateVirtualMachine(s.VMName, path, harddrivePath, vhdPath, ramSize, diskSize, diskBlockSize, s.SwitchName, s.Generation, s.DifferencingDisk, s.FixedVHD)
 	if err != nil {
 		err := fmt.Errorf("Error creating virtual machine: %s", err)
 		state.Put("error", err)
@@ -102,7 +104,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	if s.Generation == 2 {
-		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot)
+		err = driver.SetVirtualMachineSecureBoot(s.VMName, s.EnableSecureBoot, s.SecureBootTemplate)
 		if err != nil {
 			err := fmt.Errorf("Error setting secure boot: %s", err)
 			state.Put("error", err)

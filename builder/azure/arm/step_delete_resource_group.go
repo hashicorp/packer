@@ -53,7 +53,13 @@ func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state
 		s.say("\nThe resource group was created by Packer, deleting ...")
 		f, err := s.client.GroupsClient.Delete(ctx, resourceGroupName)
 		if err == nil {
-			f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+			if state.Get(constants.ArmAsyncResourceGroupDelete).(bool) {
+				// No need to wait for the complition for delete if request is Accepted
+				s.say(fmt.Sprintf("\nResource Group is being deleted, not waiting for deletion due to config. Resource Group Name '%s'", resourceGroupName))
+			} else {
+				f.WaitForCompletion(ctx, s.client.GroupsClient.Client)
+			}
+
 		}
 
 		if err != nil {
@@ -76,6 +82,7 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
 		if deploymentOperation.Properties.TargetResource == nil {
+			deploymentOperations.Next()
 			continue
 		}
 
