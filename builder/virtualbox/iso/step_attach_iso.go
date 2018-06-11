@@ -3,6 +3,7 @@ package iso
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/helper/multistep"
