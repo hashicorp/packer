@@ -43,7 +43,7 @@ func (s *stepAttachISO) Run(_ context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 	isoPath = resolvedIsoPath
-	
+
 	// Attach the disk to the controller
 	command := []string{
 		"storageattach", vmName,
