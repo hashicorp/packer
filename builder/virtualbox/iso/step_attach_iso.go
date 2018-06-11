@@ -34,6 +34,16 @@ func (s *stepAttachISO) Run(_ context.Context, state multistep.StateBag) multist
 		device = "0"
 	}
 
+	// If it's a symlink, resolve it to it's target.
+	resolvedIsoPath, err := filepath.EvalSymlinks(isoPath)
+	if err != nil {
+		err := fmt.Errorf("Error resolving symlink for ISO: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	isoPath = resolvedIsoPath
+	
 	// Attach the disk to the controller
 	command := []string{
 		"storageattach", vmName,
