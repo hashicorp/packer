@@ -840,6 +840,12 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
+			"checksumSHA1": "x6lD4wQOZc1rtm6kMaUBMwLxAlA=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external",
+			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
+			"revisionTime": "2018-06-10T02:06:14Z"
+		},
+		{
 			"checksumSHA1": "K4VAatvB/jywsU+g/mU7bnSaVaI=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips",
 			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
