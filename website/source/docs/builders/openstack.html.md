@@ -112,8 +112,11 @@ builder.
 
 -   `floating_ip` (string) - A specific floating IP to assign to this instance.
 
--   `floating_ip_pool` (string) - The name of the floating IP pool to use to
-    allocate a floating IP.
+-   `floating_ip_network` (string) - The ID of an external network that can be
+    used for creation of a new floating IP.
+
+-   `floating_ip_pool` (string) - *Deprecated* use `floating_ip_network`
+    instead.
 
 -   `image_members` (array of strings) - List of members to add to the image
     after creation. An image member is usually a project (also called the
