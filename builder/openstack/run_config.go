@@ -23,9 +23,9 @@ type RunConfig struct {
 	Flavor           string            `mapstructure:"flavor"`
 	AvailabilityZone string            `mapstructure:"availability_zone"`
 	RackconnectWait  bool              `mapstructure:"rackconnect_wait"`
-	FloatingIpPool   string            `mapstructure:"floating_ip_pool"`
-	FloatingIp       string            `mapstructure:"floating_ip"`
-	ReuseIps         bool              `mapstructure:"reuse_ips"`
+	FloatingNetwork  string            `mapstructure:"floating_network"`
+	FloatingIP       string            `mapstructure:"floating_ip"`
+	ReuseIPs         bool              `mapstructure:"reuse_ips"`
 	SecurityGroups   []string          `mapstructure:"security_groups"`
 	Networks         []string          `mapstructure:"networks"`
 	Ports            []string          `mapstructure:"ports"`
@@ -55,10 +55,6 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
 
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
-	}
-
-	if c.UseFloatingIp && c.FloatingIpPool == "" {
-		c.FloatingIpPool = "public"
 	}
 
 	// Validation

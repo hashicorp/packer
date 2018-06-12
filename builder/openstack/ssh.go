@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
 	"golang.org/x/crypto/ssh"
@@ -35,9 +35,9 @@ func CommHost(
 
 		// If we have a floating IP, use that
 		ip := state.Get("access_ip").(*floatingips.FloatingIP)
-		if ip != nil && ip.IP != "" {
-			log.Printf("[DEBUG] Using floating IP %s to connect", ip.IP)
-			return ip.IP, nil
+		if ip != nil && ip.FloatingIP != "" {
+			log.Printf("[DEBUG] Using floating IP %s to connect", ip.FloatingIP)
+			return ip.FloatingIP, nil
 		}
 
 		if s.AccessIPv4 != "" {
