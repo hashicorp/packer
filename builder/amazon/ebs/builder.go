@@ -93,7 +93,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 	ec2conn := ec2.New(session)
 
+	// TODO Translate this into VpcFilter/SubnetFilter and move the describe into apropriate step.
 	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically
+
+	/*
+	 * If subnet => vpc, az
+	 */
 	if b.config.SubnetId != "" && (b.config.AvailabilityZone == "" || b.config.VpcId == "") {
 		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", b.config.SubnetId)
 		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&b.config.SubnetId}})
@@ -177,6 +182,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AmiFilters:               b.config.SourceAmiFilter,
 		},
+		&awscommon.StepNetworkInfo{
+			VpcId:            b.config.VpcId,
+			VpcFilter:        b.config.VpcFilter,
+			SubnetId:         b.config.SubnetId,
+			SubnetFilter:     b.config.SubnetFilter,
+			AvailabilityZone: b.config.AvailabilityZone,
+		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
@@ -186,9 +198,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&awscommon.StepSecurityGroup{
+			// TODO remove
 			SecurityGroupIds: b.config.SecurityGroupIds,
 			CommConfig:       &b.config.RunConfig.Comm,
-			VpcId:            b.config.VpcId,
+			// TODO remove
+			VpcId: b.config.VpcId,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
 		&awscommon.StepCleanupVolumes{

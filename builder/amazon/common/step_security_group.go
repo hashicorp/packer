@@ -60,6 +60,13 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		Description: aws.String("Temporary group for Packer"),
 	}
 
+	// TODO always get vpc_id from state.
+	if s.VpcId == "" {
+		if vpcId, ok := state.GetOk("vpc_id"); ok {
+			s.VpcId = vpcId.(string)
+		}
+	}
+
 	if s.VpcId != "" {
 		group.VpcId = &s.VpcId
 	}
