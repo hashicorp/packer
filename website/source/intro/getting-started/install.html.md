@@ -56,7 +56,7 @@ in your `PATH`.
 1.  Clone the Packer repository from GitHub into your `GOPATH`:
 
     ``` shell
-    $ mkdir -p $(go enc GOPATH)/src/github.com/hashicorp && cd $_
+    $ mkdir -p $(go env GOPATH)/src/github.com/hashicorp && cd $_
     $ git clone https://github.com/hashicorp/packer.git
     $ cd packer
     ```
