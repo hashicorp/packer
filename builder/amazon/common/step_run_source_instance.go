@@ -154,6 +154,13 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.KeyName = &keyName
 	}
 
+	// TODO always get subnet_id from state.
+	if s.SubnetId == "" {
+		if subnetId, ok := state.GetOk("subnet_id"); ok {
+			s.SubnetId = subnetId.(string)
+		}
+	}
+
 	if s.SubnetId != "" && s.AssociatePublicIpAddress {
 		runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
