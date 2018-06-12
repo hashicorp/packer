@@ -115,9 +115,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Wait: b.config.RackconnectWait,
 		},
 		&StepAllocateIp{
-			FloatingIpPool: b.config.FloatingIpPool,
-			FloatingIp:     b.config.FloatingIp,
-			ReuseIps:       b.config.ReuseIps,
+			FloatingNetwork: b.config.FloatingNetwork,
+			FloatingIP:      b.config.FloatingIP,
+			ReuseIPs:        b.config.ReuseIPs,
 		},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
