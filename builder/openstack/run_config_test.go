@@ -101,11 +101,19 @@ func TestRunConfigPrepare_BlockStorage(t *testing.T) {
 	}
 
 	c.VolumeName = "PackerVolume"
+	if c.VolumeName != "PackerVolume" {
+		t.Fatalf("invalid value: %s", c.VolumeName)
+	}
+}
+
+func TestRunConfigPrepare_FloatingIPPoolCompat(t *testing.T) {
+	c := testRunConfig()
+	c.FloatingIPPool = "uuid"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.VolumeName != "PackerVolume" {
-		t.Fatalf("invalid value: %s", c.VolumeName)
+	if c.FloatingIPNetwork != "uuid" {
+		t.Fatalf("invalid value: %s", c.FloatingIPNetwork)
 	}
 }

@@ -11,9 +11,9 @@ import (
 )
 
 type StepAllocateIp struct {
-	FloatingNetwork string
-	FloatingIP      string
-	ReuseIPs        bool
+	FloatingIPNetwork string
+	FloatingIP        string
+	ReuseIPs          bool
 }
 
 func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -77,7 +77,7 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 	if instanceIP.ID == "" {
 		// Search for the external network that can be used for the floating IPs if
 		// user hasn't provided any.
-		floatingNetwork := s.FloatingNetwork
+		floatingNetwork := s.FloatingIPNetwork
 		if floatingNetwork == "" {
 			ui.Say(fmt.Sprintf("Searching for the external network..."))
 			externalNetwork, err := FindExternalNetwork(networkClient)
