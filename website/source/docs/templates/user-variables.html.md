@@ -176,7 +176,10 @@ variable values. Assuming this file is in `variables.json`, we can build our
 template using the following command:
 
 ``` text
+On Linux :
 $ packer build -var-file=variables.json template.json
+On Windows :
+packer build -var-file variables.json template.json
 ```
 
 The `-var-file` flag can be specified multiple times and variables from multiple
