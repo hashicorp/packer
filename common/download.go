@@ -278,8 +278,9 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 
 	resp, err := httpClient.Do(req)
-	if err == nil {
-
+	if err != nil {
+		log.Printf("[DEBUG] (download) Error making HTTP HEAD request: %s", err.Error())
+	} else {
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			// If the HEAD request succeeded, then attempt to set the range
 			// query if we can.
@@ -292,13 +293,9 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 					}
 				}
 			}
+		} else {
+			log.Printf("[DEBUG] (download) Unexpected HTTP response during HEAD request: %s", resp.Status)
 		}
-
-		if resp.StatusCode >= 400 && resp.StatusCode < 600 {
-			return fmt.Errorf("Received HTTP error: %s", resp.Status)
-		}
-	} else {
-		return err
 	}
 
 	// Set the request to GET now, and redo the query to download
@@ -307,8 +304,10 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	resp, err = httpClient.Do(req)
 	if err != nil {
 		return err
-	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
-		return fmt.Errorf("%s", resp.Status)
+	} else {
+		if resp.StatusCode >= 400 && resp.StatusCode < 600 {
+			return fmt.Errorf("Error making HTTP GET request: %s", resp.Status)
+		}
 	}
 
 	d.total = d.current + uint64(resp.ContentLength)
