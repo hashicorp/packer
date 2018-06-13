@@ -102,6 +102,14 @@ credentials inline, or in the environment, Packer will check this location. You
 can optionally specify a different location in the configuration by setting the
 environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
 
+The format for the credentials file is like so
+
+```
+[default]
+aws_access_key_id=<your access key id>
+aws_secret_access_key=<your secret access key>
+```
+
 You may also configure the profile to use by setting the `profile`
 configuration option, or setting the `AWS_PROFILE` environment variable:
 
