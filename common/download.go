@@ -278,20 +278,27 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 
 	resp, err := httpClient.Do(req)
-	if err == nil && (resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		// If the HEAD request succeeded, then attempt to set the range
-		// query if we can.
-		if resp.Header.Get("Accept-Ranges") == "bytes" {
-			if fi, err := dst.Stat(); err == nil {
-				if _, err = dst.Seek(0, os.SEEK_END); err == nil {
-					req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+	if err == nil {
 
-					d.current = uint64(fi.Size())
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			// If the HEAD request succeeded, then attempt to set the range
+			// query if we can.
+			if resp.Header.Get("Accept-Ranges") == "bytes" {
+				if fi, err := dst.Stat(); err == nil {
+					if _, err = dst.Seek(0, os.SEEK_END); err == nil {
+						req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+
+						d.current = uint64(fi.Size())
+					}
 				}
 			}
 		}
-	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
-		return fmt.Errorf("%s", resp.Status)
+
+		if resp.StatusCode >= 400 && resp.StatusCode < 600 {
+			return fmt.Errorf("Received HTTP error: %s", resp.Status)
+		}
+	} else {
+		return err
 	}
 
 	// Set the request to GET now, and redo the query to download
