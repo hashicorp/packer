@@ -78,11 +78,6 @@ builder.
 
 ### Optional:
 
--   `clone_from_snapshot_name` (string) - The name of the snapshot
-
--   `clone_all_snapshots` (boolean) - Should all snapshots be cloned when the
-    machine is cloned.
-
 -   `boot_command` (array of strings) - This is an array of commands to type
     when the virtual machine is first booted. The goal of these commands
     should be to type just enough to initialize the operating system
@@ -96,6 +91,10 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
+-   `clone_all_snapshots` (boolean) - Should all snapshots be cloned when the
+    machine is cloned.
+
+-   `clone_from_snapshot_name` (string) - The name of the snapshot
 -   `cpu` (number) - The number of cpus the virtual machine should use. If
     this isn't specified, the default is 1 cpu.
 
@@ -108,15 +107,18 @@ builder.
 -   `enable_secure_boot` (boolean) - If true enable secure boot for virtual
     machine. This defaults to false.
 
--   `secure_boot_template` (string) - The secure boot template to be
-    configured. Valid values are "MicrosoftWindows" (Windows) or
-    "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if
-    enable_secure_boot is set to "true". This defaults to "MicrosoftWindows".
-
 -   `enable_virtualization_extensions` (boolean) - If true enable
     virtualization extensions for virtual machine. This defaults to false. For
     nested virtualization you need to enable mac spoofing, disable dynamic
     memory and have at least 4GB of RAM for virtual machine.
+
+-   `floppy_dirs` (array of strings) - A list of directories to place onto the
+    floppy disk recursively. This is similar to the `floppy_files` option
+    except that the directory structure is preserved. This is useful for when
+    your floppy disk includes drivers or if you just want to organize it's
+    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are
+    allowed.  The maximum summary size of all files in the listed directories
+    are the same as in `floppy_files`.
 
 -   `floppy_files` (array of strings) - A list of files to place onto a floppy
     disk that is attached when the VM is booted. This is most useful for
@@ -127,14 +129,6 @@ builder.
     exists for creating sub-directories on the floppy. Wildcard characters (*,
     ?, and []) are allowed. Directory names are also allowed, which will add
     all the files found in the directory to the floppy.
-
--   `floppy_dirs` (array of strings) - A list of directories to place onto the
-    floppy disk recursively. This is similar to the `floppy_files` option
-    except that the directory structure is preserved. This is useful for when
-    your floppy disk includes drivers or if you just want to organize it's
-    contents as a hierarchy. Wildcard characters (\*, ?, and \[\]) are
-    allowed.  The maximum summary size of all files in the listed directories
-    are the same as in `floppy_files`.
 
 -   `guest_additions_mode` (string) - How should guest additions be installed.
     If value `attach` then attach iso image with by specified by
@@ -164,16 +158,23 @@ builder.
     maximum port the same. By default the values are 8000 and 9000,
     respectively.
 
--   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
-    files are so large, this is required and Packer will verify it prior to
-    booting a virtual machine with the ISO attached. The type of the checksum
-    is specified with `iso_checksum_type`, documented below.
-
 -   `iso_checksum_type` (string) - The type of the checksum specified in
     `iso_checksum`. Valid values are "none", "md5", "sha1", "sha256", or
     "sha512" currently. While "none" will skip checksumming, this is not
     recommended since ISO files are generally large and corruption does happen
     from time to time.
+
+-   `iso_checksum` (string) - The checksum for the OS ISO file. Because ISO
+    files are so large, this is required and Packer will verify it prior to
+    booting a virtual machine with the ISO attached. The type of the checksum
+    is specified with `iso_checksum_type`, documented below.
+
+-   `iso_target_extension` (string) - The extension of the iso file after
+    download. This defaults to "iso".
+
+-   `iso_target_path` (string) - The path where the iso should be saved after
+    download. By default will go in the packer cache, with a hash of the
+    original filename as its name.
 
 -   `iso_url` (string) - A URL to the ISO or VHD containing the installation
     image. This URL can be either an HTTP URL or a file URL (or path to a
@@ -187,12 +188,9 @@ builder.
     default this is empty and `iso_url` is used. Only one of `iso_url` or
     `iso_urls` can be specified.
 
--   `iso_target_extension` (string) - The extension of the iso file after
-    download. This defaults to "iso".
-
--   `iso_target_path` (string) - The path where the iso should be saved after
-    download. By default will go in the packer cache, with a hash of the
-    original filename as its name.
+-   `mac_address` (string) - This allows a specific MAC address to be used on
+    the default virtual network card.  The MAC address must be a string with
+    no delimiters, for example "0000deadbeef".
 
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or
@@ -204,10 +202,15 @@ builder.
 -   `ram_size` (number) - The size, in megabytes, of the ram to create for the
     VM. By default, this is 1 GB.
 
-*   `secondary_iso_images` (array of strings) - A list of iso paths to
+-   `secondary_iso_images` (array of strings) - A list of iso paths to
     attached to a VM when it is booted. This is most useful for unattended
     Windows installs, which look for an `Autounattend.xml` file on removable
     media. By default, no secondary iso will be attached.
+
+-   `secure_boot_template` (string) - The secure boot template to be
+    configured. Valid values are "MicrosoftWindows" (Windows) or
+    "MicrosoftUEFICertificateAuthority" (Linux). This only takes effect if
+    enable_secure_boot is set to "true". This defaults to "MicrosoftWindows".
 
 -   `shutdown_command` (string) - The command to use to gracefully shut down
     the machine once all the provisioning is done. By default this is an empty
@@ -225,6 +228,12 @@ builder.
 -   `skip_compaction` (boolean) - If true skip compacting the hard disk for
     virtual machine when exporting. This defaults to false.
 
+-   `skip_export` (boolean) - If `true` Packer will skip the export of the
+    VM. If you are interested only in the VHD/VHDX files, you can enable
+    this option. This will create inline disks which improves the build
+    performance.  There will not be any copying of source VHDs to the temp
+    directory. This defaults to false.
+
 -   `switch_name` (string) - The name of the switch to connect the virtual
     machine to. Be defaulting this to an empty string, Packer will try to
     determine the switch to use by looking for external switch that is up and
@@ -238,10 +247,6 @@ builder.
 -   `vlan_id` (string) - This is the vlan of the virtual machine's network
     card for the new virtual machine. By default none is set. If none is set
     then vlans are not set on the virtual machine's network card.
-
--   `mac_address` (string) - This allows a specific MAC address to be used on
-    the default virtual network card.  The MAC address must be a string with
-    no delimiters, for example "0000deadbeef".
 
 -   `vm_name` (string) - This is the name of the virtual machine for the new
     virtual machine, without the file extension. By default this is
