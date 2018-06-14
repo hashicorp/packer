@@ -426,12 +426,20 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 }
 
 func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
-	// Upload all env vars to a powershell script on the target build file system
+	// Upload all env vars to a powershell script on the target build file
+	// system. Do this in the context of a single retryable function so
+	// that we gracefully handle any errors created by transient conditions
+	// such as a system restart
 	envVarReader := strings.NewReader(flattenedEnvVars)
 	log.Printf("Uploading env vars to %s", p.config.RemoteEnvVarPath)
-	err = p.communicator.Upload(p.config.RemoteEnvVarPath, envVarReader, nil)
+	err = p.retryable(func() error {
+		if err := p.communicator.Upload(p.config.RemoteEnvVarPath, envVarReader, nil); err != nil {
+			return fmt.Errorf("Error uploading ps script containing env vars: %s", err)
+		}
+		return err
+	})
 	if err != nil {
-		return fmt.Errorf("Error uploading ps script containing env vars: %s", err)
+		return err
 	}
 	return
 }
