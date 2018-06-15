@@ -94,7 +94,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCheckAlicloudSourceImage{
 			SourceECSImageId: b.config.AlicloudSourceImage,
 		},
-		&StepConfigAlicloudKeyPair{
+		&stepConfigAlicloudKeyPair{
 			Debug:                b.config.PackerDebug,
 			KeyPairName:          b.config.SSHKeyPairName,
 			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
@@ -136,7 +136,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == VpcNet {
-		steps = append(steps, &setpConfigAlicloudEIP{
+		steps = append(steps, &stepConfigAlicloudEIP{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
@@ -147,7 +147,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		})
 	}
 	steps = append(steps,
-		&stepAttachKeyPar{},
+		&stepAttachKeyPair{},
 		&stepRunAlicloudInstance{},
 		&stepMountAlicloudDisk{},
 		&communicator.StepConnect{
@@ -170,12 +170,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
-		&setpRegionCopyAlicloudImage{
+		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
 			RegionId:                        b.config.AlicloudRegion,
 		},
-		&setpShareAlicloudImage{
+		&stepShareAlicloudImage{
 			AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
 			AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
 			RegionId:                     b.config.AlicloudRegion,
