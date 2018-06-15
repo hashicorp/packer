@@ -10,14 +10,14 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type setpConfigAlicloudEIP struct {
+type stepConfigAlicloudEIP struct {
 	AssociatePublicIpAddress bool
 	RegionId                 string
 	InternetChargeType       string
 	allocatedId              string
 }
 
-func (s *setpConfigAlicloudEIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudEIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
@@ -55,7 +55,7 @@ func (s *setpConfigAlicloudEIP) Run(_ context.Context, state multistep.StateBag)
 	return multistep.ActionContinue
 }
 
-func (s *setpConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
+func (s *stepConfigAlicloudEIP) Cleanup(state multistep.StateBag) {
 	if len(s.allocatedId) == 0 {
 		return
 	}
