@@ -240,11 +240,11 @@ builder.
 -   `skip_compaction` (boolean) - If `true` skip compacting the hard disk for
     the virtual machine when exporting. This defaults to `false`.
 
--   `skip_export` (boolean) - If `true` Packer will skip the export of the
-    VM. If you are interested only in the VHD/VHDX files, you can enable
-    this option. This will create inline disks which improves the build
-    performance.  There will not be any copying of source VHDs to the temp
-    directory. This defaults to `false`.
+-   `skip_export` (boolean) - If `true` Packer will skip the export of the VM.
+    If you are interested only in the VHD/VHDX files, you can enable this
+    option. The resulting VHD/VHDX file will be output to
+    `<output_directory>/Virtual Hard Disks`. By default this option is `false`
+    and Packer will export the VM to `output_directory`.
 
 -   `switch_name` (string) - The name of the switch to connect the virtual
     machine to. By default, leaving this value unset will cause Packer to
