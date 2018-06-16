@@ -678,20 +678,6 @@ Get-ChildItem "$srcPath" -Filter *.vhd* | %{
 	return err
 }
 
-func CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
-
-	var script = `
-param([string]$srcPath, [string]$dstPath, [string]$vhdDirName, [string]$vmDir)
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vhdDirName) -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vmDir) -Destination $dstPath
-`
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, outputPath, vhdDir, vmDir)
-	return err
-}
-
 func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
 
 	var script = `
