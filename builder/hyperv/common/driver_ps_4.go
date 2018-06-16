@@ -223,10 +223,6 @@ func (d *HypervPS4Driver) CompactDisks(path string) error {
 	return hyperv.CompactDisks(path)
 }
 
-func (d *HypervPS4Driver) CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
-	return hyperv.CopyExportedVirtualMachine(expPath, outputPath, vhdDir, vmDir)
-}
-
 func (d *HypervPS4Driver) RestartVirtualMachine(vmName string) error {
 	return hyperv.RestartVirtualMachine(vmName)
 }

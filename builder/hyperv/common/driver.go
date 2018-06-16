@@ -96,8 +96,6 @@ type Driver interface {
 
 	CompactDisks(string) error
 
-	CopyExportedVirtualMachine(string, string, string, string) error
-
 	RestartVirtualMachine(string) error
 
 	CreateDvdDrive(string, string, uint) (uint, uint, error)

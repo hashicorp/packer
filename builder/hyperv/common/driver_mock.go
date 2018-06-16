@@ -190,13 +190,6 @@ type DriverMock struct {
 	CompactDisks_Path   string
 	CompactDisks_Err    error
 
-	CopyExportedVirtualMachine_Called     bool
-	CopyExportedVirtualMachine_ExpPath    string
-	CopyExportedVirtualMachine_OutputPath string
-	CopyExportedVirtualMachine_VhdDir     string
-	CopyExportedVirtualMachine_VmDir      string
-	CopyExportedVirtualMachine_Err        error
-
 	RestartVirtualMachine_Called bool
 	RestartVirtualMachine_VmName string
 	RestartVirtualMachine_Err    error
@@ -492,15 +485,6 @@ func (d *DriverMock) CompactDisks(path string) error {
 	d.CompactDisks_Called = true
 	d.CompactDisks_Path = path
 	return d.CompactDisks_Err
-}
-
-func (d *DriverMock) CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
-	d.CopyExportedVirtualMachine_Called = true
-	d.CopyExportedVirtualMachine_ExpPath = expPath
-	d.CopyExportedVirtualMachine_OutputPath = outputPath
-	d.CopyExportedVirtualMachine_VhdDir = vhdDir
-	d.CopyExportedVirtualMachine_VmDir = vmDir
-	return d.CopyExportedVirtualMachine_Err
 }
 
 func (d *DriverMock) RestartVirtualMachine(vmName string) error {
