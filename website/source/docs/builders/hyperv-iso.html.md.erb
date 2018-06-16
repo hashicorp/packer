@@ -255,7 +255,11 @@ builder.
     the VLAN specified in by `vlan_id`.
 
 -   `temp_path` (string) - This is the temporary path in which Packer will
-    create the virtual machine. By default the value is the system `%temp%`.
+    create the virtual machine. By default a folder named
+    `packerhv[7-digit-number]` will be created under `%TEMP%` - where
+    7-digit-number is automatically generated to guarantee a unique folder
+    for the build. For most systems `%TEMP%` will evaluate to
+    `%USERPROFILE%/AppData/Local/Temp`.
 
 -   `use_fixed_vhd_format` (boolean) - If true, creates the boot disk on the
     virtual machine as a fixed VHD format disk. The default is `false`, which
