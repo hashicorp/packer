@@ -665,16 +665,16 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 	return err
 }
 
-func CompactDisks(expPath string, vhdDir string) error {
+func CompactDisks(path string) error {
 	var script = `
-param([string]$srcPath, [string]$vhdDirName)
-Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
+param([string]$srcPath)
+Get-ChildItem "$srcPath" -Filter *.vhd* | %{
     Optimize-VHD -Path $_.FullName -Mode Full
 }
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, vhdDir)
+	err := ps.Run(script, path)
 	return err
 }
 
