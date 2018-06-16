@@ -267,7 +267,7 @@ if ($harddrivePath){
 func DisableAutomaticCheckpoints(vmName string) error {
 	var script = `
 param([string]$vmName)
-if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
+if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 	Hyper-V\Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
 `
 	var ps powershell.PowerShellCmd
@@ -279,7 +279,7 @@ func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName str
 	var script = `
 param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
-$WorkingPath = Join-Path $exportPath $vmName 
+$WorkingPath = Join-Path $exportPath $vmName
 
 if (Test-Path $WorkingPath) {
 	throw "Export path working directory: $WorkingPath already exists!"
@@ -297,7 +297,7 @@ if ($snapshotName) {
     } else {
         $snapshot = $null
     }
-    
+
     if (!$snapshot) {
         #No snapshot clone
         Hyper-V\Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
@@ -328,7 +328,7 @@ param([string]$exportPath, [string]$cloneFromVmxcPath)
 if (!(Test-Path $cloneFromVmxcPath)){
 	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
 }
-	
+
 if (!(Test-Path $exportPath)){
 	New-Item -ItemType Directory -Force -Path $exportPath
 }
@@ -390,12 +390,12 @@ if ($vhdPath){
 		$existingFirstHarddrive | Hyper-V\Set-VMHardDiskDrive -Path $vhdPath
 	} else {
 		Hyper-V\Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
-	}	
+	}
 }
 Hyper-V\Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
-Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName 
+Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
 if ($vm) {
@@ -659,16 +659,16 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 	return err
 }
 
-func CompactDisks(expPath string, vhdDir string) error {
+func CompactDisks(Path string) error {
 	var script = `
-param([string]$srcPath, [string]$vhdDirName)
-Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
+param([string]$srcPath)
+Get-ChildItem "$srcPath" -Filter *.vhd* | %{
     Optimize-VHD -Path $_.FullName -Mode Full
 }
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, vhdDir)
+	err := ps.Run(script, Path)
 	return err
 }
 
