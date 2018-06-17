@@ -13,7 +13,7 @@ type Player6Driver struct {
 	Player5Driver
 }
 
-func (d *Player6Driver) Clone(dst, src string) error {
+func (d *Player6Driver) Clone(dst, src string, linked bool) error {
 	// TODO(rasa) check if running player+, not just player
 
 	cmd := exec.Command(d.Player5Driver.VmrunPath,
