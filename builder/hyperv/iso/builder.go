@@ -466,6 +466,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepUnmountFloppyDrive{
 			Generation: b.config.Generation,
 		},
+		&hypervcommon.StepCompactDisk{
+			SkipCompaction: b.config.SkipCompaction,
+		},
 		&hypervcommon.StepExportVm{
 			OutputDir:  b.config.OutputDir,
 			SkipExport: b.config.SkipExport,
