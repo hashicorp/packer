@@ -26,6 +26,7 @@ type Config struct {
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 
+	Linked         bool   `mapstructure:"linked"`
 	RemoteType     string `mapstructure:"remote_type"`
 	SkipCompaction bool   `mapstructure:"skip_compaction"`
 	SourcePath     string `mapstructure:"source_path"`

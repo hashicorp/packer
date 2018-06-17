@@ -18,7 +18,7 @@ type Fusion6Driver struct {
 	Fusion5Driver
 }
 
-func (d *Fusion6Driver) Clone(dst, src string) error {
+func (d *Fusion6Driver) Clone(dst, src string, linked bool) error {
 	cmd := exec.Command(d.vmrunPath(),
 		"-T", "fusion",
 		"clone", src, dst,
