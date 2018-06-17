@@ -41,6 +41,7 @@ func (s *stepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 
+	ui.Message(fmt.Sprintf("command:=%s", command))
 	if err := driver.Qemu(command...); err != nil {
 		err := fmt.Errorf("Error launching VM: %s", err)
 		ui.Error(err.Error())
@@ -104,6 +105,9 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	} else {
 		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.Format))
 	}
+
+	ui.Message(fmt.Sprintf("config.NetDevice:=%s", config.NetDevice))
+
 	deviceArgs = append(deviceArgs, fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
 
 	if config.Headless == true {
