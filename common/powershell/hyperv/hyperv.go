@@ -1009,7 +1009,11 @@ param([string]$mac, [int]$addressIndex)
 try {
   $vm = Hyper-V\Get-VM | ?{$_.NetworkAdapters.MacAddress -eq $mac}
   if ($vm.NetworkAdapters.IpAddresses) {
-    $ip = $vm.NetworkAdapters.IpAddresses[$addressIndex]
+    $ipAddresses = $vm.NetworkAdapters.IPAddresses
+    if ($ipAddresses -isnot [array]) {
+      $ipAddresses = @($ipAddresses)
+    }
+    $ip = $ipAddresses[$addressIndex]
   } else {
     $vm_info = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$($vm.Name)'"
     $ip_details = (Get-CimAssociatedInstance -InputObject $vm_info -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
