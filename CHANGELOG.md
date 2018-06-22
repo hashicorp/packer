@@ -52,6 +52,8 @@
 * provisoner/shell-local: New options have been added to create feature parity
     with the shell-local post-processor. This feature now works on Windows
     hosts. [GH-5956]
+* builder/virtualbox: Use HTTPS to download guest editions, now that it's
+    available. [GH-6406]
 
 ## 1.2.3 (April 25, 2018)
 
