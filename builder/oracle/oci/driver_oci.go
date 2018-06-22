@@ -45,14 +45,21 @@ func (d *driverOCI) CreateInstance(publicKey string) (string, error) {
 		metadata["user_data"] = d.cfg.UserData
 	}
 
-	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: core.LaunchInstanceDetails{
+	instanceDetails := core.LaunchInstanceDetails{
 		AvailabilityDomain: &d.cfg.AvailabilityDomain,
 		CompartmentId:      &d.cfg.CompartmentID,
 		ImageId:            &d.cfg.BaseImageID,
 		Shape:              &d.cfg.Shape,
 		SubnetId:           &d.cfg.SubnetID,
 		Metadata:           metadata,
-	}})
+	}
+
+	// When empty, the default display name is used.
+	if d.cfg.InstanceName != "" {
+		instanceDetails.DisplayName = &d.cfg.InstanceName
+	}
+
+	instance, err := d.computeClient.LaunchInstance(context.TODO(), core.LaunchInstanceRequest{LaunchInstanceDetails: instanceDetails})
 
 	if err != nil {
 		return "", err
