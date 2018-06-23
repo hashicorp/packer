@@ -140,6 +140,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
+			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
