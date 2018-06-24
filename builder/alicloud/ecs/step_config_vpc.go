@@ -85,7 +85,8 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 			e, _ := err.(*common.Error)
 			if (e.Code == "DependencyViolation.Instance" || e.Code == "DependencyViolation.RouteEntry" ||
 				e.Code == "DependencyViolation.VSwitch" ||
-				e.Code == "DependencyViolation.SecurityGroup") && time.Now().Before(timeoutPoint) {
+				e.Code == "DependencyViolation.SecurityGroup" ||
+				e.Code == "Forbbiden") && time.Now().Before(timeoutPoint) {
 				time.Sleep(1 * time.Second)
 				continue
 			}
