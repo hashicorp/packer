@@ -518,8 +518,13 @@ Hyper-V\Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoof
 
 func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateName string) error {
 	var script = `
-param([string]$vmName, $enableSecureBoot)
-Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
+param([string]$vmName, [string]$enableSecureBootString, [string]$templateName)
+$cmdletParameterExists = Get-Help SetVMFirmware -Parameter SecureBootTemplate -ErrorAction SilentlyContinue
+if ($cmdletParameterExists) {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString -SecureBootTemplate $templateName
+} else {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString
+}
 `
 
 	var ps powershell.PowerShellCmd
