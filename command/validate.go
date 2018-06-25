@@ -1,13 +1,16 @@
 package command
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/posener/complete"
 )
 
@@ -80,6 +83,47 @@ func (c *ValidateCommand) Run(args []string) int {
 		}
 	}
 
+	// Check if any of the configuration is fixable
+	var templateData map[string]interface{}
+	json.Unmarshal(tpl.RawContents, &templateData)
+	input := make(map[string]interface{})
+	for k, v := range templateData {
+		input[k] = v
+	}
+	for _, name := range fix.FixerOrder {
+		var err error
+		fixer, ok := fix.Fixers[name]
+		if !ok {
+			panic("fixer not found: " + name)
+		}
+		input, err = fixer.Fix(input)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf("Error fixing: %s", err))
+			return 1
+		}
+	}
+	// delete empty top-level keys since the fixers seem to add them
+	// willy-nilly
+	for k := range input {
+		ml, ok := input[k].([]map[string]interface{})
+		if !ok {
+			continue
+		}
+		if len(ml) == 0 {
+			delete(input, k)
+		}
+	}
+	// Guaranteed to be valid json, so we can ignore errors
+	var fixedData map[string]interface{}
+	j, _ := json.Marshal(input)
+	json.Unmarshal(j, &fixedData)
+	if diff := cmp.Diff(templateData, fixedData); diff != "" {
+		c.Ui.Say("[warning] Fixable configuration found.")
+		c.Ui.Say("You may need to run `packer fix` to get your build to run")
+		c.Ui.Say("correctly. See debug log for more information.\n")
+		log.Printf("Fixable config differences:\n%s", diff)
+	}
+
 	if len(errs) > 0 {
 		c.Ui.Error("Template validation failed. Errors are shown below.\n")
 		for i, err := range errs {
@@ -89,7 +133,6 @@ func (c *ValidateCommand) Run(args []string) int {
 				c.Ui.Error("")
 			}
 		}
-
 		return 1
 	}
 
