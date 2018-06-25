@@ -184,7 +184,13 @@ Note that if you'd like to create a spot instance, you must also add:
 ec2:RequestSpotInstances,
 ec2:CancelSpotInstanceRequests,
 ec2:DescribeSpotInstanceRequests
-```  
+```
+
+If you have the `spot_price` parameter set to `auto`, you must also add:
+
+``` json
+ec2:DescribeSpotPriceHistory
+```
 
 ## Troubleshooting
 
