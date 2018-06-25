@@ -358,7 +358,7 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		// open up the lease and read its contents
 		fh, err := os.Open(dhcpLeasesPath)
 		if err != nil {
-			log.Printf("Unable to open lease path, skipping: %s", dhcpLeasesPath)
+			log.Printf("Error while reading DHCP lease path file %s: %s", dhcpLeasesPath, err.Error())
 			continue
 		}
 		defer fh.Close()
