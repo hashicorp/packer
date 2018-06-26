@@ -81,6 +81,7 @@ type CreateStorageAttachmentInput struct {
 // CreateStorageAttachment creates a storage attachment attaching the given volume to the given instance at the given index.
 func (c *StorageAttachmentsClient) CreateStorageAttachment(input *CreateStorageAttachmentInput) (*StorageAttachmentInfo, error) {
 	input.InstanceName = c.getQualifiedName(input.InstanceName)
+	input.StorageVolumeName = c.getQualifiedName(input.StorageVolumeName)
 
 	var attachmentInfo *StorageAttachmentInfo
 	if err := c.createResource(&input, &attachmentInfo); err != nil {
