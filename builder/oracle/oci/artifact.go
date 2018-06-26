@@ -1,6 +1,7 @@
 package oci
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/oracle/oci-go-sdk/core"
@@ -41,11 +42,12 @@ func (a *Artifact) String() string {
 	)
 }
 
+// State ...
 func (a *Artifact) State(name string) interface{} {
 	return nil
 }
 
 // Destroy deletes the custom image associated with the artifact.
 func (a *Artifact) Destroy() error {
-	return a.driver.DeleteImage(*a.Image.Id)
+	return a.driver.DeleteImage(context.TODO(), *a.Image.Id)
 }
