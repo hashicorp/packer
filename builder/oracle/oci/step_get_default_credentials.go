@@ -17,7 +17,7 @@ type stepGetDefaultCredentials struct {
 	BuildName string
 }
 
-func (s *stepGetDefaultCredentials) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepGetDefaultCredentials) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(*driverOCI)
 		ui     = state.Get("ui").(packer.Ui)
@@ -36,7 +36,7 @@ func (s *stepGetDefaultCredentials) Run(_ context.Context, state multistep.State
 		return multistep.ActionContinue
 	}
 
-	username, password, err := driver.GetInstanceInitialCredentials(id)
+	username, password, err := driver.GetInstanceInitialCredentials(ctx, id)
 	if err != nil {
 		err = fmt.Errorf("Error getting instance's credentials: %s", err)
 		ui.Error(err.Error())
