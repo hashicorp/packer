@@ -150,8 +150,15 @@ builder.
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
     which will stop the instance for you. If this is set to true, Packer *will not*
-    stop the instance and will wait for you to stop it manually. You can do this
-    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+    stop the instance but will assume that you will send the stop signal
+    yourself through your final provisioner. You can do this with a
+    [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+
+    Note that Packer will still wait for the instance to be stopped, and failing
+    to send the stop signal yourself, when you have set this flag to `true`,
+    will cause a timeout.
+
+    Example of a valid shutdown command:
 
     ``` json
     {
