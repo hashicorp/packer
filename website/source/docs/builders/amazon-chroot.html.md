@@ -225,6 +225,14 @@ each category, the available configuration keys are alphabetized.
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
 
+-   `nvme_device_path` (string) - When we call the mount command (by default
+    `mount -o device dir`), the string provided in `nvme_mount_path` will
+    replace `device` in that command. When this option is not set, `device` in
+    that command will be something like `/dev/sdf1`, mirroring the attached
+    device name. This assumption works for most instances but will fail with c5
+    and m5 instances. In order to use the chroot builder with c5 and m5
+    instances, you must manually set `nvme_device_path` and `device_path`.
+
 -   `pre_mount_commands` (array of strings) - A series of commands to execute
     after attaching the root volume and before mounting the chroot. This is not
     required unless using `from_scratch`. If so, this should include any
@@ -370,6 +378,7 @@ its internals such as finding an available device.
 
 ## Gotchas
 
+### Unmounting the Filesystem
 One of the difficulties with using the chroot builder is that your provisioning
 scripts must not leave any processes running or packer will be unable to unmount
 the filesystem.
@@ -398,6 +407,53 @@ services:
   ]
 }
 ```
+
+### Using Instances with NVMe block devices.
+In C5, C5d, M5, and i3.metal instances, EBS volumes are exposed as NVMe block
+devices [reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html).
+In order to correctly mount these devices, you have to do some extra legwork,
+involving the `nvme_device_path` option above. Read that for more information.
+
+A working example for mounting an NVMe device is below:
+
+```
+{
+  "variables": {
+    "region" : "us-east-2"
+  },
+  "builders": [
+    {
+      "type": "amazon-chroot",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn-ami-hvm-*",
+        "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
+      },
+      "ena_support": true,
+      "ami_name": "amazon-chroot-test-{{timestamp}}",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo Test > /tmp/test.txt"]
+    }
+  ]
+}
+```
+
+Note that in the `nvme_device_path` you must end with the `p`; if you try to
+define the partition in this path (e.g. "nvme_device_path": `/dev/nvme1n1p1`)
+and haven't also set the `"mount_partition": 0`, a `1` will be appended to the
+`nvme_device_path` and Packer will fail.
 
 ## Building From Scratch
 

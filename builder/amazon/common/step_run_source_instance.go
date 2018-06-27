@@ -24,6 +24,7 @@ type StepRunSourceInstance struct {
 	Ctx                               interpolate.Context
 	Debug                             bool
 	EbsOptimized                      bool
+	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
 	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
@@ -114,6 +115,11 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 		Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
 		EbsOptimized:        &s.EbsOptimized,
+	}
+
+	if s.EnableT2Unlimited {
+		creditOption := "unlimited"
+		runOpts.CreditSpecification = &ec2.CreditSpecificationRequest{CpuCredits: &creditOption}
 	}
 
 	// Collect tags for tagging on resource creation
