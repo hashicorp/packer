@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -92,6 +93,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	var bConf *gossh.ClientConfig
 	var pAddr string
 	var pAuth *proxy.Auth
+	var pURL *url.URL
 	if s.Config.SSHBastionHost != "" {
 		bAddr = fmt.Sprintf(
 			"%s:%d", s.Config.SSHBastionHost, s.Config.SSHBastionPort)
@@ -111,6 +113,14 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			pAuth.Password = s.Config.SSHBastionPassword
 		}
 
+	}
+
+	if s.Config.SSHHTTPProxy != "" {
+		u, err := url.Parse(s.Config.SSHHTTPProxy)
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing SSH HTTP proxy url: %s", err)
+		}
+		pURL = u
 	}
 
 	handshakeAttempts := 0
@@ -165,6 +175,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		if pAddr != "" {
 			// Connect via SOCKS5 proxy
 			connFunc = ssh.ProxyConnectFunc(pAddr, pAuth, "tcp", connAddr)
+		} else if pURL != nil {
+			// Connect via HTTP proxy
+			connFunc = ssh.HTTPProxyConnectFunc(pURL, connAddr)
 		} else {
 			// No proxy, connect directly
 			connFunc = ssh.ConnectFunc("tcp", connAddr)
