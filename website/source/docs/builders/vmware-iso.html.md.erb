@@ -146,9 +146,9 @@ builder.
     The default is `1`.
 
     For ESXi, this defaults to `zeroedthick`. The available options for ESXi
-    are: `zeroedthick`, `eagerzeroedthick`, `thin`, `rdm:dev`, `rdmp:dev`,
-    `2gbsparse`. Due to default disk compaction processing, when using `thick`
-    set `skip_compaction` to `true`.
+    are: `zeroedthick`, `eagerzeroedthick`, `thin`. `rdm:dev`, `rdmp:dev`,
+    `2gbsparse` are not supported. Due to default disk compaction, when using
+    `zeroedthick` or `eagerzeroedthick` set `skip_compaction` to `true`.
 
     For more information, please consult the [Virtual Disk Manager User's
     Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
@@ -331,7 +331,8 @@ builder.
     `vmkfstools` in ESXi. In certain rare cases, this might actually end up
     making the resulting disks slightly larger. If you find this to be the case,
     you can disable compaction using this configuration value. Defaults to
-    `false`.
+    `false`. Default to `true` for ESXi when `disk_type_id` is not explicitly
+    defined and `false` otherwise.
 
 -   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
     not export the VM. Useful if the build output is not the resultant
