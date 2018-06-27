@@ -88,13 +88,11 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 	// Determine if we're using a bastion host, and if so, retrieve
 	// that configuration. This configuration doesn't change so we
 	// do this one before entering the retry loop.
-	var bProto, bAddr string
+	var bAddr string
 	var bConf *gossh.ClientConfig
 	var pAddr string
 	var pAuth *proxy.Auth
 	if s.Config.SSHBastionHost != "" {
-		// The protocol is hardcoded for now, but may be configurable one day
-		bProto = "tcp"
 		bAddr = fmt.Sprintf(
 			"%s:%d", s.Config.SSHBastionHost, s.Config.SSHBastionPort)
 
@@ -153,20 +151,31 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 			continue
 		}
 
-		// Attempt to connect to SSH port
+		hostAddr := fmt.Sprintf("%s:%d", host, port)
+
 		var connFunc func() (net.Conn, error)
-		address := fmt.Sprintf("%s:%d", host, port)
+		var connAddr string
+
+		if bAddr != "" {
+			connAddr = bAddr
+		} else {
+			connAddr = hostAddr
+		}
+
+		if pAddr != "" {
+			// Connect via SOCKS5 proxy
+			connFunc = ssh.ProxyConnectFunc(pAddr, pAuth, "tcp", connAddr)
+		} else {
+			// No proxy, connect directly
+			connFunc = ssh.ConnectFunc("tcp", connAddr)
+		}
+
 		if bAddr != "" {
 			// We're using a bastion host, so use the bastion connfunc
-			connFunc = ssh.BastionConnectFunc(
-				bProto, bAddr, bConf, "tcp", address)
-		} else if pAddr != "" {
-			// Connect via SOCKS5 proxy
-			connFunc = ssh.ProxyConnectFunc(pAddr, pAuth, "tcp", address)
-		} else {
-			// No bastion host, connect directly
-			connFunc = ssh.ConnectFunc("tcp", address)
+			connFunc = ssh.BastionConnectFunc(connFunc, bConf, "tcp", hostAddr)
 		}
+
+		// Attempt to connect to SSH port
 
 		nc, err := connFunc()
 		if err != nil {
@@ -187,7 +196,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")
-		comm, err = ssh.New(address, config)
+		comm, err = ssh.New(hostAddr, config)
 		if err != nil {
 			log.Printf("[DEBUG] SSH handshake err: %s", err)
 

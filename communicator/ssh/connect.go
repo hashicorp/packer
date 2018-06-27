@@ -50,17 +50,22 @@ func ProxyConnectFunc(socksProxy string, socksAuth *proxy.Auth, network, addr st
 // BastionConnectFunc is a convenience method for returning a function
 // that connects to a host over a bastion connection.
 func BastionConnectFunc(
-	bProto string,
-	bAddr string,
+	connFunc func() (net.Conn, error),
 	bConf *ssh.ClientConfig,
 	proto string,
 	addr string) func() (net.Conn, error) {
 	return func() (net.Conn, error) {
-		// Connect to the bastion
-		bastion, err := ssh.Dial(bProto, bAddr, bConf)
+		sshConn, err := connFunc()
 		if err != nil {
 			return nil, fmt.Errorf("Error connecting to bastion: %s", err)
 		}
+
+		sshClientConn, sshChans, sshReqs, err := ssh.NewClientConn(sshConn, addr, bConf)
+		if err != nil {
+			return nil, fmt.Errorf("Error initialising bastion client: %s", err)
+		}
+
+		bastion := ssh.NewClient(sshClientConn, sshChans, sshReqs)
 
 		// Connect through to the end host
 		conn, err := bastion.Dial(proto, addr)
