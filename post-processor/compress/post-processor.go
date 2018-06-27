@@ -303,6 +303,9 @@ func createTarArchive(files []string, output io.WriteCloser) error {
 			return fmt.Errorf("Failed to create tar header for %s: %s", path, err)
 		}
 
+		// workaround for archive format on go >=1.10
+		setHeaderFormat(header)
+
 		if err := archive.WriteHeader(header); err != nil {
 			return fmt.Errorf("Failed to write tar header for %s: %s", path, err)
 		}
