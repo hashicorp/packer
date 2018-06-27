@@ -82,6 +82,7 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
 		if deploymentOperation.Properties.TargetResource == nil {
+			deploymentOperations.Next()
 			continue
 		}
 

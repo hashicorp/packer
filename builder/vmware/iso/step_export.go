@@ -45,8 +45,8 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 		return multistep.ActionContinue
 	}
 
-	if c.RemoteType != "esx5" || s.Format == "" {
-		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi and the format needs to be specified)...")
+	if c.RemoteType != "esx5" {
+		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi)...")
 		return multistep.ActionContinue
 	}
 

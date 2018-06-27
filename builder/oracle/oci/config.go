@@ -44,6 +44,10 @@ type Config struct {
 	BaseImageID string `mapstructure:"base_image_ocid"`
 	Shape       string `mapstructure:"shape"`
 	ImageName   string `mapstructure:"image_name"`
+
+	// Instance
+	InstanceName string `mapstructure:"instance_name"`
+
 	// UserData and UserDataFile file are both optional and mutually exclusive.
 	UserData     string `mapstructure:"user_data"`
 	UserDataFile string `mapstructure:"user_data_file"`

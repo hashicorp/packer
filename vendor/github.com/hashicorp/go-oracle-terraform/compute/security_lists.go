@@ -30,7 +30,7 @@ type SecurityListInfo struct {
 	// Shows the default account for your identity domain.
 	Account string `json:"account"`
 	// A description of the security list.
-	Description string `json:description`
+	Description string `json:"description"`
 	// The three-part name of the security list (/Compute-identity_domain/user/object).
 	Name string `json:"name"`
 	// The policy for outbound traffic from the security list.
@@ -73,7 +73,7 @@ func (c *SecurityListsClient) CreateSecurityList(createInput *CreateSecurityList
 type GetSecurityListInput struct {
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetSecurityList retrieves the security list with the given name.
@@ -90,7 +90,7 @@ func (c *SecurityListsClient) GetSecurityList(getInput *GetSecurityListInput) (*
 type UpdateSecurityListInput struct {
 	// A description of the security list.
 	// Optional
-	Description string `json:description`
+	Description string `json:"description"`
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
 	Name string `json:"name"`
@@ -117,7 +117,7 @@ func (c *SecurityListsClient) UpdateSecurityList(updateInput *UpdateSecurityList
 type DeleteSecurityListInput struct {
 	// The three-part name of the Security List (/Compute-identity_domain/user/object).
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // DeleteSecurityList deletes the security list with the given name.
