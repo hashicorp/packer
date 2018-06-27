@@ -25,7 +25,7 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
-~&gt; **Note:** To use OpenStack builder with the OpenStack Newton (Oct 2016) 
+~&gt; **Note:** To use OpenStack builder with the OpenStack Newton (Oct 2016)
 or earlier, we recommend you use Packer v1.1.2 or earlier version.
 
 ~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
@@ -33,7 +33,8 @@ builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
 installed *if you are using temporary key pairs*, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
 [`ssh_password`](/docs/templates/communicator.html#ssh_password). All major
-OS'es have OpenSSL installed by default except Windows.
+OS'es have OpenSSL installed by default except Windows. This have been
+resolved in OpenStack Ocata(Feb 2017).
 
 
 ## Configuration Reference
@@ -55,7 +56,7 @@ builder.
 
 -   `identity_endpoint` (string) - The URL to the OpenStack Identity service.
     If not specified, Packer will use the environment variables `OS_AUTH_URL`,
-    if set.
+    if set. This is not required if using `cloud.yaml`.
 
 -   `source_image` (string) - The ID or full URL to the base image to use. This
     is the image that will be used to launch a new server and provision it.
@@ -68,11 +69,14 @@ builder.
 
 -   `username` or `user_id` (string) - The username or id used to connect to
     the OpenStack service. If not specified, Packer will use the environment
-    variable `OS_USERNAME` or `OS_USERID`, if set.
+    variable `OS_USERNAME` or `OS_USERID`, if set. This is not required if
+    using access token instead of password or if using `cloud.yaml`.
 
 -   `password` (string) - The password used to connect to the OpenStack service.
     If not specified, Packer will use the environment variables `OS_PASSWORD`,
-    if set.
+    if set. This is not required if using access token instead of password or
+    if using `cloud.yaml`.
+
 
 ### Optional:
 
@@ -81,13 +85,19 @@ builder.
     cluster will be used. This may be required for some OpenStack clusters.
 
 -   `cacert` (string) - Custom CA certificate file path.
-    If omitted the OS\_CACERT environment variable can be used.
+    If omitted the `OS_CACERT` environment variable can be used.
+
+-   `cert` (string) - Client certificate file path for SSL client authentication.
+    If omitted the `OS_CERT` environment variable can be used.
+
+-   `cloud` (string) - An entry in a `clouds.yaml` file. See the OpenStack
+    os-client-config
+    [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+    for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
+    environment variable is used.
 
 -   `config_drive` (boolean) - Whether or not nova should use ConfigDrive for
     cloud-init metadata.
-
--   `cert` (string) - Client certificate file path for SSL client authentication.
-    If omitted the OS\_CERT environment variable can be used.
 
 -   `domain_name` or `domain_id` (string) - The Domain name or ID you are
     authenticating with. OpenStack installations require this if identity v3 is used.
@@ -104,7 +114,7 @@ builder.
 
 -   `image_members` (array of strings) - List of members to add to the image
     after creation. An image member is usually a project (also called the
-    “tenant”) with whom the image is shared.
+    "tenant") with whom the image is shared.
 
 -   `image_visibility` (string) - One of "public", "private", "shared", or
     "community".
@@ -113,7 +123,7 @@ builder.
     done over an insecure connection. By default this is false.
 
 -   `key` (string) - Client private key file path for SSL client authentication.
-    If omitted the OS\_KEY environment variable can be used.
+    If omitted the `OS_KEY` environment variable can be used.
 
 -   `metadata` (object of key/value strings) - Glance metadata that will be
     applied to the image.
@@ -177,8 +187,11 @@ builder.
 
 -   `tenant_id` or `tenant_name` (string) - The tenant ID or name to boot the
     instance into. Some OpenStack installations require this. If not specified,
-    Packer will use the environment variable `OS_TENANT_NAME`, if set. Tenant
-    is also called Project in later versions of OpenStack.
+    Packer will use the environment variable `OS_TENANT_NAME` or `OS_TENANT_ID`,
+    if set. Tenant is also called Project in later versions of OpenStack.
+
+-   `token` (string) - the token (id) to use with token based authorization.
+    Packer will use the environment variable `OS_TOKEN`, if set.
 
 -   `use_floating_ip` (boolean) - *Deprecated* use `floating_ip` or `floating_ip_pool`
     instead.
@@ -279,11 +292,12 @@ export OS_PROJECT_DOMAIN_NAME="mydomain"
 
 ## Notes on OpenStack Authorization
 
-The simplest way to get all settings for authorization agains OpenStack is to
+The simplest way to get all settings for authorization against OpenStack is to
 go into the OpenStack Dashboard (Horizon) select your *Project* and navigate
 *Project, Access & Security*, select *API Access* and *Download OpenStack RC
-File v3*. Source the file, and select your wanted region by setting
-environment variable `OS_REGION_NAME` or `OS_REGION_ID` and `export OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
+File v3*. Source the file, and select your wanted region
+by setting environment variable `OS_REGION_NAME` or `OS_REGION_ID` and
+`export OS_TENANT_NAME=$OS_PROJECT_NAME` or `export OS_TENANT_ID=$OS_PROJECT_ID`.
 
 ~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
 `OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
@@ -292,3 +306,13 @@ To troubleshoot authorization issues test you environment variables with the
 OpenStack cli. It can be installed with
 
     $ pip install --user python-openstackclient
+
+### Authorize Using Tokens
+
+To authorize with a access token only `identity_endpoint` and `token` is needed,
+and possibly `tenant_name` or `tenant_id` depending on your token type. Or use
+the following environment variables:
+
+-   `OS_AUTH_URL`
+-   `OS_TOKEN`
+-   One of `OS_TENANT_NAME` or `OS_TENANT_ID`

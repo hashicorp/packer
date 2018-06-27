@@ -1,0 +1,36 @@
+{
+  "variables": {
+    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}"
+  },
+  "builders": [{
+    "type": "azure-arm",
+
+    "subscription_id": "{{user `subscription_id`}}",
+
+    "managed_image_resource_group_name": "packertest",
+    "managed_image_name": "MyWindowsOSImage",
+
+    "os_type": "Windows",
+    "image_publisher": "MicrosoftWindowsServer",
+    "image_offer": "WindowsServer",
+    "image_sku": "2012-R2-Datacenter",
+
+    "communicator": "winrm",
+    "winrm_use_ssl": "true",
+    "winrm_insecure": "true",
+    "winrm_timeout": "3m",
+    "winrm_username": "packer",
+
+    "location": "South Central US",
+    "vm_size": "Standard_DS2_v2"
+  }],
+  "provisioners": [{
+    "type": "powershell",
+    "inline": [
+      "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
+      "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+      "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+    ]
+  }]
+}
+

@@ -10,13 +10,13 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type setpRegionCopyAlicloudImage struct {
+type stepRegionCopyAlicloudImage struct {
 	AlicloudImageDestinationRegions []string
 	AlicloudImageDestinationNames   []string
 	RegionId                        string
 }
 
-func (s *setpRegionCopyAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepRegionCopyAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.AlicloudImageDestinationRegions) == 0 {
 		return multistep.ActionContinue
 	}
@@ -52,7 +52,7 @@ func (s *setpRegionCopyAlicloudImage) Run(_ context.Context, state multistep.Sta
 	return multistep.ActionContinue
 }
 
-func (s *setpRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
+func (s *stepRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 	if cancelled || halted {

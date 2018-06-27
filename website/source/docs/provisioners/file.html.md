@@ -32,7 +32,9 @@ The file provisioner can upload both single files and complete directories.
 
 ## Configuration Reference
 
-The available configuration options are listed below. All elements are required.
+The available configuration options are listed below.
+
+### Required
 
 -   `source` (string) - The path to a local file or directory to upload to
     the machine. The path can be absolute or relative. If it is relative, it is
@@ -47,6 +49,8 @@ The available configuration options are listed below. All elements are required.
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload". If it is set to "download" then the file "source" in the machine
     will be downloaded locally to "destination"
+
+### Optional
 
 -   `generated` (boolean) - For advanced users only. If true, check the file
     existence only before uploading, rather than upon pre-build validation.

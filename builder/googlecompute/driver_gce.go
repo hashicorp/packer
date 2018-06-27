@@ -168,7 +168,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme", "windows-sql-cloud"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme", "windows-sql-cloud", "rhel-sap-cloud"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)

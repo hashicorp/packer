@@ -38,6 +38,9 @@ power of Packer templates.
 * [geerlingguy/packer-ubuntu-1604](https://github.com/geerlingguy/packer-ubuntu-1604) 
   \- Ubuntu 16.04 minimal Vagrant Box using Ansible provisioner
 
+* [jakobadam/packer-qemu-templates](https://github.com/jakobadam/packer-qemu-templates)
+  - QEMU templates for various operating systems
+
 ## Wrappers
 
 - [packer-config](https://github.com/ianchesal/packer-config) - a Ruby model that lets you build Packer configurations in Ruby

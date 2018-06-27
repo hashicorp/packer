@@ -47,7 +47,12 @@ Required:
 
 -   `playbook_file` (string) - The playbook file to be executed by ansible. This
     file must exist on your local system and will be uploaded to the
-    remote machine.
+    remote machine. This option is exclusive with `playbook_files`.
+    
+-   `playbook_files` (array of strings) - The playbook files to be executed by ansible.
+    These files must exist on your local system. If the files don't exist in the `playbook_dir`
+    or you don't set `playbook_dir` they will be uploaded to the remote machine. This option
+    is exclusive with `playbook_file`.
 
 Optional:
 

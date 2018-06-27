@@ -493,9 +493,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	// readable by the ObjectID of the App.  There may be another way to handle
 	// this case, but I am not currently aware of it - send feedback.
 	isUseDeviceLogin := func(c *Config) bool {
-		if c.OSType == constants.Target_Windows {
-			return false
-		}
 
 		return c.SubscriptionID != "" &&
 			c.ClientID == "" &&
