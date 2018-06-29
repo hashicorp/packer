@@ -203,7 +203,6 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 
 	// Check it was actually completed
-	log.Printf("MEGAN result was %s", *import_result.ImportImageTasks[0].Status)
 	if *import_result.ImportImageTasks[0].Status != "completed" {
 		// The most useful error message is from the job itself
 		return nil, false, fmt.Errorf("Import task %s failed: %s", *import_start.ImportTaskId, *import_result.ImportImageTasks[0].StatusMessage)
