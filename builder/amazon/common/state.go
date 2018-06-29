@@ -242,38 +242,77 @@ func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeIm
 // if AWS_MAX_ATTEMPTS is set but AWS_POLL_DELAY_SECONDS is not, then we will
 // use waiter-specific defaults.
 
+type envInfo struct {
+	envKey     string
+	Val        int
+	overridden bool
+}
+
+type overridableWaitVars struct {
+	awsPollDelaySeconds envInfo
+	awsMaxAttempts      envInfo
+	awsTimeoutSeconds   envInfo
+}
+
 func getWaiterOptions() []request.WaiterOption {
+	envOverrides := getEnvOverrides()
+	waitOpts := applyEnvOverrides(envOverrides)
+	return waitOpts
+}
+
+func getEnvOverrides() overridableWaitVars {
+	// Load env vars from environment, and use them to override defaults
+	envValues := overridableWaitVars{
+		envInfo{"AWS_POLL_DELAY_SECONDS", 2, false},
+		envInfo{"AWS_MAX_ATTEMPTS", 0, false},
+		envInfo{"AWS_TIMEOUT_SECONDS", 300, false},
+	}
+
+	for _, varInfo := range []envInfo{envValues.awsPollDelaySeconds, envValues.awsMaxAttempts, envValues.awsTimeoutSeconds} {
+		override := os.Getenv(varInfo.envKey)
+		if override != "" {
+			n, err := strconv.Atoi(override)
+			if err != nil {
+				log.Printf("Invalid %s '%s', using default", varInfo.envKey, override)
+			} else {
+				varInfo.overridden = true
+				varInfo.Val = n
+			}
+		}
+	}
+
+	return envValues
+}
+
+func applyEnvOverrides(envOverrides overridableWaitVars) []request.WaiterOption {
 	waitOpts := make([]request.WaiterOption, 0)
 	// If user has set poll delay seconds, overwrite it. If user has NOT,
 	// default to a poll delay of 2 seconds
-	delayOverridden, delay := getEnvOverrides(2, "AWS_POLL_DELAY_SECONDS")
-	if delayOverridden {
-		delaySeconds := request.ConstantWaiterDelay(time.Duration(delay) * time.Second)
+	if envOverrides.awsPollDelaySeconds.overridden {
+		delaySeconds := request.ConstantWaiterDelay(time.Duration(envOverrides.awsPollDelaySeconds.Val) * time.Second)
 		waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
 	}
 
 	// If user has set max attempts, overwrite it. If user hasn't set max
 	// attempts, default to whatever the waiter has set as a default.
-	maxAttemptsOverridden, maxAttempts := getEnvOverrides(0, "AWS_MAX_ATTEMPTS")
-	if maxAttemptsOverridden {
-		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
+	if envOverrides.awsMaxAttempts.overridden {
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(envOverrides.awsMaxAttempts.Val))
 	}
 
-	timeoutOverridden, timeoutSeconds := getEnvOverrides(300, "AWS_TIMEOUT_SECONDS")
-	if maxAttemptsOverridden {
+	if envOverrides.awsMaxAttempts.overridden && envOverrides.awsTimeoutSeconds.overridden {
 		log.Printf("WARNING: AWS_MAX_ATTEMPTS and AWS_TIMEOUT_SECONDS are" +
 			" both set. Packer will be using AWS_MAX_ATTEMPTS and discarding " +
 			"AWS_TIMEOUT_SECONDS. If you have not set AWS_POLL_DELAY_SECONDS, " +
 			"Packer will default to a 2 second poll delay.")
-	} else if timeoutOverridden {
+	} else if envOverrides.awsTimeoutSeconds.overridden {
 		log.Printf("DEPRECATION WARNING: env var AWS_TIMEOUT_SECONDS is " +
 			"deprecated in favor of AWS_MAX_ATTEMPTS. If you have not " +
 			"explicitly set AWS_POLL_DELAY_SECONDS, we are defaulting to a " +
 			"poll delay of 2 seconds, regardless of the AWS waiter's default.")
-		maxAttempts := timeoutSeconds / delay
+		maxAttempts := envOverrides.awsTimeoutSeconds.Val / envOverrides.awsPollDelaySeconds.Val
 		// override the delay so we can get the timeout right
-		if !delayOverridden {
-			delaySeconds := request.ConstantWaiterDelay(time.Duration(delay) * time.Second)
+		if !envOverrides.awsPollDelaySeconds.overridden {
+			delaySeconds := request.ConstantWaiterDelay(time.Duration(envOverrides.awsPollDelaySeconds.Val) * time.Second)
 			waitOpts = append(waitOpts, request.WithWaiterDelay(delaySeconds))
 		}
 		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(maxAttempts))
@@ -288,23 +327,4 @@ func getWaiterOptions() []request.WaiterOption {
 	}
 
 	return waitOpts
-}
-
-func getEnvOverrides(defaultValue int, envVarName string) (bool, int) {
-	// "AWS_POLL_DELAY_SECONDS"
-	retVal := defaultValue
-	overridden := false
-	override := os.Getenv(envVarName)
-	if override != "" {
-		n, err := strconv.Atoi(override)
-		if err != nil {
-			log.Printf("Invalid %s '%s', using default", envVarName, override)
-		} else {
-			overridden = true
-			retVal = n
-		}
-	}
-
-	log.Printf("Using %ds for %s", retVal, envVarName)
-	return overridden, retVal
 }
