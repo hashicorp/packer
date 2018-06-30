@@ -16,10 +16,17 @@ type Player6Driver struct {
 func (d *Player6Driver) Clone(dst, src string, linked bool) error {
 	// TODO(rasa) check if running player+, not just player
 
+	var cloneType string
+	if linked {
+		cloneType = "linked"
+	} else {
+		cloneType = "full"
+	}
+
 	cmd := exec.Command(d.Player5Driver.VmrunPath,
 		"-T", "ws",
 		"clone", src, dst,
-		"full")
+		cloneType)
 
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
