@@ -201,3 +201,29 @@ func TestStepConfigureVMX_generatedAddresses(t *testing.T) {
 		}
 	}
 }
+
+// Should fail if the displayName key is not found in the VMX
+func TestStepConfigureVMX_displayNameMissing(t *testing.T) {
+	state := testState(t)
+	step := new(StepConfigureVMX)
+
+	// testVMXFile adds displayName key/value pair to the VMX
+	vmxPath := testVMXFile(t)
+	defer os.Remove(vmxPath)
+
+	// Bad: Delete displayName from the VMX/Create an empty VMX file
+	err := WriteVMX(vmxPath, map[string]string{})
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	state.Put("vmx_path", vmxPath)
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
+		t.Fatalf("bad action: %#v. Should halt when displayName key is missing from VMX", action)
+	}
+	if _, ok := state.GetOk("error"); !ok {
+		t.Fatal("should store error in state when displayName key is missing from VMX")
+	}
+}
