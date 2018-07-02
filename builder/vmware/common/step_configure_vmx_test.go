@@ -14,6 +14,9 @@ func testVMXFile(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+
+	// displayName must always be set
+	err = WriteVMX(tf.Name(), map[string]string{"displayName": "PackerBuild"})
 	tf.Close()
 
 	return tf.Name()
@@ -132,12 +135,29 @@ func TestStepConfigureVMX_generatedAddresses(t *testing.T) {
 	vmxPath := testVMXFile(t)
 	defer os.Remove(vmxPath)
 
-	err := WriteVMX(vmxPath, map[string]string{
-		"foo": "bar",
-		"ethernet0.generatedAddress":       "foo",
-		"ethernet1.generatedAddress":       "foo",
-		"ethernet1.generatedAddressOffset": "foo",
-	})
+	additionalTestVmxData := []struct {
+		Key   string
+		Value string
+	}{
+		{"foo", "bar"},
+		{"ethernet0.generatedaddress", "foo"},
+		{"ethernet1.generatedaddress", "foo"},
+		{"ethernet1.generatedaddressoffset", "foo"},
+	}
+
+	// Get any existing VMX data from the VMX file
+	vmxData, err := ReadVMX(vmxPath)
+	if err != nil {
+		t.Fatalf("err %s", err)
+	}
+
+	// Add the additional key/value pairs we need for this test to the existing VMX data
+	for _, data := range additionalTestVmxData {
+		vmxData[data.Key] = data.Value
+	}
+
+	// Recreate the VMX file so it includes all the data needed for this test
+	err = WriteVMX(vmxPath, vmxData)
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -157,7 +177,7 @@ func TestStepConfigureVMX_generatedAddresses(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	vmxData := ParseVMX(string(vmxContents))
+	vmxData = ParseVMX(string(vmxContents))
 
 	cases := []struct {
 		Key   string
@@ -180,5 +200,4 @@ func TestStepConfigureVMX_generatedAddresses(t *testing.T) {
 			}
 		}
 	}
-
 }
