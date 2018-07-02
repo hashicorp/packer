@@ -665,30 +665,16 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 	return err
 }
 
-func CompactDisks(expPath string, vhdDir string) error {
+func CompactDisks(Path string) error {
 	var script = `
-param([string]$srcPath, [string]$vhdDirName)
-Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
+param([string]$srcPath)
+Get-ChildItem "$srcPath" -Filter *.vhd* | %{
     Optimize-VHD -Path $_.FullName -Mode Full
 }
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, vhdDir)
-	return err
-}
-
-func CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
-
-	var script = `
-param([string]$srcPath, [string]$dstPath, [string]$vhdDirName, [string]$vmDir)
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vhdDirName) -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vmDir) -Destination $dstPath
-`
-
-	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, outputPath, vhdDir, vmDir)
+	err := ps.Run(script, Path)
 	return err
 }
 

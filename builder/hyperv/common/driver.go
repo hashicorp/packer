@@ -94,9 +94,7 @@ type Driver interface {
 
 	ExportVirtualMachine(string, string) error
 
-	CompactDisks(string, string) error
-
-	CopyExportedVirtualMachine(string, string, string, string) error
+	CompactDisks(string) error
 
 	RestartVirtualMachine(string) error
 
