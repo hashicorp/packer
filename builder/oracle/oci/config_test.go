@@ -29,6 +29,9 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		// Comm
 		"ssh_username":   "opc",
 		"use_private_ip": false,
+		"metadata": map[string]string{
+			"key": "value",
+		},
 	}
 }
 
@@ -235,6 +238,7 @@ func TestConfig(t *testing.T) {
 			t.Errorf("Expected ConfigProvider.KeyFingerprint: %s, got %s", expected, fingerprint)
 		}
 	})
+
 }
 
 // BaseTestConfig creates the base (DEFAULT) config including a temporary key
