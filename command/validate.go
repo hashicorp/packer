@@ -84,12 +84,21 @@ func (c *ValidateCommand) Run(args []string) int {
 	}
 
 	// Check if any of the configuration is fixable
-	var templateData map[string]interface{}
-	json.Unmarshal(tpl.RawContents, &templateData)
+	var rawTemplateData map[string]interface{}
 	input := make(map[string]interface{})
-	for k, v := range templateData {
-		input[k] = v
+	templateData := make(map[string]interface{})
+	json.Unmarshal(tpl.RawContents, &rawTemplateData)
+	for k, v := range rawTemplateData {
+		if vals, ok := v.([]interface{}); ok {
+			if len(vals) == 0 {
+				continue
+			}
+		}
+		templateData[strings.ToLower(k)] = v
+		input[strings.ToLower(k)] = v
 	}
+
+	// fix rawTemplateData into input
 	for _, name := range fix.FixerOrder {
 		var err error
 		fixer, ok := fix.Fixers[name]
@@ -98,7 +107,7 @@ func (c *ValidateCommand) Run(args []string) int {
 		}
 		input, err = fixer.Fix(input)
 		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Error fixing: %s", err))
+			c.Ui.Error(fmt.Sprintf("Error checking against fixers: %s", err))
 			return 1
 		}
 	}
@@ -113,10 +122,12 @@ func (c *ValidateCommand) Run(args []string) int {
 			delete(input, k)
 		}
 	}
-	// Guaranteed to be valid json, so we can ignore errors
+	// marshal/unmarshal to make comparable to templateData
 	var fixedData map[string]interface{}
+	// Guaranteed to be valid json, so we can ignore errors
 	j, _ := json.Marshal(input)
 	json.Unmarshal(j, &fixedData)
+
 	if diff := cmp.Diff(templateData, fixedData); diff != "" {
 		c.Ui.Say("[warning] Fixable configuration found.")
 		c.Ui.Say("You may need to run `packer fix` to get your build to run")
