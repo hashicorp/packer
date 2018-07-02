@@ -29,7 +29,7 @@ func (c *Config) createInstanceMetadata(sourceImage *Image, sshPublicKey string)
 	// supplied public key. This is possible if a private_key_file was
 	// specified.
 	if sshPublicKey != "" {
-		sshMetaKey := "sshKeys"
+		sshMetaKey := "ssh-keys"
 		sshKeys := fmt.Sprintf("%s:%s", c.Comm.SSHUsername, sshPublicKey)
 		if confSshKeys, exists := instanceMetadata[sshMetaKey]; exists {
 			sshKeys = fmt.Sprintf("%s\n%s", sshKeys, confSshKeys)
