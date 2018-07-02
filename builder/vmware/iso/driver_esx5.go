@@ -41,7 +41,7 @@ type ESX5Driver struct {
 	vmId      string
 }
 
-func (d *ESX5Driver) Clone(dst, src string) error {
+func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with the ESX driver.")
 }
 
