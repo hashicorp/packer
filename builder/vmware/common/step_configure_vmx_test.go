@@ -227,3 +227,28 @@ func TestStepConfigureVMX_displayNameMissing(t *testing.T) {
 		t.Fatal("should store error in state when displayName key is missing from VMX")
 	}
 }
+
+// Should store the value of displayName in the statebag
+func TestStepConfigureVMX_displayNameStore(t *testing.T) {
+	state := testState(t)
+	step := new(StepConfigureVMX)
+
+	// testVMXFile adds displayName key/value pair to the VMX
+	vmxPath := testVMXFile(t)
+	defer os.Remove(vmxPath)
+
+	state.Put("vmx_path", vmxPath)
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+	if _, ok := state.GetOk("error"); ok {
+		t.Fatal("should NOT have error")
+	}
+
+	// The value of displayName must be stored in the statebag
+	if _, ok := state.GetOk("display_name"); !ok {
+		t.Fatalf("displayName should be stored in the statebag as 'display_name'")
+	}
+}
