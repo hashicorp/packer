@@ -17,6 +17,7 @@ type StepCloneVMX struct {
 	OutputDir string
 	Path      string
 	VMName    string
+	Linked    bool
 }
 
 type vmxAdapter struct {
@@ -64,7 +65,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
-	if err := driver.Clone(vmxPath, s.Path); err != nil {
+	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
