@@ -252,3 +252,19 @@ func TestStepConfigureVMX_displayNameStore(t *testing.T) {
 		t.Fatalf("displayName should be stored in the statebag as 'display_name'")
 	}
 }
+
+func TestStepConfigureVMX_vmxPathBad(t *testing.T) {
+	state := testState(t)
+	step := new(StepConfigureVMX)
+
+	state.Put("vmx_path", "some_bad_path")
+
+	// Test the run
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
+		t.Fatalf("bad action: %#v. Should halt when vmxPath is bad", action)
+	}
+	if _, ok := state.GetOk("error"); !ok {
+		t.Fatal("should store error in state when vmxPath is bad")
+	}
+
+}
