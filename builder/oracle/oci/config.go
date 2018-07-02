@@ -48,6 +48,9 @@ type Config struct {
 	// Instance
 	InstanceName string `mapstructure:"instance_name"`
 
+	// MetaData is optional but will be constructed to include UserData or UserDataFile under the "user_data" key
+	MetaData map[string]string `mapstructure:"metadata"`
+
 	// UserData and UserDataFile file are both optional and mutually exclusive.
 	UserData     string `mapstructure:"user_data"`
 	UserDataFile string `mapstructure:"user_data_file"`
