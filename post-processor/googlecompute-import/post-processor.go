@@ -34,6 +34,7 @@ type Config struct {
 	ProjectId         string            `mapstructure:"project_id"`
 	AccountFile       string            `mapstructure:"account_file"`
 	KeepOriginalImage bool              `mapstructure:"keep_input_artifact"`
+	SkipClean         bool              `mapstructure:"skip_clean"`
 
 	ctx interpolate.Context
 }
@@ -113,6 +114,13 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	gceImageArtifact, err := CreateGceImage(p.config.AccountFile, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels)
 	if err != nil {
 		return nil, p.config.KeepOriginalImage, err
+	}
+
+	if !p.config.SkipClean {
+		err = DeleteFromBucket(p.config.AccountFile, ui, p.config.Bucket, p.config.GCSObjectName)
+		if err != nil {
+			return nil, p.config.KeepOriginalImage, err
+		}
 	}
 
 	return gceImageArtifact, p.config.KeepOriginalImage, nil
@@ -232,4 +240,37 @@ func CreateGceImage(accountFile string, ui packer.Ui, project string, rawImageUR
 	}
 
 	return &Artifact{paths: []string{op.TargetLink}}, nil
+}
+
+func DeleteFromBucket(accountFile string, ui packer.Ui, bucket string, gcsObjectName string) error {
+	var client *http.Client
+	var account googlecompute.AccountFile
+
+	err := googlecompute.ProcessAccountFile(&account, accountFile)
+	if err != nil {
+		return err
+	}
+
+	var DriverScopes = []string{"https://www.googleapis.com/auth/devstorage.full_control"}
+	conf := jwt.Config{
+		Email:      account.ClientEmail,
+		PrivateKey: []byte(account.PrivateKey),
+		Scopes:     DriverScopes,
+		TokenURL:   "https://accounts.google.com/o/oauth2/token",
+	}
+
+	client = conf.Client(oauth2.NoContext)
+	service, err := storage.New(client)
+	if err != nil {
+		return err
+	}
+
+	ui.Say(fmt.Sprintf("Deleting import source from GCS %s/%s...", bucket, gcsObjectName))
+	err = service.Objects.Delete(bucket, gcsObjectName).Do()
+	if err != nil {
+		ui.Say(fmt.Sprintf("Failed to delete: %v/%v", bucket, gcsObjectName))
+		return err
+	}
+
+	return nil
 }
