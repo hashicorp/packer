@@ -58,7 +58,7 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
-	SetPackerPasswd      bool     `mapstructure:"set_packer_passwd"`
+	SetWinrmPasswd       bool     `mapstructure:"set_winrm_passwd"`
 }
 
 type Provisioner struct {
@@ -118,11 +118,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if !p.config.UseSFTP {
 		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_SCP_IF_SSH=True")
-	}
-
-	if p.config.SetPackerPasswd {
-		var PackerEnvVar string = fmt.Sprintf("PACKER_RANDOM_PASSWORD=%s", getWinRMPassword())
-		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, PackerEnvVar)
 	}
 
 	if len(p.config.LocalPort) > 0 {
@@ -195,6 +190,12 @@ func (p *Provisioner) getVersion() error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
+
+	if p.config.SetWinrmPasswd {
+		var WinrmEnvVar string = fmt.Sprintf("GENERATED_WINRM_PASSWORD=%s", getWinRMPassword(p.config.PackerBuildName))
+		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, WinrmEnvVar)
+		ui.Say("Setting Environment variable GENERATED_WINRM_PASSWORD to WinRM password.")
+	}
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
@@ -515,10 +516,9 @@ func newSigner(privKeyFile string) (*signer, error) {
 	return signer, nil
 }
 
-func getWinRMPassword() string {
-	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password")
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
 	return winRMPass
-
 }
 
 // Ui provides concurrency-safe access to packer.Ui.
