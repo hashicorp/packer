@@ -57,6 +57,7 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
+	SetPackerPasswd      bool     `mapstructure:"set_packer_passwd"`
 }
 
 type Provisioner struct {
@@ -116,6 +117,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if !p.config.UseSFTP {
 		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "ANSIBLE_SCP_IF_SSH=True")
+	}
+
+	if p.config.SetPackerPasswd {
+		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "PACKER_RANDOM_PASSWORD=TEST")
 	}
 
 	if len(p.config.LocalPort) > 0 {
