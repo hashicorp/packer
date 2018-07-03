@@ -121,7 +121,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.SetPackerPasswd {
-		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, "PACKER_RANDOM_PASSWORD=TEST")
+		var PackerEnvVar string = fmt.Sprintf("PACKER_RANDOM_PASSWORD=%s", getWinRMPassword())
+		p.config.AnsibleEnvVars = append(p.config.AnsibleEnvVars, PackerEnvVar)
 	}
 
 	if len(p.config.LocalPort) > 0 {
@@ -512,6 +513,12 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
+}
+
+func getWinRMPassword() string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password")
+	return winRMPass
+
 }
 
 // Ui provides concurrency-safe access to packer.Ui.
