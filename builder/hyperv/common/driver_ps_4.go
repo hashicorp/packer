@@ -219,6 +219,10 @@ func (d *HypervPS4Driver) ExportVirtualMachine(vmName string, path string) error
 	return hyperv.ExportVirtualMachine(vmName, path)
 }
 
+func (d *HypervPS4Driver) PreserveLegacyExportBehaviour(srcPath string, dstPath string) error {
+	return hyperv.PreserveLegacyExportBehaviour(srcPath, dstPath)
+}
+
 func (d *HypervPS4Driver) CompactDisks(path string) error {
 	return hyperv.CompactDisks(path)
 }

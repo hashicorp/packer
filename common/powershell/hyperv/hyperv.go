@@ -665,6 +665,62 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 	return err
 }
 
+func PreserveLegacyExportBehaviour(srcPath, dstPath string) error {
+
+	var script = `
+param([string]$srcPath, [string]$dstPath)
+
+# Validate the paths returning an error if they are empty or don't exist
+$srcPath, $dstPath | % {
+    if ($_) {
+        if (! (Test-Path $_)) {
+            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            exit
+        }
+    } else {
+        [System.Console]::Error.WriteLine("A supplied path is empty")
+        exit
+    }
+}
+
+# Export-VM should just create directories at the root of the export path
+# but, just in case, move all files as well...
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination (Get-Item $dstPath).FullName
+
+# Move directories with content; Delete empty directories
+$dirObj = Get-ChildItem $srcPath -Directory | % {
+    New-Object PSObject -Property @{
+        FullName=$_.FullName;
+        HasContent=$(if ($_.GetFileSystemInfos().Count -gt 0) {$true} else {$false})
+    }
+}
+foreach ($directory in $dirObj) {
+    if ($directory.HasContent) {
+        Move-Item -Path $directory.FullName -Destination (Get-Item $dstPath).FullName
+    } else {
+        Remove-Item -Path $directory.FullName
+    }
+}
+
+# Only remove the source directory if it is now empty
+if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
+    Remove-Item -Path $srcPath
+} else {
+    # 'Return' an error message to PowerShellCmd as the directory should
+    # always be empty at the end of the script. The check is here to stop
+    # the Remove-Item command from doing any damage if some unforeseen
+    # error has occured
+    [System.Console]::Error.WriteLine("Refusing to remove $srcPath as it is not empty")
+    exit
+}
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, srcPath, dstPath)
+
+	return err
+}
+
 func CompactDisks(path string) error {
 	var script = `
 param([string]$srcPath)
