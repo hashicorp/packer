@@ -186,6 +186,11 @@ type DriverMock struct {
 	ExportVirtualMachine_Path   string
 	ExportVirtualMachine_Err    error
 
+	PreserveLegacyExportBehaviour_Called  bool
+	PreserveLegacyExportBehaviour_SrcPath string
+	PreserveLegacyExportBehaviour_DstPath string
+	PreserveLegacyExportBehaviour_Err     error
+
 	CompactDisks_Called bool
 	CompactDisks_Path   string
 	CompactDisks_Err    error
@@ -479,6 +484,13 @@ func (d *DriverMock) ExportVirtualMachine(vmName string, path string) error {
 	d.ExportVirtualMachine_VmName = vmName
 	d.ExportVirtualMachine_Path = path
 	return d.ExportVirtualMachine_Err
+}
+
+func (d *DriverMock) PreserveLegacyExportBehaviour(srcPath string, dstPath string) error {
+	d.PreserveLegacyExportBehaviour_Called = true
+	d.PreserveLegacyExportBehaviour_SrcPath = srcPath
+	d.PreserveLegacyExportBehaviour_DstPath = dstPath
+	return d.PreserveLegacyExportBehaviour_Err
 }
 
 func (d *DriverMock) CompactDisks(path string) error {
