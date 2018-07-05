@@ -34,13 +34,19 @@ func (s *StepExportVm) Run(_ context.Context, state multistep.StateBag) multiste
 		ui.Say("Skipping disk compaction...")
 	} else {
 		ui.Say("Compacting disks...")
-		err := driver.CompactDisks(tmpPath)
+		// CompactDisks searches for all VHD/VHDX files under the supplied
+		// path and runs the compacting process on each of them. If no disks
+		// are found under the supplied path this is treated as a 'soft' error
+		// and a warning message is printed. All other errors halt the build.
+		result, err := driver.CompactDisks(tmpPath)
 		if err != nil {
 			err := fmt.Errorf("Error compacting disks: %s", err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
+		// Report disk compaction results/warn if no disks were found
+		ui.Message(result)
 	}
 
 	if s.SkipExport {

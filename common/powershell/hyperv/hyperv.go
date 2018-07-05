@@ -721,17 +721,40 @@ if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
 	return err
 }
 
-func CompactDisks(path string) error {
+func CompactDisks(path string) (result string, err error) {
 	var script = `
 param([string]$srcPath)
-Get-ChildItem "$srcPath" -Filter *.vhd* | %{
-    Optimize-VHD -Path $_.FullName -Mode Full
+
+$disks = Get-ChildItem -Path $srcPath -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+# Failure to find any disks is treated as a 'soft' error. Simply print out
+# a warning and exit
+if ($disks.Length -eq 0) {
+    Write-Output "WARNING: No disks found under $srcPath"
+    exit
+}
+
+foreach ($disk in $disks) {
+    Write-Output "Compacting disk: $(Split-Path $disk -leaf)"
+
+    $sizeBefore = $disk.Length
+    Optimize-VHD -Path $disk -Mode Full
+    $sizeAfter = $disk.Length
+
+    # Calculate the percentage change in disk size
+    if ($sizeAfter -gt 0) { # Protect against division by zero
+        $percentChange = ( ( $sizeAfter / $sizeBefore ) * 100 ) - 100
+        switch($percentChange) {
+            {$_ -lt 0} {Write-Output "Disk size reduced by: $(([math]::Abs($_)).ToString("#.#"))%"}
+            {$_ -eq 0} {Write-Output "Disk size is unchanged"}
+            {$_ -gt 0} {Write-Output "WARNING: Disk size increased by: $($_.ToString("#.#"))%"}
+        }
+    }
 }
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, path)
-	return err
+	result, err = ps.Output(script, path)
+	return
 }
 
 func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
