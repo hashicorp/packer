@@ -96,7 +96,7 @@ type Driver interface {
 
 	PreserveLegacyExportBehaviour(string, string) error
 
-	CompactDisks(string) error
+	CompactDisks(string) (string, error)
 
 	RestartVirtualMachine(string) error
 
