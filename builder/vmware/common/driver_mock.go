@@ -92,6 +92,8 @@ type DriverMock struct {
 
 	VerifyCalled bool
 	VerifyErr    error
+
+	RebootCalled bool
 }
 
 type NetworkMapperMock struct {
@@ -209,6 +211,11 @@ func (d *DriverMock) Stop(path string) error {
 	d.StopCalled = true
 	d.StopPath = path
 	return d.StopErr
+}
+
+func (d *DriverMock) Reboot() error {
+	d.RebootCalled = true
+	return nil
 }
 
 func (d *DriverMock) SuppressMessages(path string) error {

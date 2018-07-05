@@ -105,7 +105,7 @@ func Test_pcxtSpecial(t *testing.T) {
 }
 
 func Test_flushes(t *testing.T) {
-	in := "abc123<wait>098"
+	in := "abc123<wait>098<reboot>"
 	expected := [][]string{
 		{"1e", "9e", "30", "b0", "2e", "ae", "02", "82", "03", "83", "04", "84"},
 		{"0b", "8b", "0a", "8a", "09", "89"},
@@ -115,12 +115,17 @@ func Test_flushes(t *testing.T) {
 		actual = append(actual, c)
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
+
+	boots := make(map[string]int)
+
+	d := NewPCXTDriver(func() { boots["reboot"] = 1; return nil }, sendCodes,
+		-1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
+	assert.Equal(boots["reboot"], 1)
 }
 
 func Test_KeyIntervalNotGiven(t *testing.T) {

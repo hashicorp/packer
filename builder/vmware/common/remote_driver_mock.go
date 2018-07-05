@@ -26,7 +26,8 @@ type RemoteDriverMock struct {
 	UploadErr   error
 	DownloadErr error
 
-	ReloadVMErr error
+	RebootCalled bool
+	ReloadVMErr  error
 }
 
 func (d *RemoteDriverMock) UploadISO(path string, checksum string, checksumType string) (string, error) {
@@ -71,4 +72,9 @@ func (d *RemoteDriverMock) RemoveCache(localPath string) error {
 
 func (d *RemoteDriverMock) ReloadVM() error {
 	return d.ReloadVMErr
+}
+
+func (d *RemoteDriverMock) Reboot() error {
+	d.RebootCalled = true
+	return nil
 }
