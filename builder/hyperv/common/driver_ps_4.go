@@ -223,7 +223,7 @@ func (d *HypervPS4Driver) PreserveLegacyExportBehaviour(srcPath string, dstPath 
 	return hyperv.PreserveLegacyExportBehaviour(srcPath, dstPath)
 }
 
-func (d *HypervPS4Driver) CompactDisks(path string) error {
+func (d *HypervPS4Driver) CompactDisks(path string) (result string, err error) {
 	return hyperv.CompactDisks(path)
 }
 

@@ -193,6 +193,7 @@ type DriverMock struct {
 
 	CompactDisks_Called bool
 	CompactDisks_Path   string
+	CompactDisks_Result string
 	CompactDisks_Err    error
 
 	RestartVirtualMachine_Called bool
@@ -493,10 +494,11 @@ func (d *DriverMock) PreserveLegacyExportBehaviour(srcPath string, dstPath strin
 	return d.PreserveLegacyExportBehaviour_Err
 }
 
-func (d *DriverMock) CompactDisks(path string) error {
+func (d *DriverMock) CompactDisks(path string) (result string, err error) {
 	d.CompactDisks_Called = true
 	d.CompactDisks_Path = path
-	return d.CompactDisks_Err
+	d.CompactDisks_Result = "Mock compact result msg: mockdisk.vhdx. Disk size reduced by 20%"
+	return d.CompactDisks_Result, d.CompactDisks_Err
 }
 
 func (d *DriverMock) RestartVirtualMachine(vmName string) error {
