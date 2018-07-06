@@ -19,18 +19,19 @@ import (
 )
 
 var builtins = map[string]string{
-	"mitchellh.amazonebs":       "aws",
-	"mitchellh.amazon.instance": "aws",
-	"mitchellh.virtualbox":      "virtualbox",
-	"mitchellh.vmware":          "vmware",
-	"mitchellh.vmware-esx":      "vmware",
-	"pearkes.digitalocean":      "digitalocean",
-	"packer.googlecompute":      "google",
-	"hashicorp.scaleway":        "scaleway",
-	"packer.parallels":          "parallels",
-	"MSOpenTech.hyperv":         "hyperv",
-	"transcend.qemu":            "libvirt",
-	"ustream.lxc":               "lxc",
+	"mitchellh.amazonebs":                 "aws",
+	"mitchellh.amazon.instance":           "aws",
+	"mitchellh.virtualbox":                "virtualbox",
+	"mitchellh.vmware":                    "vmware",
+	"mitchellh.vmware-esx":                "vmware",
+	"pearkes.digitalocean":                "digitalocean",
+	"packer.googlecompute":                "google",
+	"hashicorp.scaleway":                  "scaleway",
+	"packer.parallels":                    "parallels",
+	"MSOpenTech.hyperv":                   "hyperv",
+	"transcend.qemu":                      "libvirt",
+	"ustream.lxc":                         "lxc",
+	"packer.post-processor.docker-import": "docker",
 }
 
 type Config struct {
@@ -241,6 +242,8 @@ func providerForName(name string) Provider {
 		return new(GoogleProvider)
 	case "lxc":
 		return new(LXCProvider)
+	case "docker":
+		return new(DockerProvider)
 	default:
 		return nil
 	}
