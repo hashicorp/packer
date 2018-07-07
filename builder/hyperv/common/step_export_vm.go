@@ -10,44 +10,13 @@ import (
 )
 
 type StepExportVm struct {
-	OutputDir      string
-	SkipCompaction bool
-	SkipExport     bool
+	OutputDir  string
+	SkipExport bool
 }
 
 func (s *StepExportVm) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-
-	// Get the VM name; Get the temp directory used to store the VMs files
-	// during the build process
-	var vmName, tmpPath string
-	if v, ok := state.GetOk("vmName"); ok {
-		vmName = v.(string)
-	}
-	if v, ok := state.GetOk("packerTempDir"); ok {
-		tmpPath = v.(string)
-	}
-
-	// Compact disks first so the export process has less to do
-	if s.SkipCompaction {
-		ui.Say("Skipping disk compaction...")
-	} else {
-		ui.Say("Compacting disks...")
-		// CompactDisks searches for all VHD/VHDX files under the supplied
-		// path and runs the compacting process on each of them. If no disks
-		// are found under the supplied path this is treated as a 'soft' error
-		// and a warning message is printed. All other errors halt the build.
-		result, err := driver.CompactDisks(tmpPath)
-		if err != nil {
-			err := fmt.Errorf("Error compacting disks: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		// Report disk compaction results/warn if no disks were found
-		ui.Message(result)
-	}
 
 	if s.SkipExport {
 		ui.Say("Skipping export of virtual machine...")
@@ -55,6 +24,13 @@ func (s *StepExportVm) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	ui.Say("Exporting virtual machine...")
+
+	// The VM name is needed for the export command
+	var vmName string
+	if v, ok := state.GetOk("vmName"); ok {
+		vmName = v.(string)
+	}
+
 	// The export process exports the VM to a folder named 'vmName' under
 	// the output directory. This contains the usual 'Snapshots', 'Virtual
 	// Hard Disks' and 'Virtual Machines' directories.
