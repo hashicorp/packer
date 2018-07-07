@@ -399,8 +399,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
-			SkipExport:                     b.config.SkipExport,
-			OutputDir:                      b.config.OutputDir,
 			MacAddress:                     b.config.MacAddress,
 			FixedVHD:                       b.config.FixedVHD,
 		},
