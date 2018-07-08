@@ -37,7 +37,7 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cloning virtual machine...")
 
-	path := state.Get("packerTempDir").(string)
+	path := state.Get("build_dir").(string)
 
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""

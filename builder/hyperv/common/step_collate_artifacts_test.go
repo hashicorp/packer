@@ -58,8 +58,8 @@ func TestStepCollateArtifacts_skipExportArtifacts(t *testing.T) {
 
 	// Needs the path to the main output directory and build directory
 	step.OutputDir = "foopath"
-	packerTempDir := "fooBuildPath"
-	state.Put("packerTempDir", packerTempDir)
+	buildDir := "fooBuildPath"
+	state.Put("build_dir", buildDir)
 	// Export has been skipped
 	step.SkipExport = true
 
@@ -77,9 +77,9 @@ func TestStepCollateArtifacts_skipExportArtifacts(t *testing.T) {
 	if !driver.MoveCreatedVHDsToOutputDir_Called {
 		t.Fatal("Should have called MoveCreatedVHDsToOutputDir")
 	}
-	if driver.MoveCreatedVHDsToOutputDir_SrcPath != packerTempDir {
+	if driver.MoveCreatedVHDsToOutputDir_SrcPath != buildDir {
 		t.Fatalf("Should call with correct srcPath. Got: %s Wanted: %s",
-			driver.MoveCreatedVHDsToOutputDir_SrcPath, packerTempDir)
+			driver.MoveCreatedVHDsToOutputDir_SrcPath, buildDir)
 	}
 	if driver.MoveCreatedVHDsToOutputDir_DstPath != step.OutputDir {
 		t.Fatalf("Should call with correct dstPath. Got: %s Wanted: %s",
