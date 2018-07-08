@@ -190,6 +190,11 @@ type DriverMock struct {
 	PreserveLegacyExportBehaviour_DstPath string
 	PreserveLegacyExportBehaviour_Err     error
 
+	MoveCreatedVHDsToOutputDir_Called  bool
+	MoveCreatedVHDsToOutputDir_SrcPath string
+	MoveCreatedVHDsToOutputDir_DstPath string
+	MoveCreatedVHDsToOutputDir_Err     error
+
 	CompactDisks_Called bool
 	CompactDisks_Path   string
 	CompactDisks_Result string
@@ -490,6 +495,13 @@ func (d *DriverMock) PreserveLegacyExportBehaviour(srcPath string, dstPath strin
 	d.PreserveLegacyExportBehaviour_SrcPath = srcPath
 	d.PreserveLegacyExportBehaviour_DstPath = dstPath
 	return d.PreserveLegacyExportBehaviour_Err
+}
+
+func (d *DriverMock) MoveCreatedVHDsToOutputDir(srcPath string, dstPath string) error {
+	d.MoveCreatedVHDsToOutputDir_Called = true
+	d.MoveCreatedVHDsToOutputDir_SrcPath = srcPath
+	d.MoveCreatedVHDsToOutputDir_DstPath = dstPath
+	return d.MoveCreatedVHDsToOutputDir_Err
 }
 
 func (d *DriverMock) CompactDisks(path string) (result string, err error) {
