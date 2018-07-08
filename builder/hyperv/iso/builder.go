@@ -350,7 +350,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{
+		&hypervcommon.StepCreateBuildDir{
 			TempPath: b.config.TempPath,
 		},
 		&hypervcommon.StepOutputDir{
