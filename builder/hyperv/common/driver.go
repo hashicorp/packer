@@ -96,6 +96,8 @@ type Driver interface {
 
 	PreserveLegacyExportBehaviour(string, string) error
 
+	MoveCreatedVHDsToOutputDir(string, string) error
+
 	CompactDisks(string) (string, error)
 
 	RestartVirtualMachine(string) error

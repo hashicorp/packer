@@ -223,6 +223,12 @@ func (d *HypervPS4Driver) PreserveLegacyExportBehaviour(srcPath string, dstPath 
 	return hyperv.PreserveLegacyExportBehaviour(srcPath, dstPath)
 }
 
+func (d *HypervPS4Driver) MoveCreatedVHDsToOutputDir(srcPath string, dstPath string) error {
+	// Not implemented yet
+	err := fmt.Errorf("Not implemented yet")
+	return err
+}
+
 func (d *HypervPS4Driver) CompactDisks(path string) (result string, err error) {
 	return hyperv.CompactDisks(path)
 }
