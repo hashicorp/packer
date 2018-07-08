@@ -198,13 +198,13 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
 if ($harddrivePath){
 	if($diffDisks -eq "true"){
 		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
@@ -218,21 +218,21 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
 if($fixedVHD -eq "true"){
 	$vhdx = $vmName + '.vhd'
 }
 else{
 	$vhdx = $vmName + '.vhdx'
 }
-$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
 if ($harddrivePath){
 	if($diffDisks -eq "true"){
 		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
@@ -252,7 +252,7 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
 			return err
 		}
 
