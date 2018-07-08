@@ -15,9 +15,9 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	// Set up the path to the tmp directory used to store VM files
-	tmpPath := "foopath"
-	state.Put("packerTempDir", tmpPath)
+	// Set up the path to the build directory
+	buildDir := "foopath"
+	state.Put("build_dir", buildDir)
 
 	driver := state.Get("driver").(*DriverMock)
 
@@ -33,8 +33,8 @@ func TestStepCompactDisk(t *testing.T) {
 	if !driver.CompactDisks_Called {
 		t.Fatal("Should have called CompactDisks")
 	}
-	if driver.CompactDisks_Path != tmpPath {
-		t.Fatalf("Should call with correct path. Got: %s Wanted: %s", driver.CompactDisks_Path, tmpPath)
+	if driver.CompactDisks_Path != buildDir {
+		t.Fatalf("Should call with correct path. Got: %s Wanted: %s", driver.CompactDisks_Path, buildDir)
 	}
 }
 
@@ -43,8 +43,8 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.SkipCompaction = true
 
-	// Set up the path to the tmp directory used to store VM files
-	state.Put("packerTempDir", "foopath")
+	// Set up the path to the build directory
+	state.Put("build_dir", "foopath")
 
 	driver := state.Get("driver").(*DriverMock)
 
