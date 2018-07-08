@@ -721,6 +721,54 @@ if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
 	return err
 }
 
+func MoveCreatedVHDsToOutputDir(srcPath, dstPath string) error {
+
+	var script = `
+param([string]$srcPath, [string]$dstPath)
+
+# Validate the paths returning an error if the supplied path is empty
+# or if the paths don't exist
+$srcPath, $dstPath | % {
+    if ($_) {
+        if (! (Test-Path $_)) {
+            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            exit
+        }
+    } else {
+        [System.Console]::Error.WriteLine("A supplied path is empty")
+        exit
+    }
+}
+
+# Convert to absolute paths if required
+$srcPathAbs = (Get-Item($srcPath)).FullName
+$dstPathAbs = (Get-Item($dstPath)).FullName
+
+# Get the full path to all disks under the directory or exit if none are found
+$disks = Get-ChildItem -Path $srcPathAbs -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+if ($disks.Length -eq 0) {
+    [System.Console]::Error.WriteLine("No disks found under $srcPathAbs")
+    exit
+}
+
+# Set up directory for VHDs in the destination directory
+$vhdDstDir = Join-Path -Path $dstPathAbs -ChildPath 'Virtual Hard Disks'
+if (! (Test-Path $vhdDstDir)) {
+	New-Item -ItemType Directory -Force -Path $vhdDstDir
+}
+
+# Move the disks
+foreach ($disk in $disks) {
+	Move-Item -Path $disk -Destination $vhdDstDir
+}
+`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, srcPath, dstPath)
+
+	return err
+}
+
 func CompactDisks(path string) (result string, err error) {
 	var script = `
 param([string]$srcPath)
