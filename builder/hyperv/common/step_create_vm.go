@@ -40,7 +40,10 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating virtual machine...")
 
-	path := state.Get("packerTempDir").(string)
+	var path string
+	if v, ok := state.GetOk("build_dir"); ok {
+		path = v.(string)
+	}
 
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""

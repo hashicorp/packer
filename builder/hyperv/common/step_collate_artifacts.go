@@ -23,16 +23,16 @@ func (s *StepCollateArtifacts) Run(_ context.Context, state multistep.StateBag) 
 
 	if s.SkipExport {
 		// Get the path to the main build directory from the statebag
-		var packerTempDir string
-		if v, ok := state.GetOk("packerTempDir"); ok {
-			packerTempDir = v.(string)
+		var buildDir string
+		if v, ok := state.GetOk("build_dir"); ok {
+			buildDir = v.(string)
 		}
 		// If the user has chosen to skip a full export of the VM the only
 		// artifacts that they are interested in will be the VHDs. The
 		// called function searches for all disks under the given source
 		// directory and moves them to a 'Virtual Hard Disks' folder under
 		// the destination directory
-		err := driver.MoveCreatedVHDsToOutputDir(packerTempDir, s.OutputDir)
+		err := driver.MoveCreatedVHDsToOutputDir(buildDir, s.OutputDir)
 		if err != nil {
 			err = fmt.Errorf("Error moving VHDs from build dir to output dir: %s", err)
 			state.Put("error", err)

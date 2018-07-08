@@ -22,10 +22,10 @@ func (s *StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionContinue
 	}
 
-	// Get the tmp dir used to store the VMs files during the build process
-	var tmpPath string
-	if v, ok := state.GetOk("packerTempDir"); ok {
-		tmpPath = v.(string)
+	// Get the dir used to store the VMs files during the build process
+	var buildDir string
+	if v, ok := state.GetOk("build_dir"); ok {
+		buildDir = v.(string)
 	}
 
 	ui.Say("Compacting disks...")
@@ -33,7 +33,7 @@ func (s *StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multi
 	// path and runs the compacting process on each of them. If no disks
 	// are found under the supplied path this is treated as a 'soft' error
 	// and a warning message is printed. All other errors halt the build.
-	result, err := driver.CompactDisks(tmpPath)
+	result, err := driver.CompactDisks(buildDir)
 	if err != nil {
 		err := fmt.Errorf("Error compacting disks: %s", err)
 		state.Put("error", err)

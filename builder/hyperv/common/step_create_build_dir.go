@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -18,7 +19,7 @@ type StepCreateBuildDir struct {
 	TempPath string
 	// The full path to the build directory. This is the concatenation of
 	// TempPath plus a directory uniquely named for the build
-	dirPath string
+	buildDir string
 }
 
 // Creates the main directory used to house the VMs files and folders
@@ -32,30 +33,33 @@ func (s *StepCreateBuildDir) Run(_ context.Context, state multistep.StateBag) mu
 		s.TempPath = os.TempDir()
 	}
 
-	packerTempDir, err := ioutil.TempDir(s.TempPath, "packerhv")
+	var err error
+	s.buildDir, err = ioutil.TempDir(s.TempPath, "packerhv")
 	if err != nil {
-		err := fmt.Errorf("Error creating build directory: %s", err)
+		err = fmt.Errorf("Error creating build directory: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	s.dirPath = packerTempDir
-	state.Put("packerTempDir", packerTempDir)
+	log.Printf("Created build directory: %s", s.buildDir)
+
+	// Record the build directory location for later steps
+	state.Put("build_dir", s.buildDir)
 
 	return multistep.ActionContinue
 }
 
 // Cleanup removes the build directory
 func (s *StepCreateBuildDir) Cleanup(state multistep.StateBag) {
-	if s.dirPath == "" {
+	if s.buildDir == "" {
 		return
 	}
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting build directory...")
 
-	err := os.RemoveAll(s.dirPath)
+	err := os.RemoveAll(s.buildDir)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting build directory: %s", err))
 	}
