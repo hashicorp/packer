@@ -46,18 +46,20 @@ func TestStepCollateArtifacts_exportedArtifacts(t *testing.T) {
 			driver.PreserveLegacyExportBehaviour_DstPath, step.OutputDir)
 	}
 
-	// TODO: Create MoveCreatedVHDsToOutput func etc
-	// if driver.MoveCreatedVHDsToOutput_Called {
-	// t.Fatal("Should NOT have called MoveCreatedVHDsToOutput")
-	// }
+	// Should only be called when skip_export is true
+	if driver.MoveCreatedVHDsToOutputDir_Called {
+		t.Fatal("Should NOT have called MoveCreatedVHDsToOutputDir")
+	}
 }
 
-func TestStepCollateArtifacts_skipExportedArtifacts(t *testing.T) {
+func TestStepCollateArtifacts_skipExportArtifacts(t *testing.T) {
 	state := testState(t)
 	step := new(StepCollateArtifacts)
 
-	// TODO: Needs the path to the main output directory
-	// outputDir := "foopath"
+	// Needs the path to the main output directory and build directory
+	step.OutputDir = "foopath"
+	packerTempDir := "fooBuildPath"
+	state.Put("packerTempDir", packerTempDir)
 	// Export has been skipped
 	step.SkipExport = true
 
@@ -71,10 +73,18 @@ func TestStepCollateArtifacts_skipExportedArtifacts(t *testing.T) {
 		t.Fatal("Should NOT have error")
 	}
 
-	// TODO: Create MoveCreatedVHDsToOutput func etc
-	// if !driver.MoveCreatedVHDsToOutput_Called {
-	// t.Fatal("Should have called MoveCreatedVHDsToOutput")
-	// }
+	// Test the driver
+	if !driver.MoveCreatedVHDsToOutputDir_Called {
+		t.Fatal("Should have called MoveCreatedVHDsToOutputDir")
+	}
+	if driver.MoveCreatedVHDsToOutputDir_SrcPath != packerTempDir {
+		t.Fatalf("Should call with correct srcPath. Got: %s Wanted: %s",
+			driver.MoveCreatedVHDsToOutputDir_SrcPath, packerTempDir)
+	}
+	if driver.MoveCreatedVHDsToOutputDir_DstPath != step.OutputDir {
+		t.Fatalf("Should call with correct dstPath. Got: %s Wanted: %s",
+			driver.MoveCreatedVHDsToOutputDir_DstPath, step.OutputDir)
+	}
 
 	if driver.PreserveLegacyExportBehaviour_Called {
 		t.Fatal("Should NOT have called PreserveLegacyExportBehaviour")
