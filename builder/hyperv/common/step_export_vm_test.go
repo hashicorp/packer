@@ -45,19 +45,13 @@ func TestStepExportVm(t *testing.T) {
 			driver.ExportVirtualMachine_VmName, vmName)
 	}
 
-	if !driver.PreserveLegacyExportBehaviour_Called {
-		t.Fatal("Should have called PreserveLegacyExportBehaviour")
+	// Test we stored the export path in the statebag and it is correct
+	expectedPath := filepath.Join(outputDir, vmName)
+	if exportPath, ok := state.GetOk("export_path"); !ok {
+		t.Fatal("Should set export_path")
+	} else if exportPath != expectedPath {
+		t.Fatalf("Bad path stored for export_path. Got: %#v Wanted: %#v", exportPath, expectedPath)
 	}
-	exportPath := filepath.Join(outputDir, vmName)
-	if driver.PreserveLegacyExportBehaviour_SrcPath != exportPath {
-		t.Fatalf("Should call with correct srcPath. Got: %s Wanted: %s",
-			driver.PreserveLegacyExportBehaviour_SrcPath, exportPath)
-	}
-	if driver.PreserveLegacyExportBehaviour_DstPath != outputDir {
-		t.Fatalf("Should call with correct dstPath. Got: %s Wanted: %s",
-			driver.PreserveLegacyExportBehaviour_DstPath, outputDir)
-	}
-
 }
 
 func TestStepExportVm_skip(t *testing.T) {
@@ -83,10 +77,11 @@ func TestStepExportVm_skip(t *testing.T) {
 
 	// Test the driver
 	if driver.ExportVirtualMachine_Called {
-		t.Fatal("Should not have called ExportVirtualMachine")
+		t.Fatal("Should NOT have called ExportVirtualMachine")
 	}
 
-	if driver.PreserveLegacyExportBehaviour_Called {
-		t.Fatal("Should NOT have called PreserveLegacyExportBehaviour")
+	// Should not store the export path in the statebag
+	if _, ok := state.GetOk("export_path"); ok {
+		t.Fatal("Should NOT have stored export_path in the statebag")
 	}
 }
