@@ -96,11 +96,6 @@ type Config struct {
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
 
-	// A separate path can be used for storing the VM's disk image. The purpose is to enable
-	// reading and writing to take place on different physical disks (read from VHD temp path
-	// write to regular temp path while exporting the VM) to eliminate a single-disk bottleneck.
-	VhdTempPath string `mapstructure:"vhd_temp_path"`
-
 	Communicator string `mapstructure:"communicator"`
 
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
@@ -356,8 +351,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps := []multistep.Step{
 		&hypervcommon.StepCreateTempDir{
-			TempPath:    b.config.TempPath,
-			VhdTempPath: b.config.VhdTempPath,
+			TempPath: b.config.TempPath,
 		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
