@@ -179,8 +179,8 @@ func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile stri
 	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes, diskBlockSize, controllerType)
 }
 
-func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
-	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, vhdPath, ram, diskSize, diskBlockSize, switchName, generation, diffDisks, fixedVHD)
+func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, ram, diskSize, diskBlockSize, switchName, generation, diffDisks, fixedVHD)
 }
 
 func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {

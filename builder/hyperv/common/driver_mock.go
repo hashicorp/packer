@@ -124,7 +124,6 @@ type DriverMock struct {
 	CreateVirtualMachine_VmName           string
 	CreateVirtualMachine_Path             string
 	CreateVirtualMachine_HarddrivePath    string
-	CreateVirtualMachine_VhdPath          string
 	CreateVirtualMachine_Ram              int64
 	CreateVirtualMachine_DiskSize         int64
 	CreateVirtualMachine_DiskBlockSize    int64
@@ -402,12 +401,11 @@ func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, v
 	return d.AddVirtualMachineHardDrive_Err
 }
 
-func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
 	d.CreateVirtualMachine_Path = path
 	d.CreateVirtualMachine_HarddrivePath = harddrivePath
-	d.CreateVirtualMachine_VhdPath = vhdPath
 	d.CreateVirtualMachine_Ram = ram
 	d.CreateVirtualMachine_DiskSize = diskSize
 	d.CreateVirtualMachine_DiskBlockSize = diskBlockSize
