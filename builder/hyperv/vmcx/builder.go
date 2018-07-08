@@ -482,6 +482,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			OutputDir:  b.config.OutputDir,
 			SkipExport: b.config.SkipExport,
 		},
+		&hypervcommon.StepCollateArtifacts{
+			OutputDir:  b.config.OutputDir,
+			SkipExport: b.config.SkipExport,
+		},
 
 		// the clean up actions for each step will be executed reverse order
 	)
