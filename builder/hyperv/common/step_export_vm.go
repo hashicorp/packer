@@ -42,20 +42,9 @@ func (s *StepExportVm) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	// Shuffle around the exported folders to maintain backwards
-	// compatibility. This moves the 'Snapshots', 'Virtual Hard Disks' and
-	// 'Virtual Machines' directories from <output directory>/<vm name> so
-	// they appear directly under <output directory>. The empty '<output
-	// directory>/<vm name>' directory is removed when complete.
-	// The 'Snapshots' folder will not be moved into the output directory
-	// if it is empty.
+	// Store the path to the export directory for later steps
 	exportPath := filepath.Join(s.OutputDir, vmName)
-	err = driver.PreserveLegacyExportBehaviour(exportPath, s.OutputDir)
-	if err != nil {
-		// No need to halt here; Just warn the user instead
-		err = fmt.Errorf("WARNING: Error restoring legacy export dir structure: %s", err)
-		ui.Error(err.Error())
-	}
+	state.Put("export_path", exportPath)
 
 	return multistep.ActionContinue
 }
