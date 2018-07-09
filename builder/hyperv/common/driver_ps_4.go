@@ -175,16 +175,24 @@ func (d *HypervPS4Driver) CreateVirtualSwitch(switchName string, switchType stri
 	return hyperv.CreateVirtualSwitch(switchName, switchType)
 }
 
-func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, diskBlockSize int64, controllerType string) error {
-	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes, diskBlockSize, controllerType)
+func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string,
+	vhdSizeBytes int64, diskBlockSize int64, controllerType string) error {
+	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes,
+		diskBlockSize, controllerType)
 }
 
-func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
-	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, ram, diskSize, diskBlockSize, switchName, generation, diffDisks, fixedVHD)
+func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
+	diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool,
+	fixedVHD bool) error {
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, ram, diskSize, diskBlockSize, switchName,
+		generation, diffDisks, fixedVHD)
 }
 
-func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
-	return hyperv.CloneVirtualMachine(cloneFromVmxcPath, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
+func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string,
+	ram int64, switchName string) error {
+	return hyperv.CloneVirtualMachine(cloneFromVmxcPath, cloneFromVmName, cloneFromSnapshotName,
+		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
 }
 
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {
@@ -211,7 +219,8 @@ func (d *HypervPS4Driver) SetVirtualMachineVirtualizationExtensions(vmName strin
 	return hyperv.SetVirtualMachineVirtualizationExtensions(vmName, enable)
 }
 
-func (d *HypervPS4Driver) EnableVirtualMachineIntegrationService(vmName string, integrationServiceName string) error {
+func (d *HypervPS4Driver) EnableVirtualMachineIntegrationService(vmName string,
+	integrationServiceName string) error {
 	return hyperv.EnableVirtualMachineIntegrationService(vmName, integrationServiceName)
 }
 
@@ -239,11 +248,13 @@ func (d *HypervPS4Driver) CreateDvdDrive(vmName string, isoPath string, generati
 	return hyperv.CreateDvdDrive(vmName, isoPath, generation)
 }
 
-func (d *HypervPS4Driver) MountDvdDrive(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
+func (d *HypervPS4Driver) MountDvdDrive(vmName string, path string, controllerNumber uint,
+	controllerLocation uint) error {
 	return hyperv.MountDvdDrive(vmName, path, controllerNumber, controllerLocation)
 }
 
-func (d *HypervPS4Driver) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
+func (d *HypervPS4Driver) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
+	generation uint) error {
 	return hyperv.SetBootDvdDrive(vmName, controllerNumber, controllerLocation, generation)
 }
 
