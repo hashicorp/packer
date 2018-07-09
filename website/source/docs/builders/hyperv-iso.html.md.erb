@@ -266,11 +266,6 @@ builder.
     option is outputing a disk that is in the format required for upload to
     Azure.
 
--   `vhd_temp_path` (string) - A separate path to be used for storing the VM's
-    disk image. The purpose is to enable reading and writing to take place on
-    different physical disks (read from VHD temp path, write to regular temp
-    path while exporting the VM) to eliminate a single-disk bottleneck.
-
 -   `vlan_id` (string) - This is the VLAN of the virtual machine's network
     card for the new virtual machine. By default none is set. If none is set
     then VLANs are not set on the virtual machine's network card.
