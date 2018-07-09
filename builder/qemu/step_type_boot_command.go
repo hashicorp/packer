@@ -41,6 +41,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	httpPort := state.Get("http_port").(uint)
 	ui := state.Get("ui").(packer.Ui)
 	vncPort := state.Get("vnc_port").(uint)
+	vncIP := state.Get("vnc_ip").(string)
 
 	if config.VNCConfig.DisableVNC {
 		log.Println("Skipping boot command step...")
@@ -65,7 +66,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	// Connect to VNC
 	ui.Say("Connecting to VM via VNC")
-	nc, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", vncPort))
+	nc, err := net.Dial("tcp", fmt.Sprintf("%s:%d", vncIP, vncPort))
 	if err != nil {
 		err := fmt.Errorf("Error connecting to VNC: %s", err)
 		state.Put("error", err)
