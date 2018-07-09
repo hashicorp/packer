@@ -91,6 +91,7 @@ type Config struct {
 	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
 	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
+	TempPath                       string `mapstructure:"temp_path"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -362,7 +363,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateBuildDir{},
+		&hypervcommon.StepCreateBuildDir{
+			TempPath: b.config.TempPath,
+		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
