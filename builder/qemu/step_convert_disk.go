@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 
@@ -46,11 +48,32 @@ func (s *stepConvertDisk) Run(_ context.Context, state multistep.StateBag) multi
 	)
 
 	ui.Say("Converting hard drive...")
-	if err := driver.QemuImg(command...); err != nil {
-		err := fmt.Errorf("Error converting hard drive: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	// Retry the conversion a few times in case it takes the qemu process a
+	// moment to release the lock
+	err := common.Retry(1, 10, 10, func(_ uint) (bool, error) {
+		if err := driver.QemuImg(command...); err != nil {
+			if strings.Contains(err.Error(), `Failed to get shared "write" lock`) {
+				ui.Say("Error getting file lock for conversion; retrying...")
+				return false, nil
+			}
+			err = fmt.Errorf("Error converting hard drive: %s", err)
+			return true, err
+		}
+		return true, nil
+	})
+
+	if err != nil {
+		if err == common.RetryExhaustedError {
+			err = fmt.Errorf("Exhausted retries for getting file lock: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		} else {
+			err := fmt.Errorf("Error converting hard drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	if err := os.Rename(targetPath, sourcePath); err != nil {
