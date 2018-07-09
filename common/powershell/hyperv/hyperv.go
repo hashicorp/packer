@@ -111,7 +111,8 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, path, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, path, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -124,7 +125,8 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -146,7 +148,8 @@ if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
 Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+			strconv.FormatInt(int64(controllerLocation), 10))
 		return err
 	}
 }
@@ -160,7 +163,8 @@ Hyper-V\Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -C
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -198,7 +202,9 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
+	diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diffDisks bool, fixedVHD bool) error {
 
 	if generation == 2 {
 		var script = `
@@ -218,7 +224,10 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
+			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
+			switchName, strconv.FormatInt(int64(generation), 10),
+			strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
@@ -252,7 +261,9 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
+			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
+			switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
 			return err
 		}
 
@@ -354,7 +365,9 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 	return err
 }
 
-func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string, ram int64, switchName string) error {
+func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string,
+	ram int64, switchName string) error {
+
 	var script = `
 param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)
 
@@ -409,9 +422,13 @@ if ($vm) {
 	return err
 }
 
-func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
+	path string, harddrivePath string, ram int64, switchName string) error {
+
 	if cloneFromVmName != "" {
-		if err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots); err != nil {
+		if err := ExportVmxcVirtualMachine(path, cloneFromVmName,
+			cloneFromSnapshotName, cloneAllSnapshots); err != nil {
 			return err
 		}
 	}
@@ -1018,7 +1035,8 @@ Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter 
 	return err
 }
 
-func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
+func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64,
+	vhdBlockSize int64, controllerType string) error {
 
 	var script = `
 param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)

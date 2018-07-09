@@ -162,7 +162,8 @@ func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmxcPathRequ
 		t.Fatal("should have error")
 	} else {
 		errorMessage := err.Error()
-		if errorMessage != "1 error(s) occurred:\n\n* Virtual machine 'test_machine_name_that_does_not_exist' to clone from does not exist." {
+		if errorMessage != "1 error(s) occurred:\n\n* Virtual machine 'test_machine_name_that_does_not_exist' "+
+			"to clone from does not exist." {
 			t.Fatalf("should not have error: %s", err)
 		}
 	}
