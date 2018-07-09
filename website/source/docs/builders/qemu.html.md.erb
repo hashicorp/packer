@@ -36,7 +36,7 @@ to files, URLS for ISOs and checksums.
       "iso_checksum": "af4a1640c0c6f348c6c41f1ea9e192a2",
       "iso_checksum_type": "md5",
       "output_directory": "output_centos_tdhtest",
-      "shutdown_command": "shutdown -P now",
+      "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
       "disk_size": 5000,
       "format": "qcow2",
       "headless": false,
@@ -326,10 +326,10 @@ default port of `5985` or whatever value you have the service set to listen on.
 -   `shutdown_command` (string) - The command to use to gracefully shut down the
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine unless a
-    shutdown command takes place inside script so this may safely be omitted. If
-    one or more scripts require a reboot it is suggested to leave this blank
-    since reboots may fail and specify the final shutdown command in your
-    last script.
+    shutdown command takes place inside script so this may safely be omitted. It
+    is important to add a `shutdown_command`. By default Packer halts the virtual
+    machine and the file system may not be sync'd. Thus, changes made in a
+    provisioner might not be saved.
 
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
