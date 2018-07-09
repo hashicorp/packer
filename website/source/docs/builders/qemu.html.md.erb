@@ -329,7 +329,9 @@ default port of `5985` or whatever value you have the service set to listen on.
     shutdown command takes place inside script so this may safely be omitted. It
     is important to add a `shutdown_command`. By default Packer halts the virtual
     machine and the file system may not be sync'd. Thus, changes made in a
-    provisioner might not be saved.
+    provisioner might not be saved. If one or more scripts require a reboot it is
+    suggested to leave this blank since reboots may fail and specify the final
+    shutdown command in your last script.
 
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
