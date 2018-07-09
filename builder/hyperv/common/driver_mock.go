@@ -395,7 +395,8 @@ func (d *DriverMock) CreateVirtualSwitch(switchName string, switchType string) (
 	return d.CreateVirtualSwitch_Return, d.CreateVirtualSwitch_Err
 }
 
-func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, vhdDiskBlockSize int64, controllerType string) error {
+func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string,
+	vhdSizeBytes int64, vhdDiskBlockSize int64, controllerType string) error {
 	d.AddVirtualMachineHardDrive_Called = true
 	d.AddVirtualMachineHardDrive_VmName = vmName
 	d.AddVirtualMachineHardDrive_VhdFile = vhdFile
@@ -406,7 +407,9 @@ func (d *DriverMock) AddVirtualMachineHardDrive(vmName string, vhdFile string, v
 	return d.AddVirtualMachineHardDrive_Err
 }
 
-func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddrivePath string,
+	ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diffDisks bool, fixedVHD bool) error {
 	d.CreateVirtualMachine_Called = true
 	d.CreateVirtualMachine_VmName = vmName
 	d.CreateVirtualMachine_Path = path
@@ -420,7 +423,9 @@ func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddriveP
 	return d.CreateVirtualMachine_Err
 }
 
-func (d *DriverMock) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+func (d *DriverMock) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string,
+	harddrivePath string, ram int64, switchName string) error {
 	d.CloneVirtualMachine_Called = true
 	d.CloneVirtualMachine_CloneFromVmxcPath = cloneFromVmxcPath
 	d.CloneVirtualMachine_CloneFromVmName = cloneFromVmName
@@ -525,7 +530,8 @@ func (d *DriverMock) CreateDvdDrive(vmName string, isoPath string, generation ui
 	return d.CreateDvdDrive_ControllerNumber, d.CreateDvdDrive_ControllerLocation, d.CreateDvdDrive_Err
 }
 
-func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber uint, controllerLocation uint) error {
+func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber uint,
+	controllerLocation uint) error {
 	d.MountDvdDrive_Called = true
 	d.MountDvdDrive_VmName = vmName
 	d.MountDvdDrive_Path = path
@@ -534,7 +540,8 @@ func (d *DriverMock) MountDvdDrive(vmName string, path string, controllerNumber 
 	return d.MountDvdDrive_Err
 }
 
-func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint, generation uint) error {
+func (d *DriverMock) SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation uint,
+	generation uint) error {
 	d.SetBootDvdDrive_Called = true
 	d.SetBootDvdDrive_VmName = vmName
 	d.SetBootDvdDrive_ControllerNumber = controllerNumber
