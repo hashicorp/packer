@@ -46,6 +46,7 @@ deps:
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
+	@go get golang.org/x/tools/cmd/goimports
 	@govendor sync
 
 dev: deps ## Build and install a development build
