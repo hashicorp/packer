@@ -338,7 +338,7 @@ customize the image. Finally, when all is done, Packer will wrap the whole
 customized package up into a brand new AMI that will be available from the
 [AWS AMI management page](
 https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
-instances we subsequently create from this AMI will have our all of our
+instances we subsequently create from this AMI will have all of our
 customizations baked in. This is the core benefit we are looking to
 achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
 in this example.
