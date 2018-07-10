@@ -192,13 +192,54 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 ### winrm communicator
 
-Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
+Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` which implements
+the connection plugin.  On versions of Ansible before 2.4.x, the following works as the connection plugin
 
 ``` python
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+class Connection(SSHConnection):
+    ''' ssh based connections for powershell via packer'''
+
+    transport = 'packer'
+    has_pipelining = True
+    become_methods = []
+    allow_executable = False
+    module_implementation_preferences = ('.ps1', '')
+
+    def __init__(self, *args, **kwargs):
+        super(Connection, self).__init__(*args, **kwargs)
+```
+
+Newer versions of Ansible require all plugins to have a documentation string. You can see if there is a
+plugin available for the version of Ansible you are using [here](https://github.com/hashicorp/packer/tree/master/examples/ansible/connection-plugin).
+
+To create the plugin yourself, you will need to copy all of the `options` from the `DOCUMENTATION` string
+from the [ssh.py Ansible connection plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
+of the Ansible version you are using and add it to a packer.py file similar to as follows
+
+``` python
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+DOCUMENTATION = '''
+    connection: packer
+    short_description: ssh based connections for powershell via packer
+    description:
+        - This connection plugin allows ansible to communicate to the target packer
+        machines via ssh based connections for powershell.
+    author: Packer
+    version_added: na
+    options:
+      **** Copy ALL the options from
+      https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py
+      for the version of Ansible you are using ****
+'''
 
 class Connection(SSHConnection):
     ''' ssh based connections for powershell via packer'''
