@@ -389,7 +389,13 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	record, err := r.find("Name", config.VMName)
+	// The value in the Name field returned by 'esxcli network vm list'
+	// corresponds directly to the value of displayName set in the VMX file
+	var displayName string
+	if v, ok := state.GetOk("display_name"); ok {
+		displayName = v.(string)
+	}
+	record, err := r.find("Name", displayName)
 	if err != nil {
 		return "", err
 	}
