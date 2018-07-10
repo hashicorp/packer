@@ -214,9 +214,12 @@ class Connection(SSHConnection):
         super(Connection, self).__init__(*args, **kwargs)
 ```
 
-Newer versions of Ansible require all plugins to have a documentation string. You will need to copy
-the `options` from the `DOCUMENTATION` string from the [ssh.py Ansible connection plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
-of the Ansible version you are using and add it to packer.py similar to as follows
+Newer versions of Ansible require all plugins to have a documentation string. You can see if there is a
+plugin available for the version of Ansible you are using [here](https://github.com/hashicorp/packer/tree/master/examples/ansible/connection-plugin).
+
+To create the plugin yourself, you will need to copy all of the `options` from the `DOCUMENTATION` string
+from the [ssh.py Ansible connection plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
+of the Ansible version you are using and add it to a packer.py file similar to as follows
 
 ``` python
 from __future__ import (absolute_import, division, print_function)
@@ -233,7 +236,7 @@ DOCUMENTATION = '''
     author: Packer
     version_added: na
     options:
-      **** Copy the options from
+      **** Copy ALL the options from
       https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py
       for the version of Ansible you are using ****
 '''
