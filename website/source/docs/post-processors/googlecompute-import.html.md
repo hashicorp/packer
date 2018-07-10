@@ -54,6 +54,8 @@ for details.
 
 -   `keep_input_artifact` (boolean) - if true, do not delete the compressed RAW disk image. Defaults to false.
 
+-   `skip_clean` (boolean) - Skip removing the TAR file uploaded to the GCS bucket after the import process has completed. "true" means that we should leave it in the GCS bucket, "false" means to clean it out. Defaults to `false`.
+
 
 ## Basic Example
 
