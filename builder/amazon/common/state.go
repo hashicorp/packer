@@ -260,6 +260,20 @@ func getWaiterOptions() []request.WaiterOption {
 	return waitOpts
 }
 
+func getOverride(varInfo envInfo) envInfo {
+	override := os.Getenv(varInfo.envKey)
+	if override != "" {
+		n, err := strconv.Atoi(override)
+		if err != nil {
+			log.Printf("Invalid %s '%s', using default", varInfo.envKey, override)
+		} else {
+			varInfo.overridden = true
+			varInfo.Val = n
+		}
+	}
+
+	return varInfo
+}
 func getEnvOverrides() overridableWaitVars {
 	// Load env vars from environment, and use them to override defaults
 	envValues := overridableWaitVars{
@@ -268,18 +282,9 @@ func getEnvOverrides() overridableWaitVars {
 		envInfo{"AWS_TIMEOUT_SECONDS", 300, false},
 	}
 
-	for _, varInfo := range []envInfo{envValues.awsPollDelaySeconds, envValues.awsMaxAttempts, envValues.awsTimeoutSeconds} {
-		override := os.Getenv(varInfo.envKey)
-		if override != "" {
-			n, err := strconv.Atoi(override)
-			if err != nil {
-				log.Printf("Invalid %s '%s', using default", varInfo.envKey, override)
-			} else {
-				varInfo.overridden = true
-				varInfo.Val = n
-			}
-		}
-	}
+	envValues.awsMaxAttempts = getOverride(envValues.awsMaxAttempts)
+	envValues.awsPollDelaySeconds = getOverride(envValues.awsPollDelaySeconds)
+	envValues.awsTimeoutSeconds = getOverride(envValues.awsTimeoutSeconds)
 
 	return envValues
 }
