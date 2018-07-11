@@ -120,6 +120,7 @@ func (ds *DefaultSender) Send(c *Client, req *http.Request) (resp *http.Response
 		if err != nil || !autorest.ResponseHasStatusCode(resp, ds.ValidStatusCodes...) {
 			return resp, err
 		}
+		drainRespBody(resp)
 		autorest.DelayForBackoff(ds.RetryDuration, attempts, req.Cancel)
 		ds.attempts = attempts
 	}
@@ -878,6 +879,12 @@ func readAndCloseBody(body io.ReadCloser) ([]byte, error) {
 		err = nil
 	}
 	return out, err
+}
+
+// reads the response body then closes it
+func drainRespBody(resp *http.Response) {
+	io.Copy(ioutil.Discard, resp.Body)
+	resp.Body.Close()
 }
 
 func serviceErrFromXML(body []byte, storageErr *AzureStorageServiceError) error {

@@ -41,11 +41,11 @@ func NewSnapshotsClientWithBaseURI(baseURI string, subscriptionID string) Snapsh
 }
 
 // CreateOrUpdate creates or updates a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters. snapshot is snapshot object supplied in the body of the
-// Put disk operation.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
+// snapshot - snapshot object supplied in the body of the Put disk operation.
 func (client SnapshotsClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, snapshotName string, snapshot Snapshot) (result SnapshotsCreateOrUpdateFuture, err error) {
 	if err := validation.Validate([]validation.Validation{
 		{TargetValue: snapshot,
@@ -109,15 +109,17 @@ func (client SnapshotsClient) CreateOrUpdatePreparer(ctx context.Context, resour
 // CreateOrUpdateSender sends the CreateOrUpdate request. The method will close the
 // http.Response Body if it receives an error.
 func (client SnapshotsClient) CreateOrUpdateSender(req *http.Request) (future SnapshotsCreateOrUpdateFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -135,10 +137,10 @@ func (client SnapshotsClient) CreateOrUpdateResponder(resp *http.Response) (resu
 }
 
 // Delete deletes a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
 func (client SnapshotsClient) Delete(ctx context.Context, resourceGroupName string, snapshotName string) (result SnapshotsDeleteFuture, err error) {
 	req, err := client.DeletePreparer(ctx, resourceGroupName, snapshotName)
 	if err != nil {
@@ -179,36 +181,37 @@ func (client SnapshotsClient) DeletePreparer(ctx context.Context, resourceGroupN
 // DeleteSender sends the Delete request. The method will close the
 // http.Response Body if it receives an error.
 func (client SnapshotsClient) DeleteSender(req *http.Request) (future SnapshotsDeleteFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
 // DeleteResponder handles the response to the Delete request. The method always
 // closes the http.Response Body.
-func (client SnapshotsClient) DeleteResponder(resp *http.Response) (result OperationStatusResponse, err error) {
+func (client SnapshotsClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
 		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent),
-		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
-	result.Response = autorest.Response{Response: resp}
+	result.Response = resp
 	return
 }
 
 // Get gets information about a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
 func (client SnapshotsClient) Get(ctx context.Context, resourceGroupName string, snapshotName string) (result Snapshot, err error) {
 	req, err := client.GetPreparer(ctx, resourceGroupName, snapshotName)
 	if err != nil {
@@ -273,11 +276,11 @@ func (client SnapshotsClient) GetResponder(resp *http.Response) (result Snapshot
 }
 
 // GrantAccess grants access to a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters. grantAccessData is access data object supplied in the body
-// of the get snapshot access operation.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
+// grantAccessData - access data object supplied in the body of the get snapshot access operation.
 func (client SnapshotsClient) GrantAccess(ctx context.Context, resourceGroupName string, snapshotName string, grantAccessData GrantAccessData) (result SnapshotsGrantAccessFuture, err error) {
 	if err := validation.Validate([]validation.Validation{
 		{TargetValue: grantAccessData,
@@ -326,15 +329,17 @@ func (client SnapshotsClient) GrantAccessPreparer(ctx context.Context, resourceG
 // GrantAccessSender sends the GrantAccess request. The method will close the
 // http.Response Body if it receives an error.
 func (client SnapshotsClient) GrantAccessSender(req *http.Request) (future SnapshotsGrantAccessFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -442,8 +447,8 @@ func (client SnapshotsClient) ListComplete(ctx context.Context) (result Snapshot
 }
 
 // ListByResourceGroup lists snapshots under a resource group.
-//
-// resourceGroupName is the name of the resource group.
+// Parameters:
+// resourceGroupName - the name of the resource group.
 func (client SnapshotsClient) ListByResourceGroup(ctx context.Context, resourceGroupName string) (result SnapshotListPage, err error) {
 	result.fn = client.listByResourceGroupNextResults
 	req, err := client.ListByResourceGroupPreparer(ctx, resourceGroupName)
@@ -535,10 +540,10 @@ func (client SnapshotsClient) ListByResourceGroupComplete(ctx context.Context, r
 }
 
 // RevokeAccess revokes access to a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
 func (client SnapshotsClient) RevokeAccess(ctx context.Context, resourceGroupName string, snapshotName string) (result SnapshotsRevokeAccessFuture, err error) {
 	req, err := client.RevokeAccessPreparer(ctx, resourceGroupName, snapshotName)
 	if err != nil {
@@ -579,37 +584,38 @@ func (client SnapshotsClient) RevokeAccessPreparer(ctx context.Context, resource
 // RevokeAccessSender sends the RevokeAccess request. The method will close the
 // http.Response Body if it receives an error.
 func (client SnapshotsClient) RevokeAccessSender(req *http.Request) (future SnapshotsRevokeAccessFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
 // RevokeAccessResponder handles the response to the RevokeAccess request. The method always
 // closes the http.Response Body.
-func (client SnapshotsClient) RevokeAccessResponder(resp *http.Response) (result OperationStatusResponse, err error) {
+func (client SnapshotsClient) RevokeAccessResponder(resp *http.Response) (result autorest.Response, err error) {
 	err = autorest.Respond(
 		resp,
 		client.ByInspecting(),
 		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted),
-		autorest.ByUnmarshallingJSON(&result),
 		autorest.ByClosing())
-	result.Response = autorest.Response{Response: resp}
+	result.Response = resp
 	return
 }
 
 // Update updates (patches) a snapshot.
-//
-// resourceGroupName is the name of the resource group. snapshotName is the name of the snapshot that is being
-// created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z,
-// A-Z, 0-9 and _. The max name length is 80 characters. snapshot is snapshot object supplied in the body of the
-// Patch snapshot operation.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// snapshotName - the name of the snapshot that is being created. The name can't be changed after the snapshot
+// is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
+// snapshot - snapshot object supplied in the body of the Patch snapshot operation.
 func (client SnapshotsClient) Update(ctx context.Context, resourceGroupName string, snapshotName string, snapshot SnapshotUpdate) (result SnapshotsUpdateFuture, err error) {
 	req, err := client.UpdatePreparer(ctx, resourceGroupName, snapshotName, snapshot)
 	if err != nil {
@@ -652,15 +658,17 @@ func (client SnapshotsClient) UpdatePreparer(ctx context.Context, resourceGroupN
 // UpdateSender sends the Update request. The method will close the
 // http.Response Body if it receives an error.
 func (client SnapshotsClient) UpdateSender(req *http.Request) (future SnapshotsUpdateFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
