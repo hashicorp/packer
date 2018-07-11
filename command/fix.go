@@ -153,6 +153,8 @@ Fixes that are run:
   docker-email               Removes "login_email" from the Docker builder
   powershell-escapes         Removes PowerShell escapes from user env vars and
                              elevated username and password strings
+  hyperv-deprecations        Removes the deprecated "vhd_temp_path" setting from
+                             Hyper-V ISO builder templates
 
 Options:
 
