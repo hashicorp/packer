@@ -2,7 +2,6 @@ package chroot
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -20,7 +19,7 @@ type StepSnapshot struct {
 	snapshotId string
 }
 
-func (s *StepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepSnapshot) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 	volumeId := state.Get("volume_id").(string)
@@ -44,26 +43,7 @@ func (s *StepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Message(fmt.Sprintf("Snapshot ID: %s", s.snapshotId))
 
 	// Wait for the snapshot to be ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		StepState: state,
-		Target:    "completed",
-		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeSnapshots(&ec2.DescribeSnapshotsInput{SnapshotIds: []*string{&s.snapshotId}})
-			if err != nil {
-				return nil, "", err
-			}
-
-			if len(resp.Snapshots) == 0 {
-				return nil, "", errors.New("No snapshots found.")
-			}
-
-			s := resp.Snapshots[0]
-			return s, *s.State, nil
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	err = awscommon.WaitUntilSnapshotDone(ctx, ec2conn, s.snapshotId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for snapshot: %s", err)
 		state.Put("error", err)
