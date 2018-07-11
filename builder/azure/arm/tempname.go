@@ -2,13 +2,19 @@ package arm
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/packer/builder/azure/common"
 )
 
 const (
-	TempNameAlphabet     = "0123456789bcdfghjklmnpqrstvwxyz"
-	TempPasswordAlphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	TempNameAlphabet = "0123456789bcdfghjklmnpqrstvwxyz"
+
+	numbers   = "0123456789"
+	lowerCase = "abcdefghijklmnopqrstuvwxyz"
+	upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	TempPasswordAlphabet = numbers + lowerCase + upperCase
 )
 
 type TempName struct {
@@ -39,8 +45,37 @@ func NewTempName() *TempName {
 	tempName.VirtualNetworkName = fmt.Sprintf("pkrvn%s", suffix)
 	tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
 
-	tempName.AdminPassword = common.RandomString(TempPasswordAlphabet, 32)
+	tempName.AdminPassword = generatePassword()
 	tempName.CertificatePassword = common.RandomString(TempPasswordAlphabet, 32)
 
 	return tempName
+}
+
+// generate a password that is acceptable to Azure
+// Three of the four items must be met.
+//  1. Contains an uppercase character
+//  2. Contains a lowercase character
+//  3. Contains a numeric digit
+//  4. Contains a special character
+func generatePassword() string {
+	var s string
+	for i := 0; i < 100; i++ {
+		s := common.RandomString(TempPasswordAlphabet, 32)
+		if !strings.ContainsAny(s, numbers) {
+			continue
+		}
+
+		if !strings.ContainsAny(s, lowerCase) {
+			continue
+		}
+
+		if !strings.ContainsAny(s, upperCase) {
+			continue
+		}
+
+		return s
+	}
+
+	// if an acceptable password cannot be generated in 100 tries, give up
+	return s
 }
