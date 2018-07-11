@@ -47,7 +47,7 @@ const (
 	//  -> ^[^_\W][\w-._]{0,79}(?<![-.])$
 	//
 	// This is not an exhaustive match, but it should be extremely close.
-	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,63}$"
+	validResourceGroupNameRe = "^[^_\\W][\\w-._\\(\\)]{0,89}$"
 	validManagedDiskName     = "^[^_\\W][\\w-._)]{0,79}$"
 )
 
