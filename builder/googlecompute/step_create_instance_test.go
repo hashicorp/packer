@@ -325,3 +325,41 @@ func TestCreateInstanceMetadata_noPublicKey(t *testing.T) {
 	// ensure the ssh metadata hasn't changed
 	assert.Equal(t, metadata["sshKeys"], sshKeys, "Instance metadata should not have been modified")
 }
+
+func TestCreateInstance_NetworkIP(t *testing.T) {
+
+	state := testState(t)
+	step := new(StepCreateInstance)
+	defer step.Cleanup(state)
+
+	state.Put("ssh_public_key", "key")
+	c := state.Get("config").(*Config)
+	c.Zone = "europe-west1-b"
+	c.NetworkIP = "10.132.15.253"
+	d := state.Get("driver").(*DriverMock)
+	d.GetImageResult = StubImage("test-image", "test-project", []string{"windows"}, 100)
+	// run the step
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
+		t.Fatalf("bad action: %#v", action)
+	}
+
+	// Verify state
+	//ip, ok := d.GetInternalIP(c.Zone, "instance_name")
+	//if !ok {
+	//	t.Fatal("should have specified ip")
+	//}
+
+	// cleanup
+	step.Cleanup(state)
+
+	if d.DeleteInstanceZone != c.Zone {
+		t.Fatalf("bad instance zone: %#v", d.DeleteInstanceZone)
+	}
+
+	if d.DeleteDiskName != c.InstanceName {
+		t.Fatal("should've deleted disk")
+	}
+	if d.DeleteDiskZone != c.Zone {
+		t.Fatalf("bad disk zone: %#v", d.DeleteDiskZone)
+	}
+}

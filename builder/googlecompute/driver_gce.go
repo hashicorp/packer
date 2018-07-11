@@ -354,6 +354,16 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		serviceAccount.Scopes = c.Scopes
 	}
 
+	// Set private ip, if present
+	networkinterface := &compute.NetworkInterface{
+		AccessConfigs: []*compute.AccessConfig{accessconfig},
+		Network:       networkId,
+		Subnetwork:    subnetworkId,
+	}
+	if c.NetworkIP != "" {
+		networkinterface.NetworkIP = c.NetworkIP
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -379,11 +389,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		},
 		Name: c.Name,
 		NetworkInterfaces: []*compute.NetworkInterface{
-			{
-				AccessConfigs: []*compute.AccessConfig{accessconfig},
-				Network:       networkId,
-				Subnetwork:    subnetworkId,
-			},
+			networkinterface,
 		},
 		Scheduling: &compute.Scheduling{
 			OnHostMaintenance: c.OnHostMaintenance,
