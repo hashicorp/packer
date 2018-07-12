@@ -122,10 +122,14 @@ func runCommand(shell *winrm.Shell, cmd *winrm.Command, rc *packer.RemoteCmd) {
 }
 
 // Upload implementation of communicator.Communicator interface
-func (c *Communicator) Upload(path string, input io.Reader, _ *os.FileInfo) error {
+func (c *Communicator) Upload(path string, input io.Reader, fi *os.FileInfo) error {
 	wcp, err := c.newCopyClient()
 	if err != nil {
 		return fmt.Errorf("Was unable to create winrm client: %s", err)
+	}
+	if strings.HasSuffix(path, `\`) {
+		// path is a directory
+		path += filepath.Base((*fi).Name())
 	}
 	log.Printf("Uploading file to '%s'", path)
 	return wcp.Write(path, input)
