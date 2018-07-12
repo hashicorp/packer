@@ -78,9 +78,11 @@ func (s *StepStopEBSBackedInstance) Run(ctx context.Context, state multistep.Sta
 
 	// Wait for the instance to actually stop
 	ui.Say("Waiting for the instance to stop...")
-	err = ec2conn.WaitUntilInstanceStoppedWithContext(ctx, &ec2.DescribeInstancesInput{
-		InstanceIds: []*string{instance.InstanceId},
-	})
+	err = ec2conn.WaitUntilInstanceStoppedWithContext(ctx,
+		&ec2.DescribeInstancesInput{
+			InstanceIds: []*string{instance.InstanceId},
+		},
+		getWaiterOptions()...)
 
 	if err != nil {
 		err := fmt.Errorf("Error waiting for instance to stop: %s", err)
