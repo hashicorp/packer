@@ -412,7 +412,9 @@ builder.
     wish to bind to all interfaces use `0.0.0.0`.
 
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
-    is used to secure the VNC communication with the VM.
+    is used to secure the VNC communication with the VM. This must be set to 
+    `true` if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
+    `false`.
 
 -   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
@@ -553,6 +555,8 @@ modify as well:
     Since ovftool is only capable of password based authentication
     `remote_password` must be set when exporting the VM.
 
+-   `vnc_disable_password` - This must be set to "true" when using VNC with
+    ESXi 6.5 or 6.7.
 
 ### VNC port discovery
 
