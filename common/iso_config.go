@@ -95,7 +95,6 @@ func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs [
 							errs = append(errs, err)
 							return warnings, errs
 						}
-
 					case "":
 						break
 					default:
@@ -146,14 +145,20 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		return err
 	}
 
-	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), u.Path)
+	absPath, err := filepath.Abs(u.Path)
+	if err != nil {
+		return fmt.Errorf("Unable to generate absolute path from provided iso_url: %s", err)
+	}
+
+	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), absPath)
 	if err != nil {
 		return err
 	}
 
 	filename := filepath.Base(u.Path)
 
-	errNotFound := fmt.Errorf("No checksum for %q or %q found at: %s", filename, relpath, c.ISOChecksumURL)
+	errNotFound := fmt.Errorf("No checksum for %q, %q or %q found at: %s",
+		filename, relpath, u.Path, c.ISOChecksumURL)
 	for {
 		line, err := rd.ReadString('\n')
 		if err != nil && line == "" {
@@ -163,12 +168,14 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		if len(parts) < 2 {
 			continue
 		}
+		options := []string{filename, relpath, "./" + relpath, absPath}
 		if strings.ToLower(parts[0]) == c.ISOChecksumType {
 			// BSD-style checksum
-			if parts[1] == fmt.Sprintf("(%s)", filename) || parts[1] == fmt.Sprintf("(%s)", relpath) ||
-				parts[1] == fmt.Sprintf("(./%s)", relpath) {
-				c.ISOChecksum = parts[3]
-				return nil
+			for _, match := range options {
+				if parts[1] == fmt.Sprintf("(%s)", match) {
+					c.ISOChecksum = parts[3]
+					return nil
+				}
 			}
 		} else {
 			// Standard checksum
@@ -176,9 +183,11 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 				// Binary mode
 				parts[1] = parts[1][1:]
 			}
-			if parts[1] == filename || parts[1] == relpath || parts[1] == "./"+relpath {
-				c.ISOChecksum = parts[0]
-				return nil
+			for _, match := range options {
+				if parts[1] == match {
+					c.ISOChecksum = parts[0]
+					return nil
+				}
 			}
 		}
 	}
