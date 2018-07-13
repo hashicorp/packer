@@ -40,6 +40,8 @@ type Config struct {
 	PublicIPAddress      string   `mapstructure:"public_ip_address"`
 	SecurityGroups       []string `mapstructure:"security_groups"`
 	ServiceOffering      string   `mapstructure:"service_offering"`
+	CreateNetworkACL     bool     `mapstructure:"create_network_acl"`
+	CreateFirewallRule   bool     `mapstructure:"create_firewall_rule"`
 	SourceISO            string   `mapstructure:"source_iso"`
 	SourceTemplate       string   `mapstructure:"source_template"`
 	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
