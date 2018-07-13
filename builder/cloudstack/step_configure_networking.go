@@ -117,7 +117,7 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 	// Store the port forward ID.
 	state.Put("port_forward_id", forward.Id)
 
-	if network.Vpcid != "" {
+	if network.Vpcid != "" && config.CreateNetworkACL {
 		ui.Message("Creating network ACL rule...")
 
 		if network.Aclid == "" {
@@ -149,7 +149,7 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 
 		// Store the network ACL rule ID.
 		state.Put("network_acl_rule_id", aclRule.Id)
-	} else {
+	} else if config.CreateFirewallRule {
 		ui.Message("Creating firewall rule...")
 
 		// Create a new parameter struct.
