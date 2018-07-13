@@ -145,7 +145,12 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		return err
 	}
 
-	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), u.Path)
+	absPath, err := filepath.Abs(u.Path)
+	if err != nil {
+		return fmt.Errorf("Unable to generate absolute path from provided iso_url: %s", err)
+	}
+
+	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), absPath)
 	if err != nil {
 		return err
 	}
@@ -163,7 +168,7 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 		if len(parts) < 2 {
 			continue
 		}
-		options := []string{filename, relpath, "./" + relpath, u.Path}
+		options := []string{filename, relpath, "./" + relpath, absPath}
 		if strings.ToLower(parts[0]) == c.ISOChecksumType {
 			// BSD-style checksum
 			for _, match := range options {
