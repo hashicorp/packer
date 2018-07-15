@@ -19,7 +19,7 @@ const (
 
 // Retrieve the specific ImageDateFilter using the exported const from images
 func getDateFilter(s string) (images.ImageDateFilter, error) {
-	filters := [...]images.ImageDateFilter{
+	filters := []images.ImageDateFilter{
 		images.FilterGT,
 		images.FilterGTE,
 		images.FilterLT,
@@ -34,7 +34,8 @@ func getDateFilter(s string) (images.ImageDateFilter, error) {
 		}
 	}
 
-	return images.ImageDateFilter(nil), fmt.Errorf("No ImageDateFilter found for %s", s)
+	var badFilter images.ImageDateFilter
+	return badFilter, fmt.Errorf("No ImageDateFilter found for %s", s)
 }
 
 // Allows construction of all fields from ListOpts using the "q" tags and
@@ -121,7 +122,7 @@ func applyMostRecent(listOpts *images.ListOpts) {
 
 // Converts a given date entry to ImageDateQuery for use in ListOpts
 func dateToImageDateQuery(val *string, key *string) (*images.ImageDateQuery, error) {
-	q := images.ImageDateQuery{}
+	q := new(images.ImageDateQuery)
 	sep := ":"
 	entries := strings.Split(*val, sep)
 
@@ -140,7 +141,7 @@ func dateToImageDateQuery(val *string, key *string) (*images.ImageDateQuery, err
 			q.Date = date
 		}
 
-		return &q, nil
+		return q, nil
 	}
 
 	return nil, fmt.Errorf("Incorrect date query format for %s", key)

@@ -12,7 +12,7 @@ func TestGetImageFilter(t *testing.T) {
 		"lt":   images.FilterLT,
 		"lte":  images.FilterLTE,
 		"neq":  images.FilterNEQ,
-		"ne":   images.FilterEQ,
+		"eq":   images.FilterEQ,
 	}
 
 	for passed, expected := range passedExpectedMap {
@@ -20,7 +20,7 @@ func TestGetImageFilter(t *testing.T) {
 		if err != nil {
 			t.Errorf("Passed %s, received error: %s", passed, err.Error())
 		} else if filter != expected {
-			t.Errorf("Expected %s, got %s", string(expected), filter)
+			t.Errorf("Expected %s, got %s", expected, filter)
 		}
 	}
 }
@@ -53,11 +53,13 @@ func TestBuildImageFilter(t *testing.T) {
 		t.Errorf("Name did not parse correctly")
 	}
 
-	if testOpts.Visibility != images.ImageVisibility(filters["visibility"]) {
+	var visibility images.ImageVisibility = "public"
+	if testOpts.Visibility != visibility {
 		t.Errorf("Visibility did not parse correctly")
 	}
 
-	if testOpts.Status != images.ImageStatus(filters["image_status"]) {
+	var imageStatus images.ImageStatus = "active"
+	if testOpts.Status != imageStatus {
 		t.Errorf("Image status did not parse correctly")
 	}
 
