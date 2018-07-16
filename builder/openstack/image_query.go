@@ -126,21 +126,16 @@ func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) 
 					vField.Set(reflect.ValueOf(is))
 				}
 
-			// Generates slice of strings for Tags
-			case reflect.Slice:
-				vField.Set(reflect.ValueOf(val))
-
 			default:
 				multierror.Append(
 					fmt.Errorf("Unsupported kind %s", vField.Kind()),
 					multiErr.Errors...)
 			}
 
-			// Handles ImageDateQuery types
 		} else if fieldName == reflect.TypeOf(listOpts.CreatedAtQuery).Name() ||
 			fieldName == reflect.TypeOf(listOpts.UpdatedAtQuery).Name() {
+			// Handles ImageDateQuery types
 
-			// get ImageDateQuery from string and set to this field
 			query, err := dateToImageDateQuery(key, val.(string))
 			if err != nil {
 				multierror.Append(err, multiErr.Errors...)
@@ -148,6 +143,13 @@ func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) 
 			}
 
 			vField.Set(reflect.ValueOf(query))
+
+		} else if fieldName == reflect.TypeOf(listOpts.Tags).Name() {
+			// Handles "tags" case and processes as slice of string
+
+			if val, exists := input["tags"]; exists && vField.CanSet() {
+				vField.Set(reflect.ValueOf(val))
+			}
 		}
 	}
 
