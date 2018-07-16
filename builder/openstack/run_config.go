@@ -18,21 +18,22 @@ type RunConfig struct {
 	SSHInterface         string              `mapstructure:"ssh_interface"`
 	SSHIPVersion         string              `mapstructure:"ssh_ip_version"`
 
-	SourceImage       string            `mapstructure:"source_image"`
-	SourceImageName   string            `mapstructure:"source_image_name"`
-	Flavor            string            `mapstructure:"flavor"`
-	AvailabilityZone  string            `mapstructure:"availability_zone"`
-	RackconnectWait   bool              `mapstructure:"rackconnect_wait"`
-	FloatingIPNetwork string            `mapstructure:"floating_ip_network"`
-	FloatingIP        string            `mapstructure:"floating_ip"`
-	ReuseIPs          bool              `mapstructure:"reuse_ips"`
-	SecurityGroups    []string          `mapstructure:"security_groups"`
-	Networks          []string          `mapstructure:"networks"`
-	Ports             []string          `mapstructure:"ports"`
-	UserData          string            `mapstructure:"user_data"`
-	UserDataFile      string            `mapstructure:"user_data_file"`
-	InstanceName      string            `mapstructure:"instance_name"`
-	InstanceMetadata  map[string]string `mapstructure:"instance_metadata"`
+	SourceImage        string             `mapstructure:"source_image"`
+	SourceImageName    string             `mapstructure:"source_image_name"`
+	SourceImageFilters ImageFilterOptions `mapstructure:"source_image_filter"`
+	Flavor             string             `mapstructure:"flavor"`
+	AvailabilityZone   string             `mapstructure:"availability_zone"`
+	RackconnectWait    bool               `mapstructure:"rackconnect_wait"`
+	FloatingIPNetwork  string             `mapstructure:"floating_ip_network"`
+	FloatingIP         string             `mapstructure:"floating_ip"`
+	ReuseIPs           bool               `mapstructure:"reuse_ips"`
+	SecurityGroups     []string           `mapstructure:"security_groups"`
+	Networks           []string           `mapstructure:"networks"`
+	Ports              []string           `mapstructure:"ports"`
+	UserData           string             `mapstructure:"user_data"`
+	UserDataFile       string             `mapstructure:"user_data_file"`
+	InstanceName       string             `mapstructure:"instance_name"`
+	InstanceMetadata   map[string]string  `mapstructure:"instance_metadata"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
 
@@ -75,8 +76,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SourceImage == "" && c.SourceImageName == "" {
-		errs = append(errs, errors.New("Either a source_image or a source_image_`name must be specified"))
+	if c.SourceImage == "" && c.SourceImageName == "" && c.SourceImageFilters.Filters != nil {
+		errs = append(errs, errors.New("Either a source_image, a source_image_name, or  must be specified"))
 	} else if len(c.SourceImage) > 0 && len(c.SourceImageName) > 0 {
 		errs = append(errs, errors.New("Only a source_image or a source_image_name can be specified, not both."))
 	}
