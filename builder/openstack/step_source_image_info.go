@@ -18,7 +18,7 @@ type StepSourceImageInfo struct {
 }
 
 type ImageFilterOptions struct {
-	Filters    map[string]string `mapstructure:"filters"`
+	Filters    map[string]interface{} `mapstructure:"filters"`
 	MostRecent bool              `mapstructure:"most_recent"`
 }
 
@@ -28,7 +28,7 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 
 	client, err := config.computeV2Client()
 
-	// if an ID is provided we skip the filter since that will return a single image
+	// if an ID is provided we skip the filter since that will return a single or no image
 	if s.SourceImage != "" {
 		state.Put("source_image", s.SourceImage)
 		return multistep.ActionContinue
@@ -47,6 +47,12 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 		}
 	}
 
+	// override the "name" provided in filters if "s.SourceImageName" was filled
+	if s.SourceImageName != "" {
+		params.Name = s.SourceImageName
+	}
+
+	// apply "most_recent" logic to the sort fields and allow OpenStack to return the latest qualified image
 	if s.ImageFilters.MostRecent {
 		applyMostRecent(params)
 	}

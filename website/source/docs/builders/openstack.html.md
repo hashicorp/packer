@@ -184,11 +184,11 @@ builder.
     ```
 
     This selects the most recent production Ubuntu 16.04 shared to you by the given owner.
-    NOTE: This will fail unless *exactly* one image is returned. In the above
-    example, `most_recent` will cause this to succeed by selecting the newest image.
+    NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
+    In the example, `most_recent` will cause this to succeed by selecting the newest image.
 
     -   `filters` (map of strings) - filters used to select a `source_image`.
-        NOTE: This will fail unless *exactly* one image is returned.
+        NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
         Any filter described in the docs for [ImageService](https://developer.openstack.org/api-ref/image/v2/)
         is valid.
 
