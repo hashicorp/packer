@@ -133,6 +133,6 @@ func TestImageFilterOptionsDecode(t *testing.T) {
 	}
 	err := mapstructure.Decode(input, &opts)
 	if err != nil {
-		t.Error("Did not successfully generate ImageFilterOptions from %v. Contains %v", input, opts)
+		t.Errorf("Did not successfully generate ImageFilterOptions from %v. Contains %v", input, opts)
 	}
 }

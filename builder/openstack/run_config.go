@@ -76,7 +76,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
-	if c.SourceImage == "" && c.SourceImageName == "" && c.SourceImageFilters.Filters != nil {
+	if c.SourceImage == "" && c.SourceImageName == "" && c.SourceImageFilters.Filters == nil {
 		errs = append(errs, errors.New("Either a source_image, a source_image_name, or  must be specified"))
 	} else if len(c.SourceImage) > 0 && len(c.SourceImageName) > 0 {
 		errs = append(errs, errors.New("Only a source_image or a source_image_name can be specified, not both."))
