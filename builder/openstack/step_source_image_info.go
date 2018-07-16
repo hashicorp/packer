@@ -19,7 +19,7 @@ type StepSourceImageInfo struct {
 
 type ImageFilterOptions struct {
 	Filters    map[string]interface{} `mapstructure:"filters"`
-	MostRecent bool              `mapstructure:"most_recent"`
+	MostRecent bool                   `mapstructure:"most_recent"`
 }
 
 func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
