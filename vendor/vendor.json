@@ -9,7 +9,7 @@
 			"revisionTime": "2016-08-11T22:04:02Z"
 		},
 		{
-			"checksumSHA1": "aspvORKGJoiAwyzot4bsHqt/17Y=",
+			"checksumSHA1": "TY1n3V3oj1YcvXPTUVnlRlNfGow=",
 			"path": "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -17,7 +17,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "jD1gZ3he4E6iYOZn7D24dKeLG8k=",
+			"checksumSHA1": "qzopX7CTZDrbARD7A8DBBbevmyM=",
 			"path": "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -25,7 +25,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "pJ2o3U5IZP9z5dKYl69maIBXUOY=",
+			"checksumSHA1": "DJY5zDEcGa82/Hbfud8lgHCuvU4=",
 			"path": "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -33,7 +33,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "hnlMpNzAV5mu4PHvyTuBc/BC8aA=",
+			"checksumSHA1": "928vJH7PbmZ6/3pG5GIlaw+h7B4=",
 			"path": "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -41,7 +41,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "qHMzicMTsihjgKyS/VB8oguXmmc=",
+			"checksumSHA1": "ySkjHczHi2zN8B1TuWfvKVLGetw=",
 			"path": "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -49,7 +49,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "1fQaVn4mDau1rUfyWGitatAvXdM=",
+			"checksumSHA1": "m3K3q/zhkmRtlIGWqMWgqzWR6C4=",
 			"path": "github.com/Azure/azure-sdk-for-go/storage",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -57,7 +57,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "BeO7/Ld5yP8m32hHNGQBSUvQjaw=",
+			"checksumSHA1": "Zl5uxmDmvXF6ADQsggG50XCiWmY=",
 			"path": "github.com/Azure/azure-sdk-for-go/version",
 			"revision": "ef33a0a23b66ba5e81f699d03dc48b723c1bad50",
 			"revisionTime": "2018-06-15T22:13:27Z",
@@ -65,7 +65,7 @@
 			"versionExact": "v17.3.1"
 		},
 		{
-			"checksumSHA1": "q3bhLdUVAz5dmDFvfKJJSTd/BaE=",
+			"checksumSHA1": "4Ba4uKXCFYkXa54FD7NyI8EsXG4=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
@@ -74,7 +74,7 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "Ygkay0Aq7zeg8A9DSRWI+flRcFk=",
+			"checksumSHA1": "dMSqbz496pHMUGW8ID67vpafGto=",
 			"path": "github.com/Azure/go-autorest/autorest/adal",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
 			"revisionTime": "2018-06-28T21:22:21Z",
@@ -82,7 +82,7 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "O8hvZ5SZ6o/mGOTivIagc1uPdl4=",
+			"checksumSHA1": "NT4tlDNlszWmb7gCXnYCkcvQxhs=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/azure",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
@@ -91,7 +91,7 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "KcxXWvXhVIkfqdGR+TQqWyCbgZk=",
+			"checksumSHA1": "9nXCi9qQsYjxCeajJKWttxgEt0I=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/date",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
@@ -100,7 +100,7 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "8XiRKZWE6XGsb0eJfG4P98JwaXw=",
+			"checksumSHA1": "SbBb2GcJNm5GjuPKGL2777QywR4=",
 			"comment": "v7.0.7",
 			"path": "github.com/Azure/go-autorest/autorest/to",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
@@ -109,7 +109,7 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "SVU/fTZ9osBm+WPdd5y71RabAzE=",
+			"checksumSHA1": "HjdLfAF3oA2In8F3FKh/Y+BPyXk=",
 			"path": "github.com/Azure/go-autorest/autorest/validation",
 			"revision": "1f7cd6cfe0adea687ad44a512dfe76140f804318",
 			"revisionTime": "2018-06-28T21:22:21Z",
