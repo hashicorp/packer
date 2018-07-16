@@ -24,6 +24,10 @@ type AuditEvent struct {
 	// The GUID of the event.
 	EventId *string `mandatory:"false" json:"eventId"`
 
+	// The name of the event.
+	// Example: `LaunchInstance`
+	EventName *string `mandatory:"false" json:"eventName"`
+
 	// The source of the event.
 	EventSource *string `mandatory:"false" json:"eventSource"`
 

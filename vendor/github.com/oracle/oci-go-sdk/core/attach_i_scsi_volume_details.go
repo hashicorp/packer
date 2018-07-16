@@ -25,6 +25,9 @@ type AttachIScsiVolumeDetails struct {
 	// A user-friendly name. Does not have to be unique, and it cannot be changed. Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
+	// Whether the attachment was created in read-only mode.
+	IsReadOnly *bool `mandatory:"false" json:"isReadOnly"`
+
 	// Whether to use CHAP authentication for the volume attachment. Defaults to false.
 	UseChap *bool `mandatory:"false" json:"useChap"`
 }
@@ -37,6 +40,11 @@ func (m AttachIScsiVolumeDetails) GetDisplayName() *string {
 //GetInstanceId returns InstanceId
 func (m AttachIScsiVolumeDetails) GetInstanceId() *string {
 	return m.InstanceId
+}
+
+//GetIsReadOnly returns IsReadOnly
+func (m AttachIScsiVolumeDetails) GetIsReadOnly() *bool {
+	return m.IsReadOnly
 }
 
 //GetVolumeId returns VolumeId

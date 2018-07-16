@@ -42,10 +42,28 @@ type ListCrossConnectsRequest struct {
 
 	// A filter to return only resources that match the specified lifecycle state. The value is case insensitive.
 	LifecycleState CrossConnectLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListCrossConnectsRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListCrossConnectsRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListCrossConnectsRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListCrossConnectsResponse wrapper for the ListCrossConnects operation
@@ -54,7 +72,7 @@ type ListCrossConnectsResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []CrossConnect instance
+	// A list of []CrossConnect instances
 	Items []CrossConnect `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -69,6 +87,11 @@ type ListCrossConnectsResponse struct {
 
 func (response ListCrossConnectsResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListCrossConnectsResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
 
 // ListCrossConnectsSortByEnum Enum with underlying type: string

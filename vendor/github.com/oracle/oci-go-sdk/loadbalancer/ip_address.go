@@ -16,7 +16,7 @@ import (
 type IpAddress struct {
 
 	// An IP address.
-	// Example: `128.148.10.20`
+	// Example: `192.168.0.3`
 	IpAddress *string `mandatory:"true" json:"ipAddress"`
 
 	// Whether the IP address is public or private.

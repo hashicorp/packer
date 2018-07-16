@@ -3,7 +3,7 @@
 
 // Object Storage Service API
 //
-// APIs for managing buckets and objects.
+// Common set of Object and Archive Storage APIs for managing buckets and objects.
 //
 
 package objectstorage

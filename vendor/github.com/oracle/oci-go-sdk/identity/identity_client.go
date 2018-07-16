@@ -48,8 +48,8 @@ func (client *IdentityClient) setConfigurationProvider(configProvider common.Con
 
 	// Error has been checked already
 	region, _ := configProvider.Region()
-	client.config = &configProvider
 	client.SetRegion(region)
+	client.config = &configProvider
 	return nil
 }
 
@@ -62,20 +62,87 @@ func (client *IdentityClient) ConfigurationProvider() *common.ConfigurationProvi
 // After you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the
 // object, first make sure its `lifecycleState` has changed to ACTIVE.
 func (client IdentityClient) AddUserToGroup(ctx context.Context, request AddUserToGroupRequest) (response AddUserToGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/userGroupMemberships/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.addUserToGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(AddUserToGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into AddUserToGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// addUserToGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) addUserToGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/userGroupMemberships/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response AddUserToGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateAuthToken Creates a new auth token for the specified user. For information about what auth tokens are for, see
+// Managing User Credentials (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Tasks/managingcredentials.htm).
+// You must specify a *description* for the auth token (although it can be an empty string). It does not
+// have to be unique, and you can change it anytime with
+// UpdateAuthToken.
+// Every user has permission to create an auth token for *their own user ID*. An administrator in your organization
+// does not need to write a policy to give users this ability. To compare, administrators who have permission to the
+// tenancy can use this operation to create an auth token for any user, including themselves.
+func (client IdentityClient) CreateAuthToken(ctx context.Context, request CreateAuthTokenRequest) (response CreateAuthTokenResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createAuthToken, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateAuthTokenResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateAuthTokenResponse")
+	}
 	return
+}
+
+// createAuthToken implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createAuthToken(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/authTokens/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateAuthTokenResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // CreateCompartment Creates a new compartment in your tenancy.
@@ -93,20 +160,41 @@ func (client IdentityClient) AddUserToGroup(ctx context.Context, request AddUser
 // After you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the
 // object, first make sure its `lifecycleState` has changed to ACTIVE.
 func (client IdentityClient) CreateCompartment(ctx context.Context, request CreateCompartmentRequest) (response CreateCompartmentResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/compartments/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createCompartment, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateCompartmentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateCompartmentResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createCompartment implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createCompartment(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/compartments/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateCompartmentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // CreateCustomerSecretKey Creates a new secret key for the specified user. Secret keys are used for authentication with the Object Storage Service's Amazon S3
@@ -119,20 +207,93 @@ func (client IdentityClient) CreateCompartment(ctx context.Context, request Crea
 // does not need to write a policy to give users this ability. To compare, administrators who have permission to the
 // tenancy can use this operation to create a secret key for any user, including themselves.
 func (client IdentityClient) CreateCustomerSecretKey(ctx context.Context, request CreateCustomerSecretKeyRequest) (response CreateCustomerSecretKeyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/users/{userId}/customerSecretKeys/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createCustomerSecretKey, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateCustomerSecretKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateCustomerSecretKeyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createCustomerSecretKey implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createCustomerSecretKey(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/customerSecretKeys/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateCustomerSecretKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateDynamicGroup Creates a new dynamic group in your tenancy.
+// You must specify your tenancy's OCID as the compartment ID in the request object (remember that the tenancy
+// is simply the root compartment). Notice that IAM resources (users, groups, compartments, and some policies)
+// reside within the tenancy itself, unlike cloud resources such as compute instances, which typically
+// reside within compartments inside the tenancy. For information about OCIDs, see
+// Resource Identifiers (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm).
+// You must also specify a *name* for the dynamic group, which must be unique across all dynamic groups in your
+// tenancy, and cannot be changed. Note that this name has to be also unique accross all groups in your tenancy.
+// You can use this name or the OCID when writing policies that apply to the dynamic group. For more information
+// about policies, see How Policies Work (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policies.htm).
+// You must also specify a *description* for the dynamic group (although it can be an empty string). It does not
+// have to be unique, and you can change it anytime with UpdateDynamicGroup.
+// After you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using the
+// object, first make sure its `lifecycleState` has changed to ACTIVE.
+func (client IdentityClient) CreateDynamicGroup(ctx context.Context, request CreateDynamicGroupRequest) (response CreateDynamicGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createDynamicGroup, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateDynamicGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateDynamicGroupResponse")
+	}
 	return
+}
+
+// createDynamicGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createDynamicGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/dynamicGroups/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateDynamicGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // CreateGroup Creates a new group in your tenancy.
@@ -152,20 +313,41 @@ func (client IdentityClient) CreateCustomerSecretKey(ctx context.Context, reques
 // See AddUserToGroup and
 // CreatePolicy.
 func (client IdentityClient) CreateGroup(ctx context.Context, request CreateGroupRequest) (response CreateGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/groups/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/groups/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // CreateIdentityProvider Creates a new identity provider in your tenancy. For more information, see
@@ -183,39 +365,81 @@ func (client IdentityClient) CreateGroup(ctx context.Context, request CreateGrou
 // be CREATING. Before using the object, first make sure its `lifecycleState` has
 // changed to ACTIVE.
 func (client IdentityClient) CreateIdentityProvider(ctx context.Context, request CreateIdentityProviderRequest) (response CreateIdentityProviderResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/identityProviders/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createIdentityProvider, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateIdentityProviderResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateIdentityProviderResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createIdentityProvider implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createIdentityProvider(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/identityProviders/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateIdentityProviderResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponseWithPolymorphicBody(httpResponse, &response, &identityprovider{})
-	return
+	return response, err
 }
 
 // CreateIdpGroupMapping Creates a single mapping between an IdP group and an IAM Service
 // Group.
 func (client IdentityClient) CreateIdpGroupMapping(ctx context.Context, request CreateIdpGroupMappingRequest) (response CreateIdpGroupMappingResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/identityProviders/{identityProviderId}/groupMappings/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createIdpGroupMapping, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateIdpGroupMappingResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateIdpGroupMappingResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createIdpGroupMapping implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createIdpGroupMapping(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/identityProviders/{identityProviderId}/groupMappings/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateIdpGroupMappingResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // CreateOrResetUIPassword Creates a new Console one-time password for the specified user. For more information about user
@@ -228,20 +452,41 @@ func (client IdentityClient) CreateIdpGroupMapping(ctx context.Context, request 
 // **Note:** The user's Console login is the unique name you specified when you created the user
 // (see CreateUser).
 func (client IdentityClient) CreateOrResetUIPassword(ctx context.Context, request CreateOrResetUIPasswordRequest) (response CreateOrResetUIPasswordResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/users/{userId}/uiPassword", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createOrResetUIPassword, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateOrResetUIPasswordResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateOrResetUIPasswordResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createOrResetUIPassword implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createOrResetUIPassword(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/uiPassword")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateOrResetUIPasswordResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // CreatePolicy Creates a new policy in the specified compartment (either the tenancy or another of your compartments).
@@ -257,41 +502,126 @@ func (client IdentityClient) CreateOrResetUIPassword(ctx context.Context, reques
 // object, first make sure its `lifecycleState` has changed to ACTIVE.
 // New policies take effect typically within 10 seconds.
 func (client IdentityClient) CreatePolicy(ctx context.Context, request CreatePolicyRequest) (response CreatePolicyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/policies/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createPolicy, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreatePolicyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreatePolicyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createPolicy implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createPolicy(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/policies/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreatePolicyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // CreateRegionSubscription Creates a subscription to a region for a tenancy.
 func (client IdentityClient) CreateRegionSubscription(ctx context.Context, request CreateRegionSubscriptionRequest) (response CreateRegionSubscriptionResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/tenancies/{tenancyId}/regionSubscriptions", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createRegionSubscription, policy)
 	if err != nil {
 		return
 	}
-
-	httpResponse, err := client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		return
+	if convertedResponse, ok := ociResponse.(CreateRegionSubscriptionResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateRegionSubscriptionResponse")
 	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
 	return
 }
 
-// CreateSwiftPassword Creates a new Swift password for the specified user. For information about what Swift passwords are for, see
+// createRegionSubscription implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createRegionSubscription(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/tenancies/{tenancyId}/regionSubscriptions")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateRegionSubscriptionResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateSmtpCredential Creates a new SMTP credential for the specified user. An SMTP credential has an SMTP user name and an SMTP password.
+// You must specify a *description* for the SMTP credential (although it can be an empty string). It does not
+// have to be unique, and you can change it anytime with
+// UpdateSmtpCredential.
+func (client IdentityClient) CreateSmtpCredential(ctx context.Context, request CreateSmtpCredentialRequest) (response CreateSmtpCredentialResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createSmtpCredential, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateSmtpCredentialResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateSmtpCredentialResponse")
+	}
+	return
+}
+
+// createSmtpCredential implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createSmtpCredential(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/smtpCredentials/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateSmtpCredentialResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateSwiftPassword **Deprecated. Use CreateAuthToken instead.**
+// Creates a new Swift password for the specified user. For information about what Swift passwords are for, see
 // Managing User Credentials (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Tasks/managingcredentials.htm).
 // You must specify a *description* for the Swift password (although it can be an empty string). It does not
 // have to be unique, and you can change it anytime with
@@ -300,20 +630,139 @@ func (client IdentityClient) CreateRegionSubscription(ctx context.Context, reque
 // does not need to write a policy to give users this ability. To compare, administrators who have permission to the
 // tenancy can use this operation to create a Swift password for any user, including themselves.
 func (client IdentityClient) CreateSwiftPassword(ctx context.Context, request CreateSwiftPasswordRequest) (response CreateSwiftPasswordResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/users/{userId}/swiftPasswords/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createSwiftPassword, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateSwiftPasswordResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateSwiftPasswordResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createSwiftPassword implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createSwiftPassword(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/swiftPasswords/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateSwiftPasswordResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateTag Creates a new tag in the specified tag namespace.
+// You must specify either the OCID or the name of the tag namespace that will contain this tag definition.
+// You must also specify a *name* for the tag, which must be unique across all tags in the tag namespace
+// and cannot be changed. The name can contain any ASCII character except the space (_) or period (.) characters.
+// Names are case insensitive. That means, for example, "myTag" and "mytag" are not allowed in the same namespace.
+// If you specify a name that's already in use in the tag namespace, a 409 error is returned.
+// You must also specify a *description* for the tag.
+// It does not have to be unique, and you can change it with
+// UpdateTag.
+func (client IdentityClient) CreateTag(ctx context.Context, request CreateTagRequest) (response CreateTagResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createTag, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateTagResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateTagResponse")
+	}
 	return
+}
+
+// createTag implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createTag(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/tagNamespaces/{tagNamespaceId}/tags")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateTagResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// CreateTagNamespace Creates a new tag namespace in the specified compartment.
+// You must specify the compartment ID in the request object (remember that the tenancy is simply the root
+// compartment).
+// You must also specify a *name* for the namespace, which must be unique across all namespaces in your tenancy
+// and cannot be changed. The name can contain any ASCII character except the space (_) or period (.).
+// Names are case insensitive. That means, for example, "myNamespace" and "mynamespace" are not allowed
+// in the same tenancy. Once you created a namespace, you cannot change the name.
+// If you specify a name that's already in use in the tenancy, a 409 error is returned.
+// You must also specify a *description* for the namespace.
+// It does not have to be unique, and you can change it with
+// UpdateTagNamespace.
+// Tag namespaces cannot be deleted, but they can be retired.
+// See Retiring Key Definitions and Namespace Definitions (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/taggingoverview.htm#Retiring) for more information.
+func (client IdentityClient) CreateTagNamespace(ctx context.Context, request CreateTagNamespaceRequest) (response CreateTagNamespaceResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createTagNamespace, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(CreateTagNamespaceResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateTagNamespaceResponse")
+	}
+	return
+}
+
+// createTagNamespace implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createTagNamespace(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/tagNamespaces")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateTagNamespaceResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // CreateUser Creates a new user in your tenancy. For conceptual information about users, your tenancy, and other
@@ -346,20 +795,41 @@ func (client IdentityClient) CreateSwiftPassword(ctx context.Context, request Cr
 // UploadApiKey).
 // **Important:** Make sure to inform the new user which compartment(s) they have access to.
 func (client IdentityClient) CreateUser(ctx context.Context, request CreateUserRequest) (response CreateUserResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/users/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.createUser, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(CreateUserResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into CreateUserResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// createUser implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) createUser(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response CreateUserResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // DeleteApiKey Deletes the specified API signing key for the specified user.
@@ -368,147 +838,433 @@ func (client IdentityClient) CreateUser(ctx context.Context, request CreateUserR
 // To compare, administrators who have permission to the tenancy can use this operation to delete
 // a key for any user, including themselves.
 func (client IdentityClient) DeleteApiKey(ctx context.Context, request DeleteApiKeyRequest) (response DeleteApiKeyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/users/{userId}/apiKeys/{fingerprint}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteApiKey, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteApiKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteApiKeyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteApiKey implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteApiKey(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}/apiKeys/{fingerprint}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteApiKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// DeleteAuthToken Deletes the specified auth token for the specified user.
+func (client IdentityClient) DeleteAuthToken(ctx context.Context, request DeleteAuthTokenRequest) (response DeleteAuthTokenResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteAuthToken, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteAuthTokenResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteAuthTokenResponse")
+	}
 	return
+}
+
+// deleteAuthToken implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteAuthToken(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}/authTokens/{authTokenId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteAuthTokenResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // DeleteCustomerSecretKey Deletes the specified secret key for the specified user.
 func (client IdentityClient) DeleteCustomerSecretKey(ctx context.Context, request DeleteCustomerSecretKeyRequest) (response DeleteCustomerSecretKeyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/users/{userId}/customerSecretKeys/{customerSecretKeyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteCustomerSecretKey, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteCustomerSecretKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteCustomerSecretKeyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteCustomerSecretKey implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteCustomerSecretKey(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}/customerSecretKeys/{customerSecretKeyId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteCustomerSecretKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// DeleteDynamicGroup Deletes the specified dynamic group.
+func (client IdentityClient) DeleteDynamicGroup(ctx context.Context, request DeleteDynamicGroupRequest) (response DeleteDynamicGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteDynamicGroup, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteDynamicGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteDynamicGroupResponse")
+	}
 	return
+}
+
+// deleteDynamicGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteDynamicGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/dynamicGroups/{dynamicGroupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteDynamicGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // DeleteGroup Deletes the specified group. The group must be empty.
 func (client IdentityClient) DeleteGroup(ctx context.Context, request DeleteGroupRequest) (response DeleteGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/groups/{groupId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/groups/{groupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // DeleteIdentityProvider Deletes the specified identity provider. The identity provider must not have
 // any group mappings (see IdpGroupMapping).
 func (client IdentityClient) DeleteIdentityProvider(ctx context.Context, request DeleteIdentityProviderRequest) (response DeleteIdentityProviderResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/identityProviders/{identityProviderId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteIdentityProvider, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteIdentityProviderResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteIdentityProviderResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteIdentityProvider implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteIdentityProvider(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/identityProviders/{identityProviderId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteIdentityProviderResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // DeleteIdpGroupMapping Deletes the specified group mapping.
 func (client IdentityClient) DeleteIdpGroupMapping(ctx context.Context, request DeleteIdpGroupMappingRequest) (response DeleteIdpGroupMappingResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteIdpGroupMapping, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteIdpGroupMappingResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteIdpGroupMappingResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteIdpGroupMapping implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteIdpGroupMapping(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteIdpGroupMappingResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // DeletePolicy Deletes the specified policy. The deletion takes effect typically within 10 seconds.
 func (client IdentityClient) DeletePolicy(ctx context.Context, request DeletePolicyRequest) (response DeletePolicyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/policies/{policyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deletePolicy, policy)
 	if err != nil {
 		return
 	}
-
-	httpResponse, err := client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		return
+	if convertedResponse, ok := ociResponse.(DeletePolicyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeletePolicyResponse")
 	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
 	return
 }
 
-// DeleteSwiftPassword Deletes the specified Swift password for the specified user.
-func (client IdentityClient) DeleteSwiftPassword(ctx context.Context, request DeleteSwiftPasswordRequest) (response DeleteSwiftPasswordResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/users/{userId}/swiftPasswords/{swiftPasswordId}", request)
+// deletePolicy implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deletePolicy(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/policies/{policyId}")
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+	var response DeletePolicyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// DeleteSmtpCredential Deletes the specified SMTP credential for the specified user.
+func (client IdentityClient) DeleteSmtpCredential(ctx context.Context, request DeleteSmtpCredentialRequest) (response DeleteSmtpCredentialResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteSmtpCredential, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteSmtpCredentialResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteSmtpCredentialResponse")
+	}
 	return
+}
+
+// deleteSmtpCredential implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteSmtpCredential(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}/smtpCredentials/{smtpCredentialId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteSmtpCredentialResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// DeleteSwiftPassword **Deprecated. Use DeleteAuthToken instead.**
+// Deletes the specified Swift password for the specified user.
+func (client IdentityClient) DeleteSwiftPassword(ctx context.Context, request DeleteSwiftPasswordRequest) (response DeleteSwiftPasswordResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteSwiftPassword, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(DeleteSwiftPasswordResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteSwiftPasswordResponse")
+	}
+	return
+}
+
+// deleteSwiftPassword implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteSwiftPassword(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}/swiftPasswords/{swiftPasswordId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteSwiftPasswordResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // DeleteUser Deletes the specified user. The user must not be in any groups.
 func (client IdentityClient) DeleteUser(ctx context.Context, request DeleteUserRequest) (response DeleteUserResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/users/{userId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.deleteUser, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(DeleteUserResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into DeleteUserResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// deleteUser implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) deleteUser(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/users/{userId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response DeleteUserResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // GetCompartment Gets the specified compartment's information.
@@ -519,20 +1275,80 @@ func (client IdentityClient) DeleteUser(ctx context.Context, request DeleteUserR
 // call the ListInstances operation in the Cloud Compute
 // Service or the ListVolumes operation in Cloud Block Storage.
 func (client IdentityClient) GetCompartment(ctx context.Context, request GetCompartmentRequest) (response GetCompartmentResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/compartments/{compartmentId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getCompartment, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetCompartmentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetCompartmentResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getCompartment implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getCompartment(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/compartments/{compartmentId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetCompartmentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// GetDynamicGroup Gets the specified dynamic group's information.
+func (client IdentityClient) GetDynamicGroup(ctx context.Context, request GetDynamicGroupRequest) (response GetDynamicGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getDynamicGroup, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetDynamicGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetDynamicGroupResponse")
+	}
 	return
+}
+
+// getDynamicGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getDynamicGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dynamicGroups/{dynamicGroupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetDynamicGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // GetGroup Gets the specified group's information.
@@ -540,247 +1356,638 @@ func (client IdentityClient) GetCompartment(ctx context.Context, request GetComp
 // ListUserGroupMemberships and
 // provide the group's OCID as a query parameter in the request.
 func (client IdentityClient) GetGroup(ctx context.Context, request GetGroupRequest) (response GetGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/groups/{groupId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/groups/{groupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // GetIdentityProvider Gets the specified identity provider's information.
 func (client IdentityClient) GetIdentityProvider(ctx context.Context, request GetIdentityProviderRequest) (response GetIdentityProviderResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/identityProviders/{identityProviderId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getIdentityProvider, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetIdentityProviderResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetIdentityProviderResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getIdentityProvider implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getIdentityProvider(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/identityProviders/{identityProviderId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetIdentityProviderResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponseWithPolymorphicBody(httpResponse, &response, &identityprovider{})
-	return
+	return response, err
 }
 
 // GetIdpGroupMapping Gets the specified group mapping.
 func (client IdentityClient) GetIdpGroupMapping(ctx context.Context, request GetIdpGroupMappingRequest) (response GetIdpGroupMappingResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getIdpGroupMapping, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetIdpGroupMappingResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetIdpGroupMappingResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getIdpGroupMapping implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getIdpGroupMapping(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetIdpGroupMappingResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // GetPolicy Gets the specified policy's information.
 func (client IdentityClient) GetPolicy(ctx context.Context, request GetPolicyRequest) (response GetPolicyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/policies/{policyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getPolicy, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetPolicyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetPolicyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getPolicy implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getPolicy(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/policies/{policyId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetPolicyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// GetTag Gets the specified tag's information.
+func (client IdentityClient) GetTag(ctx context.Context, request GetTagRequest) (response GetTagResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getTag, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetTagResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetTagResponse")
+	}
 	return
+}
+
+// getTag implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getTag(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tagNamespaces/{tagNamespaceId}/tags/{tagName}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetTagResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// GetTagNamespace Gets the specified tag namespace's information.
+func (client IdentityClient) GetTagNamespace(ctx context.Context, request GetTagNamespaceRequest) (response GetTagNamespaceResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getTagNamespace, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(GetTagNamespaceResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetTagNamespaceResponse")
+	}
+	return
+}
+
+// getTagNamespace implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getTagNamespace(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tagNamespaces/{tagNamespaceId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetTagNamespaceResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // GetTenancy Get the specified tenancy's information.
 func (client IdentityClient) GetTenancy(ctx context.Context, request GetTenancyRequest) (response GetTenancyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/tenancies/{tenancyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getTenancy, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetTenancyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetTenancyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getTenancy implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getTenancy(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tenancies/{tenancyId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetTenancyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // GetUser Gets the specified user's information.
 func (client IdentityClient) GetUser(ctx context.Context, request GetUserRequest) (response GetUserResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/users/{userId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getUser, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetUserResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetUserResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getUser implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getUser(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetUserResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // GetUserGroupMembership Gets the specified UserGroupMembership's information.
 func (client IdentityClient) GetUserGroupMembership(ctx context.Context, request GetUserGroupMembershipRequest) (response GetUserGroupMembershipResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/userGroupMemberships/{userGroupMembershipId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.getUserGroupMembership, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(GetUserGroupMembershipResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into GetUserGroupMembershipResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// getUserGroupMembership implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) getUserGroupMembership(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/userGroupMemberships/{userGroupMembershipId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response GetUserGroupMembershipResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListApiKeys Lists the API signing keys for the specified user. A user can have a maximum of three keys.
 // Every user has permission to use this API call for *their own user ID*.  An administrator in your
 // organization does not need to write a policy to give users this ability.
 func (client IdentityClient) ListApiKeys(ctx context.Context, request ListApiKeysRequest) (response ListApiKeysResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/users/{userId}/apiKeys/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listApiKeys, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListApiKeysResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListApiKeysResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listApiKeys implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listApiKeys(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}/apiKeys/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListApiKeysResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListAuthTokens Lists the auth tokens for the specified user. The returned object contains the token's OCID, but not
+// the token itself. The actual token is returned only upon creation.
+func (client IdentityClient) ListAuthTokens(ctx context.Context, request ListAuthTokensRequest) (response ListAuthTokensResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listAuthTokens, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListAuthTokensResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListAuthTokensResponse")
+	}
 	return
+}
+
+// listAuthTokens implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listAuthTokens(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}/authTokens/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListAuthTokensResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // ListAvailabilityDomains Lists the Availability Domains in your tenancy. Specify the OCID of either the tenancy or another
 // of your compartments as the value for the compartment ID (remember that the tenancy is simply the root compartment).
 // See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
 func (client IdentityClient) ListAvailabilityDomains(ctx context.Context, request ListAvailabilityDomainsRequest) (response ListAvailabilityDomainsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/availabilityDomains/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listAvailabilityDomains, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListAvailabilityDomainsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListAvailabilityDomainsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listAvailabilityDomains implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listAvailabilityDomains(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/availabilityDomains/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListAvailabilityDomainsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListCompartments Lists the compartments in your tenancy. You must specify your tenancy's OCID as the value
 // for the compartment ID (remember that the tenancy is simply the root compartment).
 // See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
 func (client IdentityClient) ListCompartments(ctx context.Context, request ListCompartmentsRequest) (response ListCompartmentsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/compartments/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listCompartments, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListCompartmentsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListCompartmentsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listCompartments implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listCompartments(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/compartments/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListCompartmentsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListCustomerSecretKeys Lists the secret keys for the specified user. The returned object contains the secret key's OCID, but not
 // the secret key itself. The actual secret key is returned only upon creation.
 func (client IdentityClient) ListCustomerSecretKeys(ctx context.Context, request ListCustomerSecretKeysRequest) (response ListCustomerSecretKeysResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/users/{userId}/customerSecretKeys/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listCustomerSecretKeys, policy)
 	if err != nil {
 		return
 	}
-
-	httpResponse, err := client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		return
+	if convertedResponse, ok := ociResponse.(ListCustomerSecretKeysResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListCustomerSecretKeysResponse")
 	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
 	return
 }
 
-// ListFaultDomains Lists the Fault Domains in your tenancy. Specify the OCID of either the tenancy or another
-// of your compartments as the value for the compartment ID (remember that the tenancy is simply the root compartment).
-// See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
-func (client IdentityClient) ListFaultDomains(ctx context.Context, request ListFaultDomainsRequest) (response ListFaultDomainsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/faultDomains/", request)
+// listCustomerSecretKeys implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listCustomerSecretKeys(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}/customerSecretKeys/")
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+	var response ListCustomerSecretKeysResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListDynamicGroups Lists the dynamic groups in your tenancy. You must specify your tenancy's OCID as the value for
+// the compartment ID (remember that the tenancy is simply the root compartment).
+// See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
+func (client IdentityClient) ListDynamicGroups(ctx context.Context, request ListDynamicGroupsRequest) (response ListDynamicGroupsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listDynamicGroups, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListDynamicGroupsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListDynamicGroupsResponse")
+	}
 	return
+}
+
+// listDynamicGroups implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listDynamicGroups(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/dynamicGroups/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListDynamicGroupsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // ListGroups Lists the groups in your tenancy. You must specify your tenancy's OCID as the value for
 // the compartment ID (remember that the tenancy is simply the root compartment).
 // See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
 func (client IdentityClient) ListGroups(ctx context.Context, request ListGroupsRequest) (response ListGroupsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/groups/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listGroups, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListGroupsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListGroupsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listGroups implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listGroups(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/groups/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListGroupsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 //listidentityprovider allows to unmarshal list of polymorphic IdentityProvider
@@ -804,38 +2011,80 @@ func (m *listidentityprovider) UnmarshalPolymorphicJSON(data []byte) (interface{
 // compartment ID (remember that the tenancy is simply the root compartment).
 // See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
 func (client IdentityClient) ListIdentityProviders(ctx context.Context, request ListIdentityProvidersRequest) (response ListIdentityProvidersResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/identityProviders/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listIdentityProviders, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListIdentityProvidersResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListIdentityProvidersResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listIdentityProviders implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listIdentityProviders(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/identityProviders/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListIdentityProvidersResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponseWithPolymorphicBody(httpResponse, &response, &listidentityprovider{})
-	return
+	return response, err
 }
 
 // ListIdpGroupMappings Lists the group mappings for the specified identity provider.
 func (client IdentityClient) ListIdpGroupMappings(ctx context.Context, request ListIdpGroupMappingsRequest) (response ListIdpGroupMappingsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/identityProviders/{identityProviderId}/groupMappings/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listIdpGroupMappings, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListIdpGroupMappingsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListIdpGroupMappingsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listIdpGroupMappings implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listIdpGroupMappings(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/identityProviders/{identityProviderId}/groupMappings/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListIdpGroupMappingsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListPolicies Lists the policies in the specified compartment (either the tenancy or another of your compartments).
@@ -843,72 +2092,272 @@ func (client IdentityClient) ListIdpGroupMappings(ctx context.Context, request L
 // To determine which policies apply to a particular group or compartment, you must view the individual
 // statements inside all your policies. There isn't a way to automatically obtain that information via the API.
 func (client IdentityClient) ListPolicies(ctx context.Context, request ListPoliciesRequest) (response ListPoliciesResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/policies/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listPolicies, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListPoliciesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListPoliciesResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listPolicies implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listPolicies(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/policies/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListPoliciesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListRegionSubscriptions Lists the region subscriptions for the specified tenancy.
 func (client IdentityClient) ListRegionSubscriptions(ctx context.Context, request ListRegionSubscriptionsRequest) (response ListRegionSubscriptionsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/tenancies/{tenancyId}/regionSubscriptions", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listRegionSubscriptions, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListRegionSubscriptionsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListRegionSubscriptionsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listRegionSubscriptions implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listRegionSubscriptions(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tenancies/{tenancyId}/regionSubscriptions")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListRegionSubscriptionsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListRegions Lists all the regions offered by Oracle Cloud Infrastructure.
 func (client IdentityClient) ListRegions(ctx context.Context) (response ListRegionsResponse, err error) {
-	httpRequest := common.MakeDefaultHTTPRequest(http.MethodGet, "/regions")
-
-	httpResponse, err := client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
+	var ociResponse common.OCIResponse
+	ociResponse, err = client.listRegions(ctx)
 	if err != nil {
 		return
 	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
+	if convertedResponse, ok := ociResponse.(ListRegionsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListRegionsResponse")
+	}
 	return
 }
 
-// ListSwiftPasswords Lists the Swift passwords for the specified user. The returned object contains the password's OCID, but not
-// the password itself. The actual password is returned only upon creation.
-func (client IdentityClient) ListSwiftPasswords(ctx context.Context, request ListSwiftPasswordsRequest) (response ListSwiftPasswordsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/users/{userId}/swiftPasswords/", request)
-	if err != nil {
-		return
-	}
+// listRegions performs the request (retry policy is not enabled without a request object)
+func (client IdentityClient) listRegions(ctx context.Context) (common.OCIResponse, error) {
+	httpRequest := common.MakeDefaultHTTPRequest(http.MethodGet, "/regions")
+	var err error
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+	var response ListRegionsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListSmtpCredentials Lists the SMTP credentials for the specified user. The returned object contains the credential's OCID,
+// the SMTP user name but not the SMTP password. The SMTP password is returned only upon creation.
+func (client IdentityClient) ListSmtpCredentials(ctx context.Context, request ListSmtpCredentialsRequest) (response ListSmtpCredentialsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listSmtpCredentials, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListSmtpCredentialsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListSmtpCredentialsResponse")
+	}
 	return
+}
+
+// listSmtpCredentials implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listSmtpCredentials(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}/smtpCredentials/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListSmtpCredentialsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListSwiftPasswords **Deprecated. Use ListAuthTokens instead.**
+// Lists the Swift passwords for the specified user. The returned object contains the password's OCID, but not
+// the password itself. The actual password is returned only upon creation.
+func (client IdentityClient) ListSwiftPasswords(ctx context.Context, request ListSwiftPasswordsRequest) (response ListSwiftPasswordsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listSwiftPasswords, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListSwiftPasswordsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListSwiftPasswordsResponse")
+	}
+	return
+}
+
+// listSwiftPasswords implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listSwiftPasswords(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/{userId}/swiftPasswords/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListSwiftPasswordsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListTagNamespaces Lists the tag namespaces in the specified compartment.
+func (client IdentityClient) ListTagNamespaces(ctx context.Context, request ListTagNamespacesRequest) (response ListTagNamespacesResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listTagNamespaces, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListTagNamespacesResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListTagNamespacesResponse")
+	}
+	return
+}
+
+// listTagNamespaces implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listTagNamespaces(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tagNamespaces")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListTagNamespacesResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// ListTags Lists the tag definitions in the specified tag namespace.
+func (client IdentityClient) ListTags(ctx context.Context, request ListTagsRequest) (response ListTagsResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listTags, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(ListTagsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListTagsResponse")
+	}
+	return
+}
+
+// listTags implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listTags(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/tagNamespaces/{tagNamespaceId}/tags")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListTagsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // ListUserGroupMemberships Lists the `UserGroupMembership` objects in your tenancy. You must specify your tenancy's OCID
@@ -919,222 +2368,677 @@ func (client IdentityClient) ListSwiftPasswords(ctx context.Context, request Lis
 // - Similarly, you can limit the results to just the memberships for a given group by specifying a `groupId`.
 // - You can set both the `userId` and `groupId` to determine if the specified user is in the specified group.
 // If the answer is no, the response is an empty list.
+// - Although`userId` and `groupId` are not indvidually required, you must set one of them.
 func (client IdentityClient) ListUserGroupMemberships(ctx context.Context, request ListUserGroupMembershipsRequest) (response ListUserGroupMembershipsResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/userGroupMemberships/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listUserGroupMemberships, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListUserGroupMembershipsResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListUserGroupMembershipsResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listUserGroupMemberships implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listUserGroupMemberships(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/userGroupMemberships/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListUserGroupMembershipsResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // ListUsers Lists the users in your tenancy. You must specify your tenancy's OCID as the value for the
 // compartment ID (remember that the tenancy is simply the root compartment).
 // See Where to Get the Tenancy's OCID and User's OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/apisigningkey.htm#five).
 func (client IdentityClient) ListUsers(ctx context.Context, request ListUsersRequest) (response ListUsersResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodGet, "/users/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.listUsers, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(ListUsersResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into ListUsersResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// listUsers implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) listUsers(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodGet, "/users/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response ListUsersResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // RemoveUserFromGroup Removes a user from a group by deleting the corresponding `UserGroupMembership`.
 func (client IdentityClient) RemoveUserFromGroup(ctx context.Context, request RemoveUserFromGroupRequest) (response RemoveUserFromGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodDelete, "/userGroupMemberships/{userGroupMembershipId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.removeUserFromGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(RemoveUserFromGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into RemoveUserFromGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// removeUserFromGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) removeUserFromGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodDelete, "/userGroupMemberships/{userGroupMembershipId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response RemoveUserFromGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateAuthToken Updates the specified auth token's description.
+func (client IdentityClient) UpdateAuthToken(ctx context.Context, request UpdateAuthTokenRequest) (response UpdateAuthTokenResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateAuthToken, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateAuthTokenResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateAuthTokenResponse")
+	}
 	return
+}
+
+// updateAuthToken implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateAuthToken(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}/authTokens/{authTokenId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateAuthTokenResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // UpdateCompartment Updates the specified compartment's description or name. You can't update the root compartment.
 func (client IdentityClient) UpdateCompartment(ctx context.Context, request UpdateCompartmentRequest) (response UpdateCompartmentResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/compartments/{compartmentId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateCompartment, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateCompartmentResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateCompartmentResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateCompartment implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateCompartment(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/compartments/{compartmentId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateCompartmentResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // UpdateCustomerSecretKey Updates the specified secret key's description.
 func (client IdentityClient) UpdateCustomerSecretKey(ctx context.Context, request UpdateCustomerSecretKeyRequest) (response UpdateCustomerSecretKeyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/users/{userId}/customerSecretKeys/{customerSecretKeyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateCustomerSecretKey, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateCustomerSecretKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateCustomerSecretKeyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateCustomerSecretKey implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateCustomerSecretKey(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}/customerSecretKeys/{customerSecretKeyId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateCustomerSecretKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateDynamicGroup Updates the specified dynamic group.
+func (client IdentityClient) UpdateDynamicGroup(ctx context.Context, request UpdateDynamicGroupRequest) (response UpdateDynamicGroupResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateDynamicGroup, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateDynamicGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateDynamicGroupResponse")
+	}
 	return
+}
+
+// updateDynamicGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateDynamicGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/dynamicGroups/{dynamicGroupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateDynamicGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // UpdateGroup Updates the specified group.
 func (client IdentityClient) UpdateGroup(ctx context.Context, request UpdateGroupRequest) (response UpdateGroupResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/groups/{groupId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateGroup, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateGroupResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateGroupResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateGroup implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateGroup(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/groups/{groupId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateGroupResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // UpdateIdentityProvider Updates the specified identity provider.
 func (client IdentityClient) UpdateIdentityProvider(ctx context.Context, request UpdateIdentityProviderRequest) (response UpdateIdentityProviderResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/identityProviders/{identityProviderId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateIdentityProvider, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateIdentityProviderResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateIdentityProviderResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateIdentityProvider implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateIdentityProvider(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/identityProviders/{identityProviderId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateIdentityProviderResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponseWithPolymorphicBody(httpResponse, &response, &identityprovider{})
-	return
+	return response, err
 }
 
 // UpdateIdpGroupMapping Updates the specified group mapping.
 func (client IdentityClient) UpdateIdpGroupMapping(ctx context.Context, request UpdateIdpGroupMappingRequest) (response UpdateIdpGroupMappingResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateIdpGroupMapping, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateIdpGroupMappingResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateIdpGroupMappingResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateIdpGroupMapping implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateIdpGroupMapping(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/identityProviders/{identityProviderId}/groupMappings/{mappingId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateIdpGroupMappingResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // UpdatePolicy Updates the specified policy. You can update the description or the policy statements themselves.
 // Policy changes take effect typically within 10 seconds.
 func (client IdentityClient) UpdatePolicy(ctx context.Context, request UpdatePolicyRequest) (response UpdatePolicyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/policies/{policyId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updatePolicy, policy)
 	if err != nil {
 		return
 	}
-
-	httpResponse, err := client.Call(ctx, &httpRequest)
-	defer common.CloseBodyIfValid(httpResponse)
-	response.RawResponse = httpResponse
-	if err != nil {
-		return
+	if convertedResponse, ok := ociResponse.(UpdatePolicyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdatePolicyResponse")
 	}
-
-	err = common.UnmarshalResponse(httpResponse, &response)
 	return
 }
 
-// UpdateSwiftPassword Updates the specified Swift password's description.
-func (client IdentityClient) UpdateSwiftPassword(ctx context.Context, request UpdateSwiftPasswordRequest) (response UpdateSwiftPasswordResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/users/{userId}/swiftPasswords/{swiftPasswordId}", request)
+// updatePolicy implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updatePolicy(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/policies/{policyId}")
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+	var response UpdatePolicyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateSmtpCredential Updates the specified SMTP credential's description.
+func (client IdentityClient) UpdateSmtpCredential(ctx context.Context, request UpdateSmtpCredentialRequest) (response UpdateSmtpCredentialResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateSmtpCredential, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateSmtpCredentialResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateSmtpCredentialResponse")
+	}
 	return
+}
+
+// updateSmtpCredential implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateSmtpCredential(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}/smtpCredentials/{smtpCredentialId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateSmtpCredentialResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateSwiftPassword **Deprecated. Use UpdateAuthToken instead.**
+// Updates the specified Swift password's description.
+func (client IdentityClient) UpdateSwiftPassword(ctx context.Context, request UpdateSwiftPasswordRequest) (response UpdateSwiftPasswordResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateSwiftPassword, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateSwiftPasswordResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateSwiftPasswordResponse")
+	}
+	return
+}
+
+// updateSwiftPassword implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateSwiftPassword(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}/swiftPasswords/{swiftPasswordId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateSwiftPasswordResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateTag Updates the the specified tag definition. You can update `description`, and `isRetired`.
+func (client IdentityClient) UpdateTag(ctx context.Context, request UpdateTagRequest) (response UpdateTagResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateTag, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateTagResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateTagResponse")
+	}
+	return
+}
+
+// updateTag implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateTag(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/tagNamespaces/{tagNamespaceId}/tags/{tagName}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateTagResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
+}
+
+// UpdateTagNamespace Updates the the specified tag namespace. You can't update the namespace name.
+// Updating `isRetired` to 'true' retires the namespace and all the tag definitions in the namespace. Reactivating a
+// namespace (changing `isRetired` from 'true' to 'false') does not reactivate tag definitions.
+// To reactivate the tag definitions, you must reactivate each one indvidually *after* you reactivate the namespace,
+// using UpdateTag. For more information about retiring tag namespaces, see
+// Retiring Key Definitions and Namespace Definitions (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/taggingoverview.htm#Retiring).
+// You can't add a namespace with the same name as a retired namespace in the same tenancy.
+func (client IdentityClient) UpdateTagNamespace(ctx context.Context, request UpdateTagNamespaceRequest) (response UpdateTagNamespaceResponse, err error) {
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateTagNamespace, policy)
+	if err != nil {
+		return
+	}
+	if convertedResponse, ok := ociResponse.(UpdateTagNamespaceResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateTagNamespaceResponse")
+	}
+	return
+}
+
+// updateTagNamespace implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateTagNamespace(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/tagNamespaces/{tagNamespaceId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateTagNamespaceResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
+	defer common.CloseBodyIfValid(httpResponse)
+	response.RawResponse = httpResponse
+	if err != nil {
+		return response, err
+	}
+
+	err = common.UnmarshalResponse(httpResponse, &response)
+	return response, err
 }
 
 // UpdateUser Updates the description of the specified user.
 func (client IdentityClient) UpdateUser(ctx context.Context, request UpdateUserRequest) (response UpdateUserResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/users/{userId}", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateUser, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateUserResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateUserResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateUser implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateUser(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateUserResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // UpdateUserState Updates the state of the specified user.
 func (client IdentityClient) UpdateUserState(ctx context.Context, request UpdateUserStateRequest) (response UpdateUserStateResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPut, "/users/{userId}/state/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.updateUserState, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UpdateUserStateResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UpdateUserStateResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// updateUserState implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) updateUserState(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPut, "/users/{userId}/state/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UpdateUserStateResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }
 
 // UploadApiKey Uploads an API signing key for the specified user.
@@ -1150,18 +3054,39 @@ func (client IdentityClient) UpdateUserState(ctx context.Context, request Update
 // After you send your request, the new object's `lifecycleState` will temporarily be CREATING. Before using
 // the object, first make sure its `lifecycleState` has changed to ACTIVE.
 func (client IdentityClient) UploadApiKey(ctx context.Context, request UploadApiKeyRequest) (response UploadApiKeyResponse, err error) {
-	httpRequest, err := common.MakeDefaultHTTPRequestWithTaggedStruct(http.MethodPost, "/users/{userId}/apiKeys/", request)
+	var ociResponse common.OCIResponse
+	policy := common.NoRetryPolicy()
+	if request.RetryPolicy() != nil {
+		policy = *request.RetryPolicy()
+	}
+	ociResponse, err = common.Retry(ctx, request, client.uploadApiKey, policy)
 	if err != nil {
 		return
 	}
+	if convertedResponse, ok := ociResponse.(UploadApiKeyResponse); ok {
+		response = convertedResponse
+	} else {
+		err = fmt.Errorf("failed to convert OCIResponse into UploadApiKeyResponse")
+	}
+	return
+}
 
-	httpResponse, err := client.Call(ctx, &httpRequest)
+// uploadApiKey implements the OCIOperation interface (enables retrying operations)
+func (client IdentityClient) uploadApiKey(ctx context.Context, request common.OCIRequest) (common.OCIResponse, error) {
+	httpRequest, err := request.HTTPRequest(http.MethodPost, "/users/{userId}/apiKeys/")
+	if err != nil {
+		return nil, err
+	}
+
+	var response UploadApiKeyResponse
+	var httpResponse *http.Response
+	httpResponse, err = client.Call(ctx, &httpRequest)
 	defer common.CloseBodyIfValid(httpResponse)
 	response.RawResponse = httpResponse
 	if err != nil {
-		return
+		return response, err
 	}
 
 	err = common.UnmarshalResponse(httpResponse, &response)
-	return
+	return response, err
 }

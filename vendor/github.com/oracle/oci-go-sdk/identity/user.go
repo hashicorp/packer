@@ -15,7 +15,8 @@ import (
 // User An individual employee or system that needs to manage or use your company's Oracle Cloud Infrastructure
 // resources. Users might need to launch instances, manage remote disks, work with your cloud network, etc. Users
 // have one or more IAM Service credentials (ApiKey,
-// UIPassword, and SwiftPassword).
+// UIPassword, SwiftPassword and
+// AuthToken).
 // For more information, see User Credentials (https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/usercredentials.htm)). End users of your
 // application are not typically IAM Service users. For conceptual information about users and other IAM Service
 // components, see Overview of the IAM Service (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/overview.htm).
@@ -55,6 +56,16 @@ type User struct {
 	// - bit 1: DISABLED (reserved for future use)
 	// - bit 2: BLOCKED (the user has exceeded the maximum number of failed login attempts for the Console)
 	InactiveStatus *int `mandatory:"false" json:"inactiveStatus"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 }
 
 func (m User) String() string {

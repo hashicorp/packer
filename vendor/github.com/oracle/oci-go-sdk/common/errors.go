@@ -78,3 +78,14 @@ func IsServiceError(err error) (failure ServiceError, ok bool) {
 	failure, ok = err.(servicefailure)
 	return
 }
+
+type deadlineExceededByBackoffError struct{}
+
+func (deadlineExceededByBackoffError) Error() string {
+	return "now() + computed backoff duration exceeds request deadline"
+}
+
+// DeadlineExceededByBackoff is the error returned by Call() when GetNextDuration() returns a time.Duration that would
+// force the user to wait past the request deadline before re-issuing a request. This enables us to exit early, since
+// we cannot succeed based on the configured retry policy.
+var DeadlineExceededByBackoff error = deadlineExceededByBackoffError{}

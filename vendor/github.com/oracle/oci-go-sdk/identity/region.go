@@ -25,6 +25,7 @@ type Region struct {
 	// - `PHX`
 	// - `IAD`
 	// - `FRA`
+	// - `LHR`
 	Key *string `mandatory:"false" json:"key"`
 
 	// The name of the region.
@@ -32,6 +33,7 @@ type Region struct {
 	// - `us-phoenix-1`
 	// - `us-ashburn-1`
 	// - `eu-frankfurt-1`
+	// - `uk-london-1`
 	Name *string `mandatory:"false" json:"name"`
 }
 

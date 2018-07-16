@@ -14,11 +14,11 @@ type CommitMultipartUploadRequest struct {
 	// The top-level namespace used for the request.
 	NamespaceName *string `mandatory:"true" contributesTo:"path" name:"namespaceName"`
 
-	// The name of the bucket.
+	// The name of the bucket. Avoid entering confidential information.
 	// Example: `my-new-bucket1`
 	BucketName *string `mandatory:"true" contributesTo:"path" name:"bucketName"`
 
-	// The name of the object.
+	// The name of the object. Avoid entering confidential information.
 	// Example: `test/object1.log`
 	ObjectName *string `mandatory:"true" contributesTo:"path" name:"objectName"`
 
@@ -33,16 +33,29 @@ type CommitMultipartUploadRequest struct {
 	IfMatch *string `mandatory:"false" contributesTo:"header" name:"if-match"`
 
 	// The entity tag to avoid matching. The only valid value is ‘*’, which indicates that the request should fail if the object already exists.
-	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag
-	// of the target part.
+	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag of the target part.
 	IfNoneMatch *string `mandatory:"false" contributesTo:"header" name:"if-none-match"`
 
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request CommitMultipartUploadRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request CommitMultipartUploadRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request CommitMultipartUploadRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // CommitMultipartUploadResponse wrapper for the CommitMultipartUpload operation
@@ -55,13 +68,14 @@ type CommitMultipartUploadResponse struct {
 	OpcClientRequestId *string `presentIn:"header" name:"opc-client-request-id"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-	// request, please provide this request ID.
+	// request, provide this request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 
 	// Base-64 representation of the multipart object hash.
 	// The multipart object hash is calculated by taking the MD5 hashes of the parts passed to this call,
 	// concatenating the binary representation of those hashes in order of their part numbers,
-	// and then calculating the MD5 hash of the concatenated values.
+	// and then calculating the MD5 hash of the concatenated values. The multipart object hash is followed
+	// by a hyphen and the total number of parts (for example, '-6').
 	OpcMultipartMd5 *string `presentIn:"header" name:"opc-multipart-md5"`
 
 	// The entity tag for the object.
@@ -73,4 +87,9 @@ type CommitMultipartUploadResponse struct {
 
 func (response CommitMultipartUploadResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response CommitMultipartUploadResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
