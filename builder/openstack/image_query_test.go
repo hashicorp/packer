@@ -37,6 +37,7 @@ func TestBuildImageFilter(t *testing.T) {
 		"status":     "active",
 		"size_min":   "0",
 		"sort":       "created_at:desc",
+		"tags":       []string{"prod", "ready"},
 	}
 
 	multiErr := buildImageFilters(filters, &testOpts)
