@@ -48,7 +48,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 
 	if keypair, ok := state.GetOk("keypair"); ok {
 		kp := keypair.(string)
-		ui.Message(fmt.Sprintf("Found keypair: %s", kp))
+		ui.Message(fmt.Sprintf("Using keypair: %s", kp))
 		p.SetKeypair(kp)
 	}
 
