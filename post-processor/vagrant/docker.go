@@ -16,11 +16,14 @@ func (p *DockerProvider) Process(ui packer.Ui, artifact packer.Artifact, dir str
 	// Create the metadata
 	metadata = map[string]interface{}{"provider": "docker"}
 
-	vagrantfile = fmt.Sprintf(dockerVagrantfile)
+	vagrantfile = fmt.Sprintf(dockerVagrantfile, artifact.Id())
 	return
 }
 
 var dockerVagrantfile = `
 Vagrant.configure("2") do |config|
+	config.vm.provider :docker do |docker, override|
+		docker.image = "%s"
+	end
 end
 `
