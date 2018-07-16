@@ -41,10 +41,11 @@ func NewConnectionMonitorsClientWithBaseURI(baseURI string, subscriptionID strin
 }
 
 // CreateOrUpdate create or update a connection monitor.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name of the connection monitor. parameters is
-// parameters that define the operation to create a connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name of the connection monitor.
+// parameters - parameters that define the operation to create a connection monitor.
 func (client ConnectionMonitorsClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string, parameters ConnectionMonitor) (result ConnectionMonitorsCreateOrUpdateFuture, err error) {
 	if err := validation.Validate([]validation.Validation{
 		{TargetValue: parameters,
@@ -98,15 +99,17 @@ func (client ConnectionMonitorsClient) CreateOrUpdatePreparer(ctx context.Contex
 // CreateOrUpdateSender sends the CreateOrUpdate request. The method will close the
 // http.Response Body if it receives an error.
 func (client ConnectionMonitorsClient) CreateOrUpdateSender(req *http.Request) (future ConnectionMonitorsCreateOrUpdateFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -124,9 +127,10 @@ func (client ConnectionMonitorsClient) CreateOrUpdateResponder(resp *http.Respon
 }
 
 // Delete deletes the specified connection monitor.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name of the connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name of the connection monitor.
 func (client ConnectionMonitorsClient) Delete(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string) (result ConnectionMonitorsDeleteFuture, err error) {
 	req, err := client.DeletePreparer(ctx, resourceGroupName, networkWatcherName, connectionMonitorName)
 	if err != nil {
@@ -168,15 +172,17 @@ func (client ConnectionMonitorsClient) DeletePreparer(ctx context.Context, resou
 // DeleteSender sends the Delete request. The method will close the
 // http.Response Body if it receives an error.
 func (client ConnectionMonitorsClient) DeleteSender(req *http.Request) (future ConnectionMonitorsDeleteFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -193,9 +199,10 @@ func (client ConnectionMonitorsClient) DeleteResponder(resp *http.Response) (res
 }
 
 // Get gets a connection monitor by name.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name of the connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name of the connection monitor.
 func (client ConnectionMonitorsClient) Get(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string) (result ConnectionMonitorResult, err error) {
 	req, err := client.GetPreparer(ctx, resourceGroupName, networkWatcherName, connectionMonitorName)
 	if err != nil {
@@ -261,9 +268,9 @@ func (client ConnectionMonitorsClient) GetResponder(resp *http.Response) (result
 }
 
 // List lists all connection monitors for the specified Network Watcher.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
 func (client ConnectionMonitorsClient) List(ctx context.Context, resourceGroupName string, networkWatcherName string) (result ConnectionMonitorListResult, err error) {
 	req, err := client.ListPreparer(ctx, resourceGroupName, networkWatcherName)
 	if err != nil {
@@ -328,9 +335,10 @@ func (client ConnectionMonitorsClient) ListResponder(resp *http.Response) (resul
 }
 
 // Query query a snapshot of the most recent connection states.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name given to the connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name given to the connection monitor.
 func (client ConnectionMonitorsClient) Query(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string) (result ConnectionMonitorsQueryFuture, err error) {
 	req, err := client.QueryPreparer(ctx, resourceGroupName, networkWatcherName, connectionMonitorName)
 	if err != nil {
@@ -372,15 +380,17 @@ func (client ConnectionMonitorsClient) QueryPreparer(ctx context.Context, resour
 // QuerySender sends the Query request. The method will close the
 // http.Response Body if it receives an error.
 func (client ConnectionMonitorsClient) QuerySender(req *http.Request) (future ConnectionMonitorsQueryFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -398,9 +408,10 @@ func (client ConnectionMonitorsClient) QueryResponder(resp *http.Response) (resu
 }
 
 // Start starts the specified connection monitor.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name of the connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name of the connection monitor.
 func (client ConnectionMonitorsClient) Start(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string) (result ConnectionMonitorsStartFuture, err error) {
 	req, err := client.StartPreparer(ctx, resourceGroupName, networkWatcherName, connectionMonitorName)
 	if err != nil {
@@ -442,15 +453,17 @@ func (client ConnectionMonitorsClient) StartPreparer(ctx context.Context, resour
 // StartSender sends the Start request. The method will close the
 // http.Response Body if it receives an error.
 func (client ConnectionMonitorsClient) StartSender(req *http.Request) (future ConnectionMonitorsStartFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -467,9 +480,10 @@ func (client ConnectionMonitorsClient) StartResponder(resp *http.Response) (resu
 }
 
 // Stop stops the specified connection monitor.
-//
-// resourceGroupName is the name of the resource group containing Network Watcher. networkWatcherName is the name
-// of the Network Watcher resource. connectionMonitorName is the name of the connection monitor.
+// Parameters:
+// resourceGroupName - the name of the resource group containing Network Watcher.
+// networkWatcherName - the name of the Network Watcher resource.
+// connectionMonitorName - the name of the connection monitor.
 func (client ConnectionMonitorsClient) Stop(ctx context.Context, resourceGroupName string, networkWatcherName string, connectionMonitorName string) (result ConnectionMonitorsStopFuture, err error) {
 	req, err := client.StopPreparer(ctx, resourceGroupName, networkWatcherName, connectionMonitorName)
 	if err != nil {
@@ -511,15 +525,17 @@ func (client ConnectionMonitorsClient) StopPreparer(ctx context.Context, resourc
 // StopSender sends the Stop request. The method will close the
 // http.Response Body if it receives an error.
 func (client ConnectionMonitorsClient) StopSender(req *http.Request) (future ConnectionMonitorsStopFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
