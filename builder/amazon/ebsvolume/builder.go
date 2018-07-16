@@ -44,6 +44,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		InterpolateFilter: &interpolate.RenderFilter{
 			Exclude: []string{
 				"run_tags",
+				"spot_tags",
 				"ebs_volumes",
 			},
 		},
@@ -132,6 +133,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceAMI:                         b.config.SourceAmi,
 			SpotPrice:                         b.config.SpotPrice,
 			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
+			SpotTags:                          b.config.SpotTags,
 			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
