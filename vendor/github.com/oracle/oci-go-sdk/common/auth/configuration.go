@@ -42,7 +42,7 @@ func (p instancePrincipalConfigurationProvider) KeyID() (string, error) {
 }
 
 func (p instancePrincipalConfigurationProvider) TenancyOCID() (string, error) {
-	return "", nil
+	return p.keyProvider.TenancyOCID()
 }
 
 func (p instancePrincipalConfigurationProvider) UserOCID() (string, error) {

@@ -27,6 +27,7 @@ const (
 type instancePrincipalKeyProvider struct {
 	regionForFederationClient common.Region
 	federationClient          federationClient
+	tenancyID                 string
 }
 
 // newInstancePrincipalKeyProvider creates and returns an instancePrincipalKeyProvider instance based on
@@ -61,7 +62,7 @@ func newInstancePrincipalKeyProvider() (provider *instancePrincipalKeyProvider, 
 	federationClient := newX509FederationClient(
 		region, tenancyID, leafCertificateRetriever, intermediateCertificateRetrievers)
 
-	provider = &instancePrincipalKeyProvider{regionForFederationClient: region, federationClient: federationClient}
+	provider = &instancePrincipalKeyProvider{regionForFederationClient: region, federationClient: federationClient, tenancyID: tenancyID}
 	return
 }
 
@@ -92,4 +93,8 @@ func (p *instancePrincipalKeyProvider) KeyID() (string, error) {
 		return "", fmt.Errorf("failed to get security token: %s", err.Error())
 	}
 	return fmt.Sprintf("ST$%s", securityToken), nil
+}
+
+func (p *instancePrincipalKeyProvider) TenancyOCID() (string, error) {
+	return p.tenancyID, nil
 }

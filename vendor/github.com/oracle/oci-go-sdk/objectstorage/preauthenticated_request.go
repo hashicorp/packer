@@ -3,7 +3,7 @@
 
 // Object Storage Service API
 //
-// APIs for managing buckets and objects.
+// Common set of Object and Archive Storage APIs for managing buckets and objects.
 //
 
 package objectstorage
@@ -12,30 +12,35 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// PreauthenticatedRequest The representation of PreauthenticatedRequest
+// PreauthenticatedRequest Pre-authenticated requests provide a way to let users access a bucket or an object without having their own credentials.
+// When you create a pre-authenticated request, a unique URL is generated. Users in your organization, partners, or third
+// parties can use this URL to access the targets identified in the pre-authenticated request. See Managing Access to Buckets and Objects (https://docs.us-phoenix-1.oraclecloud.com/Content/Object/Tasks/managingaccess.htm).
+// To use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, talk to an administrator.
+// If you're an administrator who needs to write policies to give users access, see Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
 type PreauthenticatedRequest struct {
 
-	// the unique identifier to use when directly addressing the pre-authenticated request
+	// The unique identifier to use when directly addressing the pre-authenticated request.
 	Id *string `mandatory:"true" json:"id"`
 
-	// the user supplied name of the pre-authenticated request.
+	// The user-provided name of the pre-authenticated request.
 	Name *string `mandatory:"true" json:"name"`
 
-	// the uri to embed in the url when using the pre-authenticated request.
+	// The URI to embed in the URL when using the pre-authenticated request.
 	AccessUri *string `mandatory:"true" json:"accessUri"`
 
-	// the operation that can be performed on this resource e.g PUT or GET.
+	// The operation that can be performed on this resource.
 	AccessType PreauthenticatedRequestAccessTypeEnum `mandatory:"true" json:"accessType"`
 
-	// the expiration date after which the pre authenticated request will no longer be valid as per spec
-	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339)
+	// The expiration date for the pre-authenticated request as per RFC 3339 (https://tools.ietf.org/rfc/rfc3339). After this date the pre-authenticated request will no longer be valid.
 	TimeExpires *common.SDKTime `mandatory:"true" json:"timeExpires"`
 
-	// the date when the pre-authenticated request was created as per spec
-	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339)
+	// The date when the pre-authenticated request was created as per specification
+	// RFC 3339 (https://tools.ietf.org/rfc/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
-	// Name of object that is being granted access to by the pre-authenticated request. This can be null and that would mean that the pre-authenticated request is granting access to the entire bucket
+	// The name of the object that is being granted access to by the pre-authenticated request. This can be null and
+	// if so, the pre-authenticated request grants access to the entire bucket. Avoid entering confidential information.
+	// Example: test/object1.log
 	ObjectName *string `mandatory:"false" json:"objectName"`
 }
 

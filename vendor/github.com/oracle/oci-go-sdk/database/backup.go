@@ -22,8 +22,14 @@ type Backup struct {
 	// The OCID of the compartment.
 	CompartmentId *string `mandatory:"false" json:"compartmentId"`
 
+	// The Oracle Database Edition of the DbSystem on which the backup was taken.
+	DatabaseEdition *string `mandatory:"false" json:"databaseEdition"`
+
 	// The OCID of the database.
 	DatabaseId *string `mandatory:"false" json:"databaseId"`
+
+	// Size of the database in mega-bytes at the time the backup was taken.
+	DbDataSizeInMBs *int `mandatory:"false" json:"dbDataSizeInMBs"`
 
 	// The user-friendly name for the backup. It does not have to be unique.
 	DisplayName *string `mandatory:"false" json:"displayName"`

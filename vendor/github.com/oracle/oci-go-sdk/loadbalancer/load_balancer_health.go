@@ -19,7 +19,7 @@ type LoadBalancerHealth struct {
 
 	// A list of backend sets that are currently in the `CRITICAL` health state. The list identifies each backend set by the
 	// friendly name you assigned when you created it.
-	// Example: `My_backend_set`
+	// Example: `example_backend_set`
 	CriticalStateBackendSetNames []string `mandatory:"true" json:"criticalStateBackendSetNames"`
 
 	// The overall health status of the load balancer.
@@ -41,12 +41,12 @@ type LoadBalancerHealth struct {
 
 	// A list of backend sets that are currently in the `UNKNOWN` health state. The list identifies each backend set by the
 	// friendly name you assigned when you created it.
-	// Example: `Backend_set2`
+	// Example: `example_backend_set2`
 	UnknownStateBackendSetNames []string `mandatory:"true" json:"unknownStateBackendSetNames"`
 
 	// A list of backend sets that are currently in the `WARNING` health state. The list identifies each backend set by the
 	// friendly name you assigned when you created it.
-	// Example: `Backend_set3`
+	// Example: `example_backend_set3`
 	WarningStateBackendSetNames []string `mandatory:"true" json:"warningStateBackendSetNames"`
 }
 

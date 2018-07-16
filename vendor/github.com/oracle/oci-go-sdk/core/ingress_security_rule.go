@@ -21,8 +21,10 @@ type IngressSecurityRule struct {
 	// Options are supported only for ICMP ("1"), TCP ("6"), and UDP ("17").
 	Protocol *string `mandatory:"true" json:"protocol"`
 
-	// The source CIDR block for the ingress rule. This is the range of IP addresses that a
-	// packet coming into the instance can come from.
+	// The source service cidrBlock or source IP address range in CIDR notation for the ingress rule. This is the
+	// range of IP addresses that a packet coming into the instance can come from.
+	// Examples: `10.12.0.0/16`
+	//           `oci-phx-objectstorage`
 	Source *string `mandatory:"true" json:"source"`
 
 	// Optional and valid only for ICMP. Use to specify a particular ICMP type and code
@@ -42,6 +44,11 @@ type IngressSecurityRule struct {
 	// and a corresponding rule is not necessary for bidirectional traffic.
 	IsStateless *bool `mandatory:"false" json:"isStateless"`
 
+	// Type of source for IngressSecurityRule. SERVICE_CIDR_BLOCK should be used if source is a service cidrBlock.
+	// CIDR_BLOCK should be used if source is IP address range in CIDR notation. It defaults to CIDR_BLOCK, if
+	// not specified.
+	SourceType IngressSecurityRuleSourceTypeEnum `mandatory:"false" json:"sourceType,omitempty"`
+
 	// Optional and valid only for TCP. Use to specify particular destination ports for TCP rules.
 	// If you specify TCP as the protocol but omit this object, then all destination ports are allowed.
 	TcpOptions *TcpOptions `mandatory:"false" json:"tcpOptions"`
@@ -53,4 +60,27 @@ type IngressSecurityRule struct {
 
 func (m IngressSecurityRule) String() string {
 	return common.PointerString(m)
+}
+
+// IngressSecurityRuleSourceTypeEnum Enum with underlying type: string
+type IngressSecurityRuleSourceTypeEnum string
+
+// Set of constants representing the allowable values for IngressSecurityRuleSourceType
+const (
+	IngressSecurityRuleSourceTypeCidrBlock        IngressSecurityRuleSourceTypeEnum = "CIDR_BLOCK"
+	IngressSecurityRuleSourceTypeServiceCidrBlock IngressSecurityRuleSourceTypeEnum = "SERVICE_CIDR_BLOCK"
+)
+
+var mappingIngressSecurityRuleSourceType = map[string]IngressSecurityRuleSourceTypeEnum{
+	"CIDR_BLOCK":         IngressSecurityRuleSourceTypeCidrBlock,
+	"SERVICE_CIDR_BLOCK": IngressSecurityRuleSourceTypeServiceCidrBlock,
+}
+
+// GetIngressSecurityRuleSourceTypeEnumValues Enumerates the set of values for IngressSecurityRuleSourceType
+func GetIngressSecurityRuleSourceTypeEnumValues() []IngressSecurityRuleSourceTypeEnum {
+	values := make([]IngressSecurityRuleSourceTypeEnum, 0)
+	for _, v := range mappingIngressSecurityRuleSourceType {
+		values = append(values, v)
+	}
+	return values
 }
