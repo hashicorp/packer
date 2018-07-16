@@ -32,6 +32,8 @@ var builtins = map[string]string{
 	"transcend.qemu":                      "libvirt",
 	"ustream.lxc":                         "lxc",
 	"packer.post-processor.docker-import": "docker",
+	"packer.post-processor.docker-tag":    "docker",
+	"packer.post-processor.docker-push":   "docker",
 }
 
 type Config struct {
