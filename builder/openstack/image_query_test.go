@@ -30,7 +30,7 @@ func TestGetImageFilter(t *testing.T) {
 func TestBuildImageFilter(t *testing.T) {
 	testOpts := images.ListOpts{}
 
-	filters := map[string]string{
+	filters := map[string]interface{}{
 		"limit":      "3",
 		"name":       "Ubuntu 16.04",
 		"visibility": "public",
@@ -127,12 +127,14 @@ func TestImageFilterOptionsDecode(t *testing.T) {
 		"most_recent": true,
 		"filters": map[string]interface{}{
 			"visibility": "protected",
-			"tag":        "prod",
+			"tag":        []string{"prod","ready"},
 			"name":       "ubuntu 16.04",
 		},
 	}
 	err := mapstructure.Decode(input, &opts)
 	if err != nil {
-		t.Errorf("Did not successfully generate ImageFilterOptions from %v. Contains %v", input, opts)
+		t.Errorf("Did not successfully generate ImageFilterOptions from %v.\nContains %v", input, opts)
+	} else {
+		t.Logf("Successfully generate ImageFilterOptions from %v.\nContains %v", input, opts)
 	}
 }

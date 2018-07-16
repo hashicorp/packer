@@ -59,19 +59,9 @@ func getImageVisibility(s string) (images.ImageVisibility, error) {
 
 // Retrieve the specific ImageVisibility using the exported const from images
 func getImageStatus(s string) (images.ImageStatus, error) {
-	statuses := [...]images.ImageStatus{
-		images.ImageStatusActive,
-		images.ImageStatusDeactivated,
-		images.ImageStatusDeleted,
-		images.ImageStatusPendingDelete,
-		images.ImageStatusQueued,
-		images.ImageStatusSaving,
-	}
-
-	for _, status := range statuses {
-		if string(status) == s {
-			return status, nil
-		}
+	activeStatus := images.ImageStatusActive
+	if string(activeStatus) == s {
+		return activeStatus, nil
 	}
 
 	var nilStatus images.ImageStatus
@@ -80,7 +70,7 @@ func getImageStatus(s string) (images.ImageStatus, error) {
 
 // Allows construction of all fields from ListOpts using the "q" tags and
 // type detection to set all fields within a provided ListOpts struct
-func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *packer.MultiError {
+func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) *packer.MultiError {
 
 	// fill each field in the ListOpts based on tag/type
 	metaOpts := reflect.Indirect(reflect.ValueOf(listOpts))
@@ -99,7 +89,7 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 
 			// Handles integer types used in ListOpts
 			case reflect.Int64, reflect.Int:
-				iVal, err := strconv.Atoi(val)
+				iVal, err := strconv.Atoi(val.(string))
 				if err != nil {
 					multierror.Append(err, multiErr.Errors...)
 					continue
@@ -120,7 +110,7 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 					vField.Set(reflect.ValueOf(val))
 
 				case reflect.TypeOf(images.ImageVisibility("")):
-					iv, err := getImageVisibility(val)
+					iv, err := getImageVisibility(val.(string))
 					if err != nil {
 						multierror.Append(err, multiErr.Errors...)
 						continue
@@ -128,7 +118,7 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 					vField.Set(reflect.ValueOf(iv))
 
 				case reflect.TypeOf(images.ImageStatus("")):
-					is, err := getImageStatus(val)
+					is, err := getImageStatus(val.(string))
 					if err != nil {
 						multierror.Append(err, multiErr.Errors...)
 						continue
@@ -138,14 +128,7 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 
 			// Generates slice of strings for Tags
 			case reflect.Slice:
-				typeOfSlice := reflect.TypeOf(vField).Elem()
-				fieldArray := reflect.MakeSlice(reflect.SliceOf(typeOfSlice), 0, 0)
-				for _, s := range strings.Split(val, ",") {
-					if len(s) > 0 {
-						fieldArray = reflect.Append(fieldArray, reflect.ValueOf(s))
-					}
-				}
-				vField.Set(fieldArray)
+				vField.Set(reflect.ValueOf(val))
 
 			default:
 				multierror.Append(
@@ -158,7 +141,7 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 			fieldName == reflect.TypeOf(listOpts.UpdatedAtQuery).Name() {
 
 			// get ImageDateQuery from string and set to this field
-			query, err := dateToImageDateQuery(key, val)
+			query, err := dateToImageDateQuery(key, val.(string))
 			if err != nil {
 				multierror.Append(err, multiErr.Errors...)
 				continue
