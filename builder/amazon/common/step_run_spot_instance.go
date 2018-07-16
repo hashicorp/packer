@@ -32,6 +32,7 @@ type StepRunSpotInstance struct {
 	SourceAMI                         string
 	SpotPrice                         string
 	SpotPriceProduct                  string
+	SpotTags                          TagMap
 	SubnetId                          string
 	Tags                              TagMap
 	VolumeTags                        TagMap
@@ -220,6 +221,33 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		return multistep.ActionHalt
 	}
 	instanceId = *spotResp.SpotInstanceRequests[0].InstanceId
+
+	// Tag spot instance request
+	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error tagging spot request: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	spotTags.Report(ui)
+
+	if len(spotTags) > 0 && s.SpotTags.IsSet() {
+		// Retry creating tags for about 2.5 minutes
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      spotTags,
+				Resources: []*string{spotRequestId},
+			})
+			return true, err
+		})
+		if err != nil {
+			err := fmt.Errorf("Error tagging spot request: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
 
 	// Set the instance ID so that the cleanup works properly
 	s.instanceId = instanceId
