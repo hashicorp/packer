@@ -128,9 +128,11 @@ Optional Parameters:
 -   `user` (string) - The `ansible_user` to use. Defaults to the user running
     packer.
 
--   `set_winrm_passwd` (boolean) - Set to `true` to access the randomly-generated 
-    EC2 Windows password through the environment variable `GENERATED_WINRM_PASSWORD`.
-    You will also need to set `ansible_password` in your ansible playbook, for example,
+-   `set_winrm_passwd` (boolean) - Set to `true` if you are running on AWS, Azure or 
+    Google Compute and would like to access the generated password that Packer uses to 
+    connect to the instance via WinRM. The password will be avaliable on the builder 
+    through the environment variable `GENERATED_WINRM_PASSWORD`. You will also need to 
+    set `ansible_password` in your ansible playbook, for example,
     `ansible_password: "{{ lookup('env','GENERATED_WINRM_PASSWORD') }}"`
 
 ## Default Extra Variables
