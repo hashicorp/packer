@@ -70,8 +70,6 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v",
 				params)
 		}
-
-		return true, nil
 	})
 
 	if err != nil {
