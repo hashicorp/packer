@@ -3,13 +3,13 @@ package openstack
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/go-multierror"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/packer"
 )
 
 const (
@@ -35,7 +35,47 @@ func getDateFilter(s string) (images.ImageDateFilter, error) {
 	}
 
 	var badFilter images.ImageDateFilter
-	return badFilter, fmt.Errorf("No ImageDateFilter found for %s", s)
+	return badFilter, fmt.Errorf("No valid ImageDateFilter found for %s", s)
+}
+
+// Retrieve the specific ImageVisibility using the exported const from images
+func getImageVisibility(s string) (images.ImageVisibility, error) {
+	visibilities := [...]images.ImageVisibility{
+		images.ImageVisibilityPublic,
+		images.ImageVisibilityPrivate,
+		images.ImageVisibilityCommunity,
+		images.ImageVisibilityShared,
+	}
+
+	for _, visibility := range visibilities {
+		if string(visibility) == s {
+			return visibility, nil
+		}
+	}
+
+	var nilVisibility images.ImageVisibility
+	return nilVisibility, fmt.Errorf("No valid ImageVisilibility found for %s", s)
+}
+
+// Retrieve the specific ImageVisibility using the exported const from images
+func getImageStatus(s string) (images.ImageStatus, error) {
+	statuses := [...]images.ImageStatus{
+		images.ImageStatusActive,
+		images.ImageStatusDeactivated,
+		images.ImageStatusDeleted,
+		images.ImageStatusPendingDelete,
+		images.ImageStatusQueued,
+		images.ImageStatusSaving,
+	}
+
+	for _, status := range statuses {
+		if string(status) == s {
+			return status, nil
+		}
+	}
+
+	var nilStatus images.ImageStatus
+	return nilStatus, fmt.Errorf("No valid ImageVisilibility found for %s", s)
 }
 
 // Allows construction of all fields from ListOpts using the "q" tags and
@@ -43,7 +83,7 @@ func getDateFilter(s string) (images.ImageDateFilter, error) {
 func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *packer.MultiError {
 
 	// fill each field in the ListOpts based on tag/type
-	metaOpts := reflect.ValueOf(listOpts).Elem()
+	metaOpts := reflect.Indirect(reflect.ValueOf(listOpts))
 
 	multiErr := packer.MultiError{}
 
@@ -57,17 +97,46 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 		if val, exists := input[key]; exists && vField.CanSet() {
 			switch vField.Kind() {
 
-			case reflect.Int64:
+			// Handles integer types used in ListOpts
+			case reflect.Int64, reflect.Int:
 				iVal, err := strconv.Atoi(val)
 				if err != nil {
 					multierror.Append(err, multiErr.Errors...)
-				} else {
-					vField.Set(reflect.ValueOf(iVal))
+					continue
 				}
 
-			case reflect.String:
-				vField.Set(reflect.ValueOf(val))
+				if vField.Kind() == reflect.Int {
+					vField.Set(reflect.ValueOf(iVal))
+				} else {
+					var i64Val int64
+					i64Val = int64(iVal)
+					vField.Set(reflect.ValueOf(i64Val))
+				}
 
+			// Handles string and types using string
+			case reflect.String:
+				switch vField.Type() {
+				default:
+					vField.Set(reflect.ValueOf(val))
+
+				case reflect.TypeOf(images.ImageVisibility("")):
+					iv, err := getImageVisibility(val)
+					if err != nil {
+						multierror.Append(err, multiErr.Errors...)
+						continue
+					}
+					vField.Set(reflect.ValueOf(iv))
+
+				case reflect.TypeOf(images.ImageStatus("")):
+					is, err := getImageStatus(val)
+					if err != nil {
+						multierror.Append(err, multiErr.Errors...)
+						continue
+					}
+					vField.Set(reflect.ValueOf(is))
+				}
+
+			// Generates slice of strings for Tags
 			case reflect.Slice:
 				typeOfSlice := reflect.TypeOf(vField).Elem()
 				fieldArray := reflect.MakeSlice(reflect.SliceOf(typeOfSlice), 0, 0)
@@ -80,18 +149,21 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 
 			default:
 				multierror.Append(
-					fmt.Errorf("Unsupported struct type %s", vField.Type().Name),
+					fmt.Errorf("Unsupported kind %s", vField.Kind()),
 					multiErr.Errors...)
 			}
 
-		} else if fieldName == reflect.TypeOf(images.ListOpts{}.CreatedAtQuery).Name() ||
-			fieldName == reflect.TypeOf(images.ListOpts{}.UpdatedAtQuery).Name() {
+			// Handles ImageDateQuery types
+		} else if fieldName == reflect.TypeOf(listOpts.CreatedAtQuery).Name() ||
+			fieldName == reflect.TypeOf(listOpts.UpdatedAtQuery).Name() {
+
 			// get ImageDateQuery from string and set to this field
-			query, err := dateToImageDateQuery(&key, &val)
+			query, err := dateToImageDateQuery(key, val)
 			if err != nil {
 				multierror.Append(err, multiErr.Errors...)
 				continue
 			}
+
 			vField.Set(reflect.ValueOf(query))
 		}
 	}
@@ -104,13 +176,12 @@ func buildImageFilters(input map[string]string, listOpts *images.ListOpts) *pack
 // It is suggested that users use the newest sort field
 // See https://developer.openstack.org/api-ref/image/v2/
 func applyMostRecent(listOpts *images.ListOpts) {
-	// apply to old sorting properties if user used them. This overwrites previous values?
-	if listOpts.SortDir == "" && listOpts.SortKey != "" {
-		listOpts.SortDir = descendingSort
-		listOpts.SortKey = createdAtKey
-	}
+	// Apply to old sorting properties if user used them. This overwrites previous values.
+	// The docs don't seem to mention more than one field being allowed here and how they would be
+	listOpts.SortDir = descendingSort
+	listOpts.SortKey = createdAtKey
 
-	// apply to new sorting property
+	// Apply to new sorting property.
 	if listOpts.Sort != "" {
 		listOpts.Sort = fmt.Sprintf("%s:%s,%s", createdAtKey, descendingSort, listOpts.Sort)
 	} else {
@@ -121,10 +192,10 @@ func applyMostRecent(listOpts *images.ListOpts) {
 }
 
 // Converts a given date entry to ImageDateQuery for use in ListOpts
-func dateToImageDateQuery(val *string, key *string) (*images.ImageDateQuery, error) {
+func dateToImageDateQuery(val string, key string) (*images.ImageDateQuery, error) {
 	q := new(images.ImageDateQuery)
 	sep := ":"
-	entries := strings.Split(*val, sep)
+	entries := strings.Split(val, sep)
 
 	if len(entries) > 3 {
 		filter, err := getDateFilter(entries[0])
@@ -134,9 +205,13 @@ func dateToImageDateQuery(val *string, key *string) (*images.ImageDateQuery, err
 			q.Filter = filter
 		}
 
-		date, err := time.Parse((*val)[len(entries[0]):], time.RFC3339)
+		dateSubstr := val[len(entries[0])+1:]
+		date, err := time.Parse(time.RFC3339, dateSubstr)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to parse date format for %s", key)
+			return nil, fmt.Errorf("Failed to parse date format for %s.\nDate: %s.\nError: %s",
+				key,
+				dateSubstr,
+				err.Error())
 		} else {
 			q.Date = date
 		}
