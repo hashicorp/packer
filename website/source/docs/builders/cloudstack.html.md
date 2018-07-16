@@ -117,6 +117,9 @@ builder.
 -   `instance_name` (string) - The name of the instance. Defaults to
     "packer-UUID" where UUID is dynamically generated.
 
+-   `prevent_firewall_changes` (boolean) - Set to `true` to prevent network ACLs
+    or firewall rules creation. Defaults to `false`.
+
 -   `project` (string) - The name or ID of the project to deploy the instance to.
 
 -   `public_ip_address` (string) - The public IP address or it's ID used for
