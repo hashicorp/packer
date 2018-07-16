@@ -1,3 +1,9 @@
+## 1.2.6 (Unreleased)
+
+### IMPROVEMENTS:
+
+* builder/amazon: Spot requests may now have tags applied using the `spot_tags` option [GH-5452]
+
 ## 1.2.5 (July 16, 2018)
 
 ### BUG FIXES:
