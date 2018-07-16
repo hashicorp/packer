@@ -52,7 +52,7 @@ func TestBuildImageFilter(t *testing.T) {
 	}
 
 	if testOpts.Name != filters["name"] {
-		t.Errorf("Name did not parse correctly: %")
+		t.Errorf("Name did not parse correctly: %s", filters["name"])
 	}
 
 	var visibility images.ImageVisibility = "public"
@@ -66,11 +66,11 @@ func TestBuildImageFilter(t *testing.T) {
 	}
 
 	if testOpts.SizeMin != 0 {
-		t.Errorf("Size min did not parse correctly")
+		t.Errorf("Size min did not parse correctly: %s", filters["size_min"])
 	}
 
 	if testOpts.Sort != filters["sort"] {
-		t.Errorf("Limit did not parse correctly")
+		t.Errorf("Sort did not parse correctly: %s", filters["sort"])
 	}
 }
 

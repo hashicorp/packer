@@ -153,7 +153,7 @@ builder.
     Defaults to false.
 
 -   `region` (string) - The name of the region, such as "DFW", in which to
-    launch the server to create the AMI. If not specified, Packer will use the
+    launch the server to create the image. If not specified, Packer will use the
     environment variable `OS_REGION_NAME`, if set.
 
 -   `reuse_ips` (boolean) - Whether or not to attempt to reuse existing
@@ -165,6 +165,41 @@ builder.
 
 -   `security_groups` (array of strings) - A list of security groups by name to
     add to this instance.
+
+-   `source_image_filter` (object) - Filters used to populate filter options.
+    Example:
+
+    ``` json
+    {
+        "source_image_filter": {
+            "filters": {
+                "name": "ubuntu-16.04*",
+                "visibility": "protected",
+                "owner": "d1a588cf4b0743344508dc145649372d1",
+                "tag": "prod"
+            },
+            "most_recent": true
+        }
+    }
+    ```
+
+    This selects the most recent production Ubuntu 16.04 shared to you by the given owner.
+    NOTE: This will fail unless *exactly* one image is returned. In the above
+    example, `most_recent` will cause this to succeed by selecting the newest image.
+
+    -   `filters` (map of strings) - filters used to select a `source_image`.
+        NOTE: This will fail unless *exactly* one image is returned.
+        Any filter described in the docs for [ImageService](https://developer.openstack.org/api-ref/image/v2/)
+        is valid.
+
+    -   `most_recent` (boolean) - Selects the newest created image when true.
+        This is most useful for selecting a daily distro build.
+
+    You may set this in place of `source_image` or in conjunction with it. If you
+    set this in conjunction with `source_image`, the `source_image` will be added to
+    the filter. The provided `source_image` must meet all of the filtering criteria
+    provided in `source_image_filter`; this pins the image returned by the filter,
+    but will cause Packer to fail if the `source_image` does not exist.
 
 -   `ssh_interface` (string) - The type of interface to connect via SSH. Values
     useful for Rackspace are "public" or "private", and the default behavior is
