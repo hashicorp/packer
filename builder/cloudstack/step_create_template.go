@@ -51,7 +51,7 @@ func (s *stepCreateTemplate) Run(_ context.Context, state multistep.StateBag) mu
 	}
 
 	ui.Message("Retrieving the ROOT volume ID...")
-	volumeID, err := getRootVolumeID(client, instanceID, config)
+	volumeID, err := getRootVolumeID(client, instanceID, config.Project)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -89,15 +89,15 @@ func (s *stepCreateTemplate) Cleanup(state multistep.StateBag) {
 	// Nothing to cleanup for this step.
 }
 
-func getRootVolumeID(client *cloudstack.CloudStackClient, instanceID string, config *Config) (string, error) {
+func getRootVolumeID(client *cloudstack.CloudStackClient, instanceID, projectID string) (string, error) {
 	// Retrieve the virtual machine object.
 	p := client.Volume.NewListVolumesParams()
 
 	// Set the type and virtual machine ID
 	p.SetType("ROOT")
 	p.SetVirtualmachineid(instanceID)
-	if config.Project != "" {
-		p.SetProjectid(config.Project)
+	if projectID != "" {
+		p.SetProjectid(projectID)
 	}
 
 	volumes, err := client.Volume.ListVolumes(p)
