@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"regexp"
 	"strings"
 )
@@ -95,7 +96,7 @@ func (p rawConfigurationProvider) Region() (string, error) {
 }
 
 // environmentConfigurationProvider reads configuration from environment variables
-type environmentConfigurationProvider struct { // TODO: Support Instance Principal
+type environmentConfigurationProvider struct {
 	PrivateKeyPassword        string
 	EnvironmentVariablePrefix string
 }
@@ -120,7 +121,8 @@ func (p environmentConfigurationProvider) PrivateRSAKey() (key *rsa.PrivateKey, 
 		return nil, fmt.Errorf("can not read PrivateKey from env variable: %s", environmentVariable)
 	}
 
-	pemFileContent, err := ioutil.ReadFile(value)
+	expandedPath := expandPath(value)
+	pemFileContent, err := ioutil.ReadFile(expandedPath)
 	if err != nil {
 		Debugln("Can not read PrivateKey location from environment variable: " + environmentVariable)
 		return
@@ -186,7 +188,7 @@ func (p environmentConfigurationProvider) Region() (value string, err error) {
 }
 
 // fileConfigurationProvider. reads configuration information from a file
-type fileConfigurationProvider struct { // TODO: Support Instance Principal
+type fileConfigurationProvider struct {
 	//The path to the configuration file
 	ConfigPath string
 
@@ -227,8 +229,8 @@ func ConfigurationProviderFromFileWithProfile(configFilePath, profile, privateKe
 }
 
 type configFileInfo struct {
-	UserOcid, Fingerprint, KeyFilePath, TenancyOcid, Region string
-	PresentConfiguration                                    byte
+	UserOcid, Fingerprint, KeyFilePath, TenancyOcid, Region, Passphrase string
+	PresentConfiguration                                                byte
 }
 
 const (
@@ -237,6 +239,7 @@ const (
 	hasFingerprint
 	hasRegion
 	hasKeyFile
+	hasPassphrase
 	none
 )
 
@@ -277,6 +280,9 @@ func parseConfigAtLine(start int, content []string) (info *configFileInfo, err e
 
 		splits := strings.Split(line, "=")
 		switch key, value := strings.TrimSpace(splits[0]), strings.TrimSpace(splits[1]); strings.ToLower(key) {
+		case "passphrase", "pass_phrase":
+			configurationPresent = configurationPresent | hasPassphrase
+			info.Passphrase = value
 		case "user":
 			configurationPresent = configurationPresent | hasUser
 			info.UserOcid = value
@@ -299,8 +305,21 @@ func parseConfigAtLine(start int, content []string) (info *configFileInfo, err e
 
 }
 
+// cleans and expands the path if it contains a tilde , returns the expanded path or the input path as is if not expansion
+// was performed
+func expandPath(filepath string) (expandedPath string) {
+	cleanedPath := path.Clean(filepath)
+	expandedPath = cleanedPath
+	if strings.HasPrefix(cleanedPath, "~/") {
+		rest := cleanedPath[2:]
+		expandedPath = path.Join(getHomeFolder(), rest)
+	}
+	return
+}
+
 func openConfigFile(configFilePath string) (data []byte, err error) {
-	data, err = ioutil.ReadFile(configFilePath)
+	expandedPath := expandPath(configFilePath)
+	data, err = ioutil.ReadFile(expandedPath)
 	if err != nil {
 		err = fmt.Errorf("can not read config file: %s due to: %s", configFilePath, err.Error())
 	}
@@ -391,13 +410,21 @@ func (p fileConfigurationProvider) PrivateRSAKey() (key *rsa.PrivateKey, err err
 	if err != nil {
 		return
 	}
-	pemFileContent, err := ioutil.ReadFile(filePath)
+
+	expandedPath := expandPath(filePath)
+	pemFileContent, err := ioutil.ReadFile(expandedPath)
 	if err != nil {
 		err = fmt.Errorf("can not read PrivateKey  from configuration file due to: %s", err.Error())
 		return
 	}
 
-	key, err = PrivateKeyFromBytes(pemFileContent, &p.PrivateKeyPassword)
+	password := p.PrivateKeyPassword
+
+	if password == "" && ((info.PresentConfiguration & hasPassphrase) == hasPassphrase) {
+		password = info.Passphrase
+	}
+
+	key, err = PrivateKeyFromBytes(pemFileContent, &password)
 	return
 }
 
@@ -423,6 +450,12 @@ type composingConfigurationProvider struct {
 func ComposingConfigurationProvider(providers []ConfigurationProvider) (ConfigurationProvider, error) {
 	if len(providers) == 0 {
 		return nil, fmt.Errorf("providers can not be an empty slice")
+	}
+
+	for i, p := range providers {
+		if p == nil {
+			return nil, fmt.Errorf("provider in position: %d is nil. ComposingConfiurationProvider does not support nil values", i)
+		}
 	}
 	return composingConfigurationProvider{Providers: providers}, nil
 }

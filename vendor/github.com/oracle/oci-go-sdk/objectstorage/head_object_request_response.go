@@ -14,11 +14,11 @@ type HeadObjectRequest struct {
 	// The top-level namespace used for the request.
 	NamespaceName *string `mandatory:"true" contributesTo:"path" name:"namespaceName"`
 
-	// The name of the bucket.
+	// The name of the bucket. Avoid entering confidential information.
 	// Example: `my-new-bucket1`
 	BucketName *string `mandatory:"true" contributesTo:"path" name:"bucketName"`
 
-	// The name of the object.
+	// The name of the object. Avoid entering confidential information.
 	// Example: `test/object1.log`
 	ObjectName *string `mandatory:"true" contributesTo:"path" name:"objectName"`
 
@@ -27,16 +27,29 @@ type HeadObjectRequest struct {
 	IfMatch *string `mandatory:"false" contributesTo:"header" name:"if-match"`
 
 	// The entity tag to avoid matching. The only valid value is ‘*’, which indicates that the request should fail if the object already exists.
-	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag
-	// of the target part.
+	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag of the target part.
 	IfNoneMatch *string `mandatory:"false" contributesTo:"header" name:"if-none-match"`
 
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request HeadObjectRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request HeadObjectRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request HeadObjectRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // HeadObjectResponse wrapper for the HeadObject operation
@@ -49,7 +62,7 @@ type HeadObjectResponse struct {
 	OpcClientRequestId *string `presentIn:"header" name:"opc-client-request-id"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-	// request, please provide this request ID.
+	// request, provide this request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 
 	// The entity tag for the object.
@@ -84,6 +97,12 @@ type HeadObjectResponse struct {
 	// The object modification time, as described in RFC 2616 (https://tools.ietf.org/rfc/rfc2616), section 14.29.
 	LastModified *common.SDKTime `presentIn:"header" name:"last-modified"`
 
+	// The current state of the object.
+	ArchivalState HeadObjectArchivalStateEnum `presentIn:"header" name:"archival-state"`
+
+	// Time that the object is returned to the archived state. This field is only present for restored objects.
+	TimeOfArchival *common.SDKTime `presentIn:"header" name:"time-of-archival"`
+
 	// Flag to indicate whether or not the object was modified.  If this is true,
 	// the getter for the object itself will return null.  Callers should check this
 	// if they specified one of the request params that might result in a conditional
@@ -93,4 +112,36 @@ type HeadObjectResponse struct {
 
 func (response HeadObjectResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response HeadObjectResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
+}
+
+// HeadObjectArchivalStateEnum Enum with underlying type: string
+type HeadObjectArchivalStateEnum string
+
+// Set of constants representing the allowable values for HeadObjectArchivalState
+const (
+	HeadObjectArchivalStateAvailable HeadObjectArchivalStateEnum = "AVAILABLE"
+	HeadObjectArchivalStateArchived  HeadObjectArchivalStateEnum = "ARCHIVED"
+	HeadObjectArchivalStateRestoring HeadObjectArchivalStateEnum = "RESTORING"
+	HeadObjectArchivalStateRestored  HeadObjectArchivalStateEnum = "RESTORED"
+)
+
+var mappingHeadObjectArchivalState = map[string]HeadObjectArchivalStateEnum{
+	"AVAILABLE": HeadObjectArchivalStateAvailable,
+	"ARCHIVED":  HeadObjectArchivalStateArchived,
+	"RESTORING": HeadObjectArchivalStateRestoring,
+	"RESTORED":  HeadObjectArchivalStateRestored,
+}
+
+// GetHeadObjectArchivalStateEnumValues Enumerates the set of values for HeadObjectArchivalState
+func GetHeadObjectArchivalStateEnumValues() []HeadObjectArchivalStateEnum {
+	values := make([]HeadObjectArchivalStateEnum, 0)
+	for _, v := range mappingHeadObjectArchivalState {
+		values = append(values, v)
+	}
+	return values
 }

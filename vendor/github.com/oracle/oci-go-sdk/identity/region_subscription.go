@@ -24,6 +24,7 @@ type RegionSubscription struct {
 	// - `PHX`
 	// - `IAD`
 	// - `FRA`
+	// - `LHR`
 	RegionKey *string `mandatory:"true" json:"regionKey"`
 
 	// The region's name.
@@ -31,6 +32,7 @@ type RegionSubscription struct {
 	// - `us-phoenix-1`
 	// - `us-ashburn-1`
 	// - `eu-frankurt-1`
+	// - `uk-london-1`
 	RegionName *string `mandatory:"true" json:"regionName"`
 
 	// The region subscription status.
