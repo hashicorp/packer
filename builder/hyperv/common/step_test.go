@@ -2,8 +2,11 @@ package common
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -16,4 +19,10 @@ func testState(t *testing.T) multistep.StateBag {
 		Writer: new(bytes.Buffer),
 	})
 	return state
+}
+
+// Generates an absolute path to a directory under OS temp with a name
+// beginning with prefix and a UUID appended to the end
+func genTestDirPath(prefix string) string {
+	return filepath.Join(os.TempDir(), prefix+"-"+uuid.TimeOrderedUUID())
 }
