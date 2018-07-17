@@ -184,6 +184,13 @@ commonly useful environmental variables:
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
 
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
+
 ## Safely Writing A Script
 
 Whether you use the `inline` option, or pass it a direct `script` or `scripts`,
