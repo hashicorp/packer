@@ -61,7 +61,7 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s $(UNFORMATTED_FILES)
+	@gofmt -w -s main.go $(UNFORMATTED_FILES)
 
 fmt-check: ## Check go code formatting
 	@echo "==> Checking that code complies with gofmt requirements..."
