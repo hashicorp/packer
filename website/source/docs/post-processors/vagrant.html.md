@@ -133,3 +133,6 @@ Using the Docker builder or one of the Docker post processors as an input
 artifact will cause the `Vagrantfile` to include a reference to the image. For
 post processors allowing a tag to be specified, such as `docker-import` or
 `docker-tag`, the tag will be used. Otherwise, the sha256 hash will be used.
+
+Note: Using the `docker` builder to save the image as a tar file cannot be used
+to produce a Vagrant box.
