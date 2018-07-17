@@ -31,7 +31,6 @@ var builtins = map[string]string{
 	"MSOpenTech.hyperv":                   "hyperv",
 	"transcend.qemu":                      "libvirt",
 	"ustream.lxc":                         "lxc",
-	"packer.docker":                       "docker",
 	"packer.post-processor.docker-import": "docker",
 	"packer.post-processor.docker-tag":    "docker",
 	"packer.post-processor.docker-push":   "docker",
