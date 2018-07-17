@@ -238,7 +238,6 @@ func TestConfig(t *testing.T) {
 			t.Errorf("Expected ConfigProvider.KeyFingerprint: %s, got %s", expected, fingerprint)
 		}
 	})
-
 }
 
 // BaseTestConfig creates the base (DEFAULT) config including a temporary key
