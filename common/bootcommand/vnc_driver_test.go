@@ -18,7 +18,9 @@ type sender struct {
 }
 
 func (s *sender) KeyEvent(u uint32, down bool) error {
-	s.e = append(s.e, event{u, down})
+	if s != nil {
+		s.e = append(s.e, event{u, down})
+	}
 	return nil
 }
 
@@ -31,7 +33,8 @@ func Test_vncSpecialLookup(t *testing.T) {
 		{0xFFE2, true},
 	}
 	s := &sender{}
-	d := NewVNCDriver(s, time.Duration(0))
+
+	d := NewVNCDriver(noopReboot, s, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -41,12 +44,24 @@ func Test_vncSpecialLookup(t *testing.T) {
 
 func Test_vncIntervalNotGiven(t *testing.T) {
 	s := &sender{}
-	d := NewVNCDriver(s, time.Duration(0))
+	d := NewVNCDriver(noopReboot, s, time.Duration(0))
 	assert.Equal(t, d.interval, time.Duration(100)*time.Millisecond)
 }
 
 func Test_vncIntervalGiven(t *testing.T) {
 	s := &sender{}
-	d := NewVNCDriver(s, time.Duration(5000)*time.Millisecond)
+	d := NewVNCDriver(noopReboot, s, time.Duration(5000)*time.Millisecond)
 	assert.Equal(t, d.interval, time.Duration(5000)*time.Millisecond)
+}
+
+func Test_vncReboot(t *testing.T) {
+	in := "abc123<wait>098<reboot>"
+	rebootCalled := false
+	var s *sender
+	d := NewVNCDriver(func() error { rebootCalled = true; return nil }, s)
+	seq, err := GenerateExpressionSequence(in)
+	assert.NoError(t, err)
+	err = seq.Do(context.Background(), d)
+	assert.NoError(t, err)
+	assert.True(t, rebootCalled, "reboot should have been called")
 }

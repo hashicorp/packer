@@ -520,7 +520,7 @@ func (b *Builder) newDriver(qemuBinary string) (Driver, error) {
 	driver := &QemuDriver{
 		QemuPath:    qemuPath,
 		QemuImgPath: qemuImgPath,
-		VirshPath: virshPath,
+		VirshPath:   virshPath,
 	}
 
 	if err := driver.Verify(); err != nil {

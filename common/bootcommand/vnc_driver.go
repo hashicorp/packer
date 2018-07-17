@@ -26,7 +26,7 @@ type vncDriver struct {
 	err error
 }
 
-func NewVNCDriver(reboot func() error, c VNCKeyEvent, interval time.Duration) *vncDriver {
+func NewVNCDriver(reboot RebootFunc, c VNCKeyEvent, interval time.Duration) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault

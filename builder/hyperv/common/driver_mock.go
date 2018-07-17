@@ -202,7 +202,7 @@ type DriverMock struct {
 
 	RebootVirtualMachine_Called bool
 	RebootVirtualMachine_VmName string
-	RebootVirtualMachine_Err error
+	RebootVirtualMachine_Err    error
 
 	RestartVirtualMachine_Called bool
 	RestartVirtualMachine_VmName string

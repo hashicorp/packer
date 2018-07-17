@@ -118,7 +118,7 @@ func (w *waitExpression) String() string {
 	return fmt.Sprintf("Wait<%s>", w.d)
 }
 
-type rebootExpression struct {}
+type rebootExpression struct{}
 
 func (r *rebootExpression) Do(ctx context.Context, driver BCDriver) error {
 	log.Print("[INFO] Rebooting")

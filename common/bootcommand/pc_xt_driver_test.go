@@ -80,7 +80,8 @@ func Test_pcxtSpecialOnOff(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
+
+	d := NewPCXTDriver(noopReboot, sendCodes, -1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -96,7 +97,8 @@ func Test_pcxtSpecial(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
+
+	d := NewPCXTDriver(noopReboot, sendCodes, -1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -118,7 +120,7 @@ func Test_flushes(t *testing.T) {
 
 	boots := make(map[string]int)
 
-	d := NewPCXTDriver(func() { boots["reboot"] = 1; return nil }, sendCodes,
+	d := NewPCXTDriver(noopReboot, sendCodes,
 		-1, time.Duration(0))
 
 	seq, err := GenerateExpressionSequence(in)
@@ -128,12 +130,23 @@ func Test_flushes(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
+
 func Test_KeyIntervalNotGiven(t *testing.T) {
-	d := NewPCXTDriver(nil, -1, time.Duration(0))
+	d := NewPCXTDriver(noopReboot, nil, -1, time.Duration(0))
 	assert.Equal(t, d.interval, time.Duration(100)*time.Millisecond)
 }
 
 func Test_KeyIntervalGiven(t *testing.T) {
-	d := NewPCXTDriver(nil, -1, time.Duration(5000)*time.Millisecond)
+	d := NewPCXTDriver(noopReboot, nil, -1, time.Duration(5000)*time.Millisecond)
 	assert.Equal(t, d.interval, time.Duration(5000)*time.Millisecond)
+
+func Test_pcxtReboot(t *testing.T) {
+	in := "abc123<wait>098<reboot>"
+	rebootCalled := false
+	d := NewPCXTDriver(func() error { rebootCalled = true; return nil }, noopPCXTSendCode, -1)
+	seq, err := GenerateExpressionSequence(in)
+	assert.NoError(t, err)
+	err = seq.Do(context.Background(), d)
+	assert.NoError(t, err)
+	assert.True(t, rebootCalled, "reboot should have been called")
 }

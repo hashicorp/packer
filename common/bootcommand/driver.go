@@ -2,6 +2,13 @@ package bootcommand
 
 const shiftedChars = "~!@#$%^&*()_+{}|:\"<>?"
 
+// RebootFunc will be called to reboot the VM
+type RebootFunc func() error
+
+func noopReboot() error {
+	return nil
+}
+
 // BCDriver is our access to the VM we want to type boot commands to
 type BCDriver interface {
 	Reboot() error

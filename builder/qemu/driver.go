@@ -50,7 +50,7 @@ type Driver interface {
 type QemuDriver struct {
 	QemuPath    string
 	QemuImgPath string
-	VirshPath string
+	VirshPath   string
 
 	vmCmd   *exec.Cmd
 	vmEndCh <-chan int

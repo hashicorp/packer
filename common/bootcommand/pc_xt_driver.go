@@ -12,12 +12,13 @@ import (
 	"github.com/hashicorp/packer/common"
 )
 
-// RebootFunc will be called to reboot the VM
-type RebootFunc func() error
-
 // SendCodeFunc will be called to send codes to the VM
 type SendCodeFunc func([]string) error
 type scMap map[string]*scancode
+
+func noopPCXTSendCode([]string) error {
+	return nil
+}
 
 type pcXTDriver struct {
 	interval    time.Duration

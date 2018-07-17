@@ -34,7 +34,7 @@ type DriverMock struct {
 	StopErr  error
 
 	RebootName string
-	RebootErr error
+	RebootErr  error
 
 	PrlctlCalls [][]string
 	PrlctlErrs  []error
