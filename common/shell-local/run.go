@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hashicorp/packer/common"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -164,6 +165,12 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", config.PackerBuildName)
 	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", config.PackerBuilderType)
+
+	// expose PACKER_HTTP_ADDR
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		envVars["PACKER_HTTP_ADDR"] = fmt.Sprintf("%s", httpAddr)
+	}
 
 	// interpolate environment variables
 	config.Ctx.Data = &EnvVarsTemplate{
