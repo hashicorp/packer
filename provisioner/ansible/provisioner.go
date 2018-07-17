@@ -336,6 +336,13 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 		// args = append(args, "--private-key", privKeyFile)
 		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
+
+	// expose packer_http_addr extra variable
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		args = append(args, "--extra-vars", fmt.Sprintf("packer_http_addr=%s", httpAddr))
+	}
+
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envvars = append(envvars, p.config.AnsibleEnvVars...)
