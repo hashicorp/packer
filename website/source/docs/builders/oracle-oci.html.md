@@ -125,7 +125,9 @@ builder.
 
  -  `use_private_ip` (boolean) - Use private ip addresses to connect to the instance via ssh.
 
- - `metadata` (map of strings) - Metadata to be injected in the build instance.
+ - `metadata` (map of strings) - Metadata optionally contains custom metadata key/value pairs provided in the
+configuration. While this can be used to set metadata["user_data"] the explicit "user_data" and "user_data_file" values will have precedence. An instance's metadata can be obtained from at http://169.254.169.254 on the
+launched instance.
 
  - `user_data` (string) - user_data to be used by cloud
    init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Generally speaking, it is easier to use the `user_data_file`,
