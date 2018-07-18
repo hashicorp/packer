@@ -14,7 +14,7 @@ Type: `ansible`
 The `ansible` Packer provisioner runs Ansible playbooks. It dynamically creates
 an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
-machine being provisioned by Packer. 
+machine being provisioned by Packer.
 
 -&gt; **Note:**: Any `remote_user` defined in tasks will be ignored. Packer will
 always connect with the user given in the json config for this provisioner.
@@ -61,6 +61,15 @@ Optional Parameters:
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
     }
     ```
+    If you are running a Windows build on AWS, Azure or Google Compute and would
+    like to access the auto-generated password that Packer uses to connect to a
+    Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option.
+    For example:
+
+    ```json
+    "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
+    ```
 
 -   `command` (string) - The command to invoke ansible.
     Defaults to `ansible-playbook`.
@@ -72,10 +81,22 @@ Optional Parameters:
     These arguments *will not* be passed through a shell and arguments should
     not be quoted. Usage example:
 
-    ``` json
+    ```json
     {
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
     }
+    ```
+
+    If you are running a Windows build on AWS, Azure or Google Compute and would
+    like to access the auto-generated password that Packer uses to connect to a
+    Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option.
+    For example:
+
+    ```json
+      "extra_arguments": [
+        "--extra-vars", "winrm_password={{ .WinRMPassword }}"
+      ]
     ```
 
 -   `groups` (array of strings) - The groups into which the Ansible host
@@ -128,13 +149,6 @@ Optional Parameters:
 -   `user` (string) - The `ansible_user` to use. Defaults to the user running
     packer.
 
--   `set_winrm_passwd` (boolean) - Set to `true` if you are running on AWS, Azure or 
-    Google Compute and would like to access the generated password that Packer uses to 
-    connect to the instance via WinRM. The password will be avaliable to the Ansible 
-    provisioner through the environment variable `GENERATED_WINRM_PASSWORD`. You will 
-    also need to set `ansible_password` in your ansible playbook, for example,
-    `ansible_password: "{{ lookup('env','GENERATED_WINRM_PASSWORD') }}"`
-
 ## Default Extra Variables
 
 In addition to being able to specify extra arguments using the
@@ -153,7 +167,7 @@ commonly useful Ansible variables:
 
 To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"` to enable verbose logging.
 
-``` json
+```json
 {
   "extra_arguments": [ "-vvvv" ]
 }
@@ -174,7 +188,7 @@ Redhat / CentOS builds have been known to fail with the following error due to `
 
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
 
-``` json
+```json
 {
   "builders": [
     {
