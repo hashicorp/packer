@@ -42,6 +42,11 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	metadata := map[string]string{
 		"ssh_authorized_keys": publicKey,
 	}
+	if d.cfg.Metadata != nil {
+		for key, value := range d.cfg.Metadata {
+			metadata[key] = value
+		}
+	}
 	if d.cfg.UserData != "" {
 		metadata["user_data"] = d.cfg.UserData
 	}

@@ -29,6 +29,9 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		// Comm
 		"ssh_username":   "opc",
 		"use_private_ip": false,
+		"metadata": map[string]string{
+			"key": "value",
+		},
 	}
 }
 
