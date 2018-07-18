@@ -26,6 +26,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -67,8 +68,18 @@ type Provisioner struct {
 	ansibleMajVersion uint
 }
 
+type PassthroughTemplate struct {
+	WinRMPassword string
+}
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
+
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
+	p.config.ctx.Data = &PassthroughTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -188,6 +199,25 @@ func (p *Provisioner) getVersion() error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
+	// Interpolate env vars to check for .WinRMPassword
+	p.config.ctx.Data = &PassthroughTemplate{
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
+	}
+	for i, envVar := range p.config.AnsibleEnvVars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.AnsibleEnvVars[i] = envVar
+	}
+	// Interpolate extra vars to check for .WinRMPassword
+	for i, arg := range p.config.ExtraArguments {
+		arg, err := interpolate.Render(arg, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.ExtraArguments[i] = arg
+	}
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
@@ -381,7 +411,15 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
+	// remove winrm password from command, if it's been added
+	flattenedCmd := strings.Join(cmd.Args, " ")
+	sanitized := flattenedCmd
+	if len(getWinRMPassword(p.config.PackerBuildName)) > 0 {
+		sanitized = strings.Replace(sanitized,
+			getWinRMPassword(p.config.PackerBuildName), "*****", -1)
+	}
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
+
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -506,6 +544,11 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	return winRMPass
 }
 
 // Ui provides concurrency-safe access to packer.Ui.
