@@ -176,7 +176,7 @@ builder.
                 "name": "ubuntu-16.04*",
                 "visibility": "protected",
                 "owner": "d1a588cf4b0743344508dc145649372d1",
-                "tag": "prod"
+                "tag": ["prod", "ready"]
             },
             "most_recent": true
         }
@@ -189,8 +189,16 @@ builder.
 
     -   `filters` (map of strings) - filters used to select a `source_image`.
         NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
-        Any filter described in the docs for [ImageService](https://developer.openstack.org/api-ref/image/v2/)
-        is valid.
+        Of the filters described in [ImageService](https://developer.openstack.org/api-ref/image/v2/), the following
+        are valid:
+
+        - name (string)
+
+        - owner (string)
+
+        - tags (slice of strings)
+
+        - visibility (string)
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
