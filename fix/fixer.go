@@ -37,6 +37,7 @@ func init() {
 		"docker-email":               new(FixerDockerEmail),
 		"powershell-escapes":         new(FixerPowerShellEscapes),
 		"hyperv-deprecations":        new(FixerHypervDeprecations),
+		"hyperv-vmxc-typo":           new(FixerHypervVmxcTypo),
 	}
 
 	FixerOrder = []string{
@@ -57,5 +58,6 @@ func init() {
 		"docker-email",
 		"powershell-escapes",
 		"hyperv-deprecations",
+		"hyperv-vmxc-typo",
 	}
 }
