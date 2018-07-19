@@ -188,10 +188,10 @@ func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, hardd
 		generation, diffDisks, fixedVHD)
 }
 
-func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string,
 	ram int64, switchName string) error {
-	return hyperv.CloneVirtualMachine(cloneFromVmxcPath, cloneFromVmName, cloneFromSnapshotName,
+	return hyperv.CloneVirtualMachine(cloneFromVmcxPath, cloneFromVmName, cloneFromSnapshotName,
 		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
 }
 

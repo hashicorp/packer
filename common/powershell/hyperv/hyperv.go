@@ -286,7 +286,7 @@ if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 	return err
 }
 
-func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
+func ExportVmcxVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
 	var script = `
 param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
@@ -333,22 +333,22 @@ $result = Remove-Item -Path $WorkingPath
 	return err
 }
 
-func CopyVmxcVirtualMachine(exportPath string, cloneFromVmxcPath string) error {
+func CopyVmcxVirtualMachine(exportPath string, cloneFromVmcxPath string) error {
 	var script = `
-param([string]$exportPath, [string]$cloneFromVmxcPath)
-if (!(Test-Path $cloneFromVmxcPath)){
-	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
+param([string]$exportPath, [string]$cloneFromVmcxPath)
+if (!(Test-Path $cloneFromVmcxPath)){
+	throw "Clone from vmcx directory: $cloneFromVmcxPath does not exist!"
 }
 
 if (!(Test-Path $exportPath)){
 	New-Item -ItemType Directory -Force -Path $exportPath
 }
-$cloneFromVmxcPath = Join-Path $cloneFromVmxcPath '\*'
-Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
+$cloneFromVmcxPath = Join-Path $cloneFromVmcxPath '\*'
+Copy-Item $cloneFromVmcxPath $exportPath -Recurse -Force
 	`
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, exportPath, cloneFromVmxcPath)
+	err := ps.Run(script, exportPath, cloneFromVmcxPath)
 
 	return err
 }
@@ -365,7 +365,7 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 	return err
 }
 
-func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string,
+func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
 	ram int64, switchName string) error {
 
 	var script = `
@@ -422,24 +422,24 @@ if ($vm) {
 	return err
 }
 
-func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
 	path string, harddrivePath string, ram int64, switchName string) error {
 
 	if cloneFromVmName != "" {
-		if err := ExportVmxcVirtualMachine(path, cloneFromVmName,
+		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
 			cloneFromSnapshotName, cloneAllSnapshots); err != nil {
 			return err
 		}
 	}
 
-	if cloneFromVmxcPath != "" {
-		if err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath); err != nil {
+	if cloneFromVmcxPath != "" {
+		if err := CopyVmcxVirtualMachine(path, cloneFromVmcxPath); err != nil {
 			return err
 		}
 	}
 
-	if err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
+	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
 		return err
 	}
 
