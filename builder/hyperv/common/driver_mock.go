@@ -134,7 +134,7 @@ type DriverMock struct {
 	CreateVirtualMachine_Err              error
 
 	CloneVirtualMachine_Called                bool
-	CloneVirtualMachine_CloneFromVmxcPath     string
+	CloneVirtualMachine_CloneFromVmcxPath     string
 	CloneVirtualMachine_CloneFromVmName       string
 	CloneVirtualMachine_CloneFromSnapshotName string
 	CloneVirtualMachine_CloneAllSnapshots     bool
@@ -423,11 +423,11 @@ func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddriveP
 	return d.CreateVirtualMachine_Err
 }
 
-func (d *DriverMock) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string,
+func (d *DriverMock) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string,
 	harddrivePath string, ram int64, switchName string) error {
 	d.CloneVirtualMachine_Called = true
-	d.CloneVirtualMachine_CloneFromVmxcPath = cloneFromVmxcPath
+	d.CloneVirtualMachine_CloneFromVmcxPath = cloneFromVmcxPath
 	d.CloneVirtualMachine_CloneFromVmName = cloneFromVmName
 	d.CloneVirtualMachine_CloneFromSnapshotName = cloneFromSnapshotName
 	d.CloneVirtualMachine_CloneAllSnapshots = cloneAllSnapshots

@@ -62,7 +62,7 @@ type Config struct {
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
 	// This is the path to a directory containing an exported virtual machine.
-	CloneFromVMXCPath string `mapstructure:"clone_from_vmxc_path"`
+	CloneFromVMCXPath string `mapstructure:"clone_from_vmcx_path"`
 
 	// This is the name of the virtual machine to clone from.
 	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
@@ -158,9 +158,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.Generation = 1
 
 	if b.config.CloneFromVMName == "" {
-		if b.config.CloneFromVMXCPath == "" {
+		if b.config.CloneFromVMCXPath == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if "+
-				"clone_from_vmxc_path is not specified."))
+				"clone_from_vmcx_path is not specified."))
 		}
 	} else {
 		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
@@ -207,16 +207,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.CloneFromVMXCPath == "" {
+	if b.config.CloneFromVMCXPath == "" {
 		if b.config.CloneFromVMName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmxc_path be specified if "+
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmcx_path be specified if "+
 				"clone_from_vm_name must is not specified."))
 		}
 	} else {
-		if _, err := os.Stat(b.config.CloneFromVMXCPath); os.IsNotExist(err) {
+		if _, err := os.Stat(b.config.CloneFromVMCXPath); os.IsNotExist(err) {
 			if err != nil {
 				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("CloneFromVMXCPath does not exist: %s", err))
+					errs, fmt.Errorf("CloneFromVMCXPath does not exist: %s", err))
 			}
 		}
 	}
@@ -426,7 +426,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCloneVM{
-			CloneFromVMXCPath:              b.config.CloneFromVMXCPath,
+			CloneFromVMCXPath:              b.config.CloneFromVMCXPath,
 			CloneFromVMName:                b.config.CloneFromVMName,
 			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
