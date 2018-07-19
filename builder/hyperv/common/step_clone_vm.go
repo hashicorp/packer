@@ -16,7 +16,7 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepCloneVM struct {
-	CloneFromVMXCPath              string
+	CloneFromVMCXPath              string
 	CloneFromVMName                string
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
@@ -55,7 +55,7 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 
-	err := driver.CloneVirtualMachine(s.CloneFromVMXCPath, s.CloneFromVMName, s.CloneFromSnapshotName,
+	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName, s.CloneFromSnapshotName,
 		s.CloneAllSnapshots, s.VMName, path, harddrivePath, ramSize, s.SwitchName)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
