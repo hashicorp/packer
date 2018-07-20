@@ -41,7 +41,7 @@ func TestBuildImageFilter(t *testing.T) {
 
 	multiErr := buildImageFilters(filters, &testOpts)
 
-	if len(multiErr.Errors) > 0  {
+	if len(multiErr.Errors) > 0 {
 		t.Error(multiErr.Error())
 	}
 
