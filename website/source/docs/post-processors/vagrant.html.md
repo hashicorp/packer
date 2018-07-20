@@ -129,10 +129,13 @@ artifacts](/docs/templates/post-processors.html#toc_2) for more information.
 
 ### Docker
 
-Using the Docker builder or one of the Docker post processors as an input
-artifact will cause the `Vagrantfile` to include a reference to the image. For
-post processors allowing a tag to be specified, such as `docker-import` or
-`docker-tag`, the tag will be used. Otherwise, the sha256 hash will be used.
+Using a Docker input artifact will include a reference to the image in the
+`Vagrantfile`. If the image tag is not specified in the post-processor, the
+sha256 hash will be used.
 
-Note: Using the `docker` builder to save the image as a tar file cannot be used
-to produce a Vagrant box.
+The following Docker input artifacts are supported:
+
+ - `docker` builder with `commit: true`, always uses the sha256 hash
+ - `docker-import`
+ - `docker-tag`
+ - `docker-push`
