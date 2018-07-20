@@ -78,7 +78,7 @@ func TestApplyMostRecent(t *testing.T) {
 
 	applyMostRecent(&testSortOpts)
 
-	if testSortOpts.Sort != "created_at:desc" {
+	if testSortOpts.SortKey != "created_at" || testSortOpts.SortDir != "desc" {
 		t.Errorf("Error applying most recent filter: sort")
 	}
 }
