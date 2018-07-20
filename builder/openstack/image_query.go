@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	mostRecentSort = "created_at:desc"
+	mostRecentSortDir = "desc"
+	mostRecentSortKey = "created_at"
 )
 
 var validFields = map[string]string{
@@ -99,7 +100,8 @@ func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) 
 func applyMostRecent(listOpts *images.ListOpts) {
 	// Sort isn't supported through our API so there should be no existing values.
 	// Overwriting .Sort is okay.
-	listOpts.Sort = mostRecentSort
+	listOpts.SortKey = mostRecentSortKey
+	listOpts.SortDir = mostRecentSortDir
 	listOpts.Limit = 1
 
 	return
