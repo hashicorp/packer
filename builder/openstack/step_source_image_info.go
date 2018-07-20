@@ -72,6 +72,10 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 			*image = i[0]
 			return true, nil
 		default:
+			if s.ImageFilters.MostRecent {
+				*image = i[0]
+				return true, nil
+			}
 			return false, fmt.Errorf(
 				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v",
 				params)
