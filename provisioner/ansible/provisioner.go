@@ -356,8 +356,8 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	}
 	var envvars []string
 
-	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
-		p.config.PackerBuildName, p.config.PackerBuilderType),
+	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s", p.config.PackerBuildName),
+                 "--extra-vars", fmt.Sprintf("packer_builder_type=%s", p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
 		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
