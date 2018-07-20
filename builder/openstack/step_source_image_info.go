@@ -26,7 +26,7 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	client, err := config.computeV2Client()
+	client, err := config.imageV2Client()
 
 	// if an ID is provided we skip the filter since that will return a single or no image
 	if s.SourceImage != "" {
@@ -38,11 +38,11 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 
 	// build ListOpts from filters
 	if len(s.ImageFilters.Filters) > 0 {
-		err = buildImageFilters(s.ImageFilters.Filters, params)
-		if err != nil {
-			err := fmt.Errorf("Errors encountered in filter parsing.\n%s" + err.Error())
+		errs := buildImageFilters(s.ImageFilters.Filters, params)
+		if len(errs.Errors) > 0 {
+			err := fmt.Errorf("Errors encountered in filter parsing.\n%s" + errs.Error())
 			state.Put("error", err)
-			ui.Error(err.Error())
+			ui.Error(errs.Error())
 			return multistep.ActionHalt
 		}
 	}
@@ -87,7 +87,7 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 
 	ui.Message(fmt.Sprintf("Found Image ID: %s", image.ID))
 
-	state.Put("source_image", image)
+	state.Put("source_image", image.ID)
 	return multistep.ActionContinue
 }
 

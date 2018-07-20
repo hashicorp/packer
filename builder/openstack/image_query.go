@@ -100,6 +100,7 @@ func applyMostRecent(listOpts *images.ListOpts) {
 	// Sort isn't supported through our API so there should be no existing values.
 	// Overwriting .Sort is okay.
 	listOpts.Sort = mostRecentSort
+	listOpts.Limit = 1
 
 	return
 }
