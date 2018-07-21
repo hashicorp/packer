@@ -21,11 +21,11 @@ func TestImageFilterOptionsDecode(t *testing.T) {
 	err := mapstructure.Decode(input, &opts)
 	if err != nil {
 		t.Errorf("Did not successfully generate ImageFilterOptions from %v.\nContains %v", input, opts)
-	} else {
-		t.Log("Successfully generate ImageFilterOptions.")
 	}
 }
 
+// This test case confirms that only allowed fields will be set to values
+// The checked values are non-nil for their target type
 func TestBuildImageFilter(t *testing.T) {
 	testOpts := images.ListOpts{}
 
@@ -39,11 +39,7 @@ func TestBuildImageFilter(t *testing.T) {
 		"tags":       []string{"prod", "ready"},
 	}
 
-	multiErr := buildImageFilters(filters, &testOpts)
-
-	if len(multiErr.Errors) > 0 {
-		t.Error(multiErr.Error())
-	}
+	buildImageFilters(filters, &testOpts)
 
 	if testOpts.Limit != 0 {
 		t.Errorf("Limit was parsed: %d", testOpts.Limit)
@@ -78,7 +74,7 @@ func TestApplyMostRecent(t *testing.T) {
 
 	applyMostRecent(&testSortOpts)
 
-	if testSortOpts.SortKey != "created_at" || testSortOpts.SortDir != "desc" {
+	if testSortOpts.Sort != "created_at:desc" {
 		t.Errorf("Error applying most recent filter: sort")
 	}
 }
