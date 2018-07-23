@@ -10,6 +10,7 @@ import (
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -20,6 +21,8 @@ import (
 type StepCreateVolume struct {
 	volumeId       string
 	RootVolumeSize int64
+	RootVolumeTags awscommon.TagMap
+	Ctx            interpolate.Context
 }
 
 func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -27,6 +30,26 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
+
+	volTags, err := s.RootVolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error tagging volumes: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Collect tags for tagging on resource creation
+	var tagSpecs []*ec2.TagSpecification
+
+	if len(volTags) > 0 {
+		runVolTags := &ec2.TagSpecification{
+			ResourceType: aws.String("volume"),
+			Tags:         volTags,
+		}
+
+		tagSpecs = append(tagSpecs, runVolTags)
+	}
 
 	var createVolume *ec2.CreateVolumeInput
 	if config.FromScratch {
@@ -69,6 +92,10 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 	}
 
+	if len(tagSpecs) > 0 {
+		createVolume.SetTagSpecifications(tagSpecs)
+		volTags.Report(ui)
+	}
 	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)

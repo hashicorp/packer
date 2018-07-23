@@ -44,6 +44,7 @@ type Config struct {
 	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
 	SourceAmi         string                     `mapstructure:"source_ami"`
 	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
+	RootVolumeTags    awscommon.TagMap           `mapstructure:"root_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -67,6 +68,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"ami_description",
 				"snapshot_tags",
 				"tags",
+				"root_volume_tags",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",
@@ -230,6 +232,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPrepareDevice{},
 		&StepCreateVolume{
 			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeTags: b.config.RootVolumeTags,
+			Ctx:            b.config.ctx,
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
