@@ -39,6 +39,7 @@ providers.
 -   QEMU
 -   VirtualBox
 -   VMware
+-   Docker
 
 -&gt; **Support for additional providers** is planned. If the Vagrant
 post-processor doesn't support creating boxes for a provider you care about,
@@ -114,6 +115,7 @@ The available provider names are:
 - `scaleway`
 - `virtualbox`
 - `vmware`
+- `docker`
 
 ## Input Artifacts
 
@@ -124,3 +126,16 @@ it.
 
 Please see the [documentation on input
 artifacts](/docs/templates/post-processors.html#toc_2) for more information.
+
+### Docker
+
+Using a Docker input artifact will include a reference to the image in the
+`Vagrantfile`. If the image tag is not specified in the post-processor, the
+sha256 hash will be used.
+
+The following Docker input artifacts are supported:
+
+ - `docker` builder with `commit: true`, always uses the sha256 hash
+ - `docker-import`
+ - `docker-tag`
+ - `docker-push`

@@ -43,6 +43,7 @@ package:
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
+	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
