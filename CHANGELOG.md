@@ -2,6 +2,8 @@
 
 ### IMPROVEMENTS:
 
+* command/validate: Warn users if config needs fixing. [GH-6423]
+
 ### BUG FIXES:
 
 ## 1.2.5 (July 16, 2018)
