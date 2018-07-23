@@ -278,7 +278,7 @@ func getEnvOverrides() overridableWaitVars {
 	// Load env vars from environment, and use them to override defaults
 	envValues := overridableWaitVars{
 		envInfo{"AWS_POLL_DELAY_SECONDS", 2, false},
-		envInfo{"AWS_MAX_ATTEMPTS", 0, false},
+		envInfo{"AWS_MAX_ATTEMPTS", 150, false},
 		envInfo{"AWS_TIMEOUT_SECONDS", 300, false},
 	}
 
