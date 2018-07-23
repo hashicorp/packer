@@ -81,6 +81,10 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		result.builds[v] = b
 	}
 
+	if err := result.postRenderValidate(); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
 
@@ -218,6 +222,10 @@ func (c *Core) Context() *interpolate.Context {
 		TemplatePath:  c.Template.Path,
 		UserVariables: c.variables,
 	}
+}
+
+func (c *Core) postRenderValidate() error {
+	return c.Template.OnlyExceptValidate(c.builds)
 }
 
 // validate does a full validation of the template.
