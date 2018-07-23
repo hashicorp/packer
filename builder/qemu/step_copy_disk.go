@@ -28,7 +28,7 @@ func (s *stepCopyDisk) Run(_ context.Context, state multistep.StateBag) multiste
 		path,
 	}
 
-	if config.DiskImage == false {
+	if !config.DiskImage || config.UseBackingFile {
 		return multistep.ActionContinue
 	}
 

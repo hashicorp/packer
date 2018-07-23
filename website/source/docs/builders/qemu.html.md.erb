@@ -152,8 +152,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `disk_image` (boolean) - Packer defaults to building from an ISO file, this
     parameter controls whether the ISO URL supplied is actually a bootable
-    QEMU image. When this value is set to true, the machine will clone the
-    source, resize it according to `disk_size` and boot the image.
+    QEMU image. When this value is set to `true`, the machine will either clone
+    the source or use it as a backing file (if `use_backing_file` is `true`);
+    then, it will resize the image according to `disk_size` and boot it.
 
 -   `disk_interface` (string) - The interface to use for the disk. Allowed
     values include any of `ide`, `scsi`, `virtio` or `virtio-scsi`^\*. Note
@@ -318,6 +319,12 @@ template that can be invoked by `make` in parallel:
 will bind to their own SSH port as determined by each process. This will also
 work with WinRM, just change the port forward in `qemuargs` to map to WinRM's
 default port of `5985` or whatever value you have the service set to listen on.
+
+-   `use_backing_file` (boolean) - Only applicable when `disk_image` is `true`
+    and `format` is `qcow2`, set this option to `true` to create a new QCOW2
+    file that uses the file located at `iso_url` as a backing file. The new file
+    will only contain blocks that have changed compared to the backing file, so
+    enabling this option can significantly reduce disk usage.
 
 -   `use_default_display` (boolean) - If true, do not pass a `-display` option
     to qemu, allowing it to choose the default. This may be needed when running
