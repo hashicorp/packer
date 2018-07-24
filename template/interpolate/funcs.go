@@ -13,6 +13,7 @@ import (
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/version"
+	vaultapi "github.com/hashicorp/vault/api"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -38,6 +39,7 @@ var FuncGens = map[string]FuncGenerator{
 	"user":           funcGenUser,
 	"packer_version": funcGenPackerVersion,
 	"consul_key":     funcGenConsul,
+	"vault":          funcGenVault,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -202,7 +204,43 @@ func funcGenConsul(ctx *Context) interface{} {
 		if value == "" {
 			return "", fmt.Errorf("value is empty at path %s", k)
 		}
+	}
+}
 
+func funcGenVault(ctx *Context) interface{} {
+	return func(path string, key string) (string, error) {
+		// Only allow interpolation from Vault when env vars are being read.
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("Vault vars are only allowed in the variables section")
+		}
+		if token := os.Getenv("VAULT_TOKEN"); token == "" {
+			return "", errors.New("Must set VAULT_TOKEN env var in order to " +
+				"use vault template function")
+		}
+		// const EnvVaultAddress = "VAULT_ADDR"
+		// const EnvVaultToken = "VAULT_TOKEN"
+		vaultConfig := vaultapi.DefaultConfig()
+		cli, err := vaultapi.NewClient(vaultConfig)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("Error getting Vault client: %s", err))
+		}
+		secret, err := cli.Logical().Read(path)
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("Error reading vault secret: %s", err))
+		}
+		if secret == nil {
+			return "", errors.New(fmt.Sprintf("Vault Secret does not exist at the given path."))
+		}
+
+		data := secret.Data["data"]
+		if data == nil {
+			return "", errors.New(fmt.Sprintf("Vault data was empty at the "+
+				"given path. Warnings: %s", strings.Join(secret.Warnings, "; ")))
+		}
+
+		value := secret.Data["data"].(map[string]interface{})[key].(string)
 		return value, nil
 	}
 }
