@@ -35,3 +35,7 @@ human readability.
 
 The full list of fixes that the fix command performs is visible in the help
 output, which can be seen via `packer fix -h`.
+
+## Options
+
+-   `-validate=false` - Disables validation of the fixed template. True by default.

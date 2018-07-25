@@ -1,15 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
-	"os"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -76,7 +75,7 @@ func VNCPassword(skipPassword bool) string {
 	return string(password)
 }
 
-func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if !s.Enabled {
 		log.Println("Skipping VNC configuration step...")
 		return multistep.ActionContinue
@@ -86,17 +85,9 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	f, err := os.Open(vmxPath)
+	vmxData, err := ReadVMX(vmxPath)
 	if err != nil {
-		err := fmt.Errorf("Error reading VMX data: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	vmxBytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		err := fmt.Errorf("Error reading VMX data: %s", err)
+		err := fmt.Errorf("Error reading VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -120,7 +111,6 @@ func (s *StepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
 
 	log.Printf("Found available VNC port: %d", vncPort)
 
-	vmxData := ParseVMX(string(vmxBytes))
 	vncFinder.UpdateVMX(vncBindAddress, vncPassword, vncPort, vmxData)
 
 	if err := WriteVMX(vmxPath, vmxData); err != nil {

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	//"log"
 	"os"
 	"regexp"
 	"strings"
@@ -30,6 +29,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	file, err := extractScript(p)
+	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
 	}
@@ -79,8 +79,8 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
-	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"` {
-		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};{{.Vars}}&'{{.Path}}';exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
+	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"` {
+		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
 	}
 
 	if p.config.ElevatedExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
@@ -177,6 +177,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["script"] = tf.Name()
 	p = new(Provisioner)
@@ -203,6 +204,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["script"] = tf.Name()
@@ -222,6 +224,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["inline"] = []interface{}{"foo"}
 	config["scripts"] = []string{tf.Name()}
@@ -248,6 +251,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 		t.Fatalf("error tempfile: %s", err)
 	}
 	defer os.Remove(tf.Name())
+	defer tf.Close()
 
 	config["scripts"] = []string{tf.Name()}
 	p = new(Provisioner)
@@ -403,7 +407,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	ui := testUi()
 	p := new(Provisioner)
 
-	// Defaults provided by Packer
+	// Defaults provided by Packer - env vars should not appear in cmd
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 	comm := new(packer.MockCommunicator)
@@ -413,11 +417,14 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; &'c:/Windows/Temp/inlineScript.ps1';exit $LastExitCode }"`
-	if comm.StartCmd.Command != expectedCommand {
-		t.Fatalf("Expect command to be: %s, got %s", expectedCommand, comm.StartCmd.Command)
+	cmd := comm.StartCmd.Command
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	matched := re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
 	}
 
+	// User supplied env vars should not change things
 	envVars := make([]string, 2)
 	envVars[0] = "FOO=BAR"
 	envVars[1] = "BAR=BAZ"
@@ -430,15 +437,19 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:BAR=\"BAZ\"; $env:FOO=\"BAR\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; &'c:/Windows/Temp/inlineScript.ps1';exit $LastExitCode }"`
-	if comm.StartCmd.Command != expectedCommand {
-		t.Fatalf("Expect command to be: %s, got %s", expectedCommand, comm.StartCmd.Command)
+	cmd = comm.StartCmd.Command
+	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1';exit \$LastExitCode }"`)
+	matched = re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
 	}
 }
 
 func TestProvisionerProvision_Scripts(t *testing.T) {
 	tempFile, _ := ioutil.TempFile("", "packer")
 	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
 	config := testConfig()
 	delete(config, "inline")
 	config["scripts"] = []string{tempFile.Name()}
@@ -455,11 +466,12 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE=\"footype\"; $env:PACKER_BUILD_NAME=\"foobuild\"; &'c:/Windows/Temp/script.ps1';exit $LastExitCode }"`
-	if comm.StartCmd.Command != expectedCommand {
-		t.Fatalf("Expect command to be: %s, got %s", expectedCommand, comm.StartCmd.Command)
+	cmd := comm.StartCmd.Command
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	matched := re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
 	}
-
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
@@ -467,6 +479,8 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	config := testConfig()
 	ui := testUi()
 	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
 	delete(config, "inline")
 
 	config["scripts"] = []string{tempFile.Name()}
@@ -488,9 +502,11 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 		t.Fatal("should not have error")
 	}
 
-	expectedCommand := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:BAR=\"BAZ\"; $env:FOO=\"BAR\"; $env:PACKER_BUILDER_TYPE=\"footype\"; $env:PACKER_BUILD_NAME=\"foobuild\"; &'c:/Windows/Temp/script.ps1';exit $LastExitCode }"`
-	if comm.StartCmd.Command != expectedCommand {
-		t.Fatalf("Expect command to be: %s, got %s", expectedCommand, comm.StartCmd.Command)
+	cmd := comm.StartCmd.Command
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	matched := re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
 	}
 }
 
@@ -510,6 +526,12 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
 		{"FOO=bar=baz"},        // User env var with value containing equals
 		{"FOO==bar"},           // User env var with value starting with equals
+		// Test escaping of characters special to PowerShell
+		{"FOO=bar$baz"},  // User env var with value containing dollar
+		{"FOO=bar\"baz"}, // User env var with value containing a double quote
+		{"FOO=bar'baz"},  // User env var with value containing a single quote
+		{"FOO=bar`baz"},  // User env var with value containing a backtick
+
 	}
 	expected := []string{
 		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
@@ -517,6 +539,10 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
 		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
@@ -545,13 +571,22 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
 		{"FOO=bar=baz"},        // User env var with value containing equals
 		{"FOO==bar"},           // User env var with value starting with equals
+		// Test escaping of characters special to PowerShell
+		{"FOO=bar$baz"},  // User env var with value containing dollar
+		{"FOO=bar\"baz"}, // User env var with value containing a double quote
+		{"FOO=bar'baz"},  // User env var with value containing a single quote
+		{"FOO=bar`baz"},  // User env var with value containing a backtick
 	}
 	expected := []string{
-		`$env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; `,
-		`$env:FOO=\"bar\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; `,
-		`$env:BAZ=\"qux\"; $env:FOO=\"bar\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; `,
-		`$env:FOO=\"bar=baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; `,
-		`$env:FOO=\"=bar\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; `,
+		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
@@ -571,7 +606,6 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 }
 
 func TestProvision_createCommandText(t *testing.T) {
-
 	config := testConfig()
 	config["remote_path"] = "c:/Windows/Temp/script.ps1"
 	p := new(Provisioner)
@@ -586,19 +620,37 @@ func TestProvision_createCommandText(t *testing.T) {
 	// Non-elevated
 	cmd, _ := p.createCommandText()
 
-	expectedCommand := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};$env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; &'c:/Windows/Temp/script.ps1';exit $LastExitCode }"`
-
-	if cmd != expectedCommand {
-		t.Fatalf("Expected Non-elevated command: %s, got %s", expectedCommand, cmd)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){\$ProgressPreference='SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1';exit \$LastExitCode }"`)
+	matched := re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
 	}
 
 	// Elevated
 	p.config.ElevatedUser = "vagrant"
 	p.config.ElevatedPassword = "vagrant"
 	cmd, _ = p.createCommandText()
-	matched, _ := regexp.MatchString("powershell -executionpolicy bypass -file \"%TEMP%(.{1})packer-elevated-shell.*", cmd)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass -file "C:/Windows/Temp/packer-elevated-shell-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1"`)
+	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected elevated command: %s", cmd)
+	}
+}
+
+func TestProvision_uploadEnvVars(t *testing.T) {
+	p := new(Provisioner)
+	comm := new(packer.MockCommunicator)
+	p.communicator = comm
+
+	flattenedEnvVars := `$env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild";`
+
+	err := p.uploadEnvVars(flattenedEnvVars)
+	if err != nil {
+		t.Fatalf("Did not expect error: %s", err.Error())
+	}
+
+	if comm.UploadCalled != true {
+		t.Fatalf("Failed to upload env var file")
 	}
 }
 
@@ -620,7 +672,7 @@ func TestProvision_generateElevatedShellRunner(t *testing.T) {
 		t.Fatalf("Should have uploaded file")
 	}
 
-	matched, _ := regexp.MatchString("%TEMP%(.{1})packer-elevated-shell.*", path)
+	matched, _ := regexp.MatchString("C:/Windows/Temp/packer-elevated-shell.*", path)
 	if !matched {
 		t.Fatalf("Got unexpected file: %s", path)
 	}
@@ -644,7 +696,7 @@ func TestRetryable(t *testing.T) {
 	err := p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err != nil {
-		t.Fatalf("should not have error retrying funuction")
+		t.Fatalf("should not have error retrying function")
 	}
 
 	count = 0
@@ -652,7 +704,7 @@ func TestRetryable(t *testing.T) {
 	err = p.Prepare(config)
 	err = p.retryable(retryMe)
 	if err == nil {
-		t.Fatalf("should have error retrying funuction")
+		t.Fatalf("should have error retrying function")
 	}
 }
 

@@ -1,12 +1,14 @@
 package common
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
@@ -26,7 +28,7 @@ type StepShutdown struct {
 	Delay   time.Duration
 }
 
-func (s *StepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	comm := state.Get("communicator").(packer.Communicator)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

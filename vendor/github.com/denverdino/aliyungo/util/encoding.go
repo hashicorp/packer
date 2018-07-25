@@ -66,24 +66,26 @@ func setQueryValues(i interface{}, values *url.Values, prefix string) {
 		// TODO Use Tag for validation
 		// tag := typ.Field(i).Tag.Get("tagname")
 		kind := field.Kind()
+		isPtr := false
 		if (kind == reflect.Ptr || kind == reflect.Array || kind == reflect.Slice || kind == reflect.Map || kind == reflect.Chan) && field.IsNil() {
 			continue
 		}
 		if kind == reflect.Ptr {
 			field = field.Elem()
 			kind = field.Kind()
+			isPtr = true
 		}
 		var value string
 		//switch field.Interface().(type) {
 		switch kind {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			i := field.Int()
-			if i != 0 {
+			if i != 0 || isPtr {
 				value = strconv.FormatInt(i, 10)
 			}
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			i := field.Uint()
-			if i != 0 {
+			if i != 0 || isPtr {
 				value = strconv.FormatUint(i, 10)
 			}
 		case reflect.Float32:
@@ -197,12 +199,14 @@ func setQueryValuesByFlattenMethod(i interface{}, values *url.Values, prefix str
 		// tag := typ.Field(i).Tag.Get("tagname")
 		kind := field.Kind()
 
+		isPtr := false
 		if (kind == reflect.Ptr || kind == reflect.Array || kind == reflect.Slice || kind == reflect.Map || kind == reflect.Chan) && field.IsNil() {
 			continue
 		}
 		if kind == reflect.Ptr {
 			field = field.Elem()
 			kind = field.Kind()
+			isPtr = true
 		}
 
 		var value string
@@ -210,12 +214,12 @@ func setQueryValuesByFlattenMethod(i interface{}, values *url.Values, prefix str
 		switch kind {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			i := field.Int()
-			if i != 0 {
+			if i != 0 || isPtr {
 				value = strconv.FormatInt(i, 10)
 			}
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			i := field.Uint()
-			if i != 0 {
+			if i != 0 || isPtr {
 				value = strconv.FormatUint(i, 10)
 			}
 		case reflect.Float32:

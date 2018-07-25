@@ -1,21 +1,22 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
-type setpRegionCopyAlicloudImage struct {
+type stepRegionCopyAlicloudImage struct {
 	AlicloudImageDestinationRegions []string
 	AlicloudImageDestinationNames   []string
 	RegionId                        string
 }
 
-func (s *setpRegionCopyAlicloudImage) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepRegionCopyAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	if len(s.AlicloudImageDestinationRegions) == 0 {
 		return multistep.ActionContinue
 	}
@@ -51,7 +52,7 @@ func (s *setpRegionCopyAlicloudImage) Run(state multistep.StateBag) multistep.St
 	return multistep.ActionContinue
 }
 
-func (s *setpRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
+func (s *stepRegionCopyAlicloudImage) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 	if cancelled || halted {

@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"log"
 	"net/rpc"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // An implementation of packer.Ui where the Ui is actually executed

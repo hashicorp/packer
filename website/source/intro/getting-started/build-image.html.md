@@ -114,7 +114,7 @@ installing Redis.
 
 ## Your First Image
 
-With a properly validated template. It is time to build your first image. This
+With a properly validated template, it is time to build your first image. This
 is done by calling `packer build` with the template file. The output should look
 similar to below. Note that this process typically takes a few minutes.
 
@@ -181,10 +181,7 @@ you will also need to set `associate_public_ip_address` to `true`, or set up a
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
-they're built, it is up to you to launch or destroy them as you see fit. If you
-want to store and namespace images for quick reference, you can use [Atlas by
-HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
-storing images at the end of this getting started guide.
+they're built, it is up to you to launch or destroy them as you see fit.
 
 After running the above example, your AWS account now has an AMI associated
 with it. AMIs are stored in S3 by Amazon, so unless you want to be charged
@@ -338,7 +335,7 @@ customize the image. Finally, when all is done, Packer will wrap the whole
 customized package up into a brand new AMI that will be available from the
 [AWS AMI management page](
 https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
-instances we subsequently create from this AMI will have our all of our
+instances we subsequently create from this AMI will have all of our
 customizations baked in. This is the core benefit we are looking to
 achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
 in this example.
@@ -448,14 +445,19 @@ variables we will set in our build template; copy the contents into your own
 `sample_script.ps1` and provide the path to it in your build template:
 
 ```powershell
-Write-Host "PACKER_BUILD_NAME is automatically set for you, " -NoNewline
-Write-Host "or you can set it in your builder variables; " -NoNewline
+Write-Host "PACKER_BUILD_NAME is an env var Packer automatically sets for you."
+Write-Host "...or you can set it in your builder variables."
 Write-Host "The default for this builder is:" $Env:PACKER_BUILD_NAME
 
-Write-Host "Use backticks as the escape character when required in powershell:"
+Write-Host "The PowerShell provisioner will automatically escape characters"
+Write-Host "considered special to PowerShell when it encounters them in"
+Write-Host "your environment variables or in the PowerShell elevated"
+Write-Host "username/password fields."
 Write-Host "For example, VAR1 from our config is:" $Env:VAR1
 Write-Host "Likewise, VAR2 is:" $Env:VAR2
-Write-Host "Finally, VAR3 is:" $Env:VAR3
+Write-Host "VAR3 is:" $Env:VAR3
+Write-Host "Finally, VAR4 is:" $Env:VAR4
+Write-Host "None of the special characters needed escaping in the template"
 ```
 
 Finally, we need to create the actual [build template](
@@ -514,7 +516,12 @@ customize and control the build process:
     {
       "type": "powershell",
       "environment_vars": ["DEVOPS_LIFE_IMPROVER=PACKER"],
-      "inline": "Write-Host \"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\""
+      "inline": [
+        "Write-Host \"HELLO NEW USER; WELCOME TO $Env:DEVOPS_LIFE_IMPROVER\"",
+        "Write-Host \"You need to use backtick escapes when using\"",
+        "Write-Host \"characters such as DOLLAR`$ directly in a command\"",
+        "Write-Host \"or in your own scripts.\""
+      ]
     },
     {
       "type": "windows-restart"
@@ -523,9 +530,10 @@ customize and control the build process:
       "script": "./sample_script.ps1",
       "type": "powershell",
       "environment_vars": [
-        "VAR1=A`$Dollar",
-        "VAR2=A``Backtick",
-        "VAR3=A`'SingleQuote"
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote"
       ]
     }
   ]
@@ -550,39 +558,49 @@ You should see output like this:
 ```
 amazon-ebs output will be in this color.
 
-==> amazon-ebs: Prevalidating AMI Name: packer-demo-1507933843
-    amazon-ebs: Found Image ID: ami-23d93c59
-==> amazon-ebs: Creating temporary keypair: packer_59e13e94-203a-1bca-5327-bebf0d5ad15a
-==> amazon-ebs: Creating temporary security group for this instance: packer_59e13ea9-3220-8dab-29c0-ed7f71e221a1
+==> amazon-ebs: Prevalidating AMI Name: packer-demo-1518111383
+    amazon-ebs: Found Image ID: ami-013e197b
+==> amazon-ebs: Creating temporary keypair: packer_5a7c8a97-f27f-6708-cc3c-6ab9b4688b13
+==> amazon-ebs: Creating temporary security group for this instance: packer_5a7c8ab5-444c-13f2-0aa1-18d124cdb975
 ==> amazon-ebs: Authorizing access to port 5985 from 0.0.0.0/0 in the temporary security group...
 ==> amazon-ebs: Launching a source AWS instance...
 ==> amazon-ebs: Adding tags to source instance
     amazon-ebs: Adding tag: "Name": "Packer Builder"
-    amazon-ebs: Instance ID: i-0349406ac85f02166
-==> amazon-ebs: Waiting for instance (i-0349406ac85f02166) to become ready...
+    amazon-ebs: Instance ID: i-0c8c808a3b945782a
+==> amazon-ebs: Waiting for instance (i-0c8c808a3b945782a) to become ready...
 ==> amazon-ebs: Skipping waiting for password since WinRM password set...
 ==> amazon-ebs: Waiting for WinRM to become available...
     amazon-ebs: WinRM connected.
 ==> amazon-ebs: Connected to WinRM!
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner175214995
+==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner943573503
     amazon-ebs: HELLO NEW USER; WELCOME TO PACKER
+    amazon-ebs: You need to use backtick escapes when using
+    amazon-ebs: characters such as DOLLAR$ directly in a command
+    amazon-ebs: or in your own scripts.
 ==> amazon-ebs: Restarting Machine
 ==> amazon-ebs: Waiting for machine to restart...
-    amazon-ebs: WIN-TEM0TDL751M restarted.
+    amazon-ebs: WIN-NI8N45RPJ23 restarted.
 ==> amazon-ebs: Machine successfully restarted, moving on
 ==> amazon-ebs: Provisioning with Powershell...
 ==> amazon-ebs: Provisioning with powershell script: ./sample_script.ps1
-    amazon-ebs: PACKER_BUILD_NAME is automatically set for you, or you can set it in your builder variables; The default for this builder is: amazon-ebs
-    amazon-ebs: Use backticks as the escape character when required in powershell:
+    amazon-ebs: PACKER_BUILD_NAME is an env var Packer automatically sets for you.
+    amazon-ebs: ...or you can set it in your builder variables.
+    amazon-ebs: The default for this builder is: amazon-ebs
+    amazon-ebs: The PowerShell provisioner will automatically escape characters
+    amazon-ebs: considered special to PowerShell when it encounters them in
+    amazon-ebs: your environment variables or in the PowerShell elevated
+    amazon-ebs: username/password fields.
     amazon-ebs: For example, VAR1 from our config is: A$Dollar
     amazon-ebs: Likewise, VAR2 is: A`Backtick
-    amazon-ebs: Finally, VAR3 is: A'SingleQuote
+    amazon-ebs: VAR3 is: A'SingleQuote
+    amazon-ebs: Finally, VAR4 is: A"DoubleQuote
+    amazon-ebs: None of the special characters needed escaping in the template
 ==> amazon-ebs: Stopping the source instance...
     amazon-ebs: Stopping instance, attempt 1
 ==> amazon-ebs: Waiting for the instance to stop...
-==> amazon-ebs: Creating the AMI: packer-demo-1507933843
-    amazon-ebs: AMI: ami-100fc56a
+==> amazon-ebs: Creating the AMI: packer-demo-1518111383
+    amazon-ebs: AMI: ami-f0060c8a
 ==> amazon-ebs: Waiting for AMI to become ready...
 ==> amazon-ebs: Terminating the source AWS instance...
 ==> amazon-ebs: Cleaning up any extra volumes...
@@ -593,7 +611,7 @@ Build 'amazon-ebs' finished.
 
 ==> Builds finished. The artifacts of successful builds are:
 --> amazon-ebs: AMIs were created:
-us-east-1: ami-100fc56a
+us-east-1: ami-f0060c8a
 ```
 
 And if you navigate to your EC2 dashboard you should see your shiny new AMI

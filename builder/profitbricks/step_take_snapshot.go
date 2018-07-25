@@ -1,17 +1,18 @@
 package profitbricks
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
 type stepTakeSnapshot struct{}
 
-func (s *stepTakeSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepTakeSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 

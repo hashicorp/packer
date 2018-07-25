@@ -1,13 +1,21 @@
+//
+// Copyright (c) 2018, Joyent, Inc. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+
 package compute
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"path"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
+	"github.com/pkg/errors"
 )
 
 type PackagesClient struct {
@@ -40,10 +48,10 @@ type ListPackagesInput struct {
 }
 
 func (c *PackagesClient) List(ctx context.Context, input *ListPackagesInput) ([]*Package, error) {
-	path := fmt.Sprintf("/%s/packages", c.client.AccountName)
+	fullPath := path.Join("/", c.client.AccountName, "packages")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 		Body:   input,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
@@ -51,13 +59,13 @@ func (c *PackagesClient) List(ctx context.Context, input *ListPackagesInput) ([]
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing List request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list packages")
 	}
 
 	var result []*Package
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding List response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list packages response")
 	}
 
 	return result, nil
@@ -68,23 +76,23 @@ type GetPackageInput struct {
 }
 
 func (c *PackagesClient) Get(ctx context.Context, input *GetPackageInput) (*Package, error) {
-	path := fmt.Sprintf("/%s/packages/%s", c.client.AccountName, input.ID)
+	fullPath := path.Join("/", c.client.AccountName, "packages", input.ID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing Get request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to get package")
 	}
 
 	var result *Package
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding Get response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode get package response")
 	}
 
 	return result, nil

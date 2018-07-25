@@ -53,10 +53,18 @@ if ($LastExitCode -eq 0) {
 if (Test-Path env:PACKER_DEV) {
     $XC_OS=$(go.exe env GOOS)
     $XC_ARCH=$(go.exe env GOARCH)
-}
-elseif (-not (Test-Path env:XC_ARCH)) {
-    $XC_ARCH="386 amd64 arm arm64 ppc64le"
-    $XC_OS="linux darwin windows freebsd openbsd solaris"
+} else {
+    if (Test-Path env:XC_ARCH) {
+        $XC_ARCH = $(Get-Content env:XC_ARCH)
+    } else {
+        $XC_ARCH="386 amd64 arm arm64 ppc64le"
+    }
+
+    if (Test-Path env:XC_OS) {
+        $XC_OS = $(Get-Content env:XC_OS)
+    } else {
+        $XC_OS = "linux darwin windows freebsd openbsd solaris"
+    }
 }
 
 # Delete the old dir

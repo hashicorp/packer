@@ -82,11 +82,11 @@ And `packer.Cache` is used to store files between multiple Packer runs, and is
 covered in more detail in the cache section below.
 
 Because builder runs are typically a complex set of many steps, the
-[multistep](https://github.com/mitchellh/multistep) library is recommended to
-bring order to the complexity. Multistep is a library which allows you to
-separate your logic into multiple distinct "steps" and string them together. It
-fully supports cancellation mid-step and so on. Please check it out, it is how
-the built-in builders are all implemented.
+[multistep](https://github.com/hashicorp/packer/blob/master/helper/multistep)
+helper is recommended to bring order to the complexity. Multistep is a library
+which allows you to separate your logic into multiple distinct "steps" and
+string them together. It fully supports cancellation mid-step and so on. Please
+check it out, it is how the built-in builders are all implemented.
 
 Finally, as a result of `Run`, an implementation of `packer.Artifact` should be
 returned. More details on creating a `packer.Artifact` are covered in the

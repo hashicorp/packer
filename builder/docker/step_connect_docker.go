@@ -1,15 +1,17 @@
 package docker
 
 import (
+	"context"
 	"fmt"
-	"github.com/mitchellh/multistep"
 	"os/exec"
 	"strings"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type StepConnectDocker struct{}
 
-func (s *StepConnectDocker) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnectDocker) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	containerId := state.Get("container_id").(string)
 	driver := state.Get("driver").(Driver)

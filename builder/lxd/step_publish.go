@@ -1,15 +1,17 @@
 package lxd
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"regexp"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type stepPublish struct{}
 
-func (s *stepPublish) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepPublish) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

@@ -1,14 +1,15 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepSourceAMIInfo extracts critical information from the source AMI
@@ -52,7 +53,7 @@ func mostRecentAmi(images []*ec2.Image) *ec2.Image {
 	return sortedImages[len(sortedImages)-1]
 }
 
-func (s *StepSourceAMIInfo) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
 

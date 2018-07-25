@@ -9,20 +9,30 @@ import (
 	"net/url"
 
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/azure"
 )
 
 const (
-	AzureVaultApiVersion = "2015-06-01"
+	AzureVaultApiVersion = "2016-10-01"
 )
 
 type VaultClient struct {
 	autorest.Client
 	keyVaultEndpoint url.URL
+	SubscriptionID   string
+	baseURI          string
 }
 
 func NewVaultClient(keyVaultEndpoint url.URL) VaultClient {
 	return VaultClient{
 		keyVaultEndpoint: keyVaultEndpoint,
+	}
+}
+
+func NewVaultClientWithBaseURI(baseURI, subscriptionID string) VaultClient {
+	return VaultClient{
+		baseURI:        baseURI,
+		SubscriptionID: subscriptionID,
 	}
 }
 
@@ -74,6 +84,72 @@ func (client *VaultClient) GetSecret(vaultName, secretName string) (*Secret, err
 	}
 
 	return &secret, nil
+}
+
+// Delete deletes the specified Azure key vault.
+//
+// resourceGroupName is the name of the Resource Group to which the vault belongs. vaultName is the name of the vault
+// to delete
+func (client *VaultClient) Delete(resourceGroupName string, vaultName string) (result autorest.Response, err error) {
+	req, err := client.DeletePreparer(resourceGroupName, vaultName)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsClient", "Delete", nil, "Failure preparing request")
+		return
+	}
+
+	resp, err := client.DeleteSender(req)
+	if err != nil {
+		result.Response = resp
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsClient", "Delete", resp, "Failure sending request")
+		return
+	}
+
+	result, err = client.DeleteResponder(resp)
+	if err != nil {
+		err = autorest.NewErrorWithError(err, "keyvault.VaultsClient", "Delete", resp, "Failure responding to request")
+	}
+
+	return
+}
+
+// DeletePreparer prepares the Delete request.
+func (client *VaultClient) DeletePreparer(resourceGroupName string, vaultName string) (*http.Request, error) {
+	pathParameters := map[string]interface{}{
+		"resourceGroupName": autorest.Encode("path", resourceGroupName),
+		"SubscriptionID":    autorest.Encode("path", client.SubscriptionID),
+		"vaultName":         autorest.Encode("path", vaultName),
+	}
+
+	queryParameters := map[string]interface{}{
+		"api-version": AzureVaultApiVersion,
+	}
+
+	preparer := autorest.CreatePreparer(
+		autorest.AsDelete(),
+		autorest.WithBaseURL(client.baseURI),
+		autorest.WithPathParameters("/subscriptions/{SubscriptionID}/resourceGroups/{resourceGroupName}/providers/Microsoft.KeyVault/vaults/{vaultName}", pathParameters),
+		autorest.WithQueryParameters(queryParameters))
+	return preparer.Prepare(&http.Request{})
+}
+
+// DeleteSender sends the Delete request. The method will close the
+// http.Response Body if it receives an error.
+func (client *VaultClient) DeleteSender(req *http.Request) (*http.Response, error) {
+	return autorest.SendWithSender(client,
+		req,
+		azure.DoPollForAsynchronous(client.PollingDelay))
+}
+
+// DeleteResponder handles the response to the Delete request. The method always
+// closes the http.Response Body.
+func (client *VaultClient) DeleteResponder(resp *http.Response) (result autorest.Response, err error) {
+	err = autorest.Respond(
+		resp,
+		client.ByInspecting(),
+		azure.WithErrorUnlessStatusCode(http.StatusOK),
+		autorest.ByClosing())
+	result.Response = resp
+	return
 }
 
 func (client *VaultClient) getVaultUrl(vaultName string) string {

@@ -151,6 +151,16 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			"and see https://www.packer.io/docs/post-processors/vagrant-cloud.html for\n" +
 			"more detail.\n")
 	}
+
+	ui.Message("\n-----------------------------------------------------------------------\n" +
+		"Deprecation warning: The Packer and Artifact Registry features of Atlas\n" +
+		"will no longer be actively developed or maintained and will be fully\n" +
+		"decommissioned. Please see our guide on building immutable\n" +
+		"infrastructure with Packer on CI/CD for ideas on implementing\n" +
+		"these features yourself: https://www.packer.io/guides/packer-on-cicd/\n" +
+		"-----------------------------------------------------------------------\n",
+	)
+
 	if _, err := p.client.Artifact(p.config.user, p.config.name); err != nil {
 		if err != atlas.ErrNotFound {
 			return nil, false, fmt.Errorf(

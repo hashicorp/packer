@@ -59,11 +59,11 @@ to the remote host.
 
 The SSH communicator has the following options:
 
--   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
-    authenticate connections to the remote host. Defaults to false.
+-   `ssh_agent_auth` (boolean) - If `true`, the local SSH agent will be used to
+    authenticate connections to the remote host. Defaults to `false`.
 
--   `ssh_bastion_agent_auth` (boolean) - If true, the local SSH agent will
-    be used to authenticate with the bastion host. Defaults to false.
+-   `ssh_bastion_agent_auth` (boolean) - If `true`, the local SSH agent will
+    be used to authenticate with the bastion host. Defaults to `false`.
 
 -   `ssh_bastion_host` (string) - A bastion host to use for the actual
     SSH connection.
@@ -71,7 +71,7 @@ The SSH communicator has the following options:
 -   `ssh_bastion_password` (string) - The password to use to authenticate
     with the bastion host.
 
--   `ssh_bastion_port` (number) - The port of the bastion host. Defaults to 1.
+-   `ssh_bastion_port` (number) - The port of the bastion host. Defaults to `1`.
 
 -   `ssh_bastion_private_key_file` (string) - A private key file to use
     to authenticate with the bastion host.
@@ -80,43 +80,52 @@ The SSH communicator has the following options:
     host.
 
 -   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
-    will be disabled. Defaults to false.
+    will be disabled. Defaults to `false`.
 
 -   `ssh_file_transfer_method` (`scp` or `sftp`) - How to transfer files, Secure
     copy (default) or SSH File Transfer Protocol.
 
 -   `ssh_handshake_attempts` (number) - The number of handshakes to attempt
-    with SSH once it can connect. This defaults to 10.
+    with SSH once it can connect. This defaults to `10`.
 
 -   `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
+*   `ssh_keep_alive_interval` (string) - How often to send "keep alive"
+    messages to the server. Set to a negative value (`-1s`) to disable. Example
+    value: `10s`. Defaults to `5s`.
+
 -   `ssh_password` (string) - A plaintext password to use to authenticate
     with SSH.
 
--   `ssh_port` (number) - The port to connect to SSH. This defaults to 22.
+-   `ssh_port` (number) - The port to connect to SSH. This defaults to `22`.
 
 -   `ssh_private_key_file` (string) - Path to a PEM encoded private key
     file to use to authenticate with SSH.
 
--   `ssh_pty` (boolean) - If true, a PTY will be requested for the SSH
-    connection. This defaults to false.
-
--   `ssh_timeout` (string) - The time to wait for SSH to become available.
-    Packer uses this to determine when the machine has booted so this is
-    usually quite long. Example value: "10m"
-
--   `ssh_username` (string) - The username to connect to SSH with. Required
-    if using SSH.
 -   `ssh_proxy_host` (string) - A SOCKS proxy host to use for SSH connection
 
--   `ssh_proxy_port` (Integer) - A port of the SOCKS proxy, defaults to 1080
+-   `ssh_proxy_password` (string) - The password to use to authenticate with
+    the proxy server. Optional.
+
+-   `ssh_proxy_port` (number) - A port of the SOCKS proxy. Defaults to `1080`.
 
 -   `ssh_proxy_username` (string) - The username to authenticate with the proxy
     server. Optional.
 
--   `ssh_proxy_password` (string) - The password to use to authenticate with
-    the proxy server. Optional.
+-   `ssh_pty` (boolean) - If `true`, a PTY will be requested for the SSH
+    connection. This defaults to `false`.
+
+*   `ssh_read_write_timeout` (string) - The amount of time to wait for a remote
+    command to end. This might be useful if, for example, packer hangs on
+    a connection after a reboot. Example: `5m`. Disabled by default.
+
+-   `ssh_timeout` (string) - The time to wait for SSH to become available.
+    Packer uses this to determine when the machine has booted so this is
+    usually quite long. Example value: `10m`.
+
+-   `ssh_username` (string) - The username to connect to SSH with. Required
+    if using SSH.
 
 ## WinRM Communicator
 
@@ -124,23 +133,24 @@ The WinRM communicator has the following options.
 
 -   `winrm_host` (string) - The address for WinRM to connect to.
 
--   `winrm_port` (number) - The WinRM port to connect to. This defaults to
-    5985 for plain unencrypted connection and 5986 for SSL when `winrm_use_ssl` is set to true.
-
--   `winrm_username` (string) - The username to use to connect to WinRM.
+-   `winrm_insecure` (boolean) - If `true`, do not check server certificate
+    chain and host name.
 
 -   `winrm_password` (string) - The password to use to connect to WinRM.
 
+-   `winrm_port` (number) - The WinRM port to connect to. This defaults to
+    `5985` for plain unencrypted connection and `5986` for SSL when
+    `winrm_use_ssl` is set to true.
+
 -   `winrm_timeout` (string) - The amount of time to wait for WinRM to
-    become available. This defaults to "30m" since setting up a Windows
+    become available. This defaults to `30m` since setting up a Windows
     machine generally takes a long time.
 
--   `winrm_use_ssl` (boolean) - If true, use HTTPS for WinRM
-
--   `winrm_insecure` (boolean) - If true, do not check server certificate
-    chain and host name
-
--   `winrm_use_ntlm` (boolean) - If true, NTLM authentication will be used for WinRM,
+-   `winrm_use_ntlm` (boolean) - If `true`, NTLM authentication will be used for WinRM,
     rather than default (basic authentication), removing the requirement for basic
     authentication to be enabled within the target guest. Further reading for remote
     connection authentication can be found [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
+
+-   `winrm_use_ssl` (boolean) - If `true`, use HTTPS for WinRM.
+
+-   `winrm_username` (string) - The username to use to connect to WinRM.

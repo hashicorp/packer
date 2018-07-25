@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
@@ -11,20 +12,22 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepGetPassword reads the password from a Windows server and sets it
 // on the WinRM config.
 type StepGetPassword struct {
-	Debug   bool
-	Comm    *communicator.Config
-	Timeout time.Duration
+	Debug     bool
+	Comm      *communicator.Config
+	Timeout   time.Duration
+	BuildName string
 }
 
-func (s *StepGetPassword) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm
@@ -91,11 +94,15 @@ WaitLoop:
 		ui.Message(fmt.Sprintf(
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
+	// store so that we can access this later during provisioning
+	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
 
 	return multistep.ActionContinue
 }
 
-func (s *StepGetPassword) Cleanup(multistep.StateBag) {}
+func (s *StepGetPassword) Cleanup(multistep.StateBag) {
+	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
+}
 
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)

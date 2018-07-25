@@ -33,7 +33,9 @@ func init() {
 		"manifest-filename":          new(FixerManifestFilename),
 		"amazon-shutdown_behavior":   new(FixerAmazonShutdownBehavior),
 		"amazon-enhanced-networking": new(FixerAmazonEnhancedNetworking),
+		"amazon-private-ip":          new(FixerAmazonPrivateIP),
 		"docker-email":               new(FixerDockerEmail),
+		"powershell-escapes":         new(FixerPowerShellEscapes),
 	}
 
 	FixerOrder = []string{
@@ -50,6 +52,8 @@ func init() {
 		"manifest-filename",
 		"amazon-shutdown_behavior",
 		"amazon-enhanced-networking",
+		"amazon-private-ip",
 		"docker-email",
+		"powershell-escapes",
 	}
 }

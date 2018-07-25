@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	c := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)

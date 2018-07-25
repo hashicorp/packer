@@ -1,13 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step cleans up the VMX by removing or changing this prior to
@@ -24,7 +25,7 @@ type StepCleanVMX struct {
 	VNCEnabled               bool
 }
 
-func (s StepCleanVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCleanVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 

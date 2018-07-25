@@ -1,14 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures a VMX by setting some default settings as well
@@ -16,24 +16,25 @@ import (
 //
 // Uses:
 //   vmx_path string
+//
+// Produces:
+//   display_name string - Value of the displayName key set in the VMX file
 type StepConfigureVMX struct {
 	CustomData map[string]string
 	SkipFloppy bool
 }
 
-func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)
 
-	vmxContents, err := ioutil.ReadFile(vmxPath)
+	vmxData, err := ReadVMX(vmxPath)
 	if err != nil {
 		err := fmt.Errorf("Error reading VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
-	vmxData := ParseVMX(string(vmxContents))
 
 	// Set this so that no dialogs ever appear from Packer.
 	vmxData["msg.autoanswer"] = "true"
@@ -73,6 +74,19 @@ func (s *StepConfigureVMX) Run(state multistep.StateBag) multistep.StepAction {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	// If the build is taking place on a remote ESX server, the displayName
+	// will be needed for discovery of the VM's IP address and for export
+	// of the VM. The displayName key should always be set in the VMX file,
+	// so error if we don't find it
+	if displayName, ok := vmxData["displayname"]; !ok { // Packer converts key names to lowercase!
+		err := fmt.Errorf("Error: Could not get value of displayName from VMX data")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	} else {
+		state.Put("display_name", displayName)
 	}
 
 	return multistep.ActionContinue

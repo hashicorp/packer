@@ -67,11 +67,10 @@ func TestUploadDownload(t *testing.T) {
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				upload,
-				download,
+			Provisioners: []*packer.HookedProvisioner{
+				{upload, nil, ""},
+				{download, nil, ""},
 			},
-			ProvisionerTypes: []string{"", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
@@ -157,12 +156,11 @@ func TestLargeDownload(t *testing.T) {
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				shell,
-				downloadCupcake,
-				downloadBigcake,
+			Provisioners: []*packer.HookedProvisioner{
+				{shell, nil, ""},
+				{downloadCupcake, nil, ""},
+				{downloadBigcake, nil, ""},
 			},
-			ProvisionerTypes: []string{"", "", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}
@@ -203,8 +201,8 @@ func TestLargeDownload(t *testing.T) {
 	// or ui output to do this because we use /dev/urandom to create the file.
 
 	// if sha256.Sum256(inputFile) != sha256.Sum256(outputFile) {
-	// 	t.Fatalf("Input and output files do not match\n"+
-	// 		"Input:\n%s\nOutput:\n%s\n", inputFile, outputFile)
+	//	t.Fatalf("Input and output files do not match\n"+
+	//		"Input:\n%s\nOutput:\n%s\n", inputFile, outputFile)
 	// }
 
 }
@@ -267,13 +265,12 @@ func TestFixUploadOwner(t *testing.T) {
 	hooks := map[string][]packer.Hook{}
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
-			Provisioners: []packer.Provisioner{
-				fileProvisioner,
-				dirProvisioner,
-				shellProvisioner,
-				verifyProvisioner,
+			Provisioners: []*packer.HookedProvisioner{
+				{fileProvisioner, nil, ""},
+				{dirProvisioner, nil, ""},
+				{shellProvisioner, nil, ""},
+				{verifyProvisioner, nil, ""},
 			},
-			ProvisionerTypes: []string{"", "", "", ""},
 		},
 	}
 	hook := &packer.DispatchHook{Mapping: hooks}

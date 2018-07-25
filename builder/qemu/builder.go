@@ -11,11 +11,12 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 const BuilderId = "transcend.qemu"
@@ -25,6 +26,8 @@ var accels = map[string]struct{}{
 	"kvm":  {},
 	"tcg":  {},
 	"xen":  {},
+	"hax":  {},
+	"hvf":  {},
 }
 
 var netDevice = map[string]bool{
@@ -78,15 +81,15 @@ type Builder struct {
 }
 
 type Config struct {
-	common.PackerConfig `mapstructure:",squash"`
-	common.HTTPConfig   `mapstructure:",squash"`
-	common.ISOConfig    `mapstructure:",squash"`
-	Comm                communicator.Config `mapstructure:",squash"`
-	common.FloppyConfig `mapstructure:",squash"`
+	common.PackerConfig   `mapstructure:",squash"`
+	common.HTTPConfig     `mapstructure:",squash"`
+	common.ISOConfig      `mapstructure:",squash"`
+	bootcommand.VNCConfig `mapstructure:",squash"`
+	Comm                  communicator.Config `mapstructure:",squash"`
+	common.FloppyConfig   `mapstructure:",squash"`
 
 	ISOSkipCache      bool       `mapstructure:"iso_skip_cache"`
 	Accelerator       string     `mapstructure:"accelerator"`
-	BootCommand       []string   `mapstructure:"boot_command"`
 	DiskInterface     string     `mapstructure:"disk_interface"`
 	DiskSize          uint       `mapstructure:"disk_size"`
 	DiskCache         string     `mapstructure:"disk_cache"`
@@ -96,6 +99,7 @@ type Config struct {
 	Format            string     `mapstructure:"format"`
 	Headless          bool       `mapstructure:"headless"`
 	DiskImage         bool       `mapstructure:"disk_image"`
+	UseBackingFile    bool       `mapstructure:"use_backing_file"`
 	MachineType       string     `mapstructure:"machine_type"`
 	NetDevice         string     `mapstructure:"net_device"`
 	OutputDir         string     `mapstructure:"output_directory"`
@@ -117,10 +121,8 @@ type Config struct {
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`
 
-	RawBootWait        string `mapstructure:"boot_wait"`
 	RawShutdownTimeout string `mapstructure:"shutdown_timeout"`
 
-	bootWait        time.Duration ``
 	shutdownTimeout time.Duration ``
 	ctx             interpolate.Context
 }
@@ -144,7 +146,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	warnings := make([]string, 0)
 
 	if b.config.DiskSize == 0 {
-		b.config.DiskSize = 40000
+		b.config.DiskSize = 40960
 	}
 
 	if b.config.DiskCache == "" {
@@ -187,10 +189,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.QemuBinary = "qemu-system-x86_64"
 	}
 
-	if b.config.RawBootWait == "" {
-		b.config.RawBootWait = "10s"
-	}
-
 	if b.config.SSHHostPortMin == 0 {
 		b.config.SSHHostPortMin = 2222
 	}
@@ -220,6 +218,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.NetDevice == "" {
 		b.config.NetDevice = "virtio-net"
@@ -257,9 +256,14 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskCompression = false
 	}
 
+	if b.config.UseBackingFile && !(b.config.DiskImage && b.config.Format == "qcow2") {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("use_backing_file can only be enabled for QCOW2 images and when disk_image is true"))
+	}
+
 	if _, ok := accels[b.config.Accelerator]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', or 'none' are allowed"))
+			errs, errors.New("invalid accelerator, only 'kvm', 'tcg', 'xen', 'hax', 'hvf', or 'none' are allowed"))
 	}
 
 	if _, ok := netDevice[b.config.NetDevice]; !ok {
@@ -279,7 +283,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
-			errs, errors.New("unrecognized disk cache type"))
+			errs, errors.New("unrecognized disk discard type"))
 	}
 
 	if !b.config.PackerForce {
@@ -288,12 +292,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs,
 				fmt.Errorf("Output directory '%s' already exists. It must not exist.", b.config.OutputDir))
 		}
-	}
-
-	b.config.bootWait, err = time.ParseDuration(b.config.RawBootWait)
-	if err != nil {
-		errs = packer.MultiErrorAppend(
-			errs, fmt.Errorf("Failed parsing boot_wait: %s", err))
 	}
 
 	if b.config.RawShutdownTimeout == "" {
@@ -387,7 +385,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		new(stepConfigureVNC),
 		steprun,
-		&stepBootWait{},
 		&stepTypeBootCommand{},
 	)
 

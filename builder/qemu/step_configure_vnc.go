@@ -1,13 +1,14 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step configures the VM to enable the VNC server.
@@ -20,7 +21,7 @@ import (
 //   vnc_port uint - The port that VNC is configured to listen on.
 type stepConfigureVNC struct{}
 
-func (stepConfigureVNC) Run(state multistep.StateBag) multistep.StepAction {
+func (stepConfigureVNC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

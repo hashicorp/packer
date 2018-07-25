@@ -1,0 +1,17 @@
+---
+layout: guides
+sidebar_current: guides-packer-on-cicd-index
+page_title: Build Immutable Infrastructure with Packer in CI/CD
+---
+
+# Build Immutable Infrastructure with Packer in CI/CD
+
+This guide focuses on the following workflow for building immutable
+infrastructure. This workflow can be manual or automated and it can be
+implemented with a variety of technologies. The goal of this guide is to show
+how this workflow can be fully automated using Packer for building images from
+a continuous integration/continuous deployment (CI/CD) pipeline.
+
+1. [Build Images using Packer in CI/CD](/guides/packer-on-cicd/build-image-in-cicd.html)
+2. [Upload the new image to S3](/guides/packer-on-cicd/upload-images-to-artifact.html) for future deployment or use during development
+3. [Create new Terraform Enterprise runs](/guides/packer-on-cicd/trigger-tfe.html) to provision new instances with the images

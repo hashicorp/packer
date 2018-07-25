@@ -1,5 +1,9 @@
 package common
 
+import (
+	"context"
+)
+
 // A driver is able to talk to HyperV and perform certain
 // operations with it. Some of the operations on here may seem overly
 // specific, but they were built specifically in mind to handle features
@@ -52,6 +56,8 @@ type Driver interface {
 	//Set the vlan to use for machine
 	SetVirtualMachineVlanId(string, string) error
 
+	SetVmNetworkAdapterMacAddress(string, string) error
+
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
 
 	CreateExternalVirtualSwitch(string, string) error
@@ -64,9 +70,9 @@ type Driver interface {
 
 	DeleteVirtualSwitch(string) error
 
-	CreateVirtualMachine(string, string, string, string, int64, int64, string, uint) error
+	CreateVirtualMachine(string, string, string, string, int64, int64, int64, string, uint, bool, bool) error
 
-	AddVirtualMachineHardDrive(string, string, string, int64, string) error
+	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
 	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
 
@@ -80,7 +86,7 @@ type Driver interface {
 
 	SetVirtualMachineDynamicMemory(string, bool) error
 
-	SetVirtualMachineSecureBoot(string, bool) error
+	SetVirtualMachineSecureBoot(string, bool, string) error
 
 	SetVirtualMachineVirtualizationExtensions(string, bool) error
 
@@ -107,4 +113,10 @@ type Driver interface {
 	MountFloppyDrive(string, string) error
 
 	UnmountFloppyDrive(string) error
+
+	// Connect connects to a VM specified by the name given.
+	Connect(string) (context.CancelFunc, error)
+
+	// Disconnect disconnects to a VM specified by the context cancel function.
+	Disconnect(context.CancelFunc)
 }

@@ -8,12 +8,15 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 
 	"github.com/hashicorp/atlas-go/archive"
 	"github.com/hashicorp/atlas-go/v1"
 	"github.com/hashicorp/packer/helper/flag-kv"
 	"github.com/hashicorp/packer/helper/flag-slice"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 // archiveTemplateEntry is the name the template always takes within the slug.
@@ -182,15 +185,15 @@ func (c *PushCommand) Run(args []string) int {
 		info := &uploadBuildInfo{Type: b.Type}
 		// todo: remove post-migration
 		if b.Type == "vagrant" {
-			c.Ui.Message("\n-----------------------------------------------------------------------------------\n" +
-				"Warning: Vagrant-related functionality will be moved from Terraform Enterprise into \n" +
-				"its own product, Vagrant Cloud. This migration is currently planned for June 27th, \n" +
-				"2017 at 6PM EDT/3PM PDT/10PM UTC. For more information see \n" +
+			c.Ui.Error("\n-----------------------------------------------------------------------------------\n" +
+				"Vagrant-related functionality has been moved from Terraform Enterprise into \n" +
+				"its own product, Vagrant Cloud. For more information see " +
 				"https://www.vagrantup.com/docs/vagrant-cloud/vagrant-cloud-migration.html\n" +
-				"In the meantime, you should activate your Vagrant Cloud account and replace your \n" +
-				"Atlas post-processor with the Vagrant Cloud post-processor. See\n" +
-				"https://www.packer.io/docs/post-processors/vagrant-cloud.html for more details." +
+				"Please replace the Atlas post-processor with the Vagrant Cloud post-processor,\n" +
+				"and see https://www.packer.io/docs/post-processors/vagrant-cloud.html for\n" +
+				"more detail.\n" +
 				"-----------------------------------------------------------------------------------\n")
+			return 1
 		}
 
 		// Determine if we're artifacting this build
@@ -250,6 +253,15 @@ func (c *PushCommand) Run(args []string) int {
 				"Builds: %s\n\n", strings.Join(badBuilds, ", ")))
 	}
 
+	c.Ui.Message("\n-----------------------------------------------------------------------\n" +
+		"Deprecation warning: The Packer and Artifact Registry features of Atlas\n" +
+		"will no longer be actively developed or maintained and will be fully\n" +
+		"decommissioned. Please see our guide on building immutable\n" +
+		"infrastructure with Packer on CI/CD for ideas on implementing\n" +
+		"these features yourself: https://www.packer.io/guides/packer-on-cicd/\n" +
+		"-----------------------------------------------------------------------\n",
+	)
+
 	// Start the archiving process
 	r, err := archive.CreateArchive(path, &opts)
 	if err != nil {
@@ -267,7 +279,7 @@ func (c *PushCommand) Run(args []string) int {
 
 	// Make a ctrl-C channel
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 	defer signal.Stop(sigCh)
 
 	err = nil
@@ -322,6 +334,20 @@ Options:
 
 func (*PushCommand) Synopsis() string {
 	return "push a template and supporting files to a Packer build service"
+}
+
+func (*PushCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (*PushCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-name":      complete.PredictNothing,
+		"-token":     complete.PredictNothing,
+		"-sensitive": complete.PredictNothing,
+		"-var":       complete.PredictNothing,
+		"-var-file":  complete.PredictNothing,
+	}
 }
 
 func (c *PushCommand) upload(

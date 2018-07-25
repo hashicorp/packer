@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepDeregisterAMI struct {
@@ -17,7 +18,7 @@ type StepDeregisterAMI struct {
 	Regions             []string
 }
 
-func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// Check for force deregister
 	if !s.ForceDeregister {
 		return multistep.ActionContinue
@@ -40,9 +41,10 @@ func (s *StepDeregisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 		))
 
 		resp, err := regionconn.DescribeImages(&ec2.DescribeImagesInput{
+			Owners: aws.StringSlice([]string{"self"}),
 			Filters: []*ec2.Filter{{
 				Name:   aws.String("name"),
-				Values: []*string{aws.String(s.AMIName)},
+				Values: aws.StringSlice([]string{s.AMIName}),
 			}}})
 
 		if err != nil {

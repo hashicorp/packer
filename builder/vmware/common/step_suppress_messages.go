@@ -1,16 +1,18 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step suppresses any messages that VMware product might show.
 type StepSuppressMessages struct{}
 
-func (s *StepSuppressMessages) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepSuppressMessages) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

@@ -14,7 +14,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 type DriverCancelCallback func(state multistep.StateBag) bool

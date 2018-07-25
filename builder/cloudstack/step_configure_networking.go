@@ -1,13 +1,14 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -16,7 +17,7 @@ type stepSetupNetworking struct {
 	publicPort  int
 }
 
-func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -116,6 +117,11 @@ func (s *stepSetupNetworking) Run(state multistep.StateBag) multistep.StepAction
 	// Store the port forward ID.
 	state.Put("port_forward_id", forward.Id)
 
+	if config.PreventFirewallChanges {
+		ui.Message("Networking has been setup (without firewall changes)!")
+		return multistep.ActionContinue
+	}
+
 	if network.Vpcid != "" {
 		ui.Message("Creating network ACL rule...")
 
@@ -186,7 +192,7 @@ func (s *stepSetupNetworking) Cleanup(state multistep.StateBag) {
 		// Create a new parameter struct.
 		p := client.Firewall.NewDeleteFirewallRuleParams(fwRuleID)
 
-		ui.Message("Deleting firewal rule...")
+		ui.Message("Deleting firewall rule...")
 		if _, err := client.Firewall.DeleteFirewallRule(p); err != nil {
 			// This is a very poor way to be told the ID does no longer exist :(
 			if !strings.Contains(err.Error(), fmt.Sprintf(

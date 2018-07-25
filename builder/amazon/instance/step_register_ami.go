@@ -1,13 +1,14 @@
 package instance
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRegisterAMI struct {
@@ -15,7 +16,7 @@ type StepRegisterAMI struct {
 	EnableAMISriovNetSupport bool
 }
 
-func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	manifestPath := state.Get("remote_manifest_path").(string)
@@ -57,15 +58,8 @@ func (s *StepRegisterAMI) Run(state multistep.StateBag) multistep.StepAction {
 	state.Put("amis", amis)
 
 	// Wait for the image to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "available",
-		Refresh:   awscommon.AMIStateRefreshFunc(ec2conn, *registerResp.ImageId),
-		StepState: state,
-	}
-
 	ui.Say("Waiting for AMI to become ready...")
-	if _, err := awscommon.WaitForState(&stateChange); err != nil {
+	if err := awscommon.WaitUntilAMIAvailable(ctx, ec2conn, *registerResp.ImageId); err != nil {
 		err := fmt.Errorf("Error waiting for AMI: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())

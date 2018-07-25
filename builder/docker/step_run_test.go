@@ -1,9 +1,11 @@
 package docker
 
 import (
+	"context"
 	"errors"
-	"github.com/mitchellh/multistep"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testStepRunState(t *testing.T) multistep.StateBag {
@@ -26,7 +28,7 @@ func TestStepRun(t *testing.T) {
 	driver.StartID = "foo"
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -73,7 +75,7 @@ func TestStepRun_error(t *testing.T) {
 	driver.StartError = errors.New("foo")
 
 	// run the step
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

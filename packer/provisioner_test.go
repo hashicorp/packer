@@ -23,8 +23,10 @@ func TestProvisionHook(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners:     []Provisioner{pA, pB},
-		ProvisionerTypes: []string{"", ""},
+		Provisioners: []*HookedProvisioner{
+			{pA, nil, ""},
+			{pB, nil, ""},
+		},
 	}
 
 	hook.Run("foo", ui, comm, data)
@@ -47,8 +49,10 @@ func TestProvisionHook_nilComm(t *testing.T) {
 	var data interface{} = nil
 
 	hook := &ProvisionHook{
-		Provisioners:     []Provisioner{pA, pB},
-		ProvisionerTypes: []string{"", ""},
+		Provisioners: []*HookedProvisioner{
+			{pA, nil, ""},
+			{pB, nil, ""},
+		},
 	}
 
 	err := hook.Run("foo", ui, comm, data)
@@ -63,7 +67,7 @@ func TestProvisionHook_cancel(t *testing.T) {
 
 	p := &MockProvisioner{
 		ProvFunc: func() error {
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 
 			lock.Lock()
 			defer lock.Unlock()
@@ -74,8 +78,9 @@ func TestProvisionHook_cancel(t *testing.T) {
 	}
 
 	hook := &ProvisionHook{
-		Provisioners:     []Provisioner{p},
-		ProvisionerTypes: []string{""},
+		Provisioners: []*HookedProvisioner{
+			{p, nil, ""},
+		},
 	}
 
 	finished := make(chan struct{})
@@ -172,6 +177,70 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 func TestPausedProvisionerCancel(t *testing.T) {
 	mock := new(MockProvisioner)
 	prov := &PausedProvisioner{
+		Provisioner: mock,
+	}
+
+	provCh := make(chan struct{})
+	mock.ProvFunc = func() error {
+		close(provCh)
+		time.Sleep(10 * time.Millisecond)
+		return nil
+	}
+
+	// Start provisioning and wait for it to start
+	go prov.Provision(testUi(), new(MockCommunicator))
+	<-provCh
+
+	// Cancel it
+	prov.Cancel()
+	if !mock.CancelCalled {
+		t.Fatal("cancel should be called")
+	}
+}
+
+func TestDebuggedProvisioner_impl(t *testing.T) {
+	var _ Provisioner = new(DebuggedProvisioner)
+}
+
+func TestDebuggedProvisionerPrepare(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
+		Provisioner: mock,
+	}
+
+	prov.Prepare(42)
+	if !mock.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if mock.PrepConfigs[0] != 42 {
+		t.Fatal("should have proper configs")
+	}
+}
+
+func TestDebuggedProvisionerProvision(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(MockCommunicator)
+	writeReader(ui, "\n")
+	prov.Provision(ui, comm)
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+	if mock.ProvUi != ui {
+		t.Fatal("should have proper ui")
+	}
+	if mock.ProvCommunicator != comm {
+		t.Fatal("should have proper comm")
+	}
+}
+
+func TestDebuggedProvisionerCancel(t *testing.T) {
+	mock := new(MockProvisioner)
+	prov := &DebuggedProvisioner{
 		Provisioner: mock,
 	}
 
