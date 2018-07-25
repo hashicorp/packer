@@ -48,6 +48,7 @@ deps:
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
 	@go get golang.org/x/tools/cmd/goimports
+	@go get github.com/ulikunitz/xz
 	@govendor sync
 
 dev: deps ## Build and install a development build
