@@ -2,14 +2,14 @@ package openstack
 
 import (
 	"crypto/tls"
-	"fmt"
-	"os"
-
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -30,6 +30,8 @@ type AccessConfig struct {
 	CACertFile       string `mapstructure:"cacert"`
 	ClientCertFile   string `mapstructure:"cert"`
 	ClientKeyFile    string `mapstructure:"key"`
+	Token            string `mapstructure:"token"`
+	Cloud            string `mapstructure:"cloud"`
 
 	osClient *gophercloud.ProviderClient
 }
@@ -40,10 +42,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		c.EndpointType != "public" && c.EndpointType != "publicURL" &&
 		c.EndpointType != "" {
 		return []error{fmt.Errorf("Invalid endpoint type provided")}
-	}
-
-	if c.Region == "" {
-		c.Region = os.Getenv("OS_REGION_NAME")
 	}
 
 	// Legacy RackSpace stuff. We're keeping this around to keep things BC.
@@ -59,6 +57,15 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.Username == "" {
 		c.Username = os.Getenv("SDK_USERNAME")
 	}
+	// End RackSpace
+
+	if c.Cloud == "" {
+		c.Cloud = os.Getenv("OS_CLOUD")
+	}
+	if c.Region == "" {
+		c.Region = os.Getenv("OS_REGION_NAME")
+	}
+
 	if c.CACertFile == "" {
 		c.CACertFile = os.Getenv("OS_CACERT")
 	}
@@ -69,8 +76,39 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		c.ClientKeyFile = os.Getenv("OS_KEY")
 	}
 
-	// Get as much as possible from the end
-	ao, _ := openstack.AuthOptionsFromEnv()
+	clientOpts := new(clientconfig.ClientOpts)
+
+	// If a cloud entry was given, base AuthOptions on a clouds.yaml file.
+	if c.Cloud != "" {
+		clientOpts.Cloud = c.Cloud
+
+		cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
+		if err != nil {
+			return []error{err}
+		}
+
+		if c.Region == "" && cloud.RegionName != "" {
+			c.Region = cloud.RegionName
+		}
+	} else {
+		authInfo := &clientconfig.AuthInfo{
+			AuthURL:     c.IdentityEndpoint,
+			DomainID:    c.DomainID,
+			DomainName:  c.DomainName,
+			Password:    c.Password,
+			ProjectID:   c.TenantID,
+			ProjectName: c.TenantName,
+			Token:       c.Token,
+			Username:    c.Username,
+			UserID:      c.UserID,
+		}
+		clientOpts.AuthInfo = authInfo
+	}
+
+	ao, err := clientconfig.AuthOptions(clientOpts)
+	if err != nil {
+		return []error{err}
+	}
 
 	// Make sure we reauth as needed
 	ao.AllowReauth = true
@@ -87,6 +125,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 		{&c.TenantName, &ao.TenantName},
 		{&c.DomainID, &ao.DomainID},
 		{&c.DomainName, &ao.DomainName},
+		{&c.Token, &ao.TokenID},
 	}
 	for _, s := range overrides {
 		if *s.From != "" {
@@ -132,7 +171,7 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	client.HTTPClient.Transport = transport
 
 	// Auth
-	err = openstack.Authenticate(client, ao)
+	err = openstack.Authenticate(client, *ao)
 	if err != nil {
 		return []error{err}
 	}

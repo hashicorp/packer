@@ -57,7 +57,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.InstanceType == "" {
-		errs = append(errs, errors.New("An aliclod_instance_type must be specified"))
+		errs = append(errs, errors.New("An alicloud_instance_type must be specified"))
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {

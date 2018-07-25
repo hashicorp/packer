@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepModifyEBSBackedInstance struct {
@@ -14,7 +15,7 @@ type StepModifyEBSBackedInstance struct {
 	EnableAMISriovNetSupport bool
 }
 
-func (s *StepModifyEBSBackedInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepModifyEBSBackedInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)

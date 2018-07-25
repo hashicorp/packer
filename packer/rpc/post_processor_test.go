@@ -1,9 +1,10 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 var testPostProcessorArtifact = new(packer.MockArtifact)

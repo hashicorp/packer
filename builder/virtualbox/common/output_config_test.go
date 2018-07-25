@@ -1,10 +1,11 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/common"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/common"
 )
 
 func TestOutputConfigPrepare(t *testing.T) {

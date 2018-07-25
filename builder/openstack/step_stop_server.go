@@ -1,27 +1,21 @@
 package openstack
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepStopServer struct{}
 
-func (s *StepStopServer) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepStopServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
-	extensions := state.Get("extensions").(map[string]struct{})
 	server := state.Get("server").(*servers.Server)
-
-	// Verify we have the extension
-	if _, ok := extensions["os-server-start-stop"]; !ok {
-		ui.Say("OpenStack cluster doesn't support stop, skipping...")
-		return multistep.ActionContinue
-	}
 
 	// We need the v2 compute client
 	client, err := config.computeV2Client()

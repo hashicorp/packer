@@ -13,9 +13,9 @@ import (
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -33,9 +33,10 @@ type Config struct {
 	CommandWrapper    string                     `mapstructure:"command_wrapper"`
 	CopyFiles         []string                   `mapstructure:"copy_files"`
 	DevicePath        string                     `mapstructure:"device_path"`
+	NVMEDevicePath    string                     `mapstructure:"nvme_device_path"`
 	FromScratch       bool                       `mapstructure:"from_scratch"`
 	MountOptions      []string                   `mapstructure:"mount_options"`
-	MountPartition    int                        `mapstructure:"mount_partition"`
+	MountPartition    string                     `mapstructure:"mount_partition"`
 	MountPath         string                     `mapstructure:"mount_path"`
 	PostMountCommands []string                   `mapstructure:"post_mount_commands"`
 	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
@@ -43,6 +44,7 @@ type Config struct {
 	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
 	SourceAmi         string                     `mapstructure:"source_ami"`
 	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
+	RootVolumeTags    awscommon.TagMap           `mapstructure:"root_volume_tags"`
 
 	ctx interpolate.Context
 }
@@ -66,6 +68,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				"ami_description",
 				"snapshot_tags",
 				"tags",
+				"root_volume_tags",
 				"command_wrapper",
 				"post_mount_commands",
 				"pre_mount_commands",
@@ -112,8 +115,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.MountPath = "/mnt/packer-amazon-chroot-volumes/{{.Device}}"
 	}
 
-	if b.config.MountPartition == 0 {
-		b.config.MountPartition = 1
+	if b.config.MountPartition == "" {
+		b.config.MountPartition = "1"
 	}
 
 	// Accumulate any errors or warnings
@@ -173,7 +176,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return warns, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey))
+	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
 	return warns, nil
 }
 
@@ -198,6 +201,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
+	state.Put("awsSession", session)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("wrappedCommand", CommandWrapper(wrappedCommand))
@@ -228,6 +232,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepPrepareDevice{},
 		&StepCreateVolume{
 			RootVolumeSize: b.config.RootVolumeSize,
+			RootVolumeTags: b.config.RootVolumeTags,
+			Ctx:            b.config.ctx,
 		},
 		&StepAttachVolume{},
 		&StepEarlyUnflock{},
@@ -305,7 +311,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	artifact := &awscommon.Artifact{
 		Amis:           state.Get("amis").(map[string]string),
 		BuilderIdValue: BuilderId,
-		Conn:           ec2conn,
+		Session:        session,
 	}
 
 	return artifact, nil

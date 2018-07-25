@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 var additionsVersionMap = map[string]string{
@@ -36,7 +37,7 @@ type StepDownloadGuestAdditions struct {
 	Ctx                  interpolate.Context
 }
 
-func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var action multistep.StepAction
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -66,21 +67,26 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	checksumType := "sha256"
 
-	// Use the provided source (URL or file path) or generate it
+	// Grab the guest_additions_url as specified by the user.
 	url := s.GuestAdditionsURL
-	if url != "" {
-		s.Ctx.Data = &guestAdditionsUrlTemplate{
-			Version: version,
-		}
 
-		url, err = interpolate.Render(url, &s.Ctx)
-		if err != nil {
-			err := fmt.Errorf("Error preparing guest additions url: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	} else {
+	// Initialize the template context so we can interpolate some variables..
+	s.Ctx.Data = &guestAdditionsUrlTemplate{
+		Version: version,
+	}
+
+	// Interpolate any user-variables specified within the guest_additions_url
+	url, err = interpolate.Render(s.GuestAdditionsURL, &s.Ctx)
+	if err != nil {
+		err := fmt.Errorf("Error preparing guest additions url: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// If this resulted in an empty url, then ask the driver about it.
+	if url == "" {
+		log.Printf("guest_additions_url is blank; querying driver for iso.")
 		url, err = driver.Iso()
 
 		if err == nil {
@@ -88,11 +94,13 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 		} else {
 			ui.Error(err.Error())
 			url = fmt.Sprintf(
-				"http://download.virtualbox.org/virtualbox/%s/%s",
+				"https://download.virtualbox.org/virtualbox/%s/%s",
 				version,
 				additionsName)
 		}
 	}
+
+	// The driver couldn't even figure it out, so fail hard.
 	if url == "" {
 		err := fmt.Errorf("Couldn't detect guest additions URL.\n" +
 			"Please specify `guest_additions_url` manually.")
@@ -101,18 +109,20 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 		return multistep.ActionHalt
 	}
 
+	// Figure out a default checksum here
 	if checksumType != "none" {
 		if s.GuestAdditionsSHA256 != "" {
 			checksum = s.GuestAdditionsSHA256
 		} else {
-			checksum, action = s.downloadAdditionsSHA256(state, version, additionsName)
+			checksum, action = s.downloadAdditionsSHA256(ctx, state, version, additionsName)
 			if action != multistep.ActionContinue {
 				return action
 			}
 		}
 	}
 
-	url, err = common.DownloadableURL(url)
+	// Convert the file/url to an actual URL for step_download to process.
+	url, err = common.ValidatedURL(url)
 	if err != nil {
 		err := fmt.Errorf("Error preparing guest additions url: %s", err)
 		state.Put("error", err)
@@ -122,6 +132,7 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 
 	log.Printf("Guest additions URL: %s", url)
 
+	// We're good, so let's go ahead and download this thing..
 	downStep := &common.StepDownload{
 		Checksum:     checksum,
 		ChecksumType: checksumType,
@@ -130,16 +141,16 @@ func (s *StepDownloadGuestAdditions) Run(state multistep.StateBag) multistep.Ste
 		Url:          []string{url},
 	}
 
-	return downStep.Run(state)
+	return downStep.Run(ctx, state)
 }
 
 func (s *StepDownloadGuestAdditions) Cleanup(state multistep.StateBag) {}
 
-func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
+func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context, state multistep.StateBag, additionsVersion string, additionsName string) (string, multistep.StepAction) {
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf(
-		"http://download.virtualbox.org/virtualbox/%s/SHA256SUMS",
+		"https://download.virtualbox.org/virtualbox/%s/SHA256SUMS",
 		additionsVersion)
 
 	checksumsFile, err := ioutil.TempFile("", "packer")
@@ -159,7 +170,7 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(state multistep.Sta
 		Url:         []string{checksumsUrl},
 	}
 
-	action := downStep.Run(state)
+	action := downStep.Run(ctx, state)
 	if action == multistep.ActionHalt {
 		return "", action
 	}

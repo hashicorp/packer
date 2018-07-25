@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 )
 
@@ -111,9 +111,8 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccoun
 	profile.ImageReference = &compute.ImageReference{
 		ID: &managedImageId,
 	}
-	profile.OsDisk.Name = to.StringPtr("osdisk")
 	profile.OsDisk.OsType = s.osType
-	profile.OsDisk.CreateOption = compute.FromImage
+	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
@@ -136,9 +135,8 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 		Version:   &version,
 		//ID:        &imageID,
 	}
-	profile.OsDisk.Name = to.StringPtr("osdisk")
 	profile.OsDisk.OsType = s.osType
-	profile.OsDisk.CreateOption = compute.FromImage
+	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
@@ -179,6 +177,26 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 	return nil
 }
 
+func (s *TemplateBuilder) SetPlanInfo(name, product, publisher, promotionCode string) error {
+	var promotionCodeVal *string = nil
+	if promotionCode != "" {
+		promotionCodeVal = to.StringPtr(promotionCode)
+	}
+
+	for i, x := range *s.template.Resources {
+		if strings.EqualFold(*x.Type, resourceVirtualMachine) {
+			(*s.template.Resources)[i].Plan = &Plan{
+				Name:          to.StringPtr(name),
+				Product:       to.StringPtr(product),
+				Publisher:     to.StringPtr(publisher),
+				PromotionCode: promotionCodeVal,
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
@@ -188,6 +206,35 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	profile := resource.Properties.StorageProfile
 	profile.OsDisk.DiskSizeGB = to.Int32Ptr(diskSizeGB)
 
+	return nil
+}
+
+func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.StorageProfile
+	dataDisks := make([]DataDiskUnion, len(diskSizeGB))
+
+	for i, additionalsize := range diskSizeGB {
+		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalsize)
+		dataDisks[i].Lun = to.IntPtr(i)
+		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("datadisk-%d", i+1))
+		dataDisks[i].CreateOption = "Empty"
+		dataDisks[i].Caching = "ReadWrite"
+		if isManaged {
+			dataDisks[i].Vhd = nil
+			dataDisks[i].ManagedDisk = profile.OsDisk.ManagedDisk
+		} else {
+			dataDisks[i].Vhd = &compute.VirtualHardDisk{
+				URI: to.StringPtr(fmt.Sprintf("[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/datadisk-', '%d','.vhd')]", i+1)),
+			}
+			dataDisks[i].ManagedDisk = nil
+		}
+	}
+	profile.DataDisks = &dataDisks
 	return nil
 }
 
@@ -225,7 +272,7 @@ func (s *TemplateBuilder) SetVirtualNetwork(virtualNetworkResourceGroup, virtual
 	return nil
 }
 
-func (s *TemplateBuilder) SetPrivateVirtualNetworWithPublicIp(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
+func (s *TemplateBuilder) SetPrivateVirtualNetworkWithPublicIp(virtualNetworkResourceGroup, virtualNetworkName, subnetName string) error {
 	s.setVariable("virtualNetworkResourceGroup", virtualNetworkResourceGroup)
 	s.setVariable("virtualNetworkName", virtualNetworkName)
 	s.setVariable("subnetName", subnetName)
@@ -267,6 +314,17 @@ func (s *TemplateBuilder) getResourceByType(t string) (*Resource, error) {
 	for _, x := range *s.template.Resources {
 		if strings.EqualFold(*x.Type, t) {
 			return &x, nil
+		}
+	}
+
+	return nil, fmt.Errorf("template: could not find a resource of type %s", t)
+}
+
+func (s *TemplateBuilder) getResourceByType2(t string) (**Resource, error) {
+	for _, x := range *s.template.Resources {
+		if strings.EqualFold(*x.Type, t) {
+			p := &x
+			return &p, nil
 		}
 	}
 
@@ -401,12 +459,24 @@ const BasicTemplate = `{
     "dnsNameForPublicIP": {
       "type": "string"
     },
+	"nicName": {
+      "type": "string"
+	},
     "osDiskName": {
       "type": "string"
     },
+    "publicIPAddressName": {
+      "type": "string"
+	},
+	"subnetName": {
+      "type": "string"
+	},
     "storageAccountBlobEndpoint": {
       "type": "string"
     },
+	"virtualNetworkName": {
+      "type": "string"
+	},
     "vmSize": {
       "type": "string"
     },
@@ -422,14 +492,12 @@ const BasicTemplate = `{
     "publicIPAddressApiVersion": "2017-04-01",
     "virtualNetworksApiVersion": "2017-04-01",
     "location": "[resourceGroup().location]",
-    "nicName": "packerNic",
-    "publicIPAddressName": "packerPublicIP",
     "publicIPAddressType": "Dynamic",
     "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-    "subnetName": "packerSubnet",
+    "subnetName": "[parameters('subnetName')]",
     "subnetAddressPrefix": "10.0.0.0/24",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "virtualNetworkName": "packerNetwork",
+    "virtualNetworkName": "[parameters('virtualNetworkName')]",
     "virtualNetworkResourceGroup": "[resourceGroup().name]",
     "vmStorageAccountContainerName": "images",
     "vnetID": "[resourceId(variables('virtualNetworkResourceGroup'), 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
@@ -438,7 +506,7 @@ const BasicTemplate = `{
     {
       "apiVersion": "[variables('publicIPAddressApiVersion')]",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[parameters('publicIPAddressName')]",
       "location": "[variables('location')]",
       "properties": {
         "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
@@ -471,10 +539,10 @@ const BasicTemplate = `{
     {
       "apiVersion": "[variables('networkInterfacesApiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
+      "name": "[parameters('nicName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties": {
@@ -484,7 +552,7 @@ const BasicTemplate = `{
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
               },
               "subnet": {
                 "id": "[variables('subnetRef')]"
@@ -500,7 +568,7 @@ const BasicTemplate = `{
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicName'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -513,7 +581,7 @@ const BasicTemplate = `{
         },
         "storageProfile": {
           "osDisk": {
-            "name": "osdisk",
+            "name": "[parameters('osDiskName')]",
             "vhd": {
               "uri": "[concat(parameters('storageAccountBlobEndpoint'),variables('vmStorageAccountContainerName'),'/', parameters('osDiskName'),'.vhd')]"
             },
@@ -524,7 +592,7 @@ const BasicTemplate = `{
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
             }
           ]
         },

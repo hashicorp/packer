@@ -1,13 +1,14 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -20,7 +21,7 @@ type stepKeypair struct {
 	TemporaryKeyPairName string
 }
 
-func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepKeypair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {
@@ -59,6 +60,12 @@ func (s *stepKeypair) Run(state multistep.StateBag) multistep.StepAction {
 	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.TemporaryKeyPairName))
 
 	p := client.SSH.NewCreateSSHKeyPairParams(s.TemporaryKeyPairName)
+
+	cfg := state.Get("config").(*Config)
+	if cfg.Project != "" {
+		p.SetProjectid(cfg.Project)
+	}
+
 	keypair, err := client.SSH.CreateSSHKeyPair(p)
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary keypair: %s", err)
@@ -119,12 +126,16 @@ func (s *stepKeypair) Cleanup(state multistep.StateBag) {
 
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*cloudstack.CloudStackClient)
+	cfg := state.Get("config").(*Config)
+
+	p := client.SSH.NewDeleteSSHKeyPairParams(s.TemporaryKeyPairName)
+	if cfg.Project != "" {
+		p.SetProjectid(cfg.Project)
+	}
 
 	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
 
-	_, err := client.SSH.DeleteSSHKeyPair(client.SSH.NewDeleteSSHKeyPairParams(
-		s.TemporaryKeyPairName,
-	))
+	_, err := client.SSH.DeleteSSHKeyPair(p)
 	if err != nil {
 		ui.Error(err.Error())
 		ui.Error(fmt.Sprintf(

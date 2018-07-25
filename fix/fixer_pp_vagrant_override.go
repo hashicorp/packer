@@ -4,7 +4,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// FixerVagrantPPOvveride is a Fixer that replaces the provider-specific
+// FixerVagrantPPOverride is a Fixer that replaces the provider-specific
 // overrides for the Vagrant post-processor with the new style introduced
 // as part of Packer 0.5.0.
 type FixerVagrantPPOverride struct{}

@@ -2,6 +2,7 @@ package iso
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -9,17 +10,21 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
+// This step exports a VM built on ESXi using ovftool
+//
+// Uses:
+//   display_name string
 type StepExport struct {
 	Format     string
 	SkipExport bool
 	OutputDir  string
 }
 
-func (s *StepExport) generateArgs(c *Config, hidePassword bool) []string {
+func (s *StepExport) generateArgs(c *Config, displayName string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
 	if hidePassword {
 		password = "****"
@@ -28,13 +33,13 @@ func (s *StepExport) generateArgs(c *Config, hidePassword bool) []string {
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
-		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + c.VMName,
+		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + displayName,
 		s.OutputDir,
 	}
 	return append(c.OVFToolOptions, args...)
 }
 
-func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -44,8 +49,8 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 		return multistep.ActionContinue
 	}
 
-	if c.RemoteType != "esx5" || s.Format == "" {
-		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi and the format needs to be specified)...")
+	if c.RemoteType != "esx5" {
+		ui.Say("Skipping export of virtual machine (export is allowed only for ESXi)...")
 		return multistep.ActionContinue
 	}
 
@@ -71,9 +76,13 @@ func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	ui.Say("Exporting virtual machine...")
-	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(s.generateArgs(c, true), " ")))
+	var displayName string
+	if v, ok := state.GetOk("display_name"); ok {
+		displayName = v.(string)
+	}
+	ui.Message(fmt.Sprintf("Executing: %s %s", ovftool, strings.Join(s.generateArgs(c, displayName, true), " ")))
 	var out bytes.Buffer
-	cmd := exec.Command(ovftool, s.generateArgs(c, false)...)
+	cmd := exec.Command(ovftool, s.generateArgs(c, displayName, false)...)
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
 		err := fmt.Errorf("Error exporting virtual machine: %s\n%s\n", err, out.String())

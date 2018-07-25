@@ -30,7 +30,7 @@ Below is a fully functioning example.
       "type": "lxd",
       "name": "lxd-xenial",
       "image": "ubuntu-daily:xenial",
-      "output_image": "ubuntu-xenial"
+      "output_image": "ubuntu-xenial",
       "publish_properties": {
         "description": "Trivial repackage with Packer"
       }
@@ -53,6 +53,9 @@ Below is a fully functioning example.
     mention starting such downloads.
 
 ### Optional:
+
+-  `init_sleep` (string) - The number of seconds to sleep between launching the
+   LXD instance and provisioning it; defaults to 3 seconds.
 
 -  `name` (string) - The name of the started container. Defaults to
    `packer-$PACKER_BUILD_NAME`.

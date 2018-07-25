@@ -1,23 +1,24 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
-		validate: func(string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		validate: func(context.Context, string, string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionHalt {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
@@ -29,14 +30,14 @@ func TestStepValidateTemplateShouldFailIfValidateFails(t *testing.T) {
 
 func TestStepValidateTemplateShouldPassIfValidatePasses(t *testing.T) {
 	var testSubject = &StepValidateTemplate{
-		validate: func(string, string) error { return nil },
+		validate: func(context.Context, string, string) error { return nil },
 		say:      func(message string) {},
 		error:    func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
 
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
@@ -51,7 +52,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	var actualDeploymentName string
 
 	var testSubject = &StepValidateTemplate{
-		validate: func(resourceGroupName string, deploymentName string) error {
+		validate: func(ctx context.Context, resourceGroupName string, deploymentName string) error {
 			actualResourceGroupName = resourceGroupName
 			actualDeploymentName = deploymentName
 
@@ -62,7 +63,7 @@ func TestStepValidateTemplateShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 	}
 
 	stateBag := createTestStateBagStepValidateTemplate()
-	var result = testSubject.Run(stateBag)
+	var result = testSubject.Run(context.Background(), stateBag)
 
 	if result != multistep.ActionContinue {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

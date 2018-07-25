@@ -2,11 +2,13 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // StepCopyFiles copies some files from the host into the chroot environment.
@@ -18,7 +20,7 @@ type StepCopyFiles struct {
 	files []string
 }
 
-func (s *StepCopyFiles) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCopyFiles) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)

@@ -2,8 +2,7 @@ package ebssurrogate
 
 import (
 	"errors"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -44,22 +43,4 @@ func (c *RootBlockDevice) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	return nil
-}
-
-func (d *RootBlockDevice) createBlockDeviceMapping(snapshotId string) *ec2.BlockDeviceMapping {
-	rootBlockDevice := &ec2.EbsBlockDevice{
-		SnapshotId:          aws.String(snapshotId),
-		VolumeType:          aws.String(d.VolumeType),
-		VolumeSize:          aws.Int64(d.VolumeSize),
-		DeleteOnTermination: aws.Bool(d.DeleteOnTermination),
-	}
-
-	if d.IOPS != 0 {
-		rootBlockDevice.Iops = aws.Int64(d.IOPS)
-	}
-
-	return &ec2.BlockDeviceMapping{
-		DeviceName: aws.String(d.DeviceName),
-		Ebs:        rootBlockDevice,
-	}
 }

@@ -25,9 +25,9 @@ builder.
 
 -   `image` (string) - ProfitBricks volume image. Only Linux public images are supported. To obtain full list of available images you can use [ProfitBricks CLI](https://github.com/profitbricks/profitbricks-cli#image).
 
--   `password` (string) - ProfitBricks password. This can be specified via environment variable \`PROFITBRICKS\_PASSWORD', if provided. The value definded in the config has precedence over environemnt variable.
+-   `password` (string) - ProfitBricks password. This can be specified via environment variable \`PROFITBRICKS\_PASSWORD', if provided. The value defined in the config has precedence over environemnt variable.
 
--   `username` (string) - ProfitBricks username. This can be specified via environment variable \`PROFITBRICKS\_USERNAME', if provided. The value definded in the config has precedence over environemnt variable.
+-   `username` (string) - ProfitBricks username. This can be specified via environment variable \`PROFITBRICKS\_USERNAME', if provided. The value defined in the config has precedence over environemnt variable.
 
 ### Optional
 

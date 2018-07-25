@@ -2,23 +2,19 @@
   "variables": {
     "client_id": "{{env `ARM_CLIENT_ID`}}",
     "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
-    "resource_group": "{{env `ARM_RESOURCE_GROUP`}}",
-    "storage_account": "{{env `ARM_STORAGE_ACCOUNT`}}",
     "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
     "ssh_user": "packer",
-    "ssh_pass": null
+    "ssh_pass": "{{env `ARM_SSH_PASS`}}"
   },
   "builders": [{
     "type": "azure-arm",
 
     "client_id": "{{user `client_id`}}",
     "client_secret": "{{user `client_secret`}}",
-    "resource_group_name": "{{user `resource_group`}}",
-    "storage_account": "{{user `storage_account`}}",
     "subscription_id": "{{user `subscription_id`}}",
-
-    "capture_container_name": "images",
-    "capture_name_prefix": "packer",
+    
+    "managed_image_resource_group_name": "packertest",
+    "managed_image_name": "MySuseOSImage",
 
     "ssh_username": "{{user `ssh_user`}}",
     "ssh_password": "{{user `ssh_pass`}}",
@@ -26,7 +22,7 @@
     "os_type": "Linux",
     "image_publisher": "SUSE",
     "image_offer": "SLES",
-    "image_sku": "12-SP2",
+    "image_sku": "12-SP3",
     "ssh_pty": "true",
 
     "location": "South Central US",
@@ -40,6 +36,7 @@
       "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
     ],
     "inline_shebang": "/bin/sh -x",
+    "skip_clean": true,
     "type": "shell"
   }]
 }

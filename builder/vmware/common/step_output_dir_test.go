@@ -1,10 +1,12 @@
 package common
 
 import (
-	"github.com/mitchellh/multistep"
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func testOutputDir(t *testing.T) *LocalOutputDir {
@@ -28,10 +30,12 @@ func TestStepOutputDir(t *testing.T) {
 	step := new(StepOutputDir)
 
 	dir := testOutputDir(t)
+	// Delete the test output directory when done
+	defer os.RemoveAll(dir.dir)
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -59,9 +63,10 @@ func TestStepOutputDir_existsNoForce(t *testing.T) {
 	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.RemoveAll(dir.dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {
@@ -87,9 +92,10 @@ func TestStepOutputDir_existsForce(t *testing.T) {
 	if err := os.MkdirAll(dir.dir, 0755); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.RemoveAll(dir.dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -108,7 +114,7 @@ func TestStepOutputDir_cancel(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -134,7 +140,7 @@ func TestStepOutputDir_halt(t *testing.T) {
 	state.Put("dir", dir)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

@@ -1,19 +1,20 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type StepConfigureIp struct {
 }
 
-func (s *StepConfigureIp) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConfigureIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

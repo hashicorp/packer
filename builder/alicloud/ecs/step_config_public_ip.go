@@ -1,19 +1,20 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepConfigAlicloudPublicIP struct {
-	publicIPAdress string
-	RegionId       string
+	publicIPAddress string
+	RegionId        string
 }
 
-func (s *stepConfigAlicloudPublicIP) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudPublicIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
@@ -24,7 +25,7 @@ func (s *stepConfigAlicloudPublicIP) Run(state multistep.StateBag) multistep.Ste
 		ui.Say(fmt.Sprintf("Error allocating public ip: %s", err))
 		return multistep.ActionHalt
 	}
-	s.publicIPAdress = ipaddress
+	s.publicIPAddress = ipaddress
 	ui.Say(fmt.Sprintf("Allocated public ip address %s.", ipaddress))
 	state.Put("ipaddress", ipaddress)
 	return multistep.ActionContinue

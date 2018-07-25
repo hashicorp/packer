@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"runtime"
@@ -146,6 +147,10 @@ func (d *HypervPS4Driver) SetVirtualMachineVlanId(vmName string, vlanId string) 
 	return hyperv.SetVirtualMachineVlanId(vmName, vlanId)
 }
 
+func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
+}
+
 func (d *HypervPS4Driver) UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) error {
 	return hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 }
@@ -170,12 +175,12 @@ func (d *HypervPS4Driver) CreateVirtualSwitch(switchName string, switchType stri
 	return hyperv.CreateVirtualSwitch(switchName, switchType)
 }
 
-func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, controllerType string) error {
-	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes, controllerType)
+func (d *HypervPS4Driver) AddVirtualMachineHardDrive(vmName string, vhdFile string, vhdName string, vhdSizeBytes int64, diskBlockSize int64, controllerType string) error {
+	return hyperv.AddVirtualMachineHardDiskDrive(vmName, vhdFile, vhdName, vhdSizeBytes, diskBlockSize, controllerType)
 }
 
-func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, switchName string, generation uint) error {
-	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, vhdPath, ram, diskSize, switchName, generation)
+func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdPath string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+	return hyperv.CreateVirtualMachine(vmName, path, harddrivePath, vhdPath, ram, diskSize, diskBlockSize, switchName, generation, diffDisks, fixedVHD)
 }
 
 func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
@@ -198,8 +203,8 @@ func (d *HypervPS4Driver) SetVirtualMachineDynamicMemory(vmName string, enable b
 	return hyperv.SetVirtualMachineDynamicMemory(vmName, enable)
 }
 
-func (d *HypervPS4Driver) SetVirtualMachineSecureBoot(vmName string, enable bool) error {
-	return hyperv.SetVirtualMachineSecureBoot(vmName, enable)
+func (d *HypervPS4Driver) SetVirtualMachineSecureBoot(vmName string, enable bool, templateName string) error {
+	return hyperv.SetVirtualMachineSecureBoot(vmName, enable, templateName)
 }
 
 func (d *HypervPS4Driver) SetVirtualMachineVirtualizationExtensions(vmName string, enable bool) error {
@@ -342,4 +347,15 @@ func (d *HypervPS4Driver) verifyHypervPermissions() error {
 	}
 
 	return nil
+}
+
+// Connect connects to a VM specified by the name given.
+func (d *HypervPS4Driver) Connect(vmName string) (context.CancelFunc, error) {
+	return hyperv.ConnectVirtualMachine(vmName)
+}
+
+// Disconnect disconnects to a VM specified by calling the context cancel function returned
+// from Connect.
+func (d *HypervPS4Driver) Disconnect(cancel context.CancelFunc) {
+	hyperv.DisconnectVirtualMachine(cancel)
 }

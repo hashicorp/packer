@@ -45,6 +45,12 @@ func TestProvisionerPrepare_InvalidSource(t *testing.T) {
 	if err == nil {
 		t.Fatalf("should require existing file")
 	}
+
+	config["generated"] = false
+	err = p.Prepare(config)
+	if err == nil {
+		t.Fatalf("should required existing file")
+	}
 }
 
 func TestProvisionerPrepare_ValidSource(t *testing.T) {
@@ -58,10 +64,27 @@ func TestProvisionerPrepare_ValidSource(t *testing.T) {
 
 	config := testConfig()
 	config["source"] = tf.Name()
-
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("should allow valid file: %s", err)
+	}
+
+	config["generated"] = false
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should allow valid file: %s", err)
+	}
+}
+
+func TestProvisionerPrepare_GeneratedSource(t *testing.T) {
+	var p Provisioner
+
+	config := testConfig()
+	config["source"] = "/this/should/not/exist"
+	config["generated"] = true
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should allow non-existing file: %s", err)
 	}
 }
 

@@ -1,11 +1,12 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 
 	"path/filepath"
 	"strconv"
@@ -16,7 +17,7 @@ import (
 // hard drive for the virtual machine.
 type stepCreateDisk struct{}
 
-func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)

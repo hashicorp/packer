@@ -1,10 +1,11 @@
 package common
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepCompactDisk is a step that removes all empty blocks from expanding
@@ -22,7 +23,7 @@ type StepCompactDisk struct {
 }
 
 // Run runs the compaction of the virtual disk attached to the VM.
-func (s *StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	vmName := state.Get("vmName").(string)
 	ui := state.Get("ui").(packer.Ui)

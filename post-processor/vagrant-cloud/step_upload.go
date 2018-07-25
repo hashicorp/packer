@@ -1,18 +1,19 @@
 package vagrantcloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepUpload struct {
 }
 
-func (s *stepUpload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepUpload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*VagrantCloudClient)
 	ui := state.Get("ui").(packer.Ui)
 	upload := state.Get("upload").(*Upload)

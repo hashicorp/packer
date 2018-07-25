@@ -3,7 +3,7 @@ package common
 import (
 	commonssh "github.com/hashicorp/packer/common/ssh"
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 	"golang.org/x/crypto/ssh"
 )
 

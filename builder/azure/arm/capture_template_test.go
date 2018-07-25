@@ -51,7 +51,33 @@ var captureTemplate01 = `{
                                     "uri": "http://storage.blob.core.windows.net/vmcontainerce1a1b75-f480-47cb-8e6e-55142e4a5f68/osDisk.ce1a1b75-f480-47cb-8e6e-55142e4a5f68.vhd"
                                 },
                                 "caching": "ReadWrite"
-                            }
+							},
+							"dataDisks": [
+								{
+									"lun": 0,
+									"name": "packer-datadisk-0.32118633-6dc9-449f-83b6-a7d2983bec14.vhd",
+									"createOption": "Empty",
+									"image": {
+										"uri": "http://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-0.32118633-6dc9-449f-83b6-a7d2983bec14.vhd"
+									},
+									"vhd": {
+										"uri": "http://storage.blob.core.windows.net/vmcontainerce1a1b75-f480-47cb-8e6e-55142e4a5f68/datadisk-0.ce1a1b75-f480-47cb-8e6e-55142e4a5f68.vhd"
+									},
+									"caching": "ReadWrite"
+								},
+								{
+									"lun": 1,
+									"name": "packer-datadisk-1.32118633-6dc9-449f-83b6-a7d2983bec14.vhd",
+									"createOption": "Empty",
+									"image": {
+										"uri": "http://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.32118633-6dc9-449f-83b6-a7d2983bec14.vhd"
+									},
+									"vhd": {
+										"uri": "http://storage.blob.core.windows.net/vmcontainerce1a1b75-f480-47cb-8e6e-55142e4a5f68/datadisk-1.ce1a1b75-f480-47cb-8e6e-55142e4a5f68.vhd"
+									},
+									"caching": "ReadWrite"
+								}
+							]
                         },
                         "osProfile": {
                             "computerName": "[parameters('vmName')]",
@@ -167,6 +193,42 @@ func TestCaptureParseJson(t *testing.T) {
 	}
 	if osDisk.Caching != "ReadWrite" {
 		t.Errorf("Resources[0].Properties.StorageProfile.OSDisk.Caching's value was unexpected: %s", osDisk.Caching)
+	}
+
+	// == Resources/Properties/StorageProfile/DataDisks ================
+	dataDisks := testSubject.Resources[0].Properties.StorageProfile.DataDisks
+	if len(dataDisks) != 2 {
+		t.Errorf("Resources[0].Properties.StorageProfile.DataDisks, 2 disks expected but was: %d", len(dataDisks))
+	}
+	if dataDisks[0].Name != "packer-datadisk-0.32118633-6dc9-449f-83b6-a7d2983bec14.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[0].Name's value was unexpected: %s", dataDisks[0].Name)
+	}
+	if dataDisks[0].CreateOption != "Empty" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[0].CreateOption's value was unexpected: %s", dataDisks[0].CreateOption)
+	}
+	if dataDisks[0].Image.Uri != "http://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-0.32118633-6dc9-449f-83b6-a7d2983bec14.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[0].Image.Uri's value was unexpected: %s", dataDisks[0].Image.Uri)
+	}
+	if dataDisks[0].Vhd.Uri != "http://storage.blob.core.windows.net/vmcontainerce1a1b75-f480-47cb-8e6e-55142e4a5f68/datadisk-0.ce1a1b75-f480-47cb-8e6e-55142e4a5f68.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[0].Vhd.Uri's value was unexpected: %s", dataDisks[0].Vhd.Uri)
+	}
+	if dataDisks[0].Caching != "ReadWrite" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[0].Caching's value was unexpected: %s", dataDisks[0].Caching)
+	}
+	if dataDisks[1].Name != "packer-datadisk-1.32118633-6dc9-449f-83b6-a7d2983bec14.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[1].Name's value was unexpected: %s", dataDisks[1].Name)
+	}
+	if dataDisks[1].CreateOption != "Empty" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[1].CreateOption's value was unexpected: %s", dataDisks[1].CreateOption)
+	}
+	if dataDisks[1].Image.Uri != "http://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-datadisk-1.32118633-6dc9-449f-83b6-a7d2983bec14.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[1].Image.Uri's value was unexpected: %s", dataDisks[1].Image.Uri)
+	}
+	if dataDisks[1].Vhd.Uri != "http://storage.blob.core.windows.net/vmcontainerce1a1b75-f480-47cb-8e6e-55142e4a5f68/datadisk-1.ce1a1b75-f480-47cb-8e6e-55142e4a5f68.vhd" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[1].Vhd.Uri's value was unexpected: %s", dataDisks[1].Vhd.Uri)
+	}
+	if dataDisks[1].Caching != "ReadWrite" {
+		t.Errorf("Resources[0].Properties.StorageProfile.dataDisks[1].Caching's value was unexpected: %s", dataDisks[1].Caching)
 	}
 
 	// == Resources/Properties/OSProfile ============================

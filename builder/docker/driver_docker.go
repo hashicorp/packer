@@ -150,24 +150,56 @@ func (d *DockerDriver) IPAddress(id string) (string, error) {
 func (d *DockerDriver) Login(repo, user, pass string) error {
 	d.l.Lock()
 
-	args := []string{"login"}
-	if user != "" {
-		args = append(args, "-u", user)
-	}
-	if pass != "" {
-		args = append(args, "-p", pass)
-	}
-	if repo != "" {
-		args = append(args, repo)
-	}
-
-	cmd := exec.Command("docker", args...)
-	err := runAndStream(cmd, d.Ui)
+	version_running, err := d.Version()
 	if err != nil {
 		d.l.Unlock()
+		return err
 	}
 
-	return err
+	// Version 17.07.0 of Docker adds support for the new
+	// `--password-stdin` option which can be used to offer
+	// password via the standard input, rather than passing
+	// the password and/or token using a command line switch.
+	constraint, err := version.NewConstraint(">= 17.07.0")
+	if err != nil {
+		d.l.Unlock()
+		return err
+	}
+
+	cmd := exec.Command("docker")
+	cmd.Args = append(cmd.Args, "login")
+
+	if user != "" {
+		cmd.Args = append(cmd.Args, "-u", user)
+	}
+
+	if pass != "" {
+		if constraint.Check(version_running) {
+			cmd.Args = append(cmd.Args, "--password-stdin")
+
+			stdin, err := cmd.StdinPipe()
+			if err != nil {
+				d.l.Unlock()
+				return err
+			}
+			io.WriteString(stdin, pass)
+			stdin.Close()
+		} else {
+			cmd.Args = append(cmd.Args, "-p", pass)
+		}
+	}
+
+	if repo != "" {
+		cmd.Args = append(cmd.Args, repo)
+	}
+
+	err = runAndStream(cmd, d.Ui)
+	if err != nil {
+		d.l.Unlock()
+		return err
+	}
+
+	return nil
 }
 
 func (d *DockerDriver) Logout(repo string) error {
@@ -292,7 +324,7 @@ func (d *DockerDriver) TagImage(id string, repo string, force bool) error {
 		return err
 	}
 
-	version_deprecated, err := version.NewVersion(string("1.12.0"))
+	version_deprecated, err := version.NewVersion("1.12.0")
 	if err != nil {
 		// should never reach this line
 		return err

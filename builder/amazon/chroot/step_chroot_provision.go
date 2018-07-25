@@ -1,17 +1,18 @@
 package chroot
 
 import (
+	"context"
 	"log"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepChrootProvision provisions the instance within a chroot.
 type StepChrootProvision struct {
 }
 
-func (s *StepChrootProvision) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepChrootProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)

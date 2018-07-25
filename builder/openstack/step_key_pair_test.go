@@ -81,7 +81,7 @@ func TestBerToDer(t *testing.T) {
 		Writer: msg,
 	}
 
-	// Test - a DER encoded key commes back unchanged.
+	// Test - a DER encoded key comes back unchanged.
 	newKey := berToDer(der_encoded_key, ui)
 	if newKey != der_encoded_key {
 		t.Errorf("Trying to convert a DER encoded key should return the same key.")

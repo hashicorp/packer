@@ -2,12 +2,22 @@ set :base_url, "https://www.packer.io/"
 
 activate :hashicorp do |h|
   h.name         = "packer"
-  h.version      = "1.1.1"
+  h.version      = "1.2.5"
   h.github_slug  = "hashicorp/packer"
   h.website_root = "website"
 end
 
 helpers do
+  # Returns a segment tracking ID such that local development is not
+  # tracked to production systems.
+  def segmentId()
+    if (ENV['ENV'] == 'production')
+      'AjXdfmTTk1I9q9dfyePuDFHBrz1tCO3l'
+    else
+      '0EXTgkNx0Ydje2PGXVbRhpKKoe5wtzcE'
+    end
+  end
+
   # Returns the FQDN of the image URL.
   #
   # @param [String] path

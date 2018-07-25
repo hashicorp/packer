@@ -1,7 +1,9 @@
 package hyperv
 
 import (
+	"context"
 	"errors"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -12,7 +14,7 @@ func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
 param([string]$switchName, [int]$addressIndex)
 
-$HostVMAdapter = Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
+$HostVMAdapter = Hyper-V\Get-VMNetworkAdapter -ManagementOS -SwitchName $switchName
 if ($HostVMAdapter){
     $HostNetAdapter = Get-NetAdapter | ?{ $_.DeviceID -eq $HostVMAdapter.DeviceId }
     if ($HostNetAdapter){
@@ -36,10 +38,19 @@ func GetVirtualMachineNetworkAdapterAddress(vmName string) (string, error) {
 	var script = `
 param([string]$vmName, [int]$addressIndex)
 try {
-  $adapter = Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
-  $ip = $adapter.IPAddresses[$addressIndex]
-  if($ip -eq $null) {
-    return $false
+  $adapter = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
+  if ($adapter.IPAddresses) {
+    $ip = $adapter.IPAddresses[$addressIndex]
+  } else {
+    $vm = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$vmName'"
+    $ip_details = (Get-CimAssociatedInstance -InputObject $vm -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
+
+    if ($null -eq $ip_details) {
+      return $false
+    }
+
+    $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
+    $ip = ($ip_addresses -split ";")[0]
   }
 } catch {
   return $false
@@ -59,8 +70,8 @@ func CreateDvdDrive(vmName string, isoPath string, generation uint) (uint, uint,
 
 	script = `
 param([string]$vmName, [string]$isoPath)
-$dvdController = Add-VMDvdDrive -VMName $vmName -path $isoPath -Passthru
-$dvdController | Set-VMDvdDrive -path $null
+$dvdController = Hyper-V\Add-VMDvdDrive -VMName $vmName -path $isoPath -Passthru
+$dvdController | Hyper-V\Set-VMDvdDrive -path $null
 $result = "$($dvdController.ControllerNumber),$($dvdController.ControllerLocation)"
 $result
 `
@@ -94,9 +105,9 @@ func MountDvdDrive(vmName string, path string, controllerNumber uint, controller
 
 	var script = `
 param([string]$vmName,[string]$path,[string]$controllerNumber,[string]$controllerLocation)
-$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $path
+Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $path
 `
 
 	var ps powershell.PowerShellCmd
@@ -107,9 +118,9 @@ Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLo
 func UnmountDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
-$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $null
+Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation -Path $null
 `
 
 	var ps powershell.PowerShellCmd
@@ -122,7 +133,7 @@ func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation ui
 	if generation < 2 {
 		script := `
 param([string]$vmName)
-Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","Floppy")
+Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","Floppy")
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName)
@@ -130,9 +141,9 @@ Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","F
 	} else {
 		script := `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
-$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
+Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
@@ -143,9 +154,9 @@ Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction Silentl
 func DeleteDvdDrive(vmName string, controllerNumber uint, controllerLocation uint) error {
 	var script = `
 param([string]$vmName,[int]$controllerNumber,[int]$controllerLocation)
-$vmDvdDrive = Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+$vmDvdDrive = Hyper-V\Get-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
-Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
+Hyper-V\Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -ControllerLocation $controllerLocation
 `
 
 	var ps powershell.PowerShellCmd
@@ -156,7 +167,7 @@ Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Controlle
 func DeleteAllDvdDrives(vmName string) error {
 	var script = `
 param([string]$vmName)
-Get-VMDvdDrive -VMName $vmName | Remove-VMDvdDrive
+Hyper-V\Get-VMDvdDrive -VMName $vmName | Hyper-V\Remove-VMDvdDrive
 `
 
 	var ps powershell.PowerShellCmd
@@ -167,7 +178,7 @@ Get-VMDvdDrive -VMName $vmName | Remove-VMDvdDrive
 func MountFloppyDrive(vmName string, path string) error {
 	var script = `
 param([string]$vmName, [string]$path)
-Set-VMFloppyDiskDrive -VMName $vmName -Path $path
+Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $path
 `
 
 	var ps powershell.PowerShellCmd
@@ -179,7 +190,7 @@ func UnmountFloppyDrive(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-Set-VMFloppyDiskDrive -VMName $vmName -Path $null
+Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 `
 
 	var ps powershell.PowerShellCmd
@@ -187,40 +198,61 @@ Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, switchName string, generation uint) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName, [int]$generation)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 if ($harddrivePath){
-	Copy-Item -Path $harddrivePath -Destination $vhdPath
-	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
+	} else {
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
+	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
 } else {
-	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName -Generation $generation
+	Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
+	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName, strconv.FormatInt(int64(generation), 10)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [string]$switchName)
-$vhdx = $vmName + '.vhdx'
+param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
+if($fixedVHD -eq "true"){
+	$vhdx = $vmName + '.vhd'
+}
+else{
+	$vhdx = $vmName + '.vhdx'
+}
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
 if ($harddrivePath){
-	Copy-Item -Path $harddrivePath -Destination $vhdPath
-	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
+	if($diffDisks -eq "true"){
+		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
+	}
+	else{
+		Copy-Item -Path $harddrivePath -Destination $vhdPath
+	}
+	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
 } else {
-	New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -NewVHDPath $vhdPath -NewVHDSizeBytes $newVHDSizeBytes -SwitchName $switchName
+	if($fixedVHD -eq "true"){
+		Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes $newVHDSizeBytes
+	}
+	else {
+		Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
+	}
+	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), switchName); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
 			return err
 		}
 
@@ -235,8 +267,8 @@ if ($harddrivePath){
 func DisableAutomaticCheckpoints(vmName string) error {
 	var script = `
 param([string]$vmName)
-if ((Get-Command Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
-	Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
+if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
+	Hyper-V\Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
 `
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName)
@@ -247,7 +279,7 @@ func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName str
 	var script = `
 param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
-$WorkingPath = Join-Path $exportPath $vmName 
+$WorkingPath = Join-Path $exportPath $vmName
 
 if (Test-Path $WorkingPath) {
 	throw "Export path working directory: $WorkingPath already exists!"
@@ -256,22 +288,22 @@ if (Test-Path $WorkingPath) {
 $allSnapshots = [System.Boolean]::Parse($allSnapshotsString)
 
 if ($snapshotName) {
-    $snapshot = Get-VMSnapshot -VMName $vmName -Name $snapshotName
-    Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
+    $snapshot = Hyper-V\Get-VMSnapshot -VMName $vmName -Name $snapshotName
+    Hyper-V\Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
 } else {
     if (!$allSnapshots) {
         #Use last snapshot if one was not specified
-        $snapshot = Get-VMSnapshot -VMName $vmName | Select -Last 1
+        $snapshot = Hyper-V\Get-VMSnapshot -VMName $vmName | Select -Last 1
     } else {
         $snapshot = $null
     }
-    
+
     if (!$snapshot) {
         #No snapshot clone
-        Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
+        Hyper-V\Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
     } else {
         #Snapshot clone
-        Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
+        Hyper-V\Export-VMSnapshot -VMSnapshot $snapshot -Path $exportPath -ErrorAction Stop
     }
 }
 
@@ -296,7 +328,7 @@ param([string]$exportPath, [string]$cloneFromVmxcPath)
 if (!(Test-Path $cloneFromVmxcPath)){
 	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
 }
-	
+
 if (!(Test-Path $exportPath)){
 	New-Item -ItemType Directory -Force -Path $exportPath
 }
@@ -306,6 +338,18 @@ Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
 
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, exportPath, cloneFromVmxcPath)
+
+	return err
+}
+
+func SetVmNetworkAdapterMacAddress(vmName string, mac string) error {
+	var script = `
+param([string]$vmName, [string]$mac)
+Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
+	`
+
+	var ps powershell.PowerShellCmd
+	err := ps.Run(script, vmName, mac)
 
 	return err
 }
@@ -338,24 +382,24 @@ if (!$VirtualMachinePath){
     $VirtualMachinePath = Get-ChildItem -Path $importPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 }
 
-$compatibilityReport = Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy:$false
+$compatibilityReport = Hyper-V\Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy:$false
 if ($vhdPath){
 	Copy-Item -Path $harddrivePath -Destination $vhdPath
 	$existingFirstHarddrive = $compatibilityReport.VM.HardDrives | Select -First 1
 	if ($existingFirstHarddrive) {
-		$existingFirstHarddrive | Set-VMHardDiskDrive -Path $vhdPath
+		$existingFirstHarddrive | Hyper-V\Set-VMHardDiskDrive -Path $vhdPath
 	} else {
-		Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
-	}	
+		Hyper-V\Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
+	}
 }
-Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
+Hyper-V\Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
-Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
-Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName 
-$vm = Import-VM -CompatibilityReport $compatibilityReport
+Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
+Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
+$vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
 if ($vm) {
-    $result = Rename-VM -VM $vm -NewName $VMName
+    $result = Hyper-V\Rename-VM -VM $vm -NewName $VMName
 }
 	`
 
@@ -388,7 +432,7 @@ func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, clone
 func GetVirtualMachineGeneration(vmName string) (uint, error) {
 	var script = `
 param([string]$vmName)
-$generation = Get-Vm -Name $vmName | %{$_.Generation}
+$generation = Hyper-V\Get-Vm -Name $vmName | %{$_.Generation}
 if (!$generation){
     $generation = 1
 }
@@ -416,7 +460,7 @@ func SetVirtualMachineCpuCount(vmName string, cpu uint) error {
 
 	var script = `
 param([string]$vmName, [int]$cpu)
-Set-VMProcessor -VMName $vmName -Count $cpu
+Hyper-V\Set-VMProcessor -VMName $vmName -Count $cpu
 `
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, strconv.FormatInt(int64(cpu), 10))
@@ -428,7 +472,7 @@ func SetVirtualMachineVirtualizationExtensions(vmName string, enableVirtualizati
 	var script = `
 param([string]$vmName, [string]$exposeVirtualizationExtensionsString)
 $exposeVirtualizationExtensions = [System.Boolean]::Parse($exposeVirtualizationExtensionsString)
-Set-VMProcessor -VMName $vmName -ExposeVirtualizationExtensions $exposeVirtualizationExtensions
+Hyper-V\Set-VMProcessor -VMName $vmName -ExposeVirtualizationExtensions $exposeVirtualizationExtensions
 `
 	exposeVirtualizationExtensionsString := "False"
 	if enableVirtualizationExtensions {
@@ -444,7 +488,7 @@ func SetVirtualMachineDynamicMemory(vmName string, enableDynamicMemory bool) err
 	var script = `
 param([string]$vmName, [string]$enableDynamicMemoryString)
 $enableDynamicMemory = [System.Boolean]::Parse($enableDynamicMemoryString)
-Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
+Hyper-V\Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
 `
 	enableDynamicMemoryString := "False"
 	if enableDynamicMemory {
@@ -458,7 +502,7 @@ Set-VMMemory -VMName $vmName -DynamicMemoryEnabled $enableDynamicMemory
 func SetVirtualMachineMacSpoofing(vmName string, enableMacSpoofing bool) error {
 	var script = `
 param([string]$vmName, $enableMacSpoofing)
-Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
+Hyper-V\Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
 `
 
 	var ps powershell.PowerShellCmd
@@ -472,10 +516,16 @@ Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoofing
 	return err
 }
 
-func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool) error {
+func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateName string) error {
 	var script = `
-param([string]$vmName, $enableSecureBoot)
-Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
+param([string]$vmName, [string]$enableSecureBootString, [string]$templateName)
+$cmdlet = Get-Command Hyper-V\Set-VMFirmware
+# The SecureBootTemplate parameter is only available in later versions
+if ($cmdlet.Parameters.SecureBootTemplate) {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString -SecureBootTemplate $templateName
+} else {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString
+}
 `
 
 	var ps powershell.PowerShellCmd
@@ -485,7 +535,11 @@ Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
 		enableSecureBootString = "On"
 	}
 
-	err := ps.Run(script, vmName, enableSecureBootString)
+	if templateName == "" {
+		templateName = "MicrosoftWindows"
+	}
+
+	err := ps.Run(script, vmName, enableSecureBootString, templateName)
 	return err
 }
 
@@ -494,12 +548,12 @@ func DeleteVirtualMachine(vmName string) error {
 	var script = `
 param([string]$vmName)
 
-$vm = Get-VM -Name $vmName
+$vm = Hyper-V\Get-VM -Name $vmName
 if (($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::Off) -and ($vm.State -ne [Microsoft.HyperV.PowerShell.VMState]::OffCritical)) {
-    Stop-VM -VM $vm -TurnOff -Force -Confirm:$false
+    Hyper-V\Stop-VM -VM $vm -TurnOff -Force -Confirm:$false
 }
 
-Remove-VM -Name $vmName -Force -Confirm:$false
+Hyper-V\Remove-VM -Name $vmName -Force -Confirm:$false
 `
 
 	var ps powershell.PowerShellCmd
@@ -511,12 +565,12 @@ func ExportVirtualMachine(vmName string, path string) error {
 
 	var script = `
 param([string]$vmName, [string]$path)
-Export-VM -Name $vmName -Path $path
+Hyper-V\Export-VM -Name $vmName -Path $path
 
 if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.VMCX')))
 {
-  $vm = Get-VM -Name $vmName
-  $vm_adapter = Get-VMNetworkAdapter -VM $vm | Select -First 1
+  $vm = Hyper-V\Get-VM -Name $vmName
+  $vm_adapter = Hyper-V\Get-VMNetworkAdapter -VM $vm | Select -First 1
 
   $config = [xml]@"
 <?xml version="1.0" ?>
@@ -550,24 +604,24 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 
   if ($vm.Generation -eq 1)
   {
-    $vm_controllers  = Get-VMIdeController -VM $vm
+    $vm_controllers  = Hyper-V\Get-VMIdeController -VM $vm
     $controller_type = $config.SelectSingleNode('/configuration/vm-controllers')
     # IDE controllers are not stored in a special XML container
   }
   else
   {
-    $vm_controllers  = Get-VMScsiController -VM $vm
+    $vm_controllers  = Hyper-V\Get-VMScsiController -VM $vm
     $controller_type = $config.CreateElement('scsi')
     $controller_type.SetAttribute('ChannelInstanceGuid', 'x')
     # SCSI controllers are stored in the scsi XML container
-    if ((Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
+    if ((Hyper-V\Get-VMFirmware -VM $vm).SecureBoot -eq [Microsoft.HyperV.PowerShell.OnOffState]::On)
     {
-      $config.configuration.secure_boot_enabled.'#text' = 'True'
-    }
+	  $config.configuration.secure_boot_enabled.'#text' = 'True'
+	}
     else
     {
       $config.configuration.secure_boot_enabled.'#text' = 'False'
-    }
+	}
   }
 
   $vm_controllers | ForEach {
@@ -628,9 +682,9 @@ func CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string
 
 	var script = `
 param([string]$srcPath, [string]$dstPath, [string]$vhdDirName, [string]$vmDir)
-Move-Item -Path $srcPath/*.* -Destination $dstPath
-Move-Item -Path $srcPath/$vhdDirName -Destination $dstPath
-Move-Item -Path $srcPath/$vmDir -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vhdDirName) -Destination $dstPath
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vmDir) -Destination $dstPath
 `
 
 	var ps powershell.PowerShellCmd
@@ -642,9 +696,9 @@ func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
 
 	var script = `
 param([string]$switchName,[string]$switchType)
-$switches = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
+$switches = Hyper-V\Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switches.Count -eq 0) {
-  New-VMSwitch -Name $switchName -SwitchType $switchType
+  Hyper-V\New-VMSwitch -Name $switchName -SwitchType $switchType
   return $true
 }
 return $false
@@ -660,9 +714,9 @@ func DeleteVirtualSwitch(switchName string) error {
 
 	var script = `
 param([string]$switchName)
-$switch = Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
+$switch = Hyper-V\Get-VMSwitch -Name $switchName -ErrorAction SilentlyContinue
 if ($switch -ne $null) {
-    $switch | Remove-VMSwitch -Force -Confirm:$false
+    $switch | Hyper-V\Remove-VMSwitch -Force -Confirm:$false
 }
 `
 
@@ -675,9 +729,9 @@ func StartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off) {
-  Start-VM -Name $vmName -Confirm:$false
+  Hyper-V\Start-VM -Name $vmName -Confirm:$false
 }
 `
 
@@ -690,7 +744,7 @@ func RestartVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-Restart-VM $vmName -Force -Confirm:$false
+Hyper-V\Restart-VM $vmName -Force -Confirm:$false
 `
 
 	var ps powershell.PowerShellCmd
@@ -702,9 +756,9 @@ func StopVirtualMachine(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName
+$vm = Hyper-V\Get-VM -Name $vmName
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-    Stop-VM -VM $vm -Force -Confirm:$false
+    Hyper-V\Stop-VM -VM $vm -Force -Confirm:$false
 }
 `
 
@@ -735,7 +789,7 @@ func EnableVirtualMachineIntegrationService(vmName string, integrationServiceNam
 
 	var script = `
 param([string]$vmName,[string]$integrationServiceId)
-Get-VMIntegrationService -VmName $vmName | ?{$_.Id -match $integrationServiceId} | Enable-VMIntegrationService
+Hyper-V\Get-VMIntegrationService -VmName $vmName | ?{$_.Id -match $integrationServiceId} | Hyper-V\Enable-VMIntegrationService
 `
 
 	var ps powershell.PowerShellCmd
@@ -747,7 +801,7 @@ func SetNetworkAdapterVlanId(switchName string, vlanId string) error {
 
 	var script = `
 param([string]$networkAdapterName,[string]$vlanId)
-Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $networkAdapterName -Access -VlanId $vlanId
+Hyper-V\Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $networkAdapterName -Access -VlanId $vlanId
 `
 
 	var ps powershell.PowerShellCmd
@@ -759,7 +813,7 @@ func SetVirtualMachineVlanId(vmName string, vlanId string) error {
 
 	var script = `
 param([string]$vmName,[string]$vlanId)
-Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
+Hyper-V\Set-VMNetworkAdapterVlan -VMName $vmName -Access -VlanId $vlanId
 `
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, vlanId)
@@ -771,7 +825,7 @@ func GetExternalOnlineVirtualSwitch() (string, error) {
 	var script = `
 $adapters = Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' } | Sort-Object -Descending -Property Speed
 foreach ($adapter in $adapters) {
-  $switch = Get-VMSwitch -SwitchType External | Where-Object { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
+  $switch = Hyper-V\Get-VMSwitch -SwitchType External | Where-Object { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
   if ($switch -ne $null) {
     $switch.Name
@@ -801,10 +855,10 @@ $adapters = foreach ($name in $names) {
 }
 
 foreach ($adapter in $adapters) {
-  $switch = Get-VMSwitch -SwitchType External | where { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
+  $switch = Hyper-V\Get-VMSwitch -SwitchType External | where { $_.NetAdapterInterfaceDescription -eq $adapter.InterfaceDescription }
 
   if ($switch -eq $null) {
-    $switch = New-VMSwitch -Name $switchName -NetAdapterName $adapter.Name -AllowManagementOS $true -Notes 'Parent OS, VMs, WiFi'
+    $switch = Hyper-V\New-VMSwitch -Name $switchName -NetAdapterName $adapter.Name -AllowManagementOS $true -Notes 'Parent OS, VMs, WiFi'
   }
 
   if ($switch -ne $null) {
@@ -813,7 +867,7 @@ foreach ($adapter in $adapters) {
 }
 
 if($switch -ne $null) {
-  Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -VMSwitch $switch
+  Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter -VMSwitch $switch
 } else {
   Write-Error 'No internet adapters found'
 }
@@ -827,7 +881,7 @@ func GetVirtualMachineSwitchName(vmName string) (string, error) {
 
 	var script = `
 param([string]$vmName)
-(Get-VMNetworkAdapter -VMName $vmName).SwitchName
+(Hyper-V\Get-VMNetworkAdapter -VMName $vmName).SwitchName
 `
 
 	var ps powershell.PowerShellCmd
@@ -843,7 +897,7 @@ func ConnectVirtualMachineNetworkAdapterToSwitch(vmName string, switchName strin
 
 	var script = `
 param([string]$vmName,[string]$switchName)
-Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $switchName
+Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter -SwitchName $switchName
 `
 
 	var ps powershell.PowerShellCmd
@@ -851,16 +905,16 @@ Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName $swi
 	return err
 }
 
-func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, controllerType string) error {
+func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
 
 	var script = `
-param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$controllerType)
+param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)
 $vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdName
-New-VHD $vhdPath -SizeBytes $vhdSizeInBytes
-Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
+Hyper-V\New-VHD -path $vhdPath -SizeBytes $vhdSizeInBytes -BlockSizeBytes $vhdBlockSizeInByte
+Hyper-V\Add-VMHardDiskDrive -VMName $vmName -path $vhdPath -controllerType $controllerType
 `
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, vhdRoot, vhdName, strconv.FormatInt(vhdSizeBytes, 10), controllerType)
+	err := ps.Run(script, vmName, vhdRoot, vhdName, strconv.FormatInt(vhdSizeBytes, 10), strconv.FormatInt(vhdBlockSize, 10), controllerType)
 	return err
 }
 
@@ -868,8 +922,8 @@ func UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) err
 
 	var script = `
 param([string]$vmName,[string]$switchName)
-Set-VMNetworkAdapterVlan -VMName $vmName -Untagged
-Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $switchName -Untagged
+Hyper-V\Set-VMNetworkAdapterVlan -VMName $vmName -Untagged
+Hyper-V\Set-VMNetworkAdapterVlan -ManagementOS -VMNetworkAdapterName $switchName -Untagged
 `
 
 	var ps powershell.PowerShellCmd
@@ -881,7 +935,7 @@ func IsRunning(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running
 `
 
@@ -900,7 +954,7 @@ func IsOff(vmName string) (bool, error) {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Off
 `
 
@@ -919,7 +973,7 @@ func Uptime(vmName string) (uint64, error) {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 $vm.Uptime.TotalSeconds
 `
 	var ps powershell.PowerShellCmd
@@ -938,7 +992,7 @@ func Mac(vmName string) (string, error) {
 	var script = `
 param([string]$vmName, [int]$adapterIndex)
 try {
-  $adapter = Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
+  $adapter = Hyper-V\Get-VMNetworkAdapter -VMName $vmName -ErrorAction SilentlyContinue
   $mac = $adapter[$adapterIndex].MacAddress
   if($mac -eq $null) {
     return ""
@@ -959,10 +1013,23 @@ func IpAddress(mac string) (string, error) {
 	var script = `
 param([string]$mac, [int]$addressIndex)
 try {
-  $ip = Get-Vm | %{$_.NetworkAdapters} | ?{$_.MacAddress -eq $mac} | %{$_.IpAddresses[$addressIndex]}
+  $vm = Hyper-V\Get-VM | ?{$_.NetworkAdapters.MacAddress -eq $mac}
+  if ($vm.NetworkAdapters.IpAddresses) {
+    $ipAddresses = $vm.NetworkAdapters.IPAddresses
+    if ($ipAddresses -isnot [array]) {
+      $ipAddresses = @($ipAddresses)
+    }
+    $ip = $ipAddresses[$addressIndex]
+  } else {
+    $vm_info = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$($vm.Name)'"
+    $ip_details = (Get-CimAssociatedInstance -InputObject $vm_info -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }
 
-  if($ip -eq $null) {
-    return ""
+    if ($null -eq $ip_details) {
+      return ""
+    }
+
+    $ip_addresses = $ip_details.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE/child::text()").Value
+    $ip = ($ip_addresses -split ";")[0]
   }
 } catch {
   return ""
@@ -980,9 +1047,9 @@ func TurnOff(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -TurnOff -Force -Confirm:$false
+  Hyper-V\Stop-VM -Name $vmName -TurnOff -Force -Confirm:$false
 }
 `
 
@@ -995,9 +1062,9 @@ func ShutDown(vmName string) error {
 
 	var script = `
 param([string]$vmName)
-$vm = Get-VM -Name $vmName -ErrorAction SilentlyContinue
+$vm = Hyper-V\Get-VM -Name $vmName -ErrorAction SilentlyContinue
 if ($vm.State -eq [Microsoft.HyperV.PowerShell.VMState]::Running) {
-  Stop-VM -Name $vmName -Force -Confirm:$false
+  Hyper-V\Stop-VM -Name $vmName -Force -Confirm:$false
 }
 `
 
@@ -1015,7 +1082,7 @@ func TypeScanCodes(vmName string, scanCodes string) error {
 param([string]$vmName, [string]$scanCodes)
 	#Requires -Version 3
 
-	function Get-VMConsole
+	function Hyper-V\Get-VMConsole
 	{
 	    [CmdletBinding()]
 	    param (
@@ -1143,7 +1210,7 @@ param([string]$vmName, [string]$scanCodes)
 	    return $console
 	}
 
-	$vmConsole = Get-VMConsole -VMName $vmName
+	$vmConsole = Hyper-V\Get-VMConsole -VMName $vmName
 	$scanCodesToSend = ''
 	$scanCodes.Split(' ') | %{
 		$scanCode = $_
@@ -1188,4 +1255,19 @@ param([string]$vmName, [string]$scanCodes)
 	var ps powershell.PowerShellCmd
 	err := ps.Run(script, vmName, scanCodes)
 	return err
+}
+
+func ConnectVirtualMachine(vmName string) (context.CancelFunc, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, "vmconnect.exe", "localhost", vmName)
+	err := cmd.Start()
+	if err != nil {
+		// Failed to start so cancel function not required
+		cancel = nil
+	}
+	return cancel, err
+}
+
+func DisconnectVirtualMachine(cancel context.CancelFunc) {
+	cancel()
 }

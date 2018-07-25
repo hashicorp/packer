@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -13,9 +14,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRunSpotInstance struct {
@@ -31,9 +32,10 @@ type StepRunSpotInstance struct {
 	SourceAMI                         string
 	SpotPrice                         string
 	SpotPriceProduct                  string
+	SpotTags                          TagMap
 	SubnetId                          string
-	Tags                              map[string]string
-	VolumeTags                        map[string]string
+	Tags                              TagMap
+	VolumeTags                        TagMap
 	UserData                          string
 	UserDataFile                      string
 	Ctx                               interpolate.Context
@@ -42,7 +44,7 @@ type StepRunSpotInstance struct {
 	spotRequest *ec2.SpotInstanceRequest
 }
 
-func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	var keyName string
 	if name, ok := state.GetOk("keyPair"); ok {
@@ -142,14 +144,14 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	ReportTags(ui, ec2Tags)
+	ec2Tags.Report(ui)
 
 	ui.Message(fmt.Sprintf(
 		"Requesting spot instance '%s' for: %s",
@@ -201,13 +203,7 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 
 	spotRequestId := s.spotRequest.SpotInstanceRequestId
 	ui.Message(fmt.Sprintf("Waiting for spot request (%s) to become active...", *spotRequestId))
-	stateChange := StateChangeConf{
-		Pending:   []string{"open"},
-		Target:    "active",
-		Refresh:   SpotRequestStateRefreshFunc(ec2conn, *spotRequestId),
-		StepState: state,
-	}
-	_, err = WaitForState(&stateChange)
+	err = WaitUntilSpotRequestFulfilled(ctx, ec2conn, *spotRequestId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for spot request (%s) to become ready: %s", *spotRequestId, err)
 		state.Put("error", err)
@@ -226,26 +222,58 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 	}
 	instanceId = *spotResp.SpotInstanceRequests[0].InstanceId
 
+	// Tag spot instance request
+	spotTags, err := s.SpotTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error tagging spot request: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	spotTags.Report(ui)
+
+	if len(spotTags) > 0 && s.SpotTags.IsSet() {
+		// Retry creating tags for about 2.5 minutes
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      spotTags,
+				Resources: []*string{spotRequestId},
+			})
+			return true, err
+		})
+		if err != nil {
+			err := fmt.Errorf("Error tagging spot request: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	// Set the instance ID so that the cleanup works properly
 	s.instanceId = instanceId
 
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
-	stateChangeSpot := StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "running",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, instanceId),
-		StepState: state,
+	describeInstance := &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	latestInstance, err := WaitForState(&stateChangeSpot)
-	if err != nil {
+	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	instance := latestInstance.(*ec2.Instance)
+	r, err := ec2conn.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{aws.String(instanceId)},
+	})
+	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
+		err := fmt.Errorf("Error finding source instance.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	instance := r.Reservations[0].Instances[0]
 
 	// Retry creating tags for about 2.5 minutes
 	err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
@@ -278,21 +306,21 @@ func (s *StepRunSpotInstance) Run(state multistep.StateBag) multistep.StepAction
 		}
 	}
 
-	if len(volumeIds) > 0 && len(s.VolumeTags) > 0 {
+	if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
 		ui.Say("Adding tags to source EBS Volumes")
-		tags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+
+		volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 		if err != nil {
 			err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
-
-		ReportTags(ui, tags)
+		volumeTags.Report(ui)
 
 		_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
 			Resources: volumeIds,
-			Tags:      tags,
+			Tags:      volumeTags,
 		})
 
 		if err != nil {
@@ -338,13 +366,8 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			ui.Error(fmt.Sprintf("Error cancelling the spot request, may still be around: %s", err))
 			return
 		}
-		stateChange := StateChangeConf{
-			Pending: []string{"active", "open"},
-			Refresh: SpotRequestStateRefreshFunc(ec2conn, *s.spotRequest.SpotInstanceRequestId),
-			Target:  "cancelled",
-		}
 
-		_, err := WaitForState(&stateChange)
+		err := WaitUntilSpotRequestFulfilled(aws.BackgroundContext(), ec2conn, *s.spotRequest.SpotInstanceRequestId)
 		if err != nil {
 			ui.Error(err.Error())
 		}
@@ -358,14 +381,8 @@ func (s *StepRunSpotInstance) Cleanup(state multistep.StateBag) {
 			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
 			return
 		}
-		stateChange := StateChangeConf{
-			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instanceId),
-			Target:  "terminated",
-		}
 
-		_, err := WaitForState(&stateChange)
-		if err != nil {
+		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

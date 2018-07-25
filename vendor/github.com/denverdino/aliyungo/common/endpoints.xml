@@ -1346,4 +1346,14 @@
             <Product><ProductName>Slb</ProductName><DomainName>slb.cn-zhangjiakou.aliyuncs.com</DomainName></Product>
         </Products>
     </Endpoint>
+    <Endpoint name="cn-huhehaote">
+        <RegionIds><RegionId>cn-huhehaote</RegionId></RegionIds>
+        <Products>
+            <Product><ProductName>Rds</ProductName><DomainName>rds.cn-huhehaote.aliyuncs.com</DomainName></Product>
+            <Product><ProductName>Ecs</ProductName><DomainName>ecs.cn-huhehaote.aliyuncs.com</DomainName></Product>
+            <Product><ProductName>Vpc</ProductName><DomainName>vpc.cn-huhehaote.aliyuncs.com</DomainName></Product>
+            <Product><ProductName>Cms</ProductName><DomainName>metrics.cn-hangzhou.aliyuncs.com</DomainName></Product>
+            <Product><ProductName>Slb</ProductName><DomainName>slb.cn-huhehaote.aliyuncs.com</DomainName></Product>
+        </Products>
+    </Endpoint>
 </Endpoints>

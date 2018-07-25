@@ -1,6 +1,7 @@
 package cloudstack
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -8,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
@@ -27,7 +28,7 @@ type stepCreateInstance struct {
 }
 
 // Run executes the Packer build step that creates a CloudStack instance.
-func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -46,7 +47,9 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	p.SetDisplayname("Created by Packer")
 
 	if keypair, ok := state.GetOk("keypair"); ok {
-		p.SetKeypair(keypair.(string))
+		kp := keypair.(string)
+		ui.Message(fmt.Sprintf("Using keypair: %s", kp))
+		p.SetKeypair(kp)
 	}
 
 	if securitygroups, ok := state.GetOk("security_groups"); ok {
@@ -119,6 +122,7 @@ func (s *stepCreateInstance) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	ui.Message("Instance has been created!")
+	ui.Message(fmt.Sprintf("Instance ID: %s", instance.Id))
 
 	// In debug-mode, we output the password
 	if s.Debug {
@@ -225,7 +229,7 @@ func (s *stepCreateInstance) generateUserData(userData string, httpGETOnly bool)
 	if len(ud) > maxUD {
 		return "", fmt.Errorf(
 			"The supplied user_data contains %d bytes after encoding, "+
-				"this exeeds the limit of %d bytes", len(ud), maxUD)
+				"this exceeds the limit of %d bytes", len(ud), maxUD)
 	}
 
 	return ud, nil

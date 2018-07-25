@@ -24,9 +24,15 @@ has a simple mental model: you provision containers much the same way you
 provision a normal virtualized or dedicated server. For more information, read
 the section on [Dockerfiles](#dockerfiles).
 
-The Docker builder must run on a machine that has Docker installed. Therefore
-the builder only works on machines that support Docker. You can learn about
-what [platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/) in the Docker documentation.
+The Docker builder must run on a machine that has Docker Engine installed.
+Therefore the builder only works on machines that support Docker and _does not
+support running on a Docker remote host_. You can learn about what
+[platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/)
+in the Docker documentation.
+
+
+     Please note: Packer does not yet have support for Windows containers.
+
 
 ## Basic Example: Export
 
@@ -125,9 +131,8 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
-builder.
+The Docker builder uses a special Docker communicator _and will not use_ the
+standard [communicators](/docs/templates/communicator.html).
 
 ### Required:
 
@@ -212,7 +217,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 -   `container_dir` (string) - The directory inside container to mount
      temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
      By default this is set to `/packer-files`.
-     
+
 -   `fix_upload_owner` (boolean) - If true, files uploaded to the container will
     be owned by the user the container is running as. If false, the owner will depend
     on the version of docker installed in the system. Defaults to true.
@@ -303,7 +308,7 @@ nearly-identical sequence definitions, as demonstrated by the example below:
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer",
+        "repository": "hashicorp/packer1",
         "tag": "0.7"
       },
       "docker-push"
@@ -311,7 +316,7 @@ nearly-identical sequence definitions, as demonstrated by the example below:
     [
       {
         "type": "docker-tag",
-        "repository": "hashicorp/packer",
+        "repository": "hashicorp/packer2",
         "tag": "0.7"
       },
       "docker-push"
@@ -356,14 +361,14 @@ shown below:
 
 This builder allows you to build Docker images *without* Dockerfiles.
 
-With this builder, you can repeatably create Docker images without the use of a
+With this builder, you can repeatedly create Docker images without the use of a
 Dockerfile. You don't need to know the syntax or semantics of Dockerfiles.
 Instead, you can just provide shell scripts, Chef recipes, Puppet manifests,
 etc. to provision your Docker container just like you would a regular
 virtualized or dedicated machine.
 
 While Docker has many features, Packer views Docker simply as an container
-runner. To that end, Packer is able to repeatably build these containers
+runner. To that end, Packer is able to repeatedly build these containers
 using portable provisioning scripts.
 
 ## Overriding the host directory

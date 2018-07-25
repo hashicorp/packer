@@ -1,10 +1,12 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"log"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step compacts the virtual disk for the VM unless the "skip_compaction"
@@ -12,7 +14,7 @@ import (
 //
 // Uses:
 //   driver Driver
-//   full_disk_path string
+//   disk_full_paths ([]string) - The full paths to all created disks
 //   ui     packer.Ui
 //
 // Produces:
@@ -21,31 +23,22 @@ type StepCompactDisk struct {
 	Skip bool
 }
 
-func (s StepCompactDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s StepCompactDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
-	full_disk_path := state.Get("full_disk_path").(string)
+	diskFullPaths := state.Get("disk_full_paths").([]string)
 
 	if s.Skip {
 		log.Println("Skipping disk compaction step...")
 		return multistep.ActionContinue
 	}
 
-	ui.Say("Compacting the disk image")
-	if err := driver.CompactDisk(full_disk_path); err != nil {
-		state.Put("error", fmt.Errorf("Error compacting disk: %s", err))
-		return multistep.ActionHalt
-	}
-
-	if state.Get("additional_disk_paths") != nil {
-		if moreDisks := state.Get("additional_disk_paths").([]string); len(moreDisks) > 0 {
-			for i, path := range moreDisks {
-				ui.Say(fmt.Sprintf("Compacting additional disk image %d", i+1))
-				if err := driver.CompactDisk(path); err != nil {
-					state.Put("error", fmt.Errorf("Error compacting additional disk %d: %s", i+1, err))
-					return multistep.ActionHalt
-				}
-			}
+	ui.Say("Compacting all attached virtual disks...")
+	for i, diskFullPath := range diskFullPaths {
+		ui.Message(fmt.Sprintf("Compacting virtual disk %d", i+1))
+		if err := driver.CompactDisk(diskFullPath); err != nil {
+			state.Put("error", fmt.Errorf("Error compacting disk: %s", err))
+			return multistep.ActionHalt
 		}
 	}
 

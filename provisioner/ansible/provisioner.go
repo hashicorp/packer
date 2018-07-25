@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -25,6 +26,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -55,7 +57,7 @@ type Config struct {
 	SkipVersionCheck     bool     `mapstructure:"skip_version_check"`
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
-	inventoryFile        string
+	InventoryFile        string   `mapstructure:"inventory_file"`
 }
 
 type Provisioner struct {
@@ -66,8 +68,18 @@ type Provisioner struct {
 	ansibleMajVersion uint
 }
 
+type PassthroughTemplate struct {
+	WinRMPassword string
+}
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	p.done = make(chan struct{})
+
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
+	p.config.ctx.Data = &PassthroughTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
 
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
@@ -141,7 +153,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.User == "" {
-		p.config.User = os.Getenv("USER")
+		usr, err := user.Current()
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		} else {
+			p.config.User = usr.Username
+		}
 	}
 	if p.config.User == "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
@@ -182,6 +199,25 @@ func (p *Provisioner) getVersion() error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
+	// Interpolate env vars to check for .WinRMPassword
+	p.config.ctx.Data = &PassthroughTemplate{
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
+	}
+	for i, envVar := range p.config.AnsibleEnvVars {
+		envVar, err := interpolate.Render(envVar, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.AnsibleEnvVars[i] = envVar
+	}
+	// Interpolate extra vars to check for .WinRMPassword
+	for i, arg := range p.config.ExtraArguments {
+		arg, err := interpolate.Render(arg, &p.config.ctx)
+		if err != nil {
+			return fmt.Errorf("Could not interpolate ansible env vars: %s", err)
+		}
+		p.config.ExtraArguments[i] = arg
+	}
 
 	k, err := newUserKey(p.config.SSHAuthorizedKeyFile)
 	if err != nil {
@@ -260,7 +296,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	go p.adapter.Serve()
 
-	if len(p.config.inventoryFile) == 0 {
+	if len(p.config.InventoryFile) == 0 {
 		tf, err := ioutil.TempFile(p.config.InventoryDirectory, "packer-provisioner-ansible")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
@@ -289,9 +325,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}
 		tf.Close()
-		p.config.inventoryFile = tf.Name()
+		p.config.InventoryFile = tf.Name()
 		defer func() {
-			p.config.inventoryFile = ""
+			p.config.InventoryFile = ""
 		}()
 	}
 
@@ -314,15 +350,29 @@ func (p *Provisioner) Cancel() {
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
-	inventory := p.config.inventoryFile
+	inventory := p.config.InventoryFile
+	if len(p.config.InventoryDirectory) > 0 {
+		inventory = p.config.InventoryDirectory
+	}
 	var envvars []string
 
 	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
 		p.config.PackerBuildName, p.config.PackerBuilderType),
 		"-i", inventory, playbook}
 	if len(privKeyFile) > 0 {
-		args = append(args, "--private-key", privKeyFile)
+		// Changed this from using --private-key to supplying -e ansible_ssh_private_key_file as the latter
+		// is treated as a highest priority variable, and thus prevents overriding by dynamic variables
+		// as seen in #5852
+		// args = append(args, "--private-key", privKeyFile)
+		args = append(args, "-e", fmt.Sprintf("ansible_ssh_private_key_file=%s", privKeyFile))
 	}
+
+	// expose packer_http_addr extra variable
+	httpAddr := common.GetHTTPAddr()
+	if httpAddr != "" {
+		args = append(args, "--extra-vars", fmt.Sprintf("packer_http_addr=%s", httpAddr))
+	}
+
 	args = append(args, p.config.ExtraArguments...)
 	if len(p.config.AnsibleEnvVars) > 0 {
 		envvars = append(envvars, p.config.AnsibleEnvVars...)
@@ -368,7 +418,15 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 	go repeat(stdout)
 	go repeat(stderr)
 
-	ui.Say(fmt.Sprintf("Executing Ansible: %s", strings.Join(cmd.Args, " ")))
+	// remove winrm password from command, if it's been added
+	flattenedCmd := strings.Join(cmd.Args, " ")
+	sanitized := flattenedCmd
+	if len(getWinRMPassword(p.config.PackerBuildName)) > 0 {
+		sanitized = strings.Replace(sanitized,
+			getWinRMPassword(p.config.PackerBuildName), "*****", -1)
+	}
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
+
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -493,6 +551,11 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	return winRMPass
 }
 
 // Ui provides concurrency-safe access to packer.Ui.

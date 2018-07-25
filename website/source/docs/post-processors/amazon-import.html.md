@@ -61,6 +61,10 @@ Optional:
     launch the imported AMI. By default no additional users other than the user
     importing the AMI has permission to launch it.
 
+-   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
+    provider whose API is compatible with aws EC2. Specify another endpoint
+    like this `https://ec2.custom.endpoint.com`.
+
 -   `license_type` (string) - The license type to be used for the Amazon Machine
     Image (AMI) after importing. Valid values: `AWS` or `BYOL` (default).
     For more details regarding licensing, see
@@ -70,6 +74,13 @@ Optional:
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.
 
+-   `profile` (string) - The profile to use in the shared credentials file for
+    AWS. See Amazon's documentation on [specifying
+    profiles](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-profiles)
+    for more details.
+
+-   `role_name` (string) - The name of the role to use when not using the default role, 'vmimport'
+
 -   `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the
     OVA file will be copied to for import. If not specified, this will default
     to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will
@@ -77,6 +88,9 @@ Optional:
 
 -   `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the
     import process has completed. "true" means that we should leave it in the S3 bucket, "false" means to clean it out. Defaults to `false`.
+
+-   `skip_region_validation` (boolean) - Set to true if you want to skip
+    validation of the region configuration option. Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the created AMI and
     relevant snapshots.
@@ -103,6 +117,49 @@ Here is a basic example. This assumes that the builder has produced an OVA artif
   }
 }
 ```
+
+## VMWare Example
+
+This is an example that uses `vmware-iso` builder and exports the `.ova` file using ovftool.
+
+``` json
+"post-processors" : [
+     [
+        {
+          "type": "shell-local",
+          "inline": [ "/usr/bin/ovftool <packer-output-directory>/<vmware-name>.vmx <packer-output-directory>/<vmware-name>.ova" ]
+        },
+        {
+           "files": [
+             "<packer-output-directory>/<vmware-name>.ova"
+           ],
+           "type": "artifice"
+        },
+        {
+          "type": "amazon-import",
+          "access_key": "YOUR KEY HERE",
+          "secret_key": "YOUR SECRET KEY HERE",
+          "region": "us-east-1",
+          "s3_bucket_name": "importbucket",
+          "license_type": "BYOL",
+          "tags": {
+            "Description": "packer amazon-import {{timestamp}}"
+          }
+       }
+    ]
+  ]
+```
+
+## Troubleshooting Timeouts
+The amazon-import feature can take a long time to upload and convert your OVAs
+into AMIs; if you find that your build is failing because you have exceeded your
+max retries or find yourself being rate limited, you can override the max
+retries and the delay in between retries by setting the environment variables
+ `AWS_MAX_ATTEMPTS` and `AWS_POLL_DELAY_SECONDS` on the machine running the
+ Packer build. By default, the waiter that waits for your image to be imported
+ from s3 waits retries up to 300 times with a 5 second delay in between retries.
+ This is dramatically higher than many of our other waiters, to account for how
+ long this process can take.
 
 -&gt; **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above

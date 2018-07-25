@@ -224,6 +224,7 @@ type SpotStrategyType string
 const (
 	NoSpot             = SpotStrategyType("NoSpot")
 	SpotWithPriceLimit = SpotStrategyType("SpotWithPriceLimit")
+	SpotAsPriceGo      = SpotStrategyType("SpotAsPriceGo")
 )
 
 //
@@ -244,7 +245,7 @@ type InstanceAttributesType struct {
 	SerialNumber       string
 	Status             InstanceStatus
 	OperationLocks     OperationLocksType
-	SecurityGroupIds   struct {
+	SecurityGroupIds struct {
 		SecurityGroupId []string
 	}
 	PublicIpAddress         IpAddressSetType
@@ -259,11 +260,12 @@ type InstanceAttributesType struct {
 	IoOptimized             StringOrBool
 	InstanceChargeType      common.InstanceChargeType
 	ExpiredTime             util.ISO6801Time
-	Tags                    struct {
+	Tags struct {
 		Tag []TagItemType
 	}
-	SpotStrategy SpotStrategyType
-	KeyPairName  string
+	SpotStrategy   SpotStrategyType
+	SpotPriceLimit float64
+	KeyPairName    string
 }
 
 type DescribeInstanceAttributeResponse struct {
@@ -535,7 +537,9 @@ type CreateInstanceArgs struct {
 	AutoRenew               bool
 	AutoRenewPeriod         int
 	SpotStrategy            SpotStrategyType
+	SpotPriceLimit          float64
 	KeyPairName             string
+	RamRoleName             string
 }
 
 type CreateInstanceResponse struct {
@@ -623,4 +627,58 @@ func (client *Client) LeaveSecurityGroup(instanceId string, securityGroupId stri
 	response := SecurityGroupResponse{}
 	err := client.Invoke("LeaveSecurityGroup", &args, &response)
 	return err
+}
+
+type AttachInstancesArgs struct {
+	RegionId    common.Region
+	RamRoleName string
+	InstanceIds string
+}
+
+// AttachInstanceRamRole attach instances to ram role
+//
+// You can read doc at https://help.aliyun.com/document_detail/54244.html?spm=5176.doc54245.6.811.zEJcS5
+func (client *Client) AttachInstanceRamRole(args *AttachInstancesArgs) (err error) {
+	response := common.Response{}
+	err = client.Invoke("AttachInstanceRamRole", args, &response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DetachInstanceRamRole detach instances from ram role
+//
+// You can read doc at https://help.aliyun.com/document_detail/54245.html?spm=5176.doc54243.6.813.bt8RB3
+func (client *Client) DetachInstanceRamRole(args *AttachInstancesArgs) (err error) {
+	response := common.Response{}
+	err = client.Invoke("DetachInstanceRamRole", args, &response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type DescribeInstanceRamRoleResponse struct {
+	common.Response
+	InstanceRamRoleSets struct {
+		InstanceRamRoleSet []InstanceRamRoleSetType
+	}
+}
+
+type InstanceRamRoleSetType struct {
+	InstanceId  string
+	RamRoleName string
+}
+
+// DescribeInstanceRamRole
+//
+// You can read doc at https://help.aliyun.com/document_detail/54243.html?spm=5176.doc54245.6.812.RgNCoi
+func (client *Client) DescribeInstanceRamRole(args *AttachInstancesArgs) (resp *DescribeInstanceRamRoleResponse, err error) {
+	response := &DescribeInstanceRamRoleResponse{}
+	err = client.Invoke("DescribeInstanceRamRole", args, response)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
 }

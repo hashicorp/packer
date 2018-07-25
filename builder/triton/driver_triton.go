@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
-	"github.com/joyent/triton-go/client"
 	"github.com/joyent/triton-go/compute"
+	terrors "github.com/joyent/triton-go/errors"
 )
 
 type driverTriton struct {
@@ -177,7 +177,7 @@ func (d *driverTriton) WaitForMachineDeletion(machineId string, timeout time.Dur
 				// Return true only when we receive a 410 (Gone) response.  A 404
 				// indicates that the machine is being deleted whereas a 410 indicates
 				// that this process has completed.
-				if triErr, ok := err.(*client.TritonError); ok && triErr.StatusCode == http.StatusGone {
+				if terrors.IsSpecificStatusCode(err, http.StatusGone) {
 					return true, nil
 				}
 			}

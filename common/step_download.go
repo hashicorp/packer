@@ -1,14 +1,16 @@
 package common
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepDownload downloads a remote file using the download client within
@@ -45,7 +47,7 @@ type StepDownload struct {
 	Extension string
 }
 
-func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	cache := state.Get("cache").(packer.Cache)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -61,10 +63,12 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 
 	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
-	var finalPath string
-	for _, url := range s.Url {
-		ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
+	// First try to use any already downloaded file
+	// If it fails, proceed to regular download logic
 
+	var downloadConfigs = make([]*DownloadConfig, len(s.Url))
+	var finalPath string
+	for i, url := range s.Url {
 		targetPath := s.TargetPath
 		if targetPath == "" {
 			// Determine a cache key. This is normally just the URL but
@@ -88,21 +92,36 @@ func (s *StepDownload) Run(state multistep.StateBag) multistep.StepAction {
 			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
-			UserAgent:  "Packer",
+			UserAgent:  useragent.String(),
 		}
+		downloadConfigs[i] = config
 
-		path, err, retry := s.download(config, state)
-		if err != nil {
-			ui.Message(fmt.Sprintf("Error downloading: %s", err))
-		}
-
-		if !retry {
-			return multistep.ActionHalt
-		}
-
-		if err == nil {
-			finalPath = path
+		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
+			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
+			finalPath = config.TargetPath
 			break
+		}
+	}
+
+	if finalPath == "" {
+		for i, url := range s.Url {
+			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
+
+			config := downloadConfigs[i]
+
+			path, err, retry := s.download(config, state)
+			if err != nil {
+				ui.Message(fmt.Sprintf("Error downloading: %s", err))
+			}
+
+			if !retry {
+				return multistep.ActionHalt
+			}
+
+			if err == nil {
+				finalPath = path
+				break
+			}
 		}
 	}
 

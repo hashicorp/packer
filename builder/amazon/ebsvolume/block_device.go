@@ -7,7 +7,7 @@ import (
 
 type BlockDevice struct {
 	awscommon.BlockDevice `mapstructure:"-,squash"`
-	Tags                  map[string]string `mapstructure:"tags"`
+	Tags                  awscommon.TagMap `mapstructure:"tags"`
 }
 
 func commonBlockDevices(mappings []BlockDevice, ctx *interpolate.Context) (awscommon.BlockDevices, error) {

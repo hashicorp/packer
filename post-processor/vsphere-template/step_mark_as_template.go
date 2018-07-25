@@ -7,18 +7,36 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type stepMarkAsTemplate struct {
-	VMName string
+	VMName       string
+	RemoteFolder string
 }
 
-func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func NewStepMarkAsTemplate(artifact packer.Artifact) *stepMarkAsTemplate {
+	remoteFolder := "Discovered virtual machine"
+	vmname := artifact.Id()
+
+	if artifact.BuilderId() == vsphere.BuilderId {
+		id := strings.Split(artifact.Id(), "::")
+		remoteFolder = id[1]
+		vmname = id[2]
+	}
+
+	return &stepMarkAsTemplate{
+		VMName:       vmname,
+		RemoteFolder: remoteFolder,
+	}
+}
+
+func (s *stepMarkAsTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	cli := state.Get("client").(*govmomi.Client)
 	folder := state.Get("folder").(*object.Folder)
@@ -26,14 +44,8 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 
 	ui.Message("Marking as a template...")
 
-	vm, err := findRuntimeVM(cli, dcPath, s.VMName)
+	vm, err := findRuntimeVM(cli, dcPath, s.VMName, s.RemoteFolder)
 	if err != nil {
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -54,6 +66,12 @@ func (s *stepMarkAsTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	if err := vm.Unregister(context.Background()); err != nil {
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	if err := unregisterPreviousVM(cli, folder, s.VMName); err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -100,13 +118,15 @@ func datastorePath(vm *object.VirtualMachine) (*object.DatastorePath, error) {
 	datastore := re.FindStringSubmatch(disk)[1]
 	vmxPath := path.Join("/", path.Dir(strings.Split(disk, " ")[1]), vm.Name()+".vmx")
 
-	return &object.DatastorePath{datastore, vmxPath}, nil
+	return &object.DatastorePath{
+		Datastore: datastore,
+		Path:      vmxPath,
+	}, nil
 }
 
-// We will use the virtual machine created by vmware-iso builder
-func findRuntimeVM(cli *govmomi.Client, dcPath, name string) (*object.VirtualMachine, error) {
+func findRuntimeVM(cli *govmomi.Client, dcPath, name, remoteFolder string) (*object.VirtualMachine, error) {
 	si := object.NewSearchIndex(cli.Client)
-	fullPath := path.Join(dcPath, "vm", "Discovered virtual machine", name)
+	fullPath := path.Join(dcPath, "vm", remoteFolder, name)
 
 	ref, err := si.FindByInventoryPath(context.Background(), fullPath)
 	if err != nil {

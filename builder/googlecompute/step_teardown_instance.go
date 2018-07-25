@@ -1,12 +1,13 @@
 package googlecompute
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepTeardownInstance represents a Packer build step that tears down GCE
@@ -16,7 +17,7 @@ type StepTeardownInstance struct {
 }
 
 // Run executes the Packer build step that tears down a GCE instance.
-func (s *StepTeardownInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepTeardownInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

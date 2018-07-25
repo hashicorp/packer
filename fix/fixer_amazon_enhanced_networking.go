@@ -1,6 +1,8 @@
 package fix
 
 import (
+	"strings"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -22,6 +24,19 @@ func (FixerAmazonEnhancedNetworking) Fix(input map[string]interface{}) (map[stri
 
 	// Go through each builder and replace the enhanced_networking if we can
 	for _, builder := range tpl.Builders {
+		builderTypeRaw, ok := builder["type"]
+		if !ok {
+			continue
+		}
+
+		builderType, ok := builderTypeRaw.(string)
+		if !ok {
+			continue
+		}
+
+		if !strings.HasPrefix(builderType, "amazon-") {
+			continue
+		}
 		enhancedNetworkingRaw, ok := builder["enhanced_networking"]
 		if !ok {
 			continue

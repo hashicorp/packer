@@ -243,3 +243,27 @@ func TestProvisioner_removeDir(t *testing.T) {
 		}
 	}
 }
+
+func TestProvisionerPrepare_policy(t *testing.T) {
+	var p Provisioner
+
+	var policyTests = []struct {
+		name    string
+		group   string
+		success bool
+	}{
+		{"", "", true},
+		{"a", "b", true},
+		{"a", "", false},
+		{"", "a", false},
+	}
+	for _, tt := range policyTests {
+		config := testConfig()
+		config["policy_name"] = tt.name
+		config["policy_group"] = tt.group
+		err := p.Prepare(config)
+		if (err == nil) != tt.success {
+			t.Fatalf("wasn't expecting %+v to fail: %s", tt, err.Error())
+		}
+	}
+}

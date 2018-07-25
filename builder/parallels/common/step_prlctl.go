@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type commandTemplate struct {
@@ -28,7 +29,7 @@ type StepPrlctl struct {
 }
 
 // Run executes `prlctl` commands.
-func (s *StepPrlctl) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepPrlctl) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 	vmName := state.Get("vmName").(string)
