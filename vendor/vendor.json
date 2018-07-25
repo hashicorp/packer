@@ -1245,7 +1245,7 @@
 			"revisionTime": "2018-03-05T22:44:21Z"
 		},
 		{
-			"checksumSHA1": "hU3ibLi5mZBayj0HPIVpcMSvRgU=",
+			"checksumSHA1": "ByFN6xh/YGP/D3DM9c8p0D9D1XM=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "90150a8ed11b6ce285e77e8af2b0109559ce4777",
 			"revisionTime": "2018-03-15T01:07:03Z"
@@ -1281,6 +1281,30 @@
 			"checksumSHA1": "bEYlrTiz/7JbUiJgxEIkHynxO2s=",
 			"path": "github.com/ugorji/go/codec/codecgen",
 			"revision": "646ae4a518c1c3be0739df898118d9bccf993858"
+		},
+		{
+			"checksumSHA1": "amJo1E3F0QxcfxSt+FxDiQbR1wU=",
+			"path": "github.com/ulikunitz/xz",
+			"revision": "636d36a76670e6c700f22fd5f4588679ff2896c4",
+			"revisionTime": "2018-07-03T11:21:13Z"
+		},
+		{
+			"checksumSHA1": "vjnTkzNrMs5Xj6so/fq0mQ6dT1c=",
+			"path": "github.com/ulikunitz/xz/internal/hash",
+			"revision": "636d36a76670e6c700f22fd5f4588679ff2896c4",
+			"revisionTime": "2018-07-03T11:21:13Z"
+		},
+		{
+			"checksumSHA1": "m0pm57ASBK/CTdmC0ppRHO17mBs=",
+			"path": "github.com/ulikunitz/xz/internal/xlog",
+			"revision": "636d36a76670e6c700f22fd5f4588679ff2896c4",
+			"revisionTime": "2018-07-03T11:21:13Z"
+		},
+		{
+			"checksumSHA1": "2vZw6zc8xuNlyVz2QKvdlNSZQ1U=",
+			"path": "github.com/ulikunitz/xz/lzma",
+			"revision": "636d36a76670e6c700f22fd5f4588679ff2896c4",
+			"revisionTime": "2018-07-03T11:21:13Z"
 		},
 		{
 			"checksumSHA1": "AGBqaHqBx5wJdVRsQt4GeawjbXA=",
