@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -147,12 +148,14 @@ func (c *ISOConfig) parseCheckSumFile(rd *bufio.Reader) error {
 
 	absPath, err := filepath.Abs(u.Path)
 	if err != nil {
-		return fmt.Errorf("Unable to generate absolute path from provided iso_url: %s", err)
+		log.Printf("Unable to generate absolute path from provided iso_url: %s", err)
+		absPath = ""
 	}
 
 	relpath, err := filepath.Rel(filepath.Dir(checksumurl.Path), absPath)
 	if err != nil {
-		return err
+		log.Printf("Unable to determine relative pathing; continuing with abspath.")
+		relpath = ""
 	}
 
 	filename := filepath.Base(u.Path)
