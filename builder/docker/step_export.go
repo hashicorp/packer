@@ -1,18 +1,19 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepExport exports the container to a flat tar file.
 type StepExport struct{}
 
-func (s *StepExport) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 
 	driver := state.Get("driver").(Driver)

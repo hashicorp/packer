@@ -1,19 +1,21 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
+
+	"time"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
-	"time"
 )
 
-type stepAttachKeyPar struct {
+type stepAttachKeyPair struct {
 }
 
-func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	keyPairName := state.Get("keyPair").(string)
 	if keyPairName == "" {
 		return multistep.ActionContinue
@@ -48,7 +50,7 @@ func (s *stepAttachKeyPar) Run(state multistep.StateBag) multistep.StepAction {
 	return multistep.ActionContinue
 }
 
-func (s *stepAttachKeyPar) Cleanup(state multistep.StateBag) {
+func (s *stepAttachKeyPair) Cleanup(state multistep.StateBag) {
 	keyPairName := state.Get("keyPair").(string)
 	if keyPairName == "" {
 		return

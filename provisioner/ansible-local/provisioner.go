@@ -38,6 +38,9 @@ type Config struct {
 	// The main playbook file to execute.
 	PlaybookFile string `mapstructure:"playbook_file"`
 
+	// The playbook files to execute.
+	PlaybookFiles []string `mapstructure:"playbook_files"`
+
 	// An array of local paths of playbook files to upload.
 	PlaybookPaths []string `mapstructure:"playbook_paths"`
 
@@ -47,6 +50,9 @@ type Config struct {
 	// The directory where files will be uploaded. Packer requires write
 	// permissions in this directory.
 	StagingDir string `mapstructure:"staging_directory"`
+
+	// If true, staging directory is removed after executing ansible.
+	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
 
 	// The optional inventory file
 	InventoryFile string `mapstructure:"inventory_file"`
@@ -63,6 +69,8 @@ type Config struct {
 
 type Provisioner struct {
 	config Config
+
+	playbookFiles []string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -76,6 +84,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	// Reset the state.
+	p.playbookFiles = make([]string, 0, len(p.config.PlaybookFiles))
 
 	// Defaults
 	if p.config.Command == "" {
@@ -91,9 +102,32 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	// Validation
 	var errs *packer.MultiError
-	err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
-	if err != nil {
-		errs = packer.MultiErrorAppend(errs, err)
+
+	// Check that either playbook_file or playbook_files is specified
+	if len(p.config.PlaybookFiles) != 0 && p.config.PlaybookFile != "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files can be specified, not both"))
+	}
+	if len(p.config.PlaybookFiles) == 0 && p.config.PlaybookFile == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Either playbook_file or playbook_files must be specified"))
+	}
+	if p.config.PlaybookFile != "" {
+		err = validateFileConfig(p.config.PlaybookFile, "playbook_file", true)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	for _, playbookFile := range p.config.PlaybookFiles {
+		if err := validateFileConfig(playbookFile, "playbook_files", true); err != nil {
+			errs = packer.MultiErrorAppend(errs, err)
+		} else {
+			playbookFile, err := filepath.Abs(playbookFile)
+			if err != nil {
+				errs = packer.MultiErrorAppend(errs, err)
+			} else {
+				p.playbookFiles = append(p.playbookFiles, playbookFile)
+			}
+		}
 	}
 
 	// Check that the inventory file exists, if configured
@@ -166,11 +200,15 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		}
 	}
 
-	ui.Message("Uploading main Playbook file...")
-	src := p.config.PlaybookFile
-	dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
-	if err := p.uploadFile(ui, comm, dst, src); err != nil {
-		return fmt.Errorf("Error uploading main playbook: %s", err)
+	if p.config.PlaybookFile != "" {
+		ui.Message("Uploading main Playbook file...")
+		src := p.config.PlaybookFile
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+		if err := p.uploadFile(ui, comm, dst, src); err != nil {
+			return fmt.Errorf("Error uploading main playbook: %s", err)
+		}
+	} else if err := p.provisionPlaybookFiles(ui, comm); err != nil {
+		return err
 	}
 
 	if len(p.config.InventoryFile) == 0 {
@@ -201,16 +239,16 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 	if len(p.config.GalaxyFile) > 0 {
 		ui.Message("Uploading galaxy file...")
-		src = p.config.GalaxyFile
-		dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+		src := p.config.GalaxyFile
+		dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
 		if err := p.uploadFile(ui, comm, dst, src); err != nil {
 			return fmt.Errorf("Error uploading galaxy file: %s", err)
 		}
 	}
 
 	ui.Message("Uploading inventory file...")
-	src = p.config.InventoryFile
-	dst = filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
+	src := p.config.InventoryFile
+	dst := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(src)))
 	if err := p.uploadFile(ui, comm, dst, src); err != nil {
 		return fmt.Errorf("Error uploading inventory file: %s", err)
 	}
@@ -260,6 +298,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	if err := p.executeAnsible(ui, comm); err != nil {
 		return fmt.Errorf("Error executing Ansible: %s", err)
 	}
+
+	if p.config.CleanStagingDir {
+		ui.Message("Removing staging directory...")
+		if err := p.removeDir(ui, comm, p.config.StagingDir); err != nil {
+			return fmt.Errorf("Error removing staging directory: %s", err)
+		}
+	}
 	return nil
 }
 
@@ -267,6 +312,44 @@ func (p *Provisioner) Cancel() {
 	// Just hard quit. It isn't a big deal if what we're doing keeps
 	// running on the other side.
 	os.Exit(0)
+}
+
+func (p *Provisioner) provisionPlaybookFiles(ui packer.Ui, comm packer.Communicator) error {
+	var playbookDir string
+	if p.config.PlaybookDir != "" {
+		var err error
+		playbookDir, err = filepath.Abs(p.config.PlaybookDir)
+		if err != nil {
+			return err
+		}
+	}
+	for index, playbookFile := range p.playbookFiles {
+		if playbookDir != "" && strings.HasPrefix(playbookFile, playbookDir) {
+			p.playbookFiles[index] = strings.TrimPrefix(playbookFile, playbookDir)
+			continue
+		}
+		if err := p.provisionPlaybookFile(ui, comm, playbookFile); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *Provisioner) provisionPlaybookFile(ui packer.Ui, comm packer.Communicator, playbookFile string) error {
+	ui.Message(fmt.Sprintf("Uploading playbook file: %s", playbookFile))
+
+	remoteDir := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Dir(playbookFile)))
+	remotePlaybookFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, playbookFile))
+
+	if err := p.createDir(ui, comm, remoteDir); err != nil {
+		return fmt.Errorf("Error uploading playbook file: %s [%s]", playbookFile, err)
+	}
+
+	if err := p.uploadFile(ui, comm, remotePlaybookFile, playbookFile); err != nil {
+		return fmt.Errorf("Error uploading playbook: %s [%s]", playbookFile, err)
+	}
+
+	return nil
 }
 
 func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) error {
@@ -291,7 +374,6 @@ func (p *Provisioner) executeGalaxy(ui packer.Ui, comm packer.Communicator) erro
 }
 
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) error {
-	playbook := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
 	inventory := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.InventoryFile)))
 
 	extraArgs := fmt.Sprintf(" --extra-vars \"packer_build_name=%s packer_builder_type=%s packer_http_addr=%s\" ",
@@ -307,8 +389,28 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator) err
 		}
 	}
 
+	if p.config.PlaybookFile != "" {
+		playbookFile := filepath.ToSlash(filepath.Join(p.config.StagingDir, filepath.Base(p.config.PlaybookFile)))
+		if err := p.executeAnsiblePlaybook(ui, comm, playbookFile, extraArgs, inventory); err != nil {
+			return err
+		}
+	}
+
+	for _, playbookFile := range p.playbookFiles {
+		playbookFile = filepath.ToSlash(filepath.Join(p.config.StagingDir, playbookFile))
+		if err := p.executeAnsiblePlaybook(ui, comm, playbookFile, extraArgs, inventory); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *Provisioner) executeAnsiblePlaybook(
+	ui packer.Ui, comm packer.Communicator, playbookFile, extraArgs, inventory string,
+) error {
 	command := fmt.Sprintf("cd %s && %s %s%s -c local -i %s",
-		p.config.StagingDir, p.config.Command, playbook, extraArgs, inventory)
+		p.config.StagingDir, p.config.Command, playbookFile, extraArgs, inventory,
+	)
 	ui.Message(fmt.Sprintf("Executing Ansible: %s", command))
 	cmd := &packer.RemoteCmd{
 		Command: command,
@@ -367,15 +469,33 @@ func (p *Provisioner) uploadFile(ui packer.Ui, comm packer.Communicator, dst, sr
 }
 
 func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packer.RemoteCmd{
 		Command: fmt.Sprintf("mkdir -p '%s'", dir),
 	}
+
+	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
+
 	if cmd.ExitStatus != 0 {
-		return fmt.Errorf("Non-zero exit status.")
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
+	}
+	return nil
+}
+
+func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
+	cmd := &packer.RemoteCmd{
+		Command: fmt.Sprintf("rm -rf '%s'", dir),
+	}
+
+	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
+	if err := cmd.StartWithUi(comm, ui); err != nil {
+		return err
+	}
+
+	if cmd.ExitStatus != 0 {
+		return fmt.Errorf("Non-zero exit status. See output above for more information.")
 	}
 	return nil
 }

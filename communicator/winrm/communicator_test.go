@@ -48,6 +48,12 @@ func newMockWinRMServer(t *testing.T) *winrmtest.Remote {
 		func(out, err io.Writer) int {
 			return 0
 		})
+	wrm.CommandFunc(
+		winrmtest.MatchText(`powershell -Command "(Get-Item C:/Temp/packer.cmd) -is [System.IO.DirectoryInfo]"`),
+		func(out, err io.Writer) int {
+			out.Write([]byte("False"))
+			return 0
+		})
 
 	return wrm
 }

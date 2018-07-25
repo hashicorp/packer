@@ -1,5 +1,5 @@
 ---
-description:
+description: |
   The oracle-oci builder is able to create new custom images for use with Oracle
   Cloud Infrastructure (OCI).
 layout: docs
@@ -122,6 +122,21 @@ builder.
  -  `user_ocid` (string) - The OCID of the user calling the OCI API. Overrides
     value provided by the [OCI config file](https://docs.us-phoenix-1.oraclecloud.com/Content/API/Concepts/sdkconfig.htm)
     if present.
+
+ -  `use_private_ip` (boolean) - Use private ip addresses to connect to the instance via ssh.
+
+ - `metadata` (map of strings) - Metadata optionally contains custom metadata key/value pairs provided in the
+configuration. While this can be used to set metadata["user_data"] the explicit "user_data" and "user_data_file" values will have precedence. An instance's metadata can be obtained from at http://169.254.169.254 on the
+launched instance.
+
+ - `user_data` (string) - user_data to be used by cloud
+   init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Generally speaking, it is easier to use the `user_data_file`,
+   but you can use this option to put either the plaintext data or the base64
+   encoded data directly into your Packer config.
+
+ - `user_data_file` (string) - Path to a file to be used as user_data by cloud
+   init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Example:
+   `"user_data_file": "./boot_config/myscript.sh"`
 
 
 ## Basic Example

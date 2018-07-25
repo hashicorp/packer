@@ -1,16 +1,18 @@
 package common
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 type StepRebootVm struct {
 }
 
-func (s *StepRebootVm) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRebootVm) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 

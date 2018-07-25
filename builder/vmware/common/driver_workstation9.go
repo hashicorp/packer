@@ -9,11 +9,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 // Workstation9Driver is a driver that can run VMware Workstation 9
 type Workstation9Driver struct {
+	VmwareDriver
+
 	AppPath          string
 	VdiskManagerPath string
 	VmrunPath        string
@@ -22,7 +24,7 @@ type Workstation9Driver struct {
 	SSHConfig *SSHConfig
 }
 
-func (d *Workstation9Driver) Clone(dst, src string) error {
+func (d *Workstation9Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with VMware WS version 9. Please use VMware WS version 10, or greater.")
 }
 
@@ -40,8 +42,8 @@ func (d *Workstation9Driver) CompactDisk(diskPath string) error {
 	return nil
 }
 
-func (d *Workstation9Driver) CreateDisk(output string, size string, type_id string) error {
-	cmd := exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", "lsilogic", "-t", type_id, output)
+func (d *Workstation9Driver) CreateDisk(output string, size string, adapter_type string, type_id string) error {
+	cmd := exec.Command(d.VdiskManagerPath, "-c", "-s", size, "-a", adapter_type, "-t", type_id, output)
 	if _, _, err := runAndLog(cmd); err != nil {
 		return err
 	}
@@ -142,6 +144,28 @@ func (d *Workstation9Driver) Verify() error {
 		return err
 	}
 
+	// Assigning the path callbacks to VmwareDriver
+	d.VmwareDriver.DhcpLeasesPath = func(device string) string {
+		return workstationDhcpLeasesPath(device)
+	}
+
+	d.VmwareDriver.DhcpConfPath = func(device string) string {
+		return workstationDhcpConfPath(device)
+	}
+
+	d.VmwareDriver.VmnetnatConfPath = func(device string) string {
+		return workstationVmnetnatConfPath(device)
+	}
+
+	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
+		pathNetmap := workstationNetmapConfPath()
+		if _, err := os.Stat(pathNetmap); err != nil {
+			return nil, fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
+		}
+		log.Printf("Located networkmapper configuration file using Workstation: %s", pathNetmap)
+
+		return ReadNetmapConfig(pathNetmap)
+	}
 	return nil
 }
 
@@ -153,10 +177,6 @@ func (d *Workstation9Driver) ToolsInstall() error {
 	return nil
 }
 
-func (d *Workstation9Driver) DhcpLeasesPath(device string) string {
-	return workstationDhcpLeasesPath(device)
-}
-
-func (d *Workstation9Driver) VmnetnatConfPath() string {
-	return workstationVmnetnatConfPath()
+func (d *Workstation9Driver) GetVmwareDriver() VmwareDriver {
+	return d.VmwareDriver
 }

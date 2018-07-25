@@ -6,12 +6,13 @@ import (
 	"log"
 
 	"fmt"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -88,12 +89,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = []multistep.Step{
 		&stepPreValidate{
 			AlicloudDestImageName: b.config.AlicloudImageName,
-			ForceDelete:           b.config.AlicloudImageForceDetele,
+			ForceDelete:           b.config.AlicloudImageForceDelete,
 		},
 		&stepCheckAlicloudSourceImage{
 			SourceECSImageId: b.config.AlicloudSourceImage,
 		},
-		&StepConfigAlicloudKeyPair{
+		&stepConfigAlicloudKeyPair{
 			Debug:                b.config.PackerDebug,
 			KeyPairName:          b.config.SSHKeyPairName,
 			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
@@ -131,14 +132,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                b.config.AlicloudRegion,
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
-			InstnaceName:            b.config.InstanceName,
+			InstanceName:            b.config.InstanceName,
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == VpcNet {
-		steps = append(steps, &setpConfigAlicloudEIP{
+		steps = append(steps, &stepConfigAlicloudEIP{
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
+			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
@@ -146,9 +148,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		})
 	}
 	steps = append(steps,
+		&stepAttachKeyPair{},
 		&stepRunAlicloudInstance{},
 		&stepMountAlicloudDisk{},
-		&stepAttachKeyPar{},
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: SSHHost(
@@ -164,17 +166,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ForceStop: b.config.ForceStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
-			AlicloudImageForceDeteleSnapshots: b.config.AlicloudImageForceDeteleSnapshots,
-			AlicloudImageForceDetele:          b.config.AlicloudImageForceDetele,
+			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
+			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
-		&setpRegionCopyAlicloudImage{
+		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
 			RegionId:                        b.config.AlicloudRegion,
 		},
-		&setpShareAlicloudImage{
+		&stepShareAlicloudImage{
 			AlicloudImageShareAccounts:   b.config.AlicloudImageShareAccounts,
 			AlicloudImageUNShareAccounts: b.config.AlicloudImageUNShareAccounts,
 			RegionId:                     b.config.AlicloudRegion,

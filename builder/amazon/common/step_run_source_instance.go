@@ -1,41 +1,46 @@
 package common
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
+	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
 	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
+	Ctx                               interpolate.Context
 	Debug                             bool
 	EbsOptimized                      bool
+	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
 	IamInstanceProfile                string
 	InstanceInitiatedShutdownBehavior string
 	InstanceType                      string
+	IsRestricted                      bool
 	SourceAMI                         string
 	SubnetId                          string
-	Tags                              map[string]string
-	VolumeTags                        map[string]string
+	Tags                              TagMap
 	UserData                          string
 	UserDataFile                      string
-	Ctx                               interpolate.Context
+	VolumeTags                        TagMap
 
 	instanceId string
 }
 
-func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	var keyName string
 	if name, ok := state.GetOk("keyPair"); ok {
@@ -84,16 +89,15 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		s.Tags["Name"] = "Packer Builder"
 	}
 
-	ec2Tags, err := ConvertToEC2Tags(s.Tags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	ec2Tags, err := s.Tags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging source instance: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	ReportTags(ui, ec2Tags)
 
-	volTags, err := ConvertToEC2Tags(s.VolumeTags, *ec2conn.Config.Region, s.SourceAMI, s.Ctx)
+	volTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
 	if err != nil {
 		err := fmt.Errorf("Error tagging volumes: %s", err)
 		state.Put("error", err)
@@ -113,6 +117,12 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
+	if s.EnableT2Unlimited {
+		creditOption := "unlimited"
+		runOpts.CreditSpecification = &ec2.CreditSpecificationRequest{CpuCredits: &creditOption}
+	}
+
+	// Collect tags for tagging on resource creation
 	var tagSpecs []*ec2.TagSpecification
 
 	if len(ec2Tags) > 0 {
@@ -133,8 +143,11 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 		tagSpecs = append(tagSpecs, runVolTags)
 	}
 
-	if len(tagSpecs) > 0 {
+	// If our region supports it, set tag specifications
+	if len(tagSpecs) > 0 && !s.IsRestricted {
 		runOpts.SetTagSpecifications(tagSpecs)
+		ec2Tags.Report(ui)
+		volTags.Report(ui)
 	}
 
 	if keyName != "" {
@@ -174,21 +187,26 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	ui.Message(fmt.Sprintf("Instance ID: %s", instanceId))
 	ui.Say(fmt.Sprintf("Waiting for instance (%v) to become ready...", instanceId))
-	stateChange := StateChangeConf{
-		Pending:   []string{"pending"},
-		Target:    "running",
-		Refresh:   InstanceStateRefreshFunc(ec2conn, instanceId),
-		StepState: state,
+
+	describeInstance := &ec2.DescribeInstancesInput{
+		InstanceIds: []*string{aws.String(instanceId)},
 	}
-	latestInstance, err := WaitForState(&stateChange)
-	if err != nil {
+	if err := ec2conn.WaitUntilInstanceRunningWithContext(ctx, describeInstance); err != nil {
 		err := fmt.Errorf("Error waiting for instance (%s) to become ready: %s", instanceId, err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	instance := latestInstance.(*ec2.Instance)
+	r, err := ec2conn.DescribeInstances(describeInstance)
+
+	if err != nil || len(r.Reservations) == 0 || len(r.Reservations[0].Instances) == 0 {
+		err := fmt.Errorf("Error finding source instance.")
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	instance := r.Reservations[0].Instances[0]
 
 	if s.Debug {
 		if instance.PublicDnsName != nil && *instance.PublicDnsName != "" {
@@ -206,6 +224,70 @@ func (s *StepRunSourceInstance) Run(state multistep.StateBag) multistep.StepActi
 
 	state.Put("instance", instance)
 
+	// If we're in a region that doesn't support tagging on instance creation,
+	// do that now.
+
+	if s.IsRestricted {
+		ec2Tags.Report(ui)
+		// Retry creating tags for about 2.5 minutes
+		err = retry.Retry(0.2, 30, 11, func(_ uint) (bool, error) {
+			_, err := ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Tags:      ec2Tags,
+				Resources: []*string{instance.InstanceId},
+			})
+			if err == nil {
+				return true, nil
+			}
+			if awsErr, ok := err.(awserr.Error); ok {
+				if awsErr.Code() == "InvalidInstanceID.NotFound" {
+					return false, nil
+				}
+			}
+			return true, err
+		})
+
+		if err != nil {
+			err := fmt.Errorf("Error tagging source instance: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		// Now tag volumes
+
+		volumeIds := make([]*string, 0)
+		for _, v := range instance.BlockDeviceMappings {
+			if ebs := v.Ebs; ebs != nil {
+				volumeIds = append(volumeIds, ebs.VolumeId)
+			}
+		}
+
+		if len(volumeIds) > 0 && s.VolumeTags.IsSet() {
+			ui.Say("Adding tags to source EBS Volumes")
+
+			volumeTags, err := s.VolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+			if err != nil {
+				err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+			volumeTags.Report(ui)
+
+			_, err = ec2conn.CreateTags(&ec2.CreateTagsInput{
+				Resources: volumeIds,
+				Tags:      volumeTags,
+			})
+
+			if err != nil {
+				err := fmt.Errorf("Error tagging source EBS Volumes on %s: %s", *instance.InstanceId, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	}
+
 	return multistep.ActionContinue
 }
 
@@ -221,14 +303,8 @@ func (s *StepRunSourceInstance) Cleanup(state multistep.StateBag) {
 			ui.Error(fmt.Sprintf("Error terminating instance, may still be around: %s", err))
 			return
 		}
-		stateChange := StateChangeConf{
-			Pending: []string{"pending", "running", "shutting-down", "stopped", "stopping"},
-			Refresh: InstanceStateRefreshFunc(ec2conn, s.instanceId),
-			Target:  "terminated",
-		}
 
-		_, err := WaitForState(&stateChange)
-		if err != nil {
+		if err := WaitUntilInstanceTerminated(aws.BackgroundContext(), ec2conn, s.instanceId); err != nil {
 			ui.Error(err.Error())
 		}
 	}

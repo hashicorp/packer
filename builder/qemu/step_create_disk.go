@@ -1,18 +1,19 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step creates the virtual disk that will be used as the
 // hard drive for the virtual machine.
 type stepCreateDisk struct{}
 
-func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -22,11 +23,19 @@ func (s *stepCreateDisk) Run(state multistep.StateBag) multistep.StepAction {
 	command := []string{
 		"create",
 		"-f", config.Format,
-		path,
-		fmt.Sprintf("%vM", config.DiskSize),
 	}
 
-	if config.DiskImage == true {
+	if config.UseBackingFile {
+		isoPath := state.Get("iso_path").(string)
+		command = append(command, "-b", isoPath)
+	}
+
+	command = append(command,
+		path,
+		fmt.Sprintf("%vM", config.DiskSize),
+	)
+
+	if config.DiskImage && !config.UseBackingFile {
 		return multistep.ActionContinue
 	}
 

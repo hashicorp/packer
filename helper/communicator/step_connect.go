@@ -1,12 +1,13 @@
 package communicator
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/packer/communicator/none"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -43,7 +44,7 @@ type StepConnect struct {
 	substep multistep.Step
 }
 
-func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	typeMap := map[string]multistep.Step{
 		"none": nil,
 		"ssh": &StepConnectSSH{
@@ -84,7 +85,7 @@ func (s *StepConnect) Run(state multistep.StateBag) multistep.StepAction {
 	}
 
 	s.substep = step
-	return s.substep.Run(state)
+	return s.substep.Run(ctx, state)
 }
 
 func (s *StepConnect) Cleanup(state multistep.StateBag) {

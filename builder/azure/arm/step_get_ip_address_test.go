@@ -1,11 +1,12 @@
 package arm
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
@@ -13,7 +14,9 @@ func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get:      func(string, string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
+			get: func(context.Context, string, string, string) (string, error) {
+				return "", fmt.Errorf("!! Unit Test FAIL !!")
+			},
 			endpoint: endpoint,
 			say:      func(message string) {},
 			error:    func(e error) {},
@@ -21,7 +24,7 @@ func TestStepGetIPAddressShouldFailIfGetFails(t *testing.T) {
 
 		stateBag := createTestStateBagStepGetIPAddress()
 
-		var result = testSubject.Run(stateBag)
+		var result = testSubject.Run(context.Background(), stateBag)
 		if result != multistep.ActionHalt {
 			t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 		}
@@ -37,7 +40,7 @@ func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get:      func(string, string, string) (string, error) { return "", nil },
+			get:      func(context.Context, string, string, string) (string, error) { return "", nil },
 			endpoint: endpoint,
 			say:      func(message string) {},
 			error:    func(e error) {},
@@ -45,7 +48,7 @@ func TestStepGetIPAddressShouldPassIfGetPasses(t *testing.T) {
 
 		stateBag := createTestStateBagStepGetIPAddress()
 
-		var result = testSubject.Run(stateBag)
+		var result = testSubject.Run(context.Background(), stateBag)
 		if result != multistep.ActionContinue {
 			t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 		}
@@ -64,7 +67,7 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 
 	for _, endpoint := range endpoints {
 		var testSubject = &StepGetIPAddress{
-			get: func(resourceGroupName string, ipAddressName string, nicName string) (string, error) {
+			get: func(ctx context.Context, resourceGroupName string, ipAddressName string, nicName string) (string, error) {
 				actualResourceGroupName = resourceGroupName
 				actualIPAddressName = ipAddressName
 				actualNicName = nicName
@@ -77,7 +80,7 @@ func TestStepGetIPAddressShouldTakeStepArgumentsFromStateBag(t *testing.T) {
 		}
 
 		stateBag := createTestStateBagStepGetIPAddress()
-		var result = testSubject.Run(stateBag)
+		var result = testSubject.Run(context.Background(), stateBag)
 
 		if result != multistep.ActionContinue {
 			t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)

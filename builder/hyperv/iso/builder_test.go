@@ -1,11 +1,16 @@
 package iso
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
 
+	"os"
+
+	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -18,6 +23,7 @@ func testConfig() map[string]interface{} {
 		"ssh_username":            "foo",
 		"ram_size":                64,
 		"disk_size":               256,
+		"disk_block_size":         1,
 		"guest_additions_mode":    "none",
 		"disk_additional_size":    "50000,40000,30000",
 		packer.BuildNameConfigKey: "foo",
@@ -78,6 +84,111 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 
 	if b.config.DiskSize != 256 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
+	}
+}
+
+func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	expected_default_block_size := uint(32)
+	expected_min_block_size := uint(0)
+	expected_max_block_size := uint(256)
+
+	// Test default with empty disk_block_size
+	delete(config, "disk_block_size")
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+	if b.config.DiskBlockSize != expected_default_block_size {
+		t.Fatalf("bad default block size with empty config: %d. Expected %d", b.config.DiskBlockSize, expected_default_block_size)
+	}
+
+	test_sizes := []uint{0, 1, 32, 256, 512, 1 * 1024, 32 * 1024}
+	for _, test_size := range test_sizes {
+		config["disk_block_size"] = test_size
+		b = Builder{}
+		warns, err = b.Prepare(config)
+		if test_size > expected_max_block_size || test_size < expected_min_block_size {
+			if len(warns) > 0 {
+				t.Fatalf("bad, should have no warns: %#v", warns)
+			}
+			if err == nil {
+				t.Fatalf("bad, should have error but didn't. disk_block_size=%d outside expected valid range [%d,%d]", test_size, expected_min_block_size, expected_max_block_size)
+			}
+		} else {
+			if len(warns) > 0 {
+				t.Fatalf("bad: %#v", warns)
+			}
+			if err != nil {
+				t.Fatalf("bad, should not have error: %s", err)
+			}
+			if test_size == 0 {
+				if b.config.DiskBlockSize != expected_default_block_size {
+					t.Fatalf("bad default block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+				}
+			} else {
+				if b.config.DiskBlockSize != test_size {
+					t.Fatalf("bad block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+				}
+			}
+		}
+	}
+}
+
+func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
+	var b Builder
+	config := testConfig()
+	config["use_fixed_vhd_format"] = true
+	config["generation"] = 1
+	config["skip_compaction"] = true
+	config["differencing_disk"] = false
+
+	//use_fixed_vhd_format should work with generation = 1, skip_compaction = true, and differencing_disk = false
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("bad err: %s", err)
+	}
+
+	//use_fixed_vhd_format should not work with differencing_disk = true
+	config["differencing_disk"] = true
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	config["differencing_disk"] = false
+
+	//use_fixed_vhd_format should not work with skip_compaction = false
+	config["skip_compaction"] = false
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+	config["skip_compaction"] = true
+
+	//use_fixed_vhd_format should not work with generation = 2
+	config["generation"] = 2
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
 	}
 }
 
@@ -471,4 +582,46 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		}
 	}
 
+}
+
+func TestUserVariablesInBootCommand(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
+	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}
+
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	ui := packer.TestUi(t)
+	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	hook := &packer.MockHook{}
+	driver := &hypervcommon.DriverMock{}
+
+	// Set up the state.
+	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
+	state.Put("config", &b.config)
+	state.Put("driver", driver)
+	state.Put("hook", hook)
+	state.Put("http_port", uint(0))
+	state.Put("ui", ui)
+	state.Put("vmName", "packer-foo")
+
+	step := &hypervcommon.StepTypeBootCommand{
+		BootCommand: b.config.FlatBootCommand(),
+		SwitchName:  b.config.SwitchName,
+		Ctx:         b.config.ctx,
+	}
+
+	ret := step.Run(context.Background(), state)
+	if ret != multistep.ActionContinue {
+		t.Fatalf("should not have error: %#v", ret)
+	}
 }

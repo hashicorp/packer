@@ -43,6 +43,7 @@ Here is a full list of the available functions for reference.
 -   `uuid` - Returns a random UUID.
 -   `upper` - Uppercases the string.
 -   `user` - Specifies a user variable.
+-   `packer_version` - Returns Packer version.
 
 #### Specific to Amazon builders:
 
@@ -66,7 +67,7 @@ Here is a full list of the available functions for reference.
 
     This engine does not guarantee that the final image name will match the
     regex; it will not truncate your name if it exceeds 63 characters, and it
-    will not valiate that the beginning and end of the engine's output are
+    will not validate that the beginning and end of the engine's output are
     valid. For example,
     `"image_name": {{isotime | clean_image_name}}"` will cause your build to
     fail because the image name will start with a number, which is why in the

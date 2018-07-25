@@ -11,14 +11,16 @@ import (
 	"github.com/hashicorp/packer/builder/vmware/iso"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/post-processor/vsphere"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 	"github.com/vmware/govmomi"
 )
 
 var builtins = map[string]string{
-	"mitchellh.vmware-esx": "vmware",
+	vsphere.BuilderId: "vmware",
+	iso.BuilderIdESX:  "vmware",
 }
 
 type Config struct {
@@ -74,6 +76,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error invalid vSphere sdk endpoint: %s", err))
+		return errs
 	}
 
 	sdk.User = url.UserPassword(p.config.Username, p.config.Password)
@@ -87,7 +90,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 
 func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (packer.Artifact, bool, error) {
 	if _, ok := builtins[artifact.BuilderId()]; !ok {
-		return nil, false, fmt.Errorf("Unknown artifact type, can't build box: %s", artifact.BuilderId())
+		return nil, false, fmt.Errorf("The Packer vSphere Template post-processor "+
+			"can only take an artifact from the VMware-iso builder, built on "+
+			"ESXi (i.e. remote) or an artifact from the vSphere post-processor. "+
+			"Artifact type %s does not fit this requirement", artifact.BuilderId())
 	}
 
 	f := artifact.State(iso.ArtifactConfFormat)
@@ -120,9 +126,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
-		&stepMarkAsTemplate{
-			VMName: artifact.Id(),
-		},
+		NewStepMarkAsTemplate(artifact),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
 	runner.Run(state)

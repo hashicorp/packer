@@ -55,9 +55,9 @@ builder.
     the root device of the AMI. This looks like the mappings in `ami_block_device_mapping`,
     except with an additional field:
 
--   `source_device_name` (string) - The device name of the block device on the
-    source instance to be used as the root device for the AMI. This must correspond
-    to a block device in `launch_block_device_mapping`.
+    -   `source_device_name` (string) - The device name of the block device on the
+        source instance to be used as the root device for the AMI. This must correspond
+        to a block device in `launch_block_device_mapping`.
 
 ### Optional:
 
@@ -104,9 +104,8 @@ builder.
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
@@ -144,8 +143,15 @@ builder.
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
     which will stop the instance for you. If this is set to true, Packer *will not*
-    stop the instance and will wait for you to stop it manually. You can do this
-    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+    stop the instance but will assume that you will send the stop signal
+    yourself through your final provisioner. You can do this with a
+    [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+
+    Note that Packer will still wait for the instance to be stopped, and failing
+    to send the stop signal yourself, when you have set this flag to `true`,
+    will cause a timeout.
+
+    Example of a valid shutdown command:
 
     ``` json
     {
@@ -162,6 +168,30 @@ builder.
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
     Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
+
+-   `enable_t2_unlimited` (boolean) - Enabling T2 Unlimited allows the source
+    instance to burst additional CPU beyond its available [CPU Credits]
+    (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html)
+    for as long as the demand exists.
+    This is in contrast to the standard configuration that only allows an
+    instance to consume up to its available CPU Credits.
+    See the AWS documentation for [T2 Unlimited]
+    (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html)
+    and the 'T2 Unlimited Pricing' section of the [Amazon EC2 On-Demand
+    Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
+    information.
+    By default this option is disabled and Packer will set up a [T2
+    Standard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
+    instance instead.
+
+    To use T2 Unlimited you must use a T2 instance type e.g. t2.micro.
+    Additionally, T2 Unlimited cannot be used in conjunction with Spot
+    Instances e.g. when the `spot_price` option has been configured.
+    Attempting to do so will cause an error.
+
+    !&gt; **Warning!** Additional costs may be incurred by enabling T2
+    Unlimited - even for instances that would usually qualify for the
+    [AWS Free Tier](https://aws.amazon.com/free/).
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -182,10 +212,14 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `launch_block_device_mappings` (array of block device mappings) - Add one or
-    more block devices before the packer build starts. These are not necessarily
-    preserved when booting from the AMI built with packer. See
-    `ami_block_device_mappings`, above, for details.
+-   `launch_block_device_mappings` (array of block device mappings) - Add one
+    or more block devices before the Packer build starts. If you add instance
+    store volumes or EBS volumes in addition to the root device volume, the
+    created AMI will contain block device mapping information for those
+    volumes. Amazon creates snapshots of the source instance's root volume and
+    any other EBS volumes described here. When you launch an instance from this
+    new AMI, the instance automatically launches with these additional volumes,
+    and will restore them from snapshots taken from the source instance.
 
 -   `mfa_code` (string) - The MFA [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the time.
@@ -207,16 +241,14 @@ builder.
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `run_volume_tags` (object of key/value strings) - Tags to apply to the volumes
     that are *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
     to assign to the instance. By default this is not set and Packer will
@@ -242,7 +274,7 @@ builder.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -250,9 +282,8 @@ builder.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
     Example:
@@ -286,6 +317,12 @@ builder.
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
+    You may set this in place of `source_ami` or in conjunction with it. If you
+    set this in conjunction with `source_ami`, the `source_ami` will be added to
+    the filter. The provided `source_ami` must meet all of the filtering criteria
+    provided in `source_ami_filter`; this pins the AMI returned by the filter,
+    but will cause Packer to fail if the `source_ami` does not exist.
+
 -   `spot_price` (string) - The maximum hourly price to pay for a spot instance
     to create the AMI. Spot instances are a type of instance that EC2 starts
     when the current spot price is less than the maximum price you specify. Spot
@@ -298,6 +335,10 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `spot_tags` (object of key/value strings) - Requires `spot_price` to
+    be set. This tells Packer to apply tags to the spot request that is
+    issued.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
@@ -321,8 +362,19 @@ builder.
     in AWS with the source instance, set the `ssh_keypair_name` field to the name
     of the key pair.
 
--   `ssh_private_ip` (boolean) - If true, then SSH will always use the private
-    IP if available.
+-   `ssh_private_ip` (boolean) - No longer supported. See
+    [`ssh_interface`](#ssh_interface). A fixer exists to migrate.
+
+-   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
+    `public_dns` or `private_dns`. If set, either the public IP address,
+    private IP address, public DNS name or private DNS name will used as the host for SSH.
+    The default behaviour if inside a VPC is to use the public IP address if available,
+    otherwise the private IP address will be used. If not in a VPC the public DNS name
+    will be used. Also works for WinRM.
+
+    Where Packer is configured for an outbound proxy but WinRM traffic should be direct,
+    `ssh_interface` must be set to `private_dns` and `<region>.compute.internal` included
+    in the `NO_PROXY` environment variable.
 
 -   `subnet_id` (string) - If using VPC, the ID of the subnet, such as
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
@@ -330,9 +382,8 @@ builder.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI and
     relevant snapshots. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with the value of `region`.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary keypair
     to generate. By default, Packer generates a name with a UUID.
@@ -401,6 +452,16 @@ If you need to access the instance to debug for some reason, run the builder
 with the `-debug` flag. In debug mode, the Amazon builder will save the private
 key in the current directory and will output the DNS or IP information as well.
 You can use this information to access the instance as it is running.
+
+## Build template data
+
+The available variables are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
+- `SourceAMIName` - The source AMI Name (for example `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to build the AMI.
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.
+
 
 -&gt; **Note:** Packer uses pre-built AMIs as the source for building images.
 These source AMIs may include volumes that are not flagged to be destroyed on

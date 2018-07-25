@@ -1,12 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // StepOutputDir sets up the output directory by creating it if it does
@@ -18,7 +19,7 @@ type StepOutputDir struct {
 	success bool
 }
 
-func (s *StepOutputDir) Run(state multistep.StateBag) multistep.StepAction {
+func (s *StepOutputDir) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	dir := state.Get("dir").(OutputDir)
 	ui := state.Get("ui").(packer.Ui)
 

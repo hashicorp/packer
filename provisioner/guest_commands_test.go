@@ -118,3 +118,78 @@ func TestRemoveDir(t *testing.T) {
 		t.Fatalf("Unexpected Windows remove dir cmd: %s", cmd)
 	}
 }
+
+func TestStatPath(t *testing.T) {
+	// *nix
+	guestCmd, err := NewGuestCommands(UnixOSType, false)
+	if err != nil {
+		t.Fatalf("Failed to create new GuestCommands for OS: %s", UnixOSType)
+	}
+	cmd := guestCmd.StatPath("/tmp/somedir")
+	if cmd != "stat '/tmp/somedir'" {
+		t.Fatalf("Unexpected Unix stat cmd: %s", cmd)
+	}
+
+	guestCmd, err = NewGuestCommands(UnixOSType, true)
+	if err != nil {
+		t.Fatalf("Failed to create new GuestCommands for OS: %s", UnixOSType)
+	}
+	cmd = guestCmd.StatPath("/tmp/somedir")
+	if cmd != "sudo stat '/tmp/somedir'" {
+		t.Fatalf("Unexpected Unix stat cmd: %s", cmd)
+	}
+
+	// Windows OS
+	guestCmd, err = NewGuestCommands(WindowsOSType, false)
+	if err != nil {
+		t.Fatalf("Failed to create new GuestCommands for OS: %s", WindowsOSType)
+	}
+	cmd = guestCmd.StatPath("C:\\Temp\\SomeDir")
+	if cmd != "powershell.exe -Command { if (test-path C:\\Temp\\SomeDir) { exit 0 } else { exit 1 } }" {
+		t.Fatalf("Unexpected Windows stat cmd: %s", cmd)
+	}
+
+	// Windows OS w/ space in path
+	cmd = guestCmd.StatPath("C:\\Temp\\Some Dir")
+	if cmd != "powershell.exe -Command { if (test-path C:\\Temp\\Some` Dir) { exit 0 } else { exit 1 } }" {
+		t.Fatalf("Unexpected Windows stat cmd: %s", cmd)
+	}
+}
+
+func TestMovePath(t *testing.T) {
+	// *nix
+	guestCmd, err := NewGuestCommands(UnixOSType, false)
+	if err != nil {
+		t.Fatalf("Failed to create new GuestCommands for OS: %s", UnixOSType)
+	}
+	cmd := guestCmd.MovePath("/tmp/somedir", "/tmp/newdir")
+	if cmd != "mv '/tmp/somedir' '/tmp/newdir'" {
+		t.Fatalf("Unexpected Unix move cmd: %s", cmd)
+	}
+
+	// sudo *nix
+	guestCmd, err = NewGuestCommands(UnixOSType, true)
+	if err != nil {
+		t.Fatalf("Failed to create new sudo GuestCommands for OS: %s", UnixOSType)
+	}
+	cmd = guestCmd.MovePath("/tmp/somedir", "/tmp/newdir")
+	if cmd != "sudo mv '/tmp/somedir' '/tmp/newdir'" {
+		t.Fatalf("Unexpected Unix sudo mv cmd: %s", cmd)
+	}
+
+	// Windows OS
+	guestCmd, err = NewGuestCommands(WindowsOSType, false)
+	if err != nil {
+		t.Fatalf("Failed to create new GuestCommands for OS: %s", WindowsOSType)
+	}
+	cmd = guestCmd.MovePath("C:\\Temp\\SomeDir", "C:\\Temp\\NewDir")
+	if cmd != "powershell.exe -Command \"mv C:\\Temp\\SomeDir C:\\Temp\\NewDir\"" {
+		t.Fatalf("Unexpected Windows remove dir cmd: %s", cmd)
+	}
+
+	// Windows OS w/ space in path
+	cmd = guestCmd.MovePath("C:\\Temp\\Some Dir", "C:\\Temp\\New Dir")
+	if cmd != "powershell.exe -Command \"mv C:\\Temp\\Some` Dir C:\\Temp\\New` Dir\"" {
+		t.Fatalf("Unexpected Windows remove dir cmd: %s", cmd)
+	}
+}

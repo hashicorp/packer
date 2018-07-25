@@ -1,13 +1,14 @@
 package qemu
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step shuts down the machine. It first attempts to do so gracefully,
@@ -23,7 +24,7 @@ import (
 //   <nothing>
 type stepShutdown struct{}
 
-func (s *stepShutdown) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepShutdown) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)

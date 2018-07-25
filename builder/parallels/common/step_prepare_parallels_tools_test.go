@@ -1,11 +1,12 @@
 package common
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepPrepareParallelsTools_impl(t *testing.T) {
@@ -32,7 +33,7 @@ func TestStepPrepareParallelsTools(t *testing.T) {
 	driver.ToolsISOPathResult = tf.Name()
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -67,7 +68,7 @@ func TestStepPrepareParallelsTools_disabled(t *testing.T) {
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -93,7 +94,7 @@ func TestStepPrepareParallelsTools_nonExist(t *testing.T) {
 	driver.ToolsISOPathResult = "foo"
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); !ok {

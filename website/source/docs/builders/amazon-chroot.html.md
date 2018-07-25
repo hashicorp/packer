@@ -77,10 +77,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
     launch the resulting AMI(s). By default no groups have permission to launch
@@ -170,6 +168,9 @@ each category, the available configuration keys are alphabetized.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
+    -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
+        specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
@@ -212,8 +213,10 @@ each category, the available configuration keys are alphabetized.
     where the `.Device` variable is replaced with the name of the device where
     the volume is attached.
 
--   `mount_partition` (number) - The partition number containing the
-    / partition. By default this is the first partition of the volume.
+-   `mount_partition` (string) - The partition number containing the
+    / partition. By default this is the first partition of the volume, (for
+    example, `xvda1`) but you can designate the entire block device by setting
+    `"mount_partition": "0"` in your config, which will mount `xvda` instead.
 
 -   `mount_options` (array of strings) - Options to supply the `mount` command
     when mounting devices. Each option will be prefixed with `-o` and supplied
@@ -221,6 +224,14 @@ each category, the available configuration keys are alphabetized.
     shell, user discretion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
     system specific options
+
+-   `nvme_device_path` (string) - When we call the mount command (by default
+    `mount -o device dir`), the string provided in `nvme_mount_path` will
+    replace `device` in that command. When this option is not set, `device` in
+    that command will be something like `/dev/sdf1`, mirroring the attached
+    device name. This assumption works for most instances but will fail with c5
+    and m5 instances. In order to use the chroot builder with c5 and m5
+    instances, you must manually set `nvme_device_path` and `device_path`.
 
 -   `pre_mount_commands` (array of strings) - A series of commands to execute
     after attaching the root volume and before mounting the chroot. This is not
@@ -243,19 +254,22 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
+-   `root_volume_tags` (object of key/value strings) - Tags to apply to the volumes
+    that are *launched*. This is a
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 -   `snapshot_groups` (array of strings) - A list of groups that have access to
     create volumes from the snapshot(s). By default no groups have permission to create
-    volumes form the snapshot(s). `all` will make the snapshot publicly accessible.
+    volumes from the snapshot(s). `all` will make the snapshot publicly accessible.
 
 -   `snapshot_users` (array of strings) - A list of account IDs that have access to
     create volumes from the snapshot(s). By default no additional users other than the
@@ -291,6 +305,12 @@ each category, the available configuration keys are alphabetized.
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
+    You may set this in place of `source_ami` or in conjunction with it. If you
+    set this in conjunction with `source_ami`, the `source_ami` will be added to
+    the filter. The provided `source_ami` must meet all of the filtering criteria
+    provided in `source_ami_filter`; this pins the AMI returned by the filter,
+    but will cause Packer to fail if the `source_ami` does not exist.
+
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
     policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
@@ -298,10 +318,8 @@ each category, the available configuration keys are alphabetized.
     Default `false`.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI. This is a
-    [template engine](/docs/templates/engine.html)
-    where the `SourceAMI` variable is replaced with the source AMI ID and
-    `BuildRegion` variable is replaced with name of the region where this
-    is built.
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
 
 ## Basic Example
 
@@ -332,7 +350,7 @@ chroot by Packer:
 These default mounts are usually good enough for anyone and are sane defaults.
 However, if you want to change or add the mount points, you may using the
 `chroot_mounts` configuration. Here is an example configuration which only
-mounts `/prod` and `/dev`:
+mounts `/proc` and `/dev`:
 
 ``` json
 {
@@ -365,6 +383,7 @@ its internals such as finding an available device.
 
 ## Gotchas
 
+### Unmounting the Filesystem
 One of the difficulties with using the chroot builder is that your provisioning
 scripts must not leave any processes running or packer will be unable to unmount
 the filesystem.
@@ -393,6 +412,53 @@ services:
   ]
 }
 ```
+
+### Using Instances with NVMe block devices.
+In C5, C5d, M5, and i3.metal instances, EBS volumes are exposed as NVMe block
+devices [reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html).
+In order to correctly mount these devices, you have to do some extra legwork,
+involving the `nvme_device_path` option above. Read that for more information.
+
+A working example for mounting an NVMe device is below:
+
+```
+{
+  "variables": {
+    "region" : "us-east-2"
+  },
+  "builders": [
+    {
+      "type": "amazon-chroot",
+      "region": "{{user `region`}}",
+      "source_ami_filter": {
+        "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn-ami-hvm-*",
+        "root-device-type": "ebs"
+        },
+        "owners": ["137112412989"],
+        "most_recent": true
+      },
+      "ena_support": true,
+      "ami_name": "amazon-chroot-test-{{timestamp}}",
+      "nvme_device_path": "/dev/nvme1n1p",
+      "device_path": "/dev/sdf"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo Test > /tmp/test.txt"]
+    }
+  ]
+}
+```
+
+Note that in the `nvme_device_path` you must end with the `p`; if you try to
+define the partition in this path (e.g. "nvme_device_path": `/dev/nvme1n1p1`)
+and haven't also set the `"mount_partition": 0`, a `1` will be appended to the
+`nvme_device_path` and Packer will fail.
 
 ## Building From Scratch
 
@@ -423,3 +489,12 @@ provisioning commands to install the os and bootloader.
   ]
 }
 ```
+
+## Build template data
+
+The available variables are:
+
+- `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
+- `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
+- `SourceAMIName` - The source AMI Name (for example `ubuntu/images/ebs-ssd/ubuntu-xenial-16.04-amd64-server-20180306`) used to build the AMI.
+- `SourceAMITags` - The source AMI Tags, as a `map[string]string` object.

@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func commHost(state multistep.StateBag) (string, error) {

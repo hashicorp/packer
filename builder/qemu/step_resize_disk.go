@@ -1,18 +1,19 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step resizes the virtual disk that will be used as the
 // hard drive for the virtual machine.
 type stepResizeDisk struct{}
 
-func (s *stepResizeDisk) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepResizeDisk) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -20,6 +21,7 @@ func (s *stepResizeDisk) Run(state multistep.StateBag) multistep.StepAction {
 
 	command := []string{
 		"resize",
+		"-f", config.Format,
 		path,
 		fmt.Sprintf("%vM", config.DiskSize),
 	}

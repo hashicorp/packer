@@ -2,7 +2,6 @@ package lxc
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type LxcAttachCommunicator struct {
@@ -70,6 +71,24 @@ func (c *LxcAttachCommunicator) Upload(dst string, r io.Reader, fi *os.FileInfo)
 	cpCmd, err := c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", tf.Name(), dst))
 	if err != nil {
 		return err
+	}
+
+	if fi != nil {
+		tfDir := filepath.Dir(tf.Name())
+		// rename tempfile to match original file name. This makes sure that if file is being
+		// moved into a directory, the filename is preserved instead of a temp name.
+		adjustedTempName := filepath.Join(tfDir, (*fi).Name())
+		mvCmd, err := c.CmdWrapper(fmt.Sprintf("sudo mv %s %s", tf.Name(), adjustedTempName))
+		if err != nil {
+			return err
+		}
+		defer os.Remove(adjustedTempName)
+		ShellCommand(mvCmd).Run()
+		// change cpCmd to use new file name as source
+		cpCmd, err = c.CmdWrapper(fmt.Sprintf("sudo cp %s %s", adjustedTempName, dst))
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Printf("Running copy command: %s", dst)

@@ -1,13 +1,14 @@
 package qemu
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step adds a NAT port forwarding definition so that SSH is available
@@ -18,7 +19,7 @@ import (
 // Produces:
 type stepForwardSSH struct{}
 
-func (s *stepForwardSSH) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepForwardSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 

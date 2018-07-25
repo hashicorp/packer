@@ -2,13 +2,14 @@ package lxc
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/mitchellh/mapstructure"
-	"os"
-	"time"
 )
 
 type Config struct {

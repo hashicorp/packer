@@ -46,6 +46,14 @@ description: |-
               <li><a href="<%= url %>"><%= pretty_arch(arch) %></a></li>
             <% end %>
           </ul>
+          <% if os == "freebsd" %>
+            <div class="alert alert-info">
+              Note: At least <code>FreeBSD 10-STABLE</code> is required to run Packer.
+              If you'd like to run on an earlier version, please
+              <a href="/docs/install/index.html#compiling-from-source">compile Packer yourself</a>
+              using the <a href="https://github.com/golang/go/wiki/FreeBSD">correct version of Go</a>.
+            </div>
+          <% end %>
           <div class="clearfix"></div>
         </div>
       </div>

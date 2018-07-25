@@ -28,7 +28,7 @@ func ConnectFunc(network, addr string) func() (net.Conn, error) {
 	}
 }
 
-// ConnectFunc is a convenience method for returning a function
+// ProxyConnectFunc is a convenience method for returning a function
 // that connects to a host using SOCKS5 proxy
 func ProxyConnectFunc(socksProxy string, socksAuth *proxy.Auth, network, addr string) func() (net.Conn, error) {
 	return func() (net.Conn, error) {

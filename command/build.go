@@ -9,17 +9,20 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/hashicorp/packer/helper/enumflag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
+
+	"github.com/posener/complete"
 )
 
 type BuildCommand struct {
 	Meta
 }
 
-func (c BuildCommand) Run(args []string) int {
+func (c *BuildCommand) Run(args []string) int {
 	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
@@ -138,13 +141,15 @@ func (c BuildCommand) Run(args []string) int {
 		m map[string][]packer.Artifact
 	}{m: make(map[string][]packer.Artifact)}
 	errors := make(map[string]error)
+	// ctx := context.Background()
 	for _, b := range builds {
 		// Increment the waitgroup so we wait for this item to finish properly
 		wg.Add(1)
+		// buildCtx, cancelCtx := ctx.WithCancel()
 
 		// Handle interrupts for this build
 		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, os.Interrupt)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 		defer signal.Stop(sigCh)
 		go func(b packer.Build) {
 			<-sigCh
@@ -154,6 +159,7 @@ func (c BuildCommand) Run(args []string) int {
 
 			log.Printf("Stopping build: %s", b.Name())
 			b.Cancel()
+			//cancelCtx()
 			log.Printf("Build cancelled: %s", b.Name())
 		}(b)
 
@@ -279,7 +285,7 @@ func (c BuildCommand) Run(args []string) int {
 	return 0
 }
 
-func (BuildCommand) Help() string {
+func (*BuildCommand) Help() string {
 	helpText := `
 Usage: packer build [options] TEMPLATE
 
@@ -303,6 +309,25 @@ Options:
 	return strings.TrimSpace(helpText)
 }
 
-func (BuildCommand) Synopsis() string {
+func (*BuildCommand) Synopsis() string {
 	return "build image(s) from template"
+}
+
+func (*BuildCommand) AutocompleteArgs() complete.Predictor {
+	return complete.PredictNothing
+}
+
+func (*BuildCommand) AutocompleteFlags() complete.Flags {
+	return complete.Flags{
+		"-color":            complete.PredictNothing,
+		"-debug":            complete.PredictNothing,
+		"-except":           complete.PredictNothing,
+		"-only":             complete.PredictNothing,
+		"-force":            complete.PredictNothing,
+		"-machine-readable": complete.PredictNothing,
+		"-on-error":         complete.PredictNothing,
+		"-parallel":         complete.PredictNothing,
+		"-var":              complete.PredictNothing,
+		"-var-file":         complete.PredictNothing,
+	}
 }

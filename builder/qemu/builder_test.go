@@ -94,46 +94,6 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_BootWait(t *testing.T) {
-	var b Builder
-	config := testConfig()
-
-	// Test a default boot_wait
-	delete(config, "boot_wait")
-	warns, err := b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if b.config.RawBootWait != "10s" {
-		t.Fatalf("bad value: %s", b.config.RawBootWait)
-	}
-
-	// Test with a bad boot_wait
-	config["boot_wait"] = "this is not good"
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err == nil {
-		t.Fatal("should have error")
-	}
-
-	// Test with a good one
-	config["boot_wait"] = "5s"
-	b = Builder{}
-	warns, err = b.Prepare(config)
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", warns)
-	}
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-}
-
 func TestBuilderPrepare_VNCBindAddress(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -208,7 +168,7 @@ func TestBuilderPrepare_DiskSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 
-	if b.config.DiskSize != 40000 {
+	if b.config.DiskSize != 40960 {
 		t.Fatalf("bad size: %d", b.config.DiskSize)
 	}
 
@@ -254,6 +214,49 @@ func TestBuilderPrepare_Format(t *testing.T) {
 
 	// Good
 	config["format"] = "raw"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+}
+
+func TestBuilderPrepare_UseBackingFile(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	config["use_backing_file"] = true
+
+	// Bad: iso_url is not a disk_image
+	config["disk_image"] = false
+	config["format"] = "qcow2"
+	b = Builder{}
+	warns, err := b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Bad: format is not 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "raw"
+	b = Builder{}
+	warns, err = b.Prepare(config)
+	if len(warns) > 0 {
+		t.Fatalf("bad: %#v", warns)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+
+	// Good: iso_url is a disk image and format is 'qcow2'
+	config["disk_image"] = true
+	config["format"] = "qcow2"
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {

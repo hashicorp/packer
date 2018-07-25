@@ -1,13 +1,21 @@
+//
+// Copyright (c) 2018, Joyent, Inc. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//
+
 package network
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"path"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/joyent/triton-go/client"
+	"github.com/pkg/errors"
 )
 
 type Network struct {
@@ -28,23 +36,23 @@ type Network struct {
 type ListInput struct{}
 
 func (c *NetworkClient) List(ctx context.Context, _ *ListInput) ([]*Network, error) {
-	path := fmt.Sprintf("/%s/networks", c.Client.AccountName)
+	fullPath := path.Join("/", c.Client.AccountName, "networks")
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.Client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing ListNetworks request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to list networks")
 	}
 
 	var result []*Network
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding ListNetworks response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode list networks response")
 	}
 
 	return result, nil
@@ -55,23 +63,23 @@ type GetInput struct {
 }
 
 func (c *NetworkClient) Get(ctx context.Context, input *GetInput) (*Network, error) {
-	path := fmt.Sprintf("/%s/networks/%s", c.Client.AccountName, input.ID)
+	fullPath := path.Join("/", c.Client.AccountName, "networks", input.ID)
 	reqInputs := client.RequestInput{
 		Method: http.MethodGet,
-		Path:   path,
+		Path:   fullPath,
 	}
 	respReader, err := c.Client.ExecuteRequest(ctx, reqInputs)
 	if respReader != nil {
 		defer respReader.Close()
 	}
 	if err != nil {
-		return nil, errwrap.Wrapf("Error executing GetNetwork request: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to get network")
 	}
 
 	var result *Network
 	decoder := json.NewDecoder(respReader)
 	if err = decoder.Decode(&result); err != nil {
-		return nil, errwrap.Wrapf("Error decoding GetNetwork response: {{err}}", err)
+		return nil, errors.Wrap(err, "unable to decode get network response")
 	}
 
 	return result, nil

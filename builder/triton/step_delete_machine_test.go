@@ -1,10 +1,11 @@
 package triton
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepDeleteMachine(t *testing.T) {
@@ -17,7 +18,7 @@ func TestStepDeleteMachine(t *testing.T) {
 	machineId := "test-machine-id"
 	state.Put("machine", machineId)
 
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -40,7 +41,7 @@ func TestStepDeleteMachine_DeleteMachineError(t *testing.T) {
 
 	driver.DeleteMachineErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 
@@ -65,7 +66,7 @@ func TestStepDeleteMachine_WaitForMachineDeletionError(t *testing.T) {
 
 	driver.WaitForMachineDeletionErr = errors.New("error")
 
-	if action := step.Run(state); action != multistep.ActionHalt {
+	if action := step.Run(context.Background(), state); action != multistep.ActionHalt {
 		t.Fatalf("bad action: %#v", action)
 	}
 

@@ -70,7 +70,7 @@ straightforwarded, it is documented here.
 
 4.  Create new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
 
-5.  Chose `JSON` as Key type and click "Create".
+5.  Choose `JSON` as Key type and click "Create".
     A JSON file will be downloaded automatically. This is your *account file*.
 
 ### Precedence of Authentication Methods
@@ -93,7 +93,9 @@ Packer looks for credentials in the following places, preferring the first locat
 
 4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server. (Needs a correct VM authentication scope configuration, see above)
 
-## Basic Example
+## Examples
+
+### Basic Example
 
 Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners or startup-script metadata are defined, but it will effectively
@@ -109,6 +111,7 @@ is assumed to be the path to the file containing the JSON.
       "account_file": "account.json",
       "project_id": "my project",
       "source_image": "debian-7-wheezy-v20150127",
+      "ssh_username": "packer",
       "zone": "us-central1-a"
     }
   ]
@@ -117,27 +120,55 @@ is assumed to be the path to the file containing the JSON.
 
 ### Windows Example
 
-Running WinRM requires that it is opened in the firewall and that the VM enables WinRM for the
-user used to connect in a startup-script.
+Before you can provision using the winrm communicator, you need to navigate to
+https://console.cloud.google.com/networking/firewalls/list to allow traffic
+through google's firewall on the winrm port (tcp:5986).
+
+Once this is set up, the following is a complete working packer config after
+setting a valid `account_file` and `project_id`:
 
 ``` {.json}
 {
-  "builders": [{
-    "type": "googlecompute",
-    "account_file": "account.json",
-    "project_id": "my project",
-    "source_image": "windows-server-2016-dc-v20170227",
-    "disk_size": "50",
-    "machine_type": "n1-standard-1",
-    "communicator": "winrm",
-    "winrm_username": "packer_user",
-    "winrm_insecure": true,
-    "winrm_use_ssl": true,
-    "metadata": {
-      "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
-    },
-    "zone": "us-central1-a"
-  }]
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image": "windows-server-2016-dc-v20170227",
+      "disk_size": "50",
+      "machine_type": "n1-standard-1",
+      "communicator": "winrm",
+      "winrm_username": "packer_user",
+      "winrm_insecure": true,
+      "winrm_use_ssl": true,
+      "metadata": {
+        "windows-startup-script-cmd": "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
+      },
+      "zone": "us-central1-a"
+    }
+  ]
+}
+```
+
+### Nested Hypervisor Example
+
+This is an example of using the `image_licenses` configuration option to create a GCE image that has nested virtualization enabled. See
+[Enabling Nested Virtualization for VM Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
+for details.
+
+``` json
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "account_file": "account.json",
+      "project_id": "my project",
+      "source_image_family": "centos-7",
+      "ssh_username": "packer",
+      "zone": "us-central1-a",
+      "image_licenses": ["projects/vm-options/global/licenses/enable-vmx"]
+    }
+  ]
 }
 ```
 
@@ -183,6 +214,9 @@ builder.
 -   `address` (string) - The name of a pre-allocated static external IP address.
     Note, must be the name and not the actual IP address.
 
+-   `disable_default_service_account` (bool) - If true, the default service account will not be used if `service_account_email`
+    is not specified. Set this value to true and omit `service_account_email` to provision a VM with no service account.
+
 -   `disk_name` (string) - The name of the disk, if unset the instance name will be
     used.
 
@@ -200,6 +234,8 @@ builder.
 
 -   `image_labels` (object of key/value strings) - Key/value pair labels to
     apply to the created image.
+
+-   `image_licenses` (array of strings) - Licenses to apply to the created image.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
@@ -234,10 +270,13 @@ builder.
     If preemptible is true this can only be `TERMINATE`. If preemptible
     is false, it defaults to `MIGRATE`
 
--   `preemptible` (boolean) - If true, launch a preembtible instance.
+-   `preemptible` (boolean) - If true, launch a preemptible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     to the region hosting the specified `zone`.
+
+-   `service_account_email` (string) - The service account to be used for launched instance. Defaults to
+    the project's default service account unless `disable_default_service_account` is true.
 
 -   `scopes` (array of strings) - The service account scopes for launched instance.
     Defaults to:

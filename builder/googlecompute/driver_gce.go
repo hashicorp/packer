@@ -10,15 +10,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 	"strings"
 	"time"
 
-	"google.golang.org/api/compute/v1"
+	compute "google.golang.org/api/compute/v1"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/version"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -81,14 +80,12 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 
 	log.Printf("[INFO] Instantiating GCE client...")
 	service, err := compute.New(client)
-	// Set UserAgent
-	versionString := version.FormattedVersion()
-	service.UserAgent = fmt.Sprintf(
-		"(%s %s) Packer/%s", runtime.GOOS, runtime.GOARCH, versionString)
-
 	if err != nil {
 		return nil, err
 	}
+
+	// Set UserAgent
+	service.UserAgent = useragent.String()
 
 	return &driverGCE{
 		projectId: p,
@@ -97,12 +94,13 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	}, nil
 }
 
-func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string) (<-chan *Image, <-chan error) {
+func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
 	gce_image := &compute.Image{
 		Description: description,
 		Name:        name,
 		Family:      family,
 		Labels:      image_labels,
+		Licenses:    image_licenses,
 		SourceDisk:  fmt.Sprintf("%s%s/zones/%s/disks/%s", d.service.BasePath, d.projectId, zone, disk),
 		SourceType:  "RAW",
 	}
@@ -170,7 +168,7 @@ func (d *driverGCE) DeleteDisk(zone, name string) (<-chan error, error) {
 }
 
 func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
-	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme"}
+	projects := []string{d.projectId, "centos-cloud", "coreos-cloud", "cos-cloud", "debian-cloud", "google-containers", "opensuse-cloud", "rhel-cloud", "suse-cloud", "ubuntu-os-cloud", "windows-cloud", "gce-nvme", "windows-sql-cloud", "rhel-sap-cloud"}
 	var errs error
 	for _, project := range projects {
 		image, err := d.GetImageFromProject(project, name, fromFamily)
@@ -342,6 +340,20 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		guestAccelerators = append(guestAccelerators, ac)
 	}
 
+	// Configure the instance's service account. If the user has set
+	// disable_default_service_account, then the default service account
+	// will not be used. If they also do not set service_account_email, then
+	// the instance will be created with no service account or scopes.
+	serviceAccount := &compute.ServiceAccount{}
+	if !c.DisableDefaultServiceAccount {
+		serviceAccount.Email = "default"
+		serviceAccount.Scopes = c.Scopes
+	}
+	if c.ServiceAccountEmail != "" {
+		serviceAccount.Email = c.ServiceAccountEmail
+		serviceAccount.Scopes = c.Scopes
+	}
+
 	// Create the instance information
 	instance := compute.Instance{
 		Description: c.Description,
@@ -378,10 +390,7 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 			Preemptible:       c.Preemptible,
 		},
 		ServiceAccounts: []*compute.ServiceAccount{
-			{
-				Email:  "default",
-				Scopes: c.Scopes,
-			},
+			serviceAccount,
 		},
 		Tags: &compute.Tags{
 			Items: c.Tags,

@@ -35,7 +35,7 @@ func TestChecksumSHA1(t *testing.T) {
 		t.Errorf("Unable to read checksum file: %s", err)
 	}
 	if buf, _ := ioutil.ReadAll(f); !bytes.Equal(buf, []byte("d3486ae9136e7856bc42212385ea797094475802\tpackage.txt\n")) {
-		t.Errorf("Failed to compate checksum: %s\n%s", buf, "d3486ae9136e7856bc42212385ea797094475802 package.txt")
+		t.Errorf("Failed to compute checksum: %s\n%s", buf, "d3486ae9136e7856bc42212385ea797094475802 package.txt")
 	}
 
 	defer f.Close()

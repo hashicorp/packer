@@ -1,14 +1,15 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepCreateAlicloudInstance struct {
@@ -20,12 +21,12 @@ type stepCreateAlicloudInstance struct {
 	RegionId                string
 	InternetChargeType      string
 	InternetMaxBandwidthOut int
-	InstnaceName            string
+	InstanceName            string
 	ZoneId                  string
 	instance                *ecs.InstanceAttributesType
 }
 
-func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateAlicloudInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -62,7 +63,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 			IoOptimized:             ioOptimized,
 			VSwitchId:               vswitchId,
 			SecurityGroupId:         securityGroupId,
-			InstanceName:            s.InstnaceName,
+			InstanceName:            s.InstanceName,
 			Password:                password,
 			ZoneId:                  s.ZoneId,
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
@@ -88,7 +89,7 @@ func (s *stepCreateAlicloudInstance) Run(state multistep.StateBag) multistep.Ste
 			InternetMaxBandwidthOut: s.InternetMaxBandwidthOut,
 			IoOptimized:             ioOptimized,
 			SecurityGroupId:         securityGroupId,
-			InstanceName:            s.InstnaceName,
+			InstanceName:            s.InstanceName,
 			Password:                password,
 			ZoneId:                  s.ZoneId,
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),

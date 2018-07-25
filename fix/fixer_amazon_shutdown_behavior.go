@@ -1,6 +1,8 @@
 package fix
 
 import (
+	"strings"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -31,7 +33,7 @@ func (FixerAmazonShutdownBehavior) Fix(input map[string]interface{}) (map[string
 			continue
 		}
 
-		if builderType != "amazon-ebs" && builderType != "amazon-ebsvolume" && builderType != "amazon-instance" && builderType != "amazon-chroot" {
+		if !strings.HasPrefix(builderType, "amazon-") {
 			continue
 		}
 

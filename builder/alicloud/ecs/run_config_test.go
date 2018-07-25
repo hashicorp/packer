@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/packer/helper/communicator"
@@ -68,6 +69,7 @@ func TestRunConfigPrepare_UserData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.Remove(tf.Name())
 	defer tf.Close()
 
 	c.UserData = "foo"
@@ -92,6 +94,7 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer os.Remove(tf.Name())
 	defer tf.Close()
 
 	c.UserDataFile = tf.Name()

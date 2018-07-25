@@ -1,17 +1,18 @@
 package cloudstack
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"github.com/xanzy/go-cloudstack/cloudstack"
 )
 
 type stepCreateTemplate struct{}
 
-func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateTemplate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*cloudstack.CloudStackClient)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
@@ -50,7 +51,7 @@ func (s *stepCreateTemplate) Run(state multistep.StateBag) multistep.StepAction 
 	}
 
 	ui.Message("Retrieving the ROOT volume ID...")
-	volumeID, err := getRootVolumeID(client, instanceID)
+	volumeID, err := getRootVolumeID(client, instanceID, config.Project)
 	if err != nil {
 		state.Put("error", err)
 		ui.Error(err.Error())
@@ -88,13 +89,16 @@ func (s *stepCreateTemplate) Cleanup(state multistep.StateBag) {
 	// Nothing to cleanup for this step.
 }
 
-func getRootVolumeID(client *cloudstack.CloudStackClient, instanceID string) (string, error) {
+func getRootVolumeID(client *cloudstack.CloudStackClient, instanceID, projectID string) (string, error) {
 	// Retrieve the virtual machine object.
 	p := client.Volume.NewListVolumesParams()
 
 	// Set the type and virtual machine ID
 	p.SetType("ROOT")
 	p.SetVirtualmachineid(instanceID)
+	if projectID != "" {
+		p.SetProjectid(projectID)
+	}
 
 	volumes, err := client.Volume.ListVolumes(p)
 	if err != nil {

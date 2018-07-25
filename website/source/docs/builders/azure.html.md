@@ -29,8 +29,7 @@ builder.
 
 -   `client_secret` (string) The password or secret for your service principal.
 
--   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription.**
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
+-   `subscription_id` (string) Subscription under which the build will be performed. **The service principal specified in `client_id` must have full access to this subscription, unless build_resource_group_name option is specified in which case it needs to have owner access to the existing resource group specified in build_resource_group_name parameter.**
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
@@ -44,10 +43,6 @@ builder.
 
     CLI example `azure vm image list-skus -l westus -p Canonical -o UbuntuServer`
 
--   `location` (string) Azure datacenter in which your VM will build.
-
-    CLI example `azure location list`
-    
 #### VHD or Managed Image
 
 The Azure builder can create either a VHD, or a managed image. If you
@@ -55,10 +50,10 @@ are creating a VHD, you **must** start with a VHD.  Likewise, if you
 want to create a managed image you **must** start with a managed
 image.  When creating a VHD the following two options are required.
 
--   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be 
+-   `capture_container_name` (string) Destination container name. Essentially the "directory" where your VHD will be
     organized in Azure.  The captured VHD's URL will be `https://<storage_account>.blob.core.windows.net/system/Microsoft.Compute/Images/<capture_container_name>/<capture_name_prefix>.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.vhd`.
-    
--   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and 
+
+-   `capture_name_prefix` (string) VHD prefix. The final artifacts will be named `PREFIX-osDisk.UUID` and
     `PREFIX-vmTemplate.UUID`.
 
 -   `resource_group_name` (string) Resource group under which the final artifact will be stored.
@@ -68,14 +63,44 @@ image.  When creating a VHD the following two options are required.
 When creating a managed image the following two options are required.
 
 -   `managed_image_name` (string) Specify the managed image name where the result of the Packer build will be saved. The
-     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value 
-     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) 
+     image name must not exist ahead of time, and will not be overwritten. If this value is set, the value
+     `managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
      to learn more about managed images.
-     
--   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be 
-     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be 
-     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to 
+
+-   `managed_image_resource_group_name` (string) Specify the managed image resource group name where the result of the Packer build will be
+     saved.  The resource group must already exist. If this value is set, the value `managed_image_name` must also be
+     set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images) to
      learn more about managed images.
+
+#### Resource Group Usage
+
+The Azure builder can either provision resources into a new resource group that
+it controls (default) or an existing one.  The advantage of using a packer
+defined resource group is that failed resource cleanup is easier because you
+can simply remove the entire resource group, however this means that the
+provided credentials must have permission to create and remove resource groups.
+By using an existing resource group you can scope the provided credentials to
+just this group, however failed builds are more likely to leave unused
+artifacts.
+
+To have packer create a resource group you **must** provide:
+
+-   `location` (string) Azure datacenter in which your VM will build.
+
+    CLI example `azure location list`
+
+and optionally:
+
+-   `temp_resource_group_name` (string) name assigned to the temporary resource
+    group created during the build.  If this value is not set, a random value will
+    be assigned. This resource group is deleted at the end of the build.
+
+To use an existing resource group you **must** provide:
+
+-   `build_resource_group_name` (string) - Specify an existing resource group
+    to run the build in.
+
+Providing `temp_resource_group_name` or `location` in combination with `build_resource_group_name` is not allowed.
 
 ### Optional:
 
@@ -86,9 +111,9 @@ When creating a managed image the following two options are required.
 -   `cloud_environment_name` (string) One of `Public`, `China`, `Germany`, or
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
-    
+
 -   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
-    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to 
+    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to
     cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
     to learn more about custom data, and how it can be used to influence the provisioning process.
 
@@ -110,30 +135,60 @@ When creating a managed image the following two options are required.
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
-    
+
 -   `managed_image_storage_account_type` (string) Specify the storage
     account type for a managed image.  Valid values are Standard_LRS
     and Premium\_LRS.  The default is Standard\_LRS.
-                
--   `object_id` (string) Specify an OAuth Object ID to protect WinRM certificates
-    created at runtime. This variable is required when creating images based on
-    Windows; this variable is not used by non-Windows builds. See `Windows`
-    behavior for `os_type`, below.
 
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB (gigabytes).  Values of zero or less than zero are
     ignored.
+
+-   `disk_additional_size` (array of integers) - The size(s) of any additional
+    hard disks for the VM in gigabytes. If this is not specified then the VM
+    will only contain an OS disk. The number of additional disks and maximum size of a disk depends on the configuration of your VM. See [Windows](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/about-disks-and-vhds) or [Linux](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/about-disks-and-vhds) for more information.
+
+	For VHD builds the final artifacts will be named `PREFIX-dataDisk-<n>.UUID.vhd` and stored in the specified capture container along side the OS disk. The additional disks are included in the deployment template `PREFIX-vmTemplate.UUID`.
+	
+	For Managed build the final artifacts are included in the managed image. The additional disk will have the same storage account type as the OS disk, as specified with the `managed_image_storage_account_type` setting.
 
 -   `os_type` (string) If either `Linux` or `Windows` is specified Packer will
     automatically configure authentication credentials for the provisioned machine. For
     `Linux` this configures an SSH authorized key. For `Windows` this
     configures a WinRM certificate.
 
--   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be 
-    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer 
-    build, e.g. attach a resource disk to the VM.
+-   `plan_info` (object) - Used for creating images from Marketplace images.  Please refer to [Deploy an image with
+     Marketplace terms](https://aka.ms/azuremarketplaceapideployment) for more details.  Not all Marketplace images
+     support programmatic deployment, and support is controlled by the image publisher.
 
--   `temp_resource_group_name` (string) temporary name assigned to the resource group.  If this value is not set, a random
-    value will be assigned.
+     An example plan_info object is defined below.
+
+     ```json
+     {
+        "plan_info": {
+            "plan_name": "rabbitmq",
+            "plan_product": "rabbitmq",
+            "plan_publisher": "bitnami"
+        }
+     }
+     ```
+
+     `plan_name` (string) - The plan name, required.
+     `plan_product` (string) - The plan product, required.
+     `plan_publisher` (string) - The plan publisher, required.
+     `plan_promotion_code` (string) - Some images accept a promotion code, optional.
+
+     Images created from the Marketplace with `plan_info` **must** specify `plan_info` whenever the image is deployed.
+     The builder automatically adds tags to the image to ensure this information is not lost.  The following tags are
+     added.
+
+       1. PlanName
+       1. PlanProduct
+       1. PlanPublisher
+       1. PlanPromotionCode
+
+-   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
+    assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
+    build, e.g. attach a resource disk to the VM.
 
 -   `tenant_id` (string) The account identifier with which your `client_id` and `subscription_id` are associated. If not
     specified, `tenant_id` will be looked up using `subscription_id`.
@@ -159,6 +214,9 @@ When creating a managed image the following two options are required.
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information. Defaults to `Standard_A1`.
 
     CLI example `azure vm sizes -l westus`
+
+-   `async_resourcegroup_delete` (boolean) If you want packer to delete the temporary resource group asynchronously set this value. It's a boolean value
+     and defaults to false. **Important** Setting this true means that your builds are faster, however any failed deletes are not reported.
 
 ## Basic Example
 
@@ -200,23 +258,7 @@ Please refer to the Azure [examples](https://github.com/hashicorp/packer/tree/ma
 
 ### Windows
 
-The following provisioner snippet shows how to sysprep a Windows VM. Deprovision should be the last operation executed by a build.
-
-``` json
-{
-  "provisioners": [
-    {
-      "type": "powershell",
-      "inline": [
-        "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
-        "& $Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet"
-      ]
-    }
-  ]
-}
-```
-
-In some circumstances the above isn't enough to reliably know that the sysprep is actually finished generalizing the image, the code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
+The following provisioner snippet shows how to sysprep a Windows VM. Deprovision should be the last operation executed by a build. The code below will wait for sysprep to write the image status in the registry and will exit after that. The possible states, in case you want to wait for another state, [are documented here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
 
 ``` json
 {
@@ -230,8 +272,6 @@ In some circumstances the above isn't enough to reliably know that the sysprep i
     }
   ]
 }
-
-
 ```
 
 ### Linux
@@ -270,6 +310,7 @@ The Azure builder attempts to pick default values that provide for a just works 
 -   The default user name is packer not root as in other builders. Most distros on Azure do not allow root to SSH to a VM hence the need for a non-root default user. Set the ssh\_username option to override the default value.
 -   The default VM size is Standard\_A1. Set the vm\_size option to override the default value.
 -   The default image version is latest. Set the image\_version option to override the default value.
+-   By default a temporary resource group will be created and destroyed as part of the build. If you do not have permissions to do so, use `build_resource_group_name` to specify an existing resource group to run the build in.
 
 ## Implementation
 
@@ -312,9 +353,13 @@ The Azure builder creates the following random values at runtime.
 -   Compute Name: a random 15-character name prefixed with pkrvm; the name of the VM.
 -   Deployment Name: a random 15-character name prefixed with pkfdp; the name of the deployment.
 -   KeyVault Name: a random 15-character name prefixed with pkrkv.
+-   NIC Name: a random 15-character name prefixed with pkrni.
+-   Public IP Name: a random 15-character name prefixed with pkrip.
 -   OS Disk Name: a random 15-character name prefixed with pkros.
 -   Resource Group Name: a random 33-character name prefixed with packer-Resource-Group-.
+-   Subnet Name: a random 15-character name prefixed with pkrsn.
 -   SSH Key Pair: a 2,048-bit asymmetric key pair; can be overridden by the user.
+-   Virtual Network Name: a random 15-character name prefixed with pkrvn.
 
 The default alphabet used for random values is **0123456789bcdfghjklmnpqrstvwxyz**. The alphabet was reduced (no
 vowels) to prevent running afoul of Azure decency controls.
@@ -344,8 +389,6 @@ A Windows build requires two templates and two deployments. Unfortunately, the K
 the same time hence the need for two templates and deployments. The time required to deploy a KeyVault template is
 minimal, so overall impact is small.
 
-> The KeyVault certificate is protected using the object\_id of the SPN. This is why Windows builds require object\_id,
-> and an SPN. The KeyVault is deleted when the resource group is deleted.
 
 See the [examples/azure](https://github.com/hashicorp/packer/tree/master/examples/azure) folder in the packer project
 for more examples.

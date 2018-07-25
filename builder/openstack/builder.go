@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/mitchellh/multistep"
 )
 
 // The unique ID for this builder
@@ -52,6 +52,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
+	// By default, instance name is same as image name
+	if b.config.InstanceName == "" {
+		b.config.InstanceName = b.config.ImageName
+	}
+
 	log.Println(common.ScrubConfig(b.config, b.config.Password))
 	return nil, nil
 }
@@ -70,7 +75,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Build the steps
 	steps := []multistep.Step{
-		&StepLoadExtensions{},
 		&StepLoadFlavor{
 			Flavor: b.config.Flavor,
 		},
@@ -83,7 +87,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAgentAuth:         b.config.RunConfig.Comm.SSHAgentAuth,
 		},
 		&StepRunSourceServer{
-			Name:             b.config.ImageName,
+			Name:             b.config.InstanceName,
 			SourceImage:      b.config.SourceImage,
 			SourceImageName:  b.config.SourceImageName,
 			SecurityGroups:   b.config.SecurityGroups,

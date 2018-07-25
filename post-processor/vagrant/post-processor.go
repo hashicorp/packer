@@ -19,15 +19,21 @@ import (
 )
 
 var builtins = map[string]string{
-	"mitchellh.amazonebs":       "aws",
-	"mitchellh.amazon.instance": "aws",
-	"mitchellh.virtualbox":      "virtualbox",
-	"mitchellh.vmware":          "vmware",
-	"mitchellh.vmware-esx":      "vmware",
-	"pearkes.digitalocean":      "digitalocean",
-	"packer.parallels":          "parallels",
-	"MSOpenTech.hyperv":         "hyperv",
-	"transcend.qemu":            "libvirt",
+	"mitchellh.amazonebs":                 "aws",
+	"mitchellh.amazon.instance":           "aws",
+	"mitchellh.virtualbox":                "virtualbox",
+	"mitchellh.vmware":                    "vmware",
+	"mitchellh.vmware-esx":                "vmware",
+	"pearkes.digitalocean":                "digitalocean",
+	"packer.googlecompute":                "google",
+	"hashicorp.scaleway":                  "scaleway",
+	"packer.parallels":                    "parallels",
+	"MSOpenTech.hyperv":                   "hyperv",
+	"transcend.qemu":                      "libvirt",
+	"ustream.lxc":                         "lxc",
+	"packer.post-processor.docker-import": "docker",
+	"packer.post-processor.docker-tag":    "docker",
+	"packer.post-processor.docker-push":   "docker",
 }
 
 type Config struct {
@@ -220,6 +226,8 @@ func providerForName(name string) Provider {
 	switch name {
 	case "aws":
 		return new(AWSProvider)
+	case "scaleway":
+		return new(ScalewayProvider)
 	case "digitalocean":
 		return new(DigitalOceanProvider)
 	case "virtualbox":
@@ -232,12 +240,18 @@ func providerForName(name string) Provider {
 		return new(HypervProvider)
 	case "libvirt":
 		return new(LibVirtProvider)
+	case "google":
+		return new(GoogleProvider)
+	case "lxc":
+		return new(LXCProvider)
+	case "docker":
+		return new(DockerProvider)
 	default:
 		return nil
 	}
 }
 
-// OutputPathTemplate is the structure that is availalable within the
+// OutputPathTemplate is the structure that is available within the
 // OutputPath variables.
 type outputPathTemplate struct {
 	ArtifactId string

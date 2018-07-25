@@ -1,10 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
+	"path/filepath"
+
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 // This step attaches the ISO to the virtual machine.
@@ -16,7 +19,7 @@ type stepAttachISO struct {
 	diskPath string
 }
 
-func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepAttachISO) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(vboxcommon.Driver)
 	isoPath := state.Get("iso_path").(string)
@@ -31,6 +34,16 @@ func (s *stepAttachISO) Run(state multistep.StateBag) multistep.StepAction {
 		port = "1"
 		device = "0"
 	}
+
+	// If it's a symlink, resolve it to it's target.
+	resolvedIsoPath, err := filepath.EvalSymlinks(isoPath)
+	if err != nil {
+		err := fmt.Errorf("Error resolving symlink for ISO: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	isoPath = resolvedIsoPath
 
 	// Attach the disk to the controller
 	command := []string{

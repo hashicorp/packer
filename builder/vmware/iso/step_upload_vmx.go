@@ -1,11 +1,13 @@
 package iso
 
 import (
+	"context"
 	"fmt"
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 	"path/filepath"
+
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 )
 
 // This step upload the VMX to the remote host
@@ -21,7 +23,7 @@ type StepUploadVMX struct {
 	RemoteType string
 }
 
-func (c *StepUploadVMX) Run(state multistep.StateBag) multistep.StepAction {
+func (c *StepUploadVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
 
 	ui := state.Get("ui").(packer.Ui)

@@ -2,6 +2,7 @@ package packer
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -26,12 +27,18 @@ type Provisioner interface {
 	Cancel()
 }
 
+// A HookedProvisioner represents a provisioner and information describing it
+type HookedProvisioner struct {
+	Provisioner Provisioner
+	Config      interface{}
+	TypeName    string
+}
+
 // A Hook implementation that runs the given provisioners.
 type ProvisionHook struct {
 	// The provisioners to run as part of the hook. These should already
 	// be prepared (by calling Prepare) at some earlier stage.
-	Provisioners     []Provisioner
-	ProvisionerTypes []string
+	Provisioners []*HookedProvisioner
 
 	lock               sync.Mutex
 	runningProvisioner Provisioner
@@ -58,13 +65,15 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 		h.runningProvisioner = nil
 	}()
 
-	for i, p := range h.Provisioners {
+	for _, p := range h.Provisioners {
 		h.lock.Lock()
-		h.runningProvisioner = p
+		h.runningProvisioner = p.Provisioner
 		h.lock.Unlock()
 
-		ts := CheckpointReporter.AddSpan(h.ProvisionerTypes[i], "provisioner")
-		err := p.Provision(ui, comm)
+		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
+
+		err := p.Provisioner.Provision(ui, comm)
+
 		ts.End(err)
 		if err != nil {
 			return err
@@ -74,7 +83,7 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 	return nil
 }
 
-// Cancels the privisioners that are still running.
+// Cancels the provisioners that are still running.
 func (h *ProvisionHook) Cancel() {
 	h.lock.Lock()
 	defer h.lock.Unlock()
@@ -158,5 +167,92 @@ func (p *PausedProvisioner) Cancel() {
 }
 
 func (p *PausedProvisioner) provision(result chan<- error, ui Ui, comm Communicator) {
+	result <- p.Provisioner.Provision(ui, comm)
+}
+
+// DebuggedProvisioner is a Provisioner implementation that waits until a key
+// press before the provisioner is actually run.
+type DebuggedProvisioner struct {
+	Provisioner Provisioner
+
+	cancelCh chan struct{}
+	doneCh   chan struct{}
+	lock     sync.Mutex
+}
+
+func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *DebuggedProvisioner) Provision(ui Ui, comm Communicator) error {
+	p.lock.Lock()
+	cancelCh := make(chan struct{})
+	p.cancelCh = cancelCh
+
+	// Setup the done channel, which is trigger when we're done
+	doneCh := make(chan struct{})
+	defer close(doneCh)
+	p.doneCh = doneCh
+	p.lock.Unlock()
+
+	defer func() {
+		p.lock.Lock()
+		defer p.lock.Unlock()
+		if p.cancelCh == cancelCh {
+			p.cancelCh = nil
+		}
+		if p.doneCh == doneCh {
+			p.doneCh = nil
+		}
+	}()
+
+	// Use a select to determine if we get cancelled during the wait
+	message := "Pausing before the next provisioner . Press enter to continue."
+
+	result := make(chan string, 1)
+	go func() {
+		line, err := ui.Ask(message)
+		if err != nil {
+			log.Printf("Error asking for input: %s", err)
+		}
+
+		result <- line
+	}()
+
+	select {
+	case <-result:
+	case <-cancelCh:
+		return nil
+	}
+
+	provDoneCh := make(chan error, 1)
+	go p.provision(provDoneCh, ui, comm)
+
+	select {
+	case err := <-provDoneCh:
+		return err
+	case <-cancelCh:
+		p.Provisioner.Cancel()
+		return <-provDoneCh
+	}
+}
+
+func (p *DebuggedProvisioner) Cancel() {
+	var doneCh chan struct{}
+
+	p.lock.Lock()
+	if p.cancelCh != nil {
+		close(p.cancelCh)
+		p.cancelCh = nil
+	}
+	if p.doneCh != nil {
+		doneCh = p.doneCh
+	}
+	p.lock.Unlock()
+
+	<-doneCh
+}
+
+func (p *DebuggedProvisioner) provision(result chan<- error, ui Ui, comm Communicator) {
 	result <- p.Provisioner.Provision(ui, comm)
 }

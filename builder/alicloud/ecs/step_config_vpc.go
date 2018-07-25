@@ -1,14 +1,15 @@
 package ecs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepConfigAlicloudVPC struct {
@@ -18,7 +19,7 @@ type stepConfigAlicloudVPC struct {
 	isCreate  bool
 }
 
-func (s *stepConfigAlicloudVPC) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudVPC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
@@ -84,7 +85,8 @@ func (s *stepConfigAlicloudVPC) Cleanup(state multistep.StateBag) {
 			e, _ := err.(*common.Error)
 			if (e.Code == "DependencyViolation.Instance" || e.Code == "DependencyViolation.RouteEntry" ||
 				e.Code == "DependencyViolation.VSwitch" ||
-				e.Code == "DependencyViolation.SecurityGroup") && time.Now().Before(timeoutPoint) {
+				e.Code == "DependencyViolation.SecurityGroup" ||
+				e.Code == "Forbbiden") && time.Now().Before(timeoutPoint) {
 				time.Sleep(1 * time.Second)
 				continue
 			}

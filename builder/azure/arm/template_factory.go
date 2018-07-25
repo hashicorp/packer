@@ -3,10 +3,11 @@ package arm
 import (
 	"encoding/json"
 
-	"github.com/Azure/azure-sdk-for-go/arm/compute"
-	"github.com/Azure/azure-sdk-for-go/arm/resources/resources"
+	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 
 	"fmt"
+
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/template"
 )
@@ -33,13 +34,20 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		AdminUsername:              &template.TemplateParameter{Value: config.UserName},
 		AdminPassword:              &template.TemplateParameter{Value: config.Password},
 		DnsNameForPublicIP:         &template.TemplateParameter{Value: config.tmpComputeName},
+		NicName:                    &template.TemplateParameter{Value: config.tmpNicName},
 		OSDiskName:                 &template.TemplateParameter{Value: config.tmpOSDiskName},
+		PublicIPAddressName:        &template.TemplateParameter{Value: config.tmpPublicIPAddressName},
+		SubnetName:                 &template.TemplateParameter{Value: config.tmpSubnetName},
 		StorageAccountBlobEndpoint: &template.TemplateParameter{Value: config.storageAccountBlobEndpoint},
-		VMSize: &template.TemplateParameter{Value: config.VMSize},
-		VMName: &template.TemplateParameter{Value: config.tmpComputeName},
+		VirtualNetworkName:         &template.TemplateParameter{Value: config.tmpVirtualNetworkName},
+		VMSize:                     &template.TemplateParameter{Value: config.VMSize},
+		VMName:                     &template.TemplateParameter{Value: config.tmpComputeName},
 	}
 
-	builder, _ := template.NewTemplateBuilder(template.BasicTemplate)
+	builder, err := template.NewTemplateBuilder(template.BasicTemplate)
+	if err != nil {
+		return nil, err
+	}
 	osType := compute.Linux
 
 	switch config.OSType {
@@ -72,12 +80,20 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 		builder.SetOSDiskSizeGB(config.OSDiskSizeGB)
 	}
 
+	if len(config.AdditionalDiskSize) > 0 {
+		builder.SetAdditionalDisks(config.AdditionalDiskSize, config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != ""))
+	}
+
 	if config.customData != "" {
 		builder.SetCustomData(config.customData)
 	}
 
+	if config.PlanInfo.PlanName != "" {
+		builder.SetPlanInfo(config.PlanInfo.PlanName, config.PlanInfo.PlanProduct, config.PlanInfo.PlanPublisher, config.PlanInfo.PlanPromotionCode)
+	}
+
 	if config.VirtualNetworkName != "" && DefaultPrivateVirtualNetworkWithPublicIp != config.PrivateVirtualNetworkWithPublicIp {
-		builder.SetPrivateVirtualNetworWithPublicIp(
+		builder.SetPrivateVirtualNetworkWithPublicIp(
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)

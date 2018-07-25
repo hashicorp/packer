@@ -1,9 +1,10 @@
 package common
 
 import (
+	"context"
 	"testing"
 
-	"github.com/mitchellh/multistep"
+	"github.com/hashicorp/packer/helper/multistep"
 )
 
 func TestStepCompactDisk_impl(t *testing.T) {
@@ -14,12 +15,13 @@ func TestStepCompactDisk(t *testing.T) {
 	state := testState(t)
 	step := new(StepCompactDisk)
 
-	state.Put("full_disk_path", "foo")
+	diskFullPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskFullPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {
@@ -40,12 +42,13 @@ func TestStepCompactDisk_skip(t *testing.T) {
 	step := new(StepCompactDisk)
 	step.Skip = true
 
-	state.Put("full_disk_path", "foo")
+	diskFullPaths := []string{"foo"}
+	state.Put("disk_full_paths", diskFullPaths)
 
 	driver := state.Get("driver").(*DriverMock)
 
 	// Test the run
-	if action := step.Run(state); action != multistep.ActionContinue {
+	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
 	if _, ok := state.GetOk("error"); ok {

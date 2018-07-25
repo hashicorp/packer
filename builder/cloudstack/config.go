@@ -27,26 +27,27 @@ type Config struct {
 	HTTPGetOnly  bool          `mapstructure:"http_get_only"`
 	SSLNoVerify  bool          `mapstructure:"ssl_no_verify"`
 
-	CIDRList             []string `mapstructure:"cidr_list"`
-	CreateSecurityGroup  bool     `mapstructure:"create_security_group"`
-	DiskOffering         string   `mapstructure:"disk_offering"`
-	DiskSize             int64    `mapstructure:"disk_size"`
-	Expunge              bool     `mapstructure:"expunge"`
-	Hypervisor           string   `mapstructure:"hypervisor"`
-	InstanceName         string   `mapstructure:"instance_name"`
-	Keypair              string   `mapstructure:"keypair"`
-	Network              string   `mapstructure:"network"`
-	Project              string   `mapstructure:"project"`
-	PublicIPAddress      string   `mapstructure:"public_ip_address"`
-	SecurityGroups       []string `mapstructure:"security_groups"`
-	ServiceOffering      string   `mapstructure:"service_offering"`
-	SourceISO            string   `mapstructure:"source_iso"`
-	SourceTemplate       string   `mapstructure:"source_template"`
-	TemporaryKeypairName string   `mapstructure:"temporary_keypair_name"`
-	UseLocalIPAddress    bool     `mapstructure:"use_local_ip_address"`
-	UserData             string   `mapstructure:"user_data"`
-	UserDataFile         string   `mapstructure:"user_data_file"`
-	Zone                 string   `mapstructure:"zone"`
+	CIDRList               []string `mapstructure:"cidr_list"`
+	CreateSecurityGroup    bool     `mapstructure:"create_security_group"`
+	DiskOffering           string   `mapstructure:"disk_offering"`
+	DiskSize               int64    `mapstructure:"disk_size"`
+	Expunge                bool     `mapstructure:"expunge"`
+	Hypervisor             string   `mapstructure:"hypervisor"`
+	InstanceName           string   `mapstructure:"instance_name"`
+	Keypair                string   `mapstructure:"keypair"`
+	Network                string   `mapstructure:"network"`
+	Project                string   `mapstructure:"project"`
+	PublicIPAddress        string   `mapstructure:"public_ip_address"`
+	SecurityGroups         []string `mapstructure:"security_groups"`
+	ServiceOffering        string   `mapstructure:"service_offering"`
+	PreventFirewallChanges bool     `mapstructure:"prevent_firewall_changes"`
+	SourceISO              string   `mapstructure:"source_iso"`
+	SourceTemplate         string   `mapstructure:"source_template"`
+	TemporaryKeypairName   string   `mapstructure:"temporary_keypair_name"`
+	UseLocalIPAddress      bool     `mapstructure:"use_local_ip_address"`
+	UserData               string   `mapstructure:"user_data"`
+	UserDataFile           string   `mapstructure:"user_data_file"`
+	Zone                   string   `mapstructure:"zone"`
 
 	TemplateName            string `mapstructure:"template_name"`
 	TemplateDisplayText     string `mapstructure:"template_display_text"`

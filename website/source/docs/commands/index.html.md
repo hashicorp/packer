@@ -106,3 +106,18 @@ The set of machine-readable message types can be found in the
 documentation section. This section contains documentation on all the message
 types exposed by Packer core as well as all the components that ship with
 Packer by default.
+
+## Autocompletion
+
+The `packer` command features opt-in subcommand autocompletion that you can
+enable for your shell with `packer -autocomplete-install`. After doing so,
+you can invoke a new shell and use the feature.
+
+For example, assume a tab is typed at the end of each prompt line:
+
+```
+$ packer p
+plugin  push    
+$ packer push -
+-name       -sensitive  -token      -var        -var-file
+```

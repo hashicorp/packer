@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/multistep"
 )
 
 type stepSnapshot struct{}
 
-func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
+func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(Config)
@@ -111,6 +111,7 @@ func (s *stepSnapshot) Run(state multistep.StateBag) multistep.StepAction {
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	snapshotRegions = append(snapshotRegions, c.Region)
 
 	log.Printf("Snapshot image ID: %d", imageId)
 	state.Put("snapshot_image_id", imageId)
