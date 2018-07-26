@@ -1,4 +1,4 @@
-package ebs
+package common
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -14,16 +13,16 @@ import (
 // stepCleanupVolumes cleans up any orphaned volumes that were not designated to
 // remain after termination of the instance. These volumes are typically ones
 // that are marked as "delete on terminate:false" in the source_ami of a build.
-type stepCleanupVolumes struct {
-	BlockDevices common.BlockDevices
+type StepCleanupVolumes struct {
+	BlockDevices BlockDevices
 }
 
-func (s *stepCleanupVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCleanupVolumes) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// stepCleanupVolumes is for Cleanup only
 	return multistep.ActionContinue
 }
 
-func (s *stepCleanupVolumes) Cleanup(state multistep.StateBag) {
+func (s *StepCleanupVolumes) Cleanup(state multistep.StateBag) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instanceRaw := state.Get("instance")
 	var instance *ec2.Instance
