@@ -191,7 +191,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VpcId:            b.config.VpcId,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
-		&stepCleanupVolumes{
+		&awscommon.StepCleanupVolumes{
 			BlockDevices: b.config.BlockDevices,
 		},
 		instanceStep,
