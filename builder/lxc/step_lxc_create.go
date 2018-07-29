@@ -3,6 +3,8 @@ package lxc
 import (
 	"context"
 	"fmt"
+	"log"
+	"os/user"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,6 +21,13 @@ func (s *stepLxcCreate) Run(_ context.Context, state multistep.StateBag) multist
 
 	// TODO: read from env
 	lxc_dir := "/var/lib/lxc"
+	user, err := user.Current()
+	if err != nil {
+		log.Print("Cannot find current user. Falling back to /var/lib/lxc...")
+	}
+	if user.Uid != "0" && user.HomeDir != "" {
+		lxc_dir = filepath.Join(user.HomeDir, ".local", "share", "lxc")
+	}
 	rootfs := filepath.Join(lxc_dir, name, "rootfs")
 
 	if config.PackerForce {
