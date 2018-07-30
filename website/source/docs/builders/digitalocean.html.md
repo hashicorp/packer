@@ -88,6 +88,8 @@ builder.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
 
+-   `tags` (list) - Tags to apply to the droplet when it is created
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
