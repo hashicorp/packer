@@ -35,7 +35,7 @@ type Config struct {
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 	UserDataFile      string        `mapstructure:"user_data_file"`
-	RunTags           []string      `mapstructure:"run_tags"`
+	Tags              []string      `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -122,8 +122,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.RunTags == nil {
-		c.RunTags = make([]string, 0)
+	if c.Tags == nil {
+		c.Tags = make([]string, 0)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
