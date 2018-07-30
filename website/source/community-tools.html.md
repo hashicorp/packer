@@ -39,7 +39,7 @@ power of Packer templates.
   \- Ubuntu 16.04 minimal Vagrant Box using Ansible provisioner
 
 * [jakobadam/packer-qemu-templates](https://github.com/jakobadam/packer-qemu-templates)
-  - QEMU templates for various operating systems
+  \- QEMU templates for various operating systems
 
 ## Wrappers
 
