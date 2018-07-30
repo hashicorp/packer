@@ -35,6 +35,7 @@ type Config struct {
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 	UserDataFile      string        `mapstructure:"user_data_file"`
+	RunTags           []string      `mapstructure:"run_tags"`
 
 	ctx interpolate.Context
 }
@@ -119,6 +120,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
 		}
+	}
+
+	if c.RunTags == nil {
+		c.RunTags = make([]string, 0)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
