@@ -13,10 +13,14 @@ Type: `googlecompute`
 
 The `googlecompute` Packer builder is able to create
 [images](https://developers.google.com/compute/docs/images) for use with [Google
-Compute Engine](https://cloud.google.com/products/compute-engine)(GCE) based on
-existing images. Building GCE images from scratch is not possible from Packer at
-this time. For building images from scratch, please see
-[Building GCE Images from Scratch](https://cloud.google.com/compute/docs/tutorials/building-images).
+Compute Engine](https://cloud.google.com/products/compute-engine) (GCE) based on
+existing images.
+
+Building images from scratch is possible, but not with the `googlecompute` Packer builder.
+The process is recommended only for advanced users, please see [Building GCE Images from Scratch]
+(https://cloud.google.com/compute/docs/tutorials/building-images)
+and the [Google Compute Import Post-Processor](/docs/post-processors/googlecompute-import.html)
+for more information.
 
 ## Authentication
 
