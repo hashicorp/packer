@@ -36,7 +36,7 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 }
 
 func TestConfig(t *testing.T) {
-	// Shared set-up and defered deletion
+	// Shared set-up and deferred deletion
 
 	cfg, keyFile, err := baseTestConfigWithTmpKeyFile()
 	if err != nil {
