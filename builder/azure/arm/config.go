@@ -150,7 +150,7 @@ type Config struct {
 	winrmCertificate string
 
 	Comm communicator.Config `mapstructure:",squash"`
-	ctx  *interpolate.Context
+	ctx  interpolate.Context
 
 	//Cleanup
 	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
@@ -258,10 +258,10 @@ func (c *Config) createCertificate() (string, error) {
 
 func newConfig(raws ...interface{}) (*Config, []string, error) {
 	var c Config
-
+	c.ctx.Funcs = TemplateFuncs
 	err := config.Decode(&c, &config.DecodeOpts{
 		Interpolate:        true,
-		InterpolateContext: c.ctx,
+		InterpolateContext: &c.ctx,
 	}, raws...)
 
 	if err != nil {
@@ -299,7 +299,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	}
 
 	var errs *packer.MultiError
-	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
 	assertRequiredParametersSet(&c, errs)
 	assertTagProperties(&c, errs)
