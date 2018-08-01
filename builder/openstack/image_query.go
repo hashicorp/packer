@@ -38,6 +38,7 @@ func getImageVisibility(s string) (images.ImageVisibility, error) {
 }
 
 // Allows construction of all supported fields from ListOpts
+// The `input` map will be modified but is not reused further in the builder
 func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) *packer.MultiError {
 
 	// fill each field in the ListOpts based on tag/type
@@ -50,24 +51,29 @@ func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) 
 
 		// check the valid fields map and whether we can set this field
 		if key, exists := validFields[fieldName]; exists {
-			if !vField.CanSet() {
-				multiErr.Errors = append(multiErr.Errors, fmt.Errorf("Unsettable field: %s", fieldName))
-				continue
-			}
 
 			// check that this key was provided by the user, then set the field and have compatible types
 			if val, exists := input[key]; exists {
 
+				// non-settable field
+				if !vField.CanSet() {
+					multiErr.Errors = append(multiErr.Errors, fmt.Errorf("Unsettable field: %s", fieldName))
+
+					// remove key from input filters so we can go over them after
+					delete(input, key)
+					continue
+				}
+
 				switch key {
 				case "owner", "name", "tags":
-
 					if valType := reflect.TypeOf(val); valType != vField.Type() {
 						multiErr.Errors = append(multiErr.Errors,
-							fmt.Errorf("Invalid type '%v' for field %s",
+							fmt.Errorf("Invalid type '%v' for field %s (%s)",
 								valType,
+								key,
 								fieldName,
 							))
-						continue
+						break
 					}
 					vField.Set(reflect.ValueOf(val))
 
@@ -75,16 +81,25 @@ func buildImageFilters(input map[string]interface{}, listOpts *images.ListOpts) 
 					visibility, err := getImageVisibility(val.(string))
 					if err != nil {
 						multiErr.Errors = append(multiErr.Errors, err)
-						continue
+						break
 					}
 					vField.Set(reflect.ValueOf(visibility))
 
-				default:
-					multiErr.Errors = append(multiErr.Errors,
-						fmt.Errorf("Unsupported filter key provided: %s", key))
 				}
+
+				// remove key from input filters so we can go over them after
+				delete(input, key)
 			}
 		}
+	}
+
+	// error any invalid filters
+	for key, value := range input {
+		multiErr.Errors = append(multiErr.Errors, fmt.Errorf("Invalid filter: %s: %v (type: %v)",
+			key,
+			value,
+			reflect.TypeOf(value),
+		))
 	}
 
 	// Set defaults for status and member_status

@@ -39,7 +39,13 @@ func TestBuildImageFilter(t *testing.T) {
 		"tags":       []string{"prod", "ready"},
 	}
 
-	buildImageFilters(filters, &testOpts)
+	// copy of original filters to pass to build function
+	passedFilters := make(map[string]interface{})
+	for k, v := range filters {
+		passedFilters[k] = v
+	}
+
+	buildImageFilters(passedFilters, &testOpts)
 
 	if testOpts.Limit != 0 {
 		t.Errorf("Limit was parsed: %d", testOpts.Limit)
@@ -63,6 +69,28 @@ func TestBuildImageFilter(t *testing.T) {
 
 	if len(testOpts.Sort) > 0 {
 		t.Errorf("Sort was parsed: %s", testOpts.Sort)
+	}
+}
+
+// This test case confirms that invalid filter input are caught and do not result in a panic
+func TestInvalidFilterInput(t *testing.T) {
+
+	testOpts := images.ListOpts{}
+
+	filters := map[string]interface{}{
+		"tags":          "prod", // supposed to be a []string
+		"owner":         12345,  // supposed to be a string
+		"invalid_field": 0,      // not a valid field in ListOpts
+	}
+
+	numFields := len(filters)
+
+	multiErr := buildImageFilters(filters, &testOpts)
+	if len(multiErr.Errors) != numFields {
+		t.Errorf("Failed to catch all %d invalid types/fields in filters", numFields)
+		for _, err := range multiErr.Errors {
+			t.Log(err.Error())
+		}
 	}
 }
 
