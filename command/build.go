@@ -110,6 +110,7 @@ func (c *BuildCommand) Run(args []string) int {
 	log.Printf("Build debug mode: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
 	log.Printf("On error: %v", cfgOnError)
+	//log.Printf("my secrets: %v", c.CoreConfig.
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
