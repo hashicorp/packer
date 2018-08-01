@@ -19,6 +19,7 @@ type Core struct {
 	variables  map[string]string
 	builds     map[string]*template.Builder
 	version    string
+	secrets    []string
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
@@ -66,6 +67,8 @@ func NewCore(c *CoreConfig) (*Core, error) {
 	if err := result.init(); err != nil {
 		return nil, err
 	}
+	LogSecretFilter.Set("matt")
+	//log.Printf("NewCore: %+v", result.Template.Variables["efoo"])
 
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.

@@ -39,6 +39,7 @@ type Builder struct {
 }
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	log.Printf("SECRET: matt")
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
