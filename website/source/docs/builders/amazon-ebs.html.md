@@ -531,3 +531,19 @@ up all residual volumes that are not designated by the user to remain after
 termination. If you need to preserve those source volumes, you can overwrite the
 termination setting by specifying `delete_on_termination=false` in the
 `launch_block_device_mappings` block for the device.
+
+## Windows 2016 Sysprep Commands - For Amazon Windows AMIs Only
+
+For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can be easily added
+to the provisioner section.
+
+```json
+{
+    "type": "powershell",
+    "inline": [
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+    ]
+
+}
+```
