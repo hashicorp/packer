@@ -71,3 +71,5 @@ Below is a fully functioning example.
    set the description, but can be used to set anything needed.
    See https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/
    for more properties.
+   
+ - `config` (map) - List of key/value pairs you wish to pass to `lxc launch` via `--config`. Defaults to empty.
