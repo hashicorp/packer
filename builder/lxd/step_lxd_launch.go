@@ -26,7 +26,7 @@ func (s *stepLxdLaunch) Run(_ context.Context, state multistep.StateBag) multist
 	}
 
 	for k, v := range config.LaunchConfig {
-		launch_args = append(launch_args, fmt.Sprintf("--config %s=%s", k, v))
+		launch_args = append(launch_args, "--config", fmt.Sprintf("%s=%s", k, v))
 	}
 
 	ui.Say("Creating container...")
