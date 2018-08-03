@@ -18,6 +18,7 @@ type StepRunSourceServer struct {
 	SourceImageName  string
 	SecurityGroups   []string
 	Networks         []string
+	Ports            []string
 	AvailabilityZone string
 	UserData         string
 	UserDataFile     string
@@ -39,9 +40,17 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		return multistep.ActionHalt
 	}
 
-	networks := make([]servers.Network, len(s.Networks))
-	for i, networkUuid := range s.Networks {
-		networks[i].UUID = networkUuid
+	networks := make([]servers.Network, len(s.Networks) + len(s.Ports))
+	i := 0
+	if len(s.Ports) > 0 {
+		for i = 0; i < len(s.Ports); i++ {
+			networks[i].Port = s.Ports[i]
+		}
+	}
+	if len(s.Networks) > 0 {
+		for i = len(s.Ports); i < len(networks); i++ {
+			networks[i].UUID = s.Networks[i]
+		}
 	}
 
 	userData := []byte(s.UserData)
