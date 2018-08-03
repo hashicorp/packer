@@ -40,7 +40,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		return multistep.ActionHalt
 	}
 
-	networks := make([]servers.Network, len(s.Networks) + len(s.Ports))
+	networks := make([]servers.Network, len(s.Networks)+len(s.Ports))
 	i := 0
 	if len(s.Ports) > 0 {
 		for i = 0; i < len(s.Ports); i++ {
