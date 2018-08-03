@@ -44,6 +44,10 @@ type ProvisionHook struct {
 	runningProvisioner Provisioner
 }
 
+type ProvisionHookData struct {
+	WinRMPassword string
+}
+
 // Runs the provisioners in order.
 func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interface{}) error {
 	// Shortcut
@@ -71,8 +75,15 @@ func (h *ProvisionHook) Run(name string, ui Ui, comm Communicator, data interfac
 		h.lock.Unlock()
 
 		ts := CheckpointReporter.AddSpan(p.TypeName, "provisioner", p.Config)
+		// re-run prepare with builder-generated config variables (e.g. WinRMPassword)
+		// Hack Alert. #SorryNotSorry.
+		err := p.Provisioner.Prepare(data)
+		if err != nil {
+			log.Printf("Error performing secondary Prepare: %s", err)
+		}
 
-		err := p.Provisioner.Provision(ui, comm)
+		// Finally, provision.
+		err = p.Provisioner.Provision(ui, comm)
 
 		ts.End(err)
 		if err != nil {
