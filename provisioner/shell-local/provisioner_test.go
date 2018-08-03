@@ -48,8 +48,8 @@ func TestConfigPrepare(t *testing.T) {
 	}
 }
 
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
+func testConfig(t *testing.T) map[interface{}]interface{} {
+	return map[interface{}]interface{}{
 		"command": "echo foo",
 	}
 }

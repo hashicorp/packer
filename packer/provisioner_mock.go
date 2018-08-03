@@ -14,8 +14,10 @@ type MockProvisioner struct {
 }
 
 func (t *MockProvisioner) Prepare(configs ...interface{}) error {
-	t.PrepCalled = true
-	t.PrepConfigs = configs
+	if !t.PrepCalled {
+		t.PrepCalled = true
+		t.PrepConfigs = configs
+	}
 	return nil
 }
 
