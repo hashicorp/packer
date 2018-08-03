@@ -27,14 +27,6 @@ _packer () {
     '(-)*:files:_files -g "*.json"'
   )
 
-  local -a push_arguments && push_arguments=(
-    '-name=[(<name>) The destination build in Atlas.]'
-    '-token=[(<token>) Access token to use to upload.]'
-    '-var[("key=value") Variable for templates, can be used multiple times.]'
-    '-var-file=[(path) JSON file containing user variables.]' 
-    '(-)*:files:_files -g "*.json"'
-  )
-
   local -a validate_arguments && validate_arguments=(
     '-syntax-only[Only check syntax. Do not verify config of the template.]'
     '-except=[(foo,bar,baz) Validate all builds other than these]'
@@ -57,8 +49,6 @@ _packer () {
             _arguments -s -S : $build_arguments ;;
           inspect)
             _arguments -s -S : $inspect_arguments ;;
-          push)
-            _arguments -s -S : $push_arguments ;;
           validate)
             _arguments -s -S : $validate_arguments ;;
         esac
