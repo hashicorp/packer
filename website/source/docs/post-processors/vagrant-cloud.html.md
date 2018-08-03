@@ -15,8 +15,9 @@ Type: `vagrant-cloud`
 
 The Packer Vagrant Cloud post-processor receives a Vagrant box from the
 `vagrant` post-processor and pushes it to Vagrant Cloud. [Vagrant
-Cloud](https://atlas.hashicorp.com) hosts and serves boxes to Vagrant, allowing you
-to version and distribute boxes to an organization in a simple way.
+Cloud](https://app.vagrantup.com/boxes/search) hosts and serves boxes to
+Vagrant, allowing you to version and distribute boxes to an organization in
+a simple way.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand

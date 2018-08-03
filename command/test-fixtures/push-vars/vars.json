@@ -1,7 +1,0 @@
-{
-  "null": null,
-  "bar": "baz",
-  "overridden": "no",
-  "super": "this should be secret",
-  "secret": "this one too"
-}
