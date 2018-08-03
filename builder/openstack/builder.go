@@ -92,6 +92,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceImageName:  b.config.SourceImageName,
 			SecurityGroups:   b.config.SecurityGroups,
 			Networks:         b.config.Networks,
+			Ports:            b.config.Ports,
 			AvailabilityZone: b.config.AvailabilityZone,
 			UserData:         b.config.UserData,
 			UserDataFile:     b.config.UserDataFile,
