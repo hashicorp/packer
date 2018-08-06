@@ -36,6 +36,17 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 	checksum := config.ISOChecksum
 	checksumType := config.ISOChecksumType
 
+	if esx5, ok := remote.(*ESX5Driver); ok {
+		remotePath := esx5.cachePath(path)
+
+		if esx5.verifyChecksum(checksumType, checksum, remotePath) {
+			ui.Say("Remote cache was verified skipping remote upload...")
+			state.Put(s.Key, remotePath)
+			return multistep.ActionContinue
+		}
+
+	}
+
 	ui.Say(s.Message)
 	log.Printf("Remote uploading: %s", path)
 	newPath, err := remote.UploadISO(path, checksum, checksumType)
@@ -45,8 +56,8 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-
 	state.Put(s.Key, newPath)
+
 	return multistep.ActionContinue
 }
 
