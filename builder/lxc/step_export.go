@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,7 +21,16 @@ func (s *stepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 
 	name := config.ContainerName
 
-	containerDir := fmt.Sprintf("/var/lib/lxc/%s", name)
+	lxc_dir := "/var/lib/lxc"
+	user, err := user.Current()
+	if err != nil {
+		log.Print("Cannot find current user. Falling back to /var/lib/lxc...")
+	}
+	if user.Uid != "0" && user.HomeDir != "" {
+		lxc_dir = filepath.Join(user.HomeDir, ".local", "share", "lxc")
+	}
+
+	containerDir := filepath.Join(lxc_dir, name)
 	outputPath := filepath.Join(config.OutputDir, "rootfs.tar.gz")
 	configFilePath := filepath.Join(config.OutputDir, "lxc-config")
 
