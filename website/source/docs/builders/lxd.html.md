@@ -66,8 +66,11 @@ Below is a fully functioning example.
 -  `command_wrapper` (string) - Lets you prefix all builder commands, such as
    with `ssh` for a remote build host. Defaults to `""`.
 
-- `publish_properties` (map[string]string) - Pass key values to the publish
+-  `publish_properties` (map[string]string) - Pass key values to the publish
    step to be set as properties on the output image. This is most helpful to
    set the description, but can be used to set anything needed.
    See https://stgraber.org/2016/03/30/lxd-2-0-image-management-512/
    for more properties.
+   
+-  `launch_config` (map[string]string) - List of key/value pairs you wish to
+   pass to `lxc launch` via `--config`. Defaults to empty.
