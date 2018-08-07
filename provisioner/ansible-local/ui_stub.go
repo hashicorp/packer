@@ -13,3 +13,6 @@ func (su *uiStub) Machine(string, ...string) {}
 func (su *uiStub) Message(string) {}
 
 func (su *uiStub) Say(msg string) {}
+func (su *uiStub) GetMinimumLength() int {
+	return -1
+}
