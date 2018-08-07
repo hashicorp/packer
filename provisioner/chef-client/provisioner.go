@@ -174,15 +174,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if p.config.EncryptedDataBagSecretPath != "" {
-		pFileInfo, err := os.Stat(p.config.EncryptedDataBagSecretPath)
-
-		if err != nil || pFileInfo.IsDir() {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("Bad encrypted data bag secret '%s': %s", p.config.EncryptedDataBagSecretPath, err))
-		}
-	}
-
 	if p.config.ServerUrl == "" {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("server_url must be set"))
