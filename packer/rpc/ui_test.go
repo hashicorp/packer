@@ -6,17 +6,19 @@ import (
 )
 
 type testUi struct {
-	askCalled      bool
-	askQuery       string
-	errorCalled    bool
-	errorMessage   string
-	machineCalled  bool
-	machineType    string
-	machineArgs    []string
-	messageCalled  bool
-	messageMessage string
-	sayCalled      bool
-	sayMessage     string
+	askCalled              bool
+	askQuery               string
+	errorCalled            bool
+	errorMessage           string
+	machineCalled          bool
+	machineType            string
+	machineArgs            []string
+	messageCalled          bool
+	messageMessage         string
+	sayCalled              bool
+	sayMessage             string
+	getMinimumLengthCalled bool
+	getMinimumLengthValue  int
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -44,6 +46,12 @@ func (u *testUi) Message(message string) {
 func (u *testUi) Say(message string) {
 	u.sayCalled = true
 	u.sayMessage = message
+}
+
+func (u *testUi) GetMinimumLength() int {
+	u.getMinimumLengthCalled = true
+	u.getMinimumLengthValue = -1
+	return u.getMinimumLengthValue
 }
 
 func TestUiRPC(t *testing.T) {
@@ -91,6 +99,14 @@ func TestUiRPC(t *testing.T) {
 	uiClient.Machine("foo", "bar", "baz")
 	if !ui.machineCalled {
 		t.Fatal("machine should be called")
+	}
+
+	uiClient.GetMinimumLength()
+	if !ui.getMinimumLengthCalled {
+		t.Fatal("getminimumlength should be called")
+	}
+	if ui.getMinimumLengthValue != -1 {
+		t.Fatal("getminimumlength should be -1")
 	}
 
 	if ui.machineType != "foo" {

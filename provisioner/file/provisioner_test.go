@@ -120,6 +120,10 @@ func (su *stubUi) Say(msg string) {
 	su.sayMessages += msg
 }
 
+func (su *stubUi) GetMinimumLength() int {
+	return -1
+}
+
 func TestProvisionerProvision_SendsFile(t *testing.T) {
 	var p Provisioner
 	tf, err := ioutil.TempFile("", "packer")

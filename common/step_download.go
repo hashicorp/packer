@@ -8,7 +8,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/cheggaaa/pb"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/helper/useragent"
 	"github.com/hashicorp/packer/packer"
@@ -65,8 +64,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	// Get a default-looking progress bar and connect it to the ui.
-	bar := GetDefaultProgressBar()
-	bar.Callback = ui.Message
+	bar := GetNewProgressBar(&ui)
 
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
@@ -145,9 +143,8 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	var path string
 	ui := state.Get("ui").(packer.Ui)
 
-	// Get a default looking progress bar and connect it to the ui.
-	bar := GetDefaultProgressBar()
-	bar.Callback = ui.Message
+	// Get a default-looking progress bar and connect it to the ui.
+	bar := GetNewProgressBar(&ui)
 
 	// Create download client with config and progress bar
 	download := NewDownloadClient(config, bar)
