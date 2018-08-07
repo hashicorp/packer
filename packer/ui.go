@@ -37,6 +37,7 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
+	GetMinimumLength() int
 }
 
 // ColoredUi is a UI that is colored using terminal colors.
@@ -132,6 +133,10 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
+func (u *ColoredUi) GetMinimumLength() int {
+	return u.Ui.GetMinimumLength()
+}
+
 func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
@@ -166,6 +171,12 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
+}
+
+func (u *TargetedUI) GetMinimumLength() int {
+	var dummy string
+	dummy = u.prefixLines(false, "")
+	return len(dummy) + len("\n")
 }
 
 func (rw *BasicUi) Ask(query string) (string, error) {
@@ -260,6 +271,10 @@ func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
 }
 
+func (u *BasicUi) GetMinimumLength() int {
+	return 0
+}
+
 func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
 }
@@ -304,4 +319,8 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 			panic(err)
 		}
 	}
+}
+
+func (u *MachineReadableUi) GetMinimumLength() int {
+	return -1
 }

@@ -599,3 +599,7 @@ func (ui *Ui) Machine(t string, args ...string) {
 	ui.ui.Machine(t, args...)
 	<-ui.sem
 }
+
+func (ui *Ui) GetMinimumLength() int {
+	return -1
+}
