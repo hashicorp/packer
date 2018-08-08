@@ -180,7 +180,7 @@ func funcGenConsul(ctx *Context) interface{} {
 		if !ctx.EnableEnv {
 			// The error message doesn't have to be that detailed since
 			// semantic checks should catch this.
-			return "", errors.New("env vars are not allowed here")
+			return "", errors.New("consul_key is not allowed here")
 		}
 
 		consulConfig := consulapi.DefaultConfig()
