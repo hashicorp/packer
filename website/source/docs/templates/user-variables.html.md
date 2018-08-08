@@ -95,6 +95,26 @@ single source of input to a template that a user can easily discover using
 that is evaluated by shell during a variable expansion. As Packer doesn't run
 inside a shell, it won't expand `~`.
 
+## Consul keys
+
+Consul keys can be used within your template using the `consul_key` function.
+This function is available *only* within the default value of a user variable,
+for reasons similar to environment variables above.
+
+```json
+{
+    "variables": {
+        "soft_versions": "{{ consul_key `my_image/softs_versions/next` }}"
+    }
+}
+```
+
+This will default `soft_versions` to the value of the key `my_image/softs_versions/next`
+in consul.
+
+The configuration for consul (address, tokens, ...) must be specified as environment variables,
+as specified in the [Documentation](https://www.consul.io/docs/commands/index.html#environment-variables).
+
 ## Using array values
 
 Some templates call for array values. You can use template variables for these,
