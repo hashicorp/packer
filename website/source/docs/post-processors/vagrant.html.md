@@ -33,6 +33,7 @@ providers.
 -   AWS
 -   DigitalOcean
 -   Google
+-   Azure
 -   Hyper-V
 -   LXC
 -   Parallels
@@ -108,6 +109,7 @@ The available provider names are:
 - `aws`
 - `digitalocean`
 - `google`
+- `azure`
 - `hyperv`
 - `parallels`
 - `libvirt`
