@@ -263,6 +263,12 @@
 			"revision": "ad96e53bea43a905c17beeb983a0f9ce087dc48d"
 		},
 		{
+			"checksumSHA1": "DUX4pOK9NKSAzC6RRXniLviyByA=",
+			"path": "github.com/armon/go-metrics",
+			"revision": "3c58d8115a78a6879e5df75ae900846768d36895",
+			"revisionTime": "2018-07-13T14:52:31Z"
+		},
+		{
 			"checksumSHA1": "gNO0JNpLzYOdInGeq7HqMZUzx9M=",
 			"path": "github.com/armon/go-radix",
 			"revision": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
@@ -896,6 +902,26 @@
 			"revisionTime": "2017-03-19T17:27:27Z"
 		},
 		{
+			"checksumSHA1": "izBSRxLAHN+a/XpAku0in05UzlY=",
+			"comment": "20141209094003-92-g95fa852",
+			"path": "github.com/hashicorp/atlas-go/archive",
+			"revision": "17522f63497eefcffc90d528ca1eeaded2b529d3",
+			"revisionTime": "2017-08-08T16:18:53Z"
+		},
+		{
+			"checksumSHA1": "IR7S+SOsSUnPnLxgRrfemXfCqNM=",
+			"comment": "20141209094003-92-g95fa852",
+			"path": "github.com/hashicorp/atlas-go/v1",
+			"revision": "0885342d5643b7a412026596f2f3ebb3c9b4c190",
+			"revisionTime": "2017-06-08T19:44:05Z"
+		},
+		{
+			"checksumSHA1": "GDon57l3Km8hqUlE7GU6mTyyBEY=",
+			"path": "github.com/hashicorp/consul/api",
+			"revision": "3e6313bebbf087129c35fb1f93b4f69ec48fd91d",
+			"revisionTime": "2018-08-07T17:45:50Z"
+		},
+		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
@@ -910,6 +936,12 @@
 			"checksumSHA1": "fSe5y1UgTDeYlnFfUcDA1zzcw+U=",
 			"path": "github.com/hashicorp/go-cleanhttp",
 			"revision": "875fb671b3ddc66f8e2f0acc33829c8cb989a38d"
+		},
+		{
+			"checksumSHA1": "y+AeKVZoX0gB+DZW4Arzkb3tTVc=",
+			"path": "github.com/hashicorp/go-immutable-radix",
+			"revision": "7f3cd4390caab3250a57f30efdb2a65dd7649ecf",
+			"revisionTime": "2018-01-29T17:09:00Z"
 		},
 		{
 			"checksumSHA1": "lrSl49G23l6NhfilxPM0XFs5rZo=",
@@ -954,6 +986,18 @@
 			"checksumSHA1": "9nNGCY0dWyRDEm7xb57BzV0AKeA=",
 			"path": "github.com/hashicorp/go-version",
 			"revision": "7e3c02b30806fa5779d3bdfc152ce4c6f40e7b38"
+		},
+		{
+			"checksumSHA1": "8Z637dcPkbR5HdLQQBp/9jTbx9Y=",
+			"path": "github.com/hashicorp/golang-lru/simplelru",
+			"revision": "0fb14efe8c47ae851c0034ed7a448854d3d34cf3",
+			"revisionTime": "2018-02-01T23:52:37Z"
+		},
+		{
+			"checksumSHA1": "0PeWsO2aI+2PgVYlYlDPKfzCLEQ=",
+			"path": "github.com/hashicorp/serf/coordinate",
+			"revision": "984a73625de3138f44deb38d00878fab39eb6447",
+			"revisionTime": "2018-05-30T15:59:58Z"
 		},
 		{
 			"checksumSHA1": "Gm2k+46HxKqsjI8lCWBp/jRaPrM=",
