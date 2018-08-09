@@ -31,6 +31,7 @@ var builtins = map[string]string{
 	"MSOpenTech.hyperv":                   "hyperv",
 	"transcend.qemu":                      "libvirt",
 	"ustream.lxc":                         "lxc",
+	"Azure.ResourceManagement.VMImage":    "azure",
 	"packer.post-processor.docker-import": "docker",
 	"packer.post-processor.docker-tag":    "docker",
 	"packer.post-processor.docker-push":   "docker",
@@ -244,6 +245,8 @@ func providerForName(name string) Provider {
 		return new(GoogleProvider)
 	case "lxc":
 		return new(LXCProvider)
+	case "azure":
+		return new(AzureProvider)
 	case "docker":
 		return new(DockerProvider)
 	default:

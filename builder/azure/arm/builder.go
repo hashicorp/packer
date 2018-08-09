@@ -255,7 +255,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if b.config.isManagedImage() {
-		return NewManagedImageArtifact(b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation)
+		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", b.config.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
+		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
@@ -266,7 +267,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				options.Expiry = time.Now().AddDate(0, 1, 0).UTC() // one month
 				sasUrl, _ := blob.GetSASURI(options)
 				return sasUrl
-			})
+			},
+			b.config.OSType)
 	}
 
 	return &Artifact{}, nil

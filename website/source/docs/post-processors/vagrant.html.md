@@ -31,8 +31,9 @@ Currently, the Vagrant post-processor can create boxes for the following
 providers.
 
 -   AWS
+-   Azure
 -   DigitalOcean
--   Google
+-   Azure
 -   Hyper-V
 -   LXC
 -   Parallels
@@ -106,6 +107,7 @@ where it will be set to 0.
 The available provider names are:
 
 - `aws`
+- `azure`
 - `digitalocean`
 - `google`
 - `hyperv`
