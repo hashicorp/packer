@@ -18,6 +18,9 @@ type AdditionalDiskArtifact struct {
 }
 
 type Artifact struct {
+	// OS type: Linux, Windows
+	OSType string
+
 	// VHD
 	StorageAccountLocation string
 	OSDiskUri              string
@@ -29,20 +32,23 @@ type Artifact struct {
 	ManagedImageResourceGroupName string
 	ManagedImageName              string
 	ManagedImageLocation          string
+	ManagedImageId                string
 
 	// Additional Disks
 	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
-func NewManagedImageArtifact(resourceGroup, name, location string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id string) (*Artifact, error) {
 	return &Artifact{
 		ManagedImageResourceGroupName: resourceGroup,
 		ManagedImageName:              name,
 		ManagedImageLocation:          location,
+		ManagedImageId:                id,
+		OSType:                        osType,
 	}, nil
 }
 
-func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) (*Artifact, error) {
+func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string, osType string) (*Artifact, error) {
 	if template == nil {
 		return nil, fmt.Errorf("nil capture template")
 	}
@@ -76,6 +82,7 @@ func NewArtifact(template *CaptureTemplate, getSasUrl func(name string) string) 
 	}
 
 	return &Artifact{
+		OSType:                 osType,
 		OSDiskUri:              vhdUri.String(),
 		OSDiskUriReadOnlySas:   getSasUrl(getStorageUrlPath(vhdUri)),
 		TemplateUri:            templateUri.String(),
@@ -142,9 +149,11 @@ func (a *Artifact) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s:\n\n", a.BuilderId()))
+	buf.WriteString(fmt.Sprintf("OSType: %s\n", a.OSType))
 	if a.isManagedImage() {
 		buf.WriteString(fmt.Sprintf("ManagedImageResourceGroupName: %s\n", a.ManagedImageResourceGroupName))
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
+		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
