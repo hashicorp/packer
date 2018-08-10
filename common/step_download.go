@@ -63,8 +63,8 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
-	// Get a default-looking progress bar and connect it to the ui.
-	bar := GetNewProgressBar(&ui)
+	// Get a progress bar from the ui so we can hand it off to the download client
+	bar := ui.GetProgressBar()
 
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
@@ -143,8 +143,8 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	var path string
 	ui := state.Get("ui").(packer.Ui)
 
-	// Get a default-looking progress bar and connect it to the ui.
-	bar := GetNewProgressBar(&ui)
+	// Get a progress bar and hand it off to the download client
+	bar := ui.GetProgressBar()
 
 	// Create download client with config and progress bar
 	download := NewDownloadClient(config, bar)
