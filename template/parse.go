@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -23,11 +24,12 @@ type rawTemplate struct {
 	MinVersion  string `mapstructure:"min_packer_version"`
 	Description string
 
-	Builders       []map[string]interface{}
-	Push           map[string]interface{}
-	PostProcessors []interface{} `mapstructure:"post-processors"`
-	Provisioners   []map[string]interface{}
-	Variables      map[string]interface{}
+	Builders           []map[string]interface{}
+	Push               map[string]interface{}
+	PostProcessors     []interface{} `mapstructure:"post-processors"`
+	Provisioners       []map[string]interface{}
+	Variables          map[string]interface{}
+	SensitiveVariables []string `mapstructure:"sensitive-variables"`
 
 	RawContents []byte
 }
@@ -58,6 +60,12 @@ func (r *rawTemplate) Template() (*Template, error) {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"variable %s: %s", k, err))
 			continue
+		}
+
+		for _, sVar := range r.SensitiveVariables {
+			if sVar == k {
+				result.SensitiveVariables = append(result.SensitiveVariables, &v)
+			}
 		}
 
 		result.Variables[k] = &v
