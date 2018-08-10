@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"github.com/cheggaaa/pb"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -55,7 +54,7 @@ func SupportedProtocol(u *url.URL) bool {
 
 	// build a dummy NewDownloadClient since this is the only place that valid
 	// protocols are actually exposed.
-	cli := NewDownloadClient(&DownloadConfig{}, *pb.New(0))
+	cli := NewDownloadClient(&DownloadConfig{}, nil)
 
 	// Iterate through each downloader to see if a protocol was found.
 	ok := false
@@ -187,7 +186,7 @@ func FileExistsLocally(original string) bool {
 
 	// First create a dummy downloader so we can figure out which
 	// protocol to use.
-	cli := NewDownloadClient(&DownloadConfig{}, *pb.New(0))
+	cli := NewDownloadClient(&DownloadConfig{}, nil)
 	d, ok := cli.config.DownloaderMap[u.Scheme]
 	if !ok {
 		return false

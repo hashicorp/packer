@@ -1,6 +1,6 @@
 // +build !windows
 
-package common
+package packer
 
 // Imports for determining terminal information across platforms
 import (

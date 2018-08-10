@@ -60,8 +60,8 @@ func (u *Ui) Say(message string) {
 	}
 }
 
-func (u *Ui) GetMinimumLength() (result int) {
-	if err := u.client.Call("Ui.GetMinimumLength", nil, &result); err != nil {
+func (u *Ui) GetProgressBar() (result packer.ProgressBar) {
+	if err := u.client.Call("Ui.GetProgressBar", nil, &result); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
 	}
 	return
@@ -99,8 +99,8 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	return nil
 }
 
-func (u *UiServer) GetMinimumLength(noargs *interface{}, reply *int) error {
-	res := u.ui.GetMinimumLength()
+func (u *UiServer) GetProgressBar(noargs *interface{}, reply *packer.ProgressBar) error {
+	res := u.ui.GetProgressBar()
 	*reply = res
 	return nil
 }
