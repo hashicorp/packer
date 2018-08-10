@@ -20,19 +20,6 @@ const PackerKeyEnv = "PACKER_KEY_INTERVAL"
 // shorter delay (e.g. 10ms) can be used on a workstation. See PackerKeyEnv.
 const PackerKeyDefault = 100 * time.Millisecond
 
-// ScrubConfig is a helper that returns a string representation of
-// any struct with the given values stripped out.
-func ScrubConfig(target interface{}, values ...string) string {
-	conf := fmt.Sprintf("Config: %+v", target)
-	for _, value := range values {
-		if value == "" {
-			continue
-		}
-		conf = strings.Replace(conf, value, "<Filtered>", -1)
-	}
-	return conf
-}
-
 // ChooseString returns the first non-empty value.
 func ChooseString(vals ...string) string {
 	for _, el := range vals {

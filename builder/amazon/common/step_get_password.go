@@ -95,7 +95,9 @@ WaitLoop:
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
 	// store so that we can access this later during provisioning
+
 	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }

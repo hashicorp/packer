@@ -96,7 +96,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
+	log.Println(b.config)
 	return nil, nil
 }
 
