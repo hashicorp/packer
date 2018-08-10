@@ -123,8 +123,8 @@ func (u *ui) Machine(s1 string, s2 ...string) {
 	}
 }
 
-func (u *ui) GetMinimumLength() int {
-	return -1
+func (u *ui) GetProgressBar() packer.ProgressBar {
+	return packer.GetDummyProgressBar()
 }
 
 type communicator struct{}

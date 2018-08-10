@@ -1,24 +1,26 @@
 package rpc
 
 import (
+	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
 )
 
 type testUi struct {
-	askCalled              bool
-	askQuery               string
-	errorCalled            bool
-	errorMessage           string
-	machineCalled          bool
-	machineType            string
-	machineArgs            []string
-	messageCalled          bool
-	messageMessage         string
-	sayCalled              bool
-	sayMessage             string
-	getMinimumLengthCalled bool
-	getMinimumLengthValue  int
+	askCalled                   bool
+	askQuery                    string
+	errorCalled                 bool
+	errorMessage                string
+	machineCalled               bool
+	machineType                 string
+	machineArgs                 []string
+	messageCalled               bool
+	messageMessage              string
+	sayCalled                   bool
+	sayMessage                  string
+	getProgressBarCalled        bool
+	getProgressBarValue         packer.ProgressBar
+	progessBarCallbackWasCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -48,10 +50,13 @@ func (u *testUi) Say(message string) {
 	u.sayMessage = message
 }
 
-func (u *testUi) GetMinimumLength() int {
-	u.getMinimumLengthCalled = true
-	u.getMinimumLengthValue = -1
-	return u.getMinimumLengthValue
+func (u *testUi) GetProgressBar() packer.ProgressBar {
+	u.getProgressBarCalled = true
+	u.getProgressBarValue = packer.GetDummyProgressBar()
+	u.getProgressBarValue.Callback = func(string) {
+		u.progessBarCallbackWasCalled = true
+	}
+	return u.getProgressBarValue
 }
 
 func TestUiRPC(t *testing.T) {
@@ -101,12 +106,17 @@ func TestUiRPC(t *testing.T) {
 		t.Fatal("machine should be called")
 	}
 
-	uiClient.GetMinimumLength()
-	if !ui.getMinimumLengthCalled {
-		t.Fatal("getminimumlength should be called")
+	bar := uiClient.GetProgressBar()
+	if !ui.getProgressBarCalled {
+		t.Fatal("getprogressbar should be called")
 	}
-	if ui.getMinimumLengthValue != -1 {
-		t.Fatal("getminimumlength should be -1")
+
+	if bar.Callback == nil {
+		t.Fatal("getprogressbar returned a bar with an empty callback")
+	}
+	bar.Callback("test")
+	if !ui.progessBarCallbackWasCalled {
+		t.Fatal("progressbarcallback should be called")
 	}
 
 	if ui.machineType != "foo" {

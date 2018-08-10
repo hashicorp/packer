@@ -600,6 +600,6 @@ func (ui *Ui) Machine(t string, args ...string) {
 	<-ui.sem
 }
 
-func (ui *Ui) GetMinimumLength() int {
-	return -1
+func (ui *Ui) GetProgressBar() packer.ProgressBar {
+	return packer.GetDummyProgressBar()
 }

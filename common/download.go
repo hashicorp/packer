@@ -19,7 +19,9 @@ import (
 )
 
 // required import for progress-bar
-import "github.com/cheggaaa/pb"
+import (
+	"github.com/hashicorp/packer/packer"
+)
 
 // imports related to each Downloader implementation
 import (
@@ -84,16 +86,21 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar pb.ProgressBar) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig, bar packer.ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
+
+	// If bar is nil, then use a dummy progress bar that doesn't do anything
+	if bar == nil {
+		bar = packer.GetDummyProgressBar()
+	}
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
 		c.DownloaderMap = map[string]Downloader{
-			"file":  &FileDownloader{progress: &bar, bufferSize: nil},
-			"http":  &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
-			"https": &HTTPDownloader{progress: &bar, userAgent: c.UserAgent},
-			"smb":   &SMBDownloader{progress: &bar, bufferSize: nil},
+			"file":  &FileDownloader{progress: bar, bufferSize: nil},
+			"http":  &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
+			"https": &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
+			"smb":   &SMBDownloader{progress: bar, bufferSize: nil},
 		}
 	}
 	return &DownloadClient{config: c}
@@ -235,7 +242,7 @@ type HTTPDownloader struct {
 	total     uint64
 	userAgent string
 
-	progress *pb.ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -328,8 +335,9 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	d.total = d.current + uint64(resp.ContentLength)
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
+	bar := d.progress
+	bar.Total = int64(d.total)
+	progressBar := bar.Start()
 	progressBar.Set64(int64(d.current))
 
 	var buffer [4096]byte
@@ -371,7 +379,7 @@ type FileDownloader struct {
 	current uint64
 	total   uint64
 
-	progress *pb.ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *FileDownloader) Progress() uint64 {
@@ -462,8 +470,10 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
+	bar := d.progress
+	bar.Total = int64(d.total)
+	progressBar := bar.Start()
+	progressBar.Set64(int64(d.current))
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
@@ -508,7 +518,7 @@ type SMBDownloader struct {
 	current uint64
 	total   uint64
 
-	progress *pb.ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *SMBDownloader) Progress() uint64 {
@@ -581,8 +591,10 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
-	d.progress.Total = int64(d.total)
-	progressBar := d.progress.Start()
+	bar := d.progress
+	bar.Total = int64(d.total)
+	progressBar := bar.Start()
+	progressBar.Set64(int64(d.current))
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
