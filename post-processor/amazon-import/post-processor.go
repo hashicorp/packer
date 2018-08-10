@@ -92,7 +92,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AccessKey, p.config.SecretKey, p.config.Token))
+	packer.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
+	log.Println(p.config)
 	return nil
 }
 

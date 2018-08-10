@@ -555,6 +555,7 @@ func newSigner(privKeyFile string) (*signer, error) {
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }
 

@@ -28,10 +28,11 @@ func (l *secretFilter) SetOutput(output io.Writer) {
 
 func (l *secretFilter) Write(p []byte) (n int, err error) {
 	for s := range l.s {
-		p = bytes.Replace(p, []byte(s), []byte("<filtered>"), -1)
+		if s != "" {
+			p = bytes.Replace(p, []byte(s), []byte("<sensitive>"), -1)
+		}
 	}
 	return l.w.Write(p)
-	// return l.w.Write([]byte("foobar"))
 }
 
 func (l *secretFilter) get() (s []string) {

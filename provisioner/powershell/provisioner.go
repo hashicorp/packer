@@ -481,6 +481,7 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }
 

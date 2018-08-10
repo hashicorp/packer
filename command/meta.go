@@ -29,8 +29,6 @@ type Meta struct {
 	Cache      packer.Cache
 	Ui         packer.Ui
 	Version    string
-	//Secrets        []string
-	//secrets:        []string{"matt"},
 
 	// These are set by command-line flags
 	flagBuildExcept []string

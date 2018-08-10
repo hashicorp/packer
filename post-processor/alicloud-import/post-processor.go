@@ -113,7 +113,8 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		return errs
 	}
 
-	log.Println(common.ScrubConfig(p.config, p.config.AlicloudAccessKey, p.config.AlicloudSecretKey))
+	packer.LogSecretFilter.Set(p.config.AlicloudAccessKey, p.config.AlicloudSecretKey)
+	log.Println(p.config)
 	return nil
 }
 
