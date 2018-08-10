@@ -36,6 +36,9 @@ installed *if you are using temporary key pairs*, i.e. don't use
 OS'es have OpenSSL installed by default except Windows. This have been
 resolved in OpenStack Ocata(Feb 2017).
 
+~&gt; **Note:** OpenStack Block Storage volume support is available only for
+V3 Block Storage API. It's available in OpenStack since Mitaka release
+(Apr 2016).
 
 ## Configuration Reference
 
@@ -203,6 +206,22 @@ builder.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
 
+-   `use_blockstorage_volume` (boolean) - Use Block Storage service volume for
+    the instance root volume instead of Compute service local volume (default).
+
+-   `volume_name` (string) - Name of the Block Storage service volume. If this
+    isn't specified, random string will be used.
+
+-   `volume_type` (string) - Type of the Block Storage service volume. If this
+    isn't specified, the default enforced by your OpenStack cluster will be
+    used.
+
+-   `volume_availability_zone` (string) - Availability zone of the Block
+    Storage service volume. If omitted, Compute instance availability zone will
+    be used. If both of Compute instance and Block Storage volume availability
+    zones aren't specified, the default enforced by your OpenStack cluster will
+    be used.
+
 ## Basic Example: DevStack
 
 Here is a basic example. This is a example to build on DevStack running in a VM.
@@ -288,6 +307,31 @@ export OS_USERNAME="myuser"
 export OS_PASSWORD="password"
 export OS_USER_DOMAIN_NAME="mydomain"
 export OS_PROJECT_DOMAIN_NAME="mydomain"
+```
+
+## Basic Example: Instance with Block Storage root volume
+
+A basic example of Instance with a remote root Block Storage service volume.
+This is a working example to build an image on private OpenStack cloud powered
+by Selectel VPC.
+
+``` json
+{
+  "type": "openstack",
+  "identity_endpoint": "https://api.selvpc.com/identity/v3",
+  "tenant_id": "2e90c5c04c7b4c509be78723e2b55b77",
+  "username": "foo",
+  "password": "foo",
+  "region": "ru-3",
+  "ssh_username": "root",
+  "image_name": "Test image",
+  "source_image": "5f58ea7e-6264-4939-9d0f-0c23072b1132",
+  "networks": "9aab504e-bedf-48af-9256-682a7fa3dabb",
+  "flavor": "1001",
+  "availability_zone": "ru-3a",
+  "use_blockstorage_volume": true,
+  "volume_type": "fast.ru-3a"
+}
 ```
 
 ## Notes on OpenStack Authorization
