@@ -48,26 +48,20 @@ can quickly merge or address your contributions.
 
 5. The issue is closed.
 
-## Setting up Go to work on Packer
+## Setting up Go
 
-If you have never worked with Go before, you will have to complete the following
-steps in order to be able to compile and test Packer. These instructions target
+If you have never worked with Go before, you will have to install it's
+runtime in order to build packer.
+
+1. [Install go](https://golang.org/doc/install#install)
+
+## Setting up Packer for dev
+
+If/when you have go installed you can already `go get` packer and `make` in
+order to compile and test Packer. These instructions target
 POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
 
-1. [Download](https://golang.org/dl) and install Go. The instructions below are
-   for go 1.7. Earlier versions of Go are no longer supported.
-
-2. Set and export the `GOPATH` environment variable and update your `PATH`. For
-   example, you can add the following to your `.bash_profile` (or comparable
-   shell startup scripts):
-
-```
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
-```
-
-## Setting up Packer for dev
 
 1. Download the Packer source (and its dependencies) by running
    `go get github.com/hashicorp/packer`. This will download the Packer source to
