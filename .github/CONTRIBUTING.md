@@ -61,6 +61,7 @@ If/when you have go installed you can already `go get` packer and `make` in
 order to compile and test Packer. These instructions target
 POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
+The instructions below are for go 1.7. Earlier versions of Go are no longer supported.
 
 
 1. Download the Packer source (and its dependencies) by running
