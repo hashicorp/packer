@@ -67,26 +67,28 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 ```
 
-3. Download the Packer source (and its dependencies) by running
+## Setting up Packer for dev
+
+1. Download the Packer source (and its dependencies) by running
    `go get github.com/hashicorp/packer`. This will download the Packer source to
    `$GOPATH/src/github.com/hashicorp/packer`.
 
-4. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
+2. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
    so you can run `make` and easily access other files. Run `make help` to get
    information about make targets.
 
-5. Make your changes to the Packer source. You can run `make` in
+3. Make your changes to the Packer source. You can run `make` in
    `$GOPATH/src/github.com/hashicorp/packer` to run tests and build the Packer
    binary. Any compilation errors will be shown when the binaries are
    rebuilding. If you don't have `make` you can simply run
    `go build -o bin/packer .` from the project root.
 
-6. After running building Packer successfully, use
+4. After running building Packer successfully, use
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
    verify your changes work. For instance:
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
 
-7. If everything works well and the tests pass, run `go fmt` on your code before
+5. If everything works well and the tests pass, run `go fmt` on your code before
    submitting a pull-request.
 
 ### Opening an Pull Request
