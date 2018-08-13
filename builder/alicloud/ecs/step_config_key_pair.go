@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type StepConfigAlicloudKeyPair struct {
+type stepConfigAlicloudKeyPair struct {
 	Debug                bool
 	SSHAgentAuth         bool
 	DebugKeyPath         string
@@ -25,7 +25,7 @@ type StepConfigAlicloudKeyPair struct {
 	keyName string
 }
 
-func (s *StepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.PrivateKeyFile != "" {
@@ -108,7 +108,7 @@ func (s *StepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 	return multistep.ActionContinue
 }
 
-func (s *StepConfigAlicloudKeyPair) Cleanup(state multistep.StateBag) {
+func (s *stepConfigAlicloudKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	// If we used an SSH private key file, do not go about deleting
 	// keypairs

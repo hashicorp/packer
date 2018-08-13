@@ -39,6 +39,19 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 				"ssh_interface": "private_ip",
 			},
 		},
+
+		// ssh_private_ip specified as string
+		{
+			Input: map[string]interface{}{
+				"type":           "amazon-ebs",
+				"ssh_private_ip": "true",
+			},
+
+			Expected: map[string]interface{}{
+				"type":          "amazon-ebs",
+				"ssh_interface": "private_ip",
+			},
+		},
 	}
 
 	for _, tc := range cases {

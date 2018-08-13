@@ -43,9 +43,11 @@ package:
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
+	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
+	@go get golang.org/x/tools/cmd/goimports
 	@govendor sync
 
 dev: deps ## Build and install a development build
@@ -60,7 +62,7 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s $(UNFORMATTED_FILES)
+	@gofmt -w -s main.go $(UNFORMATTED_FILES)
 
 fmt-check: ## Check go code formatting
 	@echo "==> Checking that code complies with gofmt requirements..."

@@ -20,8 +20,13 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	c := state.Get("config").(Config)
 	sshPubKey := state.Get("ssh_pubkey").(string)
 	tags := []string{}
+	var bootscript *string
 
 	ui.Say("Creating server...")
+
+	if c.Bootscript != "" {
+		bootscript = &c.Bootscript
+	}
 
 	if sshPubKey != "" {
 		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.TrimSpace(sshPubKey))}
@@ -33,6 +38,7 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		Organization:   c.Organization,
 		CommercialType: c.CommercialType,
 		Tags:           tags,
+		Bootscript:     bootscript,
 	})
 
 	if err != nil {

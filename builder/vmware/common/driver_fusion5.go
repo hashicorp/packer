@@ -24,7 +24,7 @@ type Fusion5Driver struct {
 	SSHConfig *SSHConfig
 }
 
-func (d *Fusion5Driver) Clone(dst, src string) error {
+func (d *Fusion5Driver) Clone(dst, src string, linked bool) error {
 	return errors.New("Cloning is not supported with Fusion 5. Please use Fusion 6+.")
 }
 

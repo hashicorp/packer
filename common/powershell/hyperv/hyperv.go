@@ -267,7 +267,7 @@ if ($harddrivePath){
 func DisableAutomaticCheckpoints(vmName string) error {
 	var script = `
 param([string]$vmName)
-if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) { 
+if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 	Hyper-V\Set-Vm -Name $vmName -AutomaticCheckpointsEnabled $false }
 `
 	var ps powershell.PowerShellCmd
@@ -279,7 +279,7 @@ func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName str
 	var script = `
 param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
-$WorkingPath = Join-Path $exportPath $vmName 
+$WorkingPath = Join-Path $exportPath $vmName
 
 if (Test-Path $WorkingPath) {
 	throw "Export path working directory: $WorkingPath already exists!"
@@ -297,7 +297,7 @@ if ($snapshotName) {
     } else {
         $snapshot = $null
     }
-    
+
     if (!$snapshot) {
         #No snapshot clone
         Hyper-V\Export-VM -Name $vmName -Path $exportPath -ErrorAction Stop
@@ -328,7 +328,7 @@ param([string]$exportPath, [string]$cloneFromVmxcPath)
 if (!(Test-Path $cloneFromVmxcPath)){
 	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
 }
-	
+
 if (!(Test-Path $exportPath)){
 	New-Item -ItemType Directory -Force -Path $exportPath
 }
@@ -390,12 +390,12 @@ if ($vhdPath){
 		$existingFirstHarddrive | Hyper-V\Set-VMHardDiskDrive -Path $vhdPath
 	} else {
 		Hyper-V\Add-VMHardDiskDrive -VM $compatibilityReport.VM -Path $vhdPath
-	}	
+	}
 }
 Hyper-V\Set-VMMemory -VM $compatibilityReport.VM -StartupBytes $memoryStartupBytes
 $networkAdaptor = $compatibilityReport.VM.NetworkAdapters | Select -First 1
 Hyper-V\Disconnect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor
-Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName 
+Hyper-V\Connect-VMNetworkAdapter -VMNetworkAdapter $networkAdaptor -SwitchName $switchName
 $vm = Hyper-V\Import-VM -CompatibilityReport $compatibilityReport
 
 if ($vm) {
@@ -518,8 +518,14 @@ Hyper-V\Set-VMNetworkAdapter -VMName $vmName -MacAddressSpoofing $enableMacSpoof
 
 func SetVirtualMachineSecureBoot(vmName string, enableSecureBoot bool, templateName string) error {
 	var script = `
-param([string]$vmName, $enableSecureBoot)
-Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBoot
+param([string]$vmName, [string]$enableSecureBootString, [string]$templateName)
+$cmdlet = Get-Command Hyper-V\Set-VMFirmware
+# The SecureBootTemplate parameter is only available in later versions
+if ($cmdlet.Parameters.SecureBootTemplate) {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString -SecureBootTemplate $templateName
+} else {
+	Hyper-V\Set-VMFirmware -VMName $vmName -EnableSecureBoot $enableSecureBootString
+}
 `
 
 	var ps powershell.PowerShellCmd
@@ -1009,7 +1015,11 @@ param([string]$mac, [int]$addressIndex)
 try {
   $vm = Hyper-V\Get-VM | ?{$_.NetworkAdapters.MacAddress -eq $mac}
   if ($vm.NetworkAdapters.IpAddresses) {
-    $ip = $vm.NetworkAdapters.IpAddresses[$addressIndex]
+    $ipAddresses = $vm.NetworkAdapters.IPAddresses
+    if ($ipAddresses -isnot [array]) {
+      $ipAddresses = @($ipAddresses)
+    }
+    $ip = $ipAddresses[$addressIndex]
   } else {
     $vm_info = Get-CimInstance -ClassName Msvm_ComputerSystem -Namespace root\virtualization\v2 -Filter "ElementName='$($vm.Name)'"
     $ip_details = (Get-CimAssociatedInstance -InputObject $vm_info -ResultClassName Msvm_KvpExchangeComponent).GuestIntrinsicExchangeItems | %{ [xml]$_ } | ?{ $_.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE[child::text()='NetworkAddressIPv4']") }

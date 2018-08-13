@@ -19,10 +19,11 @@ package network
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/validation"
-	"net/http"
 )
 
 // ExpressRouteCircuitPeeringsClient is the network Client
@@ -41,16 +42,17 @@ func NewExpressRouteCircuitPeeringsClientWithBaseURI(baseURI string, subscriptio
 }
 
 // CreateOrUpdate creates or updates a peering in the specified express route circuits.
-//
-// resourceGroupName is the name of the resource group. circuitName is the name of the express route circuit.
-// peeringName is the name of the peering. peeringParameters is parameters supplied to the create or update express
-// route circuit peering operation.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// circuitName - the name of the express route circuit.
+// peeringName - the name of the peering.
+// peeringParameters - parameters supplied to the create or update express route circuit peering operation.
 func (client ExpressRouteCircuitPeeringsClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, circuitName string, peeringName string, peeringParameters ExpressRouteCircuitPeering) (result ExpressRouteCircuitPeeringsCreateOrUpdateFuture, err error) {
 	if err := validation.Validate([]validation.Validation{
 		{TargetValue: peeringParameters,
 			Constraints: []validation.Constraint{{Target: "peeringParameters.ExpressRouteCircuitPeeringPropertiesFormat", Name: validation.Null, Rule: false,
 				Chain: []validation.Constraint{{Target: "peeringParameters.ExpressRouteCircuitPeeringPropertiesFormat.PeerASN", Name: validation.Null, Rule: false,
-					Chain: []validation.Constraint{{Target: "peeringParameters.ExpressRouteCircuitPeeringPropertiesFormat.PeerASN", Name: validation.InclusiveMaximum, Rule: 4294967295, Chain: nil},
+					Chain: []validation.Constraint{{Target: "peeringParameters.ExpressRouteCircuitPeeringPropertiesFormat.PeerASN", Name: validation.InclusiveMaximum, Rule: int64(4294967295), Chain: nil},
 						{Target: "peeringParameters.ExpressRouteCircuitPeeringPropertiesFormat.PeerASN", Name: validation.InclusiveMinimum, Rule: 1, Chain: nil},
 					}},
 				}}}}}); err != nil {
@@ -99,15 +101,17 @@ func (client ExpressRouteCircuitPeeringsClient) CreateOrUpdatePreparer(ctx conte
 // CreateOrUpdateSender sends the CreateOrUpdate request. The method will close the
 // http.Response Body if it receives an error.
 func (client ExpressRouteCircuitPeeringsClient) CreateOrUpdateSender(req *http.Request) (future ExpressRouteCircuitPeeringsCreateOrUpdateFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -125,9 +129,10 @@ func (client ExpressRouteCircuitPeeringsClient) CreateOrUpdateResponder(resp *ht
 }
 
 // Delete deletes the specified peering from the specified express route circuit.
-//
-// resourceGroupName is the name of the resource group. circuitName is the name of the express route circuit.
-// peeringName is the name of the peering.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// circuitName - the name of the express route circuit.
+// peeringName - the name of the peering.
 func (client ExpressRouteCircuitPeeringsClient) Delete(ctx context.Context, resourceGroupName string, circuitName string, peeringName string) (result ExpressRouteCircuitPeeringsDeleteFuture, err error) {
 	req, err := client.DeletePreparer(ctx, resourceGroupName, circuitName, peeringName)
 	if err != nil {
@@ -169,15 +174,17 @@ func (client ExpressRouteCircuitPeeringsClient) DeletePreparer(ctx context.Conte
 // DeleteSender sends the Delete request. The method will close the
 // http.Response Body if it receives an error.
 func (client ExpressRouteCircuitPeeringsClient) DeleteSender(req *http.Request) (future ExpressRouteCircuitPeeringsDeleteFuture, err error) {
-	sender := autorest.DecorateSender(client, azure.DoRetryWithRegistration(client.Client))
-	future.Future = azure.NewFuture(req)
-	future.req = req
-	_, err = future.Done(sender)
+	var resp *http.Response
+	resp, err = autorest.SendWithSender(client, req,
+		azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
 	}
-	err = autorest.Respond(future.Response(),
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	err = autorest.Respond(resp, azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusAccepted, http.StatusNoContent))
+	if err != nil {
+		return
+	}
+	future.Future, err = azure.NewFutureFromResponse(resp)
 	return
 }
 
@@ -194,9 +201,10 @@ func (client ExpressRouteCircuitPeeringsClient) DeleteResponder(resp *http.Respo
 }
 
 // Get gets the specified authorization from the specified express route circuit.
-//
-// resourceGroupName is the name of the resource group. circuitName is the name of the express route circuit.
-// peeringName is the name of the peering.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// circuitName - the name of the express route circuit.
+// peeringName - the name of the peering.
 func (client ExpressRouteCircuitPeeringsClient) Get(ctx context.Context, resourceGroupName string, circuitName string, peeringName string) (result ExpressRouteCircuitPeering, err error) {
 	req, err := client.GetPreparer(ctx, resourceGroupName, circuitName, peeringName)
 	if err != nil {
@@ -262,8 +270,9 @@ func (client ExpressRouteCircuitPeeringsClient) GetResponder(resp *http.Response
 }
 
 // List gets all peerings in a specified express route circuit.
-//
-// resourceGroupName is the name of the resource group. circuitName is the name of the express route circuit.
+// Parameters:
+// resourceGroupName - the name of the resource group.
+// circuitName - the name of the express route circuit.
 func (client ExpressRouteCircuitPeeringsClient) List(ctx context.Context, resourceGroupName string, circuitName string) (result ExpressRouteCircuitPeeringListResultPage, err error) {
 	result.fn = client.listNextResults
 	req, err := client.ListPreparer(ctx, resourceGroupName, circuitName)

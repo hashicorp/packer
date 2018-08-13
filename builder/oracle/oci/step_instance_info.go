@@ -10,14 +10,14 @@ import (
 
 type stepInstanceInfo struct{}
 
-func (s *stepInstanceInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepInstanceInfo) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
 		driver = state.Get("driver").(Driver)
 		ui     = state.Get("ui").(packer.Ui)
 		id     = state.Get("instance_id").(string)
 	)
 
-	ip, err := driver.GetInstanceIP(id)
+	ip, err := driver.GetInstanceIP(ctx, id)
 	if err != nil {
 		err = fmt.Errorf("Error getting instance's IP: %s", err)
 		ui.Error(err.Error())

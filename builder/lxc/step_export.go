@@ -1,15 +1,13 @@
 package lxc
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"os/exec"
+	"os/user"
 	"path/filepath"
-	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -23,7 +21,16 @@ func (s *stepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 
 	name := config.ContainerName
 
-	containerDir := fmt.Sprintf("/var/lib/lxc/%s", name)
+	lxc_dir := "/var/lib/lxc"
+	user, err := user.Current()
+	if err != nil {
+		log.Print("Cannot find current user. Falling back to /var/lib/lxc...")
+	}
+	if user.Uid != "0" && user.HomeDir != "" {
+		lxc_dir = filepath.Join(user.HomeDir, ".local", "share", "lxc")
+	}
+
+	containerDir := filepath.Join(lxc_dir, name)
 	outputPath := filepath.Join(config.OutputDir, "rootfs.tar.gz")
 	configFilePath := filepath.Join(config.OutputDir, "lxc-config")
 
@@ -47,7 +54,7 @@ func (s *stepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 
 	_, err = io.Copy(configFile, originalConfigFile)
 
-	commands := make([][]string, 4)
+	commands := make([][]string, 3)
 	commands[0] = []string{
 		"lxc-stop", "--name", name,
 	}
@@ -57,13 +64,10 @@ func (s *stepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 	commands[2] = []string{
 		"chmod", "+x", configFilePath,
 	}
-	commands[3] = []string{
-		"sh", "-c", "chown $USER:`id -gn` " + filepath.Join(config.OutputDir, "*"),
-	}
 
 	ui.Say("Exporting container...")
 	for _, command := range commands {
-		err := s.SudoCommand(command...)
+		err := RunCommand(command...)
 		if err != nil {
 			err := fmt.Errorf("Error exporting container: %s", err)
 			state.Put("error", err)
@@ -76,25 +80,3 @@ func (s *stepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 }
 
 func (s *stepExport) Cleanup(state multistep.StateBag) {}
-
-func (s *stepExport) SudoCommand(args ...string) error {
-	var stdout, stderr bytes.Buffer
-
-	log.Printf("Executing sudo command: %#v", args)
-	cmd := exec.Command("sudo", args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-
-	stdoutString := strings.TrimSpace(stdout.String())
-	stderrString := strings.TrimSpace(stderr.String())
-
-	if _, ok := err.(*exec.ExitError); ok {
-		err = fmt.Errorf("Sudo command error: %s", stderrString)
-	}
-
-	log.Printf("stdout: %s", stdoutString)
-	log.Printf("stderr: %s", stderrString)
-
-	return err
-}

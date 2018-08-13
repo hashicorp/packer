@@ -102,6 +102,14 @@ credentials inline, or in the environment, Packer will check this location. You
 can optionally specify a different location in the configuration by setting the
 environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
 
+The format for the credentials file is like so
+
+```
+[default]
+aws_access_key_id=<your access key id>
+aws_secret_access_key=<your secret access key>
+```
+
 You may also configure the profile to use by setting the `profile`
 configuration option, or setting the `AWS_PROFILE` environment variable:
 
@@ -168,7 +176,7 @@ for Packer to work:
       "Resource" : "*"
   }]
 }
-``` 
+```
 
 Note that if you'd like to create a spot instance, you must also add:
 
@@ -176,7 +184,13 @@ Note that if you'd like to create a spot instance, you must also add:
 ec2:RequestSpotInstances,
 ec2:CancelSpotInstanceRequests,
 ec2:DescribeSpotInstanceRequests
-```  
+```
+
+If you have the `spot_price` parameter set to `auto`, you must also add:
+
+``` json
+ec2:DescribeSpotPriceHistory
+```
 
 ## Troubleshooting
 
@@ -217,3 +231,20 @@ If you suspect your system's date is wrong, you can compare it against
 <http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
 current time. If you're on Linux, you can try setting the time with ntp by
 running `sudo ntpd -q`.
+
+### `exceeded wait attempts` while waiting for tasks to complete
+We use the AWS SDK's built-in waiters to wait for longer-running tasks to
+complete. These waiters have default delays between queries and maximum number
+of queries that don't always work for our users.
+
+If you find that you are being rate-limited or have exceeded your max wait
+attempts, you can override the defaults by setting the following packer
+environment variables (note that these will apply to all aws tasks that we have
+to wait for):
+
+`AWS_MAX_ATTEMPTS` - This is how many times to re-send a status update request.
+Excepting tasks that we know can take an extremely long time, this defaults to
+40tries.
+
+`AWS_POLL_DELAY_SECONDS` - How many seconds to wait in between status update
+requests. Generally defaults to 2 or 5 seconds, depending on the task.

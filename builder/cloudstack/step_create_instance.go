@@ -47,7 +47,9 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	p.SetDisplayname("Created by Packer")
 
 	if keypair, ok := state.GetOk("keypair"); ok {
-		p.SetKeypair(keypair.(string))
+		kp := keypair.(string)
+		ui.Message(fmt.Sprintf("Using keypair: %s", kp))
+		p.SetKeypair(kp)
 	}
 
 	if securitygroups, ok := state.GetOk("security_groups"); ok {
@@ -120,6 +122,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	}
 
 	ui.Message("Instance has been created!")
+	ui.Message(fmt.Sprintf("Instance ID: %s", instance.Id))
 
 	// In debug-mode, we output the password
 	if s.Debug {

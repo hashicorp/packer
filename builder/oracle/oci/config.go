@@ -44,6 +44,17 @@ type Config struct {
 	BaseImageID string `mapstructure:"base_image_ocid"`
 	Shape       string `mapstructure:"shape"`
 	ImageName   string `mapstructure:"image_name"`
+
+	// Instance
+	InstanceName string `mapstructure:"instance_name"`
+
+	// Metadata optionally contains custom metadata key/value pairs provided in the
+	// configuration. While this can be used to set metadata["user_data"] the explicit
+	// "user_data" and "user_data_file" values will have precedence.
+	// An instance's metadata can be obtained from at http://169.254.169.254 on the
+	// launched instance.
+	Metadata map[string]string `mapstructure:"metadata"`
+
 	// UserData and UserDataFile file are both optional and mutually exclusive.
 	UserData     string `mapstructure:"user_data"`
 	UserDataFile string `mapstructure:"user_data_file"`

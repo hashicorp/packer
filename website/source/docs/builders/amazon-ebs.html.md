@@ -150,8 +150,15 @@ builder.
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
     which will stop the instance for you. If this is set to true, Packer *will not*
-    stop the instance and will wait for you to stop it manually. You can do this
-    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+    stop the instance but will assume that you will send the stop signal
+    yourself through your final provisioner. You can do this with a
+    [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+
+    Note that Packer will still wait for the instance to be stopped, and failing
+    to send the stop signal yourself, when you have set this flag to `true`,
+    will cause a timeout.
+
+    Example of a valid shutdown command:
 
     ``` json
     {
@@ -335,6 +342,10 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `spot_tags` (object of key/value strings) - Requires `spot_price` to
+    be set. This tells Packer to apply tags to the spot request that is
+    issued.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
@@ -520,3 +531,19 @@ up all residual volumes that are not designated by the user to remain after
 termination. If you need to preserve those source volumes, you can overwrite the
 termination setting by specifying `delete_on_termination=false` in the
 `launch_block_device_mappings` block for the device.
+
+## Windows 2016 Sysprep Commands - For Amazon Windows AMIs Only
+
+For Amazon Windows 2016 AMIs it is necessary to run Sysprep commands which can be easily added
+to the provisioner section.
+
+```json
+{
+    "type": "powershell",
+    "inline": [
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+    ]
+
+}
+```

@@ -6,10 +6,9 @@ sudo: false
 language: go
 
 go:
-  - 1.8.x
   - 1.9.x
-  - 1.x
-
+  - 1.10.x
+  - master
 
 install:
   - make deps
@@ -22,4 +21,6 @@ branches:
     - master
 
 matrix:
+  allow_failures:
+    - go: master
   fast_finish: true

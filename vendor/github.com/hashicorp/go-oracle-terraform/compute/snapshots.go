@@ -120,7 +120,7 @@ func (c *SnapshotsClient) CreateSnapshot(input *CreateSnapshotInput) (*Snapshot,
 type GetSnapshotInput struct {
 	// The name of the Snapshot
 	// Required
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetSnapshot retrieves the Snapshot with the given name.
@@ -176,9 +176,9 @@ func (c *SnapshotsClient) DeleteSnapshot(machineImagesClient *MachineImagesClien
 	return nil
 }
 
-// DeleteSnapshot deletes the Snapshot with the given name.
-// A machine image gets created with the associated snapshot is not deleted
-// by this method.
+// DeleteSnapshotResourceOnly deletes the Snapshot with the given name.
+// The machine image that gets created with the associated snapshot is not
+// deleted by this method.
 func (c *SnapshotsClient) DeleteSnapshotResourceOnly(input *DeleteSnapshotInput) error {
 	// Wait for snapshot complete in case delay is active and the corresponding
 	// instance needs to be deleted first

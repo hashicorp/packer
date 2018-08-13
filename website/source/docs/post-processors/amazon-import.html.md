@@ -125,30 +125,41 @@ This is an example that uses `vmware-iso` builder and exports the `.ova` file us
 ``` json
 "post-processors" : [
      [
-     {
-      "type": "shell-local",
-      "inline": [ "/usr/bin/ovftool <packer-output-directory>/<vmware-name>.vmx <packer-output-directory>/<vmware-name>.ova" ]
-     },
-     {
-         "files": [
-           "<packer-output-directory>/<vmware-name>.ova"
-         ],
-         "type": "artifice"
-     },
-     {
-      "type": "amazon-import",
-      "access_key": "YOUR KEY HERE",
-      "secret_key": "YOUR SECRET KEY HERE",
-      "region": "us-east-1",
-      "s3_bucket_name": "importbucket",
-      "license_type": "BYOL",
-      "tags": {
-        "Description": "packer amazon-import {{timestamp}}"
-      }
-     }
+        {
+          "type": "shell-local",
+          "inline": [ "/usr/bin/ovftool <packer-output-directory>/<vmware-name>.vmx <packer-output-directory>/<vmware-name>.ova" ]
+        },
+        {
+           "files": [
+             "<packer-output-directory>/<vmware-name>.ova"
+           ],
+           "type": "artifice"
+        },
+        {
+          "type": "amazon-import",
+          "access_key": "YOUR KEY HERE",
+          "secret_key": "YOUR SECRET KEY HERE",
+          "region": "us-east-1",
+          "s3_bucket_name": "importbucket",
+          "license_type": "BYOL",
+          "tags": {
+            "Description": "packer amazon-import {{timestamp}}"
+          }
+       }
     ]
   ]
 ```
+
+## Troubleshooting Timeouts
+The amazon-import feature can take a long time to upload and convert your OVAs
+into AMIs; if you find that your build is failing because you have exceeded your
+max retries or find yourself being rate limited, you can override the max
+retries and the delay in between retries by setting the environment variables
+ `AWS_MAX_ATTEMPTS` and `AWS_POLL_DELAY_SECONDS` on the machine running the
+ Packer build. By default, the waiter that waits for your image to be imported
+ from s3 waits retries up to 300 times with a 5 second delay in between retries.
+ This is dramatically higher than many of our other waiters, to account for how
+ long this process can take.
 
 -&gt; **Note:** Packer can also read the access key and secret access key from
 environmental variables. See the configuration reference in the section above

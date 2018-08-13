@@ -69,6 +69,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			OutputDir: b.config.OutputDir,
 			Path:      b.config.SourcePath,
 			VMName:    b.config.VMName,
+			Linked:    b.config.Linked,
 		},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXData,

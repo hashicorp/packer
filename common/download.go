@@ -278,30 +278,54 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 
 	resp, err := httpClient.Do(req)
-	if err == nil && (resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		// If the HEAD request succeeded, then attempt to set the range
-		// query if we can.
-		if resp.Header.Get("Accept-Ranges") == "bytes" {
-			if fi, err := dst.Stat(); err == nil {
-				if _, err = dst.Seek(0, os.SEEK_END); err == nil {
-					req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+	if err != nil || resp == nil {
 
-					d.current = uint64(fi.Size())
+		if resp == nil {
+			log.Printf("[DEBUG] (download) HTTP connection error: %s", err.Error())
+
+		} else if resp.StatusCode >= 400 && resp.StatusCode < 600 {
+			log.Printf("[DEBUG] (download) Non-successful HTTP status code (%s) while making HEAD request: %s", resp.Status, err.Error())
+
+		} else {
+			log.Printf("[DEBUG] (download) Error making HTTP HEAD request (%s): %s", resp.Status, err.Error())
+		}
+
+	} else {
+
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			// If the HEAD request succeeded, then attempt to set the range
+			// query if we can.
+
+			if resp.Header.Get("Accept-Ranges") == "bytes" {
+				if fi, err := dst.Stat(); err == nil {
+					if _, err = dst.Seek(0, os.SEEK_END); err == nil {
+						req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
+
+						d.current = uint64(fi.Size())
+					}
 				}
 			}
+
+		} else {
+			log.Printf("[DEBUG] (download) Unexpected HTTP response during HEAD request: %s", resp.Status)
 		}
-	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
-		return fmt.Errorf("%s", resp.Status)
 	}
 
 	// Set the request to GET now, and redo the query to download
 	req.Method = "GET"
 
 	resp, err = httpClient.Do(req)
-	if err != nil {
-		return err
-	} else if err != nil || (resp.StatusCode >= 400 && resp.StatusCode < 600) {
-		return fmt.Errorf("%s", resp.Status)
+	if err == nil && (resp.StatusCode >= 400 && resp.StatusCode < 600) {
+		return fmt.Errorf("Error making HTTP GET request: %s", resp.Status)
+
+	} else if err != nil {
+		if resp == nil {
+			return fmt.Errorf("HTTP connection error: %s", err.Error())
+
+		} else if resp.StatusCode >= 400 && resp.StatusCode < 600 {
+			return fmt.Errorf("HTTP %s error: %s", resp.Status, err.Error())
+		}
+		return fmt.Errorf("HTTP error: %s", err.Error())
 	}
 
 	d.total = d.current + uint64(resp.ContentLength)

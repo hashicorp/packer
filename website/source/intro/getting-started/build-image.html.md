@@ -181,10 +181,7 @@ you will also need to set `associate_public_ip_address` to `true`, or set up a
 ## Managing the Image
 
 Packer only builds images. It does not attempt to manage them in any way. After
-they're built, it is up to you to launch or destroy them as you see fit. If you
-want to store and namespace images for quick reference, you can use [Atlas by
-HashiCorp](https://atlas.hashicorp.com). We'll cover remotely building and
-storing images at the end of this getting started guide.
+they're built, it is up to you to launch or destroy them as you see fit.
 
 After running the above example, your AWS account now has an AMI associated
 with it. AMIs are stored in S3 by Amazon, so unless you want to be charged
@@ -338,7 +335,7 @@ customize the image. Finally, when all is done, Packer will wrap the whole
 customized package up into a brand new AMI that will be available from the
 [AWS AMI management page](
 https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Images). Any
-instances we subsequently create from this AMI will have our all of our
+instances we subsequently create from this AMI will have all of our
 customizations baked in. This is the core benefit we are looking to
 achieve from using the [Amazon EBS builder](/docs/builders/amazon-ebs.html)
 in this example.
