@@ -21,7 +21,6 @@ import (
 
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
 	Debug                             bool
 	EbsOptimized                      bool
@@ -33,7 +32,6 @@ type StepRunSpotInstance struct {
 	SpotPrice                         string
 	SpotPriceProduct                  string
 	SpotTags                          TagMap
-	SubnetId                          string
 	Tags                              TagMap
 	VolumeTags                        TagMap
 	UserData                          string
@@ -87,7 +85,12 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	spotPrice := s.SpotPrice
-	availabilityZone := s.AvailabilityZone
+	azConfig := ""
+	if azRaw, ok := state.GetOk("availability_zone"); ok {
+		azConfig = azRaw.(string)
+	}
+	az := azConfig
+
 	if spotPrice == "auto" {
 		ui.Message(fmt.Sprintf(
 			"Finding spot price for %s %s...",
@@ -98,7 +101,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		resp, err := ec2conn.DescribeSpotPriceHistory(&ec2.DescribeSpotPriceHistoryInput{
 			InstanceTypes:       []*string{&s.InstanceType},
 			ProductDescriptions: []*string{&s.SpotPriceProduct},
-			AvailabilityZone:    &s.AvailabilityZone,
+			AvailabilityZone:    &az,
 			StartTime:           &startTime,
 		})
 		if err != nil {
@@ -118,8 +121,8 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 			}
 			if price == 0 || current < price {
 				price = current
-				if s.AvailabilityZone == "" {
-					availabilityZone = *history.AvailabilityZone
+				if azConfig == "" {
+					az = *history.AvailabilityZone
 				}
 			}
 		}
@@ -163,24 +166,26 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		UserData:           &userData,
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 		Placement: &ec2.SpotPlacement{
-			AvailabilityZone: &availabilityZone,
+			AvailabilityZone: &az,
 		},
 		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
-	if s.SubnetId != "" && s.AssociatePublicIpAddress {
+	subnetId := state.Get("subnet_id").(string)
+
+	if subnetId != "" && s.AssociatePublicIpAddress {
 		runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
 				DeviceIndex:              aws.Int64(0),
 				AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-				SubnetId:                 &s.SubnetId,
+				SubnetId:                 &subnetId,
 				Groups:                   securityGroupIds,
 				DeleteOnTermination:      aws.Bool(true),
 			},
 		}
 	} else {
-		runOpts.SubnetId = &s.SubnetId
+		runOpts.SubnetId = &subnetId
 		runOpts.SecurityGroupIds = securityGroupIds
 	}
 

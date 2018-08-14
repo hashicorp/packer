@@ -7,27 +7,27 @@ import (
 	"math/rand"
 	"sort"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 // StepNetworkInfo queries AWS for information about
-// VPC's, Subnets, and Security Groups that is used
-// throughout the AMI creation process.
+// VPC's and Subnets that is used throughout the AMI creation process.
 //
-// Produces:
+// Produces (adding them to the state bag):
 //   vpc_id string - the VPC ID
 //   subnet_id string - the Subnet ID
-//   az string - the AZ name
-//   sg_ids []string - the SG IDs
+//   availability_zone string - the AZ name
 type StepNetworkInfo struct {
-	VpcId            string
-	VpcFilter        VpcFilterOptions
-	SubnetId         string
-	SubnetFilter     SubnetFilterOptions
-	AvailabilityZone string
-	// TODO Security groups + filter
+	VpcId               string
+	VpcFilter           VpcFilterOptions
+	SubnetId            string
+	SubnetFilter        SubnetFilterOptions
+	AvailabilityZone    string
+	SecurityGroupIds    []string
+	SecurityGroupFilter SecurityGroupFilterOptions
 }
 
 type subnetsSort []*ec2.Subnet
@@ -52,8 +52,8 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 	// VPC
 	if s.VpcId == "" && !s.VpcFilter.Empty() {
 		params := &ec2.DescribeVpcsInput{}
-
 		params.Filters = buildEc2Filters(s.VpcFilter.Filters)
+
 		log.Printf("Using VPC Filters %v", params)
 
 		vpcResp, err := ec2conn.DescribeVpcs(params)
@@ -65,7 +65,7 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 		}
 
 		if len(vpcResp.Vpcs) != 1 {
-			err := fmt.Errorf("No or more than one VPC was found matching filters: %v", params)
+			err := fmt.Errorf("Exactly one VPC should match the filter, but %d VPC's was found matching filters: %v", len(vpcResp.Vpcs), params)
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -79,11 +79,11 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 	if s.SubnetId == "" && !s.SubnetFilter.Empty() {
 		params := &ec2.DescribeSubnetsInput{}
 
-		vpcId := "vpc-id"
-		s.SubnetFilter.Filters[&vpcId] = &s.VpcId
+		if s.VpcId != "" {
+			s.SubnetFilter.Filters[aws.String("vpc-id")] = &s.VpcId
+		}
 		if s.AvailabilityZone != "" {
-			az := "availability-zone"
-			s.SubnetFilter.Filters[&az] = &s.AvailabilityZone
+			s.SubnetFilter.Filters[aws.String("availability-zone")] = &s.AvailabilityZone
 		}
 		params.Filters = buildEc2Filters(s.SubnetFilter.Filters)
 		log.Printf("Using Subnet Filters %v", params)
@@ -104,7 +104,7 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 		}
 
 		if len(subnetsResp.Subnets) > 1 && !s.SubnetFilter.Random && !s.SubnetFilter.MostFree {
-			err := fmt.Errorf("Your query returned more than one result. Please try a more specific search, or set random or most_free to true.")
+			err := fmt.Errorf("Your filter matched %d Subnets. Please try a more specific search, or set random or most_free to true.", len(subnetsResp.Subnets))
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
@@ -123,7 +123,28 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 		ui.Message(fmt.Sprintf("Found Subnet ID: %s", s.SubnetId))
 	}
 
+	// Try to find AZ and VPC Id from Subnet if they are not yet found/given
+	if s.SubnetId != "" && (s.AvailabilityZone == "" || s.VpcId == "") {
+		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", s.SubnetId)
+		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&s.SubnetId}})
+		if err != nil {
+			err := fmt.Errorf("Describing the subnet: %s returned error: %s.", s.SubnetId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+		if s.AvailabilityZone == "" {
+			s.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
+			log.Printf("[INFO] AvailabilityZone found: '%s'", s.AvailabilityZone)
+		}
+		if s.VpcId == "" {
+			s.VpcId = *resp.Subnets[0].VpcId
+			log.Printf("[INFO] VpcId found: '%s'", s.VpcId)
+		}
+	}
+
 	state.Put("vpc_id", s.VpcId)
+	state.Put("availability_zone", s.AvailabilityZone)
 	state.Put("subnet_id", s.SubnetId)
 	return multistep.ActionContinue
 }
