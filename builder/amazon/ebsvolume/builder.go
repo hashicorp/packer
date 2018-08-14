@@ -92,23 +92,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 	ec2conn := ec2.New(session)
 
-	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically
-	if b.config.SubnetId != "" && (b.config.AvailabilityZone == "" || b.config.VpcId == "") {
-		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", b.config.SubnetId)
-		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&b.config.SubnetId}})
-		if err != nil {
-			return nil, err
-		}
-		if b.config.AvailabilityZone == "" {
-			b.config.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
-			log.Printf("[INFO] AvailabilityZone found: '%s'", b.config.AvailabilityZone)
-		}
-		if b.config.VpcId == "" {
-			b.config.VpcId = *resp.Subnets[0].VpcId
-			log.Printf("[INFO] VpcId found: '%s'", b.config.VpcId)
-		}
-	}
-
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
@@ -121,7 +104,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			AvailabilityZone:                  b.config.AvailabilityZone,
 			BlockDevices:                      b.config.launchBlockDevices,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
@@ -134,7 +116,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SpotPrice:                         b.config.SpotPrice,
 			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
 			SpotTags:                          b.config.SpotTags,
-			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
@@ -142,7 +123,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			AvailabilityZone:                  b.config.AvailabilityZone,
 			BlockDevices:                      b.config.launchBlockDevices,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
@@ -154,7 +134,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                         b.config.SourceAmi,
-			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
@@ -169,6 +148,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AmiFilters:               b.config.SourceAmiFilter,
 		},
+		&awscommon.StepNetworkInfo{
+			VpcId:               b.config.VpcId,
+			VpcFilter:           b.config.VpcFilter,
+			SecurityGroupIds:    b.config.SecurityGroupIds,
+			SecurityGroupFilter: b.config.SecurityGroupFilter,
+			SubnetId:            b.config.SubnetId,
+			SubnetFilter:        b.config.SubnetFilter,
+			AvailabilityZone:    b.config.AvailabilityZone,
+		},
 		&awscommon.StepKeyPair{
 			Debug:                b.config.PackerDebug,
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
@@ -178,9 +166,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
 		},
 		&awscommon.StepSecurityGroup{
-			SecurityGroupIds: b.config.SecurityGroupIds,
-			CommConfig:       &b.config.RunConfig.Comm,
-			VpcId:            b.config.VpcId,
+			SecurityGroupFilter:   b.config.SecurityGroupFilter,
+			SecurityGroupIds:      b.config.SecurityGroupIds,
+			CommConfig:            &b.config.RunConfig.Comm,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
 		instanceStep,
