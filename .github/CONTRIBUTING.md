@@ -48,45 +48,42 @@ can quickly merge or address your contributions.
 
 5. The issue is closed.
 
-## Setting up Go to work on Packer
+## Setting up Go
 
-If you have never worked with Go before, you will have to complete the following
-steps in order to be able to compile and test Packer. These instructions target
+If you have never worked with Go before, you will have to install its
+runtime in order to build packer.
+
+1. [Install go](https://golang.org/doc/install#install)
+
+## Setting up Packer for dev
+
+If/when you have go installed you can already `go get` packer and `make` in
+order to compile and test Packer. These instructions target
 POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
+The instructions below are for go 1.7. or later.
 
-1. [Download](https://golang.org/dl) and install Go. The instructions below are
-   for go 1.7. Earlier versions of Go are no longer supported.
 
-2. Set and export the `GOPATH` environment variable and update your `PATH`. For
-   example, you can add the following to your `.bash_profile` (or comparable
-   shell startup scripts):
-
-```
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
-```
-
-3. Download the Packer source (and its dependencies) by running
+1. Download the Packer source (and its dependencies) by running
    `go get github.com/hashicorp/packer`. This will download the Packer source to
    `$GOPATH/src/github.com/hashicorp/packer`.
 
-4. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
+2. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
    so you can run `make` and easily access other files. Run `make help` to get
    information about make targets.
 
-5. Make your changes to the Packer source. You can run `make` in
+3. Make your changes to the Packer source. You can run `make` in
    `$GOPATH/src/github.com/hashicorp/packer` to run tests and build the Packer
    binary. Any compilation errors will be shown when the binaries are
    rebuilding. If you don't have `make` you can simply run
    `go build -o bin/packer .` from the project root.
 
-6. After running building Packer successfully, use
+4. After running building Packer successfully, use
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer` to build a machine and
    verify your changes work. For instance:
    `$GOPATH/src/github.com/hashicorp/packer/bin/packer build template.json`.
 
-7. If everything works well and the tests pass, run `go fmt` on your code before
+5. If everything works well and the tests pass, run `go fmt` on your code before
    submitting a pull-request.
 
 ### Opening an Pull Request
