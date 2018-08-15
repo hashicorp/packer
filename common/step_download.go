@@ -48,7 +48,7 @@ type StepDownload struct {
 
 	// Inplace indicates wether to copy file
 	// versus using it inplace.
-	// Inplace is only used when referencing local ISO files.
+	// Inplace can only be true when referencing local files.
 	Inplace bool
 }
 
@@ -94,7 +94,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		config := &DownloadConfig{
 			Url:        url,
 			TargetPath: targetPath,
-			CopyFile:   !s.Inplace,
+			Inplace:    s.Inplace,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
 			UserAgent:  useragent.String(),
