@@ -300,7 +300,7 @@ each category, the available configuration keys are alphabetized.
         is valid.
 
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is helpful to limit the AMIs to a trusted third party, or to your own account.
+        This is a required option, necessary to limit the AMIs your account or a trusted third party.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
