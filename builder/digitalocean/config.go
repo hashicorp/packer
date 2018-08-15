@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -35,6 +36,7 @@ type Config struct {
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 	UserDataFile      string        `mapstructure:"user_data_file"`
+	Tags              []string      `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -118,6 +120,17 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, errors.New(fmt.Sprintf("user_data_file not found: %s", c.UserDataFile)))
+		}
+	}
+
+	if c.Tags == nil {
+		c.Tags = make([]string, 0)
+	}
+	tagRe := regexp.MustCompile("^[[:alnum:]:_-]{1,255}$")
+
+	for _, t := range c.Tags {
+		if !tagRe.MatchString(t) {
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
 		}
 	}
 
