@@ -2,6 +2,7 @@
 
 ### IMPROVEMENTS:
 
+* builder/openstack: Add support for ports. [GH-6570]
 * command/validate: Warn users if config needs fixing. [GH-6423]
 
 ### BUG FIXES:
