@@ -2,11 +2,37 @@
 
 ### IMPROVEMENTS:
 
+* builder/amazon-chroot: New feature `root_volume_tags` to tag the created
+    volumes. [GH-6504]
+* builder/azure: Implement clean_image_name template engine. [GH-6558]
 * builder/digitalocean: Add support for tagging to instances [GH-6546]
+* builder/lxc: Allow unplivileged LXC containers. [GH-6279]
+* builder/oci: Add `metadata` feature to Packer config. [GH-6498]
 * builder/openstack: Add support for ports. [GH-6570]
+* builder/qemu: add ssh agent support. [GH-6541]
+* builder/qemu: New `use_backing_file` feature [GH-6249]
+* builder/vmware-iso: Try to use ISO files uploaded to the datastore when
+    building remotely instead of uploading them freshly every time [GH-5165]
 * command/validate: Warn users if config needs fixing. [GH-6423]
+* post-processor/vagrant: Support for Docker images. [GH-6494]
+* postprocessor/vagrant: Add support for Azure. [GH-6576]
+* provisioner/ansible: Enable {{.WinRMPassword}} template engine. [GH-6450]
+* provisioner/shell-local: Create PACKER_HTTP_ADDR environment variable
+    [GH-6503]
 
 ### BUG FIXES:
+* builder/amazon-ebssurrogate: Clean up volumes at end of build. [GH-6514]
+* builder/azure: Generated password satisfies Azure password requirements
+    [GH-6480]
+* builder/lxc: Correctly pass "config" option to "lxc launch". [GH-6563]
+* builder/vmware-iso: Fix crash caused by invalid datacenter url. [GH-6529]
+* core: Better error handling in downloader when connection error occurs.
+    [GH-6557]
+* core: Fix broken pathing checks in checksum files. [GH-6525]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: "owners" field on source_ami_filter is now required for
+    secuirty reasons. [GH-6585]
 
 ## 1.2.5 (July 16, 2018)
 
