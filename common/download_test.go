@@ -58,7 +58,6 @@ func TestDownloadClient_basic(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -94,7 +93,6 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 
 	if _, err := client.Get(); err == nil {
@@ -120,7 +118,6 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -152,7 +149,6 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		TargetPath: "./test-fixtures/root/another.txt",
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -210,7 +206,6 @@ func TestDownloadClient_resume(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL,
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -270,7 +265,6 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	config := &DownloadConfig{
 		Url:        server.URL,
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -303,7 +297,6 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		Url:        server.URL,
 		TargetPath: tf.Name(),
 		UserAgent:  "fancy user agent",
-		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -402,7 +395,7 @@ func TestDownloadFileUrl(t *testing.T) {
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
 		Hash:     HashForType("sha256"),
-		CopyFile: false,
+		Inplace:  true,
 	}
 
 	client := NewDownloadClient(config)
@@ -432,7 +425,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
 		Hash:     HashForType("sha256"),
-		CopyFile: false,
+		Inplace:  true,
 	}
 
 	// go go go
