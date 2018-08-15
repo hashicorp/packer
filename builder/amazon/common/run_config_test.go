@@ -55,15 +55,25 @@ func TestRunConfigPrepare_InstanceType(t *testing.T) {
 func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	c := testConfig()
 	c.SourceAmi = ""
-	if err := c.Prepare(nil); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 2 {
 		t.Fatalf("Should error if a source_ami (or source_ami_filter) is not specified")
 	}
 }
 
 func TestRunConfigPrepare_SourceAmiFilterBlank(t *testing.T) {
 	c := testConfigFilter()
-	if err := c.Prepare(nil); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 2 {
 		t.Fatalf("Should error if source_ami_filter is empty or not specified (and source_ami is not specified)")
+	}
+}
+
+func TestRunConfigPrepare_SourceAmiFilterOwnersBlank(t *testing.T) {
+	c := testConfigFilter()
+	filter_key := "name"
+	filter_value := "foo"
+	c.SourceAmiFilter = AmiFilterOptions{Filters: map[*string]*string{&filter_key: &filter_value}}
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("Should error if Owners is not specified)")
 	}
 }
 

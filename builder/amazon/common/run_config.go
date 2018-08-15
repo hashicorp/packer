@@ -25,6 +25,10 @@ func (d *AmiFilterOptions) Empty() bool {
 	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
+func (d *AmiFilterOptions) NoOwner() bool {
+	return len(d.Owners) == 0
+}
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
@@ -99,6 +103,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.SourceAmi == "" && c.SourceAmiFilter.Empty() {
 		errs = append(errs, fmt.Errorf("A source_ami or source_ami_filter must be specified"))
+	}
+
+	if c.SourceAmi == "" && c.SourceAmiFilter.NoOwner() {
+		errs = append(errs, fmt.Errorf("For security reasons, your source AMI filter must declare an owner."))
 	}
 
 	if c.InstanceType == "" {
