@@ -45,6 +45,11 @@ type StepDownload struct {
 	// extension on the URL is used. Otherwise, this will be forced
 	// on the downloaded file for every URL.
 	Extension string
+
+	// Inplace indicates wether to copy file
+	// versus using it inplace.
+	// Inplace is only used when referencing local ISO files.
+	Inplace bool
 }
 
 func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -89,7 +94,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		config := &DownloadConfig{
 			Url:        url,
 			TargetPath: targetPath,
-			CopyFile:   false,
+			CopyFile:   !s.Inplace,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
 			UserAgent:  useragent.String(),
