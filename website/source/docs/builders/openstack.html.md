@@ -139,6 +139,9 @@ builder.
 -   `networks` (array of strings) - A list of networks by UUID to attach to
     this instance.
 
+-   `ports` (array of strings) - A list of ports by UUID to attach to
+    this instance.
+
 -   `rackconnect_wait` (boolean) - For rackspace, whether or not to wait for
     Rackconnect to assign the machine an IP address before connecting via SSH.
     Defaults to false.
