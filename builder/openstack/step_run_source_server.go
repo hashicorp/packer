@@ -42,15 +42,11 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 
 	networks := make([]servers.Network, len(s.Networks)+len(s.Ports))
 	i := 0
-	if len(s.Ports) > 0 {
-		for i = 0; i < len(s.Ports); i++ {
-			networks[i].Port = s.Ports[i]
-		}
+	for ; i < len(s.Ports); i++ {
+		networks[i].Port = s.Ports[i]
 	}
-	if len(s.Networks) > 0 {
-		for i = len(s.Ports); i < len(networks); i++ {
-			networks[i].UUID = s.Networks[i]
-		}
+	for ; i < len(networks); i++ {
+		networks[i].UUID = s.Networks[i]
 	}
 
 	userData := []byte(s.UserData)
