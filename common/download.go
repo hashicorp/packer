@@ -154,10 +154,7 @@ func (d *DownloadClient) Get() (string, error) {
 		return "", fmt.Errorf("Unable to treat uri scheme %s as a Downloader. : %T", u.Scheme, d.downloader)
 	}
 
-	local, ok := d.downloader.(LocalDownloader)
-	if !ok && !d.config.CopyFile {
-		d.config.CopyFile = true
-	}
+	local, _ := d.downloader.(LocalDownloader)
 
 	// If we're copying the file, then just use the actual downloader
 	if d.config.CopyFile {
