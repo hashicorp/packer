@@ -2,6 +2,7 @@
 
 ### IMPROVEMENTS:
 
+* builder/digitalocean: Add support for tagging to instances [GH-6546]
 * builder/openstack: Add support for ports. [GH-6570]
 * command/validate: Warn users if config needs fixing. [GH-6423]
 
