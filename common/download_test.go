@@ -411,6 +411,50 @@ func TestDownloadFileUrl(t *testing.T) {
 	}
 }
 
+// TestDownloadFileUrl_inplace verifies that inplace setting is respected.
+func TestDownloadFileUrl_inplace(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unable to detect working directory: %s", err)
+	}
+	cwd = filepath.ToSlash(cwd)
+
+	// source_path is a file path and source is a network path
+	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
+
+	filePrefix := "file://"
+	if runtime.GOOS == "windows" {
+		filePrefix += "/"
+	}
+
+	source := fmt.Sprintf(filePrefix + sourcePath)
+	t.Logf("Trying to download %s", source)
+
+	config := &DownloadConfig{
+		Url: source,
+		// This is correct. We want to make sure we don't delete
+		Checksum: []byte{96, 111, 25, 69, 248, 26, 2, 45, 14, 208, 189, 153, 237, 253, 79, 153, 8, 28, 28, 177, 249, 127, 174, 8, 114, 145, 238, 20, 233, 69, 230, 8},
+		Hash:     HashForType("sha256"),
+		Inplace:  true,
+	}
+
+	client := NewDownloadClient(config)
+
+	// Verify that we fail to match the checksum
+	url, err := client.Get()
+	if err != nil {
+		t.Fatalf("Unexpected error: \"%v\"", err)
+	}
+
+	if sourcePath != url {
+		t.Errorf("Inplace file get should return same path, expected %s, got %s", sourcePath, url)
+	}
+
+	if _, err = os.Stat(sourcePath); err != nil {
+		t.Errorf("Could not stat source file: %s", sourcePath)
+	}
+}
+
 // SimulateFileUriDownload is a simple utility function that converts a uri
 // into a testable file path whilst ignoring a correct checksum match, stripping
 // UNC path info, and then calling stat to ensure the correct file exists.
