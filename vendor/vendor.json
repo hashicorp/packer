@@ -742,7 +742,7 @@
 			"revisionTime": "2018-05-15T01:47:05Z"
 		},
 		{
-			"checksumSHA1": "e7AW3YDVYJPKUjpqsB4AL9RRlTw=",
+			"checksumSHA1": "vFS5BwnCdQIfKm1nNWrR+ijsAZA=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
 			"revisionTime": "2018-05-31T02:06:30Z"
