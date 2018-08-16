@@ -33,6 +33,7 @@ Here is a full list of the available functions for reference.
 
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
+-   `env` - Returns environment variables. See example in [using home variable](/docs/templates/user-variables.html#using-home-variable)
 -   `isotime [FORMAT]` - UTC time, which can be
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below in [the `isotime` format reference](/docs/templates/engine.html#isotime-function-format-reference).
