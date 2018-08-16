@@ -10,6 +10,7 @@
 * builder/oci: Add `metadata` feature to Packer config. [GH-6498]
 * builder/openstack: Add support for ports. [GH-6570]
 * builder/openstack: Add support for getting config from clouds-public.yaml. [GH-6595]
+* builder/openstack: Support Block Storage volumes as boot volume. [GH-6596]
 * builder/qemu: add ssh agent support. [GH-6541]
 * builder/qemu: New `use_backing_file` feature [GH-6249]
 * builder/vmware-iso: Try to use ISO files uploaded to the datastore when
