@@ -18,13 +18,30 @@ func (s *stepCheckAlicloudSourceImage) Run(_ context.Context, state multistep.St
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
-	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{RegionId: common.Region(config.AlicloudRegion),
-		ImageId: config.AlicloudSourceImage})
+	args := &ecs.DescribeImagesArgs{
+		RegionId: common.Region(config.AlicloudRegion),
+		ImageId:  config.AlicloudSourceImage,
+	}
+	args.PageSize = 50
+	images, _, err := client.DescribeImages(args)
 	if err != nil {
 		err := fmt.Errorf("Error querying alicloud image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
+	}
+
+	// Describe markerplace image
+	args.ImageOwnerAlias = ecs.ImageOwnerMarketplace
+	imageMarkets, _, err := client.DescribeImages(args)
+	if err != nil {
+		err := fmt.Errorf("Error querying alicloud marketplace image: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	if len(imageMarkets) > 0 {
+		images = append(images, imageMarkets...)
 	}
 
 	if len(images) == 0 {
