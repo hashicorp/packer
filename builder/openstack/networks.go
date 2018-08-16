@@ -12,38 +12,6 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-// ExternalNetwork is a network with external router.
-type ExternalNetwork struct {
-	networks.Network
-	external.NetworkExternalExt
-}
-
-// FindExternalNetwork returns existing network with external router.
-// It will return first network if there are many.
-func FindExternalNetwork(client *gophercloud.ServiceClient) (*ExternalNetwork, error) {
-	var externalNetworks []ExternalNetwork
-
-	allPages, err := networks.List(client, networks.ListOpts{
-		Status: "ACTIVE",
-	}).AllPages()
-	if err != nil {
-		return nil, err
-	}
-
-	// Extract external networks from found networks.
-	err = networks.ExtractNetworksInto(allPages, &externalNetworks)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(externalNetworks) == 0 {
-		return nil, fmt.Errorf("no external networks found")
-	}
-
-	// Return the first external network.
-	return &externalNetworks[0], nil
-}
-
 // CheckFloatingIP gets a floating IP by its ID and checks if it is already
 // associated with any internal interface.
 // It returns floating IP if it can be used.
@@ -114,18 +82,24 @@ func GetInstancePortID(client *gophercloud.ServiceClient, id string) (string, er
 	return interfaces[0].PortID, nil
 }
 
-// CheckExternalNetworkRef checks provided network reference and returns a valid
+// CheckFloatingIPNetwork checks provided network reference and returns a valid
 // Networking service ID.
-func CheckExternalNetworkRef(client *gophercloud.ServiceClient, networkRef string) (string, error) {
+func CheckFloatingIPNetwork(client *gophercloud.ServiceClient, networkRef string) (string, error) {
 	if _, err := uuid.Parse(networkRef); err != nil {
-		return GetExternalNetworkIDByName(client, networkRef)
+		return GetFloatingIPNetworkIDByName(client, networkRef)
 	}
 
 	return networkRef, nil
 }
 
-// GetExternalNetworkIDByName searches for the external network ID by the provided name.
-func GetExternalNetworkIDByName(client *gophercloud.ServiceClient, networkName string) (string, error) {
+// ExternalNetwork is a network with external router.
+type ExternalNetwork struct {
+	networks.Network
+	external.NetworkExternalExt
+}
+
+// GetFloatingIPNetworkIDByName searches for the external network ID by the provided name.
+func GetFloatingIPNetworkIDByName(client *gophercloud.ServiceClient, networkName string) (string, error) {
 	var externalNetworks []ExternalNetwork
 
 	allPages, err := networks.List(client, networks.ListOpts{

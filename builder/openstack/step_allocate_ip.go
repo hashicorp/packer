@@ -43,8 +43,9 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 	// statebag below, because it is requested by Cleanup()
 	state.Put("access_ip", &instanceIP)
 
-	// Try to use floating IP provided by the user or find a free floating IP.
+	// WRITE NEW COMMENT>
 	if s.FloatingIP != "" {
+		// Try to use FloatingIP if it was provided by the user.
 		freeFloatingIP, err := CheckFloatingIP(networkClient, s.FloatingIP)
 		if err != nil {
 			err := fmt.Errorf("Error using provided floating IP '%s': %s", s.FloatingIP, err)
@@ -71,32 +72,15 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 		instanceIP = *freeFloatingIP
 		ui.Message(fmt.Sprintf("Selected floating IP: '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
 		state.Put("floatingip_istemp", false)
-	}
-
-	// Create a new floating IP if it wasn't obtained in the previous step.
-	if instanceIP.ID == "" {
-		var floatingNetwork string
-
-		if s.FloatingIPNetwork != "" {
-			// Validate provided external network reference and get an ID.
-			floatingNetwork, err = CheckExternalNetworkRef(networkClient, s.FloatingIPNetwork)
-			if err != nil {
-				err := fmt.Errorf("Error using the provided floating_ip_network: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-		} else {
-			// Search for the external network that can be used for the floating IPs.
-			ui.Say(fmt.Sprintf("Searching for the external network..."))
-			externalNetwork, err := FindExternalNetwork(networkClient)
-			if err != nil {
-				err := fmt.Errorf("Error searching the external network: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-			floatingNetwork = externalNetwork.ID
+	} else if s.FloatingIPNetwork != "" {
+		// Lastly, if FloatingIPNetwork was provided by the user, we need to use it
+		// to allocate a new floating IP and associate it to the instance.
+		floatingNetwork, err := CheckFloatingIPNetwork(networkClient, s.FloatingIPNetwork)
+		if err != nil {
+			err := fmt.Errorf("Error using the provided floating_ip_network: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 
 		ui.Say(fmt.Sprintf("Creating floating IP using network %s ...", floatingNetwork))
@@ -115,7 +99,7 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 		state.Put("floatingip_istemp", true)
 	}
 
-	// Assoctate a floating IP that was obtained in the previous steps.
+	// Assoctate a floating IP if it was obtained in the previous steps.
 	if instanceIP.ID != "" {
 		ui.Say(fmt.Sprintf("Associating floating IP '%s' (%s) with instance port...",
 			instanceIP.ID, instanceIP.FloatingIP))
