@@ -257,7 +257,7 @@ func funcGenVault(ctx *Context) interface{} {
 }
 
 func funcGenSed(ctx *Context) interface{} {
-	return func(inputString string, expression string) (string, error) {
+	return func(expression string, inputString string) (string, error) {
 		engine, err := sed.New(strings.NewReader(expression))
 
 		if err != nil {
@@ -265,6 +265,14 @@ func funcGenSed(ctx *Context) interface{} {
 		}
 
 		result, err := engine.RunString(inputString)
+
+		if err != nil{
+			return "", err
+		}
+
+		// The sed library adds a \n to all processed strings.
+		resultLength := len(result)
+		result = result[:resultLength-1]
 
 		return result, err
 	}
