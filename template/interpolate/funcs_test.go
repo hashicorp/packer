@@ -322,17 +322,17 @@ func TestFuncSed(t *testing.T) {
 		Output string
 	}{
 		{
-			`{{sed "hello" "s/hello/world/"}}`,
+			`{{sed "hello" "s|hello|world|"}}`,
 			`world`,
 		},
 
 		{
-			`{{sed "hello" "s/foo/bar/"}}`,
+			`{{sed "hello" "s|foo|bar|"}}`,
 			`hello`,
 		},
 
 		{
-			`{{user "foo" | sed "s/foo/bar/"}}`,
+			`{{user "foo" | sed "s|foo|bar|"}}`,
 			`bar`,
 		},
 	}
