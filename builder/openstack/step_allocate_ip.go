@@ -75,10 +75,19 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 
 	// Create a new floating IP if it wasn't obtained in the previous step.
 	if instanceIP.ID == "" {
-		// Search for the external network that can be used for the floating IPs if
-		// user hasn't provided any.
-		floatingNetwork := s.FloatingIPNetwork
-		if floatingNetwork == "" {
+		var floatingNetwork string
+
+		if s.FloatingIPNetwork != "" {
+			// Validate provided external network reference and get an ID.
+			floatingNetwork, err = CheckExternalNetworkRef(networkClient, s.FloatingIPNetwork)
+			if err != nil {
+				err := fmt.Errorf("Error using the provided floating_ip_network: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		} else {
+			// Search for the external network that can be used for the floating IPs.
 			ui.Say(fmt.Sprintf("Searching for the external network..."))
 			externalNetwork, err := FindExternalNetwork(networkClient)
 			if err != nil {
@@ -87,11 +96,10 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-
 			floatingNetwork = externalNetwork.ID
 		}
 
-		ui.Say(fmt.Sprintf("Creating floating IP..."))
+		ui.Say(fmt.Sprintf("Creating floating IP using network %s ...", floatingNetwork))
 		newIP, err := floatingips.Create(networkClient, floatingips.CreateOpts{
 			FloatingNetworkID: floatingNetwork,
 		}).Extract()
