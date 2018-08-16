@@ -60,7 +60,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.FloatingIPPool != "" {
+	if c.FloatingIPPool != "" && c.FloatingIPNetwork == "" {
 		c.FloatingIPNetwork = c.FloatingIPPool
 	}
 
