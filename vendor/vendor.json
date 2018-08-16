@@ -738,6 +738,36 @@
 			"revisionTime": "2018-05-31T02:06:30Z"
 		},
 		{
+			"checksumSHA1": "8YtBD+Um7I8ee1Xf1ZAWu74eP7w=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/extensions/volumeactions",
+			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
+			"revisionTime": "2018-05-15T01:47:05Z"
+		},
+		{
+			"checksumSHA1": "vqXNCd2My0y/5tPC/Bs79uf6Q4E=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes",
+			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
+			"revisionTime": "2018-05-15T01:47:05Z"
+		},
+		{
+			"checksumSHA1": "Au6MAsI90lewLByg9n+Yjtdqdh8=",
+			"path": "github.com/gophercloud/gophercloud/openstack/common/extensions",
+			"revision": "95a28eb606def6aaaed082b6b82d3244b0552184",
+			"revisionTime": "2017-06-23T01:44:30Z"
+		},
+		{
+			"checksumSHA1": "4XWDCGMYqipwJymi9xJo9UffD7g=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions",
+			"revision": "95a28eb606def6aaaed082b6b82d3244b0552184",
+			"revisionTime": "2017-06-23T01:44:30Z"
+		},
+		{
+			"checksumSHA1": "kCHEEeRVZeR1LhbvNP+WyvB8z2s=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume",
+			"revision": "282f25e4025de0a42015d2e2b5faef1d920aad3c",
+			"revisionTime": "2018-05-15T01:47:05Z"
+		},
+		{
 			"checksumSHA1": "vFS5BwnCdQIfKm1nNWrR+ijsAZA=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
