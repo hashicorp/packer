@@ -266,7 +266,7 @@ func funcGenSed(ctx *Context) interface{} {
 
 		result, err := engine.RunString(inputString)
 
-		if err != nil{
+		if err != nil {
 			return "", err
 		}
 
