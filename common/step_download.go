@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -66,7 +67,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
+	ui.Say(fmt.Sprintf("Downloading, copying or inplace referencing %s", s.Description))
 
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
@@ -99,6 +100,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 			Checksum:   checksum,
 			UserAgent:  useragent.String(),
 		}
+
 		downloadConfigs[i] = config
 
 		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
@@ -110,7 +112,11 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 
 	if finalPath == "" {
 		for i, url := range s.Url {
-			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
+			if strings.HasPrefix(url, "file://") {
+				ui.Message(fmt.Sprintf("Copying or inplace referencing: %s", url))
+			} else {
+				ui.Message(fmt.Sprintf("Downloading: %s", url))
+			}
 
 			config := downloadConfigs[i]
 
