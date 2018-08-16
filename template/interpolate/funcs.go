@@ -257,14 +257,14 @@ func funcGenVault(ctx *Context) interface{} {
 }
 
 func funcGenSed(ctx *Context) interface{} {
-	return func(k string, expr string) (string, error) {
-		engine, err := sed.NewQuiet(strings.NewReader(expr))
+	return func(inputString string, expression string) (string, error) {
+		engine, err := sed.New(strings.NewReader(expression))
 
 		if err != nil {
 			return "", err
 		}
 
-		result, err := engine.RunString(k)
+		result, err := engine.RunString(inputString)
 
 		return result, err
 	}
