@@ -204,6 +204,8 @@ func funcGenConsul(ctx *Context) interface{} {
 		if value == "" {
 			return "", fmt.Errorf("value is empty at path %s", k)
 		}
+
+		return value, nil
 	}
 }
 
@@ -234,13 +236,20 @@ func funcGenVault(ctx *Context) interface{} {
 			return "", errors.New(fmt.Sprintf("Vault Secret does not exist at the given path."))
 		}
 
-		data := secret.Data["data"]
-		if data == nil {
+		data, ok := secret.Data["data"]
+		if !ok {
+			// maybe ths is v1, not v2 kv store
+			value, ok := secret.Data[key]
+			if ok {
+				return value.(string), nil
+			}
+
+			// neither v1 nor v2 proudced a valid value
 			return "", errors.New(fmt.Sprintf("Vault data was empty at the "+
 				"given path. Warnings: %s", strings.Join(secret.Warnings, "; ")))
 		}
 
-		value := secret.Data["data"].(map[string]interface{})[key].(string)
+		value := data.(map[string]interface{})[key].(string)
 		return value, nil
 	}
 }

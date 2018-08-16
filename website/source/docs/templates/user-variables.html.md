@@ -122,12 +122,35 @@ your template as user variables. the `vault` function is available *only*
 within the default value of a user variable, allowing you to default a user
 variable to an environment variable.
 
-An example is shown below:
+An example of using a v2 kv engine:
+
+If you store a value in vault using `vault kv put secret/hello foo=world`, you
+can access it using the following template engine:
 
 ```json
 {
   "variables": {
-    "my_secret": "{{ vault `/secret/data/foo` `bar`}}"
+    "my_secret": "{{ vault `/secret/data/hello` `foo`}}"
+  }
+}
+```
+which will assign "my_secret": "world"
+
+An example of using a v1 kv engine:
+
+If you store a value in vault using:
+
+```
+vault secrets enable -version=1 -path=secrets kv
+vault kv put secrets/hello foo=world
+```
+
+You can access it using the following template engine:
+
+```
+{
+  "variables": {
+    "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
   }
 }
 ```
