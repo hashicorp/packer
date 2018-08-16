@@ -1,5 +1,12 @@
 package clientconfig
 
+// PublicClouds represents a collection of PublicCloud entries in clouds-public.yaml file.
+// The format of the clouds-public.yml is documented at
+// https://docs.openstack.org/python-openstackclient/latest/configuration/
+type PublicClouds struct {
+	Clouds map[string]Cloud `yaml:"public-clouds"`
+}
+
 // Clouds represents a collection of Cloud entries in a clouds.yaml file.
 // The format of clouds.yaml is documented at
 // https://docs.openstack.org/os-client-config/latest/user/configuration.html.
@@ -7,8 +14,10 @@ type Clouds struct {
 	Clouds map[string]Cloud `yaml:"clouds"`
 }
 
-// Cloud represents an entry in a clouds.yaml file.
+// Cloud represents an entry in a clouds.yaml/public-clouds.yaml/secure.yaml file.
 type Cloud struct {
+	Cloud      string        `yaml:"cloud"`
+	Profile    string        `yaml:"profile"`
 	AuthInfo   *AuthInfo     `yaml:"auth"`
 	AuthType   AuthType      `yaml:"auth_type"`
 	RegionName string        `yaml:"region_name"`
@@ -17,9 +26,24 @@ type Cloud struct {
 	// API Version overrides.
 	IdentityAPIVersion string `yaml:"identity_api_version"`
 	VolumeAPIVersion   string `yaml:"volume_api_version"`
+
+	// Verify whether or not SSL API requests should be verified.
+	Verify *bool `yaml:"verify"`
+
+	// CACertFile a path to a CA Cert bundle that can be used as part of
+	// verifying SSL API requests.
+	CACertFile string `yaml:"cacert"`
+
+	// ClientCertFile a path to a client certificate to use as part of the SSL
+	// transaction.
+	ClientCertFile string `yaml:"cert"`
+
+	// ClientKeyFile a path to a client key to use as part of the SSL
+	// transaction.
+	ClientKeyFile string `yaml:"key"`
 }
 
-// Auth represents the auth section of a cloud entry or
+// AuthInfo represents the auth section of a cloud entry or
 // auth options entered explicitly in ClientOpts.
 type AuthInfo struct {
 	// AuthURL is the keystone/identity endpoint URL.

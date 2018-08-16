@@ -3,6 +3,7 @@ package clientconfig
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/gophercloud/gophercloud"
@@ -15,14 +16,20 @@ import (
 type AuthType string
 
 const (
+	// AuthPassword defines an unknown version of the password
 	AuthPassword AuthType = "password"
-	AuthToken    AuthType = "token"
+	// AuthToken defined an unknown version of the token
+	AuthToken AuthType = "token"
 
+	// AuthV2Password defines version 2 of the password
 	AuthV2Password AuthType = "v2password"
-	AuthV2Token    AuthType = "v2token"
+	// AuthV2Token defines version 2 of the token
+	AuthV2Token AuthType = "v2token"
 
+	// AuthV3Password defines version 3 of the password
 	AuthV3Password AuthType = "v3password"
-	AuthV3Token    AuthType = "v3token"
+	// AuthV3Token defines version 3 of the token
+	AuthV3Token AuthType = "v3token"
 )
 
 // ClientOpts represents options to customize the way a client is
@@ -41,11 +48,16 @@ type ClientOpts struct {
 	// AuthInfo defines the authentication information needed to
 	// authenticate to a cloud when clouds.yaml isn't used.
 	AuthInfo *AuthInfo
+
+	// RegionName is the region to create a Service Client in.
+	// This will override a region in clouds.yaml or can be used
+	// when authenticating directly with AuthInfo.
+	RegionName string
 }
 
-// LoadYAML will load a clouds.yaml file and return the full config.
-func LoadYAML() (map[string]Cloud, error) {
-	content, err := findAndReadYAML()
+// LoadCloudsYAML will load a clouds.yaml file and return the full config.
+func LoadCloudsYAML() (map[string]Cloud, error) {
+	content, err := findAndReadCloudsYAML()
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +71,52 @@ func LoadYAML() (map[string]Cloud, error) {
 	return clouds.Clouds, nil
 }
 
+// LoadSecureCloudsYAML will load a secure.yaml file and return the full config.
+func LoadSecureCloudsYAML() (map[string]Cloud, error) {
+	var secureClouds Clouds
+
+	content, err := findAndReadSecureCloudsYAML()
+	if err != nil {
+		if err.Error() == "no secure.yaml file found" {
+			// secure.yaml is optional so just ignore read error
+			return secureClouds.Clouds, nil
+		}
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(content, &secureClouds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal yaml: %v", err)
+	}
+
+	return secureClouds.Clouds, nil
+}
+
+// LoadPublicCloudsYAML will load a public-clouds.yaml file and return the full config.
+func LoadPublicCloudsYAML() (map[string]Cloud, error) {
+	var publicClouds PublicClouds
+
+	content, err := findAndReadPublicCloudsYAML()
+	if err != nil {
+		if err.Error() == "no clouds-public.yaml file found" {
+			// clouds-public.yaml is optional so just ignore read error
+			return publicClouds.Clouds, nil
+		}
+
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(content, &publicClouds)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal yaml: %v", err)
+	}
+
+	return publicClouds.Clouds, nil
+}
+
 // GetCloudFromYAML will return a cloud entry from a clouds.yaml file.
 func GetCloudFromYAML(opts *ClientOpts) (*Cloud, error) {
-	clouds, err := LoadYAML()
+	clouds, err := LoadCloudsYAML()
 	if err != nil {
 		return nil, fmt.Errorf("unable to load clouds.yaml: %s", err)
 	}
@@ -101,9 +156,73 @@ func GetCloudFromYAML(opts *ClientOpts) (*Cloud, error) {
 		}
 	}
 
+	var cloudIsInCloudsYaml bool
 	if cloud == nil {
-		return nil, fmt.Errorf("Unable to determine a valid entry in clouds.yaml")
+		// not an immediate error as it might still be defined in secure.yaml
+		cloudIsInCloudsYaml = false
+	} else {
+		cloudIsInCloudsYaml = true
 	}
+
+	publicClouds, err := LoadPublicCloudsYAML()
+	if err != nil {
+		return nil, fmt.Errorf("unable to load clouds-public.yaml: %s", err)
+	}
+
+	var profileName = defaultIfEmpty(cloud.Profile, cloud.Cloud)
+	if profileName != "" {
+		publicCloud, ok := publicClouds[profileName]
+		if !ok {
+			return nil, fmt.Errorf("cloud %s does not exist in clouds-public.yaml", profileName)
+		}
+		cloud, err = mergeClouds(cloud, publicCloud)
+		if err != nil {
+			return nil, fmt.Errorf("Could not merge information from clouds.yaml and clouds-public.yaml for cloud %s", profileName)
+		}
+	}
+
+	secureClouds, err := LoadSecureCloudsYAML()
+	if err != nil {
+		return nil, fmt.Errorf("unable to load secure.yaml: %s", err)
+	}
+
+	if secureClouds != nil {
+		// If no entry was found in clouds.yaml, no cloud name was specified,
+		// and only one secureCloud entry exists, use that as the cloud entry.
+		if !cloudIsInCloudsYaml && cloudName == "" && len(secureClouds) == 1 {
+			for _, v := range secureClouds {
+				cloud = &v
+			}
+		}
+
+		secureCloud, ok := secureClouds[cloudName]
+		if !ok && cloud == nil {
+			// cloud == nil serves two purposes here:
+			// if no entry in clouds.yaml was found and
+			// if a single-entry secureCloud wasn't used.
+			// At this point, no entry could be determined at all.
+			return nil, fmt.Errorf("Could not find cloud %s", cloudName)
+		}
+
+		// If secureCloud has content and it differs from the cloud entry,
+		// merge the two together.
+		if !reflect.DeepEqual((Cloud{}), secureCloud) && !reflect.DeepEqual(cloud, secureCloud) {
+			cloud, err = mergeClouds(secureCloud, cloud)
+			if err != nil {
+				return nil, fmt.Errorf("unable to merge information from clouds.yaml and secure.yaml")
+			}
+		}
+	}
+
+	// Default is to verify SSL API requests
+	if cloud.Verify == nil {
+		iTrue := true
+		cloud.Verify = &iTrue
+	}
+
+	// TODO: this is where reading vendor files should go be considered when not found in
+	// clouds-public.yml
+	// https://github.com/openstack/openstacksdk/tree/master/openstack/config/vendors
 
 	return cloud, nil
 }
@@ -472,11 +591,20 @@ func NewServiceClient(service string, opts *ClientOpts) (*gophercloud.ServiceCli
 	}
 
 	// Determine the region to use.
+	// First, see if the cloud entry has one.
 	var region string
 	if v := cloud.RegionName; v != "" {
-		region = cloud.RegionName
+		region = v
 	}
 
+	// Next, see if one was specified in the ClientOpts.
+	// If so, this takes precedence.
+	if v := opts.RegionName; v != "" {
+		region = v
+	}
+
+	// Finally, see if there's an environment variable.
+	// This should always override prior settings.
 	if v := os.Getenv(envPrefix + "REGION_NAME"); v != "" {
 		region = v
 	}
