@@ -3,6 +3,7 @@ package openstack
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external"
@@ -111,4 +112,40 @@ func GetInstancePortID(client *gophercloud.ServiceClient, id string) (string, er
 	}
 
 	return interfaces[0].PortID, nil
+}
+
+// CheckExternalNetworkRef checks provided network reference and returns a valid
+// Networking service ID.
+func CheckExternalNetworkRef(client *gophercloud.ServiceClient, networkRef string) (string, error) {
+	if _, err := uuid.Parse(networkRef); err != nil {
+		return GetExternalNetworkIDByName(client, networkRef)
+	}
+
+	return networkRef, nil
+}
+
+// GetExternalNetworkIDByName searches for the external network ID by the provided name.
+func GetExternalNetworkIDByName(client *gophercloud.ServiceClient, networkName string) (string, error) {
+	var externalNetworks []ExternalNetwork
+
+	allPages, err := networks.List(client, networks.ListOpts{
+		Name: networkName,
+	}).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	if err := networks.ExtractNetworksInto(allPages, &externalNetworks); err != nil {
+		return "", err
+	}
+
+	if len(externalNetworks) == 0 {
+		return "", fmt.Errorf("can't find external network %s", networkName)
+	}
+	// Check and return the first external network.
+	if !externalNetworks[0].External {
+		return "", fmt.Errorf("network %s is not external", networkName)
+	}
+
+	return externalNetworks[0].ID, nil
 }
