@@ -113,7 +113,11 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 	if finalPath == "" {
 		for i, url := range s.Url {
 			if strings.HasPrefix(url, "file://") {
-				ui.Message(fmt.Sprintf("Copying or inplace referencing: %s", url))
+				if s.Inplace {
+					ui.Message(fmt.Sprintf("Inplace referencing: %s", url))
+				} else {
+					ui.Message(fmt.Sprintf("Copying: %s", url))
+				}
 			} else {
 				ui.Message(fmt.Sprintf("Downloading: %s", url))
 			}
