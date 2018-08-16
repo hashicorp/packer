@@ -108,12 +108,22 @@ func TestRunConfigPrepare_BlockStorage(t *testing.T) {
 
 func TestRunConfigPrepare_FloatingIPPoolCompat(t *testing.T) {
 	c := testRunConfig()
-	c.FloatingIPPool = "uuid"
+	c.FloatingIPPool = "uuid1"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.FloatingIPNetwork != "uuid" {
+	if c.FloatingIPNetwork != "uuid1" {
+		t.Fatalf("invalid value: %s", c.FloatingIPNetwork)
+	}
+
+	c.FloatingIPNetwork = "uuid2"
+	c.FloatingIPPool = "uuid3"
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+
+	if c.FloatingIPNetwork != "uuid2" {
 		t.Fatalf("invalid value: %s", c.FloatingIPNetwork)
 	}
 }
