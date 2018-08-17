@@ -42,9 +42,9 @@ func WaitUntilAMIAvailable(ctx aws.Context, conn *ec2.EC2, imageId string) error
 
 	waitOpts := getWaiterOptions()
 	if len(waitOpts) == 0 {
-		// Bump this default to 25 minutes because the aws default
+		// Bump this default to 30 minutes because the aws default
 		// of ten minutes doesn't work for some of our long-running copies.
-		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(100))
+		waitOpts = append(waitOpts, request.WithWaiterMaxAttempts(120))
 	}
 	err := conn.WaitUntilImageAvailableWithContext(
 		ctx,
