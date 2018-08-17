@@ -720,6 +720,12 @@
 			"revisionTime": "2015-01-27T13:39:51Z"
 		},
 		{
+			"checksumSHA1": "uFNLkTxk8BkHTk0Jcub2lj2BX4M=",
+			"path": "github.com/google/uuid",
+			"revision": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+			"revisionTime": "2017-11-29T19:10:14Z"
+		},
+		{
 			"checksumSHA1": "qduT9GZUhXc00XoHEwLx16Xn9gM=",
 			"path": "github.com/gophercloud/gophercloud",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
@@ -760,6 +766,12 @@
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions",
 			"revision": "95a28eb606def6aaaed082b6b82d3244b0552184",
 			"revisionTime": "2017-06-23T01:44:30Z"
+		},
+		{
+			"checksumSHA1": "lW+ldKF07Zz/C7WYPTchfr1USrQ=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/attachinterfaces",
+			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
+			"revisionTime": "2018-06-10T02:06:14Z"
 		},
 		{
 			"checksumSHA1": "kCHEEeRVZeR1LhbvNP+WyvB8z2s=",
@@ -832,6 +844,24 @@
 			"path": "github.com/gophercloud/gophercloud/openstack/imageservice/v2/members",
 			"revision": "7112fcd50da4ea27e8d4d499b30f04eea143bec2",
 			"revisionTime": "2018-05-31T02:06:30Z"
+		},
+		{
+			"checksumSHA1": "x6lD4wQOZc1rtm6kMaUBMwLxAlA=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/external",
+			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
+			"revisionTime": "2018-06-10T02:06:14Z"
+		},
+		{
+			"checksumSHA1": "K4VAatvB/jywsU+g/mU7bnSaVaI=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips",
+			"revision": "83835c772d1adf71e8df7440d5da9ad039dc049e",
+			"revisionTime": "2018-08-15T02:05:10Z"
+		},
+		{
+			"checksumSHA1": "XEVvG2f/dqATN4aCluZlPylW+9A=",
+			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/networks",
+			"revision": "00dcc07f1071d5f96520fac7a2b9a30eabccf879",
+			"revisionTime": "2018-06-10T02:06:14Z"
 		},
 		{
 			"checksumSHA1": "8KE4bJzhbFZKsYMxcRg6xLqqfTg=",
