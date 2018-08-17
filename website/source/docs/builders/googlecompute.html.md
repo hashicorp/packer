@@ -124,9 +124,13 @@ is assumed to be the path to the file containing the JSON.
 
 ### Windows Example
 
-Before you can provision using the winrm communicator, you need to navigate to
-https://console.cloud.google.com/networking/firewalls/list to allow traffic
+Before you can provision using the winrm communicator, you need to allow traffic
 through google's firewall on the winrm port (tcp:5986).
+You can do so using the gcloud command.
+```
+gcloud compute firewall-rules create allow-winrm --allow tcp:5986
+```
+Or alternatively by navigating to https://console.cloud.google.com/networking/firewalls/list.
 
 Once this is set up, the following is a complete working packer config after
 setting a valid `account_file` and `project_id`:
@@ -153,6 +157,7 @@ setting a valid `account_file` and `project_id`:
   ]
 }
 ```
+This build can take up to 15 min.
 
 ### Nested Hypervisor Example
 
