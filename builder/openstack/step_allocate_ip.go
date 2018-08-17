@@ -43,7 +43,12 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 	// statebag below, because it is requested by Cleanup()
 	state.Put("access_ip", &instanceIP)
 
-	// WRITE NEW COMMENT>
+	// Try to Use the OpenStack floating IP by checking provided parameters in
+	// the following order:
+	//  - try to use "FloatingIP" ID directly if it's provided
+	//  - try to find free floating IP in the project if "ReuseIPs" is set
+	//  - create a new floating IP if "FloatingIPNetwork" is provided (it can be
+	//    ID or name of the network).
 	if s.FloatingIP != "" {
 		// Try to use FloatingIP if it was provided by the user.
 		freeFloatingIP, err := CheckFloatingIP(networkClient, s.FloatingIP)
