@@ -58,7 +58,6 @@ func TestDownloadClient_basic(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL + "/basic.txt",
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -94,7 +93,6 @@ func TestDownloadClient_checksumBad(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 
 	if _, err := client.Get(); err == nil {
@@ -120,7 +118,6 @@ func TestDownloadClient_checksumGood(t *testing.T) {
 		TargetPath: tf.Name(),
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -152,7 +149,6 @@ func TestDownloadClient_checksumNoDownload(t *testing.T) {
 		TargetPath: "./test-fixtures/root/another.txt",
 		Hash:       HashForType("md5"),
 		Checksum:   checksum,
-		CopyFile:   true,
 	})
 	path, err := client.Get()
 	if err != nil {
@@ -210,7 +206,6 @@ func TestDownloadClient_resume(t *testing.T) {
 	client := NewDownloadClient(&DownloadConfig{
 		Url:        ts.URL,
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	})
 
 	path, err := client.Get()
@@ -270,7 +265,6 @@ func TestDownloadClient_usesDefaultUserAgent(t *testing.T) {
 	config := &DownloadConfig{
 		Url:        server.URL,
 		TargetPath: tf.Name(),
-		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -303,7 +297,6 @@ func TestDownloadClient_setsUserAgent(t *testing.T) {
 		Url:        server.URL,
 		TargetPath: tf.Name(),
 		UserAgent:  "fancy user agent",
-		CopyFile:   true,
 	}
 
 	client := NewDownloadClient(config)
@@ -402,7 +395,7 @@ func TestDownloadFileUrl(t *testing.T) {
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
 		Hash:     HashForType("sha256"),
-		CopyFile: false,
+		Inplace:  true,
 	}
 
 	client := NewDownloadClient(config)
@@ -411,6 +404,50 @@ func TestDownloadFileUrl(t *testing.T) {
 	_, err = client.Get()
 	if err.Error() != "checksums didn't match expected: 6e6f7065" {
 		t.Fatalf("Unexpected failure; expected checksum not to match. Error was \"%v\"", err)
+	}
+
+	if _, err = os.Stat(sourcePath); err != nil {
+		t.Errorf("Could not stat source file: %s", sourcePath)
+	}
+}
+
+// TestDownloadFileUrl_inplace verifies that inplace setting is respected.
+func TestDownloadFileUrl_inplace(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unable to detect working directory: %s", err)
+	}
+	cwd = filepath.ToSlash(cwd)
+
+	// source_path is a file path and source is a network path
+	sourcePath := fmt.Sprintf("%s/test-fixtures/fileurl/%s", cwd, "cake")
+
+	filePrefix := "file://"
+	if runtime.GOOS == "windows" {
+		filePrefix += "/"
+	}
+
+	source := fmt.Sprintf(filePrefix + sourcePath)
+	t.Logf("Trying to download %s", source)
+
+	config := &DownloadConfig{
+		Url: source,
+		// This is correct. We want to make sure we don't delete
+		Checksum: []byte{96, 111, 25, 69, 248, 26, 2, 45, 14, 208, 189, 153, 237, 253, 79, 153, 8, 28, 28, 177, 249, 127, 174, 8, 114, 145, 238, 20, 233, 69, 230, 8},
+		Hash:     HashForType("sha256"),
+		Inplace:  true,
+	}
+
+	client := NewDownloadClient(config)
+
+	// Verify that we fail to match the checksum
+	url, err := client.Get()
+	if err != nil {
+		t.Fatalf("Unexpected error: \"%v\"", err)
+	}
+
+	if sourcePath != url {
+		t.Errorf("Inplace file get should return same path, expected %s, got %s", sourcePath, url)
 	}
 
 	if _, err = os.Stat(sourcePath); err != nil {
@@ -432,7 +469,7 @@ func SimulateFileUriDownload(t *testing.T, uri string) (string, error) {
 		// This should be wrong. We want to make sure we don't delete
 		Checksum: []byte("nope"),
 		Hash:     HashForType("sha256"),
-		CopyFile: false,
+		Inplace:  true,
 	}
 
 	// go go go

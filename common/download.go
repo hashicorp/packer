@@ -38,10 +38,10 @@ type DownloadConfig struct {
 	// DownloaderMap maps a schema to a Download.
 	DownloaderMap map[string]Downloader
 
-	// If true, this will copy even a local file to the target
-	// location. If false, then it will "download" the file by just
-	// returning the local path to the file.
-	CopyFile bool
+	// Inplace indicates wether to copy file
+	// versus using it inplace.
+	// Inplace can only be true when referencing local files.
+	Inplace bool
 
 	// The hashing implementation to use to checksum the downloaded file.
 	Hash hash.Hash
@@ -155,12 +155,12 @@ func (d *DownloadClient) Get() (string, error) {
 	}
 
 	local, ok := d.downloader.(LocalDownloader)
-	if !ok && !d.config.CopyFile {
-		d.config.CopyFile = true
+	if !ok && d.config.Inplace {
+		d.config.Inplace = false
 	}
 
 	// If we're copying the file, then just use the actual downloader
-	if d.config.CopyFile {
+	if d.config.Inplace == false {
 		var f *os.File
 		finalPath = d.config.TargetPath
 
@@ -192,7 +192,7 @@ func (d *DownloadClient) Get() (string, error) {
 		verify, err = d.VerifyChecksum(finalPath)
 		if err == nil && !verify {
 			// Only delete the file if we made a copy or downloaded it
-			if d.config.CopyFile {
+			if d.config.Inplace == false {
 				os.Remove(finalPath)
 			}
 
