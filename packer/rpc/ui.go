@@ -60,13 +60,6 @@ func (u *Ui) Say(message string) {
 	}
 }
 
-func (u *Ui) GetProgressBar() (result packer.ProgressBar) {
-	if err := u.client.Call("Ui.GetProgressBar", nil, &result); err != nil {
-		log.Printf("Error in Ui RPC call: %s", err)
-	}
-	return
-}
-
 func (u *UiServer) Ask(query string, reply *string) (err error) {
 	*reply, err = u.ui.Ask(query)
 	return
@@ -96,11 +89,5 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	u.ui.Say(*message)
 
 	*reply = nil
-	return nil
-}
-
-func (u *UiServer) GetProgressBar(noargs *interface{}, reply *packer.ProgressBar) error {
-	res := u.ui.GetProgressBar()
-	*reply = res
 	return nil
 }

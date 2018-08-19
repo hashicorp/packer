@@ -18,11 +18,6 @@ import (
 	"strings"
 )
 
-// required import for progress-bar
-import (
-	"github.com/hashicorp/packer/packer"
-)
-
 // imports related to each Downloader implementation
 import (
 	"io"
@@ -86,12 +81,12 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar packer.ProgressBar) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig, bar ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
 
 	// If bar is nil, then use a dummy progress bar that doesn't do anything
 	if bar == nil {
-		bar = packer.GetDummyProgressBar()
+		bar = GetDummyProgressBar()
 	}
 
 	// Create downloader map if it hasn't been specified already.
@@ -242,7 +237,7 @@ type HTTPDownloader struct {
 	total     uint64
 	userAgent string
 
-	progress packer.ProgressBar
+	progress ProgressBar
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -336,7 +331,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = d.current + uint64(resp.ContentLength)
 
 	bar := d.progress
-	bar.Total = int64(d.total)
+	bar.SetTotal64(int64(d.total))
 	progressBar := bar.Start()
 	progressBar.Set64(int64(d.current))
 
@@ -379,7 +374,7 @@ type FileDownloader struct {
 	current uint64
 	total   uint64
 
-	progress packer.ProgressBar
+	progress ProgressBar
 }
 
 func (d *FileDownloader) Progress() uint64 {
@@ -471,7 +466,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = uint64(fi.Size())
 
 	bar := d.progress
-	bar.Total = int64(d.total)
+	bar.SetTotal64(int64(d.total))
 	progressBar := bar.Start()
 	progressBar.Set64(int64(d.current))
 
@@ -518,7 +513,7 @@ type SMBDownloader struct {
 	current uint64
 	total   uint64
 
-	progress packer.ProgressBar
+	progress ProgressBar
 }
 
 func (d *SMBDownloader) Progress() uint64 {
@@ -592,7 +587,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = uint64(fi.Size())
 
 	bar := d.progress
-	bar.Total = int64(d.total)
+	bar.SetTotal64(int64(d.total))
 	progressBar := bar.Start()
 	progressBar.Set64(int64(d.current))
 

@@ -123,10 +123,6 @@ func (u *ui) Machine(s1 string, s2 ...string) {
 	}
 }
 
-func (u *ui) GetProgressBar() packer.ProgressBar {
-	return packer.GetDummyProgressBar()
-}
-
 type communicator struct{}
 
 func (c communicator) Start(*packer.RemoteCmd) error {

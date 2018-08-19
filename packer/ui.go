@@ -15,8 +15,6 @@ import (
 	"syscall"
 	"time"
 	"unicode"
-
-	"github.com/cheggaaa/pb"
 )
 
 type UiColor uint
@@ -30,15 +28,6 @@ const (
 	UiColorCyan            = 36
 )
 
-// The ProgressBar interface is used for abstracting cheggaaa's progress-
-// bar, or any other progress bar. If a UI does not support a progress-
-// bar, then it must return a null progress bar.
-const (
-	DefaultProgressBarWidth = 80
-)
-
-type ProgressBar = *pb.ProgressBar
-
 // The Ui interface handles all communication for Packer with the outside
 // world. This sort of control allows us to strictly control how output
 // is formatted and various levels of output.
@@ -48,7 +37,6 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
-	GetProgressBar() ProgressBar
 }
 
 // ColoredUi is a UI that is colored using terminal colors.
@@ -144,11 +132,6 @@ func (u *ColoredUi) supportsColors() bool {
 	return cygwin
 }
 
-func (u *ColoredUi) GetProgressBar() ProgressBar {
-	log.Printf("ColoredUi: Using wrapped UI for progress bar.\n")
-	return u.Ui.GetProgressBar()
-}
-
 func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
@@ -183,11 +166,6 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)
-}
-
-func (u *TargetedUI) GetProgressBar() ProgressBar {
-	log.Printf("TargetedUI: Using wrapped UI for progress bar.\n")
-	return u.Ui.GetProgressBar()
 }
 
 func (rw *BasicUi) Ask(query string) (string, error) {
@@ -282,23 +260,6 @@ func (rw *BasicUi) Machine(t string, args ...string) {
 	log.Printf("machine readable: %s %#v", t, args)
 }
 
-func (rw *BasicUi) GetProgressBar() ProgressBar {
-	width := calculateProgressBarWidth(0)
-
-	log.Printf("BasicUi: Using progress bar width: %d\n", width)
-
-	bar := GetDefaultProgressBar()
-	bar.SetWidth(width)
-	bar.Callback = func(message string) {
-		rw.l.Lock()
-		defer rw.l.Unlock()
-
-		// Discard the error here so we don't emit an error everytime the progress-bar fails to update
-		fmt.Fprint(rw.Writer, message)
-	}
-	return bar
-}
-
 func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
 }
@@ -343,57 +304,4 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 			panic(err)
 		}
 	}
-}
-
-func (u *MachineReadableUi) GetProgressBar() ProgressBar {
-	log.Printf("MachineReadableUi: Using dummy progress bar.\n")
-	bar := GetDummyProgressBar()
-	return bar
-}
-
-// Return a dummy progress bar that doesn't do anything
-func GetDummyProgressBar() *pb.ProgressBar {
-	return pb.New64(0)
-}
-
-// Get a progress bar with the default appearance
-func GetDefaultProgressBar() *pb.ProgressBar {
-	bar := pb.New64(0)
-	bar.ShowPercent = true
-	bar.ShowCounters = true
-	bar.ShowSpeed = false
-	bar.ShowBar = true
-	bar.ShowTimeLeft = false
-	bar.ShowFinalTime = false
-	bar.SetUnits(pb.U_BYTES)
-	bar.Format("[=>-]")
-	bar.SetRefreshRate(1 * time.Second)
-	return bar
-}
-
-// Figure out the terminal dimensions and use it to calculate the available rendering space
-func calculateProgressBarWidth(length int) int {
-	// If the UI's width is signed, then this is an interface that doesn't really benefit from a progress bar
-	if length < 0 {
-		log.Println("Refusing to render progress-bar for unsupported UI.")
-		return length
-	}
-
-	// Figure out the terminal width if possible
-	width, _, err := GetTerminalDimensions()
-	if err != nil {
-		newerr := fmt.Errorf("Unable to determine terminal dimensions: %v", err)
-		log.Printf("Using default width (%d) for progress-bar due to error: %s", DefaultProgressBarWidth, newerr)
-		return DefaultProgressBarWidth
-	}
-
-	// If the terminal width is smaller than the requested length, then complain
-	if width < length {
-		newerr := fmt.Errorf("Terminal width (%d) is smaller than UI message width (%d).", width, length)
-		log.Printf("Using default width (%d) for progress-bar due to error: %s", DefaultProgressBarWidth, newerr)
-		return DefaultProgressBarWidth
-	}
-
-	// Otherwise subtract the minimum length and return it
-	return width - length
 }
