@@ -70,6 +70,11 @@ builder.
     is an alternative way of providing `source_image` and only either of them
     can be specified.
 
+-   `source_image_filter` (map) - The search filters for determining the base
+    image to use. This is an alternative way of providing `source_image` and
+    only one of these methods can be used. `source_image` will override the
+    filters.
+
 -   `username` or `user_id` (string) - The username or id used to connect to
     the OpenStack service. If not specified, Packer will use the environment
     variable `OS_USERNAME` or `OS_USERID`, if set. This is not required if
@@ -176,7 +181,7 @@ builder.
                 "name": "ubuntu-16.04*",
                 "visibility": "protected",
                 "owner": "d1a588cf4b0743344508dc145649372d1",
-                "tag": ["prod", "ready"]
+                "tags": ["prod", "ready"]
             },
             "most_recent": true
         }
@@ -185,7 +190,8 @@ builder.
 
     This selects the most recent production Ubuntu 16.04 shared to you by the given owner.
     NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
-    In the example, `most_recent` will cause this to succeed by selecting the newest image.
+    In the example of multiple returned images, `most_recent` will cause this to succeed by selecting
+    the newest image of the returned images.
 
     -   `filters` (map of strings) - filters used to select a `source_image`.
         NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
@@ -196,18 +202,16 @@ builder.
 
         - owner (string)
 
-        - tags (slice of strings)
+        - tags (array of strings)
 
         - visibility (string)
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
 
-    You may set this in place of `source_image` or in conjunction with it. If you
-    set this in conjunction with `source_image`, the `source_image` will be added to
-    the filter. The provided `source_image` must meet all of the filtering criteria
-    provided in `source_image_filter`; this pins the image returned by the filter,
-    but will cause Packer to fail if the `source_image` does not exist.
+    You may set use this in place of `source_image` If `source_image_filter` is provided
+    alongside `source_image`, the `source_image` will override the filter. The filter
+    will not be used in this case.
 
 -   `ssh_interface` (string) - The type of interface to connect via SSH. Values
     useful for Rackspace are "public" or "private", and the default behavior is
