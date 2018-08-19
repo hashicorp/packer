@@ -3,10 +3,16 @@ package common
 import (
 	"fmt"
 	"github.com/cheggaaa/pb"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/rpc"
 	"log"
+	"reflect"
 	"time"
 )
+
+// This is the arrow from packer/ui.go -> TargetedUI.prefixLines
+const targetedUIArrowText = "==>"
 
 // The ProgressBar interface is used for abstracting cheggaaa's progress-
 // bar, or any other progress bar. If a UI does not support a progress-
@@ -82,15 +88,18 @@ func calculateUiPrefixLength(ui packer.Ui) int {
 			return recursiveCalculateUiPrefixLength(u.Ui, agg)
 
 		case *packer.TargetedUI:
-			// A TargetedUI added the .Target and an arrow by default
-			const targetedArrowText = "==>"
+			// A TargetedUI adds the .Target and an arrow by default
 			u := ui.(*packer.TargetedUI)
-			res := fmt.Sprintf("%s %s: ", targetedArrowText, u.Target)
+			res := fmt.Sprintf("%s %s: ", targetedUIArrowText, u.Target)
 			return recursiveCalculateUiPrefixLength(u.Ui, agg+len(res))
 
 		case *packer.BasicUi:
 			// The standard BasicUi appends only a newline
 			return agg + len("\n")
+
+		// packer.rpc.Ui returns 0 here to trigger the hack described later
+		case *rpc.Ui:
+			return 0
 
 		case *packer.MachineReadableUi:
 			// MachineReadableUi doesn't emit anything...like at all
@@ -103,12 +112,30 @@ func calculateUiPrefixLength(ui packer.Ui) int {
 	return recursiveCalculateUiPrefixLength(ui, 0)
 }
 
-func GetProgressBar(ui packer.Ui) ProgressBar {
+func GetPackerConfigFromStateBag(state multistep.StateBag) *PackerConfig {
+	config := state.Get("config")
+	rConfig := reflect.Indirect(reflect.ValueOf(config))
+	iPackerConfig := rConfig.FieldByName("PackerConfig").Interface()
+	packerConfig := iPackerConfig.(PackerConfig)
+	return &packerConfig
+}
+
+func GetProgressBar(ui packer.Ui, config *PackerConfig) ProgressBar {
+	// Figure out the prefix length by quering the UI
 	uiPrefixLength := calculateUiPrefixLength(ui)
+
+	// hack to deal with packer.rpc.Ui courtesy of @Swampdragons
+	if _, ok := ui.(*rpc.Ui); uiPrefixLength == 0 && config != nil && ok {
+		res := fmt.Sprintf("%s %s: \n", targetedUIArrowText, config.PackerBuildName)
+		uiPrefixLength = len(res)
+	}
+
+	// Now we can use the prefix length to calculate the progress bar width
 	width := calculateProgressBarWidth(uiPrefixLength)
 
 	log.Printf("ProgressBar: Using progress bar width: %d\n", width)
 
+	// Get a default progress bar and set some output defaults
 	bar := GetDefaultProgressBar()
 	bar.SetWidth(width)
 	bar.Callback = func(message string) {
