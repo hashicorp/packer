@@ -12,9 +12,10 @@ import (
 )
 
 type StepSourceImageInfo struct {
-	SourceImage     string
-	SourceImageName string
-	ImageFilters    ImageFilterOptions
+	SourceImage      string
+	SourceImageName  string
+	SourceImageOpts  images.ListOpts
+	SourceMostRecent bool
 }
 
 type ImageFilterOptions struct {
@@ -28,38 +29,9 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 
 	client, err := config.imageV2Client()
 
-	// if an ID is provided we skip the filter since that will return a single or no image
-	if s.SourceImage != "" {
-		state.Put("source_image", s.SourceImage)
-		return multistep.ActionContinue
-	}
-
-	params := &images.ListOpts{}
-
-	// build ListOpts from filters
-	if len(s.ImageFilters.Filters) > 0 {
-		errs := buildImageFilters(s.ImageFilters.Filters, params)
-		if len(errs.Errors) > 0 {
-			err := fmt.Errorf("Errors encountered in filter parsing.\n%s" + errs.Error())
-			state.Put("error", err)
-			ui.Error(errs.Error())
-			return multistep.ActionHalt
-		}
-	}
-
-	// override the "name" provided in filters if "s.SourceImageName" was filled
-	if s.SourceImageName != "" {
-		params.Name = s.SourceImageName
-	}
-
-	// apply "most_recent" logic to the sort fields and allow OpenStack to return the latest qualified image
-	if s.ImageFilters.MostRecent {
-		applyMostRecent(params)
-	}
-
-	log.Printf("Using Image Filters %v", params)
+	log.Printf("Using Image Filters %v", s.SourceImageOpts)
 	image := &images.Image{}
-	err = images.List(client, params).EachPage(func(page pagination.Page) (bool, error) {
+	err = images.List(client, s.SourceImageOpts).EachPage(func(page pagination.Page) (bool, error) {
 		i, err := images.ExtractImages(page)
 		if err != nil {
 			return false, err
@@ -67,18 +39,18 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 
 		switch len(i) {
 		case 0:
-			return false, fmt.Errorf("No image was found matching filters: %v", params)
+			return false, fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
 		case 1:
 			*image = i[0]
 			return true, nil
 		default:
-			if s.ImageFilters.MostRecent {
+			if s.SourceMostRecent {
 				*image = i[0]
 				return true, nil
 			}
 			return false, fmt.Errorf(
 				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v",
-				params)
+				s.SourceImageOpts)
 		}
 	})
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -21,6 +22,7 @@ type RunConfig struct {
 	SourceImage        string             `mapstructure:"source_image"`
 	SourceImageName    string             `mapstructure:"source_image_name"`
 	SourceImageFilters ImageFilterOptions `mapstructure:"source_image_filter"`
+	SourceImageOpts    images.ListOpts    `mapstructure:""`
 	Flavor             string             `mapstructure:"flavor"`
 	AvailabilityZone   string             `mapstructure:"availability_zone"`
 	RackconnectWait    bool               `mapstructure:"rackconnect_wait"`
@@ -110,6 +112,24 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		if c.VolumeName == "" {
 			c.VolumeName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 		}
+	}
+
+	// if neither ID or image name is provided outside the filter, build the filter
+	if len(c.SourceImage) == 0 && len(c.SourceImageName) == 0 {
+		params := &images.ListOpts{}
+
+		if len(c.SourceImageFilters.Filters) > 0 {
+			filterErrs := buildImageFilters(c.SourceImageFilters.Filters, params)
+			if len(filterErrs.Errors) > 0 {
+				errs = append(errs, filterErrs.Errors...)
+			}
+		}
+
+		if c.SourceImageFilters.MostRecent {
+			applyMostRecent(params)
+		}
+
+		c.SourceImageOpts = *params
 	}
 
 	return errs
