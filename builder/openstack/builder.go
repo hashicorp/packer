@@ -87,9 +87,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAgentAuth:         b.config.RunConfig.Comm.SSHAgentAuth,
 		},
 		&StepSourceImageInfo{
-			SourceImage:     b.config.SourceImage,
-			SourceImageName: b.config.SourceImageName,
-			ImageFilters:    b.config.SourceImageFilters,
+			SourceImage:      b.config.SourceImage,
+			SourceImageName:  b.config.SourceImageName,
+			SourceImageOpts:  b.config.SourceImageOpts,
+			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
 		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
