@@ -599,7 +599,3 @@ func (ui *Ui) Machine(t string, args ...string) {
 	ui.ui.Machine(t, args...)
 	<-ui.sem
 }
-
-func (ui *Ui) GetProgressBar() packer.ProgressBar {
-	return packer.GetDummyProgressBar()
-}

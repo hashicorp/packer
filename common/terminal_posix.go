@@ -1,6 +1,6 @@
 // +build !windows
 
-package packer
+package common
 
 // Imports for determining terminal information across platforms
 import (
@@ -9,7 +9,13 @@ import (
 )
 
 // posix api
-func GetTerminalDimensions() (width, height int, err error) {
+func platformGetTerminalDimensions() (width, height int, err error) {
+
+	// grab the handle to stdin
+	// XXX: in some cases, packer closes stdin, so the following can't be guaranteed
+	/*
+		tty := os.Stdin
+	*/
 
 	// open up a handle to the current tty
 	tty, err := os.Open("/dev/tty")

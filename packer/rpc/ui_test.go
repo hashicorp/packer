@@ -1,26 +1,22 @@
 package rpc
 
 import (
-	"github.com/hashicorp/packer/packer"
 	"reflect"
 	"testing"
 )
 
 type testUi struct {
-	askCalled                   bool
-	askQuery                    string
-	errorCalled                 bool
-	errorMessage                string
-	machineCalled               bool
-	machineType                 string
-	machineArgs                 []string
-	messageCalled               bool
-	messageMessage              string
-	sayCalled                   bool
-	sayMessage                  string
-	getProgressBarCalled        bool
-	getProgressBarValue         packer.ProgressBar
-	progessBarCallbackWasCalled bool
+	askCalled      bool
+	askQuery       string
+	errorCalled    bool
+	errorMessage   string
+	machineCalled  bool
+	machineType    string
+	machineArgs    []string
+	messageCalled  bool
+	messageMessage string
+	sayCalled      bool
+	sayMessage     string
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -48,15 +44,6 @@ func (u *testUi) Message(message string) {
 func (u *testUi) Say(message string) {
 	u.sayCalled = true
 	u.sayMessage = message
-}
-
-func (u *testUi) GetProgressBar() packer.ProgressBar {
-	u.getProgressBarCalled = true
-	u.getProgressBarValue = packer.GetDummyProgressBar()
-	u.getProgressBarValue.Callback = func(string) {
-		u.progessBarCallbackWasCalled = true
-	}
-	return u.getProgressBarValue
 }
 
 func TestUiRPC(t *testing.T) {
@@ -104,19 +91,6 @@ func TestUiRPC(t *testing.T) {
 	uiClient.Machine("foo", "bar", "baz")
 	if !ui.machineCalled {
 		t.Fatal("machine should be called")
-	}
-
-	bar := uiClient.GetProgressBar()
-	if !ui.getProgressBarCalled {
-		t.Fatal("getprogressbar should be called")
-	}
-
-	if bar.Callback == nil {
-		t.Fatal("getprogressbar returned a bar with an empty callback")
-	}
-	bar.Callback("test")
-	if !ui.progessBarCallbackWasCalled {
-		t.Fatal("progressbarcallback should be called")
 	}
 
 	if ui.machineType != "foo" {

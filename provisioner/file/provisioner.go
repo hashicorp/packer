@@ -127,7 +127,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 		defer f.Close()
 
 		// Get a default progress bar
-		pb := ui.GetProgressBar()
+		pb := common.GetProgressBar(ui)
 		bar := pb.Start()
 		defer bar.Finish()
 
@@ -176,7 +176,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 		}
 
 		// Get a default progress bar
-		pb := ui.GetProgressBar()
+		pb := common.GetProgressBar(ui)
 		bar := pb.Start()
 		defer bar.Finish()
 
