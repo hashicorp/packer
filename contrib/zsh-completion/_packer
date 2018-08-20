@@ -5,7 +5,6 @@ _packer () {
     'build:Build image(s) from template'
     'fix:Fixes templates from old versions of packer'
     'inspect:See components of a template'
-    'push:Push template files to a Packer build service'
     'validate:Check that a template is valid'
     'version:Prints the Packer version'
   )
