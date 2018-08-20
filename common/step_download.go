@@ -45,11 +45,6 @@ type StepDownload struct {
 	// extension on the URL is used. Otherwise, this will be forced
 	// on the downloaded file for every URL.
 	Extension string
-
-	// Inplace indicates wether to copy file
-	// versus using it inplace.
-	// Inplace can only be true when referencing local files.
-	Inplace bool
 }
 
 func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -66,7 +61,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
+	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
 
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
@@ -94,12 +89,11 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		config := &DownloadConfig{
 			Url:        url,
 			TargetPath: targetPath,
-			Inplace:    s.Inplace,
+			CopyFile:   false,
 			Hash:       HashForType(s.ChecksumType),
 			Checksum:   checksum,
 			UserAgent:  useragent.String(),
 		}
-
 		downloadConfigs[i] = config
 
 		if match, _ := NewDownloadClient(config).VerifyChecksum(config.TargetPath); match {
@@ -111,11 +105,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 
 	if finalPath == "" {
 		for i, url := range s.Url {
-			if s.Inplace {
-				ui.Message(fmt.Sprintf("Using file in-place: %s", url))
-			} else {
-				ui.Message(fmt.Sprintf("Transferring file from path: %s", url))
-			}
+			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
 
 			config := downloadConfigs[i]
 
