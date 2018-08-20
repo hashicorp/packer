@@ -204,7 +204,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ResultKey:    "iso_path",
 			TargetPath:   b.config.TargetPath,
 			Url:          b.config.ISOUrls,
-			Inplace:      b.config.Inplace,
 		},
 		&vboxcommon.StepOutputDir{
 			Force: b.config.PackerForce,
