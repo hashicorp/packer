@@ -516,8 +516,63 @@ func TestCoreValidate(t *testing.T) {
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
+
 		if (err != nil) != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+	}
+}
+
+func TestSensitiveVars(t *testing.T) {
+	cases := []struct {
+		File          string
+		Vars          map[string]string
+		SensitiveVars []string
+		Expected      string
+		Err           bool
+	}{
+		// hardcoded
+		{
+			"sensitive-variables.json",
+			map[string]string{"foo": "bar"},
+			[]string{"foo"},
+			"bar",
+			false,
+		},
+		// interpolated
+		{
+			"sensitive-variables.json",
+			map[string]string{"foo": "{{build_name}}"},
+			[]string{"foo"},
+			"test",
+			false,
+		},
+	}
+
+	for _, tc := range cases {
+		f, err := os.Open(fixtureDir(tc.File))
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+
+		tpl, err := template.Parse(f)
+		f.Close()
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+
+		_, err = NewCore(&CoreConfig{
+			Template:  tpl,
+			Variables: tc.Vars,
+			Version:   "1.0.0",
+		})
+
+		if (err != nil) != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		}
+		filtered := LogSecretFilter.get()
+		if filtered[0] != tc.Expected && len(filtered) != 1 {
+			t.Fatalf("not filtering sensitive vars; filtered is %#v", filtered)
 		}
 	}
 }

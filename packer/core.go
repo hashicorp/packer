@@ -312,7 +312,7 @@ func (c *Core) init() error {
 		def, err := interpolate.Render(v.Default, ctx)
 		if err != nil {
 			return fmt.Errorf(
-				"error interpolating default value for '%s': %s",
+				"error interpolating default value for '%#v': %s",
 				v, err)
 		}
 		c.secrets = append(c.secrets, def)
