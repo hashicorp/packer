@@ -61,7 +61,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Downloading or copying %s", s.Description))
+	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
@@ -104,9 +104,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	if finalPath == "" {
-		for i, url := range s.Url {
-			ui.Message(fmt.Sprintf("Downloading or copying: %s", url))
-
+		for i := range s.Url {
 			config := downloadConfigs[i]
 
 			path, err, retry := s.download(config, state)
@@ -158,6 +156,11 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 		case err := <-downloadCompleteCh:
 			if err != nil {
 				return "", err, true
+			}
+			if download.config.CopyFile {
+				ui.Message(fmt.Sprintf("Transferred: %s", config.Url))
+			} else {
+				ui.Message(fmt.Sprintf("Using file in-place: %s", config.Url))
 			}
 
 			return path, nil, true
