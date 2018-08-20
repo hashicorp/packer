@@ -24,7 +24,6 @@ type ISOConfig struct {
 	TargetPath      string   `mapstructure:"iso_target_path"`
 	TargetExtension string   `mapstructure:"iso_target_extension"`
 	RawSingleISOUrl string   `mapstructure:"iso_url"`
-	Inplace         bool     `mapstructure:"iso_inplace"`
 }
 
 func (c *ISOConfig) Prepare(ctx *interpolate.Context) (warnings []string, errs []error) {
