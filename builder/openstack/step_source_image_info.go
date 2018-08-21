@@ -38,21 +38,26 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 		}
 
 		switch len(i) {
-		case 0:
-			return false, fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
 		case 1:
 			*image = i[0]
-			return true, nil
+			return false, nil
 		default:
 			if s.SourceMostRecent {
 				*image = i[0]
-				return true, nil
+				return false, nil
 			}
 			return false, fmt.Errorf(
 				"Your query returned more than one result. Please try a more specific search, or set most_recent to true. Search filters: %v",
 				s.SourceImageOpts)
 		}
 	})
+
+	if image.ID == "" {
+		err := fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	if err != nil {
 		err := fmt.Errorf("Error querying image: %s", err)
