@@ -215,6 +215,13 @@ func ConvertToLinuxPath(winAbsPath string) (string, error) {
 	// get absolute path of script, and morph it into the bash path
 	winAbsPath = strings.Replace(winAbsPath, "\\", "/", -1)
 	splitPath := strings.SplitN(winAbsPath, ":/", 2)
-	winBashPath := fmt.Sprintf("/mnt/%s/%s", strings.ToLower(splitPath[0]), splitPath[1])
-	return winBashPath, nil
+	if len(splitPath) == 2 {
+		winBashPath := fmt.Sprintf("/mnt/%s/%s", strings.ToLower(splitPath[0]), splitPath[1])
+		return winBashPath, nil
+	} else {
+		err := fmt.Errorf("There was an error splitting your absolute path; expected "+
+			"to find a drive following the format ':/' but did not: absolute "+
+			"path: %s", winAbsPath)
+		return "", err
+	}
 }

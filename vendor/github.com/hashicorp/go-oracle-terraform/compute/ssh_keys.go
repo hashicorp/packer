@@ -70,7 +70,7 @@ func (c *SSHKeysClient) CreateSSHKey(createInput *CreateSSHKeyInput) (*SSHKey, e
 // GetSSHKeyInput describes the ssh key to get
 type GetSSHKeyInput struct {
 	// The three-part name of the SSH Key (/Compute-identity_domain/user/object).
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetSSHKey retrieves the SSH key with the given name.
@@ -110,7 +110,7 @@ func (c *SSHKeysClient) UpdateSSHKey(updateInput *UpdateSSHKeyInput) (*SSHKey, e
 // DeleteKeyInput describes the ssh key to delete
 type DeleteSSHKeyInput struct {
 	// The three-part name of the SSH Key (/Compute-identity_domain/user/object).
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // DeleteSSHKey deletes the SSH key with the given name.

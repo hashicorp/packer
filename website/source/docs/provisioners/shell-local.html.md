@@ -1,7 +1,7 @@
 ---
 description: |
     shell-local will run a shell script of your choosing on the machine where Packer
-    is being run - in other words, it shell-local will run the shell script on your
+    is being run - in other words, shell-local will run the shell script on your
     build server, or your desktop, etc., rather than the remote/guest machine being
     provisioned by Packer.
 layout: docs
@@ -14,7 +14,7 @@ sidebar_current: 'docs-provisioners-shell-local'
 Type: `shell-local`
 
 shell-local will run a shell script of your choosing on the machine where Packer
-is being run - in other words, it shell-local will run the shell script on your
+is being run - in other words, shell-local will run the shell script on your
 build server, or your desktop, etc., rather than the remote/guest machine being
 provisioned by Packer.
 
@@ -183,6 +183,13 @@ commonly useful environmental variables:
 -   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
     machine that the script is running on. This is useful if you want to run
     only certain parts of the script on systems built with certain builders.
+
+-   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
 
 ## Safely Writing A Script
 

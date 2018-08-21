@@ -29,11 +29,14 @@ func testConfig(accessConfFile *os.File) map[string]interface{} {
 		// Comm
 		"ssh_username":   "opc",
 		"use_private_ip": false,
+		"metadata": map[string]string{
+			"key": "value",
+		},
 	}
 }
 
 func TestConfig(t *testing.T) {
-	// Shared set-up and defered deletion
+	// Shared set-up and deferred deletion
 
 	cfg, keyFile, err := baseTestConfigWithTmpKeyFile()
 	if err != nil {

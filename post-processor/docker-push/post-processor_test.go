@@ -42,11 +42,11 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
-	if result != nil {
-		t.Fatal("should be nil")
+	if _, ok := result.(packer.Artifact); !ok {
+		t.Fatal("should be instance of Artifact")
 	}
-	if keep {
-		t.Fatal("should not keep")
+	if !keep {
+		t.Fatal("should keep")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -57,6 +57,9 @@ func TestPostProcessor_PostProcess(t *testing.T) {
 	}
 	if driver.PushName != "foo/bar" {
 		t.Fatal("bad name")
+	}
+	if result.Id() != "foo/bar" {
+		t.Fatal("bad image id")
 	}
 }
 
@@ -69,11 +72,11 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
-	if result != nil {
-		t.Fatal("should be nil")
+	if _, ok := result.(packer.Artifact); !ok {
+		t.Fatal("should be instance of Artifact")
 	}
-	if keep {
-		t.Fatal("should not keep")
+	if !keep {
+		t.Fatal("should keep")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -84,6 +87,9 @@ func TestPostProcessor_PostProcess_portInName(t *testing.T) {
 	}
 	if driver.PushName != "localhost:5000/foo/bar" {
 		t.Fatal("bad name")
+	}
+	if result.Id() != "localhost:5000/foo/bar" {
+		t.Fatal("bad image id")
 	}
 }
 
@@ -96,11 +102,11 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	}
 
 	result, keep, err := p.PostProcess(testUi(), artifact)
-	if result != nil {
-		t.Fatal("should be nil")
+	if _, ok := result.(packer.Artifact); !ok {
+		t.Fatal("should be instance of Artifact")
 	}
-	if keep {
-		t.Fatal("should not keep")
+	if !keep {
+		t.Fatal("should keep")
 	}
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -111,5 +117,8 @@ func TestPostProcessor_PostProcess_tags(t *testing.T) {
 	}
 	if driver.PushName != "hashicorp/ubuntu:precise" {
 		t.Fatalf("bad name: %s", driver.PushName)
+	}
+	if result.Id() != "hashicorp/ubuntu:precise" {
+		t.Fatal("bad image id")
 	}
 }

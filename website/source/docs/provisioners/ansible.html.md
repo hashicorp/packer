@@ -14,9 +14,10 @@ Type: `ansible`
 The `ansible` Packer provisioner runs Ansible playbooks. It dynamically creates
 an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
-machine being provisioned by Packer. Note, this means that any `remote_user`
-defined in tasks will be ignored. Packer will always connect with the user
-given in the json config.
+machine being provisioned by Packer.
+
+-&gt; **Note:**: Any `remote_user` defined in tasks will be ignored. Packer will
+always connect with the user given in the json config for this provisioner.
 
 ## Basic Example
 
@@ -60,6 +61,15 @@ Optional Parameters:
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
     }
     ```
+    If you are running a Windows build on AWS, Azure or Google Compute and would
+    like to access the auto-generated password that Packer uses to connect to a
+    Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option.
+    For example:
+
+    ```json
+    "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
+    ```
 
 -   `command` (string) - The command to invoke ansible.
     Defaults to `ansible-playbook`.
@@ -71,10 +81,22 @@ Optional Parameters:
     These arguments *will not* be passed through a shell and arguments should
     not be quoted. Usage example:
 
-    ``` json
+    ```json
     {
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
     }
+    ```
+
+    If you are running a Windows build on AWS, Azure or Google Compute and would
+    like to access the auto-generated password that Packer uses to connect to a
+    Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option.
+    For example:
+
+    ```json
+      "extra_arguments": [
+        "--extra-vars", "winrm_password={{ .WinRMPassword }}"
+      ]
     ```
 
 -   `groups` (array of strings) - The groups into which the Ansible host
@@ -141,11 +163,18 @@ commonly useful Ansible variables:
     machine that the script is running on. This is useful if you want to run
     only certain parts of the playbook on systems built with certain builders.
 
+-   `packer_http_addr` If using a builder that provides an http server for file
+    transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+    will be set to the address. You can use this address in your provisioner to
+    download large files over http. This may be useful if you're experiencing
+    slower speeds using the default file provisioner. A file provisioner using
+    the `winrm` communicator may experience these types of difficulties.
+
 ## Debugging
 
 To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"` to enable verbose logging.
 
-``` json
+```json
 {
   "extra_arguments": [ "-vvvv" ]
 }
@@ -166,7 +195,7 @@ Redhat / CentOS builds have been known to fail with the following error due to `
 
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
 
-``` json
+```json
 {
   "builders": [
     {
@@ -191,13 +220,54 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 ### winrm communicator
 
-Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` whose contents is
+Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` which implements
+the connection plugin.  On versions of Ansible before 2.4.x, the following works as the connection plugin
 
 ``` python
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+class Connection(SSHConnection):
+    ''' ssh based connections for powershell via packer'''
+
+    transport = 'packer'
+    has_pipelining = True
+    become_methods = []
+    allow_executable = False
+    module_implementation_preferences = ('.ps1', '')
+
+    def __init__(self, *args, **kwargs):
+        super(Connection, self).__init__(*args, **kwargs)
+```
+
+Newer versions of Ansible require all plugins to have a documentation string. You can see if there is a
+plugin available for the version of Ansible you are using [here](https://github.com/hashicorp/packer/tree/master/examples/ansible/connection-plugin).
+
+To create the plugin yourself, you will need to copy all of the `options` from the `DOCUMENTATION` string
+from the [ssh.py Ansible connection plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
+of the Ansible version you are using and add it to a packer.py file similar to as follows
+
+``` python
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
+from ansible.plugins.connection.ssh import Connection as SSHConnection
+
+DOCUMENTATION = '''
+    connection: packer
+    short_description: ssh based connections for powershell via packer
+    description:
+        - This connection plugin allows ansible to communicate to the target packer
+        machines via ssh based connections for powershell.
+    author: Packer
+    version_added: na
+    options:
+      **** Copy ALL the options from
+      https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py
+      for the version of Ansible you are using ****
+'''
 
 class Connection(SSHConnection):
     ''' ssh based connections for powershell via packer'''

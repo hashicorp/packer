@@ -11,6 +11,8 @@ GOPATH=$(shell go env GOPATH)
 # gofmt
 UNFORMATTED_FILES=$(shell find . -not -path "./vendor/*" -name "*.go" | xargs gofmt -s -l)
 
+EXECUTABLE_FILES=$(shell find . -type f -perm +111 | egrep -v '^\./(vendor/|\.git|bin/|scripts/|pkg/)' | egrep -v '.*(\.sh|\.bats)' | egrep -v './provisioner/ansible/test-fixtures/exit1')
+
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
@@ -43,9 +45,11 @@ package:
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 deps:
+	@go get golang.org/x/tools/cmd/goimports
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
+	@go get golang.org/x/tools/cmd/goimports
 	@govendor sync
 
 dev: deps ## Build and install a development build
@@ -60,7 +64,7 @@ dev: deps ## Build and install a development build
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
 fmt: ## Format Go code
-	@gofmt -w -s $(UNFORMATTED_FILES)
+	@gofmt -w -s main.go $(UNFORMATTED_FILES)
 
 fmt-check: ## Check go code formatting
 	@echo "==> Checking that code complies with gofmt requirements..."
@@ -73,6 +77,15 @@ fmt-check: ## Check go code formatting
 		echo "Check passed."; \
 	fi
 
+mode-check: ## Check that only certain files are executable
+	@echo "==> Checking that only certain files are executable..."
+	@if [ ! -z "$(EXECUTABLE_FILES)" ]; then \
+		echo "These files should not be executable or they must be white listed in the Makefile:"; \
+		echo "$(EXECUTABLE_FILES)" | xargs -n1; \
+		exit 1; \
+	else \
+		echo "Check passed."; \
+	fi
 fmt-docs:
 	@find ./website/source/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
 
@@ -88,7 +101,7 @@ generate: deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
-test: deps fmt-check ## Run unit tests
+test: deps fmt-check mode-check ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \

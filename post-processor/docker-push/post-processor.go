@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+const BuilderIdImport = "packer.post-processor.docker-import"
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -103,5 +105,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		return nil, false, err
 	}
 
-	return nil, false, nil
+	artifact = &docker.ImportArtifact{
+		BuilderIdValue: BuilderIdImport,
+		Driver:         driver,
+		IdValue:        name,
+	}
+
+	return artifact, true, nil
 }

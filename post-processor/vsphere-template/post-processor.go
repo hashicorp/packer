@@ -76,6 +76,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if err != nil {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("Error invalid vSphere sdk endpoint: %s", err))
+		return errs
 	}
 
 	sdk.User = url.UserPassword(p.config.Username, p.config.Password)

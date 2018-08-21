@@ -49,6 +49,7 @@ func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) mul
 		Monitoring:        c.Monitoring,
 		IPv6:              c.IPv6,
 		UserData:          userData,
+		Tags:              c.Tags,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating droplet: %s", err)

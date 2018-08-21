@@ -25,6 +25,10 @@ func (d *AmiFilterOptions) Empty() bool {
 	return len(d.Owners) == 0 && len(d.Filters) == 0
 }
 
+func (d *AmiFilterOptions) NoOwner() bool {
+	return len(d.Owners) == 0
+}
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
@@ -43,6 +47,7 @@ type RunConfig struct {
 	SourceAmiFilter                   AmiFilterOptions  `mapstructure:"source_ami_filter"`
 	SpotPrice                         string            `mapstructure:"spot_price"`
 	SpotPriceAutoProduct              string            `mapstructure:"spot_price_auto_product"`
+	SpotTags                          map[string]string `mapstructure:"spot_tags"`
 	SubnetId                          string            `mapstructure:"subnet_id"`
 	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
 	TemporarySGSourceCidr             string            `mapstructure:"temporary_security_group_source_cidr"`
@@ -100,6 +105,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("A source_ami or source_ami_filter must be specified"))
 	}
 
+	if c.SourceAmi == "" && c.SourceAmiFilter.NoOwner() {
+		errs = append(errs, fmt.Errorf("For security reasons, your source AMI filter must declare an owner."))
+	}
+
 	if c.InstanceType == "" {
 		errs = append(errs, fmt.Errorf("An instance_type must be specified"))
 	}
@@ -115,6 +124,13 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		if c.SpotPrice != "auto" {
 			errs = append(errs, fmt.Errorf(
 				"spot_price should be set to auto when spot_price_auto_product is specified"))
+		}
+	}
+
+	if c.SpotTags != nil {
+		if c.SpotPrice == "" || c.SpotPrice == "0" {
+			errs = append(errs, fmt.Errorf(
+				"spot_tags should not be set when not requesting a spot instance"))
 		}
 	}
 

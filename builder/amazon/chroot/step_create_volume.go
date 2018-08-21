@@ -10,6 +10,7 @@ import (
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // StepCreateVolume creates a new volume from the snapshot of the root
@@ -20,13 +21,35 @@ import (
 type StepCreateVolume struct {
 	volumeId       string
 	RootVolumeSize int64
+	RootVolumeTags awscommon.TagMap
+	Ctx            interpolate.Context
 }
 
-func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
 	ui := state.Get("ui").(packer.Ui)
+
+	volTags, err := s.RootVolumeTags.EC2Tags(s.Ctx, *ec2conn.Config.Region, state)
+	if err != nil {
+		err := fmt.Errorf("Error tagging volumes: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+
+	// Collect tags for tagging on resource creation
+	var tagSpecs []*ec2.TagSpecification
+
+	if len(volTags) > 0 {
+		runVolTags := &ec2.TagSpecification{
+			ResourceType: aws.String("volume"),
+			Tags:         volTags,
+		}
+
+		tagSpecs = append(tagSpecs, runVolTags)
+	}
 
 	var createVolume *ec2.CreateVolumeInput
 	if config.FromScratch {
@@ -69,6 +92,10 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 		}
 	}
 
+	if len(tagSpecs) > 0 {
+		createVolume.SetTagSpecifications(tagSpecs)
+		volTags.Report(ui)
+	}
 	log.Printf("Create args: %+v", createVolume)
 
 	createVolumeResp, err := ec2conn.CreateVolume(createVolume)
@@ -84,22 +111,7 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 	log.Printf("Volume ID: %s", s.volumeId)
 
 	// Wait for the volume to become ready
-	stateChange := awscommon.StateChangeConf{
-		Pending:   []string{"creating"},
-		StepState: state,
-		Target:    "available",
-		Refresh: func() (interface{}, string, error) {
-			resp, err := ec2conn.DescribeVolumes(&ec2.DescribeVolumesInput{VolumeIds: []*string{&s.volumeId}})
-			if err != nil {
-				return nil, "", err
-			}
-
-			v := resp.Volumes[0]
-			return v, *v.State, nil
-		},
-	}
-
-	_, err = awscommon.WaitForState(&stateChange)
+	err = awscommon.WaitUntilVolumeAvailable(ctx, ec2conn, s.volumeId)
 	if err != nil {
 		err := fmt.Errorf("Error waiting for volume: %s", err)
 		state.Put("error", err)

@@ -109,7 +109,7 @@ func (c *MachineImagesClient) CreateMachineImage(createInput *CreateMachineImage
 // DeleteMachineImageInput describes the MachineImage to delete
 type DeleteMachineImageInput struct {
 	// The name of the MachineImage
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // DeleteMachineImage deletes the MachineImage with the given name.
@@ -122,7 +122,7 @@ type GetMachineImageInput struct {
 	// account of the associated Object Storage Classic instance
 	Account string `json:"account"`
 	// The name of the Machine Image
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetMachineImage retrieves the MachineImage with the given name.

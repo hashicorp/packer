@@ -143,8 +143,15 @@ builder.
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
     which will stop the instance for you. If this is set to true, Packer *will not*
-    stop the instance and will wait for you to stop it manually. You can do this
-    with a [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+    stop the instance but will assume that you will send the stop signal
+    yourself through your final provisioner. You can do this with a
+    [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
+
+    Note that Packer will still wait for the instance to be stopped, and failing
+    to send the stop signal yourself, when you have set this flag to `true`,
+    will cause a timeout.
+
+    Example of a valid shutdown command:
 
     ``` json
     {
@@ -305,7 +312,7 @@ builder.
         is valid.
 
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is helpful to limit the AMIs to a trusted third party, or to your own account.
+        This is a required option, necessary to limit the AMIs your account or a trusted third party.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.
@@ -328,6 +335,10 @@ builder.
     to `auto`. This tells Packer what sort of AMI you're launching to find the
     best spot price. This must be one of: `Linux/UNIX`, `SUSE Linux`, `Windows`,
     `Linux/UNIX (Amazon VPC)`, `SUSE Linux (Amazon VPC)`, `Windows (Amazon VPC)`
+
+-   `spot_tags` (object of key/value strings) - Requires `spot_price` to
+    be set. This tells Packer to apply tags to the spot request that is
+    issued.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
     on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM

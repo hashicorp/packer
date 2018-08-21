@@ -117,6 +117,11 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 	// Store the port forward ID.
 	state.Put("port_forward_id", forward.Id)
 
+	if config.PreventFirewallChanges {
+		ui.Message("Networking has been setup (without firewall changes)!")
+		return multistep.ActionContinue
+	}
+
 	if network.Vpcid != "" {
 		ui.Message("Creating network ACL rule...")
 

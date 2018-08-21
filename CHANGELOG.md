@@ -1,3 +1,102 @@
+## 1.2.6 (Unreleased)
+
+### IMPROVEMENTS:
+
+* builder/amazon-chroot: New feature `root_volume_tags` to tag the created
+    volumes. [GH-6504]
+* builder/azure: Implement clean_image_name template engine. [GH-6558]
+* builder/digitalocean: Add support for tagging to instances [GH-6546]
+* builder/lxc: Allow unplivileged LXC containers. [GH-6279]
+* builder/oci: Add `metadata` feature to Packer config. [GH-6498]
+* builder/openstack: Add support for ports. [GH-6570]
+* builder/openstack: Add support for getting config from clouds-public.yaml. [GH-6595]
+* builder/openstack: Support Block Storage volumes as boot volume. [GH-6596]
+* builder/openstack: Migrate floating IP usage to Network v2 API from Compute API. [GH-6373]
+* builder/qemu: add ssh agent support. [GH-6541]
+* builder/qemu: New `use_backing_file` feature [GH-6249]
+* builder/vmware-iso: Try to use ISO files uploaded to the datastore when
+    building remotely instead of uploading them freshly every time [GH-5165]
+* command/validate: Warn users if config needs fixing. [GH-6423]
+* post-processor/vagrant: Support for Docker images. [GH-6494]
+* postprocessor/vagrant: Add support for Azure. [GH-6576]
+* provisioner/ansible: Enable {{.WinRMPassword}} template engine. [GH-6450]
+* provisioner/shell-local: Create PACKER_HTTP_ADDR environment variable
+    [GH-6503]
+
+### BUG FIXES:
+* builder/amazon-ebssurrogate: Clean up volumes at end of build. [GH-6514]
+* builder/azure: Generated password satisfies Azure password requirements
+    [GH-6480]
+* builder/lxc: Correctly pass "config" option to "lxc launch". [GH-6563]
+* builder/vmware-iso: Fix crash caused by invalid datacenter url. [GH-6529]
+* core: Better error handling in downloader when connection error occurs.
+    [GH-6557]
+* core: Fix broken pathing checks in checksum files. [GH-6525]
+
+### BACKWARDS INCOMPATIBILITIES:
+* builder/amazon: "owners" field on source_ami_filter is now required for
+    secuirty reasons. [GH-6585]
+
+## 1.2.5 (July 16, 2018)
+
+### BUG FIXES:
+* builder/alickoud: Fix issue where internet_max_bandwidth_out template option
+    was not being passed to builder. [GH-6416]
+* builder/alicloud: Fix an issue with VPC cleanup. [GH-6418]
+* builder/amazon-chroot: Fix communicator bug that broke chroot builds.
+    [GH-6363]
+* builder/amazon: Replace packer's waiters with those from the AWS sdk, solving
+    several timeout bugs. [GH-6332]
+* builder/azure: update azure-sdk-for-go, fixing 32-bit build errors. [GH-6479]
+* builder/azure: update the max length of managed_image_resource_group to match
+    new increased length of 90 characters. [GH-6477]
+* builder/hyper-v: Fix secure boot template feature so that it properly passes
+    the temolate for MicrosoftUEFICertificateAuthority. [GH-6415]
+* builder/hyperv: Fix bug in HyperV IP lookups that was causing breakages in
+    FreeBSD/OpenBSD builds. [GH-6416]
+* builder/qemu: Fix error race condition in qemu builder that caused convert to
+    fail on ubuntu 18.x [GH-6437]
+* builder/qemu: vnc_bind_address was not being passed to qemu. [GH-6467]
+* builder/virtualbox: Allow iso_url to be a symlink. [GH-6370]
+* builder/vmware: Don't fail on DHCP lease files that cannot be read, fixing
+    bug where builder failed on NAT networks that don't serve DHCP. [GH-6415]
+* builder/vmware: Fix bug where we couldn't discover IP if vm_name differed
+    from the vmx displayName. [GH-6448]
+* builder/vmware: Fix validation to prevent hang when remopte_password is not
+    sent but vmware is building on esxi. [GH-6424]
+* builder/vmware:Correctly default the vm export format to ovf; this is what
+    the docs claimed we already did, but we didn't. [GH-4538]
+* communicator/winrm: Revert an attempt to determine whether remote upload
+    destinations were files or directories, as this broke uploads on systems
+    without Powershell installed. [GH-6481]
+* core: Fix bug in parsing of iso checksum files that arose when setting
+    iso_url to a relative filepath. [GH-6488]
+* core: Fix Packer crash caused by improper error handling in the downloader.
+    [GH-6381]
+* fix: Fix bug where fixer for ssh_private_ip that failed when boolean values
+    are passed as strings. [GH-6458]
+* provisioner/powershell: Make upload of powershell variables retryable, in
+    case of system restarts. [GH-6388]
+
+### IMPROVEMENTS:
+* builder/amazon: Add the ap-northeast-3 region. [GH-6385]
+* builder/amazon: Spot requests may now have tags applied using the `spot_tags`
+    option [GH-5452]
+* builder/cloudstack: Add support for Projectid and new config option
+    prevent_firewall_changes. [GH-6487]
+* builder/openstack: Add support for token authorization and cloud.yaml.
+    [GH-6362]
+* builder/oracle-oci: Add new "instance_name" template option. [GH-6408]
+* builder/scaleway: Add new "bootscript" parameter, allowing the user to not
+    use the default local bootscript [GH-6439]
+* builder/vmware: Add support for linked clones to vmware-vmx. [GH-6394]
+* debug: The -debug flag will now cause Packer to pause between provisioner
+    scripts in addition to Packer steps. [GH-4663]
+* post-processor/googlecompute-import: Added new googlecompute-import post-
+    processor [GH-6451]
+* provisioner/ansible: Add new "playbook_files" option to execute multiple
+    playbooks within one provisioner call. [GH-5086]
+
 ## 1.2.4 (May 29, 2018)
 
 ### BUG FIXES:
@@ -52,6 +151,8 @@
 * provisoner/shell-local: New options have been added to create feature parity
     with the shell-local post-processor. This feature now works on Windows
     hosts. [GH-5956]
+* builder/virtualbox: Use HTTPS to download guest editions, now that it's
+    available. [GH-6406]
 
 ## 1.2.3 (April 25, 2018)
 

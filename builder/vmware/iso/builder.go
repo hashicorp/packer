@@ -221,6 +221,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			fmt.Errorf("format must be one of ova, ovf, or vmx"))
 	}
 
+	if b.config.RemoteType == "esx5" && b.config.SkipExport != true && b.config.RemotePassword == "" {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("exporting the vm (with ovftool) requires that you set a value for remote_password"))
+	}
+
 	// Warnings
 	if b.config.ShutdownCommand == "" {
 		warnings = append(warnings,

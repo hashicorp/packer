@@ -17,43 +17,8 @@ type StepCloneVMX struct {
 	OutputDir string
 	Path      string
 	VMName    string
+	Linked    bool
 }
-
-type vmxAdapter struct {
-	diskPathKeyRe string
-}
-
-var (
-	// The VMX file stores the path to a configured disk, and information
-	// about that disks attachment to a virtual adapter/controller, as a
-	// key/value pair.
-	// For a virtual disk attached to bus ID 3 of the virtual machines
-	// first SCSI adapter the key/value pair would look something like:
-	// scsi0:3.fileName = "relative/path/to/scsiDisk.vmdk"
-	// The supported adapter types and configuration maximums for each type
-	// vary according to the VMware platform type and version, and the
-	// Virtual Machine Hardware version used. See the 'Virtual Machine
-	// Maximums' section within VMware's 'Configuration Maximums'
-	// documentation for each platform:
-	// https://kb.vmware.com/s/article/1003497
-	// Information about the supported Virtual Machine Hardware versions:
-	// https://kb.vmware.com/s/article/1003746
-	// The following regexp's are used to match all possible disk attachment
-	// points that may be found in the VMX file across all VMware
-	// platforms/versions and Virtual Machine Hardware versions
-	scsiAdapter = vmxAdapter{
-		diskPathKeyRe: `(?i)^scsi[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
-	}
-	sataAdapter = vmxAdapter{
-		diskPathKeyRe: `(?i)^sata[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
-	}
-	nvmeAdapter = vmxAdapter{
-		diskPathKeyRe: `(?i)^nvme[[:digit:]]:[[:digit:]]{1,2}\.fileName`,
-	}
-	ideAdapter = vmxAdapter{
-		diskPathKeyRe: `(?i)^ide[[:digit:]]:[[:digit:]]\.fileName`,
-	}
-)
 
 func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(vmwcommon.Driver)
@@ -64,7 +29,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
-	if err := driver.Clone(vmxPath, s.Path); err != nil {
+	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
@@ -81,16 +46,30 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 
-	// Search across all adapter types to get the filenames of attached disks
-	allDiskAdapters := []vmxAdapter{
-		scsiAdapter,
-		sataAdapter,
-		nvmeAdapter,
-		ideAdapter,
-	}
 	var diskFilenames []string
-	for _, adapter := range allDiskAdapters {
-		diskFilenames = append(diskFilenames, getAttachedDisks(adapter, vmxData)...)
+	// The VMX file stores the path to a configured disk, and information
+	// about that disks attachment to a virtual adapter/controller, as a
+	// key/value pair.
+	// For a virtual disk attached to bus ID 3 of the virtual machines
+	// first SCSI adapter the key/value pair would look something like:
+	// scsi0:3.fileName = "relative/path/to/scsiDisk.vmdk"
+	// The supported adapter types and configuration maximums for each type
+	// vary according to the VMware platform type and version, and the
+	// Virtual Machine Hardware version used. See the 'Virtual Machine
+	// Maximums' section within VMware's 'Configuration Maximums'
+	// documentation for each platform:
+	// https://kb.vmware.com/s/article/1003497
+	// Information about the supported Virtual Machine Hardware versions:
+	// https://kb.vmware.com/s/article/1003746
+	// The following regexp is used to match all possible disk attachment
+	// points that may be found in the VMX file across all VMware
+	// platforms/versions and Virtual Machine Hardware versions
+	diskPathKeyRe := regexp.MustCompile(`(?i)^(scsi|sata|ide|nvme)[[:digit:]]:[[:digit:]]{1,2}\.fileName`)
+	for k, v := range vmxData {
+		match := diskPathKeyRe.FindString(k)
+		if match != "" && filepath.Ext(v) == ".vmdk" {
+			diskFilenames = append(diskFilenames, v)
+		}
 	}
 
 	// Write out the relative, host filesystem paths to the disks
@@ -125,15 +104,4 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 }
 
 func (s *StepCloneVMX) Cleanup(state multistep.StateBag) {
-}
-
-func getAttachedDisks(a vmxAdapter, data map[string]string) (attachedDisks []string) {
-	pathKeyRe := regexp.MustCompile(a.diskPathKeyRe)
-	for k, v := range data {
-		match := pathKeyRe.FindString(k)
-		if match != "" && filepath.Ext(v) == ".vmdk" {
-			attachedDisks = append(attachedDisks, v)
-		}
-	}
-	return
 }

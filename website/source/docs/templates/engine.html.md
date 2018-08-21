@@ -33,6 +33,7 @@ Here is a full list of the available functions for reference.
 
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
+-   `env` - Returns environment variables. See example in [using home variable](/docs/templates/user-variables.html#using-home-variable)
 -   `isotime [FORMAT]` - UTC time, which can be
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
     examples below in [the `isotime` format reference](/docs/templates/engine.html#isotime-function-format-reference).
@@ -72,6 +73,26 @@ Here is a full list of the available functions for reference.
     `"image_name": {{isotime | clean_image_name}}"` will cause your build to
     fail because the image name will start with a number, which is why in the
     above example we prepend the isotime with "mybuild".
+
+#### Specific to Azure builders:
+
+-   `clean_image_name` - Azure managed image names can only contain
+    certain characters and the maximum length is 80. This function
+    will replace illegal characters with a "-" character.  Example:
+
+    `"mybuild-{{isotime | clean_image_name}}"` will become
+    `mybuild-2017-10-18t02-06-30z`.
+
+    Note: Valid Azure image names must match the regex
+    `^[^_\\W][\\w-._)]{0,79}$`
+
+    This engine does not guarantee that the final image name will
+    match the regex; it will not truncate your name if it exceeds 80
+    characters, and it will not validate that the beginning and end of
+    the engine's output are valid.  It will truncate invalid
+    characters from the end of the name when converting illegal
+    characters.  For example, `"managed_image_name: "My-Name::"` will
+    be converted to `"managed_image_name: "My-Name"`
 
 ## Template variables
 

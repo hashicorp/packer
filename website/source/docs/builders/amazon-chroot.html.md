@@ -254,6 +254,11 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
+-   `root_volume_tags` (object of key/value strings) - Tags to apply to the volumes
+    that are *launched*. This is a
+    [template engine](/docs/templates/engine.html),
+    see [Build template data](#build-template-data) for more information.
+
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
@@ -295,7 +300,7 @@ each category, the available configuration keys are alphabetized.
         is valid.
 
     -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is helpful to limit the AMIs to a trusted third party, or to your own account.
+        This is a required option, necessary to limit the AMIs your account or a trusted third party.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.

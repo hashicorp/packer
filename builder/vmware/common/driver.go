@@ -23,7 +23,7 @@ type Driver interface {
 	// Clone clones the VMX and the disk to the destination path. The
 	// destination is a path to the VMX file. The disk will be copied
 	// to that same directory.
-	Clone(dst string, src string) error
+	Clone(dst string, src string, cloneType bool) error
 
 	// CompactDisk compacts a virtual disk.
 	CompactDisk(string) error
@@ -358,7 +358,8 @@ func (d *VmwareDriver) GuestIP(state multistep.StateBag) (string, error) {
 		// open up the lease and read its contents
 		fh, err := os.Open(dhcpLeasesPath)
 		if err != nil {
-			return "", err
+			log.Printf("Error while reading DHCP lease path file %s: %s", dhcpLeasesPath, err.Error())
+			continue
 		}
 		defer fh.Close()
 

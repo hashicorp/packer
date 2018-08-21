@@ -1,6 +1,10 @@
 package oci
 
-import "github.com/oracle/oci-go-sdk/core"
+import (
+	"context"
+
+	"github.com/oracle/oci-go-sdk/core"
+)
 
 // driverMock implements the Driver interface and communicates with Oracle
 // OCI.
@@ -27,7 +31,7 @@ type driverMock struct {
 }
 
 // CreateInstance creates a new compute instance.
-func (d *driverMock) CreateInstance(publicKey string) (string, error) {
+func (d *driverMock) CreateInstance(ctx context.Context, publicKey string) (string, error) {
 	if d.CreateInstanceErr != nil {
 		return "", d.CreateInstanceErr
 	}
@@ -38,7 +42,7 @@ func (d *driverMock) CreateInstance(publicKey string) (string, error) {
 }
 
 // CreateImage creates a new custom image.
-func (d *driverMock) CreateImage(id string) (core.Image, error) {
+func (d *driverMock) CreateImage(ctx context.Context, id string) (core.Image, error) {
 	if d.CreateImageErr != nil {
 		return core.Image{}, d.CreateImageErr
 	}
@@ -47,7 +51,7 @@ func (d *driverMock) CreateImage(id string) (core.Image, error) {
 }
 
 // DeleteImage mocks deleting a custom image.
-func (d *driverMock) DeleteImage(id string) error {
+func (d *driverMock) DeleteImage(ctx context.Context, id string) error {
 	if d.DeleteImageErr != nil {
 		return d.DeleteImageErr
 	}
@@ -58,7 +62,7 @@ func (d *driverMock) DeleteImage(id string) error {
 }
 
 // GetInstanceIP returns the public or private IP corresponding to the given instance id.
-func (d *driverMock) GetInstanceIP(id string) (string, error) {
+func (d *driverMock) GetInstanceIP(ctx context.Context, id string) (string, error) {
 	if d.GetInstanceIPErr != nil {
 		return "", d.GetInstanceIPErr
 	}
@@ -69,7 +73,7 @@ func (d *driverMock) GetInstanceIP(id string) (string, error) {
 }
 
 // TerminateInstance terminates a compute instance.
-func (d *driverMock) TerminateInstance(id string) error {
+func (d *driverMock) TerminateInstance(ctx context.Context, id string) error {
 	if d.TerminateInstanceErr != nil {
 		return d.TerminateInstanceErr
 	}
@@ -81,12 +85,12 @@ func (d *driverMock) TerminateInstance(id string) error {
 
 // WaitForImageCreation waits for a provisioning custom image to reach the
 // "AVAILABLE" state.
-func (d *driverMock) WaitForImageCreation(id string) error {
+func (d *driverMock) WaitForImageCreation(ctx context.Context, id string) error {
 	return d.WaitForImageCreationErr
 }
 
 // WaitForInstanceState waits for an instance to reach the a given terminal
 // state.
-func (d *driverMock) WaitForInstanceState(id string, waitStates []string, terminalState string) error {
+func (d *driverMock) WaitForInstanceState(ctx context.Context, id string, waitStates []string, terminalState string) error {
 	return d.WaitForInstanceStateErr
 }

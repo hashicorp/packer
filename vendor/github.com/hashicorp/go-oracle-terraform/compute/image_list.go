@@ -89,7 +89,7 @@ func (c *ImageListClient) CreateImageList(createInput *CreateImageListInput) (*I
 // DeleteKeyInput describes the image list to delete
 type DeleteImageListInput struct {
 	// The name of the Image List
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // DeleteImageList deletes the Image List with the given name.
@@ -101,7 +101,7 @@ func (c *ImageListClient) DeleteImageList(deleteInput *DeleteImageListInput) err
 // GetImageListInput describes the image list to get
 type GetImageListInput struct {
 	// The name of the Image List
-	Name string `json:name`
+	Name string `json:"name"`
 }
 
 // GetImageList retrieves the Image List with the given name.

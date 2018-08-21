@@ -105,7 +105,7 @@ builder.
     this logic. This field can be specified as either `ide`, `sata`, or `scsi`.
 
 -   `disable_vnc` (boolean) - Whether to create a VNC connection or not.
-    A `boot_command` cannot be used when this is `false`. Defaults to `false`.
+    A `boot_command` cannot be used when this is `true`. Defaults to `false`.
 
 -   `disk_adapter_type` (string) - The adapter type of the VMware virtual disk
     to create. This option is for advanced usage, modify only if you know what
@@ -332,8 +332,13 @@ builder.
     using this configuration value. Defaults to `false`.
 
 -   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
-    not export the VM. Useful if the build output is not the resultant image,
-    but created inside the VM.
+    not export the VM. Useful if the build output is not the resultant
+    image, but created inside the VM.
+    Currently, exporting the build VM is only supported when building on
+    ESXi e.g. when `remote_type` is set to `esx5`. See the [Building on a
+    Remote vSphere
+    Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
+    section below for more info.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with the remote ESXi server. This is convenient if you
@@ -345,6 +350,11 @@ builder.
     during export. Each item in the array is a new argument. The options
     `--noSSLVerify`, `--skipManifestCheck`, and `--targetType` are reserved,
     and should not be passed to this argument.
+    Currently, exporting the build VM (with ovftool) is only supported when
+    building on ESXi e.g. when `remote_type` is set to `esx5`. See the
+    [Building on a Remote vSphere
+    Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
+    section below for more info.
 
 -   `sound` (boolean) - Enable VMware's virtual soundcard device for the VM.
 
@@ -402,7 +412,9 @@ builder.
     wish to bind to all interfaces use `0.0.0.0`.
 
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
-    is used to secure the VNC communication with the VM.
+    is used to secure the VNC communication with the VM. This must be set to 
+    `true` if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
+    `false`.
 
 -   `vnc_port_min` and `vnc_port_max` (number) - The minimum and maximum port
     to use for VNC access to the virtual machine. The builder uses VNC to type
@@ -539,7 +551,12 @@ modify as well:
 -   `format` (string) - Either "ovf", "ova" or "vmx", this specifies the output
     format of the exported virtual machine. This defaults to "ovf".
     Before using this option, you need to install `ovftool`. This option
-    works currently only with option remote_type set to "esx5".
+    currently only works when option remote_type is set to "esx5".
+    Since ovftool is only capable of password based authentication
+    `remote_password` must be set when exporting the VM.
+
+-   `vnc_disable_password` - This must be set to "true" when using VNC with
+    ESXi 6.5 or 6.7.
 
 ### VNC port discovery
 

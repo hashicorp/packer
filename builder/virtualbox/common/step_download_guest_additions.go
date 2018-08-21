@@ -94,7 +94,7 @@ func (s *StepDownloadGuestAdditions) Run(ctx context.Context, state multistep.St
 		} else {
 			ui.Error(err.Error())
 			url = fmt.Sprintf(
-				"http://download.virtualbox.org/virtualbox/%s/%s",
+				"https://download.virtualbox.org/virtualbox/%s/%s",
 				version,
 				additionsName)
 		}
@@ -150,7 +150,7 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context
 	// First things first, we get the list of checksums for the files available
 	// for this version.
 	checksumsUrl := fmt.Sprintf(
-		"http://download.virtualbox.org/virtualbox/%s/SHA256SUMS",
+		"https://download.virtualbox.org/virtualbox/%s/SHA256SUMS",
 		additionsVersion)
 
 	checksumsFile, err := ioutil.TempFile("", "packer")

@@ -18,22 +18,31 @@ type RunConfig struct {
 	SSHInterface         string              `mapstructure:"ssh_interface"`
 	SSHIPVersion         string              `mapstructure:"ssh_ip_version"`
 
-	SourceImage      string            `mapstructure:"source_image"`
-	SourceImageName  string            `mapstructure:"source_image_name"`
-	Flavor           string            `mapstructure:"flavor"`
-	AvailabilityZone string            `mapstructure:"availability_zone"`
-	RackconnectWait  bool              `mapstructure:"rackconnect_wait"`
-	FloatingIpPool   string            `mapstructure:"floating_ip_pool"`
-	FloatingIp       string            `mapstructure:"floating_ip"`
-	ReuseIps         bool              `mapstructure:"reuse_ips"`
-	SecurityGroups   []string          `mapstructure:"security_groups"`
-	Networks         []string          `mapstructure:"networks"`
-	UserData         string            `mapstructure:"user_data"`
-	UserDataFile     string            `mapstructure:"user_data_file"`
-	InstanceName     string            `mapstructure:"instance_name"`
-	InstanceMetadata map[string]string `mapstructure:"instance_metadata"`
+	SourceImage       string            `mapstructure:"source_image"`
+	SourceImageName   string            `mapstructure:"source_image_name"`
+	Flavor            string            `mapstructure:"flavor"`
+	AvailabilityZone  string            `mapstructure:"availability_zone"`
+	RackconnectWait   bool              `mapstructure:"rackconnect_wait"`
+	FloatingIPNetwork string            `mapstructure:"floating_ip_network"`
+	FloatingIP        string            `mapstructure:"floating_ip"`
+	ReuseIPs          bool              `mapstructure:"reuse_ips"`
+	SecurityGroups    []string          `mapstructure:"security_groups"`
+	Networks          []string          `mapstructure:"networks"`
+	Ports             []string          `mapstructure:"ports"`
+	UserData          string            `mapstructure:"user_data"`
+	UserDataFile      string            `mapstructure:"user_data_file"`
+	InstanceName      string            `mapstructure:"instance_name"`
+	InstanceMetadata  map[string]string `mapstructure:"instance_metadata"`
 
 	ConfigDrive bool `mapstructure:"config_drive"`
+
+	// Used for BC, value will be passed to the "floating_ip_network"
+	FloatingIPPool string `mapstructure:"floating_ip_pool"`
+
+	UseBlockStorageVolume  bool   `mapstructure:"use_blockstorage_volume"`
+	VolumeName             string `mapstructure:"volume_name"`
+	VolumeType             string `mapstructure:"volume_type"`
+	VolumeAvailabilityZone string `mapstructure:"volume_availability_zone"`
 
 	// Not really used, but here for BC
 	OpenstackProvider string `mapstructure:"openstack_provider"`
@@ -51,8 +60,8 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
-	if c.UseFloatingIp && c.FloatingIpPool == "" {
-		c.FloatingIpPool = "public"
+	if c.FloatingIPPool != "" && c.FloatingIPNetwork == "" {
+		c.FloatingIPNetwork = c.FloatingIPPool
 	}
 
 	// Validation
@@ -86,6 +95,19 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 		if len(value) > 255 {
 			errs = append(errs, fmt.Errorf("Instance metadata value too long (max 255 bytes): %s", value))
+		}
+	}
+
+	if c.UseBlockStorageVolume {
+		// Use Compute instance availability zone for the Block Storage volume if
+		// it's not provided.
+		if c.VolumeAvailabilityZone == "" {
+			c.VolumeAvailabilityZone = c.AvailabilityZone
+		}
+
+		// Use random name for the Block Storage volume if it's not provided.
+		if c.VolumeName == "" {
+			c.VolumeName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 		}
 	}
 

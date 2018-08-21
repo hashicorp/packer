@@ -74,6 +74,9 @@ builder.
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. Default `packer-TIMESTAMP`
 
+-   `bootscript` (string) - The id of an existing bootscript to use when booting
+    the server.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
