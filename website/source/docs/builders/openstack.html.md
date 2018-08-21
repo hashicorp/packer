@@ -178,7 +178,7 @@ builder.
     {
         "source_image_filter": {
             "filters": {
-                "name": "ubuntu-16.04*",
+                "name": "ubuntu-16.04",
                 "visibility": "protected",
                 "owner": "d1a588cf4b0743344508dc145649372d1",
                 "tags": ["prod", "ready"]
