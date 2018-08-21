@@ -206,6 +206,32 @@ Results in the following variables:
 | aws\_access\_key | foo   |
 | aws\_secret\_key | baz   |
 
+# Sensitive Variables
+
+If you use the environment to set a variable that is sensitive, you probably
+don't want that variable printed to the Packer logs. You can make sure that
+sensitive variables won't get printed to the logs by adding them to the
+"sensitive-variables" list within the Packer template:
+
+``` json
+{
+  "variables": {
+    "my_secret": "{{env `MY_SECRET`}}",
+    "not_a_secret": "plaintext",
+    "foo": "bar"
+  },
+
+  "sensitive-variables": ["my_secret", "foo"],
+  ...
+}
+```
+
+The above snippet of code will function exactly the same as if you did not set
+"sensitive-variables", except that the Packer UI and logs will replace all
+instances of "bar" and of whatever the value of "my_secret" is with
+`<sensitive>`. This allows you to be confident that you are not printing
+secrets in plaintext to our logs by accident.
+
 # Recipes
 
 ## Making a provisioner step conditional on the value of a variable
