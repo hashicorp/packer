@@ -260,6 +260,10 @@ builder.
 -   `metadata` (object of key/value strings) - Metadata applied to the launched
     instance.
 
+-   `min_cpu_platform` (string) - A Minimum CPU Platform for VM Instance.
+    The avalability and default CPU platforms varies across zones, based on 
+    the hardware available in each GCP zone. [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+
 -   `network` (string) - The Google Compute network id or URL to use for the
     launched instance. Defaults to `"default"`. If the value is not a URL, it
     will be interpolated to `projects/((network_project_id))/global/networks/((network))`.
