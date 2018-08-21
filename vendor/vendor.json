@@ -586,6 +586,14 @@
 			"revision": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
+			"checksumSHA1": "7GMQgpfoSQv4QcaREE2GzSZvlQI=",
+			"path": "github.com/cheggaaa/pb",
+			"revision": "2af8bbdea9e99e83b3ac400d8f6b6d1b8cbbf338",
+			"revisionTime": "2018-05-21T09:56:06Z",
+			"version": "v1.0.25",
+			"versionExact": "v1.0.25"
+		},
+		{
 			"checksumSHA1": "X2/71FBrn4pA3WcA620ySVO0uHU=",
 			"path": "github.com/creack/goselect",
 			"revision": "528c74964609a58f7c17471525659c9b71cd499b",

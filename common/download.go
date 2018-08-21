@@ -81,22 +81,28 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig, bar ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
+
+	// If bar is nil, then use a dummy progress bar that doesn't do anything
+	if bar == nil {
+		bar = GetDummyProgressBar()
+	}
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
 		c.DownloaderMap = map[string]Downloader{
-			"file":  &FileDownloader{bufferSize: nil},
-			"http":  &HTTPDownloader{userAgent: c.UserAgent},
-			"https": &HTTPDownloader{userAgent: c.UserAgent},
-			"smb":   &SMBDownloader{bufferSize: nil},
+			"file":  &FileDownloader{progress: bar, bufferSize: nil},
+			"http":  &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
+			"https": &HTTPDownloader{progress: bar, userAgent: c.UserAgent},
+			"smb":   &SMBDownloader{progress: bar, bufferSize: nil},
 		}
 	}
 	return &DownloadClient{config: c}
 }
 
-// A downloader implements the ability to transfer, cancel, or resume a file.
+// A downloader implements the ability to transfer a file, and cancel or resume
+//	it.
 type Downloader interface {
 	Resume()
 	Cancel()
@@ -205,14 +211,6 @@ func (d *DownloadClient) Get() (string, error) {
 	return finalPath, err
 }
 
-func (d *DownloadClient) PercentProgress() int {
-	if d.downloader == nil {
-		return -1
-	}
-
-	return int((float64(d.downloader.Progress()) / float64(d.downloader.Total())) * 100)
-}
-
 // VerifyChecksum tests that the path matches the checksum for the
 // download.
 func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
@@ -238,6 +236,8 @@ type HTTPDownloader struct {
 	current   uint64
 	total     uint64
 	userAgent string
+
+	progress ProgressBar
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -330,6 +330,11 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	d.total = d.current + uint64(resp.ContentLength)
 
+	bar := d.progress
+	bar.SetTotal64(int64(d.total))
+	progressBar := bar.Start()
+	progressBar.Set64(int64(d.current))
+
 	var buffer [4096]byte
 	for {
 		n, err := resp.Body.Read(buffer[:])
@@ -338,6 +343,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		}
 
 		d.current += uint64(n)
+		progressBar.Set64(int64(d.current))
 
 		if _, werr := dst.Write(buffer[:n]); werr != nil {
 			return werr
@@ -347,6 +353,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			break
 		}
 	}
+	progressBar.Finish()
 	return nil
 }
 
@@ -366,6 +373,8 @@ type FileDownloader struct {
 	active  bool
 	current uint64
 	total   uint64
+
+	progress ProgressBar
 }
 
 func (d *FileDownloader) Progress() uint64 {
@@ -456,6 +465,11 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
+	bar := d.progress
+	bar.SetTotal64(int64(d.total))
+	progressBar := bar.Start()
+	progressBar.Set64(int64(d.current))
+
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
@@ -463,6 +477,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
+		progressBar.Set64(int64(d.current))
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -475,6 +490,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
+				progressBar.Set64(int64(d.current))
 			}
 			d.active = false
 			e <- err
@@ -483,6 +499,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and we spin until it's done
 		err = <-errch
 	}
+	progressBar.Finish()
 	f.Close()
 	return err
 }
@@ -495,6 +512,8 @@ type SMBDownloader struct {
 	active  bool
 	current uint64
 	total   uint64
+
+	progress ProgressBar
 }
 
 func (d *SMBDownloader) Progress() uint64 {
@@ -567,6 +586,11 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	}
 	d.total = uint64(fi.Size())
 
+	bar := d.progress
+	bar.SetTotal64(int64(d.total))
+	progressBar := bar.Start()
+	progressBar.Set64(int64(d.current))
+
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
 		var n int64
@@ -574,6 +598,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
+		progressBar.Set64(int64(d.current))
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -586,6 +611,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
+				progressBar.Set64(int64(d.current))
 			}
 			d.active = false
 			e <- err
@@ -594,6 +620,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and as usual we spin until it's done
 		err = <-errch
 	}
+	progressBar.Finish()
 	f.Close()
 	return err
 }
