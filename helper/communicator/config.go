@@ -91,14 +91,18 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 			}
 			privateKeys = append(privateKeys, bytes)
 		}
+
+		// aws,alicloud,cloudstack,digitalOcean,oneAndOne,openstack,oracle & profitbricks key
 		if iKey, hasKey := state.GetOk("privateKey"); hasKey {
 			privateKeys = append(privateKeys, []byte(iKey.(string)))
 		}
 
-		if iKey, hasKey := state.GetOk("ssh_private_key"); hasKey { // gcp key
+		// gcp key
+		if iKey, hasKey := state.GetOk("ssh_private_key"); hasKey {
 			privateKeys = append(privateKeys, []byte(iKey.(string)))
 		}
-		//this is what scaleway.sshConfig did
+
+		//scaleway key
 		if iKey, hasKey := state.GetOk("private_key"); hasKey {
 			privateKeys = append(privateKeys, []byte(iKey.(string)))
 		}
