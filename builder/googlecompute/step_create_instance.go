@@ -111,6 +111,7 @@ func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Labels:                       c.Labels,
 		MachineType:                  c.MachineType,
 		Metadata:                     metadata,
+		MinCpuPlatform:               c.MinCpuPlatform,
 		Name:                         name,
 		Network:                      c.Network,
 		NetworkProjectId:             c.NetworkProjectId,

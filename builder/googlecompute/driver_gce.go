@@ -377,7 +377,8 @@ func (d *driverGCE) RunInstance(c *InstanceConfig) (<-chan error, error) {
 		Metadata: &compute.Metadata{
 			Items: metadata,
 		},
-		Name: c.Name,
+		MinCpuPlatform: c.MinCpuPlatform,
+		Name:           c.Name,
 		NetworkInterfaces: []*compute.NetworkInterface{
 			{
 				AccessConfigs: []*compute.AccessConfig{accessconfig},
