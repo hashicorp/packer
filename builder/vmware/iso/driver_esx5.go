@@ -15,7 +15,6 @@ import (
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -515,7 +514,7 @@ func (d *ESX5Driver) connect() error {
 	}
 
 	if d.PrivateKey != "" {
-		signer, err := commonssh.FileSigner(d.PrivateKey)
+		signer, err := gossh.ParsePrivateKey([]byte(d.PrivateKey))
 		if err != nil {
 			return err
 		}
