@@ -6,6 +6,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
@@ -155,5 +156,57 @@ func TestBuildImageFilter(t *testing.T) {
 
 	if listOpts.Owner != "1234567890" {
 		t.Errorf("Owner did not build correctly: %s", listOpts.Owner)
+	}
+}
+
+func TestBuildBadImageFilter(t *testing.T) {
+	filterMap := map[string]interface{}{
+		"limit":    "3",
+		"size_min": "25",
+	}
+
+	filters := ImageFilterOptions{}
+	mapstructure.Decode(filterMap, &filters)
+	listOpts, err := filters.Build()
+
+	if err != nil {
+		t.Errorf("Error returned processing image filter: %s", err.Error())
+		return // we cannot trust listOpts to not cause unexpected behaviour
+	}
+
+	if listOpts.Limit == filterMap["limit"] {
+		t.Errorf("Limit was parsed into ListOpts: %d", listOpts.Limit)
+	}
+
+	if listOpts.SizeMin != 0 {
+		t.Errorf("SizeMin was parsed into ListOpts: %d", listOpts.SizeMin)
+	}
+
+	if listOpts.Sort != "created_at:desc" {
+		t.Errorf("Sort was not applied: %s", listOpts.Sort)
+	}
+
+	if !filters.Empty() {
+		t.Errorf("The filters should be empty due to lack of input")
+	}
+}
+
+// Tests that the Empty method on ImageFilterOptions works as expected
+func TestImageFiltersEmpty(t *testing.T) {
+	filledFilters := ImageFilterOptions{
+		Name:       "Ubuntu 16.04",
+		Visibility: "public",
+		Owner:      "1234567890",
+		Tags:       []string{"prod", "ready"},
+	}
+
+	if filledFilters.Empty() {
+		t.Errorf("Expected filled filters to be non-empty: %v", filledFilters)
+	}
+
+	emptyFilters := ImageFilterOptions{}
+
+	if !emptyFilters.Empty() {
+		t.Errorf("Expected default filter to be empty: %v", emptyFilters)
 	}
 }
