@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/hashicorp/packer/helper/communicator"
 )
 
@@ -125,5 +126,34 @@ func TestRunConfigPrepare_FloatingIPPoolCompat(t *testing.T) {
 
 	if c.FloatingIPNetwork != "uuid2" {
 		t.Fatalf("invalid value: %s", c.FloatingIPNetwork)
+	}
+}
+
+// This test case confirms that only allowed fields will be set to values
+// The checked values are non-nil for their target type
+func TestBuildImageFilter(t *testing.T) {
+
+	filters := ImageFilterOptions{
+		Name:       "Ubuntu 16.04",
+		Visibility: "public",
+		Owner:      "1234567890",
+		Tags:       []string{"prod", "ready"},
+	}
+
+	listOpts, err := filters.Build()
+	if err != nil {
+		t.Errorf("Building filter failed with: %s", err)
+	}
+
+	if listOpts.Name != "Ubuntu 16.04" {
+		t.Errorf("Name did not build correctly: %s", listOpts.Name)
+	}
+
+	if listOpts.Visibility != images.ImageVisibilityPublic {
+		t.Errorf("Visibility did not build correctly: %s", listOpts.Visibility)
+	}
+
+	if listOpts.Owner != "1234567890" {
+		t.Errorf("Owner did not build correctly: %s", listOpts.Owner)
 	}
 }

@@ -18,14 +18,13 @@ type StepSourceImageInfo struct {
 	SourceMostRecent bool
 }
 
-type ImageFilterOptions struct {
-	Filters    map[string]interface{} `mapstructure:"filters"`
-	MostRecent bool                   `mapstructure:"most_recent"`
-}
-
 func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
+
+	if s.SourceImage != "" || s.SourceImageName != "" {
+		return multistep.ActionContinue
+	}
 
 	client, err := config.imageV2Client()
 
@@ -52,15 +51,15 @@ func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) m
 		}
 	})
 
-	if image.ID == "" {
-		err := fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
+	if err != nil {
+		err := fmt.Errorf("Error querying image: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
-	if err != nil {
-		err := fmt.Errorf("Error querying image: %s", err)
+	if image.ID == "" {
+		err := fmt.Errorf("No image was found matching filters: %v", s.SourceImageOpts)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
