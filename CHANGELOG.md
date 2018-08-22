@@ -6,6 +6,7 @@
     volumes. [GH-6504]
 * builder/azure: Implement clean_image_name template engine. [GH-6558]
 * builder/digitalocean: Add support for tagging to instances [GH-6546]
+* builder/cloudstack: Add option to use a fixed port via public_port. [GH-6532]
 * builder/lxc: Allow unplivileged LXC containers. [GH-6279]
 * builder/oci: Add `metadata` feature to Packer config. [GH-6498]
 * builder/openstack: Add support for ports. [GH-6570]
