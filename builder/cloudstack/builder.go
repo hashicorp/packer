@@ -78,12 +78,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
-			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: sshConfig(
-				b.config.Comm.SSHAgentAuth,
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPassword),
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			SSHPort:   commPort,
 			WinRMPort: commPort,
 		},

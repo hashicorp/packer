@@ -63,13 +63,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepCreateSourceMachine{},
 		&communicator.StepConnect{
-			Config: &config.Comm,
-			Host:   commHost,
-			SSHConfig: sshConfig(
-				b.config.Comm.SSHAgentAuth,
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPrivateKey,
-				b.config.Comm.SSHPassword),
+			Config:    &config.Comm,
+			Host:      commHost,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
 		&StepStopMachine{},
