@@ -62,16 +62,13 @@ type Config struct {
 // config for connecting to the instance created over SSH using the private key
 // or password.
 func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, error) {
-	useAgent := c.SSHAgentAuth
-	username := c.SSHUsername
-	password := c.SSHPassword
 	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
 		sshConfig := &ssh.ClientConfig{
-			User:            username,
+			User:            c.SSHUsername,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}
 
-		if useAgent {
+		if c.SSHAgentAuth {
 			authSock := os.Getenv("SSH_AUTH_SOCK")
 			if authSock == "" {
 				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
@@ -114,10 +111,10 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
 		}
 
-		if password != "" {
+		if c.SSHPassword != "" {
 			sshConfig.Auth = append(sshConfig.Auth,
-				ssh.Password(password),
-				ssh.KeyboardInteractive(packerssh.PasswordKeyboardInteractive(password)),
+				ssh.Password(c.SSHPassword),
+				ssh.KeyboardInteractive(packerssh.PasswordKeyboardInteractive(c.SSHPassword)),
 			)
 		}
 		return sshConfig, nil
