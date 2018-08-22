@@ -126,7 +126,7 @@ builder.
     connecting any provisioners to. If not provided, a temporary public IP
     address will be associated and released during the Packer run.
 
--   `public_ssh_port` (number) - The fixed port you want to configure in the port
+-   `public_port` (number) - The fixed port you want to configure in the port
     forwarding rule. Set this attribute if you do not want to use the a random
     public port.
 

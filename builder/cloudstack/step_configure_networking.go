@@ -31,8 +31,8 @@ func (s *stepSetupNetworking) Run(_ context.Context, state multistep.StateBag) m
 		return multistep.ActionContinue
 	}
 
-	if config.PublicSSHPort != 0 {
-		s.publicPort = config.PublicSSHPort
+	if config.PublicPort != 0 {
+		s.publicPort = config.PublicPort
 	} else {
 		// Generate a random public port used to configure our port forward.
 		rand.Seed(time.Now().UnixNano())
