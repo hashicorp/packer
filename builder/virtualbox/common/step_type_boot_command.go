@@ -21,10 +21,11 @@ type bootCommandTemplateData struct {
 }
 
 type StepTypeBootCommand struct {
-	BootCommand string
-	BootWait    time.Duration
-	VMName      string
-	Ctx         interpolate.Context
+	BootCommand   string
+	BootWait      time.Duration
+	VMName        string
+	Ctx           interpolate.Context
+	GroupInterval int
 }
 
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -64,7 +65,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 		return driver.VBoxManage(args...)
 	}
-	d := bootcommand.NewPCXTDriver(sendCodes, 25)
+	d := bootcommand.NewPCXTDriver(sendCodes, 25, s.GroupInterval)
 
 	ui.Say("Typing the boot command...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)

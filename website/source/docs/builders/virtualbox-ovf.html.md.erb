@@ -300,8 +300,23 @@ template.
 The boot command is sent to the VM through the `VBoxManage` utility in as few
 invocations as possible. We send each character in groups of 25, with a default
 delay of 100ms between groups. The delay alleviates issues with latency and CPU
-contention. If you notice missing keys, you can tune this delay by specifying e.g.
-`PACKER_KEY_INTERVAL=500ms` to wait longer between each group of characters.
+contention. If you notice missing keys, you can tune this delay by specifying
+"boot_keygroup_interval" in your Packer template, for example:
+
+```
+{
+  "builders": [
+    {
+      "type": "virtualbox",
+      "boot_keygroup_interval": "500"
+      ...
+    }
+  ]
+}
+```
+
+Note that this option will always be measured in milliseconds.
+
 
 <%= partial "partials/builders/boot-command" %>
 

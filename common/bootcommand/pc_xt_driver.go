@@ -38,12 +38,16 @@ func (sc *scancode) makeBreak() []string {
 // NewPCXTDriver creates a new boot command driver for VMs that expect PC-XT
 // keyboard codes. `send` should send its argument to the VM. `chunkSize` should
 // be the maximum number of keyboard codes to send to `send` at one time.
-func NewPCXTDriver(send SendCodeFunc, chunkSize int) *pcXTDriver {
+func NewPCXTDriver(send SendCodeFunc, chunkSize int, interval int) *pcXTDriver {
 	// We delay (default 100ms) between each input event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
 	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
 		keyInterval = delay
+	}
+	// Override interval based on builder-specific override
+	if interval >= 0 {
+		keyInterval = time.Duration(interval) * time.Millisecond
 	}
 	// Scancodes reference: https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
 	//						https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html

@@ -79,7 +79,7 @@ func Test_pcxtSpecialOnOff(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1)
+	d := NewPCXTDriver(sendCodes, -1, -1)
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -95,7 +95,7 @@ func Test_pcxtSpecial(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1)
+	d := NewPCXTDriver(sendCodes, -1, -1)
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -114,7 +114,7 @@ func Test_flushes(t *testing.T) {
 		actual = append(actual, c)
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1)
+	d := NewPCXTDriver(sendCodes, -1, -1)
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
