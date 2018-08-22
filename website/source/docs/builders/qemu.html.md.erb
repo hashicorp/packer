@@ -121,7 +121,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     upstream issue which can be tracked
     [here](https://github.com/intel/haxm/issues/20).
 
-    -&gt; The `hvf` accelerator is new and experimental as of 
+    -&gt; The `hvf` accelerator is new and experimental as of
     [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
     You may encounter issues unrelated to Packer when using it.  You may need to
     add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
@@ -386,8 +386,22 @@ machine, simulating a human actually typing the keyboard.
 
 -&gt; Keystrokes are typed as separate key up/down events over VNC with a
 default 100ms delay. The delay alleviates issues with latency and CPU
-contention. For local builds you can tune this delay by specifying
-e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+contention. You can tune this delay on a per-builder basis by specifying
+"boot_key_interval" in your Packer template, for example:
+
+```
+{
+  "builders": [
+    {
+      "type": "qemu",
+      "boot_key_interval": "10"
+      ...
+    }
+  ]
+}
+```
+
+Note that this option will always be measured in milliseconds.
 
 <%= partial "partials/builders/boot-command" %>
 

@@ -26,6 +26,7 @@ type StepTypeBootCommand struct {
 	HostInterfaces []string
 	VMName         string
 	Ctx            interpolate.Context
+	GroupInterval  int
 }
 
 // Run types the boot command by sending key scancodes into the VM.
@@ -79,7 +80,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	sendCodes := func(codes []string) error {
 		return driver.SendKeyScanCodes(s.VMName, codes...)
 	}
-	d := bootcommand.NewPCXTDriver(sendCodes, -1)
+	d := bootcommand.NewPCXTDriver(sendCodes, -1, s.GroupInterval)
 
 	ui.Say("Typing the boot command...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
