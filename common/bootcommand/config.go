@@ -11,6 +11,8 @@ import (
 type BootConfig struct {
 	RawBootWait string   `mapstructure:"boot_wait"`
 	BootCommand []string `mapstructure:"boot_command"`
+	// time in ms to wait between each group of 25 key presses
+	BootGroupInterval int `mapstructure:"boot_keygroup_interval"`
 
 	BootWait time.Duration ``
 }
@@ -18,11 +20,16 @@ type BootConfig struct {
 type VNCConfig struct {
 	BootConfig `mapstructure:",squash"`
 	DisableVNC bool `mapstructure:"disable_vnc"`
+	// time in ms to wait between each key press
+	BootKeyInterval int `mapstructure:"boot_key_interval"`
 }
 
 func (c *BootConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 	if c.RawBootWait == "" {
 		c.RawBootWait = "10s"
+	}
+	if c.BootGroupInterval == 0 {
+		c.BootGroupInterval = -1
 	}
 	if c.RawBootWait != "" {
 		bw, err := time.ParseDuration(c.RawBootWait)
@@ -54,6 +61,9 @@ func (c *VNCConfig) Prepare(ctx *interpolate.Context) (errs []error) {
 	if len(c.BootCommand) > 0 && c.DisableVNC {
 		errs = append(errs,
 			fmt.Errorf("A boot command cannot be used when vnc is disabled."))
+	}
+	if c.BootKeyInterval == 0 {
+		c.BootKeyInterval = -1
 	}
 	errs = append(errs, c.BootConfig.Prepare(ctx)...)
 	return

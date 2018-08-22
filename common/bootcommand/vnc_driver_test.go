@@ -30,7 +30,7 @@ func Test_vncSpecialLookup(t *testing.T) {
 		{0xFFE2, true},
 	}
 	s := &sender{}
-	d := NewVNCDriver(s)
+	d := NewVNCDriver(s, -1)
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)

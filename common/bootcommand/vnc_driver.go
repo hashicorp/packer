@@ -25,12 +25,16 @@ type vncDriver struct {
 	err error
 }
 
-func NewVNCDriver(c VNCKeyEvent) *vncDriver {
+func NewVNCDriver(c VNCKeyEvent, interval int) *vncDriver {
 	// We delay (default 100ms) between each key event to allow for CPU or
 	// network latency. See PackerKeyEnv for tuning.
 	keyInterval := common.PackerKeyDefault
 	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
 		keyInterval = delay
+	}
+	// override interval based on builder-specific override.
+	if interval >= 0 {
+		keyInterval = time.Duration(interval) * time.Millisecond
 	}
 
 	// Scancodes reference: https://github.com/qemu/qemu/blob/master/ui/vnc_keysym.h
