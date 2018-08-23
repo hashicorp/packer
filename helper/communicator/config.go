@@ -26,7 +26,7 @@ type Config struct {
 	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
-	SSHPrivateKey             string        `mapstructure:"ssh_private_key_file"`
+	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
 	SSHAgentAuth              bool          `mapstructure:"ssh_agent_auth"`
@@ -83,9 +83,9 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 		}
 
 		var privateKeys [][]byte
-		if c.SSHPrivateKey != "" {
+		if c.SSHPrivateKeyFile != "" {
 			// key based auth
-			bytes, err := ioutil.ReadFile(c.SSHPrivateKey)
+			bytes, err := ioutil.ReadFile(c.SSHPrivateKeyFile)
 			if err != nil {
 				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
 			}
@@ -219,8 +219,8 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			c.SSHBastionPort = 22
 		}
 
-		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKey != "" {
-			c.SSHBastionPrivateKey = c.SSHPrivateKey
+		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKeyFile != "" {
+			c.SSHBastionPrivateKey = c.SSHPrivateKeyFile
 		}
 	}
 
@@ -240,11 +240,11 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
-	if c.SSHPrivateKey != "" {
-		if _, err := os.Stat(c.SSHPrivateKey); err != nil {
+	if c.SSHPrivateKeyFile != "" {
+		if _, err := os.Stat(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := SSHFileSigner(c.SSHPrivateKey); err != nil {
+		} else if _, err := SSHFileSigner(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}

@@ -41,7 +41,7 @@ type RunConfig struct {
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
-		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" && c.Comm.WinRMPassword == "" {
+		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" && c.Comm.WinRMPassword == "" {
 
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}

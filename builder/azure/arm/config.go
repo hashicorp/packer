@@ -314,8 +314,8 @@ func setSshValues(c *Config) error {
 		c.Comm.SSHTimeout = 20 * time.Minute
 	}
 
-	if c.Comm.SSHPrivateKey != "" {
-		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKey)
+	if c.Comm.SSHPrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			return err
 		}
