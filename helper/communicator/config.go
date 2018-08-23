@@ -3,11 +3,17 @@ package communicator
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
 	"time"
 
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 // Config is the common configuration that communicators allow within
@@ -50,6 +56,73 @@ type Config struct {
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
 	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
+}
+
+// SSHConfigFunc returns a function that can be used for the SSH communicator
+// config for connecting to the instance created over SSH using the private key
+// or password.
+func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		sshConfig := &ssh.ClientConfig{
+			User:            c.SSHUsername,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+
+		if c.SSHAgentAuth {
+			authSock := os.Getenv("SSH_AUTH_SOCK")
+			if authSock == "" {
+				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+			}
+
+			sshAgent, err := net.Dial("unix", authSock)
+			if err != nil {
+				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+			}
+
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers))
+		}
+
+		var privateKeys [][]byte
+		if c.SSHPrivateKey != "" {
+			// key based auth
+			bytes, err := ioutil.ReadFile(c.SSHPrivateKey)
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			privateKeys = append(privateKeys, bytes)
+		}
+
+		// aws,alicloud,cloudstack,digitalOcean,oneAndOne,openstack,oracle & profitbricks key
+		if iKey, hasKey := state.GetOk("privateKey"); hasKey {
+			privateKeys = append(privateKeys, []byte(iKey.(string)))
+		}
+
+		// gcp key
+		if iKey, hasKey := state.GetOk("ssh_private_key"); hasKey {
+			privateKeys = append(privateKeys, []byte(iKey.(string)))
+		}
+
+		//scaleway key
+		if iKey, hasKey := state.GetOk("private_key"); hasKey {
+			privateKeys = append(privateKeys, []byte(iKey.(string)))
+		}
+
+		for _, key := range privateKeys {
+			signer, err := ssh.ParsePrivateKey(key)
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
+		}
+
+		if c.SSHPassword != "" {
+			sshConfig.Auth = append(sshConfig.Auth,
+				ssh.Password(c.SSHPassword),
+				ssh.KeyboardInteractive(packerssh.PasswordKeyboardInteractive(c.SSHPassword)),
+			)
+		}
+		return sshConfig, nil
+	}
 }
 
 // Port returns the port that will be used for access based on config.
