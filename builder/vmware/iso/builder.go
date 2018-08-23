@@ -339,6 +339,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
+			KeyInterval: b.config.VNCConfig.BootKeyInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,

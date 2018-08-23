@@ -21,10 +21,11 @@ type bootCommandTemplateData struct {
 
 // This step "types" the boot command into the VM via the Hyper-V virtual keyboard
 type StepTypeBootCommand struct {
-	BootCommand string
-	BootWait    time.Duration
-	SwitchName  string
-	Ctx         interpolate.Context
+	BootCommand   string
+	BootWait      time.Duration
+	SwitchName    string
+	Ctx           interpolate.Context
+	GroupInterval time.Duration
 }
 
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -66,7 +67,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		scanCodesToSendString := strings.Join(codes, " ")
 		return driver.TypeScanCodes(vmName, scanCodesToSendString)
 	}
-	d := bootcommand.NewPCXTDriver(sendCodes, -1)
+	d := bootcommand.NewPCXTDriver(sendCodes, -1, s.GroupInterval)
 
 	ui.Say("Typing the boot command...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)
