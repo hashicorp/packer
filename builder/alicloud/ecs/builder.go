@@ -98,7 +98,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepConfigAlicloudKeyPair{
 			Debug:                b.config.PackerDebug,
 			KeyPairName:          b.config.SSHKeyPairName,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKeyFile,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			DebugKeyPath:         fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
@@ -230,7 +230,7 @@ func (b *Builder) isVpcSpecified() bool {
 
 func (b *Builder) isUserDataNeeded() bool {
 	// Public key setup requires userdata
-	if b.config.RunConfig.Comm.SSHPrivateKey != "" {
+	if b.config.RunConfig.Comm.SSHPrivateKeyFile != "" {
 		return true
 	}
 

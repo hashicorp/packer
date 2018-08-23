@@ -67,7 +67,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:                b.config.PackerDebug,
 			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
 			KeyPair:              b.config.Keypair,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
+			PrivateKeyFile:       b.config.Comm.SSHPrivateKeyFile,
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			TemporaryKeyPairName: b.config.TemporaryKeypairName,
 		},

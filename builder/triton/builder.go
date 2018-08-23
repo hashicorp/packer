@@ -38,7 +38,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// If we are using an SSH agent to sign requests, and no private key has been
 	// specified for SSH, use the agent for connecting for provisioning.
-	if b.config.AccessConfig.KeyMaterial == "" && b.config.Comm.SSHPrivateKey == "" {
+	if b.config.AccessConfig.KeyMaterial == "" && b.config.Comm.SSHPrivateKeyFile == "" {
 		b.config.Comm.SSHAgentAuth = true
 	}
 

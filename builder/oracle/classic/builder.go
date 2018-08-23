@@ -65,7 +65,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&ocommon.StepKeyPair{
 			Debug:          b.config.PackerDebug,
 			DebugKeyPath:   fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
-			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
+			PrivateKeyFile: b.config.Comm.SSHPrivateKeyFile,
 		},
 		&stepCreateIPReservation{},
 		&stepAddKeysToAPI{},
