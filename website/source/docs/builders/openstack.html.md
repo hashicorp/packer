@@ -70,6 +70,11 @@ builder.
     is an alternative way of providing `source_image` and only either of them
     can be specified.
 
+-   `source_image_filter` (map) - The search filters for determining the base
+    image to use. This is an alternative way of providing `source_image` and
+    only one of these methods can be used. `source_image` will override the
+    filters.
+
 -   `username` or `user_id` (string) - The username or id used to connect to
     the OpenStack service. If not specified, Packer will use the environment
     variable `OS_USERNAME` or `OS_USERID`, if set. This is not required if
@@ -153,7 +158,7 @@ builder.
     Defaults to false.
 
 -   `region` (string) - The name of the region, such as "DFW", in which to
-    launch the server to create the AMI. If not specified, Packer will use the
+    launch the server to create the image. If not specified, Packer will use the
     environment variable `OS_REGION_NAME`, if set.
 
 -   `reuse_ips` (boolean) - Whether or not to attempt to reuse existing
@@ -165,6 +170,48 @@ builder.
 
 -   `security_groups` (array of strings) - A list of security groups by name to
     add to this instance.
+
+-   `source_image_filter` (object) - Filters used to populate filter options.
+    Example:
+
+    ``` json
+    {
+        "source_image_filter": {
+            "filters": {
+                "name": "ubuntu-16.04",
+                "visibility": "protected",
+                "owner": "d1a588cf4b0743344508dc145649372d1",
+                "tags": ["prod", "ready"]
+            },
+            "most_recent": true
+        }
+    }
+    ```
+
+    This selects the most recent production Ubuntu 16.04 shared to you by the given owner.
+    NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
+    In the example of multiple returned images, `most_recent` will cause this to succeed by selecting
+    the newest image of the returned images.
+
+    -   `filters` (map of strings) - filters used to select a `source_image`.
+        NOTE: This will fail unless *exactly* one image is returned, or `most_recent` is set to true.
+        Of the filters described in [ImageService](https://developer.openstack.org/api-ref/image/v2/), the following
+        are valid:
+
+        - name (string)
+
+        - owner (string)
+
+        - tags (array of strings)
+
+        - visibility (string)
+
+    -   `most_recent` (boolean) - Selects the newest created image when true.
+        This is most useful for selecting a daily distro build.
+
+    You may set use this in place of `source_image` If `source_image_filter` is provided
+    alongside `source_image`, the `source_image` will override the filter. The filter
+    will not be used in this case.
 
 -   `ssh_interface` (string) - The type of interface to connect via SSH. Values
     useful for Rackspace are "public" or "private", and the default behavior is
