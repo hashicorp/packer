@@ -261,7 +261,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
 			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 			KeyPairName:          b.config.SSHKeyPairName,
-			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKeyFile,
 			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
 		},
 		&awscommon.StepSecurityGroup{

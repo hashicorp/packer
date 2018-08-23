@@ -21,8 +21,8 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
-	if c.Comm.SSHPrivateKey != "" {
-		pemBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKey)
+	if c.Comm.SSHPrivateKeyFile != "" {
+		pemBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKeyFile)
 
 		if err != nil {
 			ui.Error(err.Error())

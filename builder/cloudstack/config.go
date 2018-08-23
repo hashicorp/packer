@@ -127,7 +127,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	// then create a temporary one, but only if the temporary_keypair_name has not
 	// been provided.
 	if c.Keypair == "" && c.TemporaryKeypairName == "" &&
-		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" {
 		c.TemporaryKeypairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 

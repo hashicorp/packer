@@ -53,7 +53,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	var errs *packer.MultiError
 
-	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKey == "" {
+	if c.Comm.SSHPassword == "" && c.Comm.SSHPrivateKeyFile == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("Either ssh private key path or ssh password must be set."))
 	}
