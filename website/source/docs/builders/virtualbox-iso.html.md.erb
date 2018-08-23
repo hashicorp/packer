@@ -345,14 +345,12 @@ contention. If you notice missing keys, you can tune this delay by specifying
   "builders": [
     {
       "type": "virtualbox",
-      "boot_keygroup_interval": "500"
+      "boot_keygroup_interval": "500ms"
       ...
     }
   ]
 }
 ```
-
-Note that this option will always be measured in milliseconds.
 
 <%= partial "partials/builders/boot-command" %>
 
