@@ -124,11 +124,11 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 	for {
 		log.Printf("Check if machine is rebooting...")
 		cmd = &packer.RemoteCmd{Command: trycommand}
-		if err := p.comm.Start(cmd); err != nil {
+		err = cmd.StartWithUi(comm, ui)
+		if err != nil {
 			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
-		cmd.Wait()
 		if cmd.ExitStatus == 1 {
 			// SSH provisioner, and we're already rebooting. SSH can reconnect
 			// without our help; exit this wait loop.
@@ -143,10 +143,7 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 		if cmd.ExitStatus == 0 {
 			// Cancel reboot we created to test if machine was already rebooting
 			cmd = &packer.RemoteCmd{Command: abortcommand}
-			if err := p.comm.Start(cmd); err != nil {
-				return err
-			}
-			cmd.Wait()
+			cmd.StartWithUi(comm, ui)
 			break
 		}
 	}
