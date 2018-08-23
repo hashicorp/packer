@@ -443,10 +443,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 
 		&hypervcommon.StepTypeBootCommand{
-			BootCommand: b.config.FlatBootCommand(),
-			BootWait:    b.config.BootWait,
-			SwitchName:  b.config.SwitchName,
-			Ctx:         b.config.ctx,
+			BootCommand:   b.config.FlatBootCommand(),
+			BootWait:      b.config.BootWait,
+			SwitchName:    b.config.SwitchName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},
 
 		// configure the communicator ssh, winrm

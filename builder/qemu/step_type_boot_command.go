@@ -95,7 +95,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		config.VMName,
 	}
 
-	d := bootcommand.NewVNCDriver(c)
+	d := bootcommand.NewVNCDriver(c, config.VNCConfig.BootKeyInterval)
 
 	ui.Say("Typing the boot command over VNC...")
 	command, err := interpolate.Render(config.VNCConfig.FlatBootCommand(), &configCtx)
