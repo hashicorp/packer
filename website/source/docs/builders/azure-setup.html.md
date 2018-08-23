@@ -265,7 +265,7 @@ $ cat <<EOF
   "client_id": $(az ad app list | jq ".[] | select(.displayName == \"$APPNAME\") | .appId"),
   "client_secret": "$PASSWORD",
   "location": "$LOCATION",
-  "tenant_id": $(az account show | jq '.tenantId')
+  "tenant_id": $(az account show | jq '.tenantId'),
   "object_id": $(az ad app list | jq ".[] | select(.displayName == \"$APPNAME\") | .objectId")
 }
 EOF
