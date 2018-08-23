@@ -26,6 +26,8 @@ type Config struct {
 	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
+	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
+	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
 	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
@@ -97,9 +99,8 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 			privateKeys = append(privateKeys, []byte(iKey.(string)))
 		}
 
-		// gcp key
-		if iKey, hasKey := state.GetOk("ssh_private_key"); hasKey {
-			privateKeys = append(privateKeys, []byte(iKey.(string)))
+		if len(c.SSHPrivateKey) != 0 {
+			privateKeys = append(privateKeys, c.SSHPrivateKey)
 		}
 
 		//scaleway key

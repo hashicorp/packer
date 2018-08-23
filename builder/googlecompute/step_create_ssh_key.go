@@ -23,10 +23,10 @@ type StepCreateSSHKey struct {
 }
 
 // Run executes the Packer build step that generates SSH key pairs.
-// The key pairs are added to the multistep state as "ssh_private_key" and
-// "ssh_public_key".
+// The key pairs are added to the ssh config
 func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
 	if s.PrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
@@ -37,8 +37,8 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		state.Put("ssh_private_key", string(privateKeyBytes))
-		state.Put("ssh_public_key", "")
+		config.Comm.SSHPrivateKey = privateKeyBytes
+		config.Comm.SSHPublicKey = nil
 
 		return multistep.ActionContinue
 	}
@@ -65,8 +65,8 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	state.Put("ssh_private_key", string(pem.EncodeToMemory(&priv_blk)))
-	state.Put("ssh_public_key", string(ssh.MarshalAuthorizedKey(pub)))
+	config.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
+	config.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
