@@ -30,7 +30,7 @@ type StepTypeBootCommand struct {
 	BootWait    time.Duration
 	VMName      string
 	Ctx         interpolate.Context
-	KeyInterval int
+	KeyInterval time.Duration
 }
 type bootCommandTemplateData struct {
 	HTTPIP   string

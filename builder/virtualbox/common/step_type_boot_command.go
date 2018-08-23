@@ -25,7 +25,7 @@ type StepTypeBootCommand struct {
 	BootWait      time.Duration
 	VMName        string
 	Ctx           interpolate.Context
-	GroupInterval int
+	GroupInterval time.Duration
 }
 
 func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
