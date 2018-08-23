@@ -132,10 +132,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				computeClient,
 				b.config.SSHInterface,
 				b.config.SSHIPVersion),
-			SSHConfig: SSHConfig(
-				b.config.RunConfig.Comm.SSHAgentAuth,
-				b.config.RunConfig.Comm.SSHUsername,
-				b.config.RunConfig.Comm.SSHPassword),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
 		&StepStopServer{},

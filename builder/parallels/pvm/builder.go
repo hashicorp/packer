@@ -86,7 +86,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      parallelscommon.CommHost,
-			SSHConfig: parallelscommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&parallelscommon.StepUploadVersion{
 			Path: b.config.PrlctlVersionFile,
