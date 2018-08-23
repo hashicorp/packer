@@ -57,7 +57,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.InstanceName = b.config.ImageName
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.Password))
+	packer.LogSecretFilter.Set(b.config.Password)
+	log.Println(b.config)
 	return nil, nil
 }
 
