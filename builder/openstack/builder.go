@@ -86,6 +86,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
 			SSHAgentAuth:         b.config.RunConfig.Comm.SSHAgentAuth,
 		},
+		&StepSourceImageInfo{
+			SourceImage:      b.config.RunConfig.SourceImage,
+			SourceImageName:  b.config.RunConfig.SourceImageName,
+			SourceImageOpts:  b.config.RunConfig.sourceImageOpts,
+			SourceMostRecent: b.config.SourceImageFilters.MostRecent,
+		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
 			SourceImage:            b.config.SourceImage,
