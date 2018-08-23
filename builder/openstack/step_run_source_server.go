@@ -76,6 +76,12 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		ServiceClient:    computeClient,
 		Metadata:         s.InstanceMetadata,
 	}
+
+	// check if image filter returned a source image ID and replace
+	if imageID, ok := state.GetOk("source_image"); ok {
+		serverOpts.ImageRef = imageID.(string)
+	}
+
 	var serverOptsExt servers.CreateOptsBuilder
 
 	// Create root volume in the Block Storage service if required.
