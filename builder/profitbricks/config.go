@@ -122,7 +122,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
-	common.ScrubConfig(c, c.PBUsername)
+	packer.LogSecretFilter.Set(c.PBUsername)
 
 	return &c, nil, nil
 }
