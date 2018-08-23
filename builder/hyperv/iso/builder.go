@@ -445,7 +445,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      hypervcommon.CommHost,
-			SSHConfig: hypervcommon.SSHConfigFunc(&b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 
 		// provision requires communicator to be setup
