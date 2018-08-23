@@ -310,20 +310,3 @@ func TestFileExistsLocally(t *testing.T) {
 		}
 	}
 }
-
-func TestScrubConfig(t *testing.T) {
-	type Inner struct {
-		Baz string
-	}
-	type Local struct {
-		Foo string
-		Bar string
-		Inner
-	}
-	c := Local{"foo", "bar", Inner{"bar"}}
-	expect := "Config: {Foo:foo Bar:<Filtered> Inner:{Baz:<Filtered>}}"
-	conf := ScrubConfig(c, c.Bar)
-	if conf != expect {
-		t.Fatalf("got %s, expected %s", conf, expect)
-	}
-}

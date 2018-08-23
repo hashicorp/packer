@@ -55,6 +55,10 @@ func realMain() int {
 			logWriter = ioutil.Discard
 		}
 
+		packer.LogSecretFilter.SetOutput(logWriter)
+
+		//packer.LogSecrets.
+
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
 
@@ -87,7 +91,7 @@ func realMain() int {
 
 		// Create the configuration for panicwrap and wrap our executable
 		wrapConfig.Handler = panicHandler(logTempFile)
-		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
+		wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
 		wrapConfig.Stdout = outW
 		wrapConfig.DetectDuration = 500 * time.Millisecond
 		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
@@ -125,7 +129,8 @@ func wrappedMain() int {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	log.SetOutput(os.Stderr)
+	packer.LogSecretFilter.SetOutput(os.Stderr)
+	log.SetOutput(&packer.LogSecretFilter)
 
 	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)
