@@ -81,6 +81,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostInterfaces: []string{},
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
+			GroupInterval:  b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,

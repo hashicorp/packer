@@ -106,10 +106,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless: b.config.Headless,
 		},
 		&vboxcommon.StepTypeBootCommand{
-			BootWait:    b.config.BootWait,
-			BootCommand: b.config.FlatBootCommand(),
-			VMName:      b.config.VMName,
-			Ctx:         b.config.ctx,
+			BootWait:      b.config.BootWait,
+			BootCommand:   b.config.FlatBootCommand(),
+			VMName:        b.config.VMName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
