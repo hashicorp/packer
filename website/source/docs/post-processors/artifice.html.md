@@ -25,8 +25,7 @@ After overriding the artifact with artifice, you can use it with other
 post-processors like
 [compress](https://www.packer.io/docs/post-processors/compress.html),
 [docker-push](https://www.packer.io/docs/post-processors/docker-push.html),
-[Atlas](https://www.packer.io/docs/post-processors/atlas.html), or a third-party
-post-processor.
+or a third-party post-processor.
 
 Artifice allows you to use the familiar packer workflow to create a fresh,
 stateless build environment for each build on the infrastructure of your
@@ -42,7 +41,7 @@ Artifice helps you tie together a few other packer features:
 -   A file provisioner, which downloads the artifact from the VM
 -   The artifice post-processor, which identifies which files have been
     downloaded from the VM
--   Additional post-processors, which push the artifact to Atlas, Docker
+-   Additional post-processors, which push the artifact to Docker
     hub, etc.
 
 You will want to perform as much work as possible inside the VM. Ideally the
@@ -68,7 +67,7 @@ This minimal example:
 2.  Installs a [consul](https://www.consul.io/) release
 3.  Downloads the consul binary
 4.  Packages it into a `.tar.gz` file
-5.  Uploads it to Atlas.
+5.  Uploads it to S3.
 
 VMX is a fast way to build and test locally, but you can easily substitute
 another builder.
@@ -113,9 +112,8 @@ another builder.
         "output": "consul-0.5.2.tar.gz"
       },
       {
-        "type":"atlas",
-        "artifact": "hashicorp/consul",
-        "artifact_type": "archive"
+        "type": "shell-local",
+        "inline": [ "/usr/local/bin/aws s3 cp consul-0.5.2.tar.gz s3://<s3 path>" ]
       }
     ]
   ]
@@ -137,7 +135,7 @@ artifact (the vmx file in this case) and it will not have the desired result.
         "files": ["consul"]
       },
       {
-        "type": "atlas",
+        "type": "compress",
         ...
       }
     ],      // <--- End post-processor chain

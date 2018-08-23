@@ -34,7 +34,6 @@ still distributed with Packer.
 
 - Amazon Import
 - Artifice
-- Atlas
 - Docker
 - Local Shell
 - Manifest
