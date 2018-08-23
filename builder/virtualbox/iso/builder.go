@@ -53,7 +53,6 @@ type Config struct {
 	KeepRegistered         bool   `mapstructure:"keep_registered"`
 	SkipExport             bool   `mapstructure:"skip_export"`
 	VMName                 string `mapstructure:"vm_name"`
-	KeyInterval            int    `mapstructure:"key_interval"`
 
 	ctx interpolate.Context
 }
@@ -120,10 +119,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.ISOInterface == "" {
 		b.config.ISOInterface = "ide"
-	}
-
-	if b.config.KeyInterval == 0 {
-		b.config.KeyInterval = -1
 	}
 
 	if b.config.VMName == "" {

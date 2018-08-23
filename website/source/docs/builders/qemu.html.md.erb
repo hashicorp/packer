@@ -394,14 +394,12 @@ contention. You can tune this delay on a per-builder basis by specifying
   "builders": [
     {
       "type": "qemu",
-      "boot_key_interval": "10"
+      "boot_key_interval": "10ms"
       ...
     }
   ]
 }
 ```
-
-Note that this option will always be measured in milliseconds.
 
 <%= partial "partials/builders/boot-command" %>
 

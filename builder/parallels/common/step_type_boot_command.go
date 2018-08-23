@@ -26,7 +26,7 @@ type StepTypeBootCommand struct {
 	HostInterfaces []string
 	VMName         string
 	Ctx            interpolate.Context
-	GroupInterval  int
+	GroupInterval  time.Duration
 }
 
 // Run types the boot command by sending key scancodes into the VM.

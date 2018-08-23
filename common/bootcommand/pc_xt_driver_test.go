@@ -3,6 +3,7 @@ package bootcommand
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -79,7 +80,7 @@ func Test_pcxtSpecialOnOff(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, -1)
+	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -95,7 +96,7 @@ func Test_pcxtSpecial(t *testing.T) {
 		codes = c
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, -1)
+	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
@@ -114,10 +115,30 @@ func Test_flushes(t *testing.T) {
 		actual = append(actual, c)
 		return nil
 	}
-	d := NewPCXTDriver(sendCodes, -1, -1)
+	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
 	seq, err := GenerateExpressionSequence(in)
 	assert.NoError(t, err)
 	err = seq.Do(context.Background(), d)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
+}
+
+func Test_KeyIntervalNotGiven(t *testing.T) {
+	var codes []string
+	sendCodes := func(c []string) error {
+		codes = c
+		return nil
+	}
+	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
+	assert.Equal(t, d.interval, time.Duration(100)*time.Millisecond)
+}
+
+func Test_KeyIntervalGiven(t *testing.T) {
+	var codes []string
+	sendCodes := func(c []string) error {
+		codes = c
+		return nil
+	}
+	d := NewPCXTDriver(sendCodes, -1, time.Duration(5000)*time.Millisecond)
+	assert.Equal(t, d.interval, time.Duration(5000)*time.Millisecond)
 }
