@@ -13,6 +13,7 @@
 * builder/openstack: Add support for getting config from clouds-public.yaml. [GH-6595]
 * builder/openstack: Support Block Storage volumes as boot volume. [GH-6596]
 * builder/openstack: Migrate floating IP usage to Network v2 API from Compute API. [GH-6373]
+| builder/openstack: Add support for source_image_filter. [GH-6490]
 * builder/qemu: add ssh agent support. [GH-6541]
 * builder/qemu: New `use_backing_file` feature [GH-6249]
 * builder/vmware-iso: Try to use ISO files uploaded to the datastore when
