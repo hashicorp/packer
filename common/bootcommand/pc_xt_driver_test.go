@@ -124,7 +124,6 @@ func Test_flushes(t *testing.T) {
 }
 
 func Test_KeyIntervalNotGiven(t *testing.T) {
-	var codes []string
 	sendCodes := func(c []string) error {
 		codes = c
 		return nil
@@ -134,7 +133,6 @@ func Test_KeyIntervalNotGiven(t *testing.T) {
 }
 
 func Test_KeyIntervalGiven(t *testing.T) {
-	var codes []string
 	sendCodes := func(c []string) error {
 		codes = c
 		return nil
