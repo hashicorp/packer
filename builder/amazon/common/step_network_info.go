@@ -53,6 +53,7 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 	if s.VpcId == "" && !s.VpcFilter.Empty() {
 		params := &ec2.DescribeVpcsInput{}
 		params.Filters = buildEc2Filters(s.VpcFilter.Filters)
+		s.VpcFilter.Filters[aws.String("state")] = aws.String("available")
 
 		log.Printf("Using VPC Filters %v", params)
 
@@ -78,6 +79,7 @@ func (s *StepNetworkInfo) Run(_ context.Context, state multistep.StateBag) multi
 	// Subnet
 	if s.SubnetId == "" && !s.SubnetFilter.Empty() {
 		params := &ec2.DescribeSubnetsInput{}
+		s.SubnetFilter.Filters[aws.String("state")] = aws.String("available")
 
 		if s.VpcId != "" {
 			s.SubnetFilter.Filters[aws.String("vpc-id")] = &s.VpcId
