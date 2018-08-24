@@ -18,7 +18,8 @@ func (s *StepSleep) Run(_ context.Context, state multistep.StateBag) multistep.S
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.ActionName) > 0 {
-		ui.Say(s.ActionName + "! Waiting for " + fmt.Sprintf("%v", uint(s.Minutes)) + " minutes to let the action to complete...")
+		ui.Say(s.ActionName + "! Waiting for " + fmt.Sprintf("%v", uint(s.Minutes)) +
+			" minutes to let the action to complete...")
 	}
 	time.Sleep(time.Minute * s.Minutes)
 
