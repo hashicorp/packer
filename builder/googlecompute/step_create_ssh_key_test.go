@@ -26,7 +26,8 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	if _, ok := state.GetOk("ssh_private_key"); !ok {
+	cfg := state.Get("config").(*Config)
+	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
 }
@@ -42,10 +43,11 @@ func TestStepCreateSSHKey(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	if _, ok := state.GetOk("ssh_private_key"); !ok {
+	cfg := state.Get("config").(*Config)
+	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
-	if _, ok := state.GetOk("ssh_public_key"); !ok {
+	if len(cfg.Comm.SSHPublicKey) == 0 {
 		t.Fatal("should have key")
 	}
 }
@@ -71,10 +73,11 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	if _, ok := state.GetOk("ssh_private_key"); !ok {
+	cfg := state.Get("config").(*Config)
+	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
-	if _, ok := state.GetOk("ssh_public_key"); !ok {
+	if len(cfg.Comm.SSHPublicKey) == 0 {
 		t.Fatal("should have key")
 	}
 	if _, err := os.Stat(tf.Name()); err != nil {
