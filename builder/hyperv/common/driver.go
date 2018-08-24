@@ -70,7 +70,7 @@ type Driver interface {
 
 	DeleteVirtualSwitch(string) error
 
-	CreateVirtualMachine(string, string, string, string, int64, int64, int64, string, uint, bool, bool) error
+	CreateVirtualMachine(string, string, string, int64, int64, int64, string, uint, bool, bool) error
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
@@ -94,9 +94,11 @@ type Driver interface {
 
 	ExportVirtualMachine(string, string) error
 
-	CompactDisks(string, string) error
+	PreserveLegacyExportBehaviour(string, string) error
 
-	CopyExportedVirtualMachine(string, string, string, string) error
+	MoveCreatedVHDsToOutputDir(string, string) error
+
+	CompactDisks(string) (string, error)
 
 	RestartVirtualMachine(string) error
 

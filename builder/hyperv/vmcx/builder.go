@@ -62,7 +62,7 @@ type Config struct {
 	GuestAdditionsPath string `mapstructure:"guest_additions_path"`
 
 	// This is the path to a directory containing an exported virtual machine.
-	CloneFromVMXCPath string `mapstructure:"clone_from_vmxc_path"`
+	CloneFromVMCXPath string `mapstructure:"clone_from_vmcx_path"`
 
 	// This is the name of the virtual machine to clone from.
 	CloneFromVMName string `mapstructure:"clone_from_vm_name"`
@@ -91,6 +91,7 @@ type Config struct {
 	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
 	SecureBootTemplate             string `mapstructure:"secure_boot_template"`
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
+	TempPath                       string `mapstructure:"temp_path"`
 
 	Communicator string `mapstructure:"communicator"`
 
@@ -157,36 +158,45 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.Generation = 1
 
 	if b.config.CloneFromVMName == "" {
-		if b.config.CloneFromVMXCPath == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if clone_from_vmxc_path is not specified."))
+		if b.config.CloneFromVMCXPath == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vm_name must be specified if "+
+				"clone_from_vmcx_path is not specified."))
 		}
 	} else {
 		virtualMachineExists, err := powershell.DoesVirtualMachineExist(b.config.CloneFromVMName)
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone from exists: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone "+
+				"from exists: %s", err))
 		} else {
 			if !virtualMachineExists {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not exist.", b.config.CloneFromVMName))
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine '%s' to clone from does not "+
+					"exist.", b.config.CloneFromVMName))
 			} else {
 				b.config.Generation, err = powershell.GetVirtualMachineGeneration(b.config.CloneFromVMName)
 				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone from generation: %s", err))
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine to clone "+
+						"from generation: %s", err))
 				}
 
 				if b.config.CloneFromSnapshotName != "" {
-					virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
+					virtualMachineSnapshotExists, err := powershell.DoesVirtualMachineSnapshotExist(
+						b.config.CloneFromVMName, b.config.CloneFromSnapshotName)
 					if err != nil {
-						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine snapshot to clone from exists: %s", err))
+						errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine "+
+							"snapshot to clone from exists: %s", err))
 					} else {
 						if !virtualMachineSnapshotExists {
-							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on virtual machine '%s' to clone from does not exist.", b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
+							errs = packer.MultiErrorAppend(errs, fmt.Errorf("Virtual machine snapshot '%s' on "+
+								"virtual machine '%s' to clone from does not exist.",
+								b.config.CloneFromSnapshotName, b.config.CloneFromVMName))
 						}
 					}
 				}
 
 				virtualMachineOn, err := powershell.IsVirtualMachineOn(b.config.CloneFromVMName)
 				if err != nil {
-					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to clone is running: %s", err))
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting if virtual machine to "+
+						"clone is running: %s", err))
 				} else {
 					if virtualMachineOn {
 						warning := fmt.Sprintf("Cloning from a virtual machine that is running.")
@@ -197,15 +207,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		}
 	}
 
-	if b.config.CloneFromVMXCPath == "" {
+	if b.config.CloneFromVMCXPath == "" {
 		if b.config.CloneFromVMName == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmxc_path be specified if clone_from_vm_name must is not specified."))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("The clone_from_vmcx_path be specified if "+
+				"clone_from_vm_name must is not specified."))
 		}
 	} else {
-		if _, err := os.Stat(b.config.CloneFromVMXCPath); os.IsNotExist(err) {
+		if _, err := os.Stat(b.config.CloneFromVMCXPath); os.IsNotExist(err) {
 			if err != nil {
 				errs = packer.MultiErrorAppend(
-					errs, fmt.Errorf("CloneFromVMXCPath does not exist: %s", err))
+					errs, fmt.Errorf("CloneFromVMCXPath does not exist: %s", err))
 			}
 		}
 	}
@@ -276,25 +287,36 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.Generation < 2 && numberOfIsos > 2 {
 		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so "+
+				"we can't support guest additions and these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so "+
+				"we can't support these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		}
 	} else if b.config.Generation > 1 && len(b.config.SecondaryDvdImages) > 16 {
 		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for "+
+				"scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for "+
+				"scsi (limited to 16), so we can't support these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		}
 	}
 
 	if b.config.EnableVirtualizationExtensions {
 		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization extensions support: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization "+
+				"extensions support: %s", err))
 		} else {
 			if !hasVirtualMachineVirtualizationExtensions {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 or newer."))
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support "+
+					"virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 "+
+					"or newer."))
 			}
 		}
 	}
@@ -314,24 +336,29 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.EnableVirtualizationExtensions {
 		if b.config.EnableDynamicMemory {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, dynamic memory should not be allowed.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"dynamic memory should not be allowed.")
 			warnings = appendWarnings(warnings, warning)
 		}
 
 		if !b.config.EnableMacSpoofing {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, mac spoofing should be allowed.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"mac spoofing should be allowed.")
 			warnings = appendWarnings(warnings, warning)
 		}
 
 		if b.config.RamSize < MinNestedVirtualizationRamSize {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start " +
+				"any nested VMs.")
 			warnings = appendWarnings(warnings, warning)
 		}
 	}
 
 	if b.config.SwitchVlanId != "" {
 		if b.config.SwitchVlanId != b.config.VlanId {
-			warning = fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor vlan. The switch will not be able to see traffic from the VM.")
+			warning = fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor " +
+				"vlan. The switch will not be able to see traffic from the VM.")
 			warnings = appendWarnings(warnings, warning)
 		}
 	}
@@ -362,7 +389,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{},
+		&hypervcommon.StepCreateBuildDir{
+			TempPath: b.config.TempPath,
+		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
 			Path:  b.config.OutputDir,
@@ -397,7 +426,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SwitchName: b.config.SwitchName,
 		},
 		&hypervcommon.StepCloneVM{
-			CloneFromVMXCPath:              b.config.CloneFromVMXCPath,
+			CloneFromVMCXPath:              b.config.CloneFromVMCXPath,
 			CloneFromVMName:                b.config.CloneFromVMName,
 			CloneFromSnapshotName:          b.config.CloneFromSnapshotName,
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
@@ -476,10 +505,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepUnmountFloppyDrive{
 			Generation: b.config.Generation,
 		},
-		&hypervcommon.StepExportVm{
-			OutputDir:      b.config.OutputDir,
+		&hypervcommon.StepCompactDisk{
 			SkipCompaction: b.config.SkipCompaction,
-			SkipExport:     b.config.SkipExport,
+		},
+		&hypervcommon.StepExportVm{
+			OutputDir:  b.config.OutputDir,
+			SkipExport: b.config.SkipExport,
+		},
+		&hypervcommon.StepCollateArtifacts{
+			OutputDir:  b.config.OutputDir,
+			SkipExport: b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order
@@ -536,9 +571,11 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
 	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v",
+			MinRamSize, b.config.RamSize)
 	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v",
+			MaxRamSize, b.config.RamSize)
 	}
 
 	return nil

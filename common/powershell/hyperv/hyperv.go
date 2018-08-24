@@ -111,7 +111,8 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, path, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, path, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -124,7 +125,8 @@ Hyper-V\Set-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -Cont
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -146,7 +148,8 @@ if (!$vmDvdDrive) {throw 'unable to find dvd drive'}
 Hyper-V\Set-VMFirmware -VMName $vmName -FirstBootDevice $vmDvdDrive -ErrorAction SilentlyContinue
 `
 		var ps powershell.PowerShellCmd
-		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+		err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+			strconv.FormatInt(int64(controllerLocation), 10))
 		return err
 	}
 }
@@ -160,7 +163,8 @@ Hyper-V\Remove-VMDvdDrive -VMName $vmName -ControllerNumber $controllerNumber -C
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10), strconv.FormatInt(int64(controllerLocation), 10))
+	err := ps.Run(script, vmName, strconv.FormatInt(int64(controllerNumber), 10),
+		strconv.FormatInt(int64(controllerLocation), 10))
 	return err
 }
 
@@ -198,13 +202,15 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, vhdRoot string, ram int64, diskSize int64, diskBlockSize int64, switchName string, generation uint, diffDisks bool, fixedVHD bool) error {
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
+	diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diffDisks bool, fixedVHD bool) error {
 
 	if generation == 2 {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
 $vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
 if ($harddrivePath){
 	if($diffDisks -eq "true"){
 		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
@@ -218,21 +224,24 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatInt(int64(generation), 10), strconv.FormatBool(diffDisks)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
+			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
+			switchName, strconv.FormatInt(int64(generation), 10),
+			strconv.FormatBool(diffDisks)); err != nil {
 			return err
 		}
 
 		return DisableAutomaticCheckpoints(vmName)
 	} else {
 		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [string]$vhdRoot, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
+param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
 if($fixedVHD -eq "true"){
 	$vhdx = $vmName + '.vhd'
 }
 else{
 	$vhdx = $vmName + '.vhdx'
 }
-$vhdPath = Join-Path -Path $vhdRoot -ChildPath $vhdx
+$vhdPath = Join-Path -Path $path -ChildPath $vhdx
 if ($harddrivePath){
 	if($diffDisks -eq "true"){
 		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
@@ -252,7 +261,9 @@ if ($harddrivePath){
 }
 `
 		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, vhdRoot, strconv.FormatInt(ram, 10), strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10), switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
+		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
+			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
+			switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
 			return err
 		}
 
@@ -275,7 +286,7 @@ if ((Get-Command Hyper-V\Set-Vm).Parameters["AutomaticCheckpointsEnabled"]) {
 	return err
 }
 
-func ExportVmxcVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
+func ExportVmcxVirtualMachine(exportPath string, vmName string, snapshotName string, allSnapshots bool) error {
 	var script = `
 param([string]$exportPath, [string]$vmName, [string]$snapshotName, [string]$allSnapshotsString)
 
@@ -322,22 +333,22 @@ $result = Remove-Item -Path $WorkingPath
 	return err
 }
 
-func CopyVmxcVirtualMachine(exportPath string, cloneFromVmxcPath string) error {
+func CopyVmcxVirtualMachine(exportPath string, cloneFromVmcxPath string) error {
 	var script = `
-param([string]$exportPath, [string]$cloneFromVmxcPath)
-if (!(Test-Path $cloneFromVmxcPath)){
-	throw "Clone from vmxc directory: $cloneFromVmxcPath does not exist!"
+param([string]$exportPath, [string]$cloneFromVmcxPath)
+if (!(Test-Path $cloneFromVmcxPath)){
+	throw "Clone from vmcx directory: $cloneFromVmcxPath does not exist!"
 }
 
 if (!(Test-Path $exportPath)){
 	New-Item -ItemType Directory -Force -Path $exportPath
 }
-$cloneFromVmxcPath = Join-Path $cloneFromVmxcPath '\*'
-Copy-Item $cloneFromVmxcPath $exportPath -Recurse -Force
+$cloneFromVmcxPath = Join-Path $cloneFromVmcxPath '\*'
+Copy-Item $cloneFromVmcxPath $exportPath -Recurse -Force
 	`
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, exportPath, cloneFromVmxcPath)
+	err := ps.Run(script, exportPath, cloneFromVmcxPath)
 
 	return err
 }
@@ -354,7 +365,9 @@ Hyper-V\Set-VMNetworkAdapter $vmName -staticmacaddress $mac
 	return err
 }
 
-func ImportVmxcVirtualMachine(importPath string, vmName string, harddrivePath string, ram int64, switchName string) error {
+func ImportVmcxVirtualMachine(importPath string, vmName string, harddrivePath string,
+	ram int64, switchName string) error {
+
 	var script = `
 param([string]$importPath, [string]$vmName, [string]$harddrivePath, [long]$memoryStartupBytes, [string]$switchName)
 
@@ -409,20 +422,24 @@ if ($vm) {
 	return err
 }
 
-func CloneVirtualMachine(cloneFromVmxcPath string, cloneFromVmName string, cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string, ram int64, switchName string) error {
+func CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
+	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string,
+	path string, harddrivePath string, ram int64, switchName string) error {
+
 	if cloneFromVmName != "" {
-		if err := ExportVmxcVirtualMachine(path, cloneFromVmName, cloneFromSnapshotName, cloneAllSnapshots); err != nil {
+		if err := ExportVmcxVirtualMachine(path, cloneFromVmName,
+			cloneFromSnapshotName, cloneAllSnapshots); err != nil {
 			return err
 		}
 	}
 
-	if cloneFromVmxcPath != "" {
-		if err := CopyVmxcVirtualMachine(path, cloneFromVmxcPath); err != nil {
+	if cloneFromVmcxPath != "" {
+		if err := CopyVmcxVirtualMachine(path, cloneFromVmcxPath); err != nil {
 			return err
 		}
 	}
 
-	if err := ImportVmxcVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
+	if err := ImportVmcxVirtualMachine(path, vmName, harddrivePath, ram, switchName); err != nil {
 		return err
 	}
 
@@ -665,31 +682,144 @@ if (Test-Path -Path ([IO.Path]::Combine($path, $vmName, 'Virtual Machines', '*.V
 	return err
 }
 
-func CompactDisks(expPath string, vhdDir string) error {
+func PreserveLegacyExportBehaviour(srcPath, dstPath string) error {
+
 	var script = `
-param([string]$srcPath, [string]$vhdDirName)
-Get-ChildItem "$srcPath/$vhdDirName" -Filter *.vhd* | %{
-    Optimize-VHD -Path $_.FullName -Mode Full
+param([string]$srcPath, [string]$dstPath)
+
+# Validate the paths returning an error if they are empty or don't exist
+$srcPath, $dstPath | % {
+    if ($_) {
+        if (! (Test-Path $_)) {
+            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            exit
+        }
+    } else {
+        [System.Console]::Error.WriteLine("A supplied path is empty")
+        exit
+    }
+}
+
+# Export-VM should just create directories at the root of the export path
+# but, just in case, move all files as well...
+Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination (Get-Item $dstPath).FullName
+
+# Move directories with content; Delete empty directories
+$dirObj = Get-ChildItem $srcPath -Directory | % {
+    New-Object PSObject -Property @{
+        FullName=$_.FullName;
+        HasContent=$(if ($_.GetFileSystemInfos().Count -gt 0) {$true} else {$false})
+    }
+}
+foreach ($directory in $dirObj) {
+    if ($directory.HasContent) {
+        Move-Item -Path $directory.FullName -Destination (Get-Item $dstPath).FullName
+    } else {
+        Remove-Item -Path $directory.FullName
+    }
+}
+
+# Only remove the source directory if it is now empty
+if ( $((Get-Item $srcPath).GetFileSystemInfos().Count) -eq 0 ) {
+    Remove-Item -Path $srcPath
+} else {
+    # 'Return' an error message to PowerShellCmd as the directory should
+    # always be empty at the end of the script. The check is here to stop
+    # the Remove-Item command from doing any damage if some unforeseen
+    # error has occured
+    [System.Console]::Error.WriteLine("Refusing to remove $srcPath as it is not empty")
+    exit
 }
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, vhdDir)
+	err := ps.Run(script, srcPath, dstPath)
+
 	return err
 }
 
-func CopyExportedVirtualMachine(expPath string, outputPath string, vhdDir string, vmDir string) error {
+func MoveCreatedVHDsToOutputDir(srcPath, dstPath string) error {
 
 	var script = `
-param([string]$srcPath, [string]$dstPath, [string]$vhdDirName, [string]$vmDir)
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName "*.*") -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vhdDirName) -Destination $dstPath
-Move-Item -Path (Join-Path (Get-Item $srcPath).FullName $vmDir) -Destination $dstPath
+param([string]$srcPath, [string]$dstPath)
+
+# Validate the paths returning an error if the supplied path is empty
+# or if the paths don't exist
+$srcPath, $dstPath | % {
+    if ($_) {
+        if (! (Test-Path $_)) {
+            [System.Console]::Error.WriteLine("Path $_ does not exist")
+            exit
+        }
+    } else {
+        [System.Console]::Error.WriteLine("A supplied path is empty")
+        exit
+    }
+}
+
+# Convert to absolute paths if required
+$srcPathAbs = (Get-Item($srcPath)).FullName
+$dstPathAbs = (Get-Item($dstPath)).FullName
+
+# Get the full path to all disks under the directory or exit if none are found
+$disks = Get-ChildItem -Path $srcPathAbs -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+if ($disks.Length -eq 0) {
+    [System.Console]::Error.WriteLine("No disks found under $srcPathAbs")
+    exit
+}
+
+# Set up directory for VHDs in the destination directory
+$vhdDstDir = Join-Path -Path $dstPathAbs -ChildPath 'Virtual Hard Disks'
+if (! (Test-Path $vhdDstDir)) {
+	New-Item -ItemType Directory -Force -Path $vhdDstDir
+}
+
+# Move the disks
+foreach ($disk in $disks) {
+	Move-Item -Path $disk -Destination $vhdDstDir
+}
 `
 
 	var ps powershell.PowerShellCmd
-	err := ps.Run(script, expPath, outputPath, vhdDir, vmDir)
+	err := ps.Run(script, srcPath, dstPath)
+
 	return err
+}
+
+func CompactDisks(path string) (result string, err error) {
+	var script = `
+param([string]$srcPath)
+
+$disks = Get-ChildItem -Path $srcPath -Recurse -Filter *.vhd* -ErrorAction SilentlyContinue | % { $_.FullName }
+# Failure to find any disks is treated as a 'soft' error. Simply print out
+# a warning and exit
+if ($disks.Length -eq 0) {
+    Write-Output "WARNING: No disks found under $srcPath"
+    exit
+}
+
+foreach ($disk in $disks) {
+    Write-Output "Compacting disk: $(Split-Path $disk -leaf)"
+
+    $sizeBefore = $disk.Length
+    Optimize-VHD -Path $disk -Mode Full
+    $sizeAfter = $disk.Length
+
+    # Calculate the percentage change in disk size
+    if ($sizeAfter -gt 0) { # Protect against division by zero
+        $percentChange = ( ( $sizeAfter / $sizeBefore ) * 100 ) - 100
+        switch($percentChange) {
+            {$_ -lt 0} {Write-Output "Disk size reduced by: $(([math]::Abs($_)).ToString("#.#"))%"}
+            {$_ -eq 0} {Write-Output "Disk size is unchanged"}
+            {$_ -gt 0} {Write-Output "WARNING: Disk size increased by: $($_.ToString("#.#"))%"}
+        }
+    }
+}
+`
+
+	var ps powershell.PowerShellCmd
+	result, err = ps.Output(script, path)
+	return
 }
 
 func CreateVirtualSwitch(switchName string, switchType string) (bool, error) {
@@ -905,7 +1035,8 @@ Hyper-V\Get-VMNetworkAdapter -VMName $vmName | Hyper-V\Connect-VMNetworkAdapter 
 	return err
 }
 
-func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64, vhdBlockSize int64, controllerType string) error {
+func AddVirtualMachineHardDiskDrive(vmName string, vhdRoot string, vhdName string, vhdSizeBytes int64,
+	vhdBlockSize int64, controllerType string) error {
 
 	var script = `
 param([string]$vmName,[string]$vhdRoot, [string]$vhdName, [string]$vhdSizeInBytes, [string]$vhdBlockSizeInByte, [string]$controllerType)
