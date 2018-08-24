@@ -261,10 +261,10 @@ growpart:
 // Ensure the VM template is correct when building from a custom managed image.
 func TestVirtualMachineDeployment08(t *testing.T) {
 	config := map[string]interface{}{
-		"location":                                 "ignore",
-		"subscription_id":                          "ignore",
-		"os_type":                                  constants.Target_Linux,
-		"communicator":                             "none",
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         constants.Target_Linux,
+		"communicator":    "none",
 		"custom_managed_image_resource_group_name": "CustomManagedImageResourceGroupName",
 		"custom_managed_image_name":                "CustomManagedImageName",
 		"managed_image_name":                       "ManagedImageName",
