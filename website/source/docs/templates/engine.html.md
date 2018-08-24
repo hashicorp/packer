@@ -39,6 +39,7 @@ Here is a full list of the available functions for reference.
     examples below in [the `isotime` format reference](/docs/templates/engine.html#isotime-function-format-reference).
 -   `lower` - Lowercases the string.
 -   `pwd` - The working directory while executing Packer.
+-   `split` - Split an input string using separator and return the requested substring.
 -   `template_dir` - The directory to the template for the build.
 -   `timestamp` - The current Unix timestamp in UTC.
 -   `uuid` - Returns a random UUID.
@@ -246,3 +247,37 @@ Please note that double quote characters need escaping inside of templates (in t
 ```
 
 -&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html) documentation for more information on how to correctly configure the Amazon builder in this example.
+
+# split Function Format Reference
+
+The function `split` takes an input string, a seperator string, and a numeric component value and returns request substring.
+
+Here are some examples using the above options:
+
+``` liquid
+build_name = foo-bar-provider
+
+{{split build_name "-" 0}} = foo
+{{split "fixed-string" "-" 1}} = string
+```
+
+Please note that double quote characters need escaping inside of templates (in this case, on the `fixed-string` value):
+
+``` json
+{
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "compression_level": 9,
+        "keep_input_artifact": false,
+        "vagrantfile_template": "tpl/{{split build_name \"-\" 1}.rb",
+        "output": "output/{{build_name}}.box",
+        "only": [
+            "org-name-provider"
+        ]
+      }
+    ]
+  ]
+}
+```
