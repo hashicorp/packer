@@ -153,6 +153,10 @@ Fixes that are run:
   docker-email               Removes "login_email" from the Docker builder
   powershell-escapes         Removes PowerShell escapes from user env vars and
                              elevated username and password strings
+  hyperv-deprecations        Removes the deprecated "vhd_temp_path" setting from
+                             Hyper-V ISO builder templates
+  hyperv-vmxc-typo           Corrects a typo in the "clone_from_vmxc_path"
+                             setting. Replaces with "clone_from_vmcx_path".
 
 Options:
 
