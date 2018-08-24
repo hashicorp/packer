@@ -174,7 +174,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&communicator.StepConnectSSH{
 				Config:    &b.config.Comm,
 				Host:      lin.SSHHost,
-				SSHConfig: lin.SSHConfig(b.config.UserName),
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
