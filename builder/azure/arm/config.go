@@ -472,7 +472,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
 		}
 		if len(*v) > 256 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(*v)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
 		}
 	}
 }
