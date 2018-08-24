@@ -799,7 +799,7 @@ func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 
 func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 	config := map[string]interface{}{
-		"image_url":                                "ignore",
+		"image_url": "ignore",
 		"custom_managed_image_resource_group_name": "ignore",
 		"custom_managed_image_name":                "ignore",
 		"location":                                 "ignore",
