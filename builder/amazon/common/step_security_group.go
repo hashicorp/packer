@@ -50,14 +50,10 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 	if !s.SecurityGroupFilter.Empty() {
 
 		params := &ec2.DescribeSecurityGroupsInput{}
-		params.Filters = buildEc2Filters(s.SecurityGroupFilter.Filters)
-		vpcFilter := ec2.Filter{
-			Name: aws.String("vpc-id"),
-			Values: []*string{
-				aws.String(vpcId),
-			},
+		if vpcId != "" {
+			s.SecurityGroupFilter.Filters[aws.String("vpc-id")] = &vpcId
 		}
-		params.Filters = append(params.Filters, &vpcFilter)
+		params.Filters = buildEc2Filters(s.SecurityGroupFilter.Filters)
 
 		log.Printf("Using SecurityGroup Filters %v", params)
 
