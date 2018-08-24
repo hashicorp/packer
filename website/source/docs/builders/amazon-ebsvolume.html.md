@@ -193,6 +193,27 @@ builder.
     described above. Note that if this is specified, you must omit the
     `security_group_id`.
 
+-   `security_group_filter` (object) - Filters used to populate the `security_group_ids` field.
+    Example:
+
+    ``` json
+    {
+      "security_group_filter": {
+        "filters": {
+          "tag:Class": "packer"
+        }
+      }
+    }
+    ```
+
+    This selects the SG's with tag `Class` with the value `packer`.
+
+    -   `filters` (map of strings) - filters used to select a `security_group_ids`.
+        Any filter described in the docs for [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
+        is valid.
+
+    `security_group_ids` take precendense over this.
+
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
     The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
@@ -299,6 +320,39 @@ builder.
     `subnet-12345def`, where Packer will launch the EC2 instance. This field is
     required if you are using an non-default VPC.
 
+-   `subnet_filter` (object) - Filters used to populate the `subnet_id` field.
+    Example:
+
+    ``` json
+    {
+      "subnet_filter": {
+        "filters": {
+          "tag:Class": "build"
+        },
+        "most_free": true,
+        "random": false
+      }
+    }
+    ```
+
+    This selects the Subnet with tag `Class` with the value `build`,  which has
+    the most free IP addresses.
+    NOTE: This will fail unless *exactly* one Subnet is returned. By using
+    `most_free` or `random` one will be selected from those matching the filter.
+
+    -   `filters` (map of strings) - filters used to select a `subnet_id`.
+        NOTE: This will fail unless *exactly* one Subnet is returned.
+        Any filter described in the docs for [DescribeSubnets](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSubnets.html)
+        is valid.
+
+    -   `most_free` (boolean) - The Subnet with the most free IPv4 addresses
+        will be used if multiple Subnets matches the filter.
+
+    -   `random` (boolean) - A random Subnet will be used if multiple Subnets
+        matches the filter. `most_free` have precendence over this.
+
+    `subnet_id` take precedence over this.
+
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name that looks like
     `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
@@ -319,6 +373,32 @@ builder.
     in order to create a temporary security group within the VPC. Requires `subnet_id`
     to be set. If this field is left blank, Packer will try to get the VPC ID from the
     `subnet_id`.
+
+-   `vpc_filter` (object) - Filters used to populate the `vpc_id` field.
+    Example:
+
+    ``` json
+    {
+      "vpc_filter": {
+        "filters": {
+          "tag:Class": "build",
+          "isDefault": "false",
+          "cidr": "/24"
+        }
+      }
+    }
+    ```
+
+    This selects the VPC with tag `Class` with the value `build`,  which is not the
+    default VPC, and have a IPv4 CIDR block of `/24`.
+    NOTE: This will fail unless *exactly* one VPC is returned.
+
+    -   `filters` (map of strings) - filters used to select a `vpc_id`.
+        NOTE: This will fail unless *exactly* one VPC is returned.
+        Any filter described in the docs for [DescribeVpcs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeVpcs.html)
+        is valid.
+
+    `vpc_id` take precedence over this.
 
 -   `windows_password_timeout` (string) - The timeout for waiting for a Windows
     password for Windows instances. Defaults to 20 minutes. Example value: `10m`
