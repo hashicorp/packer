@@ -146,7 +146,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	case "xz":
 		ui.Say(fmt.Sprintf("Using xz compression with 1 core for %s (library does not support MT)",
 			target))
-		output, err = makeXZWriter(outputFile, p.config.CompressionLevel)
+		output, err = makeXZWriter(outputFile)
 		defer output.Close()
 	case "pgzip":
 		ui.Say(fmt.Sprintf("Using pgzip compression with %d cores for %s",
@@ -280,7 +280,7 @@ func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser,
 	return lzwriter, nil
 }
 
-func makeXZWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
+func makeXZWriter(output io.WriteCloser) (io.WriteCloser, error) {
 	xzwriter, err := xz.NewWriter(output)
 	if err != nil {
 		return nil, err
