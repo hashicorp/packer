@@ -28,7 +28,7 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 		// Attach field == false
 		{
 			Input: map[string]interface{}{
-				"type": "virtualbox",
+				"type":                   "virtualbox",
 				"guest_additions_attach": false,
 			},
 
@@ -41,7 +41,7 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 		// Attach field == true
 		{
 			Input: map[string]interface{}{
-				"type": "virtualbox",
+				"type":                   "virtualbox",
 				"guest_additions_attach": true,
 			},
 
@@ -54,12 +54,12 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 		// Attach field is not a bool
 		{
 			Input: map[string]interface{}{
-				"type": "virtualbox",
+				"type":                   "virtualbox",
 				"guest_additions_attach": "what",
 			},
 
 			Expected: map[string]interface{}{
-				"type": "virtualbox",
+				"type":                   "virtualbox",
 				"guest_additions_attach": "what",
 			},
 		},
