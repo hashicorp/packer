@@ -124,19 +124,11 @@ func Test_flushes(t *testing.T) {
 }
 
 func Test_KeyIntervalNotGiven(t *testing.T) {
-	sendCodes := func(c []string) error {
-		codes = c
-		return nil
-	}
-	d := NewPCXTDriver(sendCodes, -1, time.Duration(0))
+	d := NewPCXTDriver(nil, -1, time.Duration(0))
 	assert.Equal(t, d.interval, time.Duration(100)*time.Millisecond)
 }
 
 func Test_KeyIntervalGiven(t *testing.T) {
-	sendCodes := func(c []string) error {
-		codes = c
-		return nil
-	}
-	d := NewPCXTDriver(sendCodes, -1, time.Duration(5000)*time.Millisecond)
+	d := NewPCXTDriver(nil, -1, time.Duration(5000)*time.Millisecond)
 	assert.Equal(t, d.interval, time.Duration(5000)*time.Millisecond)
 }
