@@ -16,15 +16,15 @@ type stepAttachKeyPair struct {
 }
 
 func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	keyPairName := state.Get("keyPair").(string)
-	if keyPairName == "" {
-		return multistep.ActionContinue
-	}
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	timeoutPoint := time.Now().Add(120 * time.Second)
+	keyPairName := config.Comm.SSHKeyPair
+	if keyPairName == "" {
+		return multistep.ActionContinue
+	}
 	for {
 		err := client.AttachKeyPair(&ecs.AttachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
 			KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})
@@ -51,14 +51,14 @@ func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) mul
 }
 
 func (s *stepAttachKeyPair) Cleanup(state multistep.StateBag) {
-	keyPairName := state.Get("keyPair").(string)
-	if keyPairName == "" {
-		return
-	}
 	client := state.Get("client").(*ecs.Client)
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
+	keyPairName := config.Comm.SSHKeyPair
+	if keyPairName == "" {
+		return
+	}
 
 	err := client.DetachKeyPair(&ecs.DetachKeyPairArgs{RegionId: common.Region(config.AlicloudRegion),
 		KeyPairName: keyPairName, InstanceIds: "[\"" + instance.InstanceId + "\"]"})

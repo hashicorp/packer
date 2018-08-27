@@ -107,11 +107,11 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	// Add keypair to the server create options.
-	keyName, hasKey := state.GetOk("keyPair")
-	if hasKey {
+	keyName := config.Comm.SSHKeyPair
+	if keyName != "" {
 		serverOptsExt = keypairs.CreateOptsExt{
 			CreateOptsBuilder: serverOptsExt,
-			KeyName:           keyName.(string),
+			KeyName:           keyName,
 		}
 	}
 
