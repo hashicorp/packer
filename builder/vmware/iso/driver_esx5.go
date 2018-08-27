@@ -17,6 +17,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -514,7 +515,7 @@ func (d *ESX5Driver) connect() error {
 	}
 
 	if d.PrivateKey != "" {
-		signer, err := gossh.ParsePrivateKey([]byte(d.PrivateKey))
+		signer, err := helperssh.FileSigner(d.PrivateKey)
 		if err != nil {
 			return err
 		}
