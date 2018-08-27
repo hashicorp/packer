@@ -31,7 +31,7 @@ type ESX5Driver struct {
 	Port           uint
 	Username       string
 	Password       string
-	PrivateKey     string
+	PrivateKeyFile string
 	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
@@ -514,8 +514,8 @@ func (d *ESX5Driver) connect() error {
 			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
 
-	if d.PrivateKey != "" {
-		signer, err := helperssh.FileSigner(d.PrivateKey)
+	if d.PrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(d.PrivateKeyFile)
 		if err != nil {
 			return err
 		}
