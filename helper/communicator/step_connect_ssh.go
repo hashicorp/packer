@@ -225,8 +225,8 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 				ssh.PasswordKeyboardInteractive(config.SSHBastionPassword)))
 	}
 
-	if config.SSHBastionPrivateKey != "" {
-		signer, err := helperssh.FileSigner(config.SSHBastionPrivateKey)
+	if config.SSHBastionPrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(config.SSHBastionPrivateKeyFile)
 		if err != nil {
 			return nil, err
 		}

@@ -41,7 +41,7 @@ type Config struct {
 	SSHBastionAgentAuth       bool          `mapstructure:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        string        `mapstructure:"ssh_bastion_username"`
 	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
-	SSHBastionPrivateKey      string        `mapstructure:"ssh_bastion_private_key_file"`
+	SSHBastionPrivateKeyFile  string        `mapstructure:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
 	SSHProxyHost              string        `mapstructure:"ssh_proxy_host"`
 	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
@@ -217,8 +217,8 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			c.SSHBastionPort = 22
 		}
 
-		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKeyFile != "" {
-			c.SSHBastionPrivateKey = c.SSHPrivateKeyFile
+		if c.SSHBastionPrivateKeyFile == "" && c.SSHPrivateKeyFile != "" {
+			c.SSHBastionPrivateKeyFile = c.SSHPrivateKeyFile
 		}
 	}
 
@@ -249,7 +249,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHBastionHost != "" && !c.SSHBastionAgentAuth {
-		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
+		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKeyFile == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		}
