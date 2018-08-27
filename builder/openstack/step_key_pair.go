@@ -28,6 +28,7 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(Config)
 
 	if s.PrivateKeyFile != "" {
 		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
@@ -37,8 +38,8 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		config.Comm.SSHPrivateKey = privateKeyBytes
+		config.Comm.SSHKeyPair = s.KeyPairName
 
 		return multistep.ActionContinue
 	}
@@ -50,17 +51,15 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 
 	if s.SSHAgentAuth && s.KeyPairName != "" {
 		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
-		state.Put("keyPair", s.KeyPairName)
+		config.Comm.SSHKeyPair = ""
 		return multistep.ActionContinue
 	}
 
 	if s.TemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		state.Put("keyPair", "")
+		config.Comm.SSHKeyPair = ""
 		return multistep.ActionContinue
 	}
-
-	config := state.Get("config").(Config)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
@@ -79,14 +78,14 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	if keypair.PrivateKey == "" {
+	if len(keypair.PrivateKey) == 0 {
 		state.Put("error", fmt.Errorf("The temporary keypair returned was blank"))
 		return multistep.ActionHalt
 	}
 
 	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPairName))
 
-	keypair.PrivateKey = berToDer(keypair.PrivateKey, ui)
+	keypair.PrivateKey = string(berToDer([]byte(keypair.PrivateKey), ui))
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -118,16 +117,16 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.TemporaryKeyPairName)
-	state.Put("privateKey", keypair.PrivateKey)
+	config.Comm.SSHKeyPair = s.TemporaryKeyPairName
+	config.Comm.SSHPrivateKey = []byte(keypair.PrivateKey)
 
 	return multistep.ActionContinue
 }
 
 // Work around for https://github.com/hashicorp/packer/issues/2526
-func berToDer(ber string, ui packer.Ui) string {
+func berToDer(ber []byte, ui packer.Ui) []byte {
 	// Check if x/crypto/ssh can parse the key
-	_, err := ssh.ParsePrivateKey([]byte(ber))
+	_, err := ssh.ParsePrivateKey(ber)
 	if err == nil {
 		return ber
 	}
@@ -145,7 +144,7 @@ func berToDer(ber string, ui packer.Ui) string {
 	if err != nil {
 		return ber
 	}
-	ioutil.WriteFile(berKey.Name(), []byte(ber), os.ModeAppend)
+	ioutil.WriteFile(berKey.Name(), ber, os.ModeAppend)
 	derKey, err := ioutil.TempFile("", "packer-der-privatekey-")
 	defer os.Remove(derKey.Name())
 	if err != nil {
@@ -164,7 +163,7 @@ func berToDer(ber string, ui packer.Ui) string {
 		return ber
 	}
 	ui.Say("Successfully converted BER encoded SSH key to DER encoding.")
-	return string(der)
+	return der
 }
 
 func (s *StepKeyPair) Cleanup(state multistep.StateBag) {

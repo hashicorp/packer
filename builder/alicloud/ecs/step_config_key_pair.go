@@ -27,6 +27,7 @@ type stepConfigAlicloudKeyPair struct {
 
 func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
 	if s.PrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
@@ -37,8 +38,8 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		config.Comm.SSHKeyPair = s.KeyPairName
+		config.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
@@ -76,8 +77,8 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 	s.keyName = s.TemporaryKeyPairName
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.keyName)
-	state.Put("privateKey", keyResp.PrivateKeyBody)
+	config.Comm.SSHKeyPair = s.keyName
+	config.Comm.SSHPrivateKey = []byte(keyResp.PrivateKeyBody)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
