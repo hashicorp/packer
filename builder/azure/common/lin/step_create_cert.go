@@ -58,7 +58,8 @@ func (s *StepCreateCert) createCert(state multistep.StateBag) error {
 	}))
 
 	// Set the private key in the state bag for later
-	state.Put(constants.PrivateKey, privkey)
+	state.Put("privateKey", privkey)
+
 	log.Printf("createCert: Private key:\n%s", privkey)
 
 	log.Println("createCert: Creating certificate...")
