@@ -10,6 +10,7 @@ import (
 
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
 	"golang.org/x/crypto/ssh"
@@ -241,7 +242,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if _, err := os.Stat(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := SSHFileSigner(c.SSHPrivateKeyFile); err != nil {
+		} else if _, err := helperssh.FileSigner(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}

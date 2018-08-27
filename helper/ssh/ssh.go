@@ -1,4 +1,4 @@
-package communicator
+package ssh
 
 import (
 	"encoding/pem"
@@ -9,8 +9,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// SSHFileSigner returns an ssh.Signer for a key file.
-func SSHFileSigner(path string) (ssh.Signer, error) {
+// FileSigner returns an ssh.Signer for a key file.
+func FileSigner(path string) (ssh.Signer, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
