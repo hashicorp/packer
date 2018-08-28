@@ -66,10 +66,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// ssh_private_key_file, then create a temporary one, but only if the
 	// temporary_key_pair_name has not been provided and we are not using
 	// ssh_password.
-	if c.Comm.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
+	if c.Comm.SSHKeyPairName == "" && c.Comm.SSHTemporaryKeyPairName == "" &&
 		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" {
 
-		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		c.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	if c.WindowsPasswordTimeout == 0 {
