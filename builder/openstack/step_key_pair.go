@@ -10,18 +10,16 @@ import (
 	"runtime"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
 type StepKeyPair struct {
-	Debug                bool
-	SSHAgentAuth         bool
-	DebugKeyPath         string
-	TemporaryKeyPairName string
-	KeyPairName          string
-	PrivateKeyFile       string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 
 	doCleanup bool
 }
@@ -30,8 +28,8 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(Config)
 
-	if s.PrivateKeyFile != "" {
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+	if s.Comm.SSHPrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
@@ -39,23 +37,22 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		}
 
 		config.Comm.SSHPrivateKey = privateKeyBytes
-		config.Comm.SSHKeyPairName = s.KeyPairName
 
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName == "" {
+	if s.Comm.SSHAgentAuth && config.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with key pair in Source image")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
+	if s.Comm.SSHAgentAuth && config.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", config.Comm.SSHKeyPairName))
 		config.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
-	if s.TemporaryKeyPairName == "" {
+	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
 		config.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
@@ -69,9 +66,9 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s ...", s.Comm.SSHTemporaryKeyPairName))
 	keypair, err := keypairs.Create(computeClient, keypairs.CreateOpts{
-		Name: s.TemporaryKeyPairName,
+		Name: s.Comm.SSHTemporaryKeyPairName,
 	}).Extract()
 	if err != nil {
 		state.Put("error", fmt.Errorf("Error creating temporary keypair: %s", err))
@@ -83,7 +80,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Created temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
 
 	keypair.PrivateKey = string(berToDer([]byte(keypair.PrivateKey), ui))
 
@@ -117,7 +114,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	config.Comm.SSHKeyPairName = s.TemporaryKeyPairName
+	config.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
 	config.Comm.SSHPrivateKey = []byte(keypair.PrivateKey)
 
 	return multistep.ActionContinue
@@ -178,14 +175,14 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	computeClient, err := config.computeV2Client()
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.Comm.SSHTemporaryKeyPairName))
 		return
 	}
 
-	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.TemporaryKeyPairName))
-	err = keypairs.Delete(computeClient, s.TemporaryKeyPairName).ExtractErr()
+	ui.Say(fmt.Sprintf("Deleting temporary keypair: %s ...", s.Comm.SSHTemporaryKeyPairName))
+	err = keypairs.Delete(computeClient, s.Comm.SSHTemporaryKeyPairName).ExtractErr()
 	if err != nil {
 		ui.Error(fmt.Sprintf(
-			"Error cleaning up keypair. Please delete the key manually: %s", s.TemporaryKeyPairName))
+			"Error cleaning up keypair. Please delete the key manually: %s", s.Comm.SSHTemporaryKeyPairName))
 	}
 }
