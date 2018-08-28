@@ -66,7 +66,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// ssh_private_key_file, then create a temporary one, but only if the
 	// temporary_key_pair_name has not been provided and we are not using
 	// ssh_password.
-	if c.Comm.SSHKeyPair == "" && c.TemporaryKeyPairName == "" &&
+	if c.Comm.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
 		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" {
 
 		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
@@ -92,7 +92,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
 	}
 
-	if c.Comm.SSHKeyPair != "" {
+	if c.Comm.SSHKeyPairName != "" {
 		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKeyFile == "" {
 			errs = append(errs, fmt.Errorf("ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
 		} else if c.Comm.SSHPrivateKeyFile == "" && !c.Comm.SSHAgentAuth {
