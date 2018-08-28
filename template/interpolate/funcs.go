@@ -10,6 +10,7 @@ import (
 	"text/template"
 	"time"
 
+	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/version"
 )
@@ -36,6 +37,7 @@ var FuncGens = map[string]FuncGenerator{
 	"uuid":           funcGenUuid,
 	"user":           funcGenUser,
 	"packer_version": funcGenPackerVersion,
+	"consul_key":     funcGenConsul,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -170,5 +172,37 @@ func funcGenUuid(ctx *Context) interface{} {
 func funcGenPackerVersion(ctx *Context) interface{} {
 	return func() string {
 		return version.FormattedVersion()
+	}
+}
+
+func funcGenConsul(ctx *Context) interface{} {
+	return func(k string) (string, error) {
+		if !ctx.EnableEnv {
+			// The error message doesn't have to be that detailed since
+			// semantic checks should catch this.
+			return "", errors.New("consul_key is not allowed here")
+		}
+
+		consulConfig := consulapi.DefaultConfig()
+		client, err := consulapi.NewClient(consulConfig)
+		if err != nil {
+			return "", fmt.Errorf("error getting consul client: %s", err)
+		}
+
+		q := &consulapi.QueryOptions{}
+		kv, _, err := client.KV().Get(k, q)
+		if err != nil {
+			return "", fmt.Errorf("error reading consul key: %s", err)
+		}
+		if kv == nil {
+			return "", fmt.Errorf("key does not exist at the given path: %s", k)
+		}
+
+		value := string(kv.Value)
+		if value == "" {
+			return "", fmt.Errorf("value is empty at path %s", k)
+		}
+
+		return value, nil
 	}
 }
