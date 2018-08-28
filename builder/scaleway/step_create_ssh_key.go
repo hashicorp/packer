@@ -13,24 +13,25 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
 type stepCreateSSHKey struct {
-	Debug          bool
-	DebugKeyPath   string
-	PrivateKeyFile string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 }
 
 func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
