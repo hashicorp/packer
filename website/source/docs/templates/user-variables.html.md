@@ -13,7 +13,7 @@ sidebar_current: 'docs-templates-user-variables'
 # Template User Variables
 
 User variables allow your templates to be further configured with variables from
-the command-line, environment variables, or files. This lets you parameterize
+the command-line, environment variables, Vault, or files. This lets you parameterize
 your templates so that you can keep secret tokens, environment-specific data,
 and other types of information out of your templates. This maximizes the
 portability of the template.
@@ -72,7 +72,7 @@ The `env` function is available *only* within the default value of a user
 variable, allowing you to default a user variable to an environment variable.
 An example is shown below:
 
-``` json
+```json
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
@@ -114,6 +114,53 @@ in consul.
 
 The configuration for consul (address, tokens, ...) must be specified as environment variables,
 as specified in the [Documentation](https://www.consul.io/docs/commands/index.html#environment-variables).
+
+## Vault Variables
+
+Secrets can be read from [Vault](https://www.vaultproject.io/) and used within
+your template as user variables. the `vault` function is available *only*
+within the default value of a user variable, allowing you to default a user
+variable to an environment variable.
+
+An example of using a v2 kv engine:
+
+If you store a value in vault using `vault kv put secret/hello foo=world`, you
+can access it using the following template engine:
+
+```json
+{
+  "variables": {
+    "my_secret": "{{ vault `/secret/data/hello` `foo`}}"
+  }
+}
+```
+which will assign "my_secret": "world"
+
+An example of using a v1 kv engine:
+
+If you store a value in vault using:
+
+```
+vault secrets enable -version=1 -path=secrets kv
+vault kv put secrets/hello foo=world
+```
+
+You can access it using the following template engine:
+
+```
+{
+  "variables": {
+    "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
+  }
+}
+```
+
+This example accesses the Vault path
+`secret/data/foo` and returns the value stored at the key `bar`, storing it as
+"my_secret".
+
+In order for this to work, you must set the environment variables `VAULT_TOKEN`
+and `VAULT_ADDR` to valid values.
 
 ## Using array values
 
