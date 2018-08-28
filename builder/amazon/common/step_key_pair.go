@@ -8,17 +8,17 @@ import (
 	"runtime"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type StepKeyPair struct {
 	Debug                bool
+	Comm                 *communicator.Config
 	SSHAgentAuth         bool
 	DebugKeyPath         string
 	TemporaryKeyPairName string
-	KeyPairName          string
-	PrivateKeyFile       string
 
 	doCleanup bool
 }
@@ -26,29 +26,28 @@ type StepKeyPair struct {
 func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName == "" {
+	if s.SSHAgentAuth && s.Comm.SSHKeyPair == "" {
 		ui.Say("Using SSH Agent with key pair in Source AMI")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
-		state.Put("keyPair", s.KeyPairName)
+	if s.SSHAgentAuth && s.Comm.SSHKeyPair != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPair))
+		state.Put("keyPair", s.Comm.SSHKeyPair)
 		return multistep.ActionContinue
 	}
 
@@ -70,9 +69,9 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 
 	s.doCleanup = true
 
-	// Set some state data for use in future steps
-	state.Put("keyPair", s.TemporaryKeyPairName)
-	state.Put("privateKey", *keyResp.KeyMaterial)
+	// Set some data for use in future steps
+	s.Comm.SSHKeyPair = s.TemporaryKeyPairName
+	s.Comm.SSHPrivateKey = []byte(*keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
