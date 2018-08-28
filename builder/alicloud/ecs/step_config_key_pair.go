@@ -38,7 +38,7 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 			return multistep.ActionHalt
 		}
 
-		config.Comm.SSHKeyPair = s.KeyPairName
+		config.Comm.SSHKeyPairName = s.KeyPairName
 		config.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
@@ -77,7 +77,7 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 	s.keyName = s.TemporaryKeyPairName
 
 	// Set some state data for use in future steps
-	config.Comm.SSHKeyPair = s.keyName
+	config.Comm.SSHKeyPairName = s.keyName
 	config.Comm.SSHPrivateKey = []byte(keyResp.PrivateKeyBody)
 
 	// If we're in debug mode, output the private key to the working

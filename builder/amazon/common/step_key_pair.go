@@ -39,14 +39,14 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPair == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with key pair in Source AMI")
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPair != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPair))
-		state.Put("keyPair", s.Comm.SSHKeyPair)
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
+		state.Put("keyPair", s.Comm.SSHKeyPairName)
 		return multistep.ActionContinue
 	}
 
@@ -69,7 +69,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	s.doCleanup = true
 
 	// Set some data for use in future steps
-	s.Comm.SSHKeyPair = s.TemporaryKeyPairName
+	s.Comm.SSHKeyPairName = s.TemporaryKeyPairName
 	s.Comm.SSHPrivateKey = []byte(*keyResp.KeyMaterial)
 
 	// If we're in debug mode, output the private key to the working
