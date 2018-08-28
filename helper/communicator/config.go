@@ -29,7 +29,7 @@ type Config struct {
 	SSHPassword               string        `mapstructure:"ssh_password"`
 	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
 	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
-	SSHKeyPair                string        `mapstructure:"ssh_key_pair"`
+	SSHKeyPair                string        `mapstructure:"ssh_keypair_name"`
 	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
