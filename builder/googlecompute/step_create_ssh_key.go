@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
@@ -17,9 +18,9 @@ import (
 
 // StepCreateSSHKey represents a Packer build step that generates SSH key pairs.
 type StepCreateSSHKey struct {
-	Debug          bool
-	DebugKeyPath   string
-	PrivateKeyFile string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 }
 
 // Run executes the Packer build step that generates SSH key pairs.
@@ -28,9 +29,9 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
