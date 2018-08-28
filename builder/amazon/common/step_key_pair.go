@@ -16,7 +16,6 @@ import (
 type StepKeyPair struct {
 	Debug                bool
 	Comm                 *communicator.Config
-	SSHAgentAuth         bool
 	DebugKeyPath         string
 	TemporaryKeyPairName string
 
@@ -40,12 +39,12 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.Comm.SSHKeyPair == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPair == "" {
 		ui.Say("Using SSH Agent with key pair in Source AMI")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.Comm.SSHKeyPair != "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPair != "" {
 		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPair))
 		state.Put("keyPair", s.Comm.SSHKeyPair)
 		return multistep.ActionContinue
