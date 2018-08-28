@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"context"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 
 	"io/ioutil"
@@ -17,7 +18,8 @@ func TestStepCreateSSHKey_impl(t *testing.T) {
 func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateSSHKey)
-	step.PrivateKeyFile = "test-fixtures/fake-key"
+	step.Comm = new(communicator.Config)
+	step.Comm.SSHPrivateKeyFile = "test-fixtures/fake-key"
 	defer step.Cleanup(state)
 
 	// run the step
@@ -35,6 +37,7 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 func TestStepCreateSSHKey(t *testing.T) {
 	state := testState(t)
 	step := new(StepCreateSSHKey)
+	step.Comm = new(communicator.Config)
 	defer step.Cleanup(state)
 
 	// run the step
@@ -62,6 +65,7 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 
 	state := testState(t)
 	step := new(StepCreateSSHKey)
+	step.Comm = new(communicator.Config)
 	step.Debug = true
 	step.DebugKeyPath = tf.Name()
 
