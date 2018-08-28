@@ -96,13 +96,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceECSImageId: b.config.AlicloudSourceImage,
 		},
 		&stepConfigAlicloudKeyPair{
-			Debug:                b.config.PackerDebug,
-			KeyPairName:          b.config.SSHKeyPairName,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKeyFile,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
-			RegionId:             b.config.AlicloudRegion,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
+			RegionId:     b.config.AlicloudRegion,
 		},
 	}
 	if b.chooseNetworkType() == VpcNet {
@@ -238,5 +235,5 @@ func (b *Builder) isUserDataNeeded() bool {
 }
 
 func (b *Builder) isKeyPairNeeded() bool {
-	return b.config.SSHKeyPairName != "" || b.config.TemporaryKeyPairName != ""
+	return b.config.Comm.SSHKeyPairName != "" || b.config.Comm.SSHTemporaryKeyPairName != ""
 }
