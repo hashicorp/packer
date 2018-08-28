@@ -30,6 +30,7 @@ type Config struct {
 	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
 	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
+	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
 	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
