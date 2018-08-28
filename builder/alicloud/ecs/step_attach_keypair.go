@@ -21,7 +21,7 @@ func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) mul
 	config := state.Get("config").(Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	timeoutPoint := time.Now().Add(120 * time.Second)
-	keyPairName := config.Comm.SSHKeyPair
+	keyPairName := config.Comm.SSHKeyPairName
 	if keyPairName == "" {
 		return multistep.ActionContinue
 	}
@@ -55,7 +55,7 @@ func (s *stepAttachKeyPair) Cleanup(state multistep.StateBag) {
 	config := state.Get("config").(Config)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
-	keyPairName := config.Comm.SSHKeyPair
+	keyPairName := config.Comm.SSHKeyPairName
 	if keyPairName == "" {
 		return
 	}
