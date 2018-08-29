@@ -25,6 +25,9 @@ type ListImagesRequest struct {
 	// Example: `7.2`
 	OperatingSystemVersion *string `mandatory:"false" contributesTo:"query" name:"operatingSystemVersion"`
 
+	// Shape name.
+	Shape *string `mandatory:"false" contributesTo:"query" name:"shape"`
+
 	// The maximum number of items to return in a paginated "List" call.
 	// Example: `500`
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
@@ -47,10 +50,28 @@ type ListImagesRequest struct {
 
 	// A filter to only return resources that match the given lifecycle state.  The state value is case-insensitive.
 	LifecycleState ImageLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListImagesRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListImagesRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListImagesRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListImagesResponse wrapper for the ListImages operation
@@ -59,7 +80,7 @@ type ListImagesResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []Image instance
+	// A list of []Image instances
 	Items []Image `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -74,6 +95,11 @@ type ListImagesResponse struct {
 
 func (response ListImagesResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListImagesResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
 
 // ListImagesSortByEnum Enum with underlying type: string

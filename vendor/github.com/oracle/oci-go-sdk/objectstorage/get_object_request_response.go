@@ -15,11 +15,11 @@ type GetObjectRequest struct {
 	// The top-level namespace used for the request.
 	NamespaceName *string `mandatory:"true" contributesTo:"path" name:"namespaceName"`
 
-	// The name of the bucket.
+	// The name of the bucket. Avoid entering confidential information.
 	// Example: `my-new-bucket1`
 	BucketName *string `mandatory:"true" contributesTo:"path" name:"bucketName"`
 
-	// The name of the object.
+	// The name of the object. Avoid entering confidential information.
 	// Example: `test/object1.log`
 	ObjectName *string `mandatory:"true" contributesTo:"path" name:"objectName"`
 
@@ -28,20 +28,33 @@ type GetObjectRequest struct {
 	IfMatch *string `mandatory:"false" contributesTo:"header" name:"if-match"`
 
 	// The entity tag to avoid matching. The only valid value is ‘*’, which indicates that the request should fail if the object already exists.
-	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag
-	// of the target part.
+	// For creating and committing a multipart upload, this is the entity tag of the target object. For uploading a part, this is the entity tag of the target part.
 	IfNoneMatch *string `mandatory:"false" contributesTo:"header" name:"if-none-match"`
 
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
 
 	// Optional byte range to fetch, as described in RFC 7233 (https://tools.ietf.org/rfc/rfc7233), section 2.1.
-	// Note, only a single range of bytes is supported.
+	// Note that only a single range of bytes is supported.
 	Range *string `mandatory:"false" contributesTo:"header" name:"range"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request GetObjectRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request GetObjectRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request GetObjectRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // GetObjectResponse wrapper for the GetObject operation
@@ -57,7 +70,7 @@ type GetObjectResponse struct {
 	OpcClientRequestId *string `presentIn:"header" name:"opc-client-request-id"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-	// request, please provide this request ID.
+	// request, provide this request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 
 	// The entity tag for the object.
@@ -95,6 +108,12 @@ type GetObjectResponse struct {
 	// The object modification time, as described in RFC 2616 (https://tools.ietf.org/rfc/rfc2616), section 14.29.
 	LastModified *common.SDKTime `presentIn:"header" name:"last-modified"`
 
+	// The current state of the object.
+	ArchivalState GetObjectArchivalStateEnum `presentIn:"header" name:"archival-state"`
+
+	// Time that the object is returned to the archived state. This field is only present for restored objects.
+	TimeOfArchival *common.SDKTime `presentIn:"header" name:"time-of-archival"`
+
 	// Flag to indicate whether or not the object was modified.  If this is true,
 	// the getter for the object itself will return null.  Callers should check this
 	// if they specified one of the request params that might result in a conditional
@@ -104,4 +123,36 @@ type GetObjectResponse struct {
 
 func (response GetObjectResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response GetObjectResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
+}
+
+// GetObjectArchivalStateEnum Enum with underlying type: string
+type GetObjectArchivalStateEnum string
+
+// Set of constants representing the allowable values for GetObjectArchivalState
+const (
+	GetObjectArchivalStateAvailable GetObjectArchivalStateEnum = "AVAILABLE"
+	GetObjectArchivalStateArchived  GetObjectArchivalStateEnum = "ARCHIVED"
+	GetObjectArchivalStateRestoring GetObjectArchivalStateEnum = "RESTORING"
+	GetObjectArchivalStateRestored  GetObjectArchivalStateEnum = "RESTORED"
+)
+
+var mappingGetObjectArchivalState = map[string]GetObjectArchivalStateEnum{
+	"AVAILABLE": GetObjectArchivalStateAvailable,
+	"ARCHIVED":  GetObjectArchivalStateArchived,
+	"RESTORING": GetObjectArchivalStateRestoring,
+	"RESTORED":  GetObjectArchivalStateRestored,
+}
+
+// GetGetObjectArchivalStateEnumValues Enumerates the set of values for GetObjectArchivalState
+func GetGetObjectArchivalStateEnumValues() []GetObjectArchivalStateEnum {
+	values := make([]GetObjectArchivalStateEnum, 0)
+	for _, v := range mappingGetObjectArchivalState {
+		values = append(values, v)
+	}
+	return values
 }

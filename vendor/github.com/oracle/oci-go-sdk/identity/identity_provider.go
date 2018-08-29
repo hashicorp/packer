@@ -59,6 +59,16 @@ type IdentityProvider interface {
 
 	// The detailed status of INACTIVE lifecycleState.
 	GetInactiveStatus() *int
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	GetFreeformTags() map[string]string
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	GetDefinedTags() map[string]map[string]interface{}
 }
 
 type identityprovider struct {
@@ -71,6 +81,8 @@ type identityprovider struct {
 	TimeCreated    *common.SDKTime                    `mandatory:"true" json:"timeCreated"`
 	LifecycleState IdentityProviderLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 	InactiveStatus *int                               `mandatory:"false" json:"inactiveStatus"`
+	FreeformTags   map[string]string                  `mandatory:"false" json:"freeformTags"`
+	DefinedTags    map[string]map[string]interface{}  `mandatory:"false" json:"definedTags"`
 	Protocol       string                             `json:"protocol"`
 }
 
@@ -93,6 +105,8 @@ func (m *identityprovider) UnmarshalJSON(data []byte) error {
 	m.TimeCreated = s.Model.TimeCreated
 	m.LifecycleState = s.Model.LifecycleState
 	m.InactiveStatus = s.Model.InactiveStatus
+	m.FreeformTags = s.Model.FreeformTags
+	m.DefinedTags = s.Model.DefinedTags
 	m.Protocol = s.Model.Protocol
 
 	return err
@@ -149,6 +163,16 @@ func (m identityprovider) GetLifecycleState() IdentityProviderLifecycleStateEnum
 //GetInactiveStatus returns InactiveStatus
 func (m identityprovider) GetInactiveStatus() *int {
 	return m.InactiveStatus
+}
+
+//GetFreeformTags returns FreeformTags
+func (m identityprovider) GetFreeformTags() map[string]string {
+	return m.FreeformTags
+}
+
+//GetDefinedTags returns DefinedTags
+func (m identityprovider) GetDefinedTags() map[string]map[string]interface{} {
+	return m.DefinedTags
 }
 
 func (m identityprovider) String() string {

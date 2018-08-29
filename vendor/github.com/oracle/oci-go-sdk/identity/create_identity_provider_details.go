@@ -33,6 +33,16 @@ type CreateIdentityProviderDetails interface {
 	// Active Directory Federation Services (ADFS).
 	// Example: `IDCS`
 	GetProductType() CreateIdentityProviderDetailsProductTypeEnum
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	GetFreeformTags() map[string]string
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	GetDefinedTags() map[string]map[string]interface{}
 }
 
 type createidentityproviderdetails struct {
@@ -41,6 +51,8 @@ type createidentityproviderdetails struct {
 	Name          *string                                      `mandatory:"true" json:"name"`
 	Description   *string                                      `mandatory:"true" json:"description"`
 	ProductType   CreateIdentityProviderDetailsProductTypeEnum `mandatory:"true" json:"productType"`
+	FreeformTags  map[string]string                            `mandatory:"false" json:"freeformTags"`
+	DefinedTags   map[string]map[string]interface{}            `mandatory:"false" json:"definedTags"`
 	Protocol      string                                       `json:"protocol"`
 }
 
@@ -59,6 +71,8 @@ func (m *createidentityproviderdetails) UnmarshalJSON(data []byte) error {
 	m.Name = s.Model.Name
 	m.Description = s.Model.Description
 	m.ProductType = s.Model.ProductType
+	m.FreeformTags = s.Model.FreeformTags
+	m.DefinedTags = s.Model.DefinedTags
 	m.Protocol = s.Model.Protocol
 
 	return err
@@ -95,6 +109,16 @@ func (m createidentityproviderdetails) GetDescription() *string {
 //GetProductType returns ProductType
 func (m createidentityproviderdetails) GetProductType() CreateIdentityProviderDetailsProductTypeEnum {
 	return m.ProductType
+}
+
+//GetFreeformTags returns FreeformTags
+func (m createidentityproviderdetails) GetFreeformTags() map[string]string {
+	return m.FreeformTags
+}
+
+//GetDefinedTags returns DefinedTags
+func (m createidentityproviderdetails) GetDefinedTags() map[string]map[string]interface{} {
+	return m.DefinedTags
 }
 
 func (m createidentityproviderdetails) String() string {
