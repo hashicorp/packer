@@ -37,12 +37,36 @@ type VolumeBackup struct {
 	// of the volume data was taken. Format defined by RFC3339.
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
+	// The type of a volume backup.
+	Type VolumeBackupTypeEnum `mandatory:"true" json:"type"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// The date and time the volume backup will expire and be automatically deleted.
+	// Format defined by RFC3339. This parameter will always be present for backups that
+	// were created automatically by a scheduled-backup policy. For manually created backups,
+	// it will be absent, signifying that there is no expiration time and the backup will
+	// last forever until manually deleted.
+	ExpirationTime *common.SDKTime `mandatory:"false" json:"expirationTime"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
 	// The size of the volume, in GBs.
 	SizeInGBs *int `mandatory:"false" json:"sizeInGBs"`
 
 	// The size of the volume in MBs. The value must be a multiple of 1024.
 	// This field is deprecated. Please use sizeInGBs.
 	SizeInMBs *int `mandatory:"false" json:"sizeInMBs"`
+
+	// Specifies whether the backup was created manually, or via scheduled backup policy.
+	SourceType VolumeBackupSourceTypeEnum `mandatory:"false" json:"sourceType,omitempty"`
 
 	// The date and time the request to create the volume backup was received. Format defined by RFC3339.
 	TimeRequestReceived *common.SDKTime `mandatory:"false" json:"timeRequestReceived"`
@@ -90,6 +114,52 @@ var mappingVolumeBackupLifecycleState = map[string]VolumeBackupLifecycleStateEnu
 func GetVolumeBackupLifecycleStateEnumValues() []VolumeBackupLifecycleStateEnum {
 	values := make([]VolumeBackupLifecycleStateEnum, 0)
 	for _, v := range mappingVolumeBackupLifecycleState {
+		values = append(values, v)
+	}
+	return values
+}
+
+// VolumeBackupSourceTypeEnum Enum with underlying type: string
+type VolumeBackupSourceTypeEnum string
+
+// Set of constants representing the allowable values for VolumeBackupSourceType
+const (
+	VolumeBackupSourceTypeManual    VolumeBackupSourceTypeEnum = "MANUAL"
+	VolumeBackupSourceTypeScheduled VolumeBackupSourceTypeEnum = "SCHEDULED"
+)
+
+var mappingVolumeBackupSourceType = map[string]VolumeBackupSourceTypeEnum{
+	"MANUAL":    VolumeBackupSourceTypeManual,
+	"SCHEDULED": VolumeBackupSourceTypeScheduled,
+}
+
+// GetVolumeBackupSourceTypeEnumValues Enumerates the set of values for VolumeBackupSourceType
+func GetVolumeBackupSourceTypeEnumValues() []VolumeBackupSourceTypeEnum {
+	values := make([]VolumeBackupSourceTypeEnum, 0)
+	for _, v := range mappingVolumeBackupSourceType {
+		values = append(values, v)
+	}
+	return values
+}
+
+// VolumeBackupTypeEnum Enum with underlying type: string
+type VolumeBackupTypeEnum string
+
+// Set of constants representing the allowable values for VolumeBackupType
+const (
+	VolumeBackupTypeFull        VolumeBackupTypeEnum = "FULL"
+	VolumeBackupTypeIncremental VolumeBackupTypeEnum = "INCREMENTAL"
+)
+
+var mappingVolumeBackupType = map[string]VolumeBackupTypeEnum{
+	"FULL":        VolumeBackupTypeFull,
+	"INCREMENTAL": VolumeBackupTypeIncremental,
+}
+
+// GetVolumeBackupTypeEnumValues Enumerates the set of values for VolumeBackupType
+func GetVolumeBackupTypeEnumValues() []VolumeBackupTypeEnum {
+	values := make([]VolumeBackupTypeEnum, 0)
+	for _, v := range mappingVolumeBackupType {
 		values = append(values, v)
 	}
 	return values

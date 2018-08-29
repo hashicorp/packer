@@ -19,10 +19,28 @@ type ListDbHomePatchHistoryEntriesRequest struct {
 
 	// The pagination token to continue listing from.
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListDbHomePatchHistoryEntriesRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListDbHomePatchHistoryEntriesRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListDbHomePatchHistoryEntriesRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListDbHomePatchHistoryEntriesResponse wrapper for the ListDbHomePatchHistoryEntries operation
@@ -31,7 +49,7 @@ type ListDbHomePatchHistoryEntriesResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []PatchHistoryEntrySummary instance
+	// A list of []PatchHistoryEntrySummary instances
 	Items []PatchHistoryEntrySummary `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -47,4 +65,9 @@ type ListDbHomePatchHistoryEntriesResponse struct {
 
 func (response ListDbHomePatchHistoryEntriesResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListDbHomePatchHistoryEntriesResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

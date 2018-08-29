@@ -20,10 +20,10 @@ type HealthCheckResult struct {
 
 	// The IP address of the health check status report provider. This identifier helps you differentiate same-subnet
 	// (private) load balancers that report health check status.
-	// Example: `10.2.0.1`
+	// Example: `10.0.0.7`
 	SourceIpAddress *string `mandatory:"true" json:"sourceIpAddress"`
 
-	// The OCID of the subnet hosting the load balancer that reported this health check status.
+	// The OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm) of the subnet hosting the load balancer that reported this health check status.
 	SubnetId *string `mandatory:"true" json:"subnetId"`
 
 	// The date and time the data was retrieved, in the format defined by RFC3339.

@@ -16,6 +16,7 @@ import (
 type ListenerDetails struct {
 
 	// The name of the associated backend set.
+	// Example: `example_backend_set`
 	DefaultBackendSetName *string `mandatory:"true" json:"defaultBackendSetName"`
 
 	// The communication port for the listener.
@@ -27,6 +28,16 @@ type ListenerDetails struct {
 	// operation.
 	// Example: `HTTP`
 	Protocol *string `mandatory:"true" json:"protocol"`
+
+	ConnectionConfiguration *ConnectionConfiguration `mandatory:"false" json:"connectionConfiguration"`
+
+	// An array of hostname resource names.
+	HostnameNames []string `mandatory:"false" json:"hostnameNames"`
+
+	// The name of the set of path-based routing rules, PathRouteSet,
+	// applied to this listener's traffic.
+	// Example: `example_path_route_set`
+	PathRouteSetName *string `mandatory:"false" json:"pathRouteSetName"`
 
 	SslConfiguration *SslConfigurationDetails `mandatory:"false" json:"sslConfiguration"`
 }

@@ -1,6 +1,6 @@
 DOC_SERVER_URL=https:\/\/docs.us-phoenix-1.oraclecloud.com
 
-GEN_TARGETS = identity core objectstorage loadbalancer database audit
+GEN_TARGETS = identity core objectstorage loadbalancer database audit dns filestorage email containerengine
 NON_GEN_TARGETS = common common/auth
 TARGETS = $(NON_GEN_TARGETS) $(GEN_TARGETS)
 
@@ -44,6 +44,13 @@ $(TARGETS_TEST): test-%:%
 $(TARGETS_CLEAN): clean-%:%
 	@echo "cleaning $<"
 	@-rm -rf $<
+
+# clean all generated code under GEN_TARGETS folder
+clean-generate:
+	for target in ${GEN_TARGETS}; do \
+		echo "cleaning $$target"; \
+		rm -rf $$target; \
+	done
 
 pre-doc:
 	@echo "Rendering doc server to ${DOC_SERVER_URL}"

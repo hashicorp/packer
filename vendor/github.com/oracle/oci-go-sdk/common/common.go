@@ -18,6 +18,8 @@ const (
 	RegionIAD Region = "us-ashburn-1"
 	//RegionFRA region FRA
 	RegionFRA Region = "eu-frankfurt-1"
+	//RegionLHR region LHR
+	RegionLHR Region = "uk-london-1"
 )
 
 //StringToRegion convert a string to Region type
@@ -31,6 +33,8 @@ func StringToRegion(stringRegion string) (r Region) {
 		r = RegionIAD
 	case "fra", "eu-frankfurt-1":
 		r = RegionFRA
+	case "lhr", "uk-london-1":
+		r = RegionLHR
 	default:
 		r = Region(stringRegion)
 		Debugf("region named: %s, is not recognized", stringRegion)
