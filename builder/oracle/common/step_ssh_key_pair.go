@@ -75,8 +75,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
-	state.Put("publicKey", pubSSHFormat)
+	s.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
