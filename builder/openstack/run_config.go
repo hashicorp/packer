@@ -13,9 +13,7 @@ import (
 // RunConfig contains configuration for running an instance from a source
 // image and details on how to access that launched image.
 type RunConfig struct {
-	Comm         communicator.Config `mapstructure:",squash"`
-	SSHInterface string              `mapstructure:"ssh_interface"`
-	SSHIPVersion string              `mapstructure:"ssh_ip_version"`
+	Comm communicator.Config `mapstructure:",squash"`
 
 	SourceImage        string            `mapstructure:"source_image"`
 	SourceImageName    string            `mapstructure:"source_image_name"`
@@ -131,7 +129,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("A flavor must be specified"))
 	}
 
-	if c.SSHIPVersion != "" && c.SSHIPVersion != "4" && c.SSHIPVersion != "6" {
+	if c.Comm.SSHIPVersion != "" && c.Comm.SSHIPVersion != "4" && c.Comm.SSHIPVersion != "6" {
 		errs = append(errs, errors.New("SSH IP version must be either 4 or 6"))
 	}
 

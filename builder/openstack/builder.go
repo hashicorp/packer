@@ -127,8 +127,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.RunConfig.Comm,
 			Host: CommHost(
 				computeClient,
-				b.config.SSHInterface,
-				b.config.SSHIPVersion),
+				b.config.Comm.SSHInterface,
+				b.config.Comm.SSHIPVersion),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
