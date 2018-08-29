@@ -138,6 +138,13 @@ launched instance.
    init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Example:
    `"user_data_file": "./boot_config/myscript.sh"`
 
+ - `tags` (map of strings) - Add one or more freeform tags to the resulting custom image. See [the Oracle docs](https://docs.cloud.oracle.com/iaas/Content/Identity/Concepts/taggingoverview.htm) for more details. Example:
+
+``` {.yaml}
+"tags":
+  "tag1": "value1"
+  "tag2": "value2"
+```
 
 ## Basic Example
 
