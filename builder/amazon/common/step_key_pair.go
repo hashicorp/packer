@@ -45,13 +45,12 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 
 	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
 		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
-		state.Put("keyPair", s.Comm.SSHKeyPairName)
 		return multistep.ActionContinue
 	}
 
 	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		state.Put("keyPair", "")
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 

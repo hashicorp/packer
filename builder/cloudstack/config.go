@@ -34,7 +34,6 @@ type Config struct {
 	Expunge                bool     `mapstructure:"expunge"`
 	Hypervisor             string   `mapstructure:"hypervisor"`
 	InstanceName           string   `mapstructure:"instance_name"`
-	Keypair                string   `mapstructure:"keypair"`
 	Network                string   `mapstructure:"network"`
 	Project                string   `mapstructure:"project"`
 	PublicIPAddress        string   `mapstructure:"public_ip_address"`
@@ -126,7 +125,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	// If we are not given an explicit keypair, ssh_password or ssh_private_key_file,
 	// then create a temporary one, but only if the temporary_keypair_name has not
 	// been provided.
-	if c.Keypair == "" && c.Comm.SSHTemporaryKeyPairName == "" &&
+	if c.Comm.SSHKeyPairName == "" && c.Comm.SSHTemporaryKeyPairName == "" &&
 		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" {
 		c.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}

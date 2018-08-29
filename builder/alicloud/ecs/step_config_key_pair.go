@@ -35,7 +35,6 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 			return multistep.ActionHalt
 		}
 
-		s.Comm.SSHKeyPairName = s.Comm.SSHKeyPairName
 		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
@@ -48,13 +47,12 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 
 	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
 		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
-		state.Put("keyPair", s.Comm.SSHKeyPairName)
 		return multistep.ActionContinue
 	}
 
 	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		state.Put("keyPair", "")
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
