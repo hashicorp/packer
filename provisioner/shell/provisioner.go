@@ -45,6 +45,10 @@ type Config struct {
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
 
+	// Write the Vars to a file and source them from there rather than declaring
+	// inline
+	UseEnvVarFile bool `mapstructure:"use_env_var_file"`
+
 	// The remote folder where the local shell script will be uploaded to.
 	// This should be set to a pre-existing directory, it defaults to /tmp
 	RemoteFolder string `mapstructure:"remote_folder"`
@@ -75,6 +79,8 @@ type Config struct {
 
 	startRetryTimeout time.Duration
 	ctx               interpolate.Context
+	// name of the tmp environment variable file, if UseEnvVarFile is true
+	envVarFile string
 }
 
 type Provisioner struct {
@@ -82,8 +88,9 @@ type Provisioner struct {
 }
 
 type ExecuteCommandTemplate struct {
-	Vars string
-	Path string
+	Vars       string
+	EnvVarFile string
+	Path       string
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -102,6 +109,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ExecuteCommand == "" {
 		p.config.ExecuteCommand = "chmod +x {{.Path}}; {{.Vars}} {{.Path}}"
+		if p.config.UseEnvVarFile == true {
+			p.config.ExecuteCommand = "chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}"
+		}
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -218,6 +228,57 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		tf.Close()
 	}
 
+	if p.config.UseEnvVarFile == true {
+		tf, err := ioutil.TempFile("", "packer-shell-vars")
+		if err != nil {
+			return fmt.Errorf("Error preparing shell script: %s", err)
+		}
+		defer os.Remove(tf.Name())
+
+		// Write our contents to it
+		writer := bufio.NewWriter(tf)
+		if _, err := writer.WriteString(p.createEnvVarFileContent()); err != nil {
+			return fmt.Errorf("Error preparing shell script: %s", err)
+		}
+
+		if err := writer.Flush(); err != nil {
+			return fmt.Errorf("Error preparing shell script: %s", err)
+		}
+
+		p.config.envVarFile = tf.Name()
+		defer os.Remove(p.config.envVarFile)
+
+		// upload the var file
+		var cmd *packer.RemoteCmd
+		err = p.retryable(func() error {
+			if _, err := tf.Seek(0, 0); err != nil {
+				return err
+			}
+
+			var r io.Reader = tf
+			if !p.config.Binary {
+				r = &UnixReader{Reader: r}
+			}
+			remoteVFName := fmt.Sprintf("%s/%s", p.config.RemoteFolder, "varfile")
+			if err := comm.Upload(remoteVFName, r, nil); err != nil {
+				return fmt.Errorf("Error uploading envVarFile: %s", err)
+			}
+			tf.Close()
+
+			cmd = &packer.RemoteCmd{
+				Command: fmt.Sprintf("chmod 0600 %s", remoteVFName),
+			}
+			if err := comm.Start(cmd); err != nil {
+				return fmt.Errorf(
+					"Error chmodding script file to 0755 in remote "+
+						"machine: %s", err)
+			}
+			cmd.Wait()
+			p.config.envVarFile = remoteVFName
+			return nil
+		})
+	}
+
 	// Create environment variables to set before executing the command
 	flattenedEnvVars := p.createFlattenedEnvVars()
 
@@ -233,8 +294,9 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 
 		// Compile the command
 		p.config.ctx.Data = &ExecuteCommandTemplate{
-			Vars: flattenedEnvVars,
-			Path: p.config.RemotePath,
+			Vars:       flattenedEnvVars,
+			EnvVarFile: p.config.envVarFile,
+			Path:       p.config.RemotePath,
 		}
 		command, err := interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 		if err != nil {
@@ -360,8 +422,7 @@ func (p *Provisioner) retryable(f func() error) error {
 	}
 }
 
-func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
-	flattened = ""
+func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {
 	envVars := make(map[string]string)
 
 	// Always available Packer provided env vars
@@ -386,6 +447,24 @@ func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+
+	return keys, envVars
+}
+
+func (p *Provisioner) createEnvVarFileContent() string {
+	keys, envVars := p.escapeEnvVars()
+
+	flattened := ""
+	// Re-assemble vars surrounding value with single quotes and flatten
+	for _, key := range keys {
+		flattened += fmt.Sprintf("export %s='%s'\n", key, envVars[key])
+	}
+
+	return flattened
+}
+
+func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
+	keys, envVars := p.escapeEnvVars()
 
 	// Re-assemble vars surrounding value with single quotes and flatten
 	for _, key := range keys {
