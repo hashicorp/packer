@@ -32,6 +32,8 @@ type Config struct {
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
 	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
 	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
+	SSHInterface              string        `mapstructure:"ssh_interface"`
+	SSHIPVersion              string        `mapstructure:"ssh_ip_version"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
 	SSHAgentAuth              bool          `mapstructure:"ssh_agent_auth"`
