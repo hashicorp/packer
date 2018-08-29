@@ -1100,7 +1100,6 @@
 			"path": "github.com/hashicorp/vault/helper/strutil",
 			"revision": "b9adaf9c695966639d4c358efe2d132f5ff232ab",
 			"revisionTime": "2018-07-24T21:50:49Z"
->>>>>>> add template function allowing user to read keys from vault
 		},
 		{
 			"checksumSHA1": "Gm2k+46HxKqsjI8lCWBp/jRaPrM=",
