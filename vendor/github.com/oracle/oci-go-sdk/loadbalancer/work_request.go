@@ -43,6 +43,7 @@ type WorkRequest struct {
 	TimeAccepted *common.SDKTime `mandatory:"true" json:"timeAccepted"`
 
 	// The type of action the work request represents.
+	// Example: `CreateListener`
 	Type *string `mandatory:"true" json:"type"`
 
 	// The date and time the work request was completed, in the format defined by RFC3339.

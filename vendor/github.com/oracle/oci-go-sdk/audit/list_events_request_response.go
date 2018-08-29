@@ -30,10 +30,24 @@ type ListEventsRequest struct {
 	// Unique Oracle-assigned identifier for the request.
 	// If you need to contact Oracle about a particular request, please provide the request ID.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListEventsRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListEventsRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListEventsRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListEventsResponse wrapper for the ListEvents operation
@@ -42,7 +56,7 @@ type ListEventsResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []AuditEvent instance
+	// A list of []AuditEvent instances
 	Items []AuditEvent `presentIn:"body"`
 
 	// For pagination of a list of audit events. When this header appears in the response,
@@ -57,4 +71,9 @@ type ListEventsResponse struct {
 
 func (response ListEventsResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListEventsResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

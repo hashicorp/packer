@@ -26,7 +26,7 @@ type LoadBalancer struct {
 	CompartmentId *string `mandatory:"true" json:"compartmentId"`
 
 	// A user-friendly name. It does not have to be unique, and it is changeable.
-	// Example: `My load balancer`
+	// Example: `example_load_balancer`
 	DisplayName *string `mandatory:"true" json:"displayName"`
 
 	// The OCID (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm) of the load balancer.
@@ -49,6 +49,8 @@ type LoadBalancer struct {
 
 	Certificates map[string]Certificate `mandatory:"false" json:"certificates"`
 
+	Hostnames map[string]Hostname `mandatory:"false" json:"hostnames"`
+
 	// An array of IP addresses.
 	IpAddresses []IpAddress `mandatory:"false" json:"ipAddresses"`
 
@@ -62,9 +64,12 @@ type LoadBalancer struct {
 	// requires two subnets, each in a different Availability Domain. One subnet hosts the primary load balancer and the other
 	// hosts the secondary (standby) load balancer. A public load balancer is accessible from the internet, depending on your
 	// VCN's security list rules (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Concepts/securitylists.htm).
+	// Example: `true`
 	IsPrivate *bool `mandatory:"false" json:"isPrivate"`
 
 	Listeners map[string]Listener `mandatory:"false" json:"listeners"`
+
+	PathRouteSets map[string]PathRouteSet `mandatory:"false" json:"pathRouteSets"`
 
 	// An array of subnet OCIDs (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/identifiers.htm).
 	SubnetIds []string `mandatory:"false" json:"subnetIds"`

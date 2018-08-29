@@ -17,7 +17,7 @@ type UpdateLoadBalancerDetails struct {
 
 	// The user-friendly display name for the load balancer. It does not have to be unique, and it is changeable.
 	// Avoid entering confidential information.
-	// Example: `My load balancer`
+	// Example: `example_load_balancer`
 	DisplayName *string `mandatory:"true" json:"displayName"`
 }
 

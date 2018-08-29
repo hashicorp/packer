@@ -6,6 +6,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,16 +15,55 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
 const (
 	// DefaultHostURLTemplate The default url template for service hosts
-	DefaultHostURLTemplate   = "%s.%s.oraclecloud.com"
+	DefaultHostURLTemplate = "%s.%s.oraclecloud.com"
+
+	// requestHeaderAccept The key for passing a header to indicate Accept
+	requestHeaderAccept = "Accept"
+
+	// requestHeaderAuthorization The key for passing a header to indicate Authorization
+	requestHeaderAuthorization = "Authorization"
+
+	// requestHeaderContentLength The key for passing a header to indicate Content Length
+	requestHeaderContentLength = "Content-Length"
+
+	// requestHeaderContentType The key for passing a header to indicate Content Type
+	requestHeaderContentType = "Content-Type"
+
+	// requestHeaderDate The key for passing a header to indicate Date
+	requestHeaderDate = "Date"
+
+	// requestHeaderIfMatch The key for passing a header to indicate If Match
+	requestHeaderIfMatch = "if-match"
+
+	// requestHeaderOpcClientInfo The key for passing a header to indicate OPC Client Info
+	requestHeaderOpcClientInfo = "opc-client-info"
+
+	// requestHeaderOpcRetryToken The key for passing a header to indicate OPC Retry Token
+	requestHeaderOpcRetryToken = "opc-retry-token"
+
+	// requestHeaderOpcRequestID The key for unique Oracle-assigned identifier for the request.
+	requestHeaderOpcRequestID = "opc-request-id"
+
+	// requestHeaderOpcClientRequestID The key for unique Oracle-assigned identifier for the request.
+	requestHeaderOpcClientRequestID = "opc-client-request-id"
+
+	// requestHeaderUserAgent The key for passing a header to indicate User Agent
+	requestHeaderUserAgent = "User-Agent"
+
+	// requestHeaderXContentSHA256 The key for passing a header to indicate SHA256 hash
+	requestHeaderXContentSHA256 = "X-Content-SHA256"
+
+	// private constants
 	defaultScheme            = "https"
 	defaultSDKMarker         = "Oracle-GoSDK"
 	defaultUserAgentTemplate = "%s/%s (%s/%s; go/%s)" //SDK/SDKVersion (OS/OSVersion; Lang/LangVersion)
-	defaultTimeout           = time.Second * 30
+	defaultTimeout           = 60 * time.Second
 	defaultConfigFileName    = "config"
 	defaultConfigDirName     = ".oci"
 	secondaryConfigDirName   = ".oraclebmc"
@@ -65,7 +105,15 @@ func defaultUserAgent() string {
 	return userAgent
 }
 
+var clientCounter int64
+
+func getNextSeed() int64 {
+	newCounterValue := atomic.AddInt64(&clientCounter, 1)
+	return newCounterValue + time.Now().UnixNano()
+}
+
 func newBaseClient(signer HTTPRequestSigner, dispatcher HTTPRequestDispatcher) BaseClient {
+	rand.Seed(getNextSeed())
 	return BaseClient{
 		UserAgent:   defaultUserAgent(),
 		Interceptor: nil,
@@ -146,7 +194,12 @@ func (client *BaseClient) prepareRequest(request *http.Request) (err error) {
 	if request.Header == nil {
 		request.Header = http.Header{}
 	}
-	request.Header.Set("User-Agent", client.UserAgent)
+	request.Header.Set(requestHeaderUserAgent, client.UserAgent)
+	request.Header.Set(requestHeaderDate, time.Now().UTC().Format(http.TimeFormat))
+
+	if request.Header.Get(requestHeaderOpcRetryToken) == "" {
+		request.Header.Set(requestHeaderOpcRetryToken, generateRetryToken())
+	}
 
 	if !strings.Contains(client.Host, "http") &&
 		!strings.Contains(client.Host, "https") {
@@ -160,7 +213,9 @@ func (client *BaseClient) prepareRequest(request *http.Request) (err error) {
 	request.URL.Host = clientURL.Host
 	request.URL.Scheme = clientURL.Scheme
 	currentPath := request.URL.Path
-	request.URL.Path = path.Clean(fmt.Sprintf("/%s/%s", client.BasePath, currentPath))
+	if !strings.Contains(currentPath, fmt.Sprintf("/%s", client.BasePath)) {
+		request.URL.Path = path.Clean(fmt.Sprintf("/%s/%s", client.BasePath, currentPath))
+	}
 	return
 }
 
@@ -177,10 +232,32 @@ func checkForSuccessfulResponse(res *http.Response) error {
 		return newServiceFailureFromResponse(res)
 	}
 	return nil
-
 }
 
-//Call executes the underlying http requrest with the given context
+// OCIRequest is any request made to an OCI service.
+type OCIRequest interface {
+	// HTTPRequest assembles an HTTP request.
+	HTTPRequest(method, path string) (http.Request, error)
+}
+
+// RequestMetadata is metadata about an OCIRequest. This structure represents the behavior exhibited by the SDK when
+// issuing (or reissuing) a request.
+type RequestMetadata struct {
+	// RetryPolicy is the policy for reissuing the request. If no retry policy is set on the request,
+	// then the request will be issued exactly once.
+	RetryPolicy *RetryPolicy
+}
+
+// OCIResponse is the response from issuing a request to an OCI service.
+type OCIResponse interface {
+	// HTTPResponse returns the raw HTTP response.
+	HTTPResponse() *http.Response
+}
+
+// OCIOperation is the generalization of a request-response cycle undergone by an OCI service.
+type OCIOperation func(context.Context, OCIRequest) (OCIResponse, error)
+
+// Call executes the http request with the given context
 func (client BaseClient) Call(ctx context.Context, request *http.Request) (response *http.Response, err error) {
 	Debugln("Atempting to call downstream service")
 	request = request.WithContext(ctx)

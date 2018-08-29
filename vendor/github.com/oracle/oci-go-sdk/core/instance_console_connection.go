@@ -24,8 +24,19 @@ type InstanceConsoleConnection struct {
 	// The SSH connection string for the console connection.
 	ConnectionString *string `mandatory:"false" json:"connectionString"`
 
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
 	// The SSH public key fingerprint for the console connection.
 	Fingerprint *string `mandatory:"false" json:"fingerprint"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// The OCID of the console connection.
 	Id *string `mandatory:"false" json:"id"`
@@ -35,6 +46,10 @@ type InstanceConsoleConnection struct {
 
 	// The current state of the console connection.
 	LifecycleState InstanceConsoleConnectionLifecycleStateEnum `mandatory:"false" json:"lifecycleState,omitempty"`
+
+	// The SSH connection string for the SSH tunnel used to
+	// connect to the console connection over VNC.
+	VncConnectionString *string `mandatory:"false" json:"vncConnectionString"`
 }
 
 func (m InstanceConsoleConnection) String() string {

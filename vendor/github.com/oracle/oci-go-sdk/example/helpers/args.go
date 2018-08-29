@@ -9,8 +9,6 @@ import (
 	"os"
 
 	"github.com/oracle/oci-go-sdk/common"
-
-	"github.com/subosito/gotenv"
 )
 
 var (
@@ -19,12 +17,9 @@ var (
 	rootCompartmentID  string
 )
 
-// ParseAgrs parse shared variables from environment variables, other samples should define their own
+// ParseEnvironmentVariables parse shared variables from environment variables, other samples should define their own
 // viariables and call this function to initialize shared variables
-func ParseAgrs() {
-	err := gotenv.Load(".env.sample")
-	LogIfError(err)
-
+func ParseEnvironmentVariables() {
 	availabilityDomain = os.Getenv("OCI_AVAILABILITY_DOMAIN")
 	compartmentID = os.Getenv("OCI_COMPARTMENT_ID")
 	rootCompartmentID = os.Getenv("OCI_ROOT_COMPARTMENT_ID")
