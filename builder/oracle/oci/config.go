@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
@@ -61,6 +62,9 @@ type Config struct {
 
 	// Networking
 	SubnetID string `mapstructure:"subnet_ocid"`
+
+	// Tagging
+	Tags map[string]string `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -178,6 +182,30 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	if c.BaseImageID == "" {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("'base_image_ocid' must be specified"))
+	}
+
+	// Validate tag lengths. TODO (hlowndes) maximum number of tags allowed.
+	if c.Tags != nil {
+		for k, v := range c.Tags {
+			k = strings.TrimSpace(k)
+			v = strings.TrimSpace(v)
+			if len(k) > 100 {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Tag key length too long. Maximum 100 but found %d. Key: %s", len(k), k))
+			}
+			if len(k) == 0 {
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("Tag key empty in config"))
+			}
+			if len(v) > 100 {
+				errs = packer.MultiErrorAppend(
+					errs, fmt.Errorf("Tag value length too long. Maximum 100 but found %d. Key: %s", len(v), k))
+			}
+			if len(v) == 0 {
+				errs = packer.MultiErrorAppend(
+					errs, errors.New("Tag value empty in config"))
+			}
+		}
 	}
 
 	if c.ImageName == "" {
