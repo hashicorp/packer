@@ -46,10 +46,9 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	p.SetName(config.InstanceName)
 	p.SetDisplayname("Created by Packer")
 
-	if keypair, ok := state.GetOk("keypair"); ok {
-		kp := keypair.(string)
-		ui.Message(fmt.Sprintf("Using keypair: %s", kp))
-		p.SetKeypair(kp)
+	if len(config.Comm.SSHKeyPairName) != 0 {
+		ui.Message(fmt.Sprintf("Using keypair: %s", config.Comm.SSHKeyPairName))
+		p.SetKeypair(config.Comm.SSHKeyPairName)
 	}
 
 	if securitygroups, ok := state.GetOk("security_groups"); ok {

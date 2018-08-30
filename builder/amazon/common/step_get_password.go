@@ -106,7 +106,7 @@ func (s *StepGetPassword) Cleanup(multistep.StateBag) {
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
-	privateKey := state.Get("privateKey").(string)
+	privateKey := s.Comm.SSHPrivateKey
 
 	for {
 		select {

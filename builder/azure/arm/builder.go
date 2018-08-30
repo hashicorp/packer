@@ -229,7 +229,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ui.Message(fmt.Sprintf("temp admin user: '%s'", b.config.UserName))
 		ui.Message(fmt.Sprintf("temp admin password: '%s'", b.config.Password))
 
-		if b.config.sshPrivateKey != "" {
+		if len(b.config.Comm.SSHPrivateKey) != 0 {
 			debugKeyPath := fmt.Sprintf("%s-%s.pem", b.config.PackerBuildName, b.config.tmpComputeName)
 			ui.Message(fmt.Sprintf("temp ssh key: %s", debugKeyPath))
 
@@ -282,7 +282,7 @@ func (b *Builder) writeSSHPrivateKey(ui packer.Ui, debugKeyPath string) {
 	defer f.Close()
 
 	// Write the key out
-	if _, err := f.Write([]byte(b.config.sshPrivateKey)); err != nil {
+	if _, err := f.Write(b.config.Comm.SSHPrivateKey); err != nil {
 		ui.Say(fmt.Sprintf("Error saving debug key: %s", err))
 		return
 	}
@@ -333,7 +333,6 @@ func (b *Builder) getBlobAccount(ctx context.Context, client *AzureClient, resou
 
 func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.AuthorizedKey, b.config.sshAuthorizedKey)
-	stateBag.Put(constants.PrivateKey, b.config.sshPrivateKey)
 
 	stateBag.Put(constants.ArmTags, b.config.AzureTags)
 	stateBag.Put(constants.ArmComputeName, b.config.tmpComputeName)

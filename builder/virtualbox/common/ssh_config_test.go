@@ -64,14 +64,14 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	var errs []error
 
 	c = testSSHConfig()
-	c.Comm.SSHPrivateKey = ""
+	c.Comm.SSHPrivateKeyFile = ""
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)
 	}
 
 	c = testSSHConfig()
-	c.Comm.SSHPrivateKey = "/i/dont/exist"
+	c.Comm.SSHPrivateKeyFile = "/i/dont/exist"
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) == 0 {
 		t.Fatal("should have error")
@@ -90,7 +90,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	}
 
 	c = testSSHConfig()
-	c.Comm.SSHPrivateKey = tf.Name()
+	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) == 0 {
 		t.Fatal("should have error")
@@ -101,7 +101,7 @@ func TestSSHConfigPrepare_SSHPrivateKey(t *testing.T) {
 	tf.Truncate(0)
 	tf.Write([]byte(testPem))
 	c = testSSHConfig()
-	c.Comm.SSHPrivateKey = tf.Name()
+	c.Comm.SSHPrivateKeyFile = tf.Name()
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("should not have error: %#v", errs)

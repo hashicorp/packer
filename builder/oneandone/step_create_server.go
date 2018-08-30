@@ -17,10 +17,6 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
 
-	if sshkey, ok := state.GetOk("publicKey"); ok {
-		c.SSHKey = sshkey.(string)
-	}
-
 	token := oneandone.SetToken(c.Token)
 
 	//Create an API client
@@ -72,8 +68,8 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	if c.Comm.SSHPassword != "" {
 		req.Password = c.Comm.SSHPassword
 	}
-	if c.SSHKey != "" {
-		req.SSHKey = c.SSHKey
+	if len(c.Comm.SSHPublicKey) != 0 {
+		req.SSHKey = string(c.Comm.SSHPublicKey)
 	}
 
 	server_id, server, err := api.CreateServer(&req)
