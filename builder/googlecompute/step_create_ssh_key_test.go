@@ -19,7 +19,6 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	step := new(StepCreateSSHKey)
 	cfg := state.Get("config").(*Config)
 	cfg.Comm.SSHPrivateKeyFile = "test-fixtures/fake-key"
-	state.Put("config", cfg)
 	defer step.Cleanup(state)
 
 	// run the step
@@ -28,7 +27,6 @@ func TestStepCreateSSHKey_privateKey(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	cfg = state.Get("config").(*Config)
 	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
@@ -46,7 +44,6 @@ func TestStepCreateSSHKey(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	cfg = state.Get("config").(*Config)
 	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
@@ -77,7 +74,6 @@ func TestStepCreateSSHKey_debug(t *testing.T) {
 	}
 
 	// Verify that we have a public/private key
-	cfg = state.Get("config").(*Config)
 	if len(cfg.Comm.SSHPrivateKey) == 0 {
 		t.Fatal("should have key")
 	}
