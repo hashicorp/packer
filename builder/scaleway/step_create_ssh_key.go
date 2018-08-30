@@ -27,7 +27,6 @@ type stepCreateSSHKey struct {
 
 func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(*Config)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
@@ -38,8 +37,8 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			return multistep.ActionHalt
 		}
 
-		config.Comm.SSHPrivateKey = privateKeyBytes
-		config.Comm.SSHPublicKey = nil
+		s.Comm.SSHPrivateKey = privateKeyBytes
+		s.Comm.SSHPublicKey = nil
 
 		return multistep.ActionContinue
 	}
@@ -63,7 +62,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	// Set the private key in the config for later
-	config.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
+	s.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 
 	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
 	pub_sshformat := ssh.MarshalAuthorizedKey(pub)
@@ -72,7 +71,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	log.Printf("temporary ssh key created")
 
 	// Remember some state for the future
-	config.Comm.SSHPublicKey = pub_sshformat
+	s.Comm.SSHPublicKey = pub_sshformat
 
 	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {
