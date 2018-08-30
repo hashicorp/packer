@@ -26,7 +26,6 @@ type StepKeyPair struct {
 
 func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
 		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
@@ -36,27 +35,29 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 			return multistep.ActionHalt
 		}
 
-		config.Comm.SSHPrivateKey = privateKeyBytes
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth && config.Comm.SSHKeyPairName == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with key pair in Source image")
 		return multistep.ActionContinue
 	}
 
-	if s.Comm.SSHAgentAuth && config.Comm.SSHKeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", config.Comm.SSHKeyPairName))
-		config.Comm.SSHKeyPairName = ""
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
 	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		config.Comm.SSHKeyPairName = ""
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
+
+	config := state.Get("config").(Config)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
@@ -114,8 +115,8 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	s.doCleanup = true
 
 	// Set some state data for use in future steps
-	config.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
-	config.Comm.SSHPrivateKey = []byte(keypair.PrivateKey)
+	s.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
+	s.Comm.SSHPrivateKey = []byte(keypair.PrivateKey)
 
 	return multistep.ActionContinue
 }
