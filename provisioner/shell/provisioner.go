@@ -259,7 +259,8 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			if !p.config.Binary {
 				r = &UnixReader{Reader: r}
 			}
-			remoteVFName := fmt.Sprintf("%s/%s", p.config.RemoteFolder, "varfile")
+			remoteVFName := fmt.Sprintf("%s/%s", p.config.RemoteFolder,
+				fmt.Sprintf("varfile_%d.sh", rand.Intn(9999)))
 			if err := comm.Upload(remoteVFName, r, nil); err != nil {
 				return fmt.Errorf("Error uploading envVarFile: %s", err)
 			}
@@ -359,32 +360,45 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			// Delete the temporary file we created. We retry this a few times
 			// since if the above rebooted we have to wait until the reboot
 			// completes.
-			err = p.retryable(func() error {
-				cmd = &packer.RemoteCmd{
-					Command: fmt.Sprintf("rm -f %s", p.config.RemotePath),
-				}
-				if err := comm.Start(cmd); err != nil {
-					return fmt.Errorf(
-						"Error removing temporary script at %s: %s",
-						p.config.RemotePath, err)
-				}
-				cmd.Wait()
-				// treat disconnects as retryable by returning an error
-				if cmd.ExitStatus == packer.CmdDisconnect {
-					return fmt.Errorf("Disconnect while removing temporary script.")
-				}
-				return nil
-			})
+			err = p.cleanupRemoteFile(p.config.RemotePath, comm)
 			if err != nil {
 				return err
 			}
-
-			if cmd.ExitStatus != 0 {
-				return fmt.Errorf(
-					"Error removing temporary script at %s!",
-					p.config.RemotePath)
+			err = p.cleanupRemoteFile(p.config.envVarFile, comm)
+			if err != nil {
+				return err
 			}
 		}
+	}
+
+	return nil
+}
+
+func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) error {
+	err := p.retryable(func() error {
+		cmd := &packer.RemoteCmd{
+			Command: fmt.Sprintf("rm -f %s", path),
+		}
+		if err := comm.Start(cmd); err != nil {
+			return fmt.Errorf(
+				"Error removing temporary script at %s: %s",
+				path, err)
+		}
+		cmd.Wait()
+		// treat disconnects as retryable by returning an error
+		if cmd.ExitStatus == packer.CmdDisconnect {
+			return fmt.Errorf("Disconnect while removing temporary script.")
+		}
+		if cmd.ExitStatus != 0 {
+			return fmt.Errorf(
+				"Error removing temporary script at %s!",
+				path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
