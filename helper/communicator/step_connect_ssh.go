@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -224,8 +225,8 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 				ssh.PasswordKeyboardInteractive(config.SSHBastionPassword)))
 	}
 
-	if config.SSHBastionPrivateKey != "" {
-		signer, err := gossh.ParsePrivateKey([]byte(config.SSHBastionPrivateKey))
+	if config.SSHBastionPrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(config.SSHBastionPrivateKeyFile)
 		if err != nil {
 			return nil, err
 		}

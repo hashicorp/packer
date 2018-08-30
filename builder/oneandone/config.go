@@ -20,7 +20,6 @@ type Config struct {
 
 	Token          string `mapstructure:"token"`
 	Url            string `mapstructure:"url"`
-	SSHKey         string
 	SnapshotName   string `mapstructure:"image_name"`
 	DataCenterName string `mapstructure:"data_center_name"`
 	DataCenterId   string

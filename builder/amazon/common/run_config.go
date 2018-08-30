@@ -57,9 +57,7 @@ type RunConfig struct {
 	WindowsPasswordTimeout            time.Duration     `mapstructure:"windows_password_timeout"`
 
 	// Communicator settings
-	Comm           communicator.Config `mapstructure:",squash"`
-	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
-	SSHInterface   string              `mapstructure:"ssh_interface"`
+	Comm communicator.Config `mapstructure:",squash"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
@@ -67,10 +65,10 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	// ssh_private_key_file, then create a temporary one, but only if the
 	// temporary_key_pair_name has not been provided and we are not using
 	// ssh_password.
-	if c.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
-		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" {
+	if c.Comm.SSHKeyPairName == "" && c.Comm.SSHTemporaryKeyPairName == "" &&
+		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" {
 
-		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		c.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	if c.WindowsPasswordTimeout == 0 {
@@ -85,18 +83,18 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	errs := c.Comm.Prepare(ctx)
 
 	// Validating ssh_interface
-	if c.SSHInterface != "public_ip" &&
-		c.SSHInterface != "private_ip" &&
-		c.SSHInterface != "public_dns" &&
-		c.SSHInterface != "private_dns" &&
-		c.SSHInterface != "" {
-		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.SSHInterface))
+	if c.Comm.SSHInterface != "public_ip" &&
+		c.Comm.SSHInterface != "private_ip" &&
+		c.Comm.SSHInterface != "public_dns" &&
+		c.Comm.SSHInterface != "private_dns" &&
+		c.Comm.SSHInterface != "" {
+		errs = append(errs, fmt.Errorf("Unknown interface type: %s", c.Comm.SSHInterface))
 	}
 
-	if c.SSHKeyPairName != "" {
-		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKey == "" {
+	if c.Comm.SSHKeyPairName != "" {
+		if c.Comm.Type == "winrm" && c.Comm.WinRMPassword == "" && c.Comm.SSHPrivateKeyFile == "" {
 			errs = append(errs, fmt.Errorf("ssh_private_key_file must be provided to retrieve the winrm password when using ssh_keypair_name."))
-		} else if c.Comm.SSHPrivateKey == "" && !c.Comm.SSHAgentAuth {
+		} else if c.Comm.SSHPrivateKeyFile == "" && !c.Comm.SSHAgentAuth {
 			errs = append(errs, fmt.Errorf("ssh_private_key_file must be provided or ssh_agent_auth enabled when ssh_keypair_name is specified."))
 		}
 	}

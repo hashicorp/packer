@@ -82,7 +82,7 @@ func TestBerToDer(t *testing.T) {
 	}
 
 	// Test - a DER encoded key comes back unchanged.
-	newKey := berToDer(der_encoded_key, ui)
+	newKey := string(berToDer([]byte(der_encoded_key), ui))
 	if newKey != der_encoded_key {
 		t.Errorf("Trying to convert a DER encoded key should return the same key.")
 	}
@@ -91,7 +91,7 @@ func TestBerToDer(t *testing.T) {
 	}
 
 	// Test - a BER encoded key should be converted to DER.
-	newKey = berToDer(ber_encoded_key, ui)
+	newKey = string(berToDer([]byte(ber_encoded_key), ui))
 	_, err = ssh.ParsePrivateKey([]byte(newKey))
 	if err != nil {
 		t.Errorf("Trying to convert a BER encoded key should return a DER encoded key parsable by Go.")

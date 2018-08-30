@@ -43,14 +43,14 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 				fmt.Errorf("a Username must be specified, please reference your communicator documentation"))
 		}
 
-		if !c.CommConfig.SSHAgentAuth && c.CommConfig.Password() == "" && c.CommConfig.SSHPrivateKey == "" {
+		if !c.CommConfig.SSHAgentAuth && c.CommConfig.Password() == "" && c.CommConfig.SSHPrivateKeyFile == "" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("one authentication method must be specified, please reference your communicator documentation"))
 		}
 
 		if (c.CommConfig.SSHAgentAuth &&
-			(c.CommConfig.SSHPassword != "" || c.CommConfig.SSHPrivateKey != "")) ||
-			(c.CommConfig.SSHPassword != "" && c.CommConfig.SSHPrivateKey != "") {
+			(c.CommConfig.SSHPassword != "" || c.CommConfig.SSHPrivateKeyFile != "")) ||
+			(c.CommConfig.SSHPassword != "" && c.CommConfig.SSHPrivateKeyFile != "") {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("only one of ssh_agent_auth, ssh_password, and ssh_private_key_file must be specified"))
 

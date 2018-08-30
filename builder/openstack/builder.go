@@ -80,12 +80,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Flavor: b.config.Flavor,
 		},
 		&StepKeyPair{
-			Debug:                b.config.PackerDebug,
-			DebugKeyPath:         fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
-			KeyPairName:          b.config.SSHKeyPairName,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
-			SSHAgentAuth:         b.config.RunConfig.Comm.SSHAgentAuth,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("os_%s.pem", b.config.PackerBuildName),
 		},
 		&StepSourceImageInfo{
 			SourceImage:      b.config.RunConfig.SourceImage,
@@ -130,8 +127,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.RunConfig.Comm,
 			Host: CommHost(
 				computeClient,
-				b.config.SSHInterface,
-				b.config.SSHIPVersion),
+				b.config.Comm.SSHInterface,
+				b.config.Comm.SSHIPVersion),
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},

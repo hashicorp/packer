@@ -17,6 +17,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -30,7 +31,7 @@ type ESX5Driver struct {
 	Port           uint
 	Username       string
 	Password       string
-	PrivateKey     string
+	PrivateKeyFile string
 	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
@@ -513,8 +514,8 @@ func (d *ESX5Driver) connect() error {
 			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
 
-	if d.PrivateKey != "" {
-		signer, err := gossh.ParsePrivateKey([]byte(d.PrivateKey))
+	if d.PrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(d.PrivateKeyFile)
 		if err != nil {
 			return err
 		}
