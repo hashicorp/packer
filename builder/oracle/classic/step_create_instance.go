@@ -38,8 +38,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Attributes: config.attribs,
 	}
 	if config.Comm.Type == "ssh" {
-		keyName := state.Get("key_name").(string)
-		input.SSHKeys = []string{keyName}
+		input.SSHKeys = []string{config.Comm.SSHKeyPairName}
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)

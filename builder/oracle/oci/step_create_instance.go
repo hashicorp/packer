@@ -12,14 +12,14 @@ type stepCreateInstance struct{}
 
 func (s *stepCreateInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	var (
-		driver    = state.Get("driver").(Driver)
-		ui        = state.Get("ui").(packer.Ui)
-		publicKey = state.Get("publicKey").(string)
+		driver = state.Get("driver").(Driver)
+		ui     = state.Get("ui").(packer.Ui)
+		config = state.Get("config").(*Config)
 	)
 
 	ui.Say("Creating instance...")
 
-	instanceID, err := driver.CreateInstance(ctx, publicKey)
+	instanceID, err := driver.CreateInstance(ctx, string(config.Comm.SSHPublicKey))
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
 		ui.Error(err.Error())
