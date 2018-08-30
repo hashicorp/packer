@@ -271,7 +271,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			}
 			if err := comm.Start(cmd); err != nil {
 				return fmt.Errorf(
-					"Error chmodding script file to 0755 in remote "+
+					"Error chmodding script file to 0600 in remote "+
 						"machine: %s", err)
 			}
 			cmd.Wait()
