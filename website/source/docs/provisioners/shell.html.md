@@ -70,7 +70,7 @@ Optional parameters:
     declaring them inline in our execute_command. The default `execute_command`
     will be `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`. This option is
     unnecessary for most cases, but if you have extra quoting in your custom
-    `execute_command`, then this may be neccecary for proper script execution.
+    `execute_command`, then this may be unnecessary for proper script execution.
     Default: false.
 
 -   `execute_command` (string) - The command to use to execute the script. By
