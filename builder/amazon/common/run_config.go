@@ -114,7 +114,7 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("An instance_type must be specified"))
 	}
 
-	if c.BlockDurationMinutes != nil && c.BlockDurationMinutes % 60 != 0 {
+	if c.BlockDurationMinutes % 60 != 0 {
 		errs = append(errs, fmt.Errorf(
 			"block_duration_minutes must be multiple of 60"))
 	}
