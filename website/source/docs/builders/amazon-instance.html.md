@@ -164,6 +164,10 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `block_duration_minutes` (int64) - Requires `spot_price` to
+    be set. The required duration for the Spot Instances (also known as Spot blocks).
+    This value must be a multiple of 60 (60, 120, 180, 240, 300, or 360).
+
 -   `bundle_destination` (string) - The directory on the running instance where
     the bundled AMI will be saved prior to uploading. By default this is `/tmp`.
     This directory must exist and be writable.
