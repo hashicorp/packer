@@ -367,8 +367,8 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{ansible, nil, ""},
-				{download, nil, ""},
+				{Provisioner: ansible, Config: nil, TypeName: ""},
+				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}
