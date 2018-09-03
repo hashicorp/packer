@@ -61,7 +61,7 @@ func GetDefaultProgressBar() ProgressBar {
 	bar.ShowFinalTime = false
 	bar.SetUnits(pb.U_BYTES)
 	bar.Format("[=>-]")
-	bar.SetRefreshRate(5 * time.Second)
+	bar.SetRefreshRate(1 * time.Second)
 	return bar
 }
 
@@ -121,6 +121,8 @@ func GetPackerConfigFromStateBag(state multistep.StateBag) *PackerConfig {
 }
 
 func GetProgressBar(ui packer.Ui, config *PackerConfig) ProgressBar {
+	var cachedMessage string
+
 	// Figure out the prefix length by quering the UI
 	uiPrefixLength := calculateUiPrefixLength(ui)
 
@@ -139,7 +141,18 @@ func GetProgressBar(ui packer.Ui, config *PackerConfig) ProgressBar {
 	bar := GetDefaultProgressBar()
 	bar.SetWidth(width)
 	bar.Callback = func(message string) {
+		// Check if the current appearance of the progress-bar is different from
+		// the previous appearance. If it's the same, then don't bother emitting
+		// it to reduce spamminess. (Fixes issue #6625)
+		if cachedMessage == message {
+			return
+		}
+
+		// Emit the progress-bar to the UI
 		ui.Message(message)
+
+		// Stash away the previous progress-bar in a captured variable
+		cachedMessage = message
 	}
 	return bar
 }
