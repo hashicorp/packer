@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/builder/azure/common"
+	"github.com/hashicorp/packer/common/random"
 )
 
 const (
@@ -13,8 +13,6 @@ const (
 	numbers   = "0123456789"
 	lowerCase = "abcdefghijklmnopqrstuvwxyz"
 	upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	TempPasswordAlphabet = numbers + lowerCase + upperCase
 )
 
 type TempName struct {
@@ -34,7 +32,7 @@ type TempName struct {
 func NewTempName() *TempName {
 	tempName := &TempName{}
 
-	suffix := common.RandomString(TempNameAlphabet, 10)
+	suffix := random.String(TempNameAlphabet, 10)
 	tempName.ComputeName = fmt.Sprintf("pkrvm%s", suffix)
 	tempName.DeploymentName = fmt.Sprintf("pkrdp%s", suffix)
 	tempName.KeyVaultName = fmt.Sprintf("pkrkv%s", suffix)
@@ -46,7 +44,7 @@ func NewTempName() *TempName {
 	tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
 
 	tempName.AdminPassword = generatePassword()
-	tempName.CertificatePassword = common.RandomString(TempPasswordAlphabet, 32)
+	tempName.CertificatePassword = random.AlphaNum(32)
 
 	return tempName
 }
@@ -60,7 +58,7 @@ func NewTempName() *TempName {
 func generatePassword() string {
 	var s string
 	for i := 0; i < 100; i++ {
-		s := common.RandomString(TempPasswordAlphabet, 32)
+		s := random.AlphaNum(32)
 		if !strings.ContainsAny(s, numbers) {
 			continue
 		}
