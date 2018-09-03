@@ -24,6 +24,7 @@ type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
 	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
+	BlockDurationMinutes              int64
 	Debug                             bool
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
@@ -187,8 +188,9 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-		SpotPrice:           &spotPrice,
-		LaunchSpecification: runOpts,
+		BlockDurationMinutes: &s.BlockDurationMinutes,
+		LaunchSpecification:  runOpts,
+		SpotPrice:            &spotPrice,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error launching source spot instance: %s", err)
