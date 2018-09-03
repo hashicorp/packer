@@ -169,6 +169,8 @@ func WaitForVolumeToBeAttached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 			return req, nil
 		},
 	}
+	w.ApplyOptions(opts...)
+
 	return w.WaitWithContext(ctx)
 }
 
@@ -198,6 +200,8 @@ func WaitForVolumeToBeDetached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 			return req, nil
 		},
 	}
+	w.ApplyOptions(opts...)
+
 	return w.WaitWithContext(ctx)
 }
 
@@ -227,6 +231,8 @@ func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeIm
 			return req, nil
 		},
 	}
+	w.ApplyOptions(opts...)
+
 	return w.WaitWithContext(ctx)
 }
 
@@ -281,11 +287,11 @@ func getOverride(varInfo envInfo) envInfo {
 	return varInfo
 }
 func getEnvOverrides() overridableWaitVars {
-	// Load env vars from environment, and use them to override defaults
+	// Load env vars from environment.
 	envValues := overridableWaitVars{
-		envInfo{"AWS_POLL_DELAY_SECONDS", 2, false},
+		envInfo{"AWS_POLL_DELAY_SECONDS", 0, false},
 		envInfo{"AWS_MAX_ATTEMPTS", 0, false},
-		envInfo{"AWS_TIMEOUT_SECONDS", 300, false},
+		envInfo{"AWS_TIMEOUT_SECONDS", 0, false},
 	}
 
 	envValues.awsMaxAttempts = getOverride(envValues.awsMaxAttempts)
