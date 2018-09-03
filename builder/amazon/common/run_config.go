@@ -34,6 +34,7 @@ func (d *AmiFilterOptions) NoOwner() bool {
 type RunConfig struct {
 	AssociatePublicIpAddress          bool              `mapstructure:"associate_public_ip_address"`
 	AvailabilityZone                  string            `mapstructure:"availability_zone"`
+	BlockDurationMinutes              int64             `mapstructure:"block_duration_minutes"`
 	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
 	EbsOptimized                      bool              `mapstructure:"ebs_optimized"`
 	EnableT2Unlimited                 bool              `mapstructure:"enable_t2_unlimited"`
@@ -109,6 +110,11 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if c.InstanceType == "" {
 		errs = append(errs, fmt.Errorf("An instance_type must be specified"))
+	}
+
+	if c.BlockDurationMinutes%60 != 0 {
+		errs = append(errs, fmt.Errorf(
+			"block_duration_minutes must be multiple of 60"))
 	}
 
 	if c.SpotPrice == "auto" {
