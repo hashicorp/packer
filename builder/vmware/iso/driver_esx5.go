@@ -46,7 +46,8 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
-	return nil
+	diskPath := d.datastorePath(diskPathLocal)
+	return d.sh("vmkfstools", "--punchzero", diskPath)
 }
 
 func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, adapter_type string, typeId string) error {
