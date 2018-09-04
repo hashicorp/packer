@@ -127,12 +127,12 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 		defer f.Close()
 
 		// Get a default progress bar
-		pb := common.GetProgressBar(ui, &p.config.PackerConfig)
-		bar := pb.Start()
-		defer bar.Finish()
+		pb := packer.NoopProgressBar{}
+		pb.Start(0)
+		defer pb.Finish()
 
 		// Create MultiWriter for the current progress
-		pf := io.MultiWriter(f, bar)
+		pf := io.MultiWriter(f)
 
 		// Download the file
 		if err = comm.Download(src, pf); err != nil {
@@ -176,8 +176,8 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 		}
 
 		// Get a default progress bar
-		pb := common.GetProgressBar(ui, &p.config.PackerConfig)
-		bar := pb.Start()
+		bar := ui.ProgressBar()
+		bar.Start(0)
 		defer bar.Finish()
 
 		// Create ProxyReader for the current progress

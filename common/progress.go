@@ -2,13 +2,14 @@ package common
 
 import (
 	"fmt"
+	"log"
+	"reflect"
+	"time"
+
 	"github.com/cheggaaa/pb"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/packer/rpc"
-	"log"
-	"reflect"
-	"time"
 )
 
 // This is the arrow from packer/ui.go -> TargetedUI.prefixLines
