@@ -43,6 +43,9 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		config.WithCredentials(staticCreds)
 	}
 
+	// default is 3, and when it was causing failures for users being throttled
+	config = config.WithMaxRetries(20)
+
 	if c.RawRegion != "" {
 		config = config.WithRegion(c.RawRegion)
 	} else if region := c.metadataRegion(); region != "" {
