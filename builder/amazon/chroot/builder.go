@@ -42,6 +42,7 @@ type Config struct {
 	PreMountCommands  []string                   `mapstructure:"pre_mount_commands"`
 	RootDeviceName    string                     `mapstructure:"root_device_name"`
 	RootVolumeSize    int64                      `mapstructure:"root_volume_size"`
+	RootVolumeType    string                     `mapstructure:"root_volume_type"`
 	SourceAmi         string                     `mapstructure:"source_ami"`
 	SourceAmiFilter   awscommon.AmiFilterOptions `mapstructure:"source_ami_filter"`
 	RootVolumeTags    awscommon.TagMap           `mapstructure:"root_volume_tags"`
@@ -233,6 +234,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepFlock{},
 		&StepPrepareDevice{},
 		&StepCreateVolume{
+			RootVolumeType: b.config.RootVolumeType,
 			RootVolumeSize: b.config.RootVolumeSize,
 			RootVolumeTags: b.config.RootVolumeTags,
 			Ctx:            b.config.ctx,
