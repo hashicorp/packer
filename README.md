@@ -68,7 +68,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `disk_thin_provisioned`(boolean) - Enable VMDK thin provisioning for VM. Defaults to `false`.
 * `network`(string) - Set network VM will be connected to.
 * `network_card`(string) - Set VM network card type. Example `vmxnet3`.
-* `usb_controller`(boolean) - Create US controller for virtual machine. Defaults to `false`.
+* `usb_controller`(boolean) - Create USB controller for virtual machine. Defaults to `false`.
 
 ### Boot (`vsphere-iso` only)
 
