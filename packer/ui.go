@@ -15,6 +15,8 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	"github.com/cheggaaa/pb"
 )
 
 type UiColor uint
@@ -37,6 +39,7 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
+	ProgressBar() ProgressBar
 }
 
 // ColoredUi is a UI that is colored using terminal colors.
@@ -45,6 +48,8 @@ type ColoredUi struct {
 	ErrorColor UiColor
 	Ui         Ui
 }
+
+var _ Ui = new(ColoredUi)
 
 // TargetedUI is a UI that wraps another UI implementation and modifies
 // the output to indicate a specific target. Specifically, all Say output
@@ -55,6 +60,8 @@ type TargetedUI struct {
 	Target string
 	Ui     Ui
 }
+
+var _ Ui = new(TargetedUI)
 
 // The BasicUI is a UI that reads and writes from a standard Go reader
 // and writer. It is safe to be called from multiple goroutines. Machine
@@ -68,11 +75,20 @@ type BasicUi struct {
 	scanner     *bufio.Scanner
 }
 
+var _ Ui = new(BasicUi)
+
+func (bu *BasicUi) ProgressBar() ProgressBar {
+	log.Printf("hehey !")
+	return &BasicProgressBar{ProgressBar: pb.New(0)}
+}
+
 // MachineReadableUi is a UI that only outputs machine-readable output
 // to the given Writer.
 type MachineReadableUi struct {
 	Writer io.Writer
 }
+
+var _ Ui = new(MachineReadableUi)
 
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
@@ -98,6 +114,10 @@ func (u *ColoredUi) Error(message string) {
 func (u *ColoredUi) Machine(t string, args ...string) {
 	// Don't colorize machine-readable output
 	u.Ui.Machine(t, args...)
+}
+
+func (u *ColoredUi) ProgressBar() ProgressBar {
+	return u.Ui.ProgressBar() //TODO(adrien): color me
 }
 
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
@@ -151,6 +171,10 @@ func (u *TargetedUI) Error(message string) {
 func (u *TargetedUI) Machine(t string, args ...string) {
 	// Prefix in the target, then pass through
 	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
+}
+
+func (u *TargetedUI) ProgressBar() ProgressBar {
+	return u.Ui.ProgressBar()
 }
 
 func (u *TargetedUI) prefixLines(arrow bool, message string) string {
@@ -304,4 +328,9 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 			panic(err)
 		}
 	}
+}
+
+func (u *MachineReadableUi) ProgressBar() ProgressBar {
+	panic("MachineReadableUi")
+	return nil // no-op
 }

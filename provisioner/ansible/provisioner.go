@@ -612,3 +612,8 @@ func (ui *Ui) Machine(t string, args ...string) {
 	ui.ui.Machine(t, args...)
 	<-ui.sem
 }
+
+func (ui *Ui) ProgressBar() packer.ProgressBar {
+	panic("to implement")
+	return nil // TODO
+}

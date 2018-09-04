@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // PackerKeyEnv is used to specify the key interval (delay) between keystrokes
@@ -41,7 +43,7 @@ func SupportedProtocol(u *url.URL) bool {
 
 	// build a dummy NewDownloadClient since this is the only place that valid
 	// protocols are actually exposed.
-	cli := NewDownloadClient(&DownloadConfig{}, nil)
+	cli := NewDownloadClient(&DownloadConfig{}, new(packer.NoopProgressBar))
 
 	// Iterate through each downloader to see if a protocol was found.
 	ok := false
@@ -173,7 +175,7 @@ func FileExistsLocally(original string) bool {
 
 	// First create a dummy downloader so we can figure out which
 	// protocol to use.
-	cli := NewDownloadClient(&DownloadConfig{}, nil)
+	cli := NewDownloadClient(&DownloadConfig{}, new(packer.NoopProgressBar))
 	d, ok := cli.config.DownloaderMap[u.Scheme]
 	if !ok {
 		return false
