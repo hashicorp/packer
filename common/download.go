@@ -10,19 +10,17 @@ import (
 	"errors"
 	"fmt"
 	"hash"
+	"io"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
-)
 
-// imports related to each Downloader implementation
-import (
-	"io"
-	"net/http"
-	"path/filepath"
+	"github.com/hashicorp/packer/packer" // imports related to each Downloader implementation
 )
 
 // DownloadConfig is the configuration given to instantiate a new
@@ -81,13 +79,8 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar ProgressBar) *DownloadClient {
+func NewDownloadClient(c *DownloadConfig, bar packer.ProgressBar) *DownloadClient {
 	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
-
-	// If bar is nil, then use a dummy progress bar that doesn't do anything
-	if bar == nil {
-		bar = GetDummyProgressBar()
-	}
 
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
@@ -237,7 +230,7 @@ type HTTPDownloader struct {
 	total     uint64
 	userAgent string
 
-	progress ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -331,9 +324,10 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = d.current + uint64(resp.ContentLength)
 
 	bar := d.progress
-	bar.SetTotal64(int64(d.total))
-	progressBar := bar.Start()
-	progressBar.Set64(int64(d.current))
+	log.Printf("this %#v", bar)
+	log.Printf("that")
+	bar.Start(d.total)
+	bar.Set(d.current)
 
 	var buffer [4096]byte
 	for {
@@ -343,7 +337,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		}
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
+		bar.Set(d.current)
 
 		if _, werr := dst.Write(buffer[:n]); werr != nil {
 			return werr
@@ -353,7 +347,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			break
 		}
 	}
-	progressBar.Finish()
+	bar.Finish()
 	return nil
 }
 
@@ -374,7 +368,7 @@ type FileDownloader struct {
 	current uint64
 	total   uint64
 
-	progress ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *FileDownloader) Progress() uint64 {
@@ -466,9 +460,9 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = uint64(fi.Size())
 
 	bar := d.progress
-	bar.SetTotal64(int64(d.total))
-	progressBar := bar.Start()
-	progressBar.Set64(int64(d.current))
+
+	bar.Start(d.total)
+	bar.Set(d.current)
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
@@ -477,7 +471,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
+		bar.Set(d.current)
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -490,7 +484,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
-				progressBar.Set64(int64(d.current))
+				bar.Set(d.current)
 			}
 			d.active = false
 			e <- err
@@ -499,7 +493,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and we spin until it's done
 		err = <-errch
 	}
-	progressBar.Finish()
+	bar.Finish()
 	f.Close()
 	return err
 }
@@ -513,7 +507,7 @@ type SMBDownloader struct {
 	current uint64
 	total   uint64
 
-	progress ProgressBar
+	progress packer.ProgressBar
 }
 
 func (d *SMBDownloader) Progress() uint64 {
@@ -587,9 +581,8 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	d.total = uint64(fi.Size())
 
 	bar := d.progress
-	bar.SetTotal64(int64(d.total))
-	progressBar := bar.Start()
-	progressBar.Set64(int64(d.current))
+
+	bar.Start(d.current)
 
 	// no bufferSize specified, so copy synchronously.
 	if d.bufferSize == nil {
@@ -598,7 +591,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		d.active = false
 
 		d.current += uint64(n)
-		progressBar.Set64(int64(d.current))
+		bar.Set(d.current)
 
 		// use a goro in case someone else wants to enable cancel/resume
 	} else {
@@ -611,7 +604,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 				}
 
 				d.current += uint64(n)
-				progressBar.Set64(int64(d.current))
+				bar.Set(d.current)
 			}
 			d.active = false
 			e <- err
@@ -620,7 +613,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and as usual we spin until it's done
 		err = <-errch
 	}
-	progressBar.Finish()
+	bar.Finish()
 	f.Close()
 	return err
 }
