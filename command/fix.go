@@ -157,6 +157,8 @@ Fixes that are run:
                              Hyper-V ISO builder templates
   hyperv-vmxc-typo           Corrects a typo in the "clone_from_vmxc_path"
                              setting. Replaces with "clone_from_vmcx_path".
+  vmware-compaction          Adds "skip_compaction = true" to "vmware-iso"
+                             builders with incompatible disk_type_id
 
 Options:
 
