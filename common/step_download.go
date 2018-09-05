@@ -138,11 +138,7 @@ func (s *StepDownload) Cleanup(multistep.StateBag) {}
 
 func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag) (string, error, bool) {
 	var path string
-	v, ok := state.GetOk("ui")
-	if !ok {
-		return "", nil, false
-	}
-	ui := v.(packer.Ui)
+	ui := state.Get("ui").(packer.Ui)
 
 	// Create download client with config
 	download := NewDownloadClient(config, ui)
