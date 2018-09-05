@@ -25,8 +25,9 @@ func AlphaNumUpper(length int) string { return String(PossibleAlphaNumUpper, len
 
 func String(chooseFrom string, length int) (randomString string) {
 	cflen := len(chooseFrom)
-	for i := 0; i < length; i++ {
-		randomString += string(chooseFrom[rnd.Intn(cflen)])
+	bytes := make([]byte, length)
+	for i := range bytes {
+		bytes[i] = chooseFrom[rnd.Intn(cflen)]
 	}
-	return
+	return string(bytes)
 }
