@@ -81,7 +81,6 @@ func HashForType(t string) hash.Hash {
 func NewDownloadClient(c *DownloadConfig, ui packer.Ui) *DownloadClient {
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
-		log.Printf("instantiating. ui: %#v", ui)
 		c.DownloaderMap = map[string]Downloader{
 			"file":  &FileDownloader{Ui: ui, bufferSize: nil},
 			"http":  &HTTPDownloader{Ui: ui, userAgent: c.UserAgent},
@@ -143,7 +142,6 @@ func (d *DownloadClient) Get() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("No downloader for scheme: %s", u.Scheme)
 	}
-	log.Printf("downloader: %#v", downloader)
 
 	remote, ok := downloader.(RemoteDownloader)
 	if !ok {
