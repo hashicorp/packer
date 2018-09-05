@@ -2,13 +2,14 @@ package packer
 
 import (
 	"io"
+	"sync"
+	"sync/atomic"
 
 	"github.com/cheggaaa/pb"
 )
 
 // ProgressBar allows to graphically display
 // a self refreshing progress bar.
-// No-op When in machine readable mode.
 type ProgressBar interface {
 	Start(total uint64)
 	Add(current uint64)
@@ -16,9 +17,45 @@ type ProgressBar interface {
 	Finish()
 }
 
+type StackableProgressBar struct {
+	total   uint64
+	started bool
+	BasicProgressBar
+	startOnce sync.Once
+	group     sync.WaitGroup
+}
+
+var _ ProgressBar = new(StackableProgressBar)
+
+func (spb *StackableProgressBar) start() {
+	spb.BasicProgressBar.ProgressBar = pb.New(0)
+	spb.BasicProgressBar.ProgressBar.SetUnits(pb.U_BYTES)
+
+	spb.BasicProgressBar.ProgressBar.Start()
+	go func() {
+		spb.group.Wait()
+		spb.BasicProgressBar.ProgressBar.Finish()
+		spb.startOnce = sync.Once{}
+		spb.BasicProgressBar.ProgressBar = nil
+	}()
+}
+
+func (spb *StackableProgressBar) Start(total uint64) {
+	atomic.AddUint64(&spb.total, total)
+	spb.group.Add(1)
+	spb.startOnce.Do(spb.start)
+	spb.SetTotal64(int64(spb.total))
+}
+
+func (spb *StackableProgressBar) Finish() {
+	spb.group.Done()
+}
+
 type BasicProgressBar struct {
 	*pb.ProgressBar
 }
+
+var _ ProgressBar = new(BasicProgressBar)
 
 func (bpb *BasicProgressBar) Start(total uint64) {
 	bpb.SetTotal64(int64(total))
@@ -41,19 +78,17 @@ func (bpb *BasicProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser {
 	}
 }
 
-var _ ProgressBar = new(BasicProgressBar)
-
 // NoopProgressBar is a silent progress bar
 type NoopProgressBar struct {
 }
+
+var _ ProgressBar = new(NoopProgressBar)
 
 func (npb *NoopProgressBar) Start(uint64)                                     {}
 func (npb *NoopProgressBar) Add(uint64)                                       {}
 func (npb *NoopProgressBar) Finish()                                          {}
 func (npb *NoopProgressBar) NewProxyReader(r io.Reader) io.Reader             { return r }
 func (npb *NoopProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser { return r }
-
-var _ ProgressBar = new(NoopProgressBar)
 
 // ProxyReader implements io.ReadCloser but sends
 // count of read bytes to progress bar
