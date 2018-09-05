@@ -60,31 +60,43 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 	state.Put("client", client)
 
-	// Build the steps
-	steps := []multistep.Step{
-		&ocommon.StepKeyPair{
-			Debug:        b.config.PackerDebug,
-			Comm:         &b.config.Comm,
-			DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
-		},
-		&stepCreateIPReservation{},
-		&stepAddKeysToAPI{},
-		&stepSecurity{},
-		&stepCreateInstance{},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      ocommon.CommHost,
-			SSHConfig: b.config.Comm.SSHConfigFunc(),
-		},
-		&common.StepProvision{},
-		&common.StepCleanupTempKeys{
-			Comm: &b.config.Comm,
-		},
-		&common.StepCleanupTempKeys{
-			Comm: &b.config.Comm,
-		},
-		&stepSnapshot{},
-		&stepListImages{},
+	var steps []multistep.Step
+	if b.config.PersistentVolumeSize != "" {
+		steps = []multistep.Step{
+			&stepCreatePersistentVolume{
+				volumeSize:      b.config.PersistentVolumeSize,
+				volumeName:      b.config.PersistentVolumeName,
+				latencyStorage:  b.config.PersistentVolumeLatencyStorage,
+				sourceImageList: b.config.SourceImageList,
+			},
+		}
+	} else {
+		// Build the steps
+		steps = []multistep.Step{
+			&ocommon.StepKeyPair{
+				Debug:        b.config.PackerDebug,
+				Comm:         &b.config.Comm,
+				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
+			},
+			&stepCreateIPReservation{},
+			&stepAddKeysToAPI{},
+			&stepSecurity{},
+			&stepCreateInstance{},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      ocommon.CommHost,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
+			},
+			&common.StepProvision{},
+			&common.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
+			&common.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
+			&stepSnapshot{},
+			&stepListImages{},
+		}
 	}
 
 	// Run the steps

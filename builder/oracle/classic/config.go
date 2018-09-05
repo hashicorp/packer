@@ -29,6 +29,11 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
+	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
+	PersistentVolumeSize           string `mapstructure:"persistent_volume_size"`
+	PersistentVolumeName           string `mapstructure:"persistent_volume_name"`
+	PersistentVolumeLatencyStorage bool   `mapstructure:"persistent_volume_latency_storage"`
+
 	ImageName       string        `mapstructure:"image_name"`
 	Shape           string        `mapstructure:"shape"`
 	SourceImageList string        `mapstructure:"source_image_list"`
