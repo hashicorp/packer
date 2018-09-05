@@ -128,7 +128,7 @@ func (p *Provisioner) ProvisionDownload(ui packer.Ui, comm packer.Communicator) 
 
 		// Get a default progress bar
 		pb := packer.NoopProgressBar{}
-		pb.Start(0)
+		pb.Start(0) // TODO: find size ? Remove ?
 		defer pb.Finish()
 
 		// Create MultiWriter for the current progress
