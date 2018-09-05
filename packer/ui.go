@@ -331,6 +331,5 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 }
 
 func (u *MachineReadableUi) ProgressBar() ProgressBar {
-	panic("MachineReadableUi")
-	return nil // no-op
+	return new(NoopProgressBar)
 }

@@ -614,6 +614,5 @@ func (ui *Ui) Machine(t string, args ...string) {
 }
 
 func (ui *Ui) ProgressBar() packer.ProgressBar {
-	panic("to implement")
-	return nil // TODO
+	return new(packer.NoopProgressBar)
 }
