@@ -79,7 +79,7 @@ func (u *Ui) ProgressBar() packer.ProgressBar {
 }
 
 type RemoteProgressBarClient struct {
-	id     string
+	id     string // TODO(azr): don't need an id any more since bar is a singleton
 	client *rpc.Client
 }
 
