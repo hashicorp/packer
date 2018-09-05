@@ -7,18 +7,21 @@ import (
 )
 
 var (
-	numbers   = "0123456789"
-	lowerCase = "abcdefghijklmnopqrstuvwxyz"
-	upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	PossibleNumbers   = "0123456789"
+	PossibleLowerCase = "abcdefghijklmnopqrstuvwxyz"
+	PossibleUpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-	alphaNum = numbers + lowerCase + upperCase
+	PossibleAlphaNum      = PossibleNumbers + PossibleLowerCase + PossibleUpperCase
+	PossibleAlphaNumLower = PossibleNumbers + PossibleLowerCase
+	PossibleAlphaNumUpper = PossibleNumbers + PossibleUpperCase
 )
 
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano() + int64(os.Getpid())))
 
-func AlphaNum(length int) string {
-	return String(alphaNum, length)
-}
+func Numbers(length int) string       { return String(PossibleNumbers, length) }
+func AlphaNum(length int) string      { return String(PossibleAlphaNum, length) }
+func AlphaNumLower(length int) string { return String(PossibleAlphaNumLower, length) }
+func AlphaNumUpper(length int) string { return String(PossibleAlphaNumUpper, length) }
 
 func String(chooseFrom string, length int) (randomString string) {
 	cflen := len(chooseFrom)
