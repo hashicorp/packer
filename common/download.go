@@ -163,6 +163,7 @@ func (d *DownloadClient) Get() (string, error) {
 			return "", err
 		}
 
+		log.Printf("[DEBUG] Downloading: %s", u.String())
 		err = remote.Download(f, u)
 		f.Close()
 		if err != nil {
