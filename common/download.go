@@ -56,8 +56,7 @@ type DownloadConfig struct {
 
 // A DownloadClient helps download, verify checksums, etc.
 type DownloadClient struct {
-	config     *DownloadConfig
-	downloader Downloader
+	config *DownloadConfig
 }
 
 // HashForType returns the Hash implementation for the given string
@@ -79,23 +78,21 @@ func HashForType(t string) hash.Hash {
 
 // NewDownloadClient returns a new DownloadClient for the given
 // configuration.
-func NewDownloadClient(c *DownloadConfig, bar packer.ProgressBar) *DownloadClient {
-	const mtu = 1500 /* ethernet */ - 20 /* ipv4 */ - 20 /* tcp */
-
+func NewDownloadClient(c *DownloadConfig, ui packer.Ui) *DownloadClient {
 	// Create downloader map if it hasn't been specified already.
 	if c.DownloaderMap == nil {
+		log.Printf("instantiating. ui: %#v", ui)
 		c.DownloaderMap = map[string]Downloader{
-			"file":  &FileDownloader{progressBar: bar, bufferSize: nil},
-			"http":  &HTTPDownloader{progressBar: bar, userAgent: c.UserAgent},
-			"https": &HTTPDownloader{progressBar: bar, userAgent: c.UserAgent},
-			"smb":   &SMBDownloader{progressBar: bar, bufferSize: nil},
+			"file":  &FileDownloader{Ui: ui, bufferSize: nil},
+			"http":  &HTTPDownloader{Ui: ui, userAgent: c.UserAgent},
+			"https": &HTTPDownloader{Ui: ui, userAgent: c.UserAgent},
+			"smb":   &SMBDownloader{Ui: ui, bufferSize: nil},
 		}
 	}
 	return &DownloadClient{config: c}
 }
 
-// A downloader implements the ability to transfer a file, and cancel or resume
-//	it.
+// Downloader defines what capabilities a downloader should have.
 type Downloader interface {
 	Resume()
 	Cancel()
@@ -142,17 +139,18 @@ func (d *DownloadClient) Get() (string, error) {
 	var finalPath string
 
 	var ok bool
-	d.downloader, ok = d.config.DownloaderMap[u.Scheme]
+	downloader, ok := d.config.DownloaderMap[u.Scheme]
 	if !ok {
 		return "", fmt.Errorf("No downloader for scheme: %s", u.Scheme)
 	}
+	log.Printf("downloader: %#v", downloader)
 
-	remote, ok := d.downloader.(RemoteDownloader)
+	remote, ok := downloader.(RemoteDownloader)
 	if !ok {
-		return "", fmt.Errorf("Unable to treat uri scheme %s as a Downloader. : %T", u.Scheme, d.downloader)
+		return "", fmt.Errorf("Unable to treat uri scheme %s as a Downloader. : %T", u.Scheme, downloader)
 	}
 
-	local, ok := d.downloader.(LocalDownloader)
+	local, ok := downloader.(LocalDownloader)
 	if !ok && !d.config.CopyFile {
 		d.config.CopyFile = true
 	}
@@ -167,7 +165,6 @@ func (d *DownloadClient) Get() (string, error) {
 			return "", err
 		}
 
-		log.Printf("[DEBUG] Downloading: %s", u.String())
 		err = remote.Download(f, u)
 		f.Close()
 		if err != nil {
@@ -227,7 +224,7 @@ func (d *DownloadClient) VerifyChecksum(path string) (bool, error) {
 type HTTPDownloader struct {
 	userAgent string
 
-	progressBar packer.ProgressBar
+	Ui packer.Ui
 }
 
 func (d *HTTPDownloader) Cancel() {
@@ -349,8 +346,8 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 type FileDownloader struct {
 	bufferSize *uint
 
-	active      bool
-	progressBar packer.ProgressBar
+	active bool
+	Ui     packer.Ui
 }
 
 func (d *FileDownloader) Cancel() {
@@ -469,8 +466,8 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 type SMBDownloader struct {
 	bufferSize *uint
 
-	active      bool
-	progressBar packer.ProgressBar
+	active bool
+	Ui     packer.Ui
 }
 
 func (d *SMBDownloader) Cancel() {
@@ -566,6 +563,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	return err
 }
 
-func (d *HTTPDownloader) ProgressBar() packer.ProgressBar { return d.progressBar }
-func (d *FileDownloader) ProgressBar() packer.ProgressBar { return d.progressBar }
-func (d *SMBDownloader) ProgressBar() packer.ProgressBar  { return d.progressBar }
+func (d *HTTPDownloader) ProgressBar() packer.ProgressBar { return d.Ui.ProgressBar() }
+func (d *FileDownloader) ProgressBar() packer.ProgressBar { return d.Ui.ProgressBar() }
+func (d *SMBDownloader) ProgressBar() packer.ProgressBar  { return d.Ui.ProgressBar() }

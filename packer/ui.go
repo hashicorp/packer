@@ -15,8 +15,6 @@ import (
 	"syscall"
 	"time"
 	"unicode"
-
-	"github.com/cheggaaa/pb"
 )
 
 type UiColor uint
@@ -41,6 +39,17 @@ type Ui interface {
 	Machine(string, ...string)
 	ProgressBar() ProgressBar
 }
+
+type NoopUi struct{}
+
+var _ Ui = new(NoopUi)
+
+func (*NoopUi) Ask(string) (string, error) { return "", errors.New("this is a noop ui") }
+func (*NoopUi) Say(string)                 { return }
+func (*NoopUi) Message(string)             { return }
+func (*NoopUi) Error(string)               { return }
+func (*NoopUi) Machine(string, ...string)  { return }
+func (*NoopUi) ProgressBar() ProgressBar   { return new(NoopProgressBar) }
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
@@ -73,13 +82,13 @@ type BasicUi struct {
 	l           sync.Mutex
 	interrupted bool
 	scanner     *bufio.Scanner
+	StackableProgressBar
 }
 
 var _ Ui = new(BasicUi)
 
 func (bu *BasicUi) ProgressBar() ProgressBar {
-	log.Printf("hehey !")
-	return &BasicProgressBar{ProgressBar: pb.New(0)}
+	return &bu.StackableProgressBar
 }
 
 // MachineReadableUi is a UI that only outputs machine-readable output
