@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"io"
 	"log"
 	"math/rand"
 	"net/rpc"
@@ -88,12 +89,16 @@ func (pb *RemoteProgressBarClient) Start(total uint64) {
 	pb.client.Call(pb.id+".Start", total, new(interface{}))
 }
 
-func (pb *RemoteProgressBarClient) Set(current uint64) {
-	pb.client.Call(pb.id+".Set", current, new(interface{}))
+func (pb *RemoteProgressBarClient) Add(current uint64) {
+	pb.client.Call(pb.id+".Add", current, new(interface{}))
 }
 
 func (pb *RemoteProgressBarClient) Finish() {
 	pb.client.Call(pb.id+".Finish", nil, new(interface{}))
+}
+
+func (pb *RemoteProgressBarClient) NewProxyReader(r io.Reader) io.Reader {
+	return &packer.ProxyReader{Reader: r, ProgressBar: pb}
 }
 
 func (u *UiServer) Ask(query string, reply *string) (err error) {
@@ -128,7 +133,7 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	return nil
 }
 
-func RandStringBytes(n int) string {
+func RandStringBytes(n int) string { // TODO(azr): remove before merging
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	b := make([]byte, n)
@@ -167,7 +172,7 @@ func (pb *RemoteProgressBarServer) Start(total uint64, _ *interface{}) error {
 	return nil
 }
 
-func (pb *RemoteProgressBarServer) Set(current uint64, _ *interface{}) error {
-	pb.pb.Set(current)
+func (pb *RemoteProgressBarServer) Add(current uint64, _ *interface{}) error {
+	pb.pb.Add(current)
 	return nil
 }
