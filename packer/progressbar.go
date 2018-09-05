@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -18,6 +19,7 @@ type ProgressBar interface {
 }
 
 type StackableProgressBar struct {
+	items   int32
 	total   uint64
 	started bool
 	BasicProgressBar
@@ -42,13 +44,21 @@ func (spb *StackableProgressBar) start() {
 
 func (spb *StackableProgressBar) Start(total uint64) {
 	atomic.AddUint64(&spb.total, total)
+	atomic.AddInt32(&spb.items, 1)
 	spb.group.Add(1)
 	spb.startOnce.Do(spb.start)
-	spb.SetTotal64(int64(spb.total))
+	spb.SetTotal64(int64(atomic.LoadUint64(&spb.total)))
+	spb.prefix()
+}
+
+func (spb *StackableProgressBar) prefix() {
+	spb.BasicProgressBar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", atomic.LoadInt32(&spb.items)))
 }
 
 func (spb *StackableProgressBar) Finish() {
+	atomic.AddInt32(&spb.items, -1)
 	spb.group.Done()
+	spb.prefix()
 }
 
 type BasicProgressBar struct {
