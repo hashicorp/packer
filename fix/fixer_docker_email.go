@@ -7,8 +7,8 @@ type FixerDockerEmail struct{}
 func (FixerDockerEmail) Fix(input map[string]interface{}) (map[string]interface{}, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
-		Builders       []map[string]interface{}
-		PostProcessors []map[string]interface{} `mapstructure:"post-processors"`
+		Builders []map[string]interface{}
+		PP       `mapstructure:",squash"`
 	}
 
 	// Decode the input into our structure, if we can
@@ -27,7 +27,9 @@ func (FixerDockerEmail) Fix(input map[string]interface{}) (map[string]interface{
 	}
 
 	// Go through each post-processor and delete `docker_login` if present
-	for _, pp := range tpl.PostProcessors {
+	pps := tpl.postProcessors()
+
+	for _, pp := range pps {
 		_, ok := pp["login_email"]
 		if !ok {
 			continue
@@ -36,7 +38,7 @@ func (FixerDockerEmail) Fix(input map[string]interface{}) (map[string]interface{
 	}
 
 	input["builders"] = tpl.Builders
-	input["post-processors"] = tpl.PostProcessors
+	input["post-processors"] = pps
 	return input, nil
 }
 
