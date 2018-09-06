@@ -6,7 +6,7 @@ type PP struct {
 }
 
 // postProcessors converts the variable structure of the template to a list
-func (pp *PP) postProcessors() []map[string]interface{} {
+func (pp *PP) ppList() []map[string]interface{} {
 	pps := make([]map[string]interface{}, 0, len(pp.PostProcessors))
 	for _, rawPP := range pp.PostProcessors {
 		switch pp := rawPP.(type) {
