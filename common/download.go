@@ -317,6 +317,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	bar := d.ProgressBar()
 	bar.Start(total)
+	defer bar.Finish()
 	bar.Add(current)
 
 	body := bar.NewProxyReader(resp.Body)
@@ -336,7 +337,6 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 			break
 		}
 	}
-	bar.Finish()
 	return nil
 }
 
@@ -430,6 +430,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 	bar := d.ProgressBar()
 
 	bar.Start(uint64(fi.Size()))
+	defer bar.Finish()
 	fProxy := bar.NewProxyReader(f)
 
 	// no bufferSize specified, so copy synchronously.
@@ -455,7 +456,6 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and we spin until it's done
 		err = <-errch
 	}
-	bar.Finish()
 
 	return err
 }
@@ -532,6 +532,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	bar := d.ProgressBar()
 
 	bar.Start(uint64(fi.Size()))
+	defer bar.Finish()
 	fProxy := bar.NewProxyReader(f)
 
 	// no bufferSize specified, so copy synchronously.
@@ -557,7 +558,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		// ...and as usual we spin until it's done
 		err = <-errch
 	}
-	bar.Finish()
 	return err
 }
 
