@@ -30,9 +30,7 @@ type Config struct {
 
 	// Image
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
-	PersistentVolumeSize           string `mapstructure:"persistent_volume_size"`
-	PersistentVolumeName           string `mapstructure:"persistent_volume_name"`
-	PersistentVolumeLatencyStorage bool   `mapstructure:"persistent_volume_latency_storage"`
+	PersistentVolumeSize int `mapstructure:"persistent_volume_size"`
 
 	ImageName       string        `mapstructure:"image_name"`
 	Shape           string        `mapstructure:"shape"`
@@ -52,6 +50,10 @@ type Config struct {
 	SSHSourceList string `mapstructure:"ssh_source_list"`
 
 	ctx interpolate.Context
+}
+
+func (c *Config) Identifier(s string) string {
+	return fmt.Sprintf("/Compute-%s/%s/%s", c.IdentityDomain, c.Username, s)
 }
 
 func NewConfig(raws ...interface{}) (*Config, error) {

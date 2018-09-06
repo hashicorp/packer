@@ -49,10 +49,9 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	version := len(imList.Entries) + 1
 	entriesClient := client.ImageListEntries()
 	entriesInput := compute.CreateImageListEntryInput{
-		Name: config.DestImageList,
-		MachineImages: []string{fmt.Sprintf("/Compute-%s/%s/%s",
-			config.IdentityDomain, config.Username, snap.MachineImage)},
-		Version: version,
+		Name:          config.DestImageList,
+		MachineImages: []string{config.Identifier(snap.MachineImage)},
+		Version:       version,
 	}
 	entryInfo, err := entriesClient.CreateImageListEntry(&entriesInput)
 	if err != nil {

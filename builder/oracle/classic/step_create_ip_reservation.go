@@ -36,6 +36,7 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+	// TODO: state key prefixes for multiple hosts
 	state.Put("instance_ip", ipRes.IP)
 	state.Put("ipres_name", ipresName)
 	return multistep.ActionContinue
