@@ -456,7 +456,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		err = <-errch
 	}
 	bar.Finish()
-	f.Close()
+
 	return err
 }
 
@@ -558,7 +558,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		err = <-errch
 	}
 	bar.Finish()
-	f.Close()
 	return err
 }
 
