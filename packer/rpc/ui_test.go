@@ -3,20 +3,23 @@ package rpc
 import (
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type testUi struct {
-	askCalled      bool
-	askQuery       string
-	errorCalled    bool
-	errorMessage   string
-	machineCalled  bool
-	machineType    string
-	machineArgs    []string
-	messageCalled  bool
-	messageMessage string
-	sayCalled      bool
-	sayMessage     string
+	askCalled         bool
+	askQuery          string
+	errorCalled       bool
+	errorMessage      string
+	machineCalled     bool
+	machineType       string
+	machineArgs       []string
+	messageCalled     bool
+	messageMessage    string
+	sayCalled         bool
+	sayMessage        string
+	progressBarCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -44,6 +47,11 @@ func (u *testUi) Message(message string) {
 func (u *testUi) Say(message string) {
 	u.sayCalled = true
 	u.sayMessage = message
+}
+
+func (u *testUi) ProgressBar() packer.ProgressBar {
+	u.progressBarCalled = true
+	return new(packer.NoopProgressBar)
 }
 
 func TestUiRPC(t *testing.T) {
@@ -86,6 +94,10 @@ func TestUiRPC(t *testing.T) {
 	uiClient.Say("message")
 	if ui.sayMessage != "message" {
 		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
+	uiClient.ProgressBar()
+	if ui.progressBarCalled != true {
+		t.Fatalf("ProgressBar not called.")
 	}
 
 	uiClient.Machine("foo", "bar", "baz")
