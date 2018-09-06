@@ -12,15 +12,15 @@ import (
 // ProgressBar allows to graphically display
 // a self refreshing progress bar.
 type ProgressBar interface {
-	Start(total uint64)
-	Add(current uint64)
+	Start(total int64)
+	Add(current int64)
 	NewProxyReader(r io.Reader) (proxy io.Reader)
 	Finish()
 }
 
 type StackableProgressBar struct {
 	items   int32
-	total   uint64
+	total   int64
 	started bool
 	BasicProgressBar
 	startOnce sync.Once
@@ -42,12 +42,12 @@ func (spb *StackableProgressBar) start() {
 	}()
 }
 
-func (spb *StackableProgressBar) Start(total uint64) {
-	atomic.AddUint64(&spb.total, total)
+func (spb *StackableProgressBar) Start(total int64) {
+	atomic.AddInt64(&spb.total, total)
 	atomic.AddInt32(&spb.items, 1)
 	spb.group.Add(1)
 	spb.startOnce.Do(spb.start)
-	spb.SetTotal64(int64(atomic.LoadUint64(&spb.total)))
+	spb.SetTotal64(atomic.LoadInt64(&spb.total))
 	spb.prefix()
 }
 
@@ -67,12 +67,12 @@ type BasicProgressBar struct {
 
 var _ ProgressBar = new(BasicProgressBar)
 
-func (bpb *BasicProgressBar) Start(total uint64) {
+func (bpb *BasicProgressBar) Start(total int64) {
 	bpb.SetTotal64(int64(total))
 	bpb.ProgressBar.Start()
 }
 
-func (bpb *BasicProgressBar) Add(current uint64) {
+func (bpb *BasicProgressBar) Add(current int64) {
 	bpb.ProgressBar.Add64(int64(current))
 }
 func (bpb *BasicProgressBar) NewProxyReader(r io.Reader) io.Reader {
@@ -94,8 +94,8 @@ type NoopProgressBar struct {
 
 var _ ProgressBar = new(NoopProgressBar)
 
-func (npb *NoopProgressBar) Start(uint64)                                     {}
-func (npb *NoopProgressBar) Add(uint64)                                       {}
+func (npb *NoopProgressBar) Start(int64)                                      {}
+func (npb *NoopProgressBar) Add(int64)                                        {}
 func (npb *NoopProgressBar) Finish()                                          {}
 func (npb *NoopProgressBar) NewProxyReader(r io.Reader) io.Reader             { return r }
 func (npb *NoopProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser { return r }
@@ -109,7 +109,7 @@ type ProxyReader struct {
 
 func (r *ProxyReader) Read(p []byte) (n int, err error) {
 	n, err = r.Reader.Read(p)
-	r.ProgressBar.Add(uint64(n))
+	r.ProgressBar.Add(int64(n))
 	return
 }
 
