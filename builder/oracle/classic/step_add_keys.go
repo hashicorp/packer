@@ -28,8 +28,7 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	sshPublicKey := bytes.TrimSpace(config.Comm.SSHPublicKey)
 
 	// form API call to add key to compute cloud
-	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key_%s",
-		config.IdentityDomain, config.Username, uuid.TimeOrderedUUID())
+	sshKeyName := config.Identifier(fmt.Sprintf("packer_generated_key_%s", uuid.TimeOrderedUUID()))
 
 	ui.Say(fmt.Sprintf("Creating temporary key: %s", sshKeyName))
 
