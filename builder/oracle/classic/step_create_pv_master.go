@@ -63,4 +63,35 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 }
 
 func (s *stepCreatePVMaster) Cleanup(state multistep.StateBag) {
+	_, deleted := state.GetOk("master_instance_deleted")
+	if deleted {
+		return
+	}
+
+	instanceID, ok := state.GetOk("master_instance_id")
+	if !ok {
+		return
+	}
+
+	// terminate instance
+	ui := state.Get("ui").(packer.Ui)
+	client := state.Get("client").(*compute.ComputeClient)
+
+	ui.Say("Terminating builder instance...")
+
+	instanceClient := client.Instances()
+	input := &compute.DeleteInstanceInput{
+		Name: s.name,
+		ID:   instanceID.(string),
+	}
+
+	err := instanceClient.DeleteInstance(input)
+	if err != nil {
+		err = fmt.Errorf("Problem destroying instance: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return
+	}
+	// TODO wait for instance state to change to deleted?
+	ui.Say("Terminated master instance.")
 }

@@ -76,13 +76,12 @@ func (s *stepCreatePVBuilder) Cleanup(state multistep.StateBag) {
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*compute.ComputeClient)
-	config := state.Get("config").(*Config)
 
 	ui.Say("Terminating builder instance...")
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
-		Name: config.ImageName,
+		Name: s.name,
 		ID:   instanceID.(string),
 	}
 
