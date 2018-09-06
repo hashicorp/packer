@@ -3,8 +3,9 @@ package rpc
 import (
 	"io"
 	"log"
-	"math/rand"
 	"net/rpc"
+
+	"github.com/hashicorp/packer/common/random"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -133,20 +134,10 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	return nil
 }
 
-func RandStringBytes(n int) string { // TODO(azr): remove before merging
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
-}
-
 func (u *UiServer) ProgressBar(_ *string, reply *interface{}) error {
 	bar := u.ui.ProgressBar()
 
-	callbackName := RandStringBytes(6)
+	callbackName := random.AlphaNum(6)
 
 	log.Printf("registering progressbar %s", callbackName)
 	err := u.register(callbackName, &RemoteProgressBarServer{bar})
