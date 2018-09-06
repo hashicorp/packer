@@ -18,6 +18,16 @@ type ProgressBar interface {
 	Finish()
 }
 
+// StackableProgressBar is a progress bar that
+// allows to track multiple downloads at once.
+// Every call to Start increments a counter that
+// will display the number of current loadings.
+// Every call to Start will add total to an internal
+// total that is the total displayed.
+//
+// When all active downloads are finished
+// StackableProgressBar will clean itself to a default
+// state.
 type StackableProgressBar struct {
 	items   int32
 	total   int64
@@ -61,6 +71,9 @@ func (spb *StackableProgressBar) Finish() {
 	spb.prefix()
 }
 
+// BasicProgressBar is packer's basic progress bar.
+// Current implementation will always try to keep
+// itself at the bottom of a terminal.
 type BasicProgressBar struct {
 	*pb.ProgressBar
 }
@@ -88,7 +101,7 @@ func (bpb *BasicProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser {
 	}
 }
 
-// NoopProgressBar is a silent progress bar
+// NoopProgressBar is a silent progress bar.
 type NoopProgressBar struct {
 }
 
@@ -101,7 +114,7 @@ func (npb *NoopProgressBar) NewProxyReader(r io.Reader) io.Reader             { 
 func (npb *NoopProgressBar) NewProxyReadCloser(r io.ReadCloser) io.ReadCloser { return r }
 
 // ProxyReader implements io.ReadCloser but sends
-// count of read bytes to progress bar
+// count of read bytes to a progress bar
 type ProxyReader struct {
 	io.Reader
 	ProgressBar
