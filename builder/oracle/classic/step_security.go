@@ -3,6 +3,7 @@ package classic
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
@@ -30,6 +31,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 	runUUID := uuid.TimeOrderedUUID()
 
 	secListName := fmt.Sprintf("Packer_%s_Allow_%s_%s", commType, config.ImageName, runUUID)
+	log.Println(secListName)
 	secListClient := client.SecurityLists()
 	secListInput := compute.CreateSecurityListInput{
 		Description: fmt.Sprintf("Packer-generated security list to give packer %s access", commType),
@@ -73,6 +75,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 	secRulesClient := client.SecRules()
 	secRuleName := fmt.Sprintf("Packer-allow-%s-Rule_%s_%s", commType,
 		config.ImageName, runUUID)
+	log.Println(secRuleName)
 	secRulesInput := compute.CreateSecRuleInput{
 		Action:          "PERMIT",
 		Application:     application,

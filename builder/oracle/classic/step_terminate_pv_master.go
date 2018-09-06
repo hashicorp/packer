@@ -38,6 +38,7 @@ func (s *stepTerminatePVMaster) Run(_ context.Context, state multistep.StateBag)
 	}
 
 	ui.Message(fmt.Sprintf("Deleted master instance: %s.", instanceInfo.ID))
+	state.Put("master_instance_deleted", true)
 	return multistep.ActionContinue
 }
 
