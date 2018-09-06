@@ -24,17 +24,19 @@ type ProgressBar interface {
 // will display the number of current loadings.
 // Every call to Start will add total to an internal
 // total that is the total displayed.
-//
+// First call to Start will start a goroutine
+// that is waiting for every download to be finished.
+// Last call to Finish triggers a cleanup.
 // When all active downloads are finished
 // StackableProgressBar will clean itself to a default
 // state.
 type StackableProgressBar struct {
-	items   int32
-	total   int64
-	started bool
+	mtx sync.Mutex // locks in Start & Finish
 	BasicProgressBar
-	startOnce sync.Once
-	group     sync.WaitGroup
+	items int32
+	total int64
+
+	started bool
 }
 
 var _ ProgressBar = new(StackableProgressBar)
@@ -44,21 +46,21 @@ func (spb *StackableProgressBar) start() {
 	spb.BasicProgressBar.ProgressBar.SetUnits(pb.U_BYTES)
 
 	spb.BasicProgressBar.ProgressBar.Start()
-	go func() {
-		spb.group.Wait()
-		spb.BasicProgressBar.ProgressBar.Finish()
-		spb.startOnce = sync.Once{}
-		spb.BasicProgressBar.ProgressBar = nil
-	}()
+	spb.started = true
 }
 
 func (spb *StackableProgressBar) Start(total int64) {
-	atomic.AddInt64(&spb.total, total)
-	atomic.AddInt32(&spb.items, 1)
-	spb.group.Add(1)
-	spb.startOnce.Do(spb.start)
-	spb.SetTotal64(atomic.LoadInt64(&spb.total))
+	spb.mtx.Lock()
+
+	spb.total += total
+	spb.items++
+
+	if !spb.started {
+		spb.start()
+	}
+	spb.SetTotal64(spb.total)
 	spb.prefix()
+	spb.mtx.Unlock()
 }
 
 func (spb *StackableProgressBar) prefix() {
@@ -66,9 +68,19 @@ func (spb *StackableProgressBar) prefix() {
 }
 
 func (spb *StackableProgressBar) Finish() {
-	atomic.AddInt32(&spb.items, -1)
-	spb.group.Done()
+	spb.mtx.Lock()
+
+	spb.items--
+	if spb.items == 0 {
+		// slef cleanup
+		spb.BasicProgressBar.ProgressBar.Finish()
+		spb.BasicProgressBar.ProgressBar = nil
+		spb.started = false
+		spb.total = 0
+		return
+	}
 	spb.prefix()
+	spb.mtx.Unlock()
 }
 
 // BasicProgressBar is packer's basic progress bar.
@@ -81,12 +93,12 @@ type BasicProgressBar struct {
 var _ ProgressBar = new(BasicProgressBar)
 
 func (bpb *BasicProgressBar) Start(total int64) {
-	bpb.SetTotal64(int64(total))
+	bpb.SetTotal64(total)
 	bpb.ProgressBar.Start()
 }
 
 func (bpb *BasicProgressBar) Add(current int64) {
-	bpb.ProgressBar.Add64(int64(current))
+	bpb.ProgressBar.Add64(current)
 }
 func (bpb *BasicProgressBar) NewProxyReader(r io.Reader) io.Reader {
 	return &ProxyReader{
