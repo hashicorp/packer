@@ -20,7 +20,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer" // imports related to each Downloader implementation
+	"github.com/hashicorp/packer/packer"
 )
 
 // DownloadConfig is the configuration given to instantiate a new
