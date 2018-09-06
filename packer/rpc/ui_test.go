@@ -60,11 +60,11 @@ func (u *testUi) ProgressBar() packer.ProgressBar {
 	return u
 }
 
-func (u *testUi) Start(uint64) {
+func (u *testUi) Start(int64) {
 	u.progressBarStartCalled = true
 }
 
-func (u *testUi) Add(uint64) {
+func (u *testUi) Add(int64) {
 	u.progressBarAddCalled = true
 }
 

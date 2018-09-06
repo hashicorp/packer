@@ -242,7 +242,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		return err
 	}
 
-	var current uint64
+	var current int64
 
 	// Make the request. We first make a HEAD request so we can check
 	// if the server supports range queries. If the server/URL doesn't
@@ -286,7 +286,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 					if _, err = dst.Seek(0, os.SEEK_END); err == nil {
 						req.Header.Set("Range", fmt.Sprintf("bytes=%d-", fi.Size()))
 
-						current = uint64(fi.Size())
+						current = fi.Size()
 					}
 				}
 			}
@@ -313,7 +313,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 		return fmt.Errorf("HTTP error: %s", err.Error())
 	}
 
-	total := current + uint64(resp.ContentLength)
+	total := current + resp.ContentLength
 
 	bar := d.ProgressBar()
 	bar.Start(total)
@@ -429,7 +429,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 
 	bar := d.ProgressBar()
 
-	bar.Start(uint64(fi.Size()))
+	bar.Start(fi.Size())
 	defer bar.Finish()
 	fProxy := bar.NewProxyReader(f)
 
@@ -531,7 +531,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 
 	bar := d.ProgressBar()
 
-	bar.Start(uint64(fi.Size()))
+	bar.Start(fi.Size())
 	defer bar.Finish()
 	fProxy := bar.NewProxyReader(f)
 

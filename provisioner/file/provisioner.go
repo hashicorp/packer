@@ -177,7 +177,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 
 		// Get a default progress bar
 		bar := ui.ProgressBar()
-		bar.Start(uint64(info.Size()))
+		bar.Start(info.Size())
 		defer bar.Finish()
 
 		// Create ProxyReader for the current progress

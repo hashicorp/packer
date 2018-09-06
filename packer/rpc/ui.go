@@ -73,11 +73,11 @@ func (u *Ui) ProgressBar() packer.ProgressBar {
 
 var _ packer.ProgressBar = new(Ui)
 
-func (pb *Ui) Start(total uint64) {
+func (pb *Ui) Start(total int64) {
 	pb.client.Call("Ui.Start", total, new(interface{}))
 }
 
-func (pb *Ui) Add(current uint64) {
+func (pb *Ui) Add(current int64) {
 	pb.client.Call("Ui.Add", current, new(interface{}))
 }
 
@@ -134,12 +134,12 @@ func (pb *UiServer) Finish(_ string, _ *interface{}) error {
 	return nil
 }
 
-func (pb *UiServer) Start(total uint64, _ *interface{}) error {
+func (pb *UiServer) Start(total int64, _ *interface{}) error {
 	pb.ui.ProgressBar().Start(total)
 	return nil
 }
 
-func (pb *UiServer) Add(current uint64, _ *interface{}) error {
+func (pb *UiServer) Add(current int64, _ *interface{}) error {
 	pb.ui.ProgressBar().Add(current)
 	return nil
 }
