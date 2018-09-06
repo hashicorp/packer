@@ -8,6 +8,9 @@ import (
 type FixerManifestFilename struct{}
 
 func (FixerManifestFilename) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+	if input["post-processors"] == nil {
+		return input, nil
+	}
 
 	// Our template type we'll use for this fixer only
 	type template struct {
@@ -21,7 +24,7 @@ func (FixerManifestFilename) Fix(input map[string]interface{}) (map[string]inter
 	}
 
 	// Go through each post-processor and get out all the complex configs
-	pps := tpl.postProcessors()
+	pps := tpl.ppList()
 
 	for _, pp := range pps {
 		ppTypeRaw, ok := pp["type"]
@@ -47,7 +50,7 @@ func (FixerManifestFilename) Fix(input map[string]interface{}) (map[string]inter
 
 	}
 
-	input["post-processors"] = pps
+	input["post-processors"] = tpl.PostProcessors
 	return input, nil
 }
 
