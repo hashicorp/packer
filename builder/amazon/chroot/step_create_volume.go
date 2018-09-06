@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -54,11 +55,21 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	var createVolume *ec2.CreateVolumeInput
 	if config.FromScratch {
+		rootVolumeType := ec2.VolumeTypeGp2
+		if s.RootVolumeType == "io1" {
+			err := errors.New("Cannot use io1 volume when building from scratch")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		} else if s.RootVolumeType != "" {
+			rootVolumeType = s.RootVolumeType
+		}
 		createVolume = &ec2.CreateVolumeInput{
 			AvailabilityZone: instance.Placement.AvailabilityZone,
 			Size:             aws.Int64(s.RootVolumeSize),
-			VolumeType:       aws.String(ec2.VolumeTypeGp2),
+			VolumeType:       aws.String(rootVolumeType),
 		}
+
 	} else {
 		// Determine the root device snapshot
 		image := state.Get("source_image").(*ec2.Image)
