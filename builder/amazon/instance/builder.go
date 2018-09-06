@@ -257,6 +257,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AmiFilters:               b.config.SourceAmiFilter,
+			AMIVirtType:              b.config.AMIVirtType,
 		},
 		&awscommon.StepKeyPair{
 			Debug:        b.config.PackerDebug,
