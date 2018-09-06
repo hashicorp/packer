@@ -29,12 +29,11 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 	client := state.Get("client").(*compute.ComputeClient)
 	runUUID := uuid.TimeOrderedUUID()
 
-	namePrefix := fmt.Sprintf("/Compute-%s/%s/", config.IdentityDomain, config.Username)
 	secListName := fmt.Sprintf("Packer_%s_Allow_%s_%s", commType, config.ImageName, runUUID)
 	secListClient := client.SecurityLists()
 	secListInput := compute.CreateSecurityListInput{
 		Description: fmt.Sprintf("Packer-generated security list to give packer %s access", commType),
-		Name:        namePrefix + secListName,
+		Name:        config.Identifier(secListName),
 	}
 	_, err := secListClient.CreateSecurityList(&secListInput)
 	if err != nil {
@@ -78,8 +77,8 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 		Action:          "PERMIT",
 		Application:     application,
 		Description:     "Packer-generated security rule to allow ssh/winrm",
-		DestinationList: "seclist:" + namePrefix + secListName,
-		Name:            namePrefix + secRuleName,
+		DestinationList: "seclist:" + config.Identifier(secListName),
+		Name:            config.Identifier(secRuleName),
 		SourceList:      config.SSHSourceList,
 	}
 
@@ -112,10 +111,9 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 
 	ui.Say("Deleting temporary rules and lists...")
 
-	namePrefix := fmt.Sprintf("/Compute-%s/%s/", config.IdentityDomain, config.Username)
 	// delete security rules that Packer generated
 	secRulesClient := client.SecRules()
-	ruleInput := compute.DeleteSecRuleInput{Name: namePrefix + secRuleName.(string)}
+	ruleInput := compute.DeleteSecRuleInput{Name: config.Identifier(secRuleName.(string))}
 	err := secRulesClient.DeleteSecRule(&ruleInput)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Error deleting the packer-generated security rule %s; "+
@@ -124,7 +122,7 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 
 	// delete security list that Packer generated
 	secListClient := client.SecurityLists()
-	input := compute.DeleteSecurityListInput{Name: namePrefix + secListName.(string)}
+	input := compute.DeleteSecurityListInput{Name: config.Identifier(secListName.(string))}
 	err = secListClient.DeleteSecurityList(&input)
 	if err != nil {
 		ui.Say(fmt.Sprintf("Error deleting the packer-generated security list %s; "+
@@ -140,7 +138,7 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 		}
 		applicationClient := client.SecurityApplications()
 		deleteApplicationInput := compute.DeleteSecurityApplicationInput{
-			Name: namePrefix + application.(string),
+			Name: config.Identifier(application.(string)),
 		}
 		err = applicationClient.DeleteSecurityApplication(&deleteApplicationInput)
 		if err != nil {

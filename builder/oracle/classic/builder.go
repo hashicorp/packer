@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -31,6 +32,16 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 	}
 	b.config = config
 
+	var errs *packer.MultiError
+
+	if b.config.PersistentVolumeSize > 0 && b.config.Comm.Type != "ssh" {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("Persistent storage volumes are only supported on unix, and must use the ssh communicator."))
+	}
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, errs
+	}
 	return nil, nil
 }
 
@@ -59,16 +70,52 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("client", client)
+	runID := uuid.TimeOrderedUUID()
 
 	var steps []multistep.Step
-	if b.config.PersistentVolumeSize != "" {
+	if b.config.PersistentVolumeSize > 0 {
 		steps = []multistep.Step{
+			// TODO: make volume names UUIDs
 			&stepCreatePersistentVolume{
-				volumeSize:      b.config.PersistentVolumeSize,
-				volumeName:      b.config.PersistentVolumeName,
-				latencyStorage:  b.config.PersistentVolumeLatencyStorage,
+				volumeSize:      fmt.Sprintf("%d", b.config.PersistentVolumeSize),
+				volumeName:      fmt.Sprintf("master-storage_%s", runID),
 				sourceImageList: b.config.SourceImageList,
+				bootable:        true,
 			},
+			&stepCreatePersistentVolume{
+				volumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
+				volumeName: fmt.Sprintf("builder-storage_%s", runID),
+			},
+			&ocommon.StepKeyPair{
+				Debug:        b.config.PackerDebug,
+				Comm:         &b.config.Comm,
+				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
+			},
+			&stepCreateIPReservation{},
+			&stepAddKeysToAPI{},
+			&stepSecurity{},
+			&stepCreatePVMaster{
+				name:       fmt.Sprintf("master-instance_%s", runID),
+				volumeName: fmt.Sprintf("master-storage_%s", runID),
+			},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      ocommon.CommHost,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
+			},
+			&common.StepProvision{},
+			&stepTerminatePVMaster{},
+			&stepCreatePVBuilder{
+				name:              fmt.Sprintf("builder-instance_%s", runID),
+				masterVolumeName:  fmt.Sprintf("master-storage_%s", runID),
+				builderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
+			},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      ocommon.CommHost,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
+			},
+			&stepCreateImage{},
 		}
 	} else {
 		// Build the steps
