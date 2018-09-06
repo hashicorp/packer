@@ -118,3 +118,47 @@ func TestDecode(t *testing.T) {
 		}
 	}
 }
+
+func TestDecodeAdditive(t *testing.T) {
+	type Target struct {
+		Name    string
+		Address string
+		Time    time.Duration
+	}
+
+	cases := map[string]struct {
+		Input  []interface{}
+		Output *Target
+		Opts   *DecodeOpts
+	}{
+		"build type": {
+			[]interface{}{
+				map[string]interface{}{
+					"name": "{{build_type}}",
+				},
+				map[string]interface{}{
+					"packer_builder_type": "foo",
+				},
+			},
+			&Target{
+				Name:    "foo",
+				Address: "keep",
+			},
+			nil,
+		},
+	}
+	for k, tc := range cases {
+		result := Target{
+			Name:    "overwrite",
+			Address: "keep",
+		}
+		err := Decode(&result, tc.Opts, tc.Input...)
+		if err != nil {
+			t.Fatalf("err: %s\n\n%s", k, err)
+		}
+
+		if !reflect.DeepEqual(&result, tc.Output) {
+			t.Fatalf("bad:\n\n%#v\n\n%#v", &result, tc.Output)
+		}
+	}
+}
