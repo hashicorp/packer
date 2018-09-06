@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/rpc"
 
-	"github.com/hashicorp/packer/common/random"
-
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -67,38 +65,27 @@ func (u *Ui) Say(message string) {
 }
 
 func (u *Ui) ProgressBar() packer.ProgressBar {
-	var callMeMaybe string
-	if err := u.client.Call("Ui.ProgressBar", nil, &callMeMaybe); err != nil {
+	if err := u.client.Call("Ui.ProgressBar", new(interface{}), new(interface{})); err != nil {
 		log.Printf("Error in Ui RPC call: %s", err)
-		return new(packer.NoopProgressBar)
 	}
-
-	return &RemoteProgressBarClient{
-		id:     callMeMaybe,
-		client: u.client,
-	}
+	return u // Ui is also a progress bar !!
 }
 
-type RemoteProgressBarClient struct {
-	id     string // TODO(azr): don't need an id any more since bar is a singleton
-	client *rpc.Client
+var _ packer.ProgressBar = new(Ui)
+
+func (pb *Ui) Start(total uint64) {
+	pb.client.Call("Ui.Start", total, new(interface{}))
 }
 
-var _ packer.ProgressBar = new(RemoteProgressBarClient)
-
-func (pb *RemoteProgressBarClient) Start(total uint64) {
-	pb.client.Call(pb.id+".Start", total, new(interface{}))
+func (pb *Ui) Add(current uint64) {
+	pb.client.Call("Ui.Add", current, new(interface{}))
 }
 
-func (pb *RemoteProgressBarClient) Add(current uint64) {
-	pb.client.Call(pb.id+".Add", current, new(interface{}))
+func (pb *Ui) Finish() {
+	pb.client.Call("Ui.Finish", nil, new(interface{}))
 }
 
-func (pb *RemoteProgressBarClient) Finish() {
-	pb.client.Call(pb.id+".Finish", nil, new(interface{}))
-}
-
-func (pb *RemoteProgressBarClient) NewProxyReader(r io.Reader) io.Reader {
+func (pb *Ui) NewProxyReader(r io.Reader) io.Reader {
 	return &packer.ProxyReader{Reader: r, ProgressBar: pb}
 }
 
@@ -135,35 +122,24 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 }
 
 func (u *UiServer) ProgressBar(_ *string, reply *interface{}) error {
-	bar := u.ui.ProgressBar()
-
-	callbackName := random.AlphaNum(6)
-
-	log.Printf("registering progressbar %s", callbackName)
-	err := u.register(callbackName, &RemoteProgressBarServer{bar})
-	if err != nil {
-		log.Printf("failed to register a new progress bar rpc server, %s", err)
-		return err
-	}
-	*reply = callbackName
+	// No-op for now, this function might be
+	// used in the future if we want to use
+	// different progress bars with identifiers.
+	u.ui.ProgressBar()
 	return nil
 }
 
-type RemoteProgressBarServer struct {
-	pb packer.ProgressBar
-}
-
-func (pb *RemoteProgressBarServer) Finish(_ string, _ *interface{}) error {
-	pb.pb.Finish()
+func (pb *UiServer) Finish(_ string, _ *interface{}) error {
+	pb.ui.ProgressBar().Finish()
 	return nil
 }
 
-func (pb *RemoteProgressBarServer) Start(total uint64, _ *interface{}) error {
-	pb.pb.Start(total)
+func (pb *UiServer) Start(total uint64, _ *interface{}) error {
+	pb.ui.ProgressBar().Start(total)
 	return nil
 }
 
-func (pb *RemoteProgressBarServer) Add(current uint64, _ *interface{}) error {
-	pb.pb.Add(current)
+func (pb *UiServer) Add(current uint64, _ *interface{}) error {
+	pb.ui.ProgressBar().Add(current)
 	return nil
 }
