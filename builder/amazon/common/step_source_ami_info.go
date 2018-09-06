@@ -21,6 +21,7 @@ type StepSourceAMIInfo struct {
 	SourceAmi                string
 	EnableAMISriovNetSupport bool
 	EnableAMIENASupport      bool
+	AMIVirtType              string
 	AmiFilters               AmiFilterOptions
 }
 
@@ -105,11 +106,13 @@ func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if (s.EnableAMIENASupport || s.EnableAMISriovNetSupport) && *image.VirtualizationType != "hvm" {
-		err := fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if s.EnableAMIENASupport || s.EnableAMISriovNetSupport {
+		err = s.canEnableEnhancedNetworking(image)
+		if err != nil {
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	state.Put("source_image", image)
@@ -117,3 +120,16 @@ func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 }
 
 func (s *StepSourceAMIInfo) Cleanup(multistep.StateBag) {}
+
+func (s *StepSourceAMIInfo) canEnableEnhancedNetworking(image *ec2.Image) error {
+	if s.AMIVirtType == "hvm" {
+		return nil
+	}
+	if s.AMIVirtType != "" {
+		return fmt.Errorf("Cannot enable enhanced networking, AMIVirtType '%s' is not HVM", s.AMIVirtType)
+	}
+	if *image.VirtualizationType != "hvm" {
+		return fmt.Errorf("Cannot enable enhanced networking, source AMI '%s' is not HVM", s.SourceAmi)
+	}
+	return nil
+}
