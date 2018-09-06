@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"io"
 	"reflect"
 	"testing"
 
@@ -8,18 +9,23 @@ import (
 )
 
 type testUi struct {
-	askCalled         bool
-	askQuery          string
-	errorCalled       bool
-	errorMessage      string
-	machineCalled     bool
-	machineType       string
-	machineArgs       []string
-	messageCalled     bool
-	messageMessage    string
-	sayCalled         bool
-	sayMessage        string
-	progressBarCalled bool
+	askCalled      bool
+	askQuery       string
+	errorCalled    bool
+	errorMessage   string
+	machineCalled  bool
+	machineType    string
+	machineArgs    []string
+	messageCalled  bool
+	messageMessage string
+	sayCalled      bool
+	sayMessage     string
+
+	progressBarCalled               bool
+	progressBarStartCalled          bool
+	progressBarAddCalled            bool
+	progressBarFinishCalled         bool
+	progressBarNewProxyReaderCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -51,7 +57,24 @@ func (u *testUi) Say(message string) {
 
 func (u *testUi) ProgressBar() packer.ProgressBar {
 	u.progressBarCalled = true
-	return new(packer.NoopProgressBar)
+	return u
+}
+
+func (u *testUi) Start(uint64) {
+	u.progressBarStartCalled = true
+}
+
+func (u *testUi) Add(uint64) {
+	u.progressBarAddCalled = true
+}
+
+func (u *testUi) Finish() {
+	u.progressBarFinishCalled = true
+}
+
+func (u *testUi) NewProxyReader(r io.Reader) io.Reader {
+	u.progressBarNewProxyReaderCalled = true
+	return r
 }
 
 func TestUiRPC(t *testing.T) {
@@ -95,9 +118,25 @@ func TestUiRPC(t *testing.T) {
 	if ui.sayMessage != "message" {
 		t.Fatalf("bad: %#v", ui.errorMessage)
 	}
-	uiClient.ProgressBar()
+
+	bar := uiClient.ProgressBar()
 	if ui.progressBarCalled != true {
-		t.Fatalf("ProgressBar not called.")
+		t.Errorf("ProgressBar not called.")
+	}
+
+	bar.Start(100)
+	if ui.progressBarStartCalled != true {
+		t.Errorf("progressBar.Start not called.")
+	}
+
+	bar.Add(1)
+	if ui.progressBarAddCalled != true {
+		t.Errorf("progressBar.Add not called.")
+	}
+
+	bar.Finish()
+	if ui.progressBarFinishCalled != true {
+		t.Errorf("progressBar.Finish not called.")
 	}
 
 	uiClient.Machine("foo", "bar", "baz")
