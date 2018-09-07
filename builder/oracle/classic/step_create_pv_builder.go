@@ -14,7 +14,6 @@ type stepCreatePVBuilder struct {
 	name              string
 	masterVolumeName  string
 	builderVolumeName string
-	builderBootName   string
 }
 
 func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -42,15 +41,11 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 		},
 		Storage: []compute.StorageAttachmentInput{
 			{
-				Volume: s.builderBootName,
+				Volume: s.builderVolumeName,
 				Index:  1,
 			},
-			{
-				Volume: s.builderVolumeName,
-				Index:  2,
-			},
 		},
-		BootOrder:  []int{1},
+		ImageList:  config.SourceImageList,
 		Attributes: config.attribs,
 		SSHKeys:    []string{config.Comm.SSHKeyPairName},
 	}
