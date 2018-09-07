@@ -31,6 +31,8 @@ type Config struct {
 	// Image
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
 	PersistentVolumeSize int `mapstructure:"persistent_volume_size"`
+	//TODO
+	// builder image
 
 	ImageName       string        `mapstructure:"image_name"`
 	Shape           string        `mapstructure:"shape"`
