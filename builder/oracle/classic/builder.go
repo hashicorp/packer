@@ -82,12 +82,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				bootable:        true,
 			},
 			&stepCreatePersistentVolume{
-				volumeSize:      fmt.Sprintf("%d", b.config.PersistentVolumeSize),
-				volumeName:      fmt.Sprintf("builder-boot_%s", runID),
-				sourceImageList: b.config.SourceImageList,
-				bootable:        true,
-			},
-			&stepCreatePersistentVolume{
 				volumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
 				volumeName: fmt.Sprintf("builder-storage_%s", runID),
 			},
@@ -114,7 +108,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				name:              fmt.Sprintf("builder-instance_%s", runID),
 				masterVolumeName:  fmt.Sprintf("master-storage_%s", runID),
 				builderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
-				builderBootName:   fmt.Sprintf("builder-boot_%s", runID),
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
