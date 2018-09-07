@@ -148,23 +148,18 @@ func uint8ToStringHook(f reflect.Kind, t reflect.Kind, v interface{}) (interface
 }
 
 func updateString(oldString, newString string) string {
-	if oldString != "" {
-		if newString != "" {
-			return newString
-		}
-		return oldString
+	if newString != "" {
+		return newString
 	}
-	return newString
+	return oldString
 }
 
 func updateMap(oldMap, newMap map[string]string) map[string]string {
 	if oldMap == nil {
-		oldMap = newMap
+		return newMap
 	} else {
 		for newk, newv := range newMap {
-			if newk != "" {
-				oldMap[newk] = newv
-			}
+			oldMap[newk] = newv
 		}
 	}
 	return oldMap
