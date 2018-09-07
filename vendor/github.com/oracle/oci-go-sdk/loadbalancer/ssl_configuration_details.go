@@ -18,7 +18,7 @@ type SslConfigurationDetails struct {
 	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
 	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
 	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
-	// Example: `My_certificate_bundle`
+	// Example: `example_certificate_bundle`
 	CertificateName *string `mandatory:"true" json:"certificateName"`
 
 	// The maximum depth for peer certificate chain verification.

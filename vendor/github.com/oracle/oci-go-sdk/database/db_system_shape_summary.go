@@ -19,11 +19,23 @@ import (
 // see Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
 type DbSystemShapeSummary struct {
 
-	// The maximum number of CPU cores that can be enabled on the DB System.
+	// The maximum number of CPU cores that can be enabled on the DB System for this shape.
 	AvailableCoreCount *int `mandatory:"true" json:"availableCoreCount"`
 
 	// The name of the shape used for the DB System.
 	Name *string `mandatory:"true" json:"name"`
+
+	// The discrete number by which the CPU core count for this shape can be increased or decreased.
+	CoreCountIncrement *int `mandatory:"false" json:"coreCountIncrement"`
+
+	// The maximum number of database nodes available for this shape.
+	MaximumNodeCount *int `mandatory:"false" json:"maximumNodeCount"`
+
+	// The minimum number of CPU cores that can be enabled on the DB System for this shape.
+	MinimumCoreCount *int `mandatory:"false" json:"minimumCoreCount"`
+
+	// The minimum number of database nodes available for this shape.
+	MinimumNodeCount *int `mandatory:"false" json:"minimumNodeCount"`
 
 	// Deprecated. Use `name` instead of `shape`.
 	Shape *string `mandatory:"false" json:"shape"`

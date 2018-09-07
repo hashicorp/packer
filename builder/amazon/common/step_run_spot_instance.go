@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -22,7 +23,9 @@ import (
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
 	BlockDevices                      BlockDevices
+	BlockDurationMinutes              int64
 	Debug                             bool
+	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
 	IamInstanceProfile                string
@@ -44,10 +47,6 @@ type StepRunSpotInstance struct {
 
 func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	var keyName string
-	if name, ok := state.GetOk("keyPair"); ok {
-		keyName = name.(string)
-	}
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
 	ui := state.Get("ui").(packer.Ui)
 
@@ -189,13 +188,14 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		runOpts.SecurityGroupIds = securityGroupIds
 	}
 
-	if keyName != "" {
-		runOpts.KeyName = &keyName
+	if s.Comm.SSHKeyPairName != "" {
+		runOpts.KeyName = &s.Comm.SSHKeyPairName
 	}
 
 	runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-		SpotPrice:           &spotPrice,
-		LaunchSpecification: runOpts,
+		BlockDurationMinutes: &s.BlockDurationMinutes,
+		LaunchSpecification:  runOpts,
+		SpotPrice:            &spotPrice,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error launching source spot instance: %s", err)

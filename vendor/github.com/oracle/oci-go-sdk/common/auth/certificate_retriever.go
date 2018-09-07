@@ -82,6 +82,10 @@ func (r *urlBasedX509CertificateRetriever) renewCertificate(url string) (certifi
 	certificatePemRaw = body.Bytes()
 	var block *pem.Block
 	block, _ = pem.Decode(certificatePemRaw)
+	if block == nil {
+		return nil, nil, fmt.Errorf("failed to parse the new certificate, not valid pem data")
+	}
+
 	if certificate, err = x509.ParseCertificate(block.Bytes); err != nil {
 		return nil, nil, fmt.Errorf("failed to parse the new certificate: %s", err.Error())
 	}

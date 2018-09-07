@@ -65,13 +65,25 @@ Optional parameters:
     Packer injects some environmental variables by default into the environment,
     as well, which are covered in the section below.
 
--   `execute_command` (string) - The command to use to execute the script. By
-    default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`. The value
-    of this is treated as [configuration
-    template](/docs/templates/engine.html). There are two
-    available variables: `Path`, which is the path to the script to run, and
-    `Vars`, which is the list of `environment_vars`, if configured.
+-   `use_env_var_file` (boolean) - If true, Packer will write your environment
+    variables to a tempfile and source them from that file, rather than
+    declaring them inline in our execute_command. The default `execute_command`
+    will be `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`. This option is
+    unnecessary for most cases, but if you have extra quoting in your custom
+    `execute_command`, then this may be unnecessary for proper script execution.
+    Default: false.
 
+-   `execute_command` (string) - The command to use to execute the script. By
+    default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`, unless the
+    user has set `"use_env_var_file": true` -- in that case, the default
+    `execute_command` is `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`.
+    The value of this is treated as a
+    [configuration template](/docs/templates/engine.html). There are three
+    available variables:
+      *  `Path` is the path to the script to run
+      *  `Vars` is the list of `environment_vars`, if configured.
+      *  `EnvVarFile` is the path to the file containing env vars, if
+            `use_env_var_file` is true.
 -   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if the
     server disconnects us. A disconnect might happen if you restart the ssh
     server or reboot the host.
@@ -256,9 +268,48 @@ would be:
     create race conditions. Your first provisioner can tell the machine to wait
     until it completely boots.
 
-``` json
+```json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]
 }
+```
+
+## Quoting Environment Variables
+
+Packer manages quoting for you, so you should't have to worry about it.
+Below is an example of packer template inputs and what you should expect to get
+out:
+
+```json
+  "provisioners": [
+    {
+      "type":  "shell",
+      "environment_vars": ["FOO=foo",
+                           "BAR=bar's",
+                           "BAZ=baz=baz",
+                           "QUX==qux",
+                           "FOOBAR=foo bar",
+                           "FOOBARBAZ='foo bar baz'",
+                           "QUX2=\"qux\""],
+      "inline": ["echo \"FOO is $FOO\"",
+                 "echo \"BAR is $BAR\"",
+                 "echo \"BAZ is $BAZ\"",
+                 "echo \"QUX is $QUX\"",
+                 "echo \"FOOBAR is $FOOBAR\"",
+                 "echo \"FOOBARBAZ is $FOOBARBAZ\"",
+                 "echo \"QUX2 is $QUX2\""]
+    }
+```
+
+Output:
+
+```
+    docker: FOO is foo
+    docker: BAR is bar's
+    docker: BAZ is baz=baz
+    docker: QUX is =qux
+    docker: FOOBAR is foo bar
+    docker: FOOBARBAZ is 'foo bar baz'
+    docker: QUX2 is "qux"
 ```

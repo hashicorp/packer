@@ -2,23 +2,29 @@
 
 ### IMPROVEMENTS:
 
+* builder/alicloud: Support source image coming from marketplace [GH-6588]
 * builder/amazon-chroot: New feature `root_volume_tags` to tag the created
     volumes. [GH-6504]
 * builder/azure: Implement clean_image_name template engine. [GH-6558]
-* builder/digitalocean: Add support for tagging to instances [GH-6546]
 * builder/cloudstack: Add option to use a fixed port via public_port. [GH-6532]
+* builder/digitalocean: Add support for tagging to instances [GH-6546]
+* builder/googlecompute: Add new `min_cpu_platform` feature [GH-6607]
 * builder/lxc: Allow unplivileged LXC containers. [GH-6279]
 * builder/oci: Add `metadata` feature to Packer config. [GH-6498]
+* builder/openstack: Add support for getting config from clouds-public.yaml.
+    [GH-6595]
 * builder/openstack: Add support for ports. [GH-6570]
-* builder/openstack: Add support for getting config from clouds-public.yaml. [GH-6595]
+* builder/openstack: Add support for source_image_filter. [GH-6490]
+* builder/openstack: Migrate floating IP usage to Network v2 API from Compute
+    API. [GH-6373]
 * builder/openstack: Support Block Storage volumes as boot volume. [GH-6596]
-* builder/openstack: Migrate floating IP usage to Network v2 API from Compute API. [GH-6373]
-| builder/openstack: Add support for source_image_filter. [GH-6490]
 * builder/qemu: add ssh agent support. [GH-6541]
 * builder/qemu: New `use_backing_file` feature [GH-6249]
 * builder/vmware-iso: Try to use ISO files uploaded to the datastore when
     building remotely instead of uploading them freshly every time [GH-5165]
 * command/validate: Warn users if config needs fixing. [GH-6423]
+* core: Add progress-bar to download step. [GH-5851]
+* core: Deduplicate ui and log lines that stream to terminal [GH-6611]
 * post-processor/vagrant: Support for Docker images. [GH-6494]
 * postprocessor/vagrant: Add support for Azure. [GH-6576]
 * provisioner/ansible: Enable {{.WinRMPassword}} template engine. [GH-6450]
@@ -34,6 +40,8 @@
 * core: Better error handling in downloader when connection error occurs.
     [GH-6557]
 * core: Fix broken pathing checks in checksum files. [GH-6525]
+* provisioner/windows-restart: Provisioner now works when used in conjuction
+    with SSH communicator [GH-6606]
 
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: "owners" field on source_ami_filter is now required for

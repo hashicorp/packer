@@ -14,7 +14,7 @@ type ListObjectsRequest struct {
 	// The top-level namespace used for the request.
 	NamespaceName *string `mandatory:"true" contributesTo:"path" name:"namespaceName"`
 
-	// The name of the bucket.
+	// The name of the bucket. Avoid entering confidential information.
 	// Example: `my-new-bucket1`
 	BucketName *string `mandatory:"true" contributesTo:"path" name:"bucketName"`
 
@@ -31,10 +31,10 @@ type ListObjectsRequest struct {
 	Limit *int `mandatory:"false" contributesTo:"query" name:"limit"`
 
 	// When this parameter is set, only objects whose names do not contain the delimiter character
-	// (after an optionally specified prefix) are returned. Scanned objects whose names contain the
-	// delimiter have part of their name up to the last occurrence of the delimiter (after the optional
-	// prefix) returned as a set of prefixes. Note that only '/' is a supported delimiter character at
-	// this time.
+	// (after an optionally specified prefix) are returned in the objects key of the response body.
+	// Scanned objects whose names contain the delimiter have the part of their name up to the first
+	// occurrence of the delimiter (including the optional prefix) returned as a set of prefixes.
+	// Note that only '/' is a supported delimiter character at this time.
 	Delimiter *string `mandatory:"false" contributesTo:"query" name:"delimiter"`
 
 	// Object summary in list of objects includes the 'name' field. This parameter can also include 'size'
@@ -45,10 +45,24 @@ type ListObjectsRequest struct {
 
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListObjectsRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListObjectsRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListObjectsRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListObjectsResponse wrapper for the ListObjects operation
@@ -64,10 +78,15 @@ type ListObjectsResponse struct {
 	OpcClientRequestId *string `presentIn:"header" name:"opc-client-request-id"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-	// request, please provide this request ID.
+	// request, provide this request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 }
 
 func (response ListObjectsResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListObjectsResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

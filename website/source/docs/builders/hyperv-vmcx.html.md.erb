@@ -22,18 +22,18 @@ boots it, provisions software within the OS, and then shuts it down. The
 result of the Hyper-V builder is a directory containing all the files
 necessary to run the virtual machine portably.
 
-## Basic Example
+## Basic Examples
 
-Here is a basic example. This example is not functional. It will start the OS
-installer but then fail because we don't provide the preseed file for Ubuntu
-to self-install. Still, the example serves to show the basic configuration:
+Here are some basic examples. Neither example would really do anything more
+than producing a copy of the source virtual machine. However, the examples
+could be used as a starting point for more advanced templates.
 
 Import from folder:
 
 ``` json
 {
   "type": "hyperv-vmcx",
-  "clone_from_vmxc_path": "c:\\virtual machines\\ubuntu-12.04.5-server-amd64",
+  "clone_from_vmcx_path": "c:/virtual machines/ubuntu-12.04.5-server-amd64",
   "ssh_username": "packer",
   "ssh_password": "packer",
   "shutdown_command": "echo 'packer' | sudo -S shutdown -P now"
@@ -71,12 +71,14 @@ builder.
 
 ### Required for virtual machine import:
 
--   `clone_from_vmxc_path` (string) - The path to the exported virtual machine
-    folder.
+-   `clone_from_vmcx_path` (string) - The path to a directory containing a
+    previously exported virtual machine. The exported machine will be used
+    as the source for new VM.
+
 
 ### Required for virtual machine clone:
 
--   `clone_from_vm_name` (string) - The name of the vm to clone from. Ideally
+-   `clone_from_vm_name` (string) - The name of the VM to clone from. Ideally
     the machine to clone from should be shutdown.
 
 ### Optional:
@@ -94,11 +96,25 @@ builder.
     Packer to wait for 1 minute 30 seconds before typing the boot command.
     The default duration is "10s" (10 seconds).
 
--   `clone_all_snapshots` (boolean) - If set to `true` all snapshots will be
-    cloned when the machine is cloned.
+-   `clone_all_snapshots` (boolean) - If set to `true` all snapshots
+    present in the source machine will be copied when the machine is
+    cloned. The final result of the build will be an exported virtual
+    machine that contains all the snapshots of the parent.
 
--   `clone_from_snapshot_name` (string) - The name of the snapshot to clone
-    from.
+    If `clone_from_vmcx_path` is set, this setting has no effect and any
+    snapshots associated with the source VM will also be present in the
+    resultant VM.
+
+    If `clone_from_snapshot_name` is configured, this setting has no
+    effect and the resultant machine will not contain any snapshots.
+
+-   `clone_from_snapshot_name` (string) - The name of a snapshot in the
+    source machine to use as a starting point for the clone. If the value
+    given is an empty string, the last snapshot present in the source will
+    be chosen as the starting point for the new VM.
+
+    This setting only has an effect if using `clone_from_vm_name` and is
+    ignored otherwise.
 
 -   `cpu` (number) - The number of CPUs the virtual machine should use. If
     this isn't specified, the default is 1 CPU.
@@ -202,12 +218,13 @@ builder.
     the default virtual network card. The MAC address must be a string with
     no delimiters, for example "0000deadbeef".
 
--   `output_directory` (string) - This is the path to the directory where the
-    resulting virtual machine will be created. This may be relative or
-    absolute. If relative, the path is relative to the working directory when
-    `packer` is executed. This directory must not exist or be empty prior to
-    running the builder. By default this is "output-BUILDNAME" where
-    "BUILDNAME" is the name of the build.
+-   `output_directory` (string) - This setting specifies the directory that
+    artifacts from the build, such as the virtual machine files and disks,
+    will be output to. The path to the directory may be relative or
+    absolute. If relative, the path is relative to the working directory
+    `packer` is executed from. This directory must not exist or, if
+    created, must be empty prior to running the builder. By default this is
+    "output-BUILDNAME" where "BUILDNAME" is the name of the build.
 
 -   `ram_size` (number) - The amount, in megabytes, of RAM to assign to the
     VM. By default, this is 1 GB.
@@ -239,11 +256,11 @@ builder.
 -   `skip_compaction` (boolean) - If `true` skip compacting the hard disk for
     the virtual machine when exporting. This defaults to `false`.
 
--   `skip_export` (boolean) - If `true` Packer will skip the export of the
-    VM. If you are interested only in the VHD/VHDX files, you can enable
-    this option. This will create inline disks which improves the build
-    performance.  There will not be any copying of source VHDs to the temp
-    directory. This defaults to `false`.
+-   `skip_export` (boolean) - If `true` Packer will skip the export of the VM.
+    If you are interested only in the VHD/VHDX files, you can enable this
+    option. The resulting VHD/VHDX file will be output to
+    `<output_directory>/Virtual Hard Disks`. By default this option is `false`
+    and Packer will export the VM to `output_directory`.
 
 -   `switch_name` (string) - The name of the switch to connect the virtual
     machine to. By default, leaving this value unset will cause Packer to
@@ -254,6 +271,16 @@ builder.
     network card. By default none is set. If none is set then a VLAN is not
     set on the switch's network card. If this value is set it should match
     the VLAN specified in by `vlan_id`.
+
+-   `temp_path` (string) - The location under which Packer will create a
+    directory to house all the VM files and folders during the build.
+    By default `%TEMP%` is used which, for most systems, will evaluate to
+    `%USERPROFILE%/AppData/Local/Temp`.
+
+    The build directory housed under `temp_path` will have a name similar
+    to `packerhv1234567`. The seven digit number at the end of the name is
+    automatically generated by Packer to ensure the directory name is
+    unique.
 
 -   `vlan_id` (string) - This is the VLAN of the virtual machine's network
     card for the new virtual machine. By default none is set. If none is set

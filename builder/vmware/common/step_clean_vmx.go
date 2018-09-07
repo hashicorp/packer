@@ -47,7 +47,7 @@ func (s StepCleanVMX) Run(_ context.Context, state multistep.StateBag) multistep
 	}
 	vmxData["floppy0.present"] = "FALSE"
 
-	devRe := regexp.MustCompile(`^ide\d:\d\.`)
+	devRe := regexp.MustCompile(`^(ide|sata)\d:\d\.`)
 	for k, v := range vmxData {
 		ide := devRe.FindString(k)
 		if ide == "" || v != "cdrom-image" {

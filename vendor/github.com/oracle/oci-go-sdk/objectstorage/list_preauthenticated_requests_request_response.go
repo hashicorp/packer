@@ -14,11 +14,11 @@ type ListPreauthenticatedRequestsRequest struct {
 	// The top-level namespace used for the request.
 	NamespaceName *string `mandatory:"true" contributesTo:"path" name:"namespaceName"`
 
-	// The name of the bucket.
+	// The name of the bucket. Avoid entering confidential information.
 	// Example: `my-new-bucket1`
 	BucketName *string `mandatory:"true" contributesTo:"path" name:"bucketName"`
 
-	// Pre-authenticated requests returned by the list must have object names starting with prefix
+	// User-specified object name prefixes can be used to query and return a list of pre-authenticated requests.
 	ObjectNamePrefix *string `mandatory:"false" contributesTo:"query" name:"objectNamePrefix"`
 
 	// The maximum number of items to return.
@@ -29,10 +29,24 @@ type ListPreauthenticatedRequestsRequest struct {
 
 	// The client request ID for tracing.
 	OpcClientRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-client-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListPreauthenticatedRequestsRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListPreauthenticatedRequestsRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListPreauthenticatedRequestsRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListPreauthenticatedRequestsResponse wrapper for the ListPreauthenticatedRequests operation
@@ -41,14 +55,14 @@ type ListPreauthenticatedRequestsResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []PreauthenticatedRequestSummary instance
+	// A list of []PreauthenticatedRequestSummary instances
 	Items []PreauthenticatedRequestSummary `presentIn:"body"`
 
 	// Echoes back the value passed in the opc-client-request-id header, for use by clients when debugging.
 	OpcClientRequestId *string `presentIn:"header" name:"opc-client-request-id"`
 
 	// Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-	// request, please provide this request ID.
+	// request, provide this request ID.
 	OpcRequestId *string `presentIn:"header" name:"opc-request-id"`
 
 	// For pagination of a list of pre-authenticated requests, if this header appears in the response,
@@ -60,4 +74,9 @@ type ListPreauthenticatedRequestsResponse struct {
 
 func (response ListPreauthenticatedRequestsResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListPreauthenticatedRequestsResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

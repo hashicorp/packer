@@ -9,6 +9,7 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/oracle/oci-go-sdk/common"
 )
 
@@ -29,12 +30,6 @@ type LaunchDbSystemDetails struct {
 	// - Exadata.Full1.336 - Specify a multiple of 8, from 88 to 336.
 	// For VM DB systems, the core count is inferred from the specific VM shape chosen, so this parameter is not used.
 	CpuCoreCount *int `mandatory:"true" json:"cpuCoreCount"`
-
-	// The Oracle Database Edition that applies to all the databases on the DB System.
-	// Exadata DB Systems and 2-node RAC DB Systems require ENTERPRISE_EDITION_EXTREME_PERFORMANCE.
-	DatabaseEdition LaunchDbSystemDetailsDatabaseEditionEnum `mandatory:"true" json:"databaseEdition"`
-
-	DbHome *CreateDbHomeDetails `mandatory:"true" json:"dbHome"`
 
 	// The host name for the DB System. The host name must begin with an alphabetic character and
 	// can contain a maximum of 30 alphanumeric characters, including hyphens (-).
@@ -58,6 +53,8 @@ type LaunchDbSystemDetails struct {
 	// This restriction applies to both the client subnet and backup subnet.
 	SubnetId *string `mandatory:"true" json:"subnetId"`
 
+	DbHome *CreateDbHomeDetails `mandatory:"true" json:"dbHome"`
+
 	// The OCID of the backup network subnet the DB System is associated with. Applicable only to Exadata.
 	// **Subnet Restrictions:** See above subnetId's **Subnet Restriction**.
 	BackupSubnetId *string `mandatory:"false" json:"backupSubnetId"`
@@ -70,10 +67,10 @@ type LaunchDbSystemDetails struct {
 	// Specify 80 or 40. The default is 80 percent assigned to DATA storage. This is not applicable for VM based DB systems.
 	DataStoragePercentage *int `mandatory:"false" json:"dataStoragePercentage"`
 
-	// The type of redundancy configured for the DB System.
-	// Normal is 2-way redundancy, recommended for test and development systems.
-	// High is 3-way redundancy, recommended for production systems.
-	DiskRedundancy LaunchDbSystemDetailsDiskRedundancyEnum `mandatory:"false" json:"diskRedundancy,omitempty"`
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// The user-friendly name for the DB System. It does not have to be unique.
 	DisplayName *string `mandatory:"false" json:"displayName"`
@@ -83,18 +80,126 @@ type LaunchDbSystemDetails struct {
 	// (don't provide one). Otherwise, provide a valid DNS domain name. Hyphens (-) are not permitted.
 	Domain *string `mandatory:"false" json:"domain"`
 
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
 	// Size, in GBs, of the initial data volume that will be created and attached to VM-shape based DB system. This storage can later be scaled up if needed. Note that the total storage size attached will be more than what is requested, to account for REDO/RECO space and software volume.
 	InitialDataStorageSizeInGB *int `mandatory:"false" json:"initialDataStorageSizeInGB"`
 
-	// The Oracle license model that applies to all the databases on the DB System. The default is LICENSE_INCLUDED.
-	LicenseModel LaunchDbSystemDetailsLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
-
 	// Number of nodes to launch for a VM-shape based RAC DB system.
 	NodeCount *int `mandatory:"false" json:"nodeCount"`
+
+	// The Oracle Database Edition that applies to all the databases on the DB System.
+	// Exadata DB Systems and 2-node RAC DB Systems require ENTERPRISE_EDITION_EXTREME_PERFORMANCE.
+	DatabaseEdition LaunchDbSystemDetailsDatabaseEditionEnum `mandatory:"true" json:"databaseEdition"`
+
+	// The type of redundancy configured for the DB System.
+	// Normal is 2-way redundancy, recommended for test and development systems.
+	// High is 3-way redundancy, recommended for production systems.
+	DiskRedundancy LaunchDbSystemDetailsDiskRedundancyEnum `mandatory:"false" json:"diskRedundancy,omitempty"`
+
+	// The Oracle license model that applies to all the databases on the DB System. The default is LICENSE_INCLUDED.
+	LicenseModel LaunchDbSystemDetailsLicenseModelEnum `mandatory:"false" json:"licenseModel,omitempty"`
+}
+
+//GetAvailabilityDomain returns AvailabilityDomain
+func (m LaunchDbSystemDetails) GetAvailabilityDomain() *string {
+	return m.AvailabilityDomain
+}
+
+//GetBackupSubnetId returns BackupSubnetId
+func (m LaunchDbSystemDetails) GetBackupSubnetId() *string {
+	return m.BackupSubnetId
+}
+
+//GetClusterName returns ClusterName
+func (m LaunchDbSystemDetails) GetClusterName() *string {
+	return m.ClusterName
+}
+
+//GetCompartmentId returns CompartmentId
+func (m LaunchDbSystemDetails) GetCompartmentId() *string {
+	return m.CompartmentId
+}
+
+//GetCpuCoreCount returns CpuCoreCount
+func (m LaunchDbSystemDetails) GetCpuCoreCount() *int {
+	return m.CpuCoreCount
+}
+
+//GetDataStoragePercentage returns DataStoragePercentage
+func (m LaunchDbSystemDetails) GetDataStoragePercentage() *int {
+	return m.DataStoragePercentage
+}
+
+//GetDefinedTags returns DefinedTags
+func (m LaunchDbSystemDetails) GetDefinedTags() map[string]map[string]interface{} {
+	return m.DefinedTags
+}
+
+//GetDisplayName returns DisplayName
+func (m LaunchDbSystemDetails) GetDisplayName() *string {
+	return m.DisplayName
+}
+
+//GetDomain returns Domain
+func (m LaunchDbSystemDetails) GetDomain() *string {
+	return m.Domain
+}
+
+//GetFreeformTags returns FreeformTags
+func (m LaunchDbSystemDetails) GetFreeformTags() map[string]string {
+	return m.FreeformTags
+}
+
+//GetHostname returns Hostname
+func (m LaunchDbSystemDetails) GetHostname() *string {
+	return m.Hostname
+}
+
+//GetInitialDataStorageSizeInGB returns InitialDataStorageSizeInGB
+func (m LaunchDbSystemDetails) GetInitialDataStorageSizeInGB() *int {
+	return m.InitialDataStorageSizeInGB
+}
+
+//GetNodeCount returns NodeCount
+func (m LaunchDbSystemDetails) GetNodeCount() *int {
+	return m.NodeCount
+}
+
+//GetShape returns Shape
+func (m LaunchDbSystemDetails) GetShape() *string {
+	return m.Shape
+}
+
+//GetSshPublicKeys returns SshPublicKeys
+func (m LaunchDbSystemDetails) GetSshPublicKeys() []string {
+	return m.SshPublicKeys
+}
+
+//GetSubnetId returns SubnetId
+func (m LaunchDbSystemDetails) GetSubnetId() *string {
+	return m.SubnetId
 }
 
 func (m LaunchDbSystemDetails) String() string {
 	return common.PointerString(m)
+}
+
+// MarshalJSON marshals to json representation
+func (m LaunchDbSystemDetails) MarshalJSON() (buff []byte, e error) {
+	type MarshalTypeLaunchDbSystemDetails LaunchDbSystemDetails
+	s := struct {
+		DiscriminatorParam string `json:"source"`
+		MarshalTypeLaunchDbSystemDetails
+	}{
+		"NONE",
+		(MarshalTypeLaunchDbSystemDetails)(m),
+	}
+
+	return json.Marshal(&s)
 }
 
 // LaunchDbSystemDetailsDatabaseEditionEnum Enum with underlying type: string

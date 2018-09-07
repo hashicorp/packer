@@ -15,7 +15,6 @@ func TestStateBagShouldBePopulatedExpectedValues(t *testing.T) {
 
 	var expectedStateBagKeys = []string{
 		constants.AuthorizedKey,
-		constants.PrivateKey,
 
 		constants.ArmTags,
 		constants.ArmComputeName,

@@ -3,7 +3,7 @@
 
 // Object Storage Service API
 //
-// APIs for managing buckets and objects.
+// Common set of Object and Archive Storage APIs for managing buckets and objects.
 //
 
 package objectstorage
@@ -24,7 +24,8 @@ type ListObjects struct {
 	Prefixes []string `mandatory:"false" json:"prefixes"`
 
 	// The name of the object to use in the 'startWith' parameter to obtain the next page of
-	// a truncated ListObjects response.
+	// a truncated ListObjects response. Avoid entering confidential information.
+	// Example: test/object1.log
 	NextStartWith *string `mandatory:"false" json:"nextStartWith"`
 }
 

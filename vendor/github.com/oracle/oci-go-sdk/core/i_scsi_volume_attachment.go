@@ -53,6 +53,9 @@ type IScsiVolumeAttachment struct {
 	// Example: `My volume attachment`
 	DisplayName *string `mandatory:"false" json:"displayName"`
 
+	// Whether the attachment was created in read-only mode.
+	IsReadOnly *bool `mandatory:"false" json:"isReadOnly"`
+
 	// The Challenge-Handshake-Authentication-Protocol (CHAP) secret valid for the associated CHAP user name.
 	// (Also called the "CHAP password".)
 	// Example: `d6866c0d-298b-48ba-95af-309b4faux45e`
@@ -89,6 +92,11 @@ func (m IScsiVolumeAttachment) GetId() *string {
 //GetInstanceId returns InstanceId
 func (m IScsiVolumeAttachment) GetInstanceId() *string {
 	return m.InstanceId
+}
+
+//GetIsReadOnly returns IsReadOnly
+func (m IScsiVolumeAttachment) GetIsReadOnly() *bool {
+	return m.IsReadOnly
 }
 
 //GetLifecycleState returns LifecycleState

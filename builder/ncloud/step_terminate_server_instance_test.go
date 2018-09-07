@@ -11,8 +11,8 @@ import (
 func TestStepTerminateServerInstanceShouldFailIfOperationTerminationFails(t *testing.T) {
 	var testSubject = &StepTerminateServerInstance{
 		TerminateServerInstance: func(serverInstanceNo string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
-		Say:   func(message string) {},
-		Error: func(e error) {},
+		Say:                     func(message string) {},
+		Error:                   func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepTerminateServerInstance()
@@ -31,8 +31,8 @@ func TestStepTerminateServerInstanceShouldFailIfOperationTerminationFails(t *tes
 func TestStepTerminateServerInstanceShouldPassIfOperationTerminationPasses(t *testing.T) {
 	var testSubject = &StepTerminateServerInstance{
 		TerminateServerInstance: func(serverInstanceNo string) error { return nil },
-		Say:   func(message string) {},
-		Error: func(e error) {},
+		Say:                     func(message string) {},
+		Error:                   func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepTerminateServerInstance()

@@ -4,17 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/packer/builder/azure/common"
-)
-
-const (
-	TempNameAlphabet = "0123456789bcdfghjklmnpqrstvwxyz"
-
-	numbers   = "0123456789"
-	lowerCase = "abcdefghijklmnopqrstuvwxyz"
-	upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	TempPasswordAlphabet = numbers + lowerCase + upperCase
+	"github.com/hashicorp/packer/common/random"
 )
 
 type TempName struct {
@@ -34,7 +24,7 @@ type TempName struct {
 func NewTempName() *TempName {
 	tempName := &TempName{}
 
-	suffix := common.RandomString(TempNameAlphabet, 10)
+	suffix := random.AlphaNumLower(10)
 	tempName.ComputeName = fmt.Sprintf("pkrvm%s", suffix)
 	tempName.DeploymentName = fmt.Sprintf("pkrdp%s", suffix)
 	tempName.KeyVaultName = fmt.Sprintf("pkrkv%s", suffix)
@@ -46,7 +36,7 @@ func NewTempName() *TempName {
 	tempName.ResourceGroupName = fmt.Sprintf("packer-Resource-Group-%s", suffix)
 
 	tempName.AdminPassword = generatePassword()
-	tempName.CertificatePassword = common.RandomString(TempPasswordAlphabet, 32)
+	tempName.CertificatePassword = random.AlphaNum(32)
 
 	return tempName
 }
@@ -60,16 +50,16 @@ func NewTempName() *TempName {
 func generatePassword() string {
 	var s string
 	for i := 0; i < 100; i++ {
-		s := common.RandomString(TempPasswordAlphabet, 32)
-		if !strings.ContainsAny(s, numbers) {
+		s := random.AlphaNum(32)
+		if !strings.ContainsAny(s, random.PossibleNumbers) {
 			continue
 		}
 
-		if !strings.ContainsAny(s, lowerCase) {
+		if !strings.ContainsAny(s, random.PossibleLowerCase) {
 			continue
 		}
 
-		if !strings.ContainsAny(s, upperCase) {
+		if !strings.ContainsAny(s, random.PossibleUpperCase) {
 			continue
 		}
 

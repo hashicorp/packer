@@ -135,6 +135,11 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `block_duration_minutes` (int64) - Requires `spot_price` to
+    be set. The required duration for the Spot Instances (also known as Spot blocks).
+    This value must be a multiple of 60 (60, 120, 180, 240, 300, or 360).
+    You can't specify an Availability Zone group or a launch group if you specify a duration.
+
 -   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.

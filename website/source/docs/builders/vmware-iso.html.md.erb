@@ -146,8 +146,9 @@ builder.
     The default is `1`.
 
     For ESXi, this defaults to `zeroedthick`. The available options for ESXi
-    are: `zeroedthick`, `eagerzeroedthick`, `thin`, `rdm:dev`, `rdmp:dev`,
-    `2gbsparse`.
+    are: `zeroedthick`, `eagerzeroedthick`, `thin`. `rdm:dev`, `rdmp:dev`,
+    `2gbsparse` are not supported. Due to default disk compaction, when using
+    `zeroedthick` or `eagerzeroedthick` set `skip_compaction` to `true`.
 
     For more information, please consult the [Virtual Disk Manager User's
     Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
@@ -326,10 +327,12 @@ builder.
     `5m` or five minutes.
 
 -   `skip_compaction` (boolean) - VMware-created disks are defragmented and
-    compacted at the end of the build process using `vmware-vdiskmanager`. In
-    certain rare cases, this might actually end up making the resulting disks
-    slightly larger. If you find this to be the case, you can disable compaction
-    using this configuration value. Defaults to `false`.
+    compacted at the end of the build process using `vmware-vdiskmanager` or
+    `vmkfstools` in ESXi. In certain rare cases, this might actually end up
+    making the resulting disks slightly larger. If you find this to be the case,
+    you can disable compaction using this configuration value. Defaults to
+    `false`. Default to `true` for ESXi when `disk_type_id` is not explicitly
+    defined and `false` otherwise.
 
 -   `skip_export` (boolean) - Defaults to `false`. When enabled, Packer will
     not export the VM. Useful if the build output is not the resultant
@@ -341,10 +344,9 @@ builder.
     section below for more info.
 
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
-    the VM registered with the remote ESXi server. This is convenient if you
-    use packer to provision VMs on ESXi and don't want to use ovftool to
-    deploy the resulting artifact (VMX or OVA or whatever you used as `format`).
-    Defaults to `false`.
+    the VM registered with the remote ESXi server. If you do not need to export
+    the vm, then also set `skip_export: true` in order to avoid an unnecessary
+    step of using ovftool to export the vm. Defaults to `false`.
 
 -   `ovftool_options` (array of strings) - Extra options to pass to ovftool
     during export. Each item in the array is a new argument. The options
@@ -412,7 +414,7 @@ builder.
     wish to bind to all interfaces use `0.0.0.0`.
 
 -   `vnc_disable_password` (boolean) - Don't auto-generate a VNC password that
-    is used to secure the VNC communication with the VM. This must be set to 
+    is used to secure the VNC communication with the VM. This must be set to
     `true` if building on ESXi 6.5 and 6.7 with VNC enabled. Defaults to
     `false`.
 
@@ -439,8 +441,20 @@ machine, simulating a human actually typing the keyboard.
 
 -&gt; Keystrokes are typed as separate key up/down events over VNC with a
 default 100ms delay. The delay alleviates issues with latency and CPU
-contention. For local builds you can tune this delay by specifying
-e.g. `PACKER_KEY_INTERVAL=10ms` to speed through the boot command.
+contention. You can tune this delay on a per-builder basis by specifying
+"boot_key_interval" in your Packer template, for example:
+
+```
+{
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "boot_key_interval": "10ms"
+      ...
+    }
+  ]
+}
+```
 
 <%= partial "partials/builders/boot-command" %>
 

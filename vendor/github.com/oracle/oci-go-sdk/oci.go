@@ -1,4 +1,3 @@
-
 /*
 This is the official Go SDK for Oracle Cloud Infrastructure
 
@@ -186,7 +185,7 @@ Pagination
 
 When calling a list operation, the operation will retrieve a page of results. To retrieve more data, call the list operation again,
 passing in the value of the most recent response's OpcNextPage as the value of Page in the next list operation call.
-When there is no more data the OpcNextPage field will be nil. An example of pagination using this logic can be found here: https://github.com/oracle/oci-go-sdk/blob/master/example/example_core_test.go#L86
+When there is no more data the OpcNextPage field will be nil. An example of pagination using this logic can be found here: https://github.com/oracle/oci-go-sdk/blob/master/example/example_core_pagination_test.go
 
 Logging and Debugging
 
@@ -194,6 +193,35 @@ The SDK has a built-in logging mechanism used internally. The internal logging l
 requests, responses and potential errors when (un)marshalling request and responses.
 
 To expose debugging logs, set the environment variable "OCI_GO_SDK_DEBUG" to "1", or some other non empty string.
+
+Retry
+
+Sometimes you may need to wait until an attribute of a resource, such as an instance or a VCN, reaches a certain state.
+An example of this would be launching an instance and then waiting for the instance to become available, or waiting until a subnet in a VCN has been terminated.
+You might also want to retry the same operation again if there's network issue etc...
+This can be accomplished by using the RequestMetadata.RetryPolicy. You can find the examples here: https://github.com/oracle/oci-go-sdk/blob/master/example/example_retry_test.go
+
+Using the SDK with a proxy server
+
+The GO SDK uses the net/http package to make calls to OCI services. If your environment requires you to use a proxy server for outgoing HTTP requests
+then you can set this up in the following ways:
+
+1. Configuring environment variable as described here https://golang.org/pkg/net/http/#ProxyFromEnvironment
+2. Modifying the underlying Transport struct for a service client
+
+In order to modify the underlying Transport struct in HttpClient, you can do something similar to (sample code for audit service client):
+	// create audit service client
+	client, clerr := audit.NewAuditClientWithConfigurationProvider(common.DefaultConfigProvider())
+
+	// create a proxy url
+	proxyURL, err := url.Parse("http(s)://[username]:[password]@[ip address]:[port]")
+
+	client.HTTPClient = &http.Client{
+		// adding the proxy settings to the http.Transport
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyURL),
+		},
+	}
 
 
 Forward Compatibility
@@ -226,7 +254,7 @@ Please refer to this link: https://github.com/oracle/oci-go-sdk#help
 
 
 
- */
+*/
 package oci
 
 //go:generate go run cmd/genver/main.go cmd/genver/version_template.go --output common/version.go

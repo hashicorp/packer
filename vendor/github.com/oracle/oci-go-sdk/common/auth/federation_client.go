@@ -53,7 +53,11 @@ var (
 func newAuthClient(region common.Region, provider common.KeyProvider) *common.BaseClient {
 	signer := common.RequestSigner(provider, genericHeaders, bodyHeaders)
 	client := common.DefaultBaseClientWithSigner(signer)
-	client.Host = fmt.Sprintf(common.DefaultHostURLTemplate, "auth", string(region))
+	if region == common.RegionSEA {
+		client.Host = "https://auth.r1.oracleiaas.com"
+	} else {
+		client.Host = fmt.Sprintf(common.DefaultHostURLTemplate, "auth", string(region))
+	}
 	client.BasePath = "v1/x509"
 	return &client
 }

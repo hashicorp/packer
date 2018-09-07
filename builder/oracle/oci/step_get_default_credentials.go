@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -52,7 +51,8 @@ func (s *stepGetDefaultCredentials) Run(ctx context.Context, state multistep.Sta
 	}
 
 	// store so that we can access this later during provisioning
-	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	state.Put("winrm_password", s.Comm.WinRMPassword)
+	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }

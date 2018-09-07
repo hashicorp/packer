@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testConfig() map[interface{}]interface{} {
+	return map[interface{}]interface{}{
 		"inline": []interface{}{"foo", "bar"},
 	}
 }
