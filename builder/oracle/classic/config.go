@@ -31,8 +31,13 @@ type Config struct {
 	// Image
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
 	PersistentVolumeSize int `mapstructure:"persistent_volume_size"`
-	//TODO
-	// builder image
+	/* TODO:
+	builder image list
+	default to OL image
+	make sure if set then PVS is above
+	some way to choose which connection to use for master
+	possible ignore everything for builder and always use SSH keys
+	*/
 
 	ImageName       string        `mapstructure:"image_name"`
 	Shape           string        `mapstructure:"shape"`

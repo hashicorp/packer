@@ -75,7 +75,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	var steps []multistep.Step
 	if b.config.PersistentVolumeSize > 0 {
 		steps = []multistep.Step{
-			// TODO: make volume names UUIDs
 			&stepCreatePersistentVolume{
 				volumeSize:      fmt.Sprintf("%d", b.config.PersistentVolumeSize),
 				volumeName:      fmt.Sprintf("master-storage_%s", runID),
