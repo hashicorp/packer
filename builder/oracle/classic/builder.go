@@ -106,8 +106,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&stepTerminatePVMaster{},
 			&stepCreatePVBuilder{
 				name:              fmt.Sprintf("builder-instance_%s", runID),
-				masterVolumeName:  fmt.Sprintf("master-storage_%s", runID),
 				builderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
+			},
+			&stepAttachVolume{
+				volumeName:      fmt.Sprintf("master-storage_%s", runID),
+				index:           2,
+				instanceInfoKey: "builder_instance_info",
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
