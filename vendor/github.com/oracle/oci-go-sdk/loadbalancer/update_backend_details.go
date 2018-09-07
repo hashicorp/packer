@@ -17,17 +17,17 @@ type UpdateBackendDetails struct {
 
 	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
 	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
-	// Example: `true`
+	// Example: `false`
 	Backup *bool `mandatory:"true" json:"backup"`
 
 	// Whether the load balancer should drain this server. Servers marked "drain" receive no new
 	// incoming traffic.
-	// Example: `true`
+	// Example: `false`
 	Drain *bool `mandatory:"true" json:"drain"`
 
 	// Whether the load balancer should treat this server as offline. Offline servers receive no incoming
 	// traffic.
-	// Example: `true`
+	// Example: `false`
 	Offline *bool `mandatory:"true" json:"offline"`
 
 	// The load balancing policy weight assigned to the server. Backend servers with a higher weight receive a larger

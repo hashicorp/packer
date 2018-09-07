@@ -17,10 +17,9 @@ import (
 //
 // Uses:
 //   communicator packer.Communicator
-//   dir OutputDir
-//   driver Driver
-//   ui     packer.Ui
-//   vmx_path string
+//   driver       Driver
+//   ui           packer.Ui
+//   vmName       string
 //
 // Produces:
 //   <nothing>

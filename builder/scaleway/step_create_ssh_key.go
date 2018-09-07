@@ -1,6 +1,7 @@
 package scaleway
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
@@ -11,33 +12,33 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
 type stepCreateSSHKey struct {
-	Debug          bool
-	DebugKeyPath   string
-	PrivateKeyFile string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 }
 
 func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		state.Put("private_key", string(privateKeyBytes))
-		state.Put("ssh_pubkey", "")
+		s.Comm.SSHPrivateKey = privateKeyBytes
+		s.Comm.SSHPublicKey = nil
 
 		return multistep.ActionContinue
 	}
@@ -60,17 +61,17 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		Bytes:   priv_der,
 	}
 
-	// Set the private key in the statebag for later
-	state.Put("private_key", string(pem.EncodeToMemory(&priv_blk)))
+	// Set the private key in the config for later
+	s.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 
 	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
-	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
-	pub_sshformat = strings.Replace(pub_sshformat, " ", "_", -1)
+	pub_sshformat := ssh.MarshalAuthorizedKey(pub)
+	pub_sshformat = bytes.Replace(pub_sshformat, []byte(" "), []byte("_"), -1)
 
 	log.Printf("temporary ssh key created")
 
 	// Remember some state for the future
-	state.Put("ssh_pubkey", string(pub_sshformat))
+	s.Comm.SSHPublicKey = pub_sshformat
 
 	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {

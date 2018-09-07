@@ -18,11 +18,12 @@ type Template struct {
 	Description string
 	MinVersion  string
 
-	Variables      map[string]*Variable
-	Builders       map[string]*Builder
-	Provisioners   []*Provisioner
-	PostProcessors [][]*PostProcessor
-	Push           Push
+	Variables          map[string]*Variable
+	SensitiveVariables []*Variable
+	Builders           map[string]*Builder
+	Provisioners       []*Provisioner
+	PostProcessors     [][]*PostProcessor
+	Push               Push
 
 	// RawContents is just the raw data for this template
 	RawContents []byte

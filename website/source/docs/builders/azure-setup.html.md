@@ -139,15 +139,17 @@ A [resource group](https://azure.microsoft.com/en-us/documentation/articles/reso
 
 ``` shell
 $ azure location list
+$ LOCATION=xxx
+$ GROUPNAME=xxx
 # ...
 
-$ azure group create -n GROUPNAME -l LOCATION
+$ azure group create -n $GROUPNAME -l $LOCATION
 ```
 
 Python:
 
 ```shell
-$ az group create -n GROUPNAME -l LOCATION
+$ az group create -n $GROUPNAME -l $LOCATION
 ```
 
 Your storage account (below) will need to use the same `GROUPNAME` and `LOCATION`.
@@ -158,8 +160,8 @@ We will need to create a storage account where your Packer artifacts will be sto
 
 ``` shell
 $ azure storage account create \
-  -g GROUPNAME \
-  -l LOCATION \
+  -g $GROUPNAME \
+  -l $LOCATION \
   --sku-name LRS \
   --kind storage STORAGENAME
 ```
@@ -167,7 +169,7 @@ $ azure storage account create \
 Python:
 
 ```shell
-$ az storage account create -n STORAGENAME -g GROUPNAME -l LOCATION --sku Standard_LRS
+$ az storage account create -n STORAGENAME -g $GROUPNAME -l $LOCATION --sku Standard_LRS
 ```
 
 -&gt; `LRS` and `Standard_LRS` are meant as literal "LRS" or "Standard_LRS" and not as variables.
@@ -178,21 +180,29 @@ Make sure that `GROUPNAME` and `LOCATION` are the same as above. Also, ensure th
 
 An application represents a way to authorize access to the Azure API. Note that you will need to specify a URL for your application (this is intended to be used for OAuth callbacks) but these do not actually need to be valid URLs.
 
+First pick APPNAME, APPURL and PASSWORD:
+
+```shell
+APPNAME=packer.test
+APPURL=packer.test
+ PASSWORD=xxx
+```
+Password is your `client_secret` and can be anything you like. I recommend using ```openssl rand -base64 24```.
+
 ``` shell
 $ azure ad app create \
-  -n APPNAME \
-  -i APPURL \
-  --home-page APPURL \
-  -p PASSWORD
+  -n $APPNAME \
+  -i $APPURL \
+  --home-page $APPURL \
+  -p $PASSWORD
 ```
 
 Python:
 
 ```shell
-az ad app create --display-name APPNAME --identifier-uris APPURL --homepage APPURL --password PASSWORD
+$ az ad app create --display-name $APPNAME --identifier-uris $APPURL --homepage $APPURL --password $PASSWORD
 ```
 
-Password is your `client_secret` and can be anything you like. I recommend using `openssl rand -base64 24`.
 
 ### Create a Service Principal
 
@@ -201,18 +211,21 @@ You cannot directly grant permissions to an application. Instead, you create a s
 First, get the `APPID` for the application we just created.
 
 ``` shell
-$ azure ad app list --json \
-  | jq '.[] | select(.displayName | contains("APPNAME")) | .appId'
+$ azure ad app show --json --search $APPNAME  | jq '.[0] | .appId'
+$ APPID=$(!!)
 # ...
 
-$ azure ad sp create --applicationId APPID
+$ azure ad sp create --applicationId $APPID
 ```
 
 Python:
 
 ```shell
-$ id=$(az ad app list | jq -r '.[] | select(.displayName == "Packer") | .appId')
-$ az ad sp create --id "$id"
+$ az ad app list | jq -r ".[] | select(.displayName == \"${APPNAME}\") | .appId"
+$ APPID=$(!!)
+#...
+
+$ az ad sp create --id $APPID
 ```
 
 ### Grant Permissions to Your Application
@@ -221,7 +234,7 @@ Finally, we will associate the proper permissions with our application's service
 
 ``` shell
 $ azure role assignment create \
-  --spn APPURL \
+  --spn $APPURL \
   -o "Owner" \
   -c /subscriptions/SUBSCRIPTIONID
 ```
@@ -230,14 +243,13 @@ Python:
 
 ```shell
 # NOTE: Trying to assign the role to the service principal by name directly yields a HTTP 400 error. See: https://github.com/Azure/azure-cli/issues/4911
-$ az role assignment create --assignee "$(az ad sp list | jq -r '.[] | select(.displayName == "APPNAME") | .objectId')" --role Owner
+$ az role assignment create --assignee "$(az ad sp list | jq -r ".[] | select(.displayName == \"$APPNAME\") | .objectId")" --role Owner
 ```
 
 There are a lot of pre-defined roles and you can define your own with more granular permissions, though this is out of scope. You can see a list of pre-configured roles via:
 
 ``` shell
-$ azure role list --json \
-  | jq ".[] | {name:.Name, description:.Description}"
+$ azure role list --json | jq ".[] | {name:.Name, description:.Description}"
 ```
 
 ### Configuring Packer
@@ -248,15 +260,15 @@ Python:
 
 ```shell
 $ cat <<EOF
-> {
->   "subscription_id": $(az account show | jq '.id'),
->   "client_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .appId'),
->   "client_secret": "$password",
->   "location": "$location",
->   "tenant_id": $(az account show | jq '.tenantId')
->   "object_id": $(az ad app list | jq '.[] | select(.displayName == "Packer") | .objectId')
-> }
-> EOF
+{
+  "subscription_id": $(az account show | jq '.id'),
+  "client_id": $(az ad app list | jq ".[] | select(.displayName == \"$APPNAME\") | .appId"),
+  "client_secret": "$PASSWORD",
+  "location": "$LOCATION",
+  "tenant_id": $(az account show | jq '.tenantId'),
+  "object_id": $(az ad app list | jq ".[] | select(.displayName == \"$APPNAME\") | .objectId")
+}
+EOF
 ```
 
 node.js:
@@ -264,15 +276,14 @@ node.js:
 Get `subscription_id`:
 
 ``` shell
-$ azure account show --json \
-  | jq ".[] | .id"
+$ azure account show --json | jq ".[] | .id"
 ```
 
 Get `client_id`
 
 ``` shell
-$ azure ad app list --json \
-  | jq '.[] | select(.displayName | contains("APPNAME")) | .appId'
+$ azure ad app list --json | jq ".[] | select(.displayName | contains(\"$APPNAME\")) | .appId"
+$ CLIENT_ID=$(!!)
 ```
 
 
@@ -283,7 +294,7 @@ This cannot be retrieved. If you forgot this, you will have to delete and re-cre
 Get `object_id` (OSTYpe=Windows only)
 
 ``` shell
-azure ad sp show -n CLIENT_ID
+azure ad sp show -n $CLIENT_ID
 ```
 
 Get `resource_group_name`

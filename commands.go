@@ -35,12 +35,6 @@ func init() {
 			}, nil
 		},
 
-		"push": func() (cli.Command, error) {
-			return &command.PushCommand{
-				Meta: *CommandMeta,
-			}, nil
-		},
-
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
 				Meta: *CommandMeta,

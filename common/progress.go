@@ -61,7 +61,7 @@ func GetDefaultProgressBar() ProgressBar {
 	bar.ShowFinalTime = false
 	bar.SetUnits(pb.U_BYTES)
 	bar.Format("[=>-]")
-	bar.SetRefreshRate(1 * time.Second)
+	bar.SetRefreshRate(5 * time.Second)
 	return bar
 }
 

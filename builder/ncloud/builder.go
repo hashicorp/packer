@@ -51,7 +51,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Host: func(stateBag multistep.StateBag) (string, error) {
 					return stateBag.Get("PublicIP").(string), nil
 				},
-				SSHConfig: SSHConfig(b.config.Comm.SSHUsername),
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&common.StepProvision{},
 			NewStepStopServerInstance(conn, ui),

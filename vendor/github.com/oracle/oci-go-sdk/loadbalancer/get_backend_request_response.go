@@ -15,20 +15,34 @@ type GetBackendRequest struct {
 	LoadBalancerId *string `mandatory:"true" contributesTo:"path" name:"loadBalancerId"`
 
 	// The name of the backend set that includes the backend server.
-	// Example: `My_backend_set`
+	// Example: `example_backend_set`
 	BackendSetName *string `mandatory:"true" contributesTo:"path" name:"backendSetName"`
 
 	// The IP address and port of the backend server to retrieve.
-	// Example: `1.1.1.7:42`
+	// Example: `10.0.0.3:8080`
 	BackendName *string `mandatory:"true" contributesTo:"path" name:"backendName"`
 
 	// The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
 	// particular request, please provide the request ID.
 	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request GetBackendRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request GetBackendRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request GetBackendRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // GetBackendResponse wrapper for the GetBackend operation
@@ -47,4 +61,9 @@ type GetBackendResponse struct {
 
 func (response GetBackendResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response GetBackendResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

@@ -117,7 +117,7 @@ For example, assume a tab is typed at the end of each prompt line:
 
 ```
 $ packer p
-plugin  push    
-$ packer push -
--name       -sensitive  -token      -var        -var-file
+plugin  build
+$ packer build -
+-color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -var               -var-file
 ```

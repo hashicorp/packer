@@ -23,7 +23,7 @@ func testConfig() map[string]interface{} {
 		"ssh_username":            "foo",
 		"ram_size":                64,
 		"guest_additions_mode":    "none",
-		"clone_from_vmxc_path":    "generated",
+		"clone_from_vmcx_path":    "generated",
 		packer.BuildNameConfigKey: "foo",
 	}
 }
@@ -40,13 +40,13 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -65,13 +65,13 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	// Add a random key
 	config["i_should_not_be_valid"] = true
@@ -87,7 +87,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 func TestBuilderPrepare_CloneFromExistingMachineOrImportFromExportedMachineSettingsRequired(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	delete(config, "clone_from_vmxc_path")
+	delete(config, "clone_from_vmcx_path")
 
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -102,7 +102,7 @@ func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -111,7 +111,7 @@ func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
 	//Delete the folder immediately
 	os.RemoveAll(td)
 
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -126,7 +126,7 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -135,7 +135,7 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	//Only delete afterwards
 	defer os.RemoveAll(td)
 
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
@@ -146,10 +146,10 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	}
 }
 
-func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmxcPathRequired(t *testing.T) {
+func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmcxPathRequired(t *testing.T) {
 	var b Builder
 	config := testConfig()
-	delete(config, "clone_from_vmxc_path")
+	delete(config, "clone_from_vmcx_path")
 
 	config["clone_from_vm_name"] = "test_machine_name_that_does_not_exist"
 
@@ -162,7 +162,8 @@ func disabled_TestBuilderPrepare_CloneFromVmSettingUsedSoNoCloneFromVmxcPathRequ
 		t.Fatal("should have error")
 	} else {
 		errorMessage := err.Error()
-		if errorMessage != "1 error(s) occurred:\n\n* Virtual machine 'test_machine_name_that_does_not_exist' to clone from does not exist." {
+		if errorMessage != "1 error(s) occurred:\n\n* Virtual machine 'test_machine_name_that_does_not_exist' "+
+			"to clone from does not exist." {
 			t.Fatalf("should not have error: %s", err)
 		}
 	}
@@ -172,13 +173,13 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	// Test bad
 	config["iso_checksum"] = ""
@@ -210,13 +211,13 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	// Test bad
 	config["iso_checksum_type"] = ""
@@ -274,13 +275,13 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	delete(config, "iso_url")
 	delete(config, "iso_urls")
@@ -353,13 +354,13 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	delete(config, "floppy_files")
 	warns, err := b.Prepare(config)
@@ -395,13 +396,13 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	config["floppy_files"] = []string{"nonexistent.bat", "nonexistent.ps1"}
 	b = Builder{}
@@ -420,13 +421,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 	{
 		config := testConfig()
 
-		//Create vmxc folder
+		//Create vmcx folder
 		td, err := ioutil.TempDir("", "packer")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 		defer os.RemoveAll(td)
-		config["clone_from_vmxc_path"] = td
+		config["clone_from_vmcx_path"] = td
 
 		config["communicator"] = "winrm"
 		config["winrm_username"] = "username"
@@ -457,13 +458,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 	{
 		config := testConfig()
 
-		//Create vmxc folder
+		//Create vmcx folder
 		td, err := ioutil.TempDir("", "packer")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
 		defer os.RemoveAll(td)
-		config["clone_from_vmxc_path"] = td
+		config["clone_from_vmcx_path"] = td
 
 		config["communicator"] = "ssh"
 		config["ssh_username"] = "username"
@@ -495,13 +496,13 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	//Create vmxc folder
+	//Create vmcx folder
 	td, err := ioutil.TempDir("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
-	config["clone_from_vmxc_path"] = td
+	config["clone_from_vmcx_path"] = td
 
 	config[packer.UserVariablesConfigKey] = map[string]string{"test-variable": "test"}
 	config["boot_command"] = []string{"blah {{user `test-variable`}} blah"}

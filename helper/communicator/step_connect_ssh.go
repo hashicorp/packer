@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
@@ -177,9 +177,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
-			Connection: connFunc,
-			SSHConfig:  sshConfig,
-			Pty:        s.Config.SSHPty,
+			Connection:             connFunc,
+			SSHConfig:              sshConfig,
+			Pty:                    s.Config.SSHPty,
 			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
 			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
@@ -225,8 +225,8 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 				ssh.PasswordKeyboardInteractive(config.SSHBastionPassword)))
 	}
 
-	if config.SSHBastionPrivateKey != "" {
-		signer, err := commonssh.FileSigner(config.SSHBastionPrivateKey)
+	if config.SSHBastionPrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(config.SSHBastionPrivateKeyFile)
 		if err != nil {
 			return nil, err
 		}

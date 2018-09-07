@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/klauspost/pgzip"
 	"github.com/pierrec/lz4"
+	"github.com/ulikunitz/xz"
 )
 
 var (
@@ -142,6 +143,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			runtime.GOMAXPROCS(-1), target))
 		output, err = makeLZ4Writer(outputFile, p.config.CompressionLevel)
 		defer output.Close()
+	case "xz":
+		ui.Say(fmt.Sprintf("Using xz compression with 1 core for %s (library does not support MT)",
+			target))
+		output, err = makeXZWriter(outputFile)
+		defer output.Close()
 	case "pgzip":
 		ui.Say(fmt.Sprintf("Using pgzip compression with %d cores for %s",
 			runtime.GOMAXPROCS(-1), target))
@@ -209,6 +215,7 @@ func (config *Config) detectFromFilename() {
 		"gz":   "pgzip",
 		"lz4":  "lz4",
 		"bgzf": "bgzf",
+		"xz":   "xz",
 	}
 
 	if config.Format == "" {
@@ -271,6 +278,14 @@ func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser,
 		lzwriter.Header.HighCompression = true
 	}
 	return lzwriter, nil
+}
+
+func makeXZWriter(output io.WriteCloser) (io.WriteCloser, error) {
+	xzwriter, err := xz.NewWriter(output)
+	if err != nil {
+		return nil, err
+	}
+	return xzwriter, nil
 }
 
 func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {

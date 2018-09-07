@@ -42,10 +42,28 @@ type ListVolumeBackupsRequest struct {
 
 	// A filter to only return resources that match the given lifecycle state.  The state value is case-insensitive.
 	LifecycleState VolumeBackupLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListVolumeBackupsRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListVolumeBackupsRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListVolumeBackupsRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListVolumeBackupsResponse wrapper for the ListVolumeBackups operation
@@ -54,7 +72,7 @@ type ListVolumeBackupsResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []VolumeBackup instance
+	// A list of []VolumeBackup instances
 	Items []VolumeBackup `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -69,6 +87,11 @@ type ListVolumeBackupsResponse struct {
 
 func (response ListVolumeBackupsResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListVolumeBackupsResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
 
 // ListVolumeBackupsSortByEnum Enum with underlying type: string

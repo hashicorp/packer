@@ -45,9 +45,20 @@ type DhcpOptions struct {
 	// The OCID of the VCN the set of DHCP options belongs to.
 	VcnId *string `mandatory:"true" json:"vcnId"`
 
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 }
 
 func (m DhcpOptions) String() string {
@@ -57,20 +68,24 @@ func (m DhcpOptions) String() string {
 // UnmarshalJSON unmarshals from json
 func (m *DhcpOptions) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		DisplayName    *string                       `json:"displayName"`
-		CompartmentId  *string                       `json:"compartmentId"`
-		Id             *string                       `json:"id"`
-		LifecycleState DhcpOptionsLifecycleStateEnum `json:"lifecycleState"`
-		Options        []dhcpoption                  `json:"options"`
-		TimeCreated    *common.SDKTime               `json:"timeCreated"`
-		VcnId          *string                       `json:"vcnId"`
+		DefinedTags    map[string]map[string]interface{} `json:"definedTags"`
+		DisplayName    *string                           `json:"displayName"`
+		FreeformTags   map[string]string                 `json:"freeformTags"`
+		CompartmentId  *string                           `json:"compartmentId"`
+		Id             *string                           `json:"id"`
+		LifecycleState DhcpOptionsLifecycleStateEnum     `json:"lifecycleState"`
+		Options        []dhcpoption                      `json:"options"`
+		TimeCreated    *common.SDKTime                   `json:"timeCreated"`
+		VcnId          *string                           `json:"vcnId"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
 	if e != nil {
 		return
 	}
+	m.DefinedTags = model.DefinedTags
 	m.DisplayName = model.DisplayName
+	m.FreeformTags = model.FreeformTags
 	m.CompartmentId = model.CompartmentId
 	m.Id = model.Id
 	m.LifecycleState = model.LifecycleState
@@ -80,7 +95,7 @@ func (m *DhcpOptions) UnmarshalJSON(data []byte) (e error) {
 		if err != nil {
 			return err
 		}
-		m.Options[i] = nn
+		m.Options[i] = nn.(DhcpOption)
 	}
 	m.TimeCreated = model.TimeCreated
 	m.VcnId = model.VcnId

@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -21,6 +22,7 @@ import (
 type StepCreateVolume struct {
 	volumeId       string
 	RootVolumeSize int64
+	RootVolumeType string
 	RootVolumeTags awscommon.TagMap
 	Ctx            interpolate.Context
 }
@@ -53,11 +55,21 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 
 	var createVolume *ec2.CreateVolumeInput
 	if config.FromScratch {
+		rootVolumeType := ec2.VolumeTypeGp2
+		if s.RootVolumeType == "io1" {
+			err := errors.New("Cannot use io1 volume when building from scratch")
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		} else if s.RootVolumeType != "" {
+			rootVolumeType = s.RootVolumeType
+		}
 		createVolume = &ec2.CreateVolumeInput{
 			AvailabilityZone: instance.Placement.AvailabilityZone,
 			Size:             aws.Int64(s.RootVolumeSize),
-			VolumeType:       aws.String(ec2.VolumeTypeGp2),
+			VolumeType:       aws.String(rootVolumeType),
 		}
+
 	} else {
 		// Determine the root device snapshot
 		image := state.Get("source_image").(*ec2.Image)
@@ -70,25 +82,12 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 			}
 		}
 
-		if rootDevice == nil {
-			err := fmt.Errorf("Couldn't find root device!")
+		ui.Say("Creating the root volume...")
+		createVolume, err = s.buildCreateVolumeInput(*instance.Placement.AvailabilityZone, rootDevice)
+		if err != nil {
 			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
-		}
-
-		ui.Say("Creating the root volume...")
-		vs := *rootDevice.Ebs.VolumeSize
-		if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
-			vs = s.RootVolumeSize
-		}
-
-		createVolume = &ec2.CreateVolumeInput{
-			AvailabilityZone: instance.Placement.AvailabilityZone,
-			Size:             aws.Int64(vs),
-			SnapshotId:       rootDevice.Ebs.SnapshotId,
-			VolumeType:       rootDevice.Ebs.VolumeType,
-			Iops:             rootDevice.Ebs.Iops,
 		}
 	}
 
@@ -136,4 +135,34 @@ func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting EBS volume: %s", err))
 	}
+}
+
+func (s *StepCreateVolume) buildCreateVolumeInput(az string, rootDevice *ec2.BlockDeviceMapping) (*ec2.CreateVolumeInput, error) {
+	if rootDevice == nil {
+		return nil, fmt.Errorf("Couldn't find root device!")
+	}
+	createVolumeInput := &ec2.CreateVolumeInput{
+		AvailabilityZone: aws.String(az),
+		Size:             rootDevice.Ebs.VolumeSize,
+		SnapshotId:       rootDevice.Ebs.SnapshotId,
+		VolumeType:       rootDevice.Ebs.VolumeType,
+		Iops:             rootDevice.Ebs.Iops,
+	}
+	if s.RootVolumeSize > *rootDevice.Ebs.VolumeSize {
+		createVolumeInput.Size = aws.Int64(s.RootVolumeSize)
+	}
+
+	if s.RootVolumeType == "" || s.RootVolumeType == *rootDevice.Ebs.VolumeType {
+		return createVolumeInput, nil
+	}
+
+	if s.RootVolumeType == "io1" {
+		return nil, fmt.Errorf("Root volume type cannot be io1, because existing root volume type was %s", *rootDevice.Ebs.VolumeType)
+	}
+
+	createVolumeInput.VolumeType = aws.String(s.RootVolumeType)
+	// non io1 cannot set iops
+	createVolumeInput.Iops = nil
+
+	return createVolumeInput, nil
 }

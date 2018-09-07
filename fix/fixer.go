@@ -36,6 +36,9 @@ func init() {
 		"amazon-private-ip":          new(FixerAmazonPrivateIP),
 		"docker-email":               new(FixerDockerEmail),
 		"powershell-escapes":         new(FixerPowerShellEscapes),
+		"hyperv-deprecations":        new(FixerHypervDeprecations),
+		"hyperv-vmxc-typo":           new(FixerHypervVmxcTypo),
+		"vmware-compaction":          new(FixerVMwareCompaction),
 	}
 
 	FixerOrder = []string{
@@ -55,5 +58,6 @@ func init() {
 		"amazon-private-ip",
 		"docker-email",
 		"powershell-escapes",
+		"vmware-compaction",
 	}
 }

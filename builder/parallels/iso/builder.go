@@ -192,11 +192,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostInterfaces: b.config.HostInterfaces,
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
+			GroupInterval:  b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      parallelscommon.CommHost,
-			SSHConfig: parallelscommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&parallelscommon.StepUploadVersion{
 			Path: b.config.PrlctlVersionFile,
