@@ -3,6 +3,7 @@ package classic
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -48,10 +49,6 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 				Volume: s.builderVolumeName,
 				Index:  2,
 			},
-			{
-				Volume: s.masterVolumeName,
-				Index:  3,
-			},
 		},
 		BootOrder:  []int{1},
 		Attributes: config.attribs,
@@ -61,6 +58,20 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 	instanceInfo, err := instanceClient.CreateInstance(input)
 	if err != nil {
 		err = fmt.Errorf("Problem creating instance: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	log.Printf("Created instance %s", instanceInfo.Name)
+
+	saClient := client.StorageAttachments()
+	saInput := &compute.CreateStorageAttachmentInput{
+		Index:             3,
+		InstanceName:      s.name,
+		StorageVolumeName: s.masterVolumeName,
+	}
+	if _, err := saClient.CreateStorageAttachment(saInput); err != nil {
+		err = fmt.Errorf("Problem attaching master volume: %s", err)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
