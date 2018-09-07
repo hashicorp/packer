@@ -58,7 +58,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 
 	state.Put("master_instance_info", instanceInfo)
 	state.Put("master_instance_id", instanceInfo.ID)
-	ui.Message(fmt.Sprintf("Created master instance: %s.", instanceInfo.ID))
+	ui.Message(fmt.Sprintf("Created master instance: %s.", instanceInfo.Name))
 	return multistep.ActionContinue
 }
 

@@ -12,7 +12,6 @@ import (
 
 type stepCreatePVBuilder struct {
 	name              string
-	masterVolumeName  string
 	builderVolumeName string
 }
 
@@ -59,22 +58,10 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 	}
 	log.Printf("Created instance %s", instanceInfo.Name)
 
-	saClient := client.StorageAttachments()
-	saInput := &compute.CreateStorageAttachmentInput{
-		Index:             3,
-		InstanceName:      s.name,
-		StorageVolumeName: s.masterVolumeName,
-	}
-	if _, err := saClient.CreateStorageAttachment(saInput); err != nil {
-		err = fmt.Errorf("Problem attaching master volume: %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-
 	state.Put("builder_instance_info", instanceInfo)
 	state.Put("builder_instance_id", instanceInfo.ID)
-	ui.Message(fmt.Sprintf("Created builder instance: %s.", instanceInfo.ID))
+
+	ui.Message(fmt.Sprintf("Created builder instance: %s.", instanceInfo.Name))
 	return multistep.ActionContinue
 }
 
@@ -105,4 +92,5 @@ func (s *stepCreatePVBuilder) Cleanup(state multistep.StateBag) {
 	}
 	// TODO wait for instance state to change to deleted?
 	ui.Say("Terminated builder instance.")
+
 }
