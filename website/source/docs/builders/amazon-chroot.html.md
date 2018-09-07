@@ -254,6 +254,11 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
+-   `root_volume_type` (string) - The type of EBS volume for the chroot environment
+     and resulting AMI. The default value is the type of the `source_ami`, unless
+    `from_scratch` is true, in which case the default value is `gp2`. You can only
+     specify `io1` if building based on top of a `source_ami` which is also `io1`.
+
 -   `root_volume_tags` (object of key/value strings) - Tags to apply to the volumes
     that are *launched*. This is a
     [template engine](/docs/templates/engine.html),
