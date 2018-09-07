@@ -25,8 +25,7 @@ post-processors like
 [artifice](https://www.packer.io/docs/post-processors/artifice.html),
 [compress](https://www.packer.io/docs/post-processors/compress.html),
 [docker-push](https://www.packer.io/docs/post-processors/docker-push.html),
-[atlas](https://www.packer.io/docs/post-processors/atlas.html), or a third-party
-post-processor.
+ or a third-party post-processor.
 
 ## Basic example
 

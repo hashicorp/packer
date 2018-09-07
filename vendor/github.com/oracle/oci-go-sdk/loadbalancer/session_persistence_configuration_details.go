@@ -23,12 +23,12 @@ type SessionPersistenceConfigurationDetails struct {
 
 	// The name of the cookie used to detect a session initiated by the backend server. Use '*' to specify
 	// that any cookie set by the backend causes the session to persist.
-	// Example: `myCookieName`
+	// Example: `example_cookie`
 	CookieName *string `mandatory:"true" json:"cookieName"`
 
 	// Whether the load balancer is prevented from directing traffic from a persistent session client to
 	// a different backend server if the original server is unavailable. Defaults to false.
-	// Example: `true`
+	// Example: `false`
 	DisableFallback *bool `mandatory:"false" json:"disableFallback"`
 }
 

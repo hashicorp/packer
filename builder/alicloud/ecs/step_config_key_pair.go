@@ -9,18 +9,16 @@ import (
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type stepConfigAlicloudKeyPair struct {
-	Debug                bool
-	SSHAgentAuth         bool
-	DebugKeyPath         string
-	TemporaryKeyPairName string
-	KeyPairName          string
-	PrivateKeyFile       string
-	RegionId             string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
+	RegionId     string
 
 	keyName string
 }
@@ -28,43 +26,41 @@ type stepConfigAlicloudKeyPair struct {
 func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
+	if s.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		state.Put("keyPair", s.KeyPairName)
-		state.Put("privateKey", string(privateKeyBytes))
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName == "" {
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName == "" {
 		ui.Say("Using SSH Agent with key pair in source image")
 		return multistep.ActionContinue
 	}
 
-	if s.SSHAgentAuth && s.KeyPairName != "" {
-		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.KeyPairName))
-		state.Put("keyPair", s.KeyPairName)
+	if s.Comm.SSHAgentAuth && s.Comm.SSHKeyPairName != "" {
+		ui.Say(fmt.Sprintf("Using SSH Agent for existing key pair %s", s.Comm.SSHKeyPairName))
 		return multistep.ActionContinue
 	}
 
-	if s.TemporaryKeyPairName == "" {
+	if s.Comm.SSHTemporaryKeyPairName == "" {
 		ui.Say("Not using temporary keypair")
-		state.Put("keyPair", "")
+		s.Comm.SSHKeyPairName = ""
 		return multistep.ActionContinue
 	}
 
 	client := state.Get("client").(*ecs.Client)
 
-	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.TemporaryKeyPairName))
+	ui.Say(fmt.Sprintf("Creating temporary keypair: %s", s.Comm.SSHTemporaryKeyPairName))
 	keyResp, err := client.CreateKeyPair(&ecs.CreateKeyPairArgs{
-		KeyPairName: s.TemporaryKeyPairName,
+		KeyPairName: s.Comm.SSHTemporaryKeyPairName,
 		RegionId:    common.Region(s.RegionId),
 	})
 	if err != nil {
@@ -73,11 +69,11 @@ func (s *stepConfigAlicloudKeyPair) Run(_ context.Context, state multistep.State
 	}
 
 	// Set the keyname so we know to delete it later
-	s.keyName = s.TemporaryKeyPairName
+	s.keyName = s.Comm.SSHTemporaryKeyPairName
 
 	// Set some state data for use in future steps
-	state.Put("keyPair", s.keyName)
-	state.Put("privateKey", keyResp.PrivateKeyBody)
+	s.Comm.SSHKeyPairName = s.keyName
+	s.Comm.SSHPrivateKey = []byte(keyResp.PrivateKeyBody)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
@@ -112,7 +108,7 @@ func (s *stepConfigAlicloudKeyPair) Cleanup(state multistep.StateBag) {
 	// If no key name is set, then we never created it, so just return
 	// If we used an SSH private key file, do not go about deleting
 	// keypairs
-	if s.PrivateKeyFile != "" || (s.KeyPairName == "" && s.keyName == "") {
+	if s.Comm.SSHPrivateKeyFile != "" || (s.Comm.SSHKeyPairName == "" && s.keyName == "") {
 		return
 	}
 

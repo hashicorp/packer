@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	"github.com/hashicorp/packer/common/random"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -22,10 +23,17 @@ func (s *stepCreateAMI) Run(ctx context.Context, state multistep.StateBag) multi
 	ui := state.Get("ui").(packer.Ui)
 
 	// Create the image
-	ui.Say(fmt.Sprintf("Creating the AMI: %s", config.AMIName))
+	amiName := config.AMIName
+	if config.AMIEncryptBootVolume {
+		// to avoid having a temporary unencrypted
+		// image named config.AMIName
+		amiName = random.AlphaNum(7)
+	}
+
+	ui.Say(fmt.Sprintf("Creating unencrypted AMI %s from instance %s", amiName, *instance.InstanceId))
 	createOpts := &ec2.CreateImageInput{
 		InstanceId:          instance.InstanceId,
-		Name:                &config.AMIName,
+		Name:                &amiName,
 		BlockDeviceMappings: config.BlockDevices.BuildAMIDevices(),
 	}
 

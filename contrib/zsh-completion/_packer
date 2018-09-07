@@ -5,7 +5,6 @@ _packer () {
     'build:Build image(s) from template'
     'fix:Fixes templates from old versions of packer'
     'inspect:See components of a template'
-    'push:Push template files to a Packer build service'
     'validate:Check that a template is valid'
     'version:Prints the Packer version'
   )
@@ -24,14 +23,6 @@ _packer () {
   
   local -a inspect_arguments && inspect_arguments=(
     '-machine-readable[Machine-readable output]' 
-    '(-)*:files:_files -g "*.json"'
-  )
-
-  local -a push_arguments && push_arguments=(
-    '-name=[(<name>) The destination build in Atlas.]'
-    '-token=[(<token>) Access token to use to upload.]'
-    '-var[("key=value") Variable for templates, can be used multiple times.]'
-    '-var-file=[(path) JSON file containing user variables.]' 
     '(-)*:files:_files -g "*.json"'
   )
 
@@ -57,8 +48,6 @@ _packer () {
             _arguments -s -S : $build_arguments ;;
           inspect)
             _arguments -s -S : $inspect_arguments ;;
-          push)
-            _arguments -s -S : $push_arguments ;;
           validate)
             _arguments -s -S : $validate_arguments ;;
         esac

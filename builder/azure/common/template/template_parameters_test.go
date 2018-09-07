@@ -14,8 +14,8 @@ func TestTemplateParametersShouldHaveExpectedKeys(t *testing.T) {
 		DnsNameForPublicIP:         &TemplateParameter{Value: "sentinel"},
 		OSDiskName:                 &TemplateParameter{Value: "sentinel"},
 		StorageAccountBlobEndpoint: &TemplateParameter{Value: "sentinel"},
-		VMName: &TemplateParameter{Value: "sentinel"},
-		VMSize: &TemplateParameter{Value: "sentinel"},
+		VMName:                     &TemplateParameter{Value: "sentinel"},
+		VMSize:                     &TemplateParameter{Value: "sentinel"},
 	}
 
 	bs, err := json.Marshal(params)
@@ -55,8 +55,8 @@ func TestParameterValuesShouldBeSet(t *testing.T) {
 		DnsNameForPublicIP:         &TemplateParameter{Value: "dnsnameforpublicip00"},
 		OSDiskName:                 &TemplateParameter{Value: "osdiskname00"},
 		StorageAccountBlobEndpoint: &TemplateParameter{Value: "storageaccountblobendpoint00"},
-		VMName: &TemplateParameter{Value: "vmname00"},
-		VMSize: &TemplateParameter{Value: "vmsize00"},
+		VMName:                     &TemplateParameter{Value: "vmname00"},
+		VMSize:                     &TemplateParameter{Value: "vmsize00"},
 	}
 
 	bs, err := json.Marshal(params)

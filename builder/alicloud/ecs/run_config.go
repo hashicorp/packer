@@ -31,19 +31,17 @@ type RunConfig struct {
 	InstanceName             string `mapstructure:"instance_name"`
 	InternetChargeType       string `mapstructure:"internet_charge_type"`
 	InternetMaxBandwidthOut  int    `mapstructure:"internet_max_bandwidth_out"`
-	TemporaryKeyPairName     string `mapstructure:"temporary_key_pair_name"`
 
 	// Communicator settings
-	Comm           communicator.Config `mapstructure:",squash"`
-	SSHKeyPairName string              `mapstructure:"ssh_keypair_name"`
-	SSHPrivateIp   bool                `mapstructure:"ssh_private_ip"`
+	Comm         communicator.Config `mapstructure:",squash"`
+	SSHPrivateIp bool                `mapstructure:"ssh_private_ip"`
 }
 
 func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
-	if c.SSHKeyPairName == "" && c.TemporaryKeyPairName == "" &&
-		c.Comm.SSHPrivateKey == "" && c.Comm.SSHPassword == "" && c.Comm.WinRMPassword == "" {
+	if c.Comm.SSHKeyPairName == "" && c.Comm.SSHTemporaryKeyPairName == "" &&
+		c.Comm.SSHPrivateKeyFile == "" && c.Comm.SSHPassword == "" && c.Comm.WinRMPassword == "" {
 
-		c.TemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		c.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
 	}
 
 	// Validation

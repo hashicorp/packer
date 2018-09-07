@@ -206,27 +206,27 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 
 func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 	c := testConfig()
-	c.TemporaryKeyPairName = ""
+	c.Comm.SSHTemporaryKeyPairName = ""
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.TemporaryKeyPairName == "" {
+	if c.Comm.SSHTemporaryKeyPairName == "" {
 		t.Fatal("keypair name is empty")
 	}
 
 	// Match prefix and UUID, e.g. "packer_5790d491-a0b8-c84c-c9d2-2aea55086550".
 	r := regexp.MustCompile(`\Apacker_(?:(?i)[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)\z`)
-	if !r.MatchString(c.TemporaryKeyPairName) {
+	if !r.MatchString(c.Comm.SSHTemporaryKeyPairName) {
 		t.Fatal("keypair name is not valid")
 	}
 
-	c.TemporaryKeyPairName = "ssh-key-123"
+	c.Comm.SSHTemporaryKeyPairName = "ssh-key-123"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.TemporaryKeyPairName != "ssh-key-123" {
+	if c.Comm.SSHTemporaryKeyPairName != "ssh-key-123" {
 		t.Fatal("keypair name does not match")
 	}
 }

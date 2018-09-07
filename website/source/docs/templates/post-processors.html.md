@@ -98,35 +98,6 @@ It is very important that any post processors that need to be run in order, be s
 As you may be able to imagine, the **simple** and **detailed** definitions are
 simply shortcuts for a **sequence** definition of only one element.
 
-## Creating Vagrant Boxes in Atlas
-
-It is important to sequence post processors when creating and uploading vagrant boxes to Atlas via Packer. Using a sequence will ensure that the post processors are ran in order and creates the vagrant box prior to uploading the box to Atlas.
-
-``` json
-{
-  "post-processors": [
-    [
-      {
-        "type": "vagrant",
-        "keep_input_artifact": false
-      },
-      {
-        "type": "atlas",
-        "only": ["virtualbox-iso"],
-        "artifact": "dundlermifflin/dwight-schrute",
-        "artifact_type": "vagrant.box",
-        "metadata": {
-          "provider": "virtualbox",
-          "version": "0.0.1"
-        }
-      }
-    ]
-  ]
-}
-```
-
-More documentation on the Atlas post-processor can be found [here](/docs/post-processors/atlas.html)
-
 ## Input Artifacts
 
 When using post-processors, the input artifact (coming from a builder or another

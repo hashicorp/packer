@@ -15,9 +15,9 @@ import (
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -31,7 +31,7 @@ type ESX5Driver struct {
 	Port           uint
 	Username       string
 	Password       string
-	PrivateKey     string
+	PrivateKeyFile string
 	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
@@ -46,7 +46,8 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
-	return nil
+	diskPath := d.datastorePath(diskPathLocal)
+	return d.sh("vmkfstools", "--punchzero", diskPath)
 }
 
 func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, adapter_type string, typeId string) error {
@@ -514,8 +515,8 @@ func (d *ESX5Driver) connect() error {
 			ssh.PasswordKeyboardInteractive(d.Password)),
 	}
 
-	if d.PrivateKey != "" {
-		signer, err := commonssh.FileSigner(d.PrivateKey)
+	if d.PrivateKeyFile != "" {
+		signer, err := helperssh.FileSigner(d.PrivateKeyFile)
 		if err != nil {
 			return err
 		}

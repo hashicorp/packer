@@ -56,7 +56,8 @@ func (s *StepMountGuestAdditions) Run(_ context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
-	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", s.GuestAdditionsPath, controllerNumber, controllerLocation))
+	log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", s.GuestAdditionsPath,
+		controllerNumber, controllerLocation))
 
 	return multistep.ActionContinue
 }

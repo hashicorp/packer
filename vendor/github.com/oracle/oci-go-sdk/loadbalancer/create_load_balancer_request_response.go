@@ -24,10 +24,24 @@ type CreateLoadBalancerRequest struct {
 	// has been deleted and purged from the system, then a retry of the original creation request
 	// may be rejected).
 	OpcRetryToken *string `mandatory:"false" contributesTo:"header" name:"opc-retry-token"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request CreateLoadBalancerRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request CreateLoadBalancerRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request CreateLoadBalancerRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // CreateLoadBalancerResponse wrapper for the CreateLoadBalancer operation
@@ -46,4 +60,9 @@ type CreateLoadBalancerResponse struct {
 
 func (response CreateLoadBalancerResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response CreateLoadBalancerResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

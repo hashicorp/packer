@@ -17,7 +17,8 @@ import (
 // How Load Balancing Policies Work (https://docs.us-phoenix-1.oraclecloud.com/Content/Balance/Reference/lbpolicies.htm).
 type LoadBalancerPolicy struct {
 
-	// The name of the load balancing policy.
+	// The name of a load balancing policy.
+	// Example: 'LEAST_CONNECTIONS'
 	Name *string `mandatory:"true" json:"name"`
 }
 

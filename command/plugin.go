@@ -48,7 +48,6 @@ import (
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
-	atlaspostprocessor "github.com/hashicorp/packer/post-processor/atlas"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
@@ -139,7 +138,6 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
-	"atlas":                new(atlaspostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),

@@ -18,6 +18,9 @@ type Context struct {
 	// "user" function reads from.
 	UserVariables map[string]string
 
+	// SensitiveVariables is a list of variables to sanitize.
+	SensitiveVariables []string
+
 	// EnableEnv enables the env function
 	EnableEnv bool
 

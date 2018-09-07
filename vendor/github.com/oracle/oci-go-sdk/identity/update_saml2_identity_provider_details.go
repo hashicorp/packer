@@ -20,6 +20,16 @@ type UpdateSaml2IdentityProviderDetails struct {
 	// be unique, and it's changeable.
 	Description *string `mandatory:"false" json:"description"`
 
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
 	// The URL for retrieving the identity provider's metadata,
 	// which contains information required for federating.
 	MetadataUrl *string `mandatory:"false" json:"metadataUrl"`
@@ -31,6 +41,16 @@ type UpdateSaml2IdentityProviderDetails struct {
 //GetDescription returns Description
 func (m UpdateSaml2IdentityProviderDetails) GetDescription() *string {
 	return m.Description
+}
+
+//GetFreeformTags returns FreeformTags
+func (m UpdateSaml2IdentityProviderDetails) GetFreeformTags() map[string]string {
+	return m.FreeformTags
+}
+
+//GetDefinedTags returns DefinedTags
+func (m UpdateSaml2IdentityProviderDetails) GetDefinedTags() map[string]map[string]interface{} {
+	return m.DefinedTags
 }
 
 func (m UpdateSaml2IdentityProviderDetails) String() string {

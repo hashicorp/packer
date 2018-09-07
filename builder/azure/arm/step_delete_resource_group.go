@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	retry "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -93,11 +94,19 @@ func (s *StepDeleteResourceGroup) deleteDeploymentResources(ctx context.Context,
 			resourceType,
 			resourceName))
 
-		err := deleteResource(ctx, s.client,
-			resourceType,
-			resourceName,
-			resourceGroupName)
-		s.reportIfError(err, resourceName)
+		err := retry.Retry(10, 600, 10, func(attempt uint) (bool, error) {
+			err := deleteResource(ctx, s.client,
+				resourceType,
+				resourceName,
+				resourceGroupName)
+			if err != nil {
+				s.reportIfError(err, resourceName)
+				return false, nil
+			}
+
+			return true, nil
+		})
+
 		if err = deploymentOperations.Next(); err != nil {
 			return err
 		}

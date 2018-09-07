@@ -18,7 +18,7 @@ type UpdateListenerRequest struct {
 	LoadBalancerId *string `mandatory:"true" contributesTo:"path" name:"loadBalancerId"`
 
 	// The name of the listener to update.
-	// Example: `My listener`
+	// Example: `example_listener`
 	ListenerName *string `mandatory:"true" contributesTo:"path" name:"listenerName"`
 
 	// The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
@@ -31,10 +31,24 @@ type UpdateListenerRequest struct {
 	// has been deleted and purged from the system, then a retry of the original creation request
 	// may be rejected).
 	OpcRetryToken *string `mandatory:"false" contributesTo:"header" name:"opc-retry-token"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request UpdateListenerRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request UpdateListenerRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request UpdateListenerRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // UpdateListenerResponse wrapper for the UpdateListener operation
@@ -53,4 +67,9 @@ type UpdateListenerResponse struct {
 
 func (response UpdateListenerResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response UpdateListenerResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

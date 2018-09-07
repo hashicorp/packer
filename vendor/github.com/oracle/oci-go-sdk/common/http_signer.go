@@ -46,13 +46,22 @@ var (
 	defaultGenericHeaders    = []string{"date", "(request-target)", "host"}
 	defaultBodyHeaders       = []string{"content-length", "content-type", "x-content-sha256"}
 	defaultBodyHashPredicate = func(r *http.Request) bool {
-		return r.Method == http.MethodPost || r.Method == http.MethodPut
+		return r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch
 	}
 )
 
 // DefaultRequestSigner creates a signer with default parameters.
 func DefaultRequestSigner(provider KeyProvider) HTTPRequestSigner {
 	return RequestSigner(provider, defaultGenericHeaders, defaultBodyHeaders)
+}
+
+// RequestSignerExcludeBody creates a signer without hash the body.
+func RequestSignerExcludeBody(provider KeyProvider) HTTPRequestSigner {
+	bodyHashPredicate := func(r *http.Request) bool {
+		// week request signer will not hash the body
+		return false
+	}
+	return RequestSignerWithBodyHashingPredicate(provider, defaultGenericHeaders, defaultBodyHeaders, bodyHashPredicate)
 }
 
 // RequestSigner creates a signer that utilizes the specified headers for signing
@@ -125,7 +134,7 @@ func calculateHashOfBody(request *http.Request) (err error) {
 	} else {
 		hash = hashAndEncode([]byte(""))
 	}
-	request.Header.Set("X-Content-Sha256", hash)
+	request.Header.Set(requestHeaderXContentSHA256, hash)
 	return
 }
 
@@ -224,7 +233,7 @@ func (signer ociRequestSigner) Sign(request *http.Request) (err error) {
 	authValue := fmt.Sprintf("Signature version=\"%s\",headers=\"%s\",keyId=\"%s\",algorithm=\"rsa-sha256\",signature=\"%s\"",
 		signerVersion, signingHeaders, keyID, signature)
 
-	request.Header.Set("Authorization", authValue)
+	request.Header.Set(requestHeaderAuthorization, authValue)
 
 	return
 }

@@ -96,7 +96,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
+	log.Println(b.config)
 	return nil, nil
 }
 
@@ -121,6 +122,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
 			BlockDevices:                      b.config.BlockDevices,
+			BlockDurationMinutes:              b.config.BlockDurationMinutes,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
@@ -141,6 +143,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
 			BlockDevices:                      b.config.BlockDevices,
+			Comm:                              &b.config.RunConfig.Comm,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
@@ -172,6 +175,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMISriovNetSupport: b.config.AMISriovNetSupport,
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AmiFilters:               b.config.SourceAmiFilter,
+			AMIVirtType:              b.config.AMIVirtType,
 		},
 		&awscommon.StepNetworkInfo{
 			VpcId:               b.config.VpcId,
@@ -183,12 +187,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AvailabilityZone:    b.config.AvailabilityZone,
 		},
 		&awscommon.StepKeyPair{
-			Debug:                b.config.PackerDebug,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:          b.config.SSHKeyPairName,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.RunConfig.Comm,
+			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
 			SecurityGroupFilter:   b.config.SecurityGroupFilter,
@@ -210,11 +211,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.SSHInterface),
-			SSHConfig: awscommon.SSHConfig(
-				b.config.RunConfig.Comm.SSHAgentAuth,
-				b.config.RunConfig.Comm.SSHUsername,
-				b.config.RunConfig.Comm.SSHPassword),
+				b.config.Comm.SSHInterface),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
 		&awscommon.StepStopEBSBackedInstance{

@@ -11,22 +11,23 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
 )
 
 type StepKeyPair struct {
-	Debug          bool
-	DebugKeyPath   string
-	PrivateKeyFile string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 }
 
 func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.PrivateKeyFile != "" {
-		privateKeyBytes, err := ioutil.ReadFile(s.PrivateKeyFile)
+	if s.Comm.SSHPrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			err = fmt.Errorf("Error loading configured private key file: %s", err)
 			ui.Error(err.Error())
@@ -42,8 +43,8 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 			return multistep.ActionHalt
 		}
 
-		state.Put("publicKey", string(ssh.MarshalAuthorizedKey(key.PublicKey())))
-		state.Put("privateKey", string(privateKeyBytes))
+		s.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(key.PublicKey())
+		s.Comm.SSHPrivateKey = privateKeyBytes
 
 		return multistep.ActionContinue
 	}
@@ -74,8 +75,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionHalt
 	}
 
-	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
-	state.Put("publicKey", pubSSHFormat)
+	s.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 	// If we're in debug mode, output the private key to the working
 	// directory.
