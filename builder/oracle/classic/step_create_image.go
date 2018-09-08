@@ -15,6 +15,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	//hook := state.Get("hook").(packer.Hook)
 	ui := state.Get("ui").(packer.Ui)
 	comm := state.Get("communicator").(packer.Communicator)
+
 	command := `#!/bin/sh
 	set -e
 	mkdir /builder
