@@ -39,7 +39,7 @@ of the step in question has limitations:
  * the template packer is building is **not** reloaded from file.
  * the resources specified from builders **are** reloaded from file.
 
-Check the specfiics on your builder to confirm their behavior.
+Check the specfics on your builder to confirm their behavior.
 
 ### Windows
 
