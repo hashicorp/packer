@@ -16,8 +16,8 @@ import (
 
 // Be sure to remove the Ansible stub file in each test with:
 //   defer os.Remove(config["command"].(string))
-func testConfig(t *testing.T) map[interface{}]interface{} {
-	m := make((map[interface{}]interface{}))
+func testConfig(t *testing.T) map[string]interface{} {
+	m := make(map[string]interface{})
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("err: %s", err)

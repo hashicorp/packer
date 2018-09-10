@@ -26,6 +26,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -57,8 +58,6 @@ type Config struct {
 	UseSFTP              bool     `mapstructure:"use_sftp"`
 	InventoryDirectory   string   `mapstructure:"inventory_directory"`
 	InventoryFile        string   `mapstructure:"inventory_file"`
-	// for internal use only; unsettable by user.
-	winrmpassword string
 }
 
 type Provisioner struct {
@@ -74,35 +73,14 @@ type PassthroughTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// This is a bit of a hack. For provisioners that need access to
-	// auto-generated WinRMPasswords, the mechanism of keeping provisioner data
-	// and build data totally segregated breaks down. We get around this by
-	// having the builder stash the WinRMPassword in the state bag, then
-	// grabbing it out of the statebag inside of StepProvision.  Then, when
-	// the time comes to provision for real, we run the prepare step one more
-	// time, now with WinRMPassword defined in the raws, and can store the
-	// password on the provisioner config without overwriting the rest of the
-	// work we've already done in the first prepare run.
-	if len(raws) == 1 {
-		for k, v := range raws[0].(map[interface{}]interface{}) {
-			if k.(string) == "WinRMPassword" {
-				p.config.winrmpassword = v.(string)
-
-				// Even if WinRMPassword is not gonna be used, we've stored the
-				// key and pointed it to an empty string. That means we'll
-				// always reach this on our second-run of Prepare()
-				return nil
-			}
-		}
-	}
-
 	p.done = make(chan struct{})
 
-	// don't interpolate winrmpassword yet; if we've made it to this line, then
-	// we have not obtained the winrm password yet.
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
 	p.config.ctx.Data = &PassthroughTemplate{
 		WinRMPassword: `{{.WinRMPassword}}`,
 	}
+
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -222,9 +200,8 @@ func (p *Provisioner) getVersion() error {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Ansible...")
 	// Interpolate env vars to check for .WinRMPassword
-	packer.LogSecretFilter.Set(p.config.winrmpassword)
 	p.config.ctx.Data = &PassthroughTemplate{
-		WinRMPassword: p.config.winrmpassword,
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
 	}
 	for i, envVar := range p.config.AnsibleEnvVars {
 		envVar, err := interpolate.Render(envVar, &p.config.ctx)
@@ -443,7 +420,12 @@ func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, pri
 
 	// remove winrm password from command, if it's been added
 	flattenedCmd := strings.Join(cmd.Args, " ")
-	ui.Say(fmt.Sprintf("Executing Ansible: %s", flattenedCmd))
+	sanitized := flattenedCmd
+	if len(getWinRMPassword(p.config.PackerBuildName)) > 0 {
+		sanitized = strings.Replace(sanitized,
+			getWinRMPassword(p.config.PackerBuildName), "*****", -1)
+	}
+	ui.Say(fmt.Sprintf("Executing Ansible: %s", sanitized))
 
 	if err := cmd.Start(); err != nil {
 		return err
@@ -569,6 +551,12 @@ func newSigner(privKeyFile string) (*signer, error) {
 	}
 
 	return signer, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
+	return winRMPass
 }
 
 // Ui provides concurrency-safe access to packer.Ui.
