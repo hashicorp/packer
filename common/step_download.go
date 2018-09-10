@@ -63,9 +63,6 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 
 	ui.Say(fmt.Sprintf("Retrieving %s", s.Description))
 
-	// Get a progress bar from the ui so we can hand it off to the download client
-	bar := GetProgressBar(ui, GetPackerConfigFromStateBag(state))
-
 	// First try to use any already downloaded file
 	// If it fails, proceed to regular download logic
 
@@ -99,7 +96,7 @@ func (s *StepDownload) Run(_ context.Context, state multistep.StateBag) multiste
 		}
 		downloadConfigs[i] = config
 
-		if match, _ := NewDownloadClient(config, bar).VerifyChecksum(config.TargetPath); match {
+		if match, _ := NewDownloadClient(config, ui).VerifyChecksum(config.TargetPath); match {
 			ui.Message(fmt.Sprintf("Found already downloaded, initial checksum matched, no download needed: %s", url))
 			finalPath = config.TargetPath
 			break
@@ -143,11 +140,8 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	var path string
 	ui := state.Get("ui").(packer.Ui)
 
-	// Get a progress bar and hand it off to the download client
-	bar := GetProgressBar(ui, GetPackerConfigFromStateBag(state))
-
-	// Create download client with config and progress bar
-	download := NewDownloadClient(config, bar)
+	// Create download client with config
+	download := NewDownloadClient(config, ui)
 
 	downloadCompleteCh := make(chan error, 1)
 	go func() {
@@ -159,7 +153,6 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 	for {
 		select {
 		case err := <-downloadCompleteCh:
-			bar.Finish()
 
 			if err != nil {
 				return "", err, true
@@ -174,7 +167,6 @@ func (s *StepDownload) download(config *DownloadConfig, state multistep.StateBag
 
 		case <-time.After(1 * time.Second):
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
-				bar.Finish()
 				ui.Say("Interrupt received. Cancelling download...")
 				return "", nil, false
 			}
