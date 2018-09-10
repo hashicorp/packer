@@ -50,6 +50,7 @@ type Config struct {
 	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
 	SSHProxyUsername          string        `mapstructure:"ssh_proxy_username"`
 	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
+	SSHHTTPProxy              string        `mapstructure:"ssh_http_proxy"`
 	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
 	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
 
@@ -264,8 +265,8 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			c.SSHFileTransferMethod))
 	}
 
-	if c.SSHBastionHost != "" && c.SSHProxyHost != "" {
-		errs = append(errs, errors.New("please specify either ssh_bastion_host or ssh_proxy_host, not both"))
+	if c.SSHProxyHost != "" && c.SSHHTTPProxy != "" {
+		errs = append(errs, errors.New("please specify either ssh_proxy_host or ssh_http_proxy, but not both"))
 	}
 
 	return errs

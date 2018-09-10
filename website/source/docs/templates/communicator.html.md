@@ -91,6 +91,9 @@ The SSH communicator has the following options:
 -   `ssh_host` (string) - The address to SSH to. This usually is automatically
     configured by the builder.
 
+-   `ssh_http_proxy` (string) - The URL of an HTTP CONNECT proxy to use for
+    SSH communication. Optional.
+
 *   `ssh_keep_alive_interval` (string) - How often to send "keep alive"
     messages to the server. Set to a negative value (`-1s`) to disable. Example
     value: `10s`. Defaults to `5s`.

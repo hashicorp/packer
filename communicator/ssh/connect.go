@@ -1,8 +1,13 @@
 package ssh
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"net"
+	"net/http"
+	"net/url"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -47,20 +52,76 @@ func ProxyConnectFunc(socksProxy string, socksAuth *proxy.Auth, network, addr st
 	}
 }
 
+// ProxyConnectFunc is a convenience method for returning a function
+// that connects to a host using an HTTP CONNECT proxy
+//
+// Note: shamelessly copied from https://github.com/golang/build/blob/ce623a5/cmd/buildlet/reverse.go#L213
+func HTTPProxyConnectFunc(proxyURL *url.URL, addr string) func() (net.Conn, error) {
+	return func() (net.Conn, error) {
+		proxyAddr := proxyURL.Host
+		if proxyURL.Port() == "" {
+			proxyAddr = net.JoinHostPort(proxyAddr, "80")
+		}
+
+		c, err := net.Dial("tcp", proxyAddr)
+		if err != nil {
+			return nil, fmt.Errorf("dialing proxy %q failed: %v", proxyAddr, err)
+		}
+
+		req := bytes.NewBuffer(nil)
+		fmt.Fprintf(req, "CONNECT %s HTTP/1.1\r\nHost: %s\r\n", addr, proxyURL.Hostname())
+		if proxyURL.User != nil {
+			auth := proxyURL.User.Username()
+			if p, ok := proxyURL.User.Password(); ok {
+				auth += ":" + p
+			}
+
+			fmt.Fprintf(req, "Proxy-Authorization: Basic %s\r\n", base64.StdEncoding.EncodeToString([]byte(auth)))
+		}
+		fmt.Fprintf(req, "\r\n")
+
+		req.WriteTo(c)
+
+		br := bufio.NewReader(c)
+		res, err := http.ReadResponse(br, nil)
+		if err != nil {
+			return nil, fmt.Errorf("reading HTTP response from CONNECT to %s via proxy %s failed: %v", addr, proxyAddr, err)
+		}
+		if res.StatusCode != 200 {
+			return nil, fmt.Errorf("proxy error from %s while dialing %s: %v", proxyAddr, addr, res.Status)
+		}
+
+		// It's safe to discard the bufio.Reader here and return the
+		// original TCP conn directly because we only use this for
+		// TLS, and in TLS the client speaks first, so we know there's
+		// no unbuffered data. But we can double-check.
+		if br.Buffered() > 0 {
+			return nil, fmt.Errorf("unexpected %d bytes of buffered data from CONNECT proxy %q", br.Buffered(), proxyAddr)
+		}
+
+		return c, nil
+	}
+}
+
 // BastionConnectFunc is a convenience method for returning a function
 // that connects to a host over a bastion connection.
 func BastionConnectFunc(
-	bProto string,
-	bAddr string,
+	connFunc func() (net.Conn, error),
 	bConf *ssh.ClientConfig,
 	proto string,
 	addr string) func() (net.Conn, error) {
 	return func() (net.Conn, error) {
-		// Connect to the bastion
-		bastion, err := ssh.Dial(bProto, bAddr, bConf)
+		sshConn, err := connFunc()
 		if err != nil {
 			return nil, fmt.Errorf("Error connecting to bastion: %s", err)
 		}
+
+		sshClientConn, sshChans, sshReqs, err := ssh.NewClientConn(sshConn, addr, bConf)
+		if err != nil {
+			return nil, fmt.Errorf("Error initialising bastion client: %s", err)
+		}
+
+		bastion := ssh.NewClient(sshClientConn, sshChans, sshReqs)
 
 		// Connect through to the end host
 		conn, err := bastion.Dial(proto, addr)
