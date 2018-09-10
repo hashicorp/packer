@@ -71,7 +71,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 			if !c.AMISkipRegionValidation {
 				// Verify the region is real
-				if valid := ValidateRegion(region); !valid {
+				if valid := ValidateRegion(region, getValidationSession()); !valid {
 					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
 				}
 			}
