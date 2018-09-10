@@ -13,33 +13,40 @@ func testAccessConfig() *AccessConfig {
 
 func TestAccessConfigPrepare_Region(t *testing.T) {
 	c := testAccessConfig()
-	c.RawRegion = ""
-	if err := c.Prepare(nil); err != nil {
-		t.Fatalf("shouldn't have err: %s", err)
-	}
+
+	mockConn := &mockEC2Client{}
 
 	c.RawRegion = "us-east-12"
-	if err := c.Prepare(nil); err == nil {
-		t.Fatal("should have error")
+	valid := ValidateRegion(c.RawRegion, mockConn)
+	if valid {
+		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "us-east-1"
-	if err := c.Prepare(nil); err != nil {
-		t.Fatalf("shouldn't have err: %s", err)
+	valid = ValidateRegion(c.RawRegion, mockConn)
+	if !valid {
+		t.Fatalf("shouldn't have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "custom"
-	if err := c.Prepare(nil); err == nil {
-		t.Fatalf("should have err")
+	valid = ValidateRegion(c.RawRegion, mockConn)
+	if valid {
+		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "custom"
 	c.SkipValidation = true
+	// testing whole prepare func here; this is checking that validation is
+	// skipped, so we don't need a mock connection
 	if err := c.Prepare(nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
-	c.SkipValidation = false
 
+	c.SkipValidation = false
+	c.RawRegion = ""
+	if err := c.Prepare(nil); err != nil {
+		t.Fatalf("shouldn't have err: %s", err)
+	}
 }
 
 func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {

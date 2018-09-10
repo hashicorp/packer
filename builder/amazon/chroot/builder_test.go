@@ -11,6 +11,8 @@ func testConfig() map[string]interface{} {
 		"ami_name":   "foo",
 		"source_ami": "foo",
 		"region":     "us-east-1",
+		// region validation logic is checked in ami_config_test
+		"skip_region_validation": true,
 	}
 }
 
