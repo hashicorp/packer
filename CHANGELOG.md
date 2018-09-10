@@ -25,7 +25,7 @@
 * builder/oracle-oci: Add support for freeform tagging of OCI images [GH-6338]
 * builder/qemu: add ssh agent support. [GH-6541]
 * builder/qemu: New `use_backing_file` feature [GH-6249]
-* builder/vmware-esxi: Add support for disk compaction [GH-6411]
+* builder/vmware-iso: Add support for disk compaction [GH-6411]
 * builder/vmware-iso: Try to use ISO files uploaded to the datastore when
     building remotely instead of uploading them freshly every time [GH-5165]
 * command/validate: Warn users if config needs fixing. [GH-6423]
@@ -91,6 +91,7 @@
 ### BACKWARDS INCOMPATIBILITIES:
 * builder/amazon: "owners" field on source_ami_filter is now required for
     secuirty reasons. [GH-6585]
+* builder/vmware-iso: validation will fail for templates using esxi that have the "disk_type_id" set to something other than "thin" or "" and that do not have "skip_compaction": true also set. Use `packer fix` to fix this. [GH-6411]
 
 ## 1.2.5 (July 16, 2018)
 
