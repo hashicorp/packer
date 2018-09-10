@@ -43,6 +43,11 @@ Required:
 
 Optional:
 
+-   `esxi_host` (string) - Target vSphere host. Used to assign specific esx host
+    to upload the resulting VM to, when a vCenter Server is used as `host`. Can be
+    either a hostname (e.g. "packer-esxi1", requires proper DNS setup and/or correct
+    DNS search domain setting) or an ipv4 address.
+
 -   `disk_mode` (string) - Target disk format. See `ovftool` manual for
     available options. By default, "thick" will be used.
 
