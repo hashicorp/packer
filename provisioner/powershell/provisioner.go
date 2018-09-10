@@ -17,6 +17,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -97,9 +98,6 @@ type Config struct {
 	// Changes will not be effective until the system is rebooted."
 	ValidExitCodes []int `mapstructure:"valid_exit_codes"`
 
-	// internal variable, to be written to at provisioner run time.
-	winrmpassword string
-
 	ctx interpolate.Context
 }
 
@@ -119,28 +117,8 @@ type EnvVarsTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
-	// This is a bit of a hack. For provisioners that need access to
-	// auto-generated WinRMPasswords, the mechanism of keeping provisioner data
-	// and build data totally segregated breaks down. We get around this by
-	// having the builder stash the WinRMPassword in the state bag, then
-	// grabbing it out of the statebag inside of StepProvision.  Then, when
-	// the time comes to provision for real, we run the prepare step one more
-	// time, now with WinRMPassword defined in the raws, and can store the
-	// password on the provisioner config without overwriting the rest of the
-	// work we've already done in the first prepare run.
-	if len(raws) == 1 {
-		for k, v := range raws[0].(map[interface{}]interface{}) {
-			if k.(string) == "WinRMPassword" {
-				p.config.winrmpassword = v.(string)
-				// Even if WinRMPassword is not gonna be used, we've stored the
-				// key and pointed it to an empty string. That means we'll
-				// always reach this on our second-run of Prepare()
-				return nil
-			}
-		}
-	}
-
-	// Only get here if it's the first time the Provisioner's Prepare is run
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
 	p.config.ctx.Data = &EnvVarsTemplate{
 		WinRMPassword: `{{.WinRMPassword}}`,
 	}
@@ -157,7 +135,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}, raws...)
 
 	if err != nil {
-		return fmt.Errorf("Error decoding powershell provisioner template: %s", err)
+		return err
 	}
 
 	if p.config.EnvVarFormat == "" {
@@ -283,7 +261,7 @@ func extractScript(p *Provisioner) (string, error) {
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
 	p.communicator = comm
-	packer.LogSecretFilter.Set(p.config.winrmpassword)
+
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)
 
@@ -414,7 +392,7 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 
 	// interpolate environment variables
 	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: p.config.winrmpassword,
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
 	}
 	// Split vars into key/value components
 	for _, envVar := range p.config.Vars {
@@ -489,7 +467,7 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 	p.config.ctx.Data = &ExecuteCommandTemplate{
 		Path:          p.config.RemotePath,
 		Vars:          p.config.RemoteEnvVarPath,
-		WinRMPassword: p.config.winrmpassword,
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
 	}
 	command, err = interpolate.Render(p.config.ExecuteCommand, &p.config.ctx)
 
@@ -499,6 +477,12 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 
 	// Return the interpolated command
 	return command, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
+	return winRMPass
 }
 
 func (p *Provisioner) createCommandTextPrivileged() (command string, err error) {
@@ -512,7 +496,7 @@ func (p *Provisioner) createCommandTextPrivileged() (command string, err error) 
 	p.config.ctx.Data = &ExecuteCommandTemplate{
 		Path:          p.config.RemotePath,
 		Vars:          p.config.RemoteEnvVarPath,
-		WinRMPassword: p.config.winrmpassword,
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
 	}
 	command, err = interpolate.Render(p.config.ElevatedExecuteCommand, &p.config.ctx)
 	if err != nil {
@@ -571,7 +555,7 @@ func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath strin
 	}
 	// Replace ElevatedPassword for winrm users who used this feature
 	p.config.ctx.Data = &EnvVarsTemplate{
-		WinRMPassword: p.config.winrmpassword,
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
 	}
 
 	p.config.ElevatedPassword, _ = interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
