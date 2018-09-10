@@ -532,6 +532,14 @@
 			"versionExact": "v1.12.72"
 		},
 		{
+			"checksumSHA1": "u+wyWp/GWHHINKLeXP0eQmbfQ38=",
+			"path": "github.com/aws/aws-sdk-go/service/ec2/ec2iface",
+			"revision": "586c9ba6027a527800564282bb843d7e6e7985c9",
+			"revisionTime": "2018-02-07T00:16:19Z",
+			"version": "v1.12.72",
+			"versionExact": "v1.12.72"
+		},
+		{
 			"checksumSHA1": "kEgV0dSAj3M3M1waEkC27JS7VnU=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/service/ecr",
@@ -1006,12 +1014,6 @@
 			"revisionTime": "2018-02-01T23:52:37Z"
 		},
 		{
-			"checksumSHA1": "0PeWsO2aI+2PgVYlYlDPKfzCLEQ=",
-			"path": "github.com/hashicorp/serf/coordinate",
-			"revision": "984a73625de3138f44deb38d00878fab39eb6447",
-			"revisionTime": "2018-05-30T15:59:58Z"
-		},
-		{
 			"checksumSHA1": "HtpYAWHvd9mq+mHkpo7z8PGzMik=",
 			"path": "github.com/hashicorp/hcl",
 			"revision": "ef8a98b0bbce4a65b5aa4c368430a80ddc533168",
@@ -1064,6 +1066,12 @@
 			"path": "github.com/hashicorp/hcl/json/token",
 			"revision": "ef8a98b0bbce4a65b5aa4c368430a80ddc533168",
 			"revisionTime": "2018-04-04T17:41:02Z"
+		},
+		{
+			"checksumSHA1": "0PeWsO2aI+2PgVYlYlDPKfzCLEQ=",
+			"path": "github.com/hashicorp/serf/coordinate",
+			"revision": "984a73625de3138f44deb38d00878fab39eb6447",
+			"revisionTime": "2018-05-30T15:59:58Z"
 		},
 		{
 			"checksumSHA1": "oi8fnfAPPTf2nN7zptlyu/EsMMs=",

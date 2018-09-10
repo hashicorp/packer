@@ -3,6 +3,9 @@ package common
 import (
 	"reflect"
 	"testing"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
 
 func testAMIConfig() *AMIConfig {
@@ -29,6 +32,19 @@ func TestAMIConfigPrepare_name(t *testing.T) {
 	}
 }
 
+type mockEC2Client struct {
+	ec2iface.EC2API
+}
+
+func (m *mockEC2Client) DescribeRegions(*ec2.DescribeRegionsInput) (*ec2.DescribeRegionsOutput, error) {
+	// Describes a region.
+	regionString := "us-east-1"
+	reg := ec2.Region{RegionName: &regionString}
+	return &ec2.DescribeRegionsOutput{
+		Regions: []*ec2.Region{&reg},
+	}, nil
+}
+
 func TestAMIConfigPrepare_regions(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIRegions = nil
@@ -36,7 +52,8 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
-	c.AMIRegions = listEC2Regions()
+	mockConn := &mockEC2Client{}
+	c.AMIRegions = listEC2Regions(mockConn)
 	if err := c.Prepare(nil, nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
