@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -99,27 +100,6 @@ func TestProvisionerPrepare_EmptyDestination(t *testing.T) {
 	}
 }
 
-type stubUi struct {
-	sayMessages string
-}
-
-func (su *stubUi) Ask(string) (string, error) {
-	return "", nil
-}
-
-func (su *stubUi) Error(string) {
-}
-
-func (su *stubUi) Machine(string, ...string) {
-}
-
-func (su *stubUi) Message(string) {
-}
-
-func (su *stubUi) Say(msg string) {
-	su.sayMessages += msg
-}
-
 func TestProvisionerProvision_SendsFile(t *testing.T) {
 	var p Provisioner
 	tf, err := ioutil.TempFile("", "packer")
@@ -141,18 +121,21 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	ui := &stubUi{}
+	b := bytes.NewBuffer(nil)
+	ui := &packer.BasicUi{
+		Writer: b,
+	}
 	comm := &packer.MockCommunicator{}
 	err = p.Provision(ui, comm)
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
 
-	if !strings.Contains(ui.sayMessages, tf.Name()) {
+	if !strings.Contains(b.String(), tf.Name()) {
 		t.Fatalf("should print source filename")
 	}
 
-	if !strings.Contains(ui.sayMessages, "something") {
+	if !strings.Contains(b.String(), "something") {
 		t.Fatalf("should print destination filename")
 	}
 
@@ -197,18 +180,21 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 		if err := p.Prepare(config); err != nil {
 			t.Fatalf("err: %s", err)
 		}
-		ui := &stubUi{}
+		b := bytes.NewBuffer(nil)
+		ui := &packer.BasicUi{
+			Writer: b,
+		}
 		comm := &packer.MockCommunicator{}
 		err = p.ProvisionDownload(ui, comm)
 		if err != nil {
 			t.Fatalf("should successfully provision: %s", err)
 		}
 
-		if !strings.Contains(ui.sayMessages, tf.Name()) {
+		if !strings.Contains(b.String(), tf.Name()) {
 			t.Fatalf("should print source filename")
 		}
 
-		if !strings.Contains(ui.sayMessages, "something") {
+		if !strings.Contains(b.String(), "something") {
 			t.Fatalf("should print destination filename")
 		}
 
