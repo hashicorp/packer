@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -94,13 +95,15 @@ WaitLoop:
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
 	// store so that we can access this later during provisioning
-	state.Put("winrm_password", s.Comm.WinRMPassword)
+
+	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
 	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }
 
 func (s *StepGetPassword) Cleanup(multistep.StateBag) {
+	commonhelper.RemoveSharedStateFile("winrm_password", s.BuildName)
 }
 
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
