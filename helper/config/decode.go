@@ -42,10 +42,11 @@ func Decode(target interface{}, config *DecodeOpts, raws ...interface{}) error {
 		if config.InterpolateContext == nil {
 			config.InterpolateContext = ctx
 		} else {
-			config.InterpolateContext.BuildName = ctx.BuildName
-			config.InterpolateContext.BuildType = ctx.BuildType
-			config.InterpolateContext.TemplatePath = ctx.TemplatePath
-			config.InterpolateContext.UserVariables = ctx.UserVariables
+			config.InterpolateContext.BuildName = updateString(config.InterpolateContext.BuildName, ctx.BuildName)
+			config.InterpolateContext.BuildType = updateString(config.InterpolateContext.BuildType, ctx.BuildType)
+			config.InterpolateContext.TemplatePath = updateString(config.InterpolateContext.TemplatePath, ctx.TemplatePath)
+			config.InterpolateContext.UserVariables = updateMap(config.InterpolateContext.UserVariables, ctx.UserVariables)
+			config.InterpolateContext.SensitiveVariables = append(config.InterpolateContext.SensitiveVariables, ctx.SensitiveVariables...)
 		}
 		ctx = config.InterpolateContext
 
@@ -144,4 +145,22 @@ func uint8ToStringHook(f reflect.Kind, t reflect.Kind, v interface{}) (interface
 	}
 
 	return v, nil
+}
+
+func updateString(oldString, newString string) string {
+	if newString != "" {
+		return newString
+	}
+	return oldString
+}
+
+func updateMap(oldMap, newMap map[string]string) map[string]string {
+	if oldMap == nil {
+		return newMap
+	} else {
+		for newk, newv := range newMap {
+			oldMap[newk] = newv
+		}
+	}
+	return oldMap
 }
