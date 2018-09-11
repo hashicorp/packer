@@ -13,6 +13,7 @@ import (
 	"os"
 	"time"
 
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -113,6 +114,7 @@ func (s *StepCreateWindowsPassword) Run(_ context.Context, state multistep.State
 	}
 
 	state.Put("winrm_password", data.password)
+	commonhelper.SetSharedState("winrm_password", data.password, c.PackerConfig.PackerBuildName)
 	packer.LogSecretFilter.Set(data.password)
 
 	return multistep.ActionContinue
