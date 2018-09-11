@@ -19,6 +19,7 @@ import (
 type AccessConfig struct {
 	AccessKey            string `mapstructure:"access_key"`
 	CustomEndpointEc2    string `mapstructure:"custom_endpoint_ec2"`
+	DecodeAuthZMessages  bool   `mapstructure:"decode_authorization_messages"`
 	MFACode              string `mapstructure:"mfa_code"`
 	ProfileName          string `mapstructure:"profile"`
 	RawRegion            string `mapstructure:"region"`
@@ -91,6 +92,11 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 		}
 		log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
 	}
+
+	if c.DecodeAuthZMessages {
+		DecodeAuthZMessages(c.session)
+	}
+
 	return c.session, nil
 }
 
