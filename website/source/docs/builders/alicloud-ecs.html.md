@@ -190,6 +190,9 @@ builder.
 
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
 
+-   `ssh_private_ip` (boolean) - If this value is true, packer will connect to the ECS created through private ip
+    instead of allocating a public ip or an EIP. The default value is false.
+
 ## Basic Example
 
 Here is a basic example for Alicloud.
