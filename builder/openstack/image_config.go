@@ -14,6 +14,7 @@ type ImageConfig struct {
 	ImageMetadata   map[string]string            `mapstructure:"metadata"`
 	ImageVisibility imageservice.ImageVisibility `mapstructure:"image_visibility"`
 	ImageMembers    []string                     `mapstructure:"image_members"`
+	DiskFormat      string                       `mapstructure:"disk_format"`
 }
 
 func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
