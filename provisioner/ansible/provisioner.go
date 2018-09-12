@@ -601,6 +601,6 @@ func (ui *Ui) Machine(t string, args ...string) {
 	<-ui.sem
 }
 
-func (ui *Ui) ProgressBar() packer.ProgressBar {
+func (ui *Ui) ProgressBar(string) packer.ProgressBar {
 	return new(packer.NoopProgressBar)
 }
