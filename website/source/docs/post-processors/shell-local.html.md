@@ -60,7 +60,7 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (array of strings) - The command used to execute the script. By
-    default this is `["/bin/sh", "-c", "{{.Vars}}, "{{.Script}}"]`
+    default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
     This is treated as a [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
