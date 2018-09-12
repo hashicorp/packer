@@ -18,6 +18,7 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	PVConfig            `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 	attribs             map[string]interface{}
 
@@ -29,16 +30,6 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
-	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
-	PersistentVolumeSize int `mapstructure:"persistent_volume_size"`
-	/* TODO:
-	builder image list
-	default to OL image
-	make sure if set then PVS is above
-	some way to choose which connection to use for master
-	possible ignore everything for builder and always use SSH keys
-	*/
-
 	ImageName       string        `mapstructure:"image_name"`
 	Shape           string        `mapstructure:"shape"`
 	SourceImageList string        `mapstructure:"source_image_list"`
@@ -91,6 +82,8 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	if c.SnapshotTimeout == 0 {
 		c.SnapshotTimeout = 20 * time.Minute
 	}
+
+	// if using a persistent volume
 
 	// Validate that all required fields are present
 	var errs *packer.MultiError
