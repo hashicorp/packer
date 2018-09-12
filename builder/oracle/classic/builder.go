@@ -34,10 +34,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 
 	var errs *packer.MultiError
 
-	if b.config.PersistentVolumeSize > 0 && b.config.Comm.Type != "ssh" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Persistent storage volumes are only supported on unix, and must use the ssh communicator."))
-	}
+	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx).Errors...)
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
