@@ -69,6 +69,7 @@ func (spb *StackableProgressBar) prefix() {
 
 func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
+	defer spb.mtx.Unlock()
 
 	spb.items--
 	if spb.items == 0 {
@@ -80,7 +81,6 @@ func (spb *StackableProgressBar) Finish() {
 		return
 	}
 	spb.prefix()
-	spb.mtx.Unlock()
 }
 
 // BasicProgressBar is packer's basic progress bar.
