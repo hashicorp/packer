@@ -186,12 +186,15 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	if s.Comm.SSHKeyPairName != "" {
 		runOpts.KeyName = &s.Comm.SSHKeyPairName
 	}
+	spotInstanceInput := &ec2.RequestSpotInstancesInput{
+		LaunchSpecification: runOpts,
+		SpotPrice:           &spotPrice,
+	}
+	if s.BlockDurationMinutes != 0 {
+		spotInstanceInput.BlockDurationMinutes = &s.BlockDurationMinutes
+	}
 
-	runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-		BlockDurationMinutes: &s.BlockDurationMinutes,
-		LaunchSpecification:  runOpts,
-		SpotPrice:            &spotPrice,
-	})
+	runSpotResp, err := ec2conn.RequestSpotInstances(spotInstanceInput)
 	if err != nil {
 		err := fmt.Errorf("Error launching source spot instance: %s", err)
 		state.Put("error", err)
