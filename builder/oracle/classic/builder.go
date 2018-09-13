@@ -34,7 +34,7 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 
 	var errs *packer.MultiError
 
-	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx).Errors...)
+	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx))
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, errs
@@ -70,7 +70,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	runID := uuid.TimeOrderedUUID()
 
 	var steps []multistep.Step
-	if b.config.PersistentVolumeSize > 0 {
+	if b.config.IsPV() {
 		steps = []multistep.Step{
 			&stepCreatePersistentVolume{
 				volumeSize:      fmt.Sprintf("%d", b.config.PersistentVolumeSize),
@@ -115,7 +115,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Host:      ocommon.CommHost,
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&stepCreateImage{},
+			&stepCreateImage{
+				uploadImageCommand: b.config.BuilderUploadImageCommand,
+			},
 		}
 	} else {
 		// Build the steps
