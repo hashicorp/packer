@@ -7,10 +7,9 @@ import (
 
 type PVConfig struct {
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
-	PersistentVolumeSize            int    `mapstructure:"persistent_volume_size"`
-	BuilderImageList                string `mapstructure:"builder_image_list"`
-	BuilderInstallUploadToolCommand string `mapstructure:"builder_install_upload_tool_command"`
-	BuilderUploadImageCommand       string `mapstructure:"builder_upload_image_command"`
+	PersistentVolumeSize      int    `mapstructure:"persistent_volume_size"`
+	BuilderImageList          string `mapstructure:"builder_image_list"`
+	BuilderUploadImageCommand string `mapstructure:"builder_upload_image_command"`
 	/* TODO:
 	default to OL image
 	make sure if set then PVS is above
@@ -19,8 +18,12 @@ type PVConfig struct {
 	*/
 }
 
+func (c *PVConfig) IsPV() bool {
+	return c.PersistentVolumeSize > 0
+}
+
 func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
-	if c.PersistentVolumeSize == 0 {
+	if !c.IsPV() {
 		return nil
 	}
 
@@ -31,6 +34,7 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 --retry-delay 0 \
 -o {{ .DiskImagePath }} \
 '...'`
+		c.BuilderUploadImageCommand = "false"
 	}
 	/*
 		errs = packer.MultiErrorAppend(errs,
