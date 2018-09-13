@@ -11,8 +11,7 @@ import (
 )
 
 type stepCreateImage struct {
-	installUploadToolCommand string
-	uploadImageCommand       string
+	uploadImageCommand string
 }
 
 type uploadCmdData struct {
@@ -38,7 +37,6 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	command := fmt.Sprintf(`#!/bin/sh
 	set -e
-	%s
 	mkdir /builder
 	mkfs -t ext3 /dev/xvdb
 	mount /dev/xvdb /builder
@@ -46,7 +44,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	cd /builder
 	dd if=/dev/xvdc bs=8M status=progress | cp --sparse=always /dev/stdin diskimage.raw
 	tar czSf ./diskimage.tar.gz ./diskimage.raw
-	%s`, s.installUploadToolCommand, uploadImageCmd)
+	%s`, uploadImageCmd)
 
 	dest := "/tmp/create-packer-diskimage.sh"
 	comm.Upload(dest, strings.NewReader(command), nil)
