@@ -44,9 +44,11 @@ func (spb *StackableProgressBar) New(identifier string) ProgressBar {
 	spb.wg.Add(1)
 	defer spb.mtx.Unlock()
 
+	start := false
 	if spb.pool == nil {
 		spb.pool = pb.NewPool()
 		go spb.cleanup()
+		start = true
 	}
 
 	bar := NewProgressBar(identifier)
@@ -55,7 +57,9 @@ func (spb *StackableProgressBar) New(identifier string) ProgressBar {
 	spb.bars = append(spb.bars, bar)
 
 	spb.pool.Add(bar.ProgressBar)
-	spb.pool.Start()
+	if start {
+		spb.pool.Start()
+	}
 	return bar
 }
 
