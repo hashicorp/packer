@@ -317,6 +317,9 @@ This template should build a Windows Server 2012 image on Google Cloud Platform:
 }
 ```
 
+### Post i/o timeout errors
+If you see `unknown error: Post http://<ip>:<port>/wsman:dial tcp <ip>:<port>: i/o timeout` errors while provisioning a Windows machine, try setting Ansible to copy files over [ssh instead of sftp](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_SCP_IF_SSH).
+
 ### Too many SSH keys
 
 SSH servers only allow you to attempt to authenticate a certain number of times. All of your loaded keys will be tried before the dynamically generated key. If you have too many SSH keys loaded in your `ssh-agent`, the Ansible provisioner may fail authentication with a message similar to this:
