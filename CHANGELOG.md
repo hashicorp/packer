@@ -1,3 +1,12 @@
+## 1.3.1 (September 13, 2018)
+### IMPROVEMENTS:
+* builder/amazon: automatically decode encoded authorization messages if
+    possible [GH-5415]
+### BUG FIXES:
+* builder/amazon: fix bugs relating to spot instances provisioning [GH-6697]
+    [GH-6693]
+* core: progressbar: fix deadlock locking builds afer first display [GH-6698]
+
 ## 1.3.0 (September 11, 2018)
 
 ### IMPROVEMENTS:
