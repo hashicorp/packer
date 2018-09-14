@@ -45,7 +45,10 @@ func TestESX5Driver_HostIP(t *testing.T) {
 	expected_host := "127.0.0.1"
 
 	//create mock SSH server
-	listen, _ := net.Listen("tcp", fmt.Sprintf("%s:0", expected_host))
+	listen, err := net.Listen("tcp", fmt.Sprintf("%s:0", expected_host))
+	if err != nil {
+		t.Fatalf("Listen: %s", err)
+	}
 	port := listen.Addr().(*net.TCPAddr).Port
 	defer listen.Close()
 
