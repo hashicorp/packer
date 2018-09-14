@@ -9,6 +9,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -27,6 +28,7 @@ type StepRunSourceServer struct {
 	InstanceMetadata      map[string]string
 	UseBlockStorageVolume bool
 	server                *servers.Server
+	Comm                  *communicator.Config
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -107,7 +109,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	// Add keypair to the server create options.
-	keyName := config.Comm.SSHKeyPairName
+	keyName := s.Comm.SSHKeyPairName
 	if keyName != "" {
 		serverOptsExt = keypairs.CreateOptsExt{
 			CreateOptsBuilder: serverOptsExt,
