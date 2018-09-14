@@ -54,6 +54,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	}
 
 	if b.config.Discard {

@@ -31,6 +31,7 @@ type Config struct {
 	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
 	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
+	SSHClearAuthorizedKeys    bool          `mapstructure:"ssh_clear_authorized_keys"`
 	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
 	SSHInterface              string        `mapstructure:"ssh_interface"`
 	SSHIPVersion              string        `mapstructure:"ssh_ip_version"`

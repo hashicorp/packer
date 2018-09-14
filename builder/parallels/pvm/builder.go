@@ -102,6 +102,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 		},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&parallelscommon.StepPrlctl{
 			Commands: b.config.PrlctlPost,
 			Ctx:      b.config.ctx,
