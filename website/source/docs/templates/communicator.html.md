@@ -79,6 +79,13 @@ The SSH communicator has the following options:
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
 
+-   `ssh_clear_authorized_keys` (boolean) - If true, Packer will attempt to
+    remove its temporary key from `~/.ssh/authorized_keys` and
+    `/root/.ssh/authorized_keys`. This is a mostly cosmetic option, since Packer
+    will delete the temporary private key from the host system regardless of
+    whether this is set to true (unless the user has set the `-debug` flag).
+    Defaults to "false"; currently only works on guests with `sed` installed.
+
 -   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
     will be disabled. Defaults to `false`.
 
