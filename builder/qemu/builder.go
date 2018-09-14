@@ -403,6 +403,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = append(steps,
 		new(common.StepProvision),
 	)
+
+	steps = append(steps,
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
+	)
 	steps = append(steps,
 		new(stepShutdown),
 	)
