@@ -2,9 +2,12 @@
 ### IMPROVEMENTS:
 * builder/amazon: automatically decode encoded authorization messages if
     possible [GH-5415]
+* builder:amazon: Optional cleanup of the authorized keys file [GH-6713]
+
 ### BUG FIXES:
 * builder/amazon: fix bugs relating to spot instances provisioning [GH-6697]
     [GH-6693]
+* builder/openstack: fix ssh keypair not attached [GH-6701]
 * core: progressbar: fix deadlock locking builds afer first display [GH-6698]
 
 ## 1.3.0 (September 11, 2018)
