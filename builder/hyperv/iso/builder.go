@@ -460,6 +460,11 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// provision requires communicator to be setup
 		&common.StepProvision{},
 
+		// Remove ephemeral key from authorized_hosts if using SSH communicator
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
+
 		&hypervcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
