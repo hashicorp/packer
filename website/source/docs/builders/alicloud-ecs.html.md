@@ -190,6 +190,8 @@ builder.
 
 -   `zone_id` (string) - ID of the zone to which the disk belongs.
 
+-   `tags` (object of key/value strings) - Tags applied to the destination image.
+
 ## Basic Example
 
 Here is a basic example for Alicloud.

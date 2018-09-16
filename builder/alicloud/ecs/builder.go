@@ -169,6 +169,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
+		&stepCreateTags{
+			Tags: b.config.AlicloudImageTags,
+		},
 		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
