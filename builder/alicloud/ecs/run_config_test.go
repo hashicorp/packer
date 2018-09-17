@@ -123,3 +123,27 @@ func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 		t.Fatal("keypair name does not match")
 	}
 }
+
+func TestRunConfigPrepare_SSHPrivateIp(t *testing.T) {
+	c := testConfig()
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.SSHPrivateIp != false {
+		t.Fatalf("invalid value, expected: %t, actul: %t", false, c.SSHPrivateIp)
+	}
+	c.SSHPrivateIp = true
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.SSHPrivateIp != true {
+		t.Fatalf("invalid value, expected: %t, actul: %t", true, c.SSHPrivateIp)
+	}
+	c.SSHPrivateIp = false
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.SSHPrivateIp != false {
+		t.Fatalf("invalid value, expected: %t, actul: %t", false, c.SSHPrivateIp)
+	}
+}
