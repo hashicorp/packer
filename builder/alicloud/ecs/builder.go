@@ -139,10 +139,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
+			SSHPrivateIp:             b.config.SSHPrivateIp,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
-			RegionId: b.config.AlicloudRegion,
+			RegionId:     b.config.AlicloudRegion,
+			SSHPrivateIp: b.config.SSHPrivateIp,
 		})
 	}
 	steps = append(steps,
