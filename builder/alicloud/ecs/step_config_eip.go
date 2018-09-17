@@ -16,12 +16,24 @@ type stepConfigAlicloudEIP struct {
 	InternetChargeType       string
 	InternetMaxBandwidthOut  int
 	allocatedId              string
+	SSHPrivateIp             bool
 }
 
 func (s *stepConfigAlicloudEIP) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
+
+	if s.SSHPrivateIp {
+		ipaddress := instance.VpcAttributes.PrivateIpAddress.IpAddress
+		if len(ipaddress) == 0 {
+			ui.Say("Failed to get private ip of instance")
+			return multistep.ActionHalt
+		}
+		state.Put("ipaddress", ipaddress[0])
+		return multistep.ActionContinue
+	}
+
 	ui.Say("Allocating eip")
 	ipaddress, allocateId, err := client.AllocateEipAddress(&ecs.AllocateEipAddressArgs{
 		RegionId: common.Region(s.RegionId), InternetChargeType: common.InternetChargeType(s.InternetChargeType),
