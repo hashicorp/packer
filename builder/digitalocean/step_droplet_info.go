@@ -14,7 +14,7 @@ type stepDropletInfo struct{}
 func (s *stepDropletInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	dropletID := state.Get("droplet_id").(int)
 
 	ui.Say("Waiting for droplet to become active...")
