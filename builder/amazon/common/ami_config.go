@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -56,44 +57,8 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		}
 	}
 
-	if len(c.AMIRegions) > 0 {
-		regionSet := make(map[string]struct{})
-		regions := make([]string, 0, len(c.AMIRegions))
-
-		for _, region := range c.AMIRegions {
-			// If we already saw the region, then don't look again
-			if _, ok := regionSet[region]; ok {
-				continue
-			}
-
-			// Mark that we saw the region
-			regionSet[region] = struct{}{}
-
-			if !c.AMISkipRegionValidation {
-				// Verify the region is real
-				if valid := ValidateRegion(region, getValidationSession()); !valid {
-					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
-				}
-			}
-
-			// Make sure that if we have region_kms_key_ids defined,
-			// the regions in ami_regions are also in region_kms_key_ids
-			if len(c.AMIRegionKMSKeyIDs) > 0 {
-				if _, ok := c.AMIRegionKMSKeyIDs[region]; !ok {
-					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
-				}
-			}
-			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
-				// make sure we don't try to copy to the region we originally
-				// create the AMI in.
-				log.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
-				continue
-			}
-			regions = append(regions, region)
-		}
-
-		c.AMIRegions = regions
-	}
+	ec2conn := getValidationSession()
+	errs = c.prepareRegions(ec2conn, accessConfig, errs)
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
@@ -129,4 +94,46 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 	}
 
 	return nil
+}
+
+func (c *AMIConfig) prepareRegions(ec2conn ec2iface.EC2API, accessConfig *AccessConfig, errs []error) []error {
+	if len(c.AMIRegions) > 0 {
+		regionSet := make(map[string]struct{})
+		regions := make([]string, 0, len(c.AMIRegions))
+
+		for _, region := range c.AMIRegions {
+			// If we already saw the region, then don't look again
+			if _, ok := regionSet[region]; ok {
+				continue
+			}
+
+			// Mark that we saw the region
+			regionSet[region] = struct{}{}
+
+			if !c.AMISkipRegionValidation {
+				// Verify the region is real
+				if valid := ValidateRegion(region, ec2conn); !valid {
+					errs = append(errs, fmt.Errorf("Unknown region: %s", region))
+				}
+			}
+
+			// Make sure that if we have region_kms_key_ids defined,
+			// the regions in ami_regions are also in region_kms_key_ids
+			if len(c.AMIRegionKMSKeyIDs) > 0 {
+				if _, ok := c.AMIRegionKMSKeyIDs[region]; !ok {
+					errs = append(errs, fmt.Errorf("Region %s is in ami_regions but not in region_kms_key_ids", region))
+				}
+			}
+			if (accessConfig != nil) && (region == accessConfig.RawRegion) {
+				// make sure we don't try to copy to the region we originally
+				// create the AMI in.
+				log.Printf("Cannot copy AMI to AWS session region '%s', deleting it from `ami_regions`.", region)
+				continue
+			}
+			regions = append(regions, region)
+		}
+
+		c.AMIRegions = regions
+	}
+	return errs
 }
