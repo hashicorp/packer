@@ -14,13 +14,13 @@ import (
 type StepCreateSourceMachine struct{}
 
 func (s *StepCreateSourceMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
 	if !config.MachineImageFilters.Empty() {
 		ui.Say("Selecting an image based on search criteria")
-		imageId, err := driver.GetImage(config)
+		imageId, err := driver.GetImage(*config)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Problem selecting an image based on an search criteria: %s", err))
 			return multistep.ActionHalt
@@ -29,7 +29,7 @@ func (s *StepCreateSourceMachine) Run(_ context.Context, state multistep.StateBa
 		config.MachineImage = imageId
 	}
 
-	machineId, err := driver.CreateMachine(config)
+	machineId, err := driver.CreateMachine(*config)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Problem creating source machine: %s", err))
 		return multistep.ActionHalt
