@@ -18,7 +18,7 @@ type StepAllocateIp struct {
 
 func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 
 	// We need the v2 compute client
@@ -138,7 +138,7 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 }
 
 func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	instanceIP := state.Get("access_ip").(*floatingips.FloatingIP)
 
