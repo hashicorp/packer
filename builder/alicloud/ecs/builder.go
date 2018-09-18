@@ -79,7 +79,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -146,9 +146,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		})
 	}
 	steps = append(steps,
-		&stepAttachKeyPair{
-			Comm: &b.config.Comm,
-		},
+		&stepAttachKeyPair{},
 		&stepRunAlicloudInstance{},
 		&stepMountAlicloudDisk{},
 		&communicator.StepConnect{
