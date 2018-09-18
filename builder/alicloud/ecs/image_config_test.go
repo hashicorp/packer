@@ -55,6 +55,24 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 }
 
+func TestECSImageConfigPrepare_imageTags(t *testing.T) {
+	c := testAlicloudImageConfig()
+	c.AlicloudImageTags = map[string]string{
+		"TagKey1": "TagValue1",
+		"TagKey2": "TagValue2",
+	}
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if len(c.AlicloudImageTags) != 2 || c.AlicloudImageTags["TagKey1"] != "TagValue1" ||
+		c.AlicloudImageTags["TagKey2"] != "TagValue2" {
+		t.Fatalf("invalid value, expected: %s, actual: %s", map[string]string{
+			"TagKey1": "TagValue1",
+			"TagKey2": "TagValue2",
+		}, c.AlicloudImageTags)
+	}
+}
+
 func regionsToString() []string {
 	var regions []string
 	for _, region := range common.ValidRegions {

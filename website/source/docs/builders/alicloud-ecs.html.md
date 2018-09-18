@@ -192,6 +192,8 @@ builder.
 
 -   `ssh_private_ip` (boolean) - If this value is true, packer will connect to the ECS created through private ip
     instead of allocating a public ip or an EIP. The default value is false.
+    
+-   `tags` (object of key/value strings) - Tags applied to the destination image.
 
 ## Basic Example
 

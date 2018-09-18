@@ -113,6 +113,17 @@ func TestBuilderAcc_forceDeleteSnapshot(t *testing.T) {
 	})
 }
 
+func TestBuilderAcc_imageTags(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Builder:  &Builder{},
+		Template: testBuilderAccImageTags,
+		Check:    checkImageTags(),
+	})
+}
+
 func checkSnapshotsDeleted(snapshotIds []string) builderT.TestCheckFunc {
 	return func(artifacts []packer.Artifact) error {
 		// Verify the snapshots are gone
@@ -202,6 +213,51 @@ func checkRegionCopy(regions []string) builderT.TestCheckFunc {
 		client, _ := testAliyunClient()
 		for key, value := range artifact.AlicloudImages {
 			client.WaitForImageReady(common.Region(key), value, 1800)
+		}
+		return nil
+	}
+}
+
+func checkImageTags() builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		if len(artifacts) > 1 {
+			return fmt.Errorf("more than 1 artifact")
+		}
+		// Get the actual *Artifact pointer so we can access the AMIs directly
+		artifactRaw := artifacts[0]
+		artifact, ok := artifactRaw.(*Artifact)
+		if !ok {
+			return fmt.Errorf("unknown artifact: %#v", artifactRaw)
+		}
+		// describe the image, get block devices with a snapshot
+		client, _ := testAliyunClient()
+		tags, _, err := client.DescribeTags(
+			&ecs.DescribeTagsArgs{
+				RegionId:     "cn-beijing",
+				ResourceType: ecs.TagResourceImage,
+				ResourceId:   artifact.AlicloudImages["cn-beijing"],
+			})
+		if err != nil {
+			return fmt.Errorf("Error retrieving Image Attributes for ECS Image Artifact (%#v) "+
+				"in ECS Image Tags Test: %s", artifact, err)
+		}
+		failed := false
+		if len(tags) != 2 {
+			failed = true
+		}
+		if !failed {
+			for i := 0; i < len(tags); i++ {
+				if tags[i].TagKey == "TagKey1" && tags[i].TagValue != "TagValue1" {
+					failed = true
+				} else if tags[i].TagKey == "TagKey2" && tags[i].TagValue != "TagValue2" {
+					failed = true
+				} else if tags[i].TagKey != "TagKey1" && tags[i].TagKey != "TagKey2" {
+					failed = true
+				}
+			}
+		}
+		if failed {
+			return fmt.Errorf("tags is not correctly set %#v", tags)
 		}
 		return nil
 	}
@@ -305,6 +361,22 @@ const testBuilderAccSharing = `
 	}]
 }
 `
+
+const testBuilderAccImageTags = `
+{	"builders": [{
+		"type": "test",
+		"region": "cn-beijing",
+		"instance_type": "ecs.n1.tiny",
+		"source_image":"ubuntu_16_0402_64_20G_alibase_20180409.vhd",
+		"ssh_username": "root",
+		"io_optimized":"true",
+		"image_name": "packer-test_{{timestamp}}",
+		"tags": {
+			"TagKey1": "TagValue1",
+			"TagKey2": "TagValue2"
+        }
+	}]
+}`
 
 func buildForceDeregisterConfig(val, name string) string {
 	return fmt.Sprintf(testBuilderAccForceDelete, val, name)
