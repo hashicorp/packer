@@ -47,6 +47,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
+	config["skip_region_validation"] = true
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -99,6 +100,7 @@ func TestBuilderPrepare_InvalidShutdownBehavior(t *testing.T) {
 
 	// Test good
 	config["shutdown_behavior"] = "terminate"
+	config["skip_region_validation"] = true
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
