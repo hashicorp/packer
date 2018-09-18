@@ -19,7 +19,7 @@ func (s *StepWaitForRackConnect) Run(_ context.Context, state multistep.StateBag
 		return multistep.ActionContinue
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
 

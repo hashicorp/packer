@@ -19,7 +19,7 @@ func (s *StepDetachVolume) Run(_ context.Context, state multistep.StateBag) mult
 		return multistep.ActionContinue
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	blockStorageClient, err := config.blockStorageV3Client()
