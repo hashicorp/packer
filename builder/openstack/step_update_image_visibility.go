@@ -14,7 +14,7 @@ type stepUpdateImageVisibility struct{}
 func (s *stepUpdateImageVisibility) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	imageId := state.Get("image").(string)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	if config.ImageVisibility == "" {
 		return multistep.ActionContinue

@@ -30,7 +30,7 @@ type StepRunSourceServer struct {
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
 	sourceImage := state.Get("source_image").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -148,7 +148,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
