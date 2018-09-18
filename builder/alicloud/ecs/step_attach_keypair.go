@@ -8,22 +8,20 @@ import (
 
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/ecs"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type stepAttachKeyPair struct {
-	Comm *communicator.Config
 }
 
 func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*ecs.Client)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	timeoutPoint := time.Now().Add(120 * time.Second)
-	keyPairName := s.Comm.SSHKeyPairName
+	keyPairName := config.Comm.SSHKeyPairName
 	if keyPairName == "" {
 		return multistep.ActionContinue
 	}
@@ -54,7 +52,7 @@ func (s *stepAttachKeyPair) Run(_ context.Context, state multistep.StateBag) mul
 
 func (s *stepAttachKeyPair) Cleanup(state multistep.StateBag) {
 	client := state.Get("client").(*ecs.Client)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	instance := state.Get("instance").(*ecs.InstanceAttributesType)
 	keyPairName := config.Comm.SSHKeyPairName

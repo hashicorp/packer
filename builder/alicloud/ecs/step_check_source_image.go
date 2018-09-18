@@ -16,7 +16,7 @@ type stepCheckAlicloudSourceImage struct {
 
 func (s *stepCheckAlicloudSourceImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	args := &ecs.DescribeImagesArgs{
 		RegionId: common.Region(config.AlicloudRegion),
