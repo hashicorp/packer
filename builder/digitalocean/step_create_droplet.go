@@ -18,7 +18,7 @@ type stepCreateDroplet struct {
 func (s *stepCreateDroplet) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	sshKeyId := state.Get("ssh_key_id").(int)
 
 	// Create the droplet based on configuration
