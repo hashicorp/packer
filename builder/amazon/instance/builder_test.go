@@ -41,6 +41,8 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 func TestBuilderPrepare_AccountId(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
+
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -84,6 +86,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
+	config["skip_region_validation"] = true
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -118,6 +121,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 func TestBuilderPrepare_BundleDestination(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -138,6 +142,7 @@ func TestBuilderPrepare_BundleDestination(t *testing.T) {
 func TestBuilderPrepare_BundlePrefix(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -174,6 +179,7 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 func TestBuilderPrepare_S3Bucket(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -199,6 +205,7 @@ func TestBuilderPrepare_S3Bucket(t *testing.T) {
 func TestBuilderPrepare_X509CertPath(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -240,6 +247,7 @@ func TestBuilderPrepare_X509CertPath(t *testing.T) {
 func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
@@ -281,6 +289,7 @@ func TestBuilderPrepare_X509KeyPath(t *testing.T) {
 func TestBuilderPrepare_X509UploadPath(t *testing.T) {
 	b := &Builder{}
 	config, tempfile := testConfig()
+	config["skip_region_validation"] = true
 	defer os.Remove(tempfile.Name())
 	defer tempfile.Close()
 
