@@ -28,7 +28,7 @@ type stepCreateAlicloudInstance struct {
 
 func (s *stepCreateAlicloudInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	source_image := state.Get("source_image").(*ecs.ImageType)
 	network_type := state.Get("networktype").(InstanceNetWork)

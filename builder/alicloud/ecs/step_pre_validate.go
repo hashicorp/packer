@@ -23,7 +23,7 @@ func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multi
 	}
 
 	client := state.Get("client").(*ecs.Client)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui.Say("Prevalidating image name...")
 	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{
 		ImageName: s.AlicloudDestImageName,

@@ -292,8 +292,7 @@ const testBuilderAccBasic = `
 		"type": "test",
 		"region": "cn-beijing",
 		"instance_type": "ecs.n1.tiny",
-		"source_image":"ubuntu_16_0402_64_40G_base_20170222.vhd",
-		"ssh_username": "ubuntu",
+		"source_image":"ubuntu_16_0402_64_20G_alibase_20180409.vhd",
 		"io_optimized":"true",
 		"ssh_username":"root",
 		"image_name": "packer-test_{{timestamp}}"
