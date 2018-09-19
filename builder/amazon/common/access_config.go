@@ -148,7 +148,8 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.RawRegion != "" && !c.SkipValidation {
-		if valid := ValidateRegion(c.RawRegion); !valid {
+		ec2conn := getValidationSession()
+		if valid := ValidateRegion(c.RawRegion, ec2conn); !valid {
 			errs = append(errs, fmt.Errorf("Unknown region: %s", c.RawRegion))
 		}
 	}
