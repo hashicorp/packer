@@ -64,28 +64,36 @@ func (u *Ui) Say(message string) {
 	}
 }
 
-func (u *Ui) ProgressBar() packer.ProgressBar {
-	if err := u.client.Call("Ui.ProgressBar", new(interface{}), new(interface{})); err != nil {
-		log.Printf("Error in Ui RPC call: %s", err)
+func (u *Ui) ProgressBar(identifier string) packer.ProgressBar {
+	if err := u.client.Call("Ui.ProgressBar", identifier, new(interface{})); err != nil {
+		log.Printf("Err or in Ui RPC call: %s", err)
 	}
-	return u // Ui is also a progress bar !!
+	return &RemoteProgressBarClient{
+		id:     identifier,
+		client: u.client,
+	}
 }
 
-var _ packer.ProgressBar = new(Ui)
-
-func (pb *Ui) Start(total int64) {
-	pb.client.Call("Ui.Start", total, new(interface{}))
+type RemoteProgressBarClient struct {
+	id     string
+	client *rpc.Client
 }
 
-func (pb *Ui) Add(current int64) {
-	pb.client.Call("Ui.Add", current, new(interface{}))
+var _ packer.ProgressBar = new(RemoteProgressBarClient)
+
+func (pb *RemoteProgressBarClient) Start(total int64) {
+	pb.client.Call(pb.id+".Start", total, new(interface{}))
 }
 
-func (pb *Ui) Finish() {
-	pb.client.Call("Ui.Finish", nil, new(interface{}))
+func (pb *RemoteProgressBarClient) Add(current int64) {
+	pb.client.Call(pb.id+".Add", current, new(interface{}))
 }
 
-func (pb *Ui) NewProxyReader(r io.Reader) io.Reader {
+func (pb *RemoteProgressBarClient) Finish() {
+	pb.client.Call(pb.id+".Finish", nil, new(interface{}))
+}
+
+func (pb *RemoteProgressBarClient) NewProxyReader(r io.Reader) io.Reader {
 	return &packer.ProxyReader{Reader: r, ProgressBar: pb}
 }
 
@@ -121,25 +129,38 @@ func (u *UiServer) Say(message *string, reply *interface{}) error {
 	return nil
 }
 
-func (u *UiServer) ProgressBar(_ *string, reply *interface{}) error {
-	// No-op for now, this function might be
-	// used in the future if we want to use
-	// different progress bars with identifiers.
-	u.ui.ProgressBar()
+// ProgressBar registers a rpc progress bar server identified by identifier.
+// ProgressBar expects identifiers to be unique across runs
+// since for examples an iso download should be cached.
+func (u *UiServer) ProgressBar(identifier string, reply *interface{}) error {
+
+	bar := u.ui.ProgressBar(identifier)
+	log.Printf("registering progressbar for '%s'", identifier)
+	err := u.register(identifier, &UiProgressBarServer{bar})
+	if err != nil {
+		log.Printf("failed to register a new progress bar rpc server, %s", err)
+		return err
+	}
+	*reply = identifier
+
 	return nil
 }
 
-func (pb *UiServer) Finish(_ string, _ *interface{}) error {
-	pb.ui.ProgressBar().Finish()
+type UiProgressBarServer struct {
+	bar packer.ProgressBar
+}
+
+func (pb *UiProgressBarServer) Finish(_ string, _ *interface{}) error {
+	pb.bar.Finish()
 	return nil
 }
 
-func (pb *UiServer) Start(total int64, _ *interface{}) error {
-	pb.ui.ProgressBar().Start(total)
+func (pb *UiProgressBarServer) Start(total int64, _ *interface{}) error {
+	pb.bar.Start(total)
 	return nil
 }
 
-func (pb *UiServer) Add(current int64, _ *interface{}) error {
-	pb.ui.ProgressBar().Add(current)
+func (pb *UiProgressBarServer) Add(current int64, _ *interface{}) error {
+	pb.bar.Add(current)
 	return nil
 }
