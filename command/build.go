@@ -23,12 +23,13 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
+	var cfgColor, cfgDebug, cfgConnInfo, cfgForce, cfgTimestamp, cfgParallel bool
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
+	flags.BoolVar(&cfgConnInfo, "connection-info", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
 	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
@@ -76,6 +77,7 @@ func (c *BuildCommand) Run(args []string) int {
 	}
 
 	if cfgDebug {
+		cfgConnInfo = true
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
@@ -115,12 +117,14 @@ func (c *BuildCommand) Run(args []string) int {
 	}
 
 	log.Printf("Build debug mode: %v", cfgDebug)
+	log.Printf("Provide connection information: %v", cfgDebug)
 	log.Printf("Force build: %v", cfgForce)
 	log.Printf("On error: %v", cfgOnError)
 
 	// Set the debug and force mode and prepare all the builds
 	for _, b := range builds {
 		log.Printf("Preparing build: %s", b.Name())
+		b.SetShowConnectionInfo(cfgConnInfo)
 		b.SetDebug(cfgDebug)
 		b.SetForce(cfgForce)
 		b.SetOnError(cfgOnError)
@@ -302,6 +306,7 @@ Usage: packer build [options] TEMPLATE
 Options:
 
   -color=false                  Disable color output. (Default: color)
+  -connection-info              Show connection information for builds, implicitly enabled if debug is used.
   -debug                        Debug mode enabled for builds.
   -except=foo,bar,baz           Build all builds other than these.
   -only=foo,bar,baz             Build only the specified builds.
@@ -328,6 +333,7 @@ func (*BuildCommand) AutocompleteArgs() complete.Predictor {
 func (*BuildCommand) AutocompleteFlags() complete.Flags {
 	return complete.Flags{
 		"-color":            complete.PredictNothing,
+		"-connection-info":  complete.PredictNothing,
 		"-debug":            complete.PredictNothing,
 		"-except":           complete.PredictNothing,
 		"-only":             complete.PredictNothing,

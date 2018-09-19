@@ -68,6 +68,12 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error)
 	return artifacts, nil
 }
 
+func (b *build) SetShowConnectionInfo(val bool) {
+	if err := b.client.Call("Build.SetShowConnectionInfo", val, new(interface{})); err != nil {
+		panic(err)
+	}
+}
+
 func (b *build) SetDebug(val bool) {
 	if err := b.client.Call("Build.SetDebug", val, new(interface{})); err != nil {
 		panic(err)

@@ -27,10 +27,11 @@ import (
 //   communicator packer.Communicator
 type StepConnectWinRM struct {
 	// All the fields below are documented on StepConnect
-	Config      *Config
-	Host        func(multistep.StateBag) (string, error)
-	WinRMConfig func(multistep.StateBag) (*WinRMConfig, error)
-	WinRMPort   func(multistep.StateBag) (int, error)
+	Config             *Config
+	Host               func(multistep.StateBag) (string, error)
+	ShowConnectionInfo bool
+	WinRMConfig        func(multistep.StateBag) (*WinRMConfig, error)
+	WinRMPort          func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectWinRM) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -129,6 +130,9 @@ func (s *StepConnectWinRM) waitForWinRM(state multistep.StateBag, cancel <-chan 
 		}
 
 		log.Println("[INFO] Attempting WinRM connection...")
+		if s.ShowConnectionInfo {
+			// TODO rickard
+		}
 		comm, err = winrm.New(&winrm.Config{
 			Host:               host,
 			Port:               port,

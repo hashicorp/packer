@@ -13,9 +13,9 @@ import (
 )
 
 type StepKeyPair struct {
-	Debug        bool
-	Comm         *communicator.Config
-	DebugKeyPath string
+	ShowConnectionInfo bool
+	Comm               *communicator.Config
+	DebugKeyPath       string
 
 	doCleanup bool
 }
@@ -68,9 +68,9 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	s.Comm.SSHKeyPairName = s.Comm.SSHTemporaryKeyPairName
 	s.Comm.SSHPrivateKey = []byte(*keyResp.KeyMaterial)
 
-	// If we're in debug mode, output the private key to the working
+	// If we're upposed to show connection info output the private key to the working
 	// directory.
-	if s.Debug {
+	if s.ShowConnectionInfo {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
@@ -114,7 +114,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	// Also remove the physical key if we're debugging.
-	if s.Debug {
+	if s.ShowConnectionInfo {
 		if err := os.Remove(s.DebugKeyPath); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error removing debug key '%s': %s", s.DebugKeyPath, err))
