@@ -17,7 +17,7 @@ type stepSnapshot struct{}
 func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*godo.Client)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	dropletId := state.Get("droplet_id").(int)
 	var snapshotRegions []string
 
