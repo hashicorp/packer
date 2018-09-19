@@ -24,7 +24,7 @@ func (s *stepConfigAlicloudVSwitch) Run(_ context.Context, state multistep.State
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpcid").(string)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	if len(s.VSwitchId) != 0 {
 		vswitchs, _, err := client.DescribeVSwitches(&ecs.DescribeVSwitchesArgs{

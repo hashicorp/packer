@@ -20,7 +20,7 @@ type stepDeleteAlicloudImageSnapshots struct {
 func (s *stepDeleteAlicloudImageSnapshots) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui.Say("Deleting image snapshots.")
 	// Check for force delete
 	if s.AlicloudImageForceDelete {
