@@ -55,7 +55,7 @@ func (u *testUi) Say(message string) {
 	u.sayMessage = message
 }
 
-func (u *testUi) ProgressBar(string) packer.ProgressBar {
+func (u *testUi) ProgressBar() packer.ProgressBar {
 	u.progressBarCalled = true
 	return u
 }
@@ -119,7 +119,7 @@ func TestUiRPC(t *testing.T) {
 		t.Fatalf("bad: %#v", ui.errorMessage)
 	}
 
-	bar := uiClient.ProgressBar("test")
+	bar := uiClient.ProgressBar()
 	if ui.progressBarCalled != true {
 		t.Errorf("ProgressBar not called.")
 	}

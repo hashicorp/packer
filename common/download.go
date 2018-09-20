@@ -95,7 +95,7 @@ func NewDownloadClient(c *DownloadConfig, ui packer.Ui) *DownloadClient {
 type Downloader interface {
 	Resume()
 	Cancel()
-	ProgressBar(identifier string) packer.ProgressBar
+	ProgressBar() packer.ProgressBar
 }
 
 // A LocalDownloader is responsible for converting a uri to a local path
@@ -315,7 +315,7 @@ func (d *HTTPDownloader) Download(dst *os.File, src *url.URL) error {
 
 	total := current + resp.ContentLength
 
-	bar := d.ProgressBar(src.String())
+	bar := d.ProgressBar()
 	bar.Start(total)
 	defer bar.Finish()
 	bar.Add(current)
@@ -427,7 +427,7 @@ func (d *FileDownloader) Download(dst *os.File, src *url.URL) error {
 		return err
 	}
 
-	bar := d.ProgressBar(src.String())
+	bar := d.ProgressBar()
 
 	bar.Start(fi.Size())
 	defer bar.Finish()
@@ -529,7 +529,7 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 		return err
 	}
 
-	bar := d.ProgressBar(src.String())
+	bar := d.ProgressBar()
 
 	bar.Start(fi.Size())
 	defer bar.Finish()
@@ -561,14 +561,6 @@ func (d *SMBDownloader) Download(dst *os.File, src *url.URL) error {
 	return err
 }
 
-func (d *HTTPDownloader) ProgressBar(identifier string) packer.ProgressBar {
-	return d.Ui.ProgressBar(identifier)
-}
-
-func (d *FileDownloader) ProgressBar(identifier string) packer.ProgressBar {
-	return d.Ui.ProgressBar(identifier)
-}
-
-func (d *SMBDownloader) ProgressBar(identifier string) packer.ProgressBar {
-	return d.Ui.ProgressBar(identifier)
-}
+func (d *HTTPDownloader) ProgressBar() packer.ProgressBar { return d.Ui.ProgressBar() }
+func (d *FileDownloader) ProgressBar() packer.ProgressBar { return d.Ui.ProgressBar() }
+func (d *SMBDownloader) ProgressBar() packer.ProgressBar  { return d.Ui.ProgressBar() }

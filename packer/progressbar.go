@@ -1,8 +1,10 @@
 package packer
 
 import (
+	"fmt"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/cheggaaa/pb"
 )
@@ -16,51 +18,69 @@ type ProgressBar interface {
 	Finish()
 }
 
-// StackableProgressBar is a progress bar pool that
-// allows to track multiple advencments at once,
-// by displaying multiple bars.
+// StackableProgressBar is a progress bar that
+// allows to track multiple downloads at once.
+// Every call to Start increments a counter that
+// will display the number of current loadings.
+// Every call to Start will add total to an internal
+// total that is the total displayed.
+// First call to Start will start a goroutine
+// that is waiting for every download to be finished.
+// Last call to Finish triggers a cleanup.
+// When all active downloads are finished
+// StackableProgressBar will clean itself to a default
+// state.
 type StackableProgressBar struct {
 	mtx sync.Mutex // locks in Start & Finish
+	BasicProgressBar
+	items int32
+	total int64
 
-	pool *pb.Pool
-	bars []*BasicProgressBar
-
-	wg sync.WaitGroup
+	started bool
 }
 
-func (spb *StackableProgressBar) cleanup() {
-	spb.wg.Wait()
+var _ ProgressBar = new(StackableProgressBar)
 
+func (spb *StackableProgressBar) start() {
+	spb.BasicProgressBar.ProgressBar = pb.New(0)
+	spb.BasicProgressBar.ProgressBar.SetUnits(pb.U_BYTES)
+
+	spb.BasicProgressBar.ProgressBar.Start()
+	spb.started = true
+}
+
+func (spb *StackableProgressBar) Start(total int64) {
+	spb.mtx.Lock()
+
+	spb.total += total
+	spb.items++
+
+	if !spb.started {
+		spb.start()
+	}
+	spb.SetTotal64(spb.total)
+	spb.prefix()
+	spb.mtx.Unlock()
+}
+
+func (spb *StackableProgressBar) prefix() {
+	spb.BasicProgressBar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", atomic.LoadInt32(&spb.items)))
+}
+
+func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
 
-	spb.pool.Stop()
-	spb.pool = nil
-	spb.bars = nil
-}
-
-func (spb *StackableProgressBar) New(identifier string) ProgressBar {
-	spb.mtx.Lock()
-	spb.wg.Add(1)
-	defer spb.mtx.Unlock()
-
-	start := false
-	if spb.pool == nil {
-		spb.pool = pb.NewPool()
-		go spb.cleanup()
-		start = true
+	spb.items--
+	if spb.items == 0 {
+		// slef cleanup
+		spb.BasicProgressBar.ProgressBar.Finish()
+		spb.BasicProgressBar.ProgressBar = nil
+		spb.started = false
+		spb.total = 0
+		return
 	}
-
-	bar := NewProgressBar(identifier)
-	bar.Prefix(identifier)
-	bar.finishCb = spb.wg.Done
-	spb.bars = append(spb.bars, bar)
-
-	spb.pool.Add(bar.ProgressBar)
-	if start {
-		spb.pool.Start()
-	}
-	return bar
+	spb.prefix()
 }
 
 // BasicProgressBar is packer's basic progress bar.
@@ -68,13 +88,6 @@ func (spb *StackableProgressBar) New(identifier string) ProgressBar {
 // itself at the bottom of a terminal.
 type BasicProgressBar struct {
 	*pb.ProgressBar
-	finishCb func()
-}
-
-func NewProgressBar(identifier string) *BasicProgressBar {
-	bar := new(BasicProgressBar)
-	bar.ProgressBar = pb.New(0)
-	return bar
 }
 
 var _ ProgressBar = new(BasicProgressBar)
@@ -82,13 +95,6 @@ var _ ProgressBar = new(BasicProgressBar)
 func (bpb *BasicProgressBar) Start(total int64) {
 	bpb.SetTotal64(total)
 	bpb.ProgressBar.Start()
-}
-
-func (bpb *BasicProgressBar) Finish() {
-	if bpb.finishCb != nil {
-		bpb.finishCb()
-	}
-	bpb.ProgressBar.Finish()
 }
 
 func (bpb *BasicProgressBar) Add(current int64) {
