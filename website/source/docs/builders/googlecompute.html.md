@@ -318,7 +318,8 @@ builder.
     will be interpolated to `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
 
 
--   `tags` (array of strings)
+-   `tags` (array of strings) - Assign network tags to apply firewall rules to
+    VM instance.
 
 -   `use_internal_ip` (boolean) - If true, use the instance's internal IP
     instead of its external IP during building.
