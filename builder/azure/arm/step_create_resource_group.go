@@ -108,7 +108,10 @@ func (s *StepCreateResourceGroup) Cleanup(state multistep.StateBag) {
 	}
 
 	ui := state.Get("ui").(packer.Ui)
-	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
+	if state.Get(constants.ArmSkipDelete).(bool) {
+		ui.Say("\nSkipping deletion...")
+		return
+	} else if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
 		ui.Say("\nThe resource group was not created by Packer, not deleting ...")
 		return
 	} else {

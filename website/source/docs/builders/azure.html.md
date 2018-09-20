@@ -186,6 +186,9 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
        1. PlanPublisher
        1. PlanPromotionCode
 
+-   `skip_delete` (boolean) skip deletion of the temporary resource group and any temporary resources.  Resources
+    are not deleted if the build fails or succeeds.
+
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.

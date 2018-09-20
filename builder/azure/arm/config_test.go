@@ -799,7 +799,7 @@ func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 
 func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 	config := map[string]interface{}{
-		"image_url": "ignore",
+		"image_url":                                "ignore",
 		"custom_managed_image_resource_group_name": "ignore",
 		"custom_managed_image_name":                "ignore",
 		"location":                                 "ignore",
@@ -1241,6 +1241,7 @@ func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
 		"managed_image_name":                "ignore",
 		"managed_image_resource_group_name": "ignore",
 		"async_resourcegroup_delete":        "true",
+		"skip_delete":                       "true",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -1250,6 +1251,9 @@ func TestConfigShouldAllowAsyncResourceGroupOverride(t *testing.T) {
 
 	if c.AsyncResourceGroupDelete != true {
 		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+	if c.SkipDelete != true {
+		t.Errorf("expected SkipDelete to be %q, but got %t", "SkipDelete", c.SkipDelete)
 	}
 }
 func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
@@ -1272,6 +1276,9 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideNoValue(t *testing.T) {
 
 	if c.AsyncResourceGroupDelete != false {
 		t.Errorf("expected async_resourcegroup_delete to be %q, but got %t", "async_resourcegroup_delete", c.AsyncResourceGroupDelete)
+	}
+	if c.SkipDelete != false {
+		t.Errorf("expected SkipDelete to be %q, but got %t", "SkipDelete", c.SkipDelete)
 	}
 }
 func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
