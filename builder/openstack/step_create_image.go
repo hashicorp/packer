@@ -47,7 +47,8 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		}
 		volume := state.Get("volume_id").(string)
 		image, err := volumeactions.UploadImage(blockStorageClient, volume, volumeactions.UploadImageOpts{
-			ImageName: config.ImageName,
+			DiskFormat: config.ImageDiskFormat,
+			ImageName:  config.ImageName,
 		}).Extract()
 		if err != nil {
 			err := fmt.Errorf("Error creating image: %s", err)
