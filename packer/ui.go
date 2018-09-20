@@ -37,24 +37,19 @@ type Ui interface {
 	Message(string)
 	Error(string)
 	Machine(string, ...string)
-
-	// ProgressBar instanciates a ProgressBar for
-	// an object named 'identifer'.
-	// ProgressBar should not be called twice with
-	// the same identifier.
-	ProgressBar(identifier string) ProgressBar
+	ProgressBar() ProgressBar
 }
 
 type NoopUi struct{}
 
 var _ Ui = new(NoopUi)
 
-func (*NoopUi) Ask(string) (string, error)     { return "", errors.New("this is a noop ui") }
-func (*NoopUi) Say(string)                     { return }
-func (*NoopUi) Message(string)                 { return }
-func (*NoopUi) Error(string)                   { return }
-func (*NoopUi) Machine(string, ...string)      { return }
-func (*NoopUi) ProgressBar(string) ProgressBar { return new(NoopProgressBar) }
+func (*NoopUi) Ask(string) (string, error) { return "", errors.New("this is a noop ui") }
+func (*NoopUi) Say(string)                 { return }
+func (*NoopUi) Message(string)             { return }
+func (*NoopUi) Error(string)               { return }
+func (*NoopUi) Machine(string, ...string)  { return }
+func (*NoopUi) ProgressBar() ProgressBar   { return new(NoopProgressBar) }
 
 // ColoredUi is a UI that is colored using terminal colors.
 type ColoredUi struct {
@@ -92,8 +87,8 @@ type BasicUi struct {
 
 var _ Ui = new(BasicUi)
 
-func (bu *BasicUi) ProgressBar(identifier string) ProgressBar {
-	return bu.StackableProgressBar.New(identifier)
+func (bu *BasicUi) ProgressBar() ProgressBar {
+	return &bu.StackableProgressBar
 }
 
 // MachineReadableUi is a UI that only outputs machine-readable output
@@ -130,8 +125,8 @@ func (u *ColoredUi) Machine(t string, args ...string) {
 	u.Ui.Machine(t, args...)
 }
 
-func (u *ColoredUi) ProgressBar(identifier string) ProgressBar {
-	return u.Ui.ProgressBar(identifier) //TODO(adrien): color me
+func (u *ColoredUi) ProgressBar() ProgressBar {
+	return u.Ui.ProgressBar() //TODO(adrien): color me
 }
 
 func (u *ColoredUi) colorize(message string, color UiColor, bold bool) string {
@@ -187,8 +182,8 @@ func (u *TargetedUI) Machine(t string, args ...string) {
 	u.Ui.Machine(fmt.Sprintf("%s,%s", u.Target, t), args...)
 }
 
-func (u *TargetedUI) ProgressBar(identifier string) ProgressBar {
-	return u.Ui.ProgressBar(identifier)
+func (u *TargetedUI) ProgressBar() ProgressBar {
+	return u.Ui.ProgressBar()
 }
 
 func (u *TargetedUI) prefixLines(arrow bool, message string) string {
@@ -344,6 +339,6 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	}
 }
 
-func (u *MachineReadableUi) ProgressBar(string) ProgressBar {
+func (u *MachineReadableUi) ProgressBar() ProgressBar {
 	return new(NoopProgressBar)
 }
