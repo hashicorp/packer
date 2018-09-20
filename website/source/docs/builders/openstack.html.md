@@ -275,6 +275,9 @@ builder.
     zones aren't specified, the default enforced by your OpenStack cluster will
     be used.
 
+-   `image_disk_format` (string) - Disk format of the resulting image.
+    This option works if `use_blockstorage_volume` is true.
+
 ## Basic Example: DevStack
 
 Here is a basic example. This is a example to build on DevStack running in a VM.
