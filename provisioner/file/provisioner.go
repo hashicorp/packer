@@ -176,7 +176,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 		}
 
 		// Get a default progress bar
-		bar := ui.ProgressBar(fmt.Sprintf("Uploading %s => %s", src, dst))
+		bar := ui.ProgressBar()
 		bar.Start(info.Size())
 		defer bar.Finish()
 
