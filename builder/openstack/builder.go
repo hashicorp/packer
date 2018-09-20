@@ -52,6 +52,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
+	if b.config.ImageConfig.ImageDiskFormat != "" && !b.config.RunConfig.UseBlockStorageVolume {
+		return nil, fmt.Errorf("use_blockstorage_volume must be true if image_disk_format is specified.")
+	}
+
 	// By default, instance name is same as image name
 	if b.config.InstanceName == "" {
 		b.config.InstanceName = b.config.ImageName
