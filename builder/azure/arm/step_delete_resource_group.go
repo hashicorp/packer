@@ -34,7 +34,10 @@ func NewStepDeleteResourceGroup(client *AzureClient, ui packer.Ui) *StepDeleteRe
 
 func (s *StepDeleteResourceGroup) deleteResourceGroup(ctx context.Context, state multistep.StateBag, resourceGroupName string) error {
 	var err error
-	if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
+	if state.Get(constants.ArmSkipDelete).(bool) {
+		s.say("\nSkipping deletion ...")
+		return nil
+	} else if state.Get(constants.ArmIsExistingResourceGroup).(bool) {
 		s.say("\nThe resource group was not created by Packer, only deleting individual resources ...")
 		var deploymentName = state.Get(constants.ArmDeploymentName).(string)
 		err = s.deleteDeploymentResources(ctx, deploymentName, resourceGroupName)

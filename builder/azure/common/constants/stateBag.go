@@ -35,4 +35,5 @@ const (
 	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
 	ArmManagedImageName              string = "arm.ManagedImageName"
 	ArmAsyncResourceGroupDelete      string = "arm.AsyncResourceGroupDelete"
+	ArmSkipDelete                    string = "arm.SkipDelete"
 )

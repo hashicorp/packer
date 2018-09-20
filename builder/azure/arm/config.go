@@ -153,6 +153,7 @@ type Config struct {
 
 	//Cleanup
 	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
+	SkipDelete               bool `mapstructure:"skip_delete"`
 }
 
 type keyVaultCertificate struct {
