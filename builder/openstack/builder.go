@@ -96,15 +96,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&StepCreateVolume{
 			UseBlockStorageVolume:  b.config.UseBlockStorageVolume,
-			SourceImage:            b.config.SourceImage,
 			VolumeName:             b.config.VolumeName,
 			VolumeType:             b.config.VolumeType,
 			VolumeAvailabilityZone: b.config.VolumeAvailabilityZone,
 		},
 		&StepRunSourceServer{
 			Name:                  b.config.InstanceName,
-			SourceImage:           b.config.SourceImage,
-			SourceImageName:       b.config.SourceImageName,
 			SecurityGroups:        b.config.SecurityGroups,
 			Networks:              b.config.Networks,
 			Ports:                 b.config.Ports,
