@@ -22,5 +22,5 @@
 /intro/platforms.html                           /docs/builders/index.html
 /docs/templates/configuration-templates.html    /docs/templates/engine.html
 /docs/machine-readable/*                        /docs/commands/index.html
-/docs/command-line/*                            /docs/commands/
-/docs/extend/*                                  /docs/extending/
+/docs/command-line/*                            /docs/commands/:splat
+/docs/extend/*                                  /docs/extending/:splat
