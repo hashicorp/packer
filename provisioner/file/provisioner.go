@@ -185,6 +185,11 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 
 		// Upload the file
 		if err = comm.Upload(dst, pf, &fi); err != nil {
+			if strings.Contains(err.Error(), "Error restoring file") {
+				ui.Error(fmt.Sprintf("Upload failed: %s; this can occur when "+
+					"your file destination is a folder without a trailing "+
+					"slash.", err))
+			}
 			ui.Error(fmt.Sprintf("Upload failed: %s", err))
 			return err
 		}
