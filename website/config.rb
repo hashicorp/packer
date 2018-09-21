@@ -109,3 +109,7 @@ helpers do
     return classes.join(" ")
   end
 end
+
+# Netlify redirects/headers
+proxy '_redirects', 'netlify-redirects', ignore: true
+proxy '_headers', 'netlify-headers', ignore: true
