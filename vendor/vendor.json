@@ -1321,10 +1321,10 @@
 			"versionExact": "v2.0.0"
 		},
 		{
-			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
+			"checksumSHA1": "qDOL2Q0BzBA5WwQN06a5/MbEGFQ=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "81144009af586de8e7729b829266f09dd0d59701",
-			"revisionTime": "2018-01-02T16:08:24Z"
+			"revision": "0fd363d6159ae26cd0be16262941301e69461641",
+			"revisionTime": "2018-09-21T17:45:48Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",
