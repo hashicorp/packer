@@ -37,6 +37,8 @@ func main() {
 // realMain is executed from main and returns the exit status to exit with.
 func realMain() int {
 	var wrapConfig panicwrap.WrapConfig
+	wrapConfig.CookieKey = "PACKER_WRAP_COOKIE"
+	wrapConfig.CookieValue = "49C22B1A-3A93-4C98-97FA-E07D18C787B5"
 
 	if !panicwrap.Wrapped(&wrapConfig) {
 		// Generate a UUID for this packer run and pass it to the environment.
