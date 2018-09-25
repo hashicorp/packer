@@ -147,3 +147,30 @@ func TestRunConfigPrepare_SSHPrivateIp(t *testing.T) {
 		t.Fatalf("invalid value, expected: %t, actul: %t", false, c.SSHPrivateIp)
 	}
 }
+
+func TestRunConfigPrepare_DisableStopInstance(t *testing.T) {
+	c := testConfig()
+
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.DisableStopInstance != false {
+		t.Fatalf("invalid value, expected: %t, actul: %t", false, c.DisableStopInstance)
+	}
+
+	c.DisableStopInstance = true
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.DisableStopInstance != true {
+		t.Fatalf("invalid value, expected: %t, actul: %t", true, c.DisableStopInstance)
+	}
+
+	c.DisableStopInstance = false
+	if err := c.Prepare(nil); len(err) != 0 {
+		t.Fatalf("err: %s", err)
+	}
+	if c.DisableStopInstance != false {
+		t.Fatalf("invalid value, expected: %t, actul: %t", false, c.DisableStopInstance)
+	}
+}
