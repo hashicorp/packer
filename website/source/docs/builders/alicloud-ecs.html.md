@@ -56,6 +56,12 @@ builder.
     If it is set to `false`, the system is shut down normally; if it is set to
     `true`, the system is forced to shut down.
 
+-   `disable_stop_instance` (boolean) - If this option is set to `true`, Packer will not stop the instance
+    for you, and you need to make sure the instance will be stopped in the final provisioner command. Otherwise,
+    Packer will timeout while waiting the instance to be stopped. This option is provided for some specific
+    scenarios that you want to stop the instance by yourself. E.g., Sysprep a windows which may shutdown the instance
+    within its command. The default value is `false`.     
+
 -   `image_copy_names` (array of string) - The name of the destination image, \[2,
     128\] English or Chinese characters. It must begin with an uppercase/lowercase
     letter or a Chinese character, and may contain numbers, `_` or `-`. It cannot
