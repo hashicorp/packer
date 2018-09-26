@@ -211,7 +211,7 @@ Here is a basic example for Alicloud.
     "secret_key":"{{user `secret_key`}}",
     "region":"cn-beijing",
     "image_name":"packer_test2",
-    "source_image":"centos_7_2_64_40G_base_20170222.vhd",
+    "source_image":"centos_7_04_64_20G_alibase_201701015.vhd",
     "ssh_username":"root",
     "instance_type":"ecs.n1.tiny",
     "io_optimized":"true",
@@ -226,6 +226,9 @@ Here is a basic example for Alicloud.
   }]
 }
 ```
+
+~&gt; Note: Images can become deprecated after a while; run
+`aliyun ecs DescribeImages` to find one that exists.
 
 See the
 [examples/alicloud](https://github.com/hashicorp/packer/tree/master/examples/alicloud)
