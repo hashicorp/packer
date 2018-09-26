@@ -44,7 +44,11 @@ The available configuration options are listed below.
 
 -   `destination` (string) - The path where the file will be uploaded to in
     the machine. This value must be a writable location and any parent
-    directories must already exist.
+    directories must already exist. If the source is a file, it's a good idea to
+    make the destination a file as well, but if you set your destination as a
+    directory, at least make sure that the destination ends in a trailing slash
+    so that Packer knows to use the source's basename in the final upload path.
+    Failure to do so may cause Packer to fail on file uploads.
 
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload". If it is set to "download" then the file "source" in the machine
