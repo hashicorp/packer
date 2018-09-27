@@ -14,7 +14,7 @@ type stepCreateTags struct {
 }
 
 func (s *stepCreateTags) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	imageId := state.Get("alicloudimage").(string)
