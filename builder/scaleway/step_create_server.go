@@ -17,8 +17,7 @@ type stepCreateServer struct {
 func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
-	sshPubKey := state.Get("ssh_pubkey").(string)
+	c := state.Get("config").(*Config)
 	tags := []string{}
 	var bootscript *string
 
@@ -28,8 +27,8 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		bootscript = &c.Bootscript
 	}
 
-	if sshPubKey != "" {
-		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.TrimSpace(sshPubKey))}
+	if c.Comm.SSHPublicKey != nil {
+		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.Replace(strings.TrimSpace(string(c.Comm.SSHPublicKey)), " ", "_", -1))}
 	}
 
 	server, err := client.PostServer(api.ScalewayServerDefinition{
