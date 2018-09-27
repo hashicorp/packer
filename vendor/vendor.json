@@ -1443,10 +1443,10 @@
 			"revisionTime": "2017-03-21T23:07:31Z"
 		},
 		{
-			"checksumSHA1": "UvMjUbtTEF0wskLTpV8grtBUh7Q=",
+			"checksumSHA1": "17M5pJv8Wr4lIxmINnba9vTozR8=",
 			"path": "github.com/scaleway/scaleway-cli/pkg/api",
-			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
-			"revisionTime": "2018-03-05T22:44:21Z"
+			"revision": "7b12c9699d70d4ca06140b7d829d09b6a1c8f6f5",
+			"revisionTime": "2018-09-21T09:43:45Z"
 		},
 		{
 			"checksumSHA1": "kveaAmNlnvmIIuEkFcMlB+N7TqY=",
