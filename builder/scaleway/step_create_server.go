@@ -38,6 +38,7 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		CommercialType: c.CommercialType,
 		Tags:           tags,
 		Bootscript:     bootscript,
+		BootType:       c.BootType,
 	})
 
 	if err != nil {

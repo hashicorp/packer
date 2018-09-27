@@ -30,6 +30,7 @@ type Config struct {
 	ImageName    string `mapstructure:"image_name"`
 	ServerName   string `mapstructure:"server_name"`
 	Bootscript   string `mapstructure:"bootscript"`
+	BootType     string `mapstructure:"boottype"`
 
 	UserAgent string
 	ctx       interpolate.Context
@@ -84,6 +85,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	if c.ServerName == "" {
 		// Default to packer-[time-ordered-uuid]
 		c.ServerName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	}
+
+	if c.BootType == "" {
+		c.BootType = "bootscript"
 	}
 
 	var errs *packer.MultiError
