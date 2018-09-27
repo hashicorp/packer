@@ -118,6 +118,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&stepCreateImage{
 				uploadImageCommand: b.config.BuilderUploadImageCommand,
 			},
+			&common.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
 		}
 	} else {
 		// Build the steps
@@ -137,9 +140,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&common.StepProvision{},
-			&common.StepCleanupTempKeys{
-				Comm: &b.config.Comm,
-			},
 			&common.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
