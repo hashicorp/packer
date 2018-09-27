@@ -57,7 +57,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 		return multistep.ActionContinue
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
@@ -169,7 +169,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
