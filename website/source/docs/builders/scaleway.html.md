@@ -74,6 +74,9 @@ builder.
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. Default `packer-TIMESTAMP`
 
+-   `boottype` (string) - The type of boot, can be either `local` or `bootscript`,
+    Default `bootscript`
+
 -   `bootscript` (string) - The id of an existing bootscript to use when booting
     the server.
 
