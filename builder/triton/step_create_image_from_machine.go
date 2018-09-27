@@ -15,7 +15,7 @@ import (
 type StepCreateImageFromMachine struct{}
 
 func (s *StepCreateImageFromMachine) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -23,7 +23,7 @@ func (s *StepCreateImageFromMachine) Run(_ context.Context, state multistep.Stat
 
 	ui.Say("Creating image from source machine...")
 
-	imageId, err := driver.CreateImageFromMachine(machineId, config)
+	imageId, err := driver.CreateImageFromMachine(machineId, *config)
 	if err != nil {
 		state.Put("error", fmt.Errorf("Problem creating image from machine: %s", err))
 		return multistep.ActionHalt

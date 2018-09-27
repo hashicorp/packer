@@ -73,7 +73,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
@@ -110,7 +110,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			ConfigDrive:           b.config.ConfigDrive,
 			InstanceMetadata:      b.config.InstanceMetadata,
 			UseBlockStorageVolume: b.config.UseBlockStorageVolume,
-			Comm:                  &b.config.Comm,
 		},
 		&StepGetPassword{
 			Debug: b.config.PackerDebug,
