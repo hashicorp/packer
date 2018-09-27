@@ -15,7 +15,7 @@ type stepImage struct{}
 func (s *stepImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	snapshotID := state.Get("snapshot_id").(string)
 	bootscriptID := ""
 
