@@ -163,7 +163,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Comm: &b.config.RunConfig.Comm,
 		},
 		&stepStopAlicloudInstance{
-			ForceStop: b.config.ForceStopInstance,
+			ForceStop:   b.config.ForceStopInstance,
+			DisableStop: b.config.DisableStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
