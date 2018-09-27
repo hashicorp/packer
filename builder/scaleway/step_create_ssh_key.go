@@ -1,7 +1,6 @@
 package scaleway
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
@@ -13,7 +12,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/crypto/ssh"
@@ -21,31 +19,31 @@ import (
 
 type stepCreateSSHKey struct {
 	Debug        bool
-	Comm         *communicator.Config
 	DebugKeyPath string
 }
 
 func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
+	config := state.Get("config").(*Config)
 
-	if s.Comm.SSHPrivateKeyFile != "" {
+	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
+		privateKeyBytes, err := ioutil.ReadFile(config.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			state.Put("error", fmt.Errorf(
 				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
-		s.Comm.SSHPrivateKey = privateKeyBytes
-		s.Comm.SSHPublicKey = nil
+		config.Comm.SSHPrivateKey = privateKeyBytes
+		config.Comm.SSHPublicKey = nil
 
 		return multistep.ActionContinue
 	}
 
 	ui.Say("Creating temporary ssh key for server...")
 
-	priv, err := rsa.GenerateKey(rand.Reader, 2014)
+	priv, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary SSH key: %s", err)
 		state.Put("error", err)
@@ -61,17 +59,19 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		Bytes:   priv_der,
 	}
 
-	// Set the private key in the config for later
-	s.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
-
-	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
-	pub_sshformat := ssh.MarshalAuthorizedKey(pub)
-	pub_sshformat = bytes.Replace(pub_sshformat, []byte(" "), []byte("_"), -1)
+	pub, err := ssh.NewPublicKey(&priv.PublicKey)
+	if err != nil {
+		err := fmt.Errorf("Error creating temporary SSH key: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
 	log.Printf("temporary ssh key created")
 
 	// Remember some state for the future
-	s.Comm.SSHPublicKey = pub_sshformat
+	config.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
+	config.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
 	// If we're in debug mode, output the private key to the working directory.
 	if s.Debug {
