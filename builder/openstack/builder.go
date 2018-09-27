@@ -62,7 +62,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.Password)
-	log.Println(b.config)
 	return nil, nil
 }
 
