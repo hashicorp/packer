@@ -21,7 +21,7 @@ func (s *stepDeleteAlicloudImageSnapshots) Run(_ context.Context, state multiste
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
-	ui.Say("Deleting image snapshots.")
+
 	// Check for force delete
 	if s.AlicloudImageForceDelete {
 		images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{
@@ -31,6 +31,9 @@ func (s *stepDeleteAlicloudImageSnapshots) Run(_ context.Context, state multiste
 		if len(images) < 1 {
 			return multistep.ActionContinue
 		}
+
+		ui.Say(fmt.Sprintf("Deleting duplicated image and snapshot: %s", s.AlicloudImageName))
+
 		for _, image := range images {
 			if image.ImageOwnerAlias != string(ecs.ImageOwnerSelf) {
 				log.Printf("You can only delete instances based on customized images %s ", image.ImageId)
