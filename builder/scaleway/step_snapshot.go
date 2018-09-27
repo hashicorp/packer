@@ -15,7 +15,7 @@ type stepSnapshot struct{}
 func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
-	c := state.Get("config").(Config)
+	c := state.Get("config").(*Config)
 	volumeID := state.Get("root_volume_id").(string)
 
 	ui.Say(fmt.Sprintf("Creating snapshot: %v", c.SnapshotName))
