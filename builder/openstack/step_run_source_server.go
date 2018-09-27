@@ -9,7 +9,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -26,11 +25,10 @@ type StepRunSourceServer struct {
 	InstanceMetadata      map[string]string
 	UseBlockStorageVolume bool
 	server                *servers.Server
-	Comm                  *communicator.Config
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
 	sourceImage := state.Get("source_image").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -102,7 +100,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	// Add keypair to the server create options.
-	keyName := s.Comm.SSHKeyPairName
+	keyName := config.Comm.SSHKeyPairName
 	if keyName != "" {
 		serverOptsExt = keypairs.CreateOptsExt{
 			CreateOptsBuilder: serverOptsExt,
@@ -148,7 +146,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client

@@ -20,7 +20,7 @@ type stepCreateImage struct {
 }
 
 func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 	ui := state.Get("ui").(packer.Ui)
 
