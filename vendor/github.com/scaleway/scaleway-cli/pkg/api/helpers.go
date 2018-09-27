@@ -319,6 +319,7 @@ type ConfigCreateServer struct {
 	CommercialType    string
 	DynamicIPRequired bool
 	EnableIPV6        bool
+	BootType          string
 }
 
 // Return offer from any of the product name or alternate names
@@ -350,6 +351,10 @@ func CreateServer(api *ScalewayAPI, c *ConfigCreateServer) (string, error) {
 		return "", errors.New("Invalid commercial type")
 	}
 
+	if c.BootType != "local" && c.BootType != "bootscript" {
+		return "", errors.New("Invalid boot type")
+	}
+
 	if c.Name == "" {
 		c.Name = strings.Replace(namesgenerator.GetRandomName(0), "_", "-", -1)
 	}
@@ -360,6 +365,7 @@ func CreateServer(api *ScalewayAPI, c *ConfigCreateServer) (string, error) {
 	server.Volumes = make(map[string]string)
 	server.DynamicIPRequired = &c.DynamicIPRequired
 	server.EnableIPV6 = c.EnableIPV6
+	server.BootType = c.BootType
 	if commercialType == "" {
 		return "", errors.New("You need to specify a commercial-type")
 	}
