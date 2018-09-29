@@ -23,13 +23,14 @@ type BuildCommand struct {
 }
 
 func (c *BuildCommand) Run(args []string) int {
-	var cfgColor, cfgDebug, cfgForce, cfgParallel bool
+	var cfgColor, cfgDebug, cfgForce, cfgTimestamp, cfgParallel bool
 	var cfgOnError string
 	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
+	flags.BoolVar(&cfgTimestamp, "timestamp", false, "")
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
@@ -100,6 +101,12 @@ func (c *BuildCommand) Run(args []string) int {
 				if i+1 == len(buildNames) {
 					// Add a newline between the color output and the actual output
 					c.Ui.Say("")
+				}
+				// Now add timestamps if requested
+				if cfgTimestamp {
+					ui = &packer.TimestampedUi{
+						Ui: ui,
+					}
 				}
 			}
 		}
@@ -302,6 +309,7 @@ Options:
   -machine-readable             Machine-readable output
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
   -parallel=false               Disable parallelization (on by default)
+  -timestamp=true               Enable timestamps in build log (off by default)
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.
 `
@@ -327,6 +335,7 @@ func (*BuildCommand) AutocompleteFlags() complete.Flags {
 		"-machine-readable": complete.PredictNothing,
 		"-on-error":         complete.PredictNothing,
 		"-parallel":         complete.PredictNothing,
+		"-timestamp":        complete.PredictNothing,
 		"-var":              complete.PredictNothing,
 		"-var-file":         complete.PredictNothing,
 	}
