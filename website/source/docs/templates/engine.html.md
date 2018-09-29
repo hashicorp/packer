@@ -250,7 +250,7 @@ Please note that double quote characters need escaping inside of templates (in t
 
 # split Function Format Reference
 
-The function `split` takes an input string, a seperator string, and a numeric component value and returns request substring.
+The function `split` takes an input string, a seperator string, and a numeric component value and returns the requested substring.
 
 Here are some examples using the above options:
 
