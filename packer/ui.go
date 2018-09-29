@@ -99,6 +99,14 @@ type MachineReadableUi struct {
 
 var _ Ui = new(MachineReadableUi)
 
+// TimestampedUi is a UI that wraps another UI implementation and prefixes
+// prefixes each message with an RFC3339 timestamp
+type TimestampedUi struct {
+	Ui Ui
+}
+
+var _ Ui = new(TimestampedUi)
+
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
 }
@@ -341,4 +349,30 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 
 func (u *MachineReadableUi) ProgressBar() ProgressBar {
 	return new(NoopProgressBar)
+}
+
+func (u *TimestampedUi) Ask(query string) (string, error) {
+	return u.Ui.Ask(query)
+}
+
+func (u *TimestampedUi) Say(message string) {
+	u.Ui.Say(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Message(message string) {
+	u.Ui.Message(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Error(message string) {
+	u.Ui.Error(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Machine(message string, args ...string) {
+	u.Ui.Machine(message, args...)
+}
+
+func (u *TimestampedUi) ProgressBar() ProgressBar { return u.Ui.ProgressBar() }
+
+func (u *TimestampedUi) timestampLine(string string) string {
+	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
 }
