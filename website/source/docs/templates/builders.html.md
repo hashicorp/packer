@@ -10,7 +10,7 @@ sidebar_current: 'docs-templates-builders'
 # Template Builders
 
 Within the template, the builders section contains an array of all the builders
-that Packer should use to generate a machine images for the template.
+that Packer should use to generate machine images for the template.
 
 Builders are responsible for creating machines and generating images from them
 for various platforms. For example, there are separate builders for EC2, VMware,
