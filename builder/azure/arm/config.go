@@ -80,6 +80,12 @@ type Config struct {
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 
 	// Compute
+	ImageGallerySubscription   string `mapstructure:"image_gallery_subscription"`
+	ImageGalleryResourceGroup  string `mapstructure:"image_gallery_resource_group"`
+	ImageGalleryName           string `mapstructure:"image_gallery_name"`
+	ImageGalleryImageName      string `mapstructure:"image_gallery_image_name"`
+	ImageGalleryImageVersion   string `mapstructure:"image_gallery_image_version"`
+
 	ImagePublisher string `mapstructure:"image_publisher"`
 	ImageOffer     string `mapstructure:"image_offer"`
 	ImageSku       string `mapstructure:"image_sku"`
@@ -584,6 +590,10 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
 	}
 
+	if c.ImageGalleryName != "" {
+		fmt.Println("Skipping checks for shared image gallery")
+		return
+	}
 	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))

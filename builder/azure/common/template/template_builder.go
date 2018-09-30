@@ -145,6 +145,25 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 	return nil
 }
 
+func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Properties.StorageProfile
+	profile.ImageReference = &compute.ImageReference{
+		ID:        &imageID}
+	profile.OsDisk.OsType = s.osType
+	// profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
+	profile.OsDisk.Vhd = nil
+	// profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
+	//	StorageAccountType: storageAccountType,
+	//}
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetMarketPlaceImage(publisher, offer, sku, version string) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
@@ -486,7 +505,7 @@ const BasicTemplate = `{
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",
-    "apiVersion": "2017-03-30",
+    "apiVersion": "2018-04-01",
     "managedDiskApiVersion": "2017-03-30",
     "networkInterfacesApiVersion": "2017-04-01",
     "publicIPAddressApiVersion": "2017-04-01",
