@@ -191,8 +191,8 @@ In order to interact with build artifacts, you may want to use the [manifest
 post-processor](/docs/post-processors/manifest.html). This will write the list
 of files produced by a `builder` to a json file after each `builder` is run.
 
-For example, if you wanted to package a file from the file builder into
-a tarball, you might wright this:
+For example, if you wanted to package a file from the file builder into a
+tarball, you might write this:
 
 ``` json
 {
