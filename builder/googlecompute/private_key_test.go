@@ -43,10 +43,11 @@ func TestProcesssPrivateKeyFile(t *testing.T) {
 }
 
 func TestProcessPrivateKeyFile_encrypted(t *testing.T) {
+	data := []byte("what")
 	// Encrypt the file
 	b, err := x509.EncryptPEMBlock(rand.Reader,
 		"RSA PRIVATE KEY",
-		[]byte("what"),
+		data,
 		[]byte("password"),
 		x509.PEMCipherAES128)
 	if err != nil {
@@ -68,8 +69,16 @@ func TestProcessPrivateKeyFile_encrypted(t *testing.T) {
 	path := tf.Name()
 
 	// Should have an error with a bad password
-	if _, err := processPrivateKeyFile(path, "bad"); err == nil {
-		t.Fatal("should error")
+	if b, err := processPrivateKeyFile(path, "bad"); err == nil {
+		if string(b) == string(data) {
+			t.Fatal("should error & be different")
+		}
+		t.Logf(`Decrypt was successfull but the body was wrong.`)
+		// Because of deficiencies
+		// in the encrypted-PEM format, it's not always possible to detect an incorrect
+		// password. In these cases no error will be returned but the decrypted DER
+		// bytes will be random noise.
+		// https://github.com/golang/go/blob/50bd1c4d4eb4fac8ddeb5f063c099daccfb71b26/src/crypto/x509/pem_decrypt.go#L112-L114
 	}
 
 	if _, err := processPrivateKeyFile(path, "password"); err != nil {
