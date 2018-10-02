@@ -309,7 +309,7 @@ Options:
   -machine-readable             Machine-readable output
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
   -parallel=false               Disable parallelization (on by default)
-  -timestamp=true               Enable timestamps in build log (off by default)
+  -timestamp-ui=true            Prefix each ui output with an RFC3339 timestamp (off by default).
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.
 `
