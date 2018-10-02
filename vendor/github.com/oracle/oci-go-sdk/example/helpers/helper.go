@@ -8,14 +8,17 @@ package helpers
 import (
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/oracle/oci-go-sdk/common"
 )
 
-// LogIfError is equivalent to Println() followed by a call to os.Exit(1) if error is not nil
-func LogIfError(err error) {
+// FatalIfError is equivalent to Println() followed by a call to os.Exit(1) if error is not nil
+func FatalIfError(err error) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -97,6 +100,45 @@ func CheckLifecycleState(lifecycleState string) func(interface{}) (bool, error) 
 		log.Printf("Current lifecycle state is: %s, waiting for it becomes to: %s", fieldLifecycle, lifecycleState)
 		return isEqual, nil
 	}
+}
+
+// GetRequestMetadataWithDefaultRetryPolicy returns a requestMetadata with default retry policy
+// which will do retry for non-200 status code return back from service
+// Notes: not all non-200 status code should do retry, this should be based on specific operation
+// such as delete operation followed with get operation will retrun 404 if resource already been
+// deleted
+func GetRequestMetadataWithDefaultRetryPolicy() common.RequestMetadata {
+	return common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+}
+
+// GetRequestMetadataWithCustomizedRetryPolicy returns a requestMetadata which will do the retry based on
+// input function (retry until the function return false)
+func GetRequestMetadataWithCustomizedRetryPolicy(fn func(r common.OCIOperationResponse) bool) common.RequestMetadata {
+	return common.RequestMetadata{
+		RetryPolicy: getExponentialBackoffRetryPolicy(uint(20), fn),
+	}
+}
+
+func getDefaultRetryPolicy() *common.RetryPolicy {
+	// how many times to do the retry
+	attempts := uint(10)
+
+	// retry for all non-200 status code
+	retryOnAllNon200ResponseCodes := func(r common.OCIOperationResponse) bool {
+		return !(r.Error == nil && 199 < r.Response.HTTPResponse().StatusCode && r.Response.HTTPResponse().StatusCode < 300)
+	}
+	return getExponentialBackoffRetryPolicy(attempts, retryOnAllNon200ResponseCodes)
+}
+
+func getExponentialBackoffRetryPolicy(n uint, fn func(r common.OCIOperationResponse) bool) *common.RetryPolicy {
+	// the duration between each retry operation, you might want to waite longer each time the retry fails
+	exponentialBackoff := func(r common.OCIOperationResponse) time.Duration {
+		return time.Duration(math.Pow(float64(2), float64(r.AttemptNumber-1))) * time.Second
+	}
+	policy := common.NewRetryPolicy(n, fn, exponentialBackoff)
+	return &policy
 }
 
 // GetRandomString returns a random string with length equals to n

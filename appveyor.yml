@@ -16,8 +16,55 @@ environment:
 clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
+  - ps: |
+        # Installs golang on Windows.
+        #
+        # # Run script:
+        # .\install-go.ps1
+        #
+        # # Download and run script:
+        # $env:GOVERSION = '1.5.3'
+        # iex ((new-object net.webclient).DownloadString('SCRIPT_URL_HERE'))
+
+        $version = '1.11'
+
+        $downloadDir = $env:TEMP
+        $packageName = 'golang'
+        $url32 = 'https://storage.googleapis.com/golang/go' + $version + '.windows-386.zip'
+        $url64 = 'https://storage.googleapis.com/golang/go' + $version + '.windows-amd64.zip'
+        $goroot = "C:\go$version"
+
+        # Determine type of system
+        if ($ENV:PROCESSOR_ARCHITECTURE -eq "AMD64") {
+          $url = $url64
+        } else {
+          $url = $url32
+        }
+
+        if (Test-Path "$goroot\bin\go") {
+          Write-Host "Go is installed to $goroot"
+          exit
+        }
+
+        echo "Downloading $url"
+        $zip = "$downloadDir\golang-$version.zip"
+        if (!(Test-Path "$zip")) {
+          $downloader = new-object System.Net.WebClient
+          $downloader.DownloadFile($url, $zip)
+        }
+
+        echo "Extracting $zip to $goroot"
+        if (Test-Path "$downloadDir\go") {
+          rm -Force -Recurse -Path "$downloadDir\go"
+        }
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("$zip", $downloadDir)
+        mv "$downloadDir\go" $goroot
   - set GO15VENDOREXPERIMENT=1
+  - set GOROOT=C:\go1.11
+  - set Path=%GOROOT%\bin;%PATH%
   - echo %Path%
+  - echo %GOROOT%
   - go version
   - go env
   - go get github.com/mitchellh/gox

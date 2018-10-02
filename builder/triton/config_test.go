@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func testConfig(t *testing.T) Config {
-	return Config{
+func testConfig(t *testing.T) *Config {
+	return &Config{
 		AccessConfig:        testAccessConfig(),
 		SourceMachineConfig: testSourceMachineConfig(t),
 		TargetImageConfig:   testTargetImageConfig(t),

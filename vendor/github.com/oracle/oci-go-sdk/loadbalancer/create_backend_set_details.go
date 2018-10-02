@@ -21,7 +21,7 @@ type CreateBackendSetDetails struct {
 	// A friendly name for the backend set. It must be unique and it cannot be changed.
 	// Valid backend set names include only alphanumeric characters, dashes, and underscores. Backend set names cannot
 	// contain spaces. Avoid entering confidential information.
-	// Example: `My_backend_set`
+	// Example: `example_backend_set`
 	Name *string `mandatory:"true" json:"name"`
 
 	// The load balancer policy for the backend set. To get a list of available policies, use the

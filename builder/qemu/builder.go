@@ -393,7 +393,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
 				Host:      commHost,
-				SSHConfig: sshConfig,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
 			},
@@ -402,6 +402,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps = append(steps,
 		new(common.StepProvision),
+	)
+
+	steps = append(steps,
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	)
 	steps = append(steps,
 		new(stepShutdown),

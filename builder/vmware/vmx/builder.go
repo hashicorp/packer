@@ -97,11 +97,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
+			KeyInterval: b.config.VNCConfig.BootKeyInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      driver.CommHost,
-			SSHConfig: vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
@@ -110,6 +111,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:               b.config.ctx,
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,

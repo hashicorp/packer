@@ -121,6 +121,11 @@ each category, the available configuration keys are alphabetized.
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `decode_authorization_messages` (boolean) - Enable automatic decoding of any
+    encoded authorization (error) messages using the `sts:DecodeAuthorizationMessage` API.
+    Note: requires that the effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+    on resource `*`. Default `false`.
+
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
     forces Packer to find an open device automatically.
@@ -254,6 +259,11 @@ each category, the available configuration keys are alphabetized.
     of the `source_ami` unless `from_scratch` is `true`, in which case
     this field must be defined.
 
+-   `root_volume_type` (string) - The type of EBS volume for the chroot environment
+     and resulting AMI. The default value is the type of the `source_ami`, unless
+    `from_scratch` is true, in which case the default value is `gp2`. You can only
+     specify `io1` if building based on top of a `source_ami` which is also `io1`.
+
 -   `root_volume_tags` (object of key/value strings) - Tags to apply to the volumes
     that are *launched*. This is a
     [template engine](/docs/templates/engine.html),
@@ -299,8 +309,11 @@ each category, the available configuration keys are alphabetized.
         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
         is valid.
 
-    -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is a required option, necessary to limit the AMIs your account or a trusted third party.
+    -   `owners` (array of strings) - Filters the images by their owner. You may
+        specify one or more AWS account IDs, "self" (which will use the account
+        whose credentials you are using to run Packer), or an AWS owner alias:
+        for example, "amazon", "aws-marketplace", or "microsoft".
+        This option is required for security reasons.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.

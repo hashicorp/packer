@@ -144,7 +144,6 @@ type Config struct {
 
 	// Authentication with the VM via SSH
 	sshAuthorizedKey string
-	sshPrivateKey    string
 
 	// Authentication with the VM via WinRM
 	winrmCertificate string
@@ -315,8 +314,8 @@ func setSshValues(c *Config) error {
 		c.Comm.SSHTimeout = 20 * time.Minute
 	}
 
-	if c.Comm.SSHPrivateKey != "" {
-		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKey)
+	if c.Comm.SSHPrivateKeyFile != "" {
+		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			return err
 		}
@@ -330,7 +329,7 @@ func setSshValues(c *Config) error {
 			publicKey.Type(),
 			base64.StdEncoding.EncodeToString(publicKey.Marshal()),
 			time.Now().Format(time.RFC3339))
-		c.sshPrivateKey = string(privateKeyBytes)
+		c.Comm.SSHPrivateKey = privateKeyBytes
 
 	} else {
 		sshKeyPair, err := NewOpenSshKeyPair()
@@ -339,7 +338,7 @@ func setSshValues(c *Config) error {
 		}
 
 		c.sshAuthorizedKey = sshKeyPair.AuthorizedKey()
-		c.sshPrivateKey = sshKeyPair.PrivateKey()
+		c.Comm.SSHPrivateKey = sshKeyPair.PrivateKey()
 	}
 
 	return nil
@@ -363,6 +362,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
 	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
+	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
 	c.tmpCertificatePassword = tempName.CertificatePassword
 	if c.TempComputeName == "" {
@@ -475,7 +475,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
 		}
 		if len(*v) > 256 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(*v)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
 		}
 	}
 }

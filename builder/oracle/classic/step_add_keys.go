@@ -1,9 +1,9 @@
 package classic
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/common/uuid"
@@ -25,7 +25,7 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	// grab packer-generated key from statebag context.
-	sshPublicKey := strings.TrimSpace(state.Get("publicKey").(string))
+	sshPublicKey := bytes.TrimSpace(config.Comm.SSHPublicKey)
 
 	// form API call to add key to compute cloud
 	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key_%s",
@@ -36,7 +36,7 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
 		Name:    sshKeyName,
-		Key:     sshPublicKey,
+		Key:     string(sshPublicKey),
 		Enabled: true,
 	}
 
@@ -48,20 +48,20 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	state.Put("key_name", keyInfo.Name)
+	config.Comm.SSHKeyPairName = keyInfo.Name
 	return multistep.ActionContinue
 }
 
 func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
 	// Delete the keys we created during this run
-	keyName, ok := state.GetOk("key_name")
-	if !ok {
+	config := state.Get("config").(*Config)
+	if len(config.Comm.SSHKeyPairName) == 0 {
 		// No keys were generated; none need to be cleaned up.
 		return
 	}
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting SSH keys...")
-	deleteInput := compute.DeleteSSHKeyInput{Name: keyName.(string)}
+	deleteInput := compute.DeleteSSHKeyInput{Name: config.Comm.SSHKeyPairName}
 	client := state.Get("client").(*compute.ComputeClient)
 	deleteClient := client.SSHKeys()
 	err := deleteClient.DeleteSSHKey(&deleteInput)

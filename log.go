@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 // These are the environmental variables that determine if we log, and if
@@ -22,6 +25,20 @@ func logOutput() (logOutput io.Writer, err error) {
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			// no path; do a little light filtering to avoid double-dipping UI
+			// calls.
+			r, w := io.Pipe()
+			scanner := bufio.NewScanner(r)
+			go func(scanner *bufio.Scanner) {
+				for scanner.Scan() {
+					if strings.Contains(scanner.Text(), "ui:") {
+						continue
+					}
+					os.Stderr.WriteString(fmt.Sprintf(scanner.Text() + "\n"))
+				}
+			}(scanner)
+			logOutput = w
 		}
 	}
 

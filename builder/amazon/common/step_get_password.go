@@ -95,7 +95,9 @@ WaitLoop:
 			"Password (since debug is enabled): %s", s.Comm.WinRMPassword))
 	}
 	// store so that we can access this later during provisioning
+
 	commonhelper.SetSharedState("winrm_password", s.Comm.WinRMPassword, s.BuildName)
+	packer.LogSecretFilter.Set(s.Comm.WinRMPassword)
 
 	return multistep.ActionContinue
 }
@@ -107,7 +109,7 @@ func (s *StepGetPassword) Cleanup(multistep.StateBag) {
 func (s *StepGetPassword) waitForPassword(state multistep.StateBag, cancel <-chan struct{}) (string, error) {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	instance := state.Get("instance").(*ec2.Instance)
-	privateKey := state.Get("privateKey").(string)
+	privateKey := s.Comm.SSHPrivateKey
 
 	for {
 		select {

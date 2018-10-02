@@ -60,7 +60,7 @@ Optional parameters:
     as well, which are covered in the section below.
 
 -   `execute_command` (array of strings) - The command used to execute the script. By
-    default this is `["/bin/sh", "-c", "{{.Vars}}, "{{.Script}}"]`
+    default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
     on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
     This is treated as a [template engine](/docs/templates/engine.html).
     There are two available variables: `Script`, which is the path to the script
@@ -191,8 +191,8 @@ In order to interact with build artifacts, you may want to use the [manifest
 post-processor](/docs/post-processors/manifest.html). This will write the list
 of files produced by a `builder` to a json file after each `builder` is run.
 
-For example, if you wanted to package a file from the file builder into
-a tarball, you might wright this:
+For example, if you wanted to package a file from the file builder into a
+tarball, you might write this:
 
 ``` json
 {

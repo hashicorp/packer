@@ -76,7 +76,7 @@ func getImage(c *Config, d Driver) (*Image, error) {
 func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	d := state.Get("driver").(Driver)
-	sshPublicKey := state.Get("ssh_public_key").(string)
+
 	ui := state.Get("ui").(packer.Ui)
 
 	sourceImage, err := getImage(c, d)
@@ -98,7 +98,7 @@ func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 
 	var errCh <-chan error
 	var metadata map[string]string
-	metadata, err = c.createInstanceMetadata(sourceImage, sshPublicKey)
+	metadata, err = c.createInstanceMetadata(sourceImage, string(c.Comm.SSHPublicKey))
 	errCh, err = d.RunInstance(&InstanceConfig{
 		AcceleratorType:              c.AcceleratorType,
 		AcceleratorCount:             c.AcceleratorCount,
@@ -111,6 +111,7 @@ func (s *StepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Labels:                       c.Labels,
 		MachineType:                  c.MachineType,
 		Metadata:                     metadata,
+		MinCpuPlatform:               c.MinCpuPlatform,
 		Name:                         name,
 		Network:                      c.Network,
 		NetworkProjectId:             c.NetworkProjectId,

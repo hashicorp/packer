@@ -11,7 +11,6 @@ import (
 
 type StepCreateVolume struct {
 	UseBlockStorageVolume  bool
-	SourceImage            string
 	VolumeName             string
 	VolumeType             string
 	VolumeAvailabilityZone string
@@ -25,8 +24,9 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 		return multistep.ActionContinue
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+	sourceImage := state.Get("source_image").(string)
 
 	// We will need Block Storage and Image services clients.
 	blockStorageClient, err := config.blockStorageV3Client()
@@ -43,7 +43,7 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	// Get needed volume size from the source image.
-	volumeSize, err := GetVolumeSize(imageClient, s.SourceImage)
+	volumeSize, err := GetVolumeSize(imageClient, sourceImage)
 	if err != nil {
 		err := fmt.Errorf("Error creating volume: %s", err)
 		state.Put("error", err)
@@ -57,7 +57,7 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 		VolumeType:       s.VolumeType,
 		AvailabilityZone: s.VolumeAvailabilityZone,
 		Name:             s.VolumeName,
-		ImageID:          s.SourceImage,
+		ImageID:          sourceImage,
 	}
 	volume, err := volumes.Create(blockStorageClient, volumeOpts).Extract()
 	if err != nil {
@@ -92,7 +92,7 @@ func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	blockStorageClient, err := config.blockStorageV3Client()

@@ -91,6 +91,9 @@ func Validate(config *Config) error {
 				"{{.Script}}",
 			}
 		}
+		if len(config.TempfileExtension) == 0 {
+			config.TempfileExtension = ".cmd"
+		}
 	} else {
 		if config.InlineShebang == "" {
 			config.InlineShebang = "/bin/sh -e"

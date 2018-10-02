@@ -164,6 +164,11 @@ builder.
 -   `availability_zone` (string) - Destination availability zone to launch
     instance in. Leave this empty to allow Amazon to auto-assign.
 
+-   `block_duration_minutes` (int64) - Requires `spot_price` to
+    be set. The required duration for the Spot Instances (also known as Spot blocks).
+    This value must be a multiple of 60 (60, 120, 180, 240, 300, or 360).
+    You can't specify an Availability Zone group or a launch group if you specify a duration.
+
 -   `bundle_destination` (string) - The directory on the running instance where
     the bundled AMI will be saved prior to uploading. By default this is `/tmp`.
     This directory must exist and be writable.
@@ -183,6 +188,11 @@ builder.
 -   `custom_endpoint_ec2` (string) - This option is useful if you use a cloud
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
+
+-   `decode_authorization_messages` (boolean) - Enable automatic decoding of any
+    encoded authorization (error) messages using the `sts:DecodeAuthorizationMessage` API.
+    Note: requires that the effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+    on resource `*`. Default `false`.
 
 -   `ebs_optimized` (boolean) - Mark instance as [EBS
     Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
@@ -311,8 +321,11 @@ builder.
         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
         is valid.
 
-    -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is a required option, necessary to limit the AMIs your account or a trusted third party.
+    -   `owners` (array of strings) - Filters the images by their owner. You may
+        specify one or more AWS account IDs, "self" (which will use the account
+        whose credentials you are using to run Packer), or an AWS owner alias:
+        for example, "amazon", "aws-marketplace", or "microsoft".
+        This option is required for security reasons.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.

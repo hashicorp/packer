@@ -555,6 +555,7 @@ func newSigner(privKeyFile string) (*signer, error) {
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }
 
@@ -598,4 +599,8 @@ func (ui *Ui) Machine(t string, args ...string) {
 	ui.sem <- 1
 	ui.ui.Machine(t, args...)
 	<-ui.sem
+}
+
+func (ui *Ui) ProgressBar() packer.ProgressBar {
+	return new(packer.NoopProgressBar)
 }

@@ -3,11 +3,18 @@ package communicator
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
 	"time"
 
+	packerssh "github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/multistep"
+	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 // Config is the common configuration that communicators allow within
@@ -20,7 +27,14 @@ type Config struct {
 	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
-	SSHPrivateKey             string        `mapstructure:"ssh_private_key_file"`
+	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
+	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
+	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
+	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
+	SSHClearAuthorizedKeys    bool          `mapstructure:"ssh_clear_authorized_keys"`
+	SSHPrivateKeyFile         string        `mapstructure:"ssh_private_key_file"`
+	SSHInterface              string        `mapstructure:"ssh_interface"`
+	SSHIPVersion              string        `mapstructure:"ssh_ip_version"`
 	SSHPty                    bool          `mapstructure:"ssh_pty"`
 	SSHTimeout                time.Duration `mapstructure:"ssh_timeout"`
 	SSHAgentAuth              bool          `mapstructure:"ssh_agent_auth"`
@@ -31,7 +45,7 @@ type Config struct {
 	SSHBastionAgentAuth       bool          `mapstructure:"ssh_bastion_agent_auth"`
 	SSHBastionUsername        string        `mapstructure:"ssh_bastion_username"`
 	SSHBastionPassword        string        `mapstructure:"ssh_bastion_password"`
-	SSHBastionPrivateKey      string        `mapstructure:"ssh_bastion_private_key_file"`
+	SSHBastionPrivateKeyFile  string        `mapstructure:"ssh_bastion_private_key_file"`
 	SSHFileTransferMethod     string        `mapstructure:"ssh_file_transfer_method"`
 	SSHProxyHost              string        `mapstructure:"ssh_proxy_host"`
 	SSHProxyPort              int           `mapstructure:"ssh_proxy_port"`
@@ -50,6 +64,67 @@ type Config struct {
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
 	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
+}
+
+// SSHConfigFunc returns a function that can be used for the SSH communicator
+// config for connecting to the instance created over SSH using the private key
+// or password.
+func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		sshConfig := &ssh.ClientConfig{
+			User:            c.SSHUsername,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		}
+
+		if c.SSHAgentAuth {
+			authSock := os.Getenv("SSH_AUTH_SOCK")
+			if authSock == "" {
+				return nil, fmt.Errorf("SSH_AUTH_SOCK is not set")
+			}
+
+			sshAgent, err := net.Dial("unix", authSock)
+			if err != nil {
+				return nil, fmt.Errorf("Cannot connect to SSH Agent socket %q: %s", authSock, err)
+			}
+
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeysCallback(agent.NewClient(sshAgent).Signers))
+		}
+
+		var privateKeys [][]byte
+		if c.SSHPrivateKeyFile != "" {
+			// key based auth
+			bytes, err := ioutil.ReadFile(c.SSHPrivateKeyFile)
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			privateKeys = append(privateKeys, bytes)
+		}
+
+		// aws,alicloud,cloudstack,digitalOcean,oneAndOne,openstack,oracle & profitbricks key
+		if iKey, hasKey := state.GetOk("privateKey"); hasKey {
+			privateKeys = append(privateKeys, []byte(iKey.(string)))
+		}
+
+		if len(c.SSHPrivateKey) != 0 {
+			privateKeys = append(privateKeys, c.SSHPrivateKey)
+		}
+
+		for _, key := range privateKeys {
+			signer, err := ssh.ParsePrivateKey(key)
+			if err != nil {
+				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+			}
+			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
+		}
+
+		if c.SSHPassword != "" {
+			sshConfig.Auth = append(sshConfig.Auth,
+				ssh.Password(c.SSHPassword),
+				ssh.KeyboardInteractive(packerssh.PasswordKeyboardInteractive(c.SSHPassword)),
+			)
+		}
+		return sshConfig, nil
+	}
 }
 
 // Port returns the port that will be used for access based on config.
@@ -146,8 +221,8 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			c.SSHBastionPort = 22
 		}
 
-		if c.SSHBastionPrivateKey == "" && c.SSHPrivateKey != "" {
-			c.SSHBastionPrivateKey = c.SSHPrivateKey
+		if c.SSHBastionPrivateKeyFile == "" && c.SSHPrivateKeyFile != "" {
+			c.SSHBastionPrivateKeyFile = c.SSHPrivateKeyFile
 		}
 	}
 
@@ -167,18 +242,18 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
-	if c.SSHPrivateKey != "" {
-		if _, err := os.Stat(c.SSHPrivateKey); err != nil {
+	if c.SSHPrivateKeyFile != "" {
+		if _, err := os.Stat(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := SSHFileSigner(c.SSHPrivateKey); err != nil {
+		} else if _, err := helperssh.FileSigner(c.SSHPrivateKeyFile); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}
 	}
 
 	if c.SSHBastionHost != "" && !c.SSHBastionAgentAuth {
-		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKey == "" {
+		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKeyFile == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		}

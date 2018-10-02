@@ -49,11 +49,11 @@ func (s *OpenSshKeyPair) AuthorizedKey() string {
 		time.Now().Format(time.RFC3339))
 }
 
-func (s *OpenSshKeyPair) PrivateKey() string {
-	privateKey := string(pem.EncodeToMemory(&pem.Block{
+func (s *OpenSshKeyPair) PrivateKey() []byte {
+	privateKey := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(s.privateKey),
-	}))
+	})
 
 	return privateKey
 }

@@ -5,7 +5,6 @@ const (
 	AuthorizedKey string = "authorizedKey"
 	Certificate   string = "certificate"
 	Error         string = "error"
-	PrivateKey    string = "privateKey"
 	SSHHost       string = "sshHost"
 	Thumbprint    string = "thumbprint"
 	Ui            string = "ui"

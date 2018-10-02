@@ -67,7 +67,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AlicloudAccessKey, b.config.AlicloudSecretKey))
+	packer.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
 	return nil, nil
 }
 
@@ -78,7 +78,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -95,13 +95,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SourceECSImageId: b.config.AlicloudSourceImage,
 		},
 		&stepConfigAlicloudKeyPair{
-			Debug:                b.config.PackerDebug,
-			KeyPairName:          b.config.SSHKeyPairName,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
-			RegionId:             b.config.AlicloudRegion,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("ecs_%s.pem", b.config.PackerBuildName),
+			RegionId:     b.config.AlicloudRegion,
 		},
 	}
 	if b.chooseNetworkType() == VpcNet {
@@ -141,10 +138,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
+			SSHPrivateIp:             b.config.SSHPrivateIp,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
-			RegionId: b.config.AlicloudRegion,
+			RegionId:     b.config.AlicloudRegion,
+			SSHPrivateIp: b.config.SSHPrivateIp,
 		})
 	}
 	steps = append(steps,
@@ -156,14 +155,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Host: SSHHost(
 				client,
 				b.config.SSHPrivateIp),
-			SSHConfig: SSHConfig(
-				b.config.RunConfig.Comm.SSHAgentAuth,
-				b.config.RunConfig.Comm.SSHUsername,
-				b.config.RunConfig.Comm.SSHPassword),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.RunConfig.Comm,
+		},
 		&stepStopAlicloudInstance{
-			ForceStop: b.config.ForceStopInstance,
+			ForceStop:   b.config.ForceStopInstance,
+			DisableStop: b.config.DisableStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
@@ -171,6 +171,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
+		&stepCreateTags{
+			Tags: b.config.AlicloudImageTags,
+		},
 		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,
@@ -232,7 +235,7 @@ func (b *Builder) isVpcSpecified() bool {
 
 func (b *Builder) isUserDataNeeded() bool {
 	// Public key setup requires userdata
-	if b.config.RunConfig.Comm.SSHPrivateKey != "" {
+	if b.config.RunConfig.Comm.SSHPrivateKeyFile != "" {
 		return true
 	}
 
@@ -240,5 +243,5 @@ func (b *Builder) isUserDataNeeded() bool {
 }
 
 func (b *Builder) isKeyPairNeeded() bool {
-	return b.config.SSHKeyPairName != "" || b.config.TemporaryKeyPairName != ""
+	return b.config.Comm.SSHKeyPairName != "" || b.config.Comm.SSHTemporaryKeyPairName != ""
 }

@@ -8,11 +8,12 @@ import (
 	"testing"
 
 	"fmt"
+	"os/exec"
+
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/template"
-	"os/exec"
 )
 
 func TestProvisioner_Impl(t *testing.T) {
@@ -132,7 +133,7 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(&uiStub{}, comm); err != nil {
+	if err := p.Provision(new(packer.NoopUi), comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -166,7 +167,7 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	}
 
 	comm := &communicatorMock{}
-	if err := p.Provision(&uiStub{}, comm); err != nil {
+	if err := p.Provision(new(packer.NoopUi), comm); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 
@@ -367,8 +368,8 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{ansible, nil, ""},
-				{download, nil, ""},
+				{Provisioner: ansible, Config: nil, TypeName: ""},
+				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}

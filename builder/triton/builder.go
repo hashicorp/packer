@@ -38,7 +38,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	// If we are using an SSH agent to sign requests, and no private key has been
 	// specified for SSH, use the agent for connecting for provisioning.
-	if b.config.AccessConfig.KeyMaterial == "" && b.config.Comm.SSHPrivateKey == "" {
+	if b.config.AccessConfig.KeyMaterial == "" && b.config.Comm.SSHPrivateKeyFile == "" {
 		b.config.Comm.SSHAgentAuth = true
 	}
 
@@ -54,7 +54,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("debug", b.config.PackerDebug)
 	state.Put("driver", driver)
 	state.Put("hook", hook)
@@ -63,15 +63,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepCreateSourceMachine{},
 		&communicator.StepConnect{
-			Config: &config.Comm,
-			Host:   commHost,
-			SSHConfig: sshConfig(
-				b.config.Comm.SSHAgentAuth,
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPrivateKey,
-				b.config.Comm.SSHPassword),
+			Config:    &config.Comm,
+			Host:      commHost,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &config.Comm,
+		},
 		&StepStopMachine{},
 		&StepCreateImageFromMachine{},
 		&StepDeleteMachine{},

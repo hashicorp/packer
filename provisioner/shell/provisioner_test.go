@@ -286,6 +286,61 @@ func TestProvisioner_createFlattenedEnvVars(t *testing.T) {
 	}
 }
 
+func TestProvisioner_createEnvVarFileContent(t *testing.T) {
+	var flattenedEnvVars string
+	config := testConfig()
+
+	userEnvVarTests := [][]string{
+		{},                     // No user env var
+		{"FOO=bar"},            // Single user env var
+		{"FOO=bar's"},          // User env var with single quote in value
+		{"FOO=bar", "BAZ=qux"}, // Multiple user env vars
+		{"FOO=bar=baz"},        // User env var with value containing equals
+		{"FOO==bar"},           // User env var with value starting with equals
+	}
+	expected := []string{
+		`export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+		`export FOO='bar'
+export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+		`export FOO='bar'"'"'s'
+export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+		`export BAZ='qux'
+export FOO='bar'
+export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+		`export FOO='bar=baz'
+export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+		`export FOO='=bar'
+export PACKER_BUILDER_TYPE='iso'
+export PACKER_BUILD_NAME='vmware'
+`,
+	}
+
+	p := new(Provisioner)
+	p.Prepare(config)
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+
+	for i, expectedValue := range expected {
+		p.config.Vars = userEnvVarTests[i]
+		flattenedEnvVars = p.createEnvVarFileContent()
+		if flattenedEnvVars != expectedValue {
+			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
+		}
+	}
+}
+
 func TestProvisioner_RemoteFolderSetSuccessfully(t *testing.T) {
 	config := testConfig()
 

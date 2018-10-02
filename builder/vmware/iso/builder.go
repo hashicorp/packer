@@ -139,12 +139,27 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.DiskAdapterType = "lsilogic"
 	}
 
+	if !b.config.SkipCompaction {
+		if b.config.RemoteType == "esx5" {
+			if b.config.DiskTypeId == "" {
+				b.config.SkipCompaction = true
+			}
+		}
+	}
+
 	if b.config.DiskTypeId == "" {
 		// Default is growable virtual disk split in 2GB files.
 		b.config.DiskTypeId = "1"
 
 		if b.config.RemoteType == "esx5" {
 			b.config.DiskTypeId = "zeroedthick"
+		}
+	}
+
+	if b.config.RemoteType == "esx5" {
+		if b.config.DiskTypeId != "thin" && !b.config.SkipCompaction {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("skip_compaction must be 'true' for disk_type_id: %s", b.config.DiskTypeId))
 		}
 	}
 
@@ -339,11 +354,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			BootCommand: b.config.FlatBootCommand(),
 			VMName:      b.config.VMName,
 			Ctx:         b.config.ctx,
+			KeyInterval: b.config.VNCConfig.BootKeyInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      driver.CommHost,
-			SSHConfig: vmwcommon.SSHConfigFunc(&b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&vmwcommon.StepUploadTools{
 			RemoteType:        b.config.RemoteType,
@@ -352,6 +368,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:               b.config.ctx,
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&vmwcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,

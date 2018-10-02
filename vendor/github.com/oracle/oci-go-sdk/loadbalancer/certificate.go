@@ -12,7 +12,7 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// Certificate The configuration details of a listener certificate bundle.
+// Certificate The configuration details of a certificate bundle.
 // For more information on SSL certficate configuration, see
 // Managing SSL Certificates (https://docs.us-phoenix-1.oraclecloud.com/Content/Balance/Tasks/managingcertificates.htm).
 type Certificate struct {
@@ -31,7 +31,7 @@ type Certificate struct {
 	// A friendly name for the certificate bundle. It must be unique and it cannot be changed.
 	// Valid certificate bundle names include only alphanumeric characters, dashes, and underscores.
 	// Certificate bundle names cannot contain spaces. Avoid entering confidential information.
-	// Example: `My_certificate_bundle`
+	// Example: `example_certificate_bundle`
 	CertificateName *string `mandatory:"true" json:"certificateName"`
 
 	// The public certificate, in PEM format, that you received from your SSL certificate provider.

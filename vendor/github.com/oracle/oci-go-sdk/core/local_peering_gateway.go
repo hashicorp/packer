@@ -51,6 +51,17 @@ type LocalPeeringGateway struct {
 	// The OCID of the VCN the LPG belongs to.
 	VcnId *string `mandatory:"true" json:"vcnId"`
 
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
 	// The range of IP addresses available on the VCN at the other
 	// end of the peering from this LPG. The value is `null` if the LPG is not peered.
 	// You can use this as the destination CIDR for a route rule to route a subnet's

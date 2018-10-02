@@ -51,9 +51,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		new(StepCheckExistingImage),
 		&StepCreateSSHKey{
-			Debug:          b.config.PackerDebug,
-			DebugKeyPath:   fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
-			PrivateKeyFile: b.config.Comm.SSHPrivateKey,
+			Debug:        b.config.PackerDebug,
+			DebugKeyPath: fmt.Sprintf("gce_%s.pem", b.config.PackerBuildName),
 		},
 		&StepCreateInstance{
 			Debug: b.config.PackerDebug,
@@ -68,10 +67,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config:      &b.config.Comm,
 			Host:        commHost,
-			SSHConfig:   sshConfig,
+			SSHConfig:   b.config.Comm.SSHConfigFunc(),
 			WinRMConfig: winrmConfig,
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	}
 	if _, exists := b.config.Metadata[StartupScriptKey]; exists || b.config.StartupScriptFile != "" {
 		steps = append(steps, new(StepWaitStartupScript))

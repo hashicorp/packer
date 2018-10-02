@@ -33,6 +33,14 @@ provided when `PACKER_LOG=1` environment variable is set prior to a build,
 and you can connect to the local machine using the userid and password defined
 in the kickstart or preseed associated with initializing the local VM.
 
+It should be noted that one of the options `-on-error` is to `retry`, the retry
+of the step in question has limitations:
+
+ * the template packer is building is **not** reloaded from file.
+ * the resources specified from builders **are** reloaded from file.
+
+Check the specfics on your builder to confirm their behavior.
+
 ### Windows
 
 As of Packer 0.8.1 the default WinRM communicator will emit the password for a
