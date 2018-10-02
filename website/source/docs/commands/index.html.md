@@ -119,5 +119,5 @@ For example, assume a tab is typed at the end of each prompt line:
 $ packer p
 plugin  build
 $ packer build -
--color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -var               -var-file
+-color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -timestamp          -var               -var-file
 ```

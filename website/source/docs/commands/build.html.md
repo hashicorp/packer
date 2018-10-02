@@ -50,6 +50,9 @@ that are created will be outputted at the end of the build.
 -   `-parallel=false` - Disable parallelization of multiple builders (on by
     default).
 
+-   `-timestamp-ui=true` - Prefix each ui output with an RFC3339 timestamp (off
+    by default).
+
 -   `-var` - Set a variable in your packer template. This option can be used
     multiple times. This is useful for setting version numbers for your build.
 
