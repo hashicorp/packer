@@ -99,14 +99,6 @@ type MachineReadableUi struct {
 
 var _ Ui = new(MachineReadableUi)
 
-// TimestampedUi is a UI that wraps another UI implementation and prefixes
-// prefixes each message with an RFC3339 timestamp
-type TimestampedUi struct {
-	Ui Ui
-}
-
-var _ Ui = new(TimestampedUi)
-
 func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
 }
@@ -350,6 +342,14 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 func (u *MachineReadableUi) ProgressBar() ProgressBar {
 	return new(NoopProgressBar)
 }
+
+// TimestampedUi is a UI that wraps another UI implementation and prefixes
+// prefixes each message with an RFC3339 timestamp
+type TimestampedUi struct {
+	Ui Ui
+}
+
+var _ Ui = new(TimestampedUi)
 
 func (u *TimestampedUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(query)
