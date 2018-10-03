@@ -152,14 +152,9 @@ func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error 
 	}
 
 	profile := resource.Properties.StorageProfile
-	profile.ImageReference = &compute.ImageReference{
-		ID:        &imageID}
+	profile.ImageReference = &compute.ImageReference{ID: &imageID}
 	profile.OsDisk.OsType = s.osType
-	// profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
-	// profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
-	//	StorageAccountType: storageAccountType,
-	//}
 
 	return nil
 }
