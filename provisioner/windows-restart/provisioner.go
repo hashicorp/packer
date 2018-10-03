@@ -138,7 +138,6 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
 			time.Sleep(10 * time.Second)
-			break
 		}
 		if cmd.ExitStatus == 0 {
 			// Cancel reboot we created to test if machine was already rebooting
