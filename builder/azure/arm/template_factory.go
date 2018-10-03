@@ -72,15 +72,15 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.ImageVersion)
 
 		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID, config.managedImageStorageAccountType)
-	} else if config.ImageGallerySubscription != "" && config.ImageGalleryResourceGroup != "" && config.ImageGalleryName != "" && config.ImageGalleryImageName != "" {
+	} else if config.SharedGallerySubscription != "" && config.SharedGalleryResourceGroup != "" && config.SharedGalleryName != "" && config.SharedGalleryImageName != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/galleries/%s/images/%s",
-			config.ImageGallerySubscription,
-			config.ImageGalleryResourceGroup,
-			config.ImageGalleryName,
-			config.ImageGalleryImageName)
-		if config.ImageGalleryImageVersion != "" {
+			config.SharedGallerySubscription,
+			config.SharedGalleryResourceGroup,
+			config.SharedGalleryName,
+			config.SharedGalleryImageName)
+		if config.SharedGalleryImageVersion != "" {
 			imageID += fmt.Sprintf("/versions/%s",
-				config.ImageGalleryImageVersion)
+				config.SharedGalleryImageVersion)
 		}
 
 		builder.SetSharedGalleryImage(config.Location, imageID)
