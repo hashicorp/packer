@@ -151,6 +151,7 @@ func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error 
 		return err
 	}
 
+	s.setVariable("apiVersion", "2018-04-01") // Required for Shared Image Gallery
 	profile := resource.Properties.StorageProfile
 	profile.ImageReference = &compute.ImageReference{ID: &imageID}
 	profile.OsDisk.OsType = s.osType
@@ -500,7 +501,7 @@ const BasicTemplate = `{
   },
   "variables": {
     "addressPrefix": "10.0.0.0/16",
-    "apiVersion": "2018-04-01",
+    "apiVersion": "2017-03-30",
     "managedDiskApiVersion": "2017-03-30",
     "networkInterfacesApiVersion": "2017-04-01",
     "publicIPAddressApiVersion": "2017-04-01",
