@@ -30,7 +30,7 @@ func (c *BuildCommand) Run(args []string) int {
 	flags.BoolVar(&cfgColor, "color", true, "")
 	flags.BoolVar(&cfgDebug, "debug", false, "")
 	flags.BoolVar(&cfgForce, "force", false, "")
-	flags.BoolVar(&cfgTimestamp, "timestamp", false, "")
+	flags.BoolVar(&cfgTimestamp, "timestamp-ui", false, "")
 	flagOnError := enumflag.New(&cfgOnError, "cleanup", "abort", "ask")
 	flags.Var(flagOnError, "on-error", "")
 	flags.BoolVar(&cfgParallel, "parallel", true, "")
@@ -309,7 +309,7 @@ Options:
   -machine-readable             Machine-readable output
   -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
   -parallel=false               Disable parallelization (on by default)
-  -timestamp-ui=true            Prefix each ui output with an RFC3339 timestamp (off by default).
+  -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.
 `
@@ -335,7 +335,7 @@ func (*BuildCommand) AutocompleteFlags() complete.Flags {
 		"-machine-readable": complete.PredictNothing,
 		"-on-error":         complete.PredictNothing,
 		"-parallel":         complete.PredictNothing,
-		"-timestamp":        complete.PredictNothing,
+		"-timestamp-ui":     complete.PredictNothing,
 		"-var":              complete.PredictNothing,
 		"-var-file":         complete.PredictNothing,
 	}
