@@ -80,11 +80,11 @@ type Config struct {
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 
 	// Compute
-	SharedGallerySubscription   string `mapstructure:"shared_gallery_subscription"`
-	SharedGalleryResourceGroup  string `mapstructure:"shared_gallery_resource_group"`
-	SharedGalleryName           string `mapstructure:"shared_gallery_name"`
-	SharedGalleryImageName      string `mapstructure:"shared_gallery_image_name"`
-	SharedGalleryImageVersion   string `mapstructure:"shared_gallery_image_version"`
+	SharedGallerySubscription  string `mapstructure:"shared_gallery_subscription"`
+	SharedGalleryResourceGroup string `mapstructure:"shared_gallery_resource_group"`
+	SharedGalleryName          string `mapstructure:"shared_gallery_name"`
+	SharedGalleryImageName     string `mapstructure:"shared_gallery_image_name"`
+	SharedGalleryImageVersion  string `mapstructure:"shared_gallery_image_version"`
 
 	ImagePublisher string `mapstructure:"image_publisher"`
 	ImageOffer     string `mapstructure:"image_offer"`
