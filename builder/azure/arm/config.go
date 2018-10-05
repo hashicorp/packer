@@ -79,13 +79,14 @@ type Config struct {
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 
-	// Compute
+	// Shared Gallery
 	SharedGallerySubscription  string `mapstructure:"shared_gallery_subscription"`
 	SharedGalleryResourceGroup string `mapstructure:"shared_gallery_resource_group"`
 	SharedGalleryName          string `mapstructure:"shared_gallery_name"`
 	SharedGalleryImageName     string `mapstructure:"shared_gallery_image_name"`
 	SharedGalleryImageVersion  string `mapstructure:"shared_gallery_image_version"`
 
+	// Compute
 	ImagePublisher string `mapstructure:"image_publisher"`
 	ImageOffer     string `mapstructure:"image_offer"`
 	ImageSku       string `mapstructure:"image_sku"`
@@ -601,6 +602,12 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		if c.SharedGalleryImageName == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_gallery_image_name must be specified"))
 		}
+        if c.CaptureContainerName != "" {
+            errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_container_name] is not supported when using Shared Image Gallery as source. Use managed_image_resource_group_name instead."))
+        }
+        if c.CaptureNamePrefix != "" {
+            errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_name_prefix] is not supported when using Shared Image Gallery as source. Use managed_image_name instead."))
+        }
 	} else if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
