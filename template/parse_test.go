@@ -106,9 +106,11 @@ func TestParse(t *testing.T) {
 				Provisioners: []*Provisioner{
 					{
 						Type: "something",
-						Override: map[string]interface{}{
-							"foo": map[string]interface{}{},
-						},
+						Override: []map[string]interface{}{{
+							"foo": []map[string]interface{}{{
+								"bar": "baz",
+							}},
+						}},
 					},
 				},
 			},
@@ -266,6 +268,8 @@ func TestParse(t *testing.T) {
 						{
 							Type: "foo",
 						},
+					},
+					{
 						{
 							Type: "bar",
 						},
@@ -321,11 +325,12 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		path, _ := filepath.Abs(fixtureDir(tc.File))
 		tpl, err := ParseFile(fixtureDir(tc.File))
 		if (err != nil) != tc.Err {
-			t.Fatalf("err: %s", err)
+			t.Errorf("err: %s", err)
+			continue
 		}
 
 		if tc.Result != nil {
@@ -335,7 +340,7 @@ func TestParse(t *testing.T) {
 			tpl.RawContents = nil
 		}
 		if !reflect.DeepEqual(tpl, tc.Result) {
-			t.Fatalf("bad: %s\n\n%#v\n\n%#v", tc.File, tpl, tc.Result)
+			t.Errorf("[%d]bad: %s result,expected\n\n%#v\n\n%#v", i, tc.File, tpl, tc.Result)
 		}
 	}
 }
@@ -358,18 +363,17 @@ func TestParse_bad(t *testing.T) {
 		File     string
 		Expected string
 	}{
-		{"error-beginning.json", "line 1, column 1 (offset 1)"},
-		{"error-middle.json", "line 5, column 6 (offset 50)"},
-		{"error-end.json", "line 1, column 30 (offset 30)"},
-		{"malformed.json", "line 16, column 3 (offset 433)"},
+		{"error-beginning.json", "At 1:1: illegal char"},
+		{"error-end.json", "1:30: illegal char: *"},
 	}
 	for _, tc := range cases {
 		_, err := ParseFile(fixtureDir(tc.File))
 		if err == nil {
-			t.Fatalf("expected error")
+			t.Errorf("file: %s\nexpected error", tc.File)
+			continue
 		}
 		if !strings.Contains(err.Error(), tc.Expected) {
-			t.Fatalf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
+			t.Errorf("file: %s\nExpected: %s\n%s\n", tc.File, tc.Expected, err.Error())
 		}
 	}
 }

@@ -146,8 +146,10 @@ func (c *Core) Build(n string) (Build, error) {
 		config := make([]interface{}, 1, 2)
 		config[0] = rawP.Config
 		if rawP.Override != nil {
-			if override, ok := rawP.Override[rawName]; ok {
-				config = append(config, override)
+			for _, override := range rawP.Override {
+				if override, ok := override[rawName]; ok {
+					config = append(config, override)
+				}
 			}
 		}
 
@@ -263,7 +265,7 @@ func (c *Core) validate() error {
 	var err error
 	for n, v := range c.Template.Variables {
 		if v.Required {
-			if _, ok := c.variables[n]; !ok {
+			if v, ok := c.variables[n]; !ok || v == "" {
 				err = multierror.Append(err, fmt.Errorf(
 					"required variable not set: %s", n))
 			}

@@ -51,7 +51,7 @@ type Provisioner struct {
 
 	Type        string
 	Config      map[string]interface{}
-	Override    map[string]interface{}
+	Override    []map[string]interface{}
 	PauseBefore time.Duration `mapstructure:"pause_before"`
 }
 
@@ -107,12 +107,14 @@ func (t *Template) Validate() error {
 			}
 		}
 
-		// Validate overrides
-		for name := range p.Override {
-			if _, ok := t.Builders[name]; !ok {
-				err = multierror.Append(err, fmt.Errorf(
-					"provisioner %d: override '%s' doesn't exist",
-					i+1, name))
+		for _, overide := range p.Override {
+			// Validate overrides
+			for name := range overide {
+				if _, ok := t.Builders[name]; !ok {
+					err = multierror.Append(err, fmt.Errorf(
+						"provisioner %d: override '%s' doesn't exist",
+						i+1, name))
+				}
 			}
 		}
 	}

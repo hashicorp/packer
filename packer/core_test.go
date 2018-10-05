@@ -349,10 +349,12 @@ func TestCoreBuild_provOverride(t *testing.T) {
 
 	found := false
 	for _, raw := range p.PrepConfigs {
-		if m, ok := raw.(map[string]interface{}); ok {
-			if _, ok := m["foo"]; ok {
-				found = true
-				break
+		if m, ok := raw.([]map[string]interface{}); ok {
+			for _, m := range m {
+				if _, ok := m["foo"]; ok {
+					found = true
+					break
+				}
 			}
 		}
 	}
@@ -499,7 +501,7 @@ func TestCoreValidate(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		f, err := os.Open(fixtureDir(tc.File))
 		if err != nil {
 			t.Fatalf("err: %s", err)
@@ -518,7 +520,7 @@ func TestCoreValidate(t *testing.T) {
 		})
 
 		if (err != nil) != tc.Err {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+			t.Errorf("[%d]err: %v\n\n%v", i, tc.File, err)
 		}
 	}
 }

@@ -3,7 +3,9 @@
         {
             "type": "something",
             "override": {
-                "foo": {}
+                "foo": {
+                    "bar":"baz"
+                }
             }
         }
     ]

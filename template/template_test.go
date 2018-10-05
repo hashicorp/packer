@@ -74,7 +74,7 @@ func TestTemplateValidate(t *testing.T) {
 		},
 	}
 
-	for _, tc := range cases {
+	for i, tc := range cases {
 		f, err := os.Open(fixtureDir(tc.File))
 		if err != nil {
 			t.Fatalf("err: %s", err)
@@ -83,12 +83,12 @@ func TestTemplateValidate(t *testing.T) {
 		tpl, err := Parse(f)
 		f.Close()
 		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+			t.Fatalf("[%d]err: %s\n\n%s", i, tc.File, err)
 		}
 
 		err = tpl.Validate()
 		if (err != nil) != tc.Err {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+			t.Fatalf("[%d]err: %s\n\n%s", i, tc.File, err)
 		}
 	}
 }

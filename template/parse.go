@@ -28,7 +28,7 @@ type rawTemplate struct {
 	Push               []map[string]interface{}
 	PostProcessors     []interface{} `mapstructure:"post-processors"`
 	Provisioners       []map[string]interface{}
-	Variables          []map[string]interface{}
+	Variables          []map[string]string
 	SensitiveVariables []string `mapstructure:"sensitive-variables"`
 
 	RawContents []byte
@@ -45,7 +45,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 	result.MinVersion = r.MinVersion
 	result.RawContents = r.RawContents
 
-	if result.Variables == nil {
+	if len(r.Variables) > 0 {
 		result.Variables = make(map[string]*Variable)
 	}
 	for _, variables := range r.Variables {
@@ -53,7 +53,7 @@ func (r *rawTemplate) Template() (*Template, error) {
 			var v Variable
 
 			// Variable is required if the value is exactly nil
-			v.Required = rawV == nil
+			v.Required = rawV == ""
 
 			// Weak decode the default if we have one
 			if err := r.decoder(&v.Default, nil).Decode(rawV); err != nil {
