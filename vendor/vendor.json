@@ -1115,6 +1115,12 @@
 			"revision": "df949784da9ed028ee76df44652e42d37a09d7e4"
 		},
 		{
+			"checksumSHA1": "jofBtpmVJ4H9yiesFeuPu8pZaf4=",
+			"path": "github.com/hetznercloud/hcloud-go/hcloud",
+			"revision": "62b54b43b09a0e828e6a27e9cc5e6b9dd20d67c6",
+			"revisionTime": "2018-09-24T12:42:35Z"
+		},
+		{
 			"checksumSHA1": "3/Bhy+ua/DCv2ElMD5GzOYSGN6g=",
 			"comment": "0.2.2-2-gc01cf91",
 			"path": "github.com/jmespath/go-jmespath",
