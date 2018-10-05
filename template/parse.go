@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/hcl"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -24,10 +25,10 @@ type rawTemplate struct {
 	Description string
 
 	Builders           []map[string]interface{}
-	Push               map[string]interface{}
+	Push               []map[string]interface{}
 	PostProcessors     []interface{} `mapstructure:"post-processors"`
 	Provisioners       []map[string]interface{}
-	Variables          map[string]interface{}
+	Variables          []map[string]interface{}
 	SensitiveVariables []string `mapstructure:"sensitive-variables"`
 
 	RawContents []byte
@@ -44,30 +45,31 @@ func (r *rawTemplate) Template() (*Template, error) {
 	result.MinVersion = r.MinVersion
 	result.RawContents = r.RawContents
 
-	// Gather the variables
-	if len(r.Variables) > 0 {
-		result.Variables = make(map[string]*Variable, len(r.Variables))
+	if result.Variables == nil {
+		result.Variables = make(map[string]*Variable)
 	}
-	for k, rawV := range r.Variables {
-		var v Variable
+	for _, variables := range r.Variables {
+		for k, rawV := range variables {
+			var v Variable
 
-		// Variable is required if the value is exactly nil
-		v.Required = rawV == nil
+			// Variable is required if the value is exactly nil
+			v.Required = rawV == nil
 
-		// Weak decode the default if we have one
-		if err := r.decoder(&v.Default, nil).Decode(rawV); err != nil {
-			errs = multierror.Append(errs, fmt.Errorf(
-				"variable %s: %s", k, err))
-			continue
-		}
-
-		for _, sVar := range r.SensitiveVariables {
-			if sVar == k {
-				result.SensitiveVariables = append(result.SensitiveVariables, &v)
+			// Weak decode the default if we have one
+			if err := r.decoder(&v.Default, nil).Decode(rawV); err != nil {
+				errs = multierror.Append(errs, fmt.Errorf(
+					"variable %s: %s", k, err))
+				continue
 			}
-		}
 
-		result.Variables[k] = &v
+			for _, sVar := range r.SensitiveVariables {
+				if sVar == k {
+					result.SensitiveVariables = append(result.SensitiveVariables, &v)
+				}
+			}
+
+			result.Variables[k] = &v
+		}
 	}
 
 	// Let's start by gathering all the builders
@@ -193,9 +195,9 @@ func (r *rawTemplate) Template() (*Template, error) {
 	}
 
 	// Push
-	if len(r.Push) > 0 {
+	if len(r.Push) > 0 && len(r.Push[0]) > 0 {
 		var p Push
-		if err := r.decoder(&p, nil).Decode(r.Push); err != nil {
+		if err := r.decoder(&p, nil).Decode(r.Push[0]); err != nil {
 			errs = multierror.Append(errs, fmt.Errorf(
 				"push: %s", err))
 		}
@@ -279,7 +281,7 @@ func Parse(r io.Reader) (*Template, error) {
 	// the rawTemplate directly because we'd rather use mapstructure to
 	// decode since it has richer errors.
 	var raw interface{}
-	if err := json.Unmarshal(buf.Bytes(), &raw); err != nil {
+	if err := hcl.Unmarshal(buf.Bytes(), &raw); err != nil {
 		return nil, err
 	}
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/hcl"
 	"github.com/hashicorp/packer/fix"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template"
@@ -87,7 +88,10 @@ func (c *ValidateCommand) Run(args []string) int {
 	var rawTemplateData map[string]interface{}
 	input := make(map[string]interface{})
 	templateData := make(map[string]interface{})
-	json.Unmarshal(tpl.RawContents, &rawTemplateData)
+	err = hcl.Unmarshal(tpl.RawContents, &rawTemplateData)
+	if err != nil {
+		log.Printf("decode err: %v", err)
+	}
 	for k, v := range rawTemplateData {
 		if vals, ok := v.([]interface{}); ok {
 			if len(vals) == 0 {
