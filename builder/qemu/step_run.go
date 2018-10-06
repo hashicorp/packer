@@ -217,6 +217,13 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 		}
 	}
 
+	// Check if we are missing the netDevice #6804
+	if x, ok := inArgs["-device"]; ok {
+		if !strings.Contains(strings.Join(x, ""), config.NetDevice) {
+			inArgs["-device"] = append(inArgs["-device"], fmt.Sprintf("%s,netdev=user.0", config.NetDevice))
+		}
+	}
+
 	// Flatten to array of strings
 	outArgs := make([]string, 0)
 	for key, values := range inArgs {
