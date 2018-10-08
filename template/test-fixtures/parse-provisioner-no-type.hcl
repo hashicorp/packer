@@ -1,0 +1,3 @@
+provisioners = {
+  foo = "something"
+}

@@ -1,0 +1,3 @@
+post-processors = [{
+  type = "foo"
+}, "bar"]

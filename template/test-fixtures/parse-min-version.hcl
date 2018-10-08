@@ -1,0 +1,1 @@
+min_packer_version = "1.2"
