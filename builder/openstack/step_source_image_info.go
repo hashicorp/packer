@@ -19,14 +19,22 @@ type StepSourceImageInfo struct {
 }
 
 func (s *StepSourceImageInfo) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	if s.SourceImage != "" || s.SourceImageName != "" {
+	if s.SourceImage != "" {
+		state.Put("source_image", s.SourceImage)
+
 		return multistep.ActionContinue
 	}
 
 	client, err := config.imageV2Client()
+
+	if s.SourceImageName != "" {
+		s.SourceImageOpts = images.ListOpts{
+			Name: s.SourceImageName,
+		}
+	}
 
 	log.Printf("Using Image Filters %v", s.SourceImageOpts)
 	image := &images.Image{}

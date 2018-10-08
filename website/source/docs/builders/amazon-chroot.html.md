@@ -121,6 +121,11 @@ each category, the available configuration keys are alphabetized.
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `decode_authorization_messages` (boolean) - Enable automatic decoding of any
+    encoded authorization (error) messages using the `sts:DecodeAuthorizationMessage` API.
+    Note: requires that the effective user/role have permissions to `sts:DecodeAuthorizationMessage`
+    on resource `*`. Default `false`.
+
 -   `device_path` (string) - The path to the device where the root volume of the
     source AMI will be attached. This defaults to "" (empty string), which
     forces Packer to find an open device automatically.
@@ -304,8 +309,11 @@ each category, the available configuration keys are alphabetized.
         Any filter described in the docs for [DescribeImages](http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeImages.html)
         is valid.
 
-    -   `owners` (array of strings) - This scopes the AMIs to certain Amazon account IDs.
-        This is a required option, necessary to limit the AMIs your account or a trusted third party.
+    -   `owners` (array of strings) - Filters the images by their owner. You may
+        specify one or more AWS account IDs, "self" (which will use the account
+        whose credentials you are using to run Packer), or an AWS owner alias:
+        for example, "amazon", "aws-marketplace", or "microsoft".
+        This option is required for security reasons.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
         This is most useful for selecting a daily distro build.

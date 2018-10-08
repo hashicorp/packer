@@ -79,6 +79,13 @@ The SSH communicator has the following options:
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
 
+-   `ssh_clear_authorized_keys` (boolean) - If true, Packer will attempt to
+    remove its temporary key from `~/.ssh/authorized_keys` and
+    `/root/.ssh/authorized_keys`. This is a mostly cosmetic option, since Packer
+    will delete the temporary private key from the host system regardless of
+    whether this is set to true (unless the user has set the `-debug` flag).
+    Defaults to "false"; currently only works on guests with `sed` installed.
+
 -   `ssh_disable_agent_forwarding` (boolean) - If true, SSH agent forwarding
     will be disabled. Defaults to `false`.
 
@@ -146,10 +153,12 @@ The WinRM communicator has the following options.
     become available. This defaults to `30m` since setting up a Windows
     machine generally takes a long time.
 
--   `winrm_use_ntlm` (boolean) - If `true`, NTLM authentication will be used for WinRM,
-    rather than default (basic authentication), removing the requirement for basic
-    authentication to be enabled within the target guest. Further reading for remote
-    connection authentication can be found [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
+-   `winrm_use_ntlm` (boolean) - If `true`, NTLMv2 authentication (with
+    session security) will be used for WinRM, rather than
+    default (basic authentication), removing the requirement for basic
+    authentication to be enabled within the target guest. Further reading
+    for remote connection authentication can be found
+    [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
 
 -   `winrm_use_ssl` (boolean) - If `true`, use HTTPS for WinRM.
 

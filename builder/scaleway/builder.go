@@ -19,7 +19,7 @@ import (
 const BuilderId = "hashicorp.scaleway"
 
 type Builder struct {
-	config Config
+	config *Config
 	runner multistep.Runner
 }
 
@@ -28,7 +28,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if errs != nil {
 		return warnings, errs
 	}
-	b.config = *c
+	b.config = c
 
 	return nil, nil
 }
@@ -50,7 +50,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&stepCreateSSHKey{
 			Debug:        b.config.PackerDebug,
-			Comm:         &b.config.Comm,
 			DebugKeyPath: fmt.Sprintf("scw_%s.pem", b.config.PackerBuildName),
 		},
 		new(stepCreateServer),
@@ -61,6 +60,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		new(stepShutdown),
 		new(stepSnapshot),
 		new(stepImage),

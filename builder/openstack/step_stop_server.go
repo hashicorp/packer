@@ -14,7 +14,7 @@ type StepStopServer struct{}
 
 func (s *StepStopServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 
 	// We need the v2 compute client

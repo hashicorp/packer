@@ -24,7 +24,9 @@ func (s *stepRunAlicloudInstance) Run(_ context.Context, state multistep.StateBa
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	ui.Say("Starting instance.")
+
+	ui.Say(fmt.Sprintf("Starting instance: %s", instance.InstanceId))
+
 	err = client.WaitForInstance(instance.InstanceId, ecs.Running, ALICLOUD_DEFAULT_TIMEOUT)
 	if err != nil {
 		err := fmt.Errorf("Timeout waiting for instance to start: %s", err)

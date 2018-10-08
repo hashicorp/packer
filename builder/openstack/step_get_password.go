@@ -22,7 +22,7 @@ type StepGetPassword struct {
 }
 
 func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm

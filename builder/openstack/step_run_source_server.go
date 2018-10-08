@@ -15,8 +15,6 @@ import (
 
 type StepRunSourceServer struct {
 	Name                  string
-	SourceImage           string
-	SourceImageName       string
 	SecurityGroups        []string
 	Networks              []string
 	Ports                 []string
@@ -30,8 +28,9 @@ type StepRunSourceServer struct {
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
+	sourceImage := state.Get("source_image").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -65,8 +64,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 
 	serverOpts := servers.CreateOpts{
 		Name:             s.Name,
-		ImageRef:         s.SourceImage,
-		ImageName:        s.SourceImageName,
+		ImageRef:         sourceImage,
 		FlavorRef:        flavor,
 		SecurityGroups:   s.SecurityGroups,
 		Networks:         networks,
@@ -75,11 +73,6 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		ConfigDrive:      &s.ConfigDrive,
 		ServiceClient:    computeClient,
 		Metadata:         s.InstanceMetadata,
-	}
-
-	// check if image filter returned a source image ID and replace
-	if imageID, ok := state.GetOk("source_image"); ok {
-		serverOpts.ImageRef = imageID.(string)
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder
@@ -153,7 +146,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client

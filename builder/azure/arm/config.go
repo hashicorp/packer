@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/pkcs12"
 	"github.com/hashicorp/packer/common"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
@@ -359,7 +360,10 @@ func setRuntimeValues(c *Config) {
 	var tempName = NewTempName()
 
 	c.tmpAdminPassword = tempName.AdminPassword
+	// store so that we can access this later during provisioning
+	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
 	packer.LogSecretFilter.Set(c.tmpAdminPassword)
+
 	c.tmpCertificatePassword = tempName.CertificatePassword
 	if c.TempComputeName == "" {
 		c.tmpComputeName = tempName.ComputeName

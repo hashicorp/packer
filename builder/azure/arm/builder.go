@@ -177,6 +177,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&packerCommon.StepProvision{},
+			&packerCommon.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),

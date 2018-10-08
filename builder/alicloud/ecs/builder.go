@@ -68,7 +68,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	packer.LogSecretFilter.Set(b.config.AlicloudAccessKey, b.config.AlicloudSecretKey)
-	log.Println(b.config)
 	return nil, nil
 }
 
@@ -79,7 +78,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -139,10 +138,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			RegionId:                 b.config.AlicloudRegion,
 			InternetChargeType:       b.config.InternetChargeType,
 			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
+			SSHPrivateIp:             b.config.SSHPrivateIp,
 		})
 	} else {
 		steps = append(steps, &stepConfigAlicloudPublicIP{
-			RegionId: b.config.AlicloudRegion,
+			RegionId:     b.config.AlicloudRegion,
+			SSHPrivateIp: b.config.SSHPrivateIp,
 		})
 	}
 	steps = append(steps,
@@ -157,8 +158,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.RunConfig.Comm,
+		},
 		&stepStopAlicloudInstance{
-			ForceStop: b.config.ForceStopInstance,
+			ForceStop:   b.config.ForceStopInstance,
+			DisableStop: b.config.DisableStopInstance,
 		},
 		&stepDeleteAlicloudImageSnapshots{
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
@@ -166,6 +171,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageName:                 b.config.AlicloudImageName,
 		},
 		&stepCreateAlicloudImage{},
+		&stepCreateTags{
+			Tags: b.config.AlicloudImageTags,
+		},
 		&stepRegionCopyAlicloudImage{
 			AlicloudImageDestinationRegions: b.config.AlicloudImageDestinationRegions,
 			AlicloudImageDestinationNames:   b.config.AlicloudImageDestinationNames,

@@ -1,8 +1,24 @@
-## 1.3.0 (Unreleased)
+## 1.3.1 (September 13, 2018)
+### IMPROVEMENTS:
+* builder/amazon: automatically decode encoded authorization messages if
+    possible [GH-5415]
+* builder:amazon: Optional cleanup of the authorized keys file [GH-6713]
+
+### BUG FIXES:
+* builder/amazon: fix bugs relating to spot instances provisioning [GH-6697]
+    [GH-6693]
+* builder/openstack: fix ssh keypair not attached [GH-6701]
+* core: progressbar: fix deadlock locking builds afer first display [GH-6698]
+
+## 1.3.0 (September 11, 2018)
 
 ### IMPROVEMENTS:
 * azure/arm: Retry cleanup of individual resources on error [GH-6644]
 * builder/alicloud: Support source image coming from marketplace [GH-6588]
+* builder/amazon-chroot: Add new `root_volume_type` option. [GH-6669]
+* builder/amazon-chroot: If you have a PV source AMI, with the Amazon Chroot
+    builder, and the destination AMI is type HVM, you can now enable
+    ena_support, example: [GH-6670]
 * builder/amazon-chroot: New feature `root_volume_tags` to tag the created
     volumes. [GH-6504]
 * builder/amazon: Create a random interim AMI name when encrypt_boot is true so
@@ -46,6 +62,7 @@
     op but is a big win for maintainability. [GH-6621] [GH-6613]
 * post-processor/compress: Add support for xz compression [GH-6534]
 * post-processor/vagrant: Support for Docker images. [GH-6494]
+* post-processor/vsphere: Add new `esxi_host` option. [GH-5366]
 * postprocessor/vagrant: Add support for Azure. [GH-6576]
 * provisioner/ansible: Add new "extra var", packer_http_addr. [GH-6501]
 * provisioner/ansible: Enable {{.WinRMPassword}} template engine. [GH-6450]

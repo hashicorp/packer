@@ -11,6 +11,8 @@ func testConfig() map[string]interface{} {
 		"ami_name":   "foo",
 		"source_ami": "foo",
 		"region":     "us-east-1",
+		// region validation logic is checked in ami_config_test
+		"skip_region_validation": true,
 	}
 }
 
@@ -28,6 +30,7 @@ func TestBuilderPrepare_AMIName(t *testing.T) {
 
 	// Test good
 	config["ami_name"] = "foo"
+	config["skip_region_validation"] = true
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)

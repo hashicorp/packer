@@ -19,6 +19,7 @@ type RunConfig struct {
 	Description              string `mapstructure:"description"`
 	AlicloudSourceImage      string `mapstructure:"source_image"`
 	ForceStopInstance        bool   `mapstructure:"force_stop_instance"`
+	DisableStopInstance      bool   `mapstructure:"disable_stop_instance"`
 	SecurityGroupId          string `mapstructure:"security_group_id"`
 	SecurityGroupName        string `mapstructure:"security_group_name"`
 	UserData                 string `mapstructure:"user_data"`

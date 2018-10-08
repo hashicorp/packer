@@ -117,9 +117,10 @@
 			"versionExact": "v10.12.0"
 		},
 		{
-			"checksumSHA1": "TgrN0l/E16deTlLYNt8wf66urSU=",
+			"checksumSHA1": "4LNEtQCFSZ/NbHBdkB7XPrwO+kI=",
 			"path": "github.com/Azure/go-ntlmssp",
-			"revision": "e0b63eb299a769ea4b04dadfe530f6074b277afb"
+			"revision": "4a21cbd618b459155f8b8ee7f4491cd54f5efa77",
+			"revisionTime": "2018-08-10T17:55:52Z"
 		},
 		{
 			"checksumSHA1": "++XyYR/ZfYoCxGn5vTlXzQZ9eo0=",
@@ -526,6 +527,14 @@
 			"checksumSHA1": "Sj6NTKuc/6+amv4RsMqrZkvkvpc=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/service/ec2",
+			"revision": "586c9ba6027a527800564282bb843d7e6e7985c9",
+			"revisionTime": "2018-02-07T00:16:19Z",
+			"version": "v1.12.72",
+			"versionExact": "v1.12.72"
+		},
+		{
+			"checksumSHA1": "u+wyWp/GWHHINKLeXP0eQmbfQ38=",
+			"path": "github.com/aws/aws-sdk-go/service/ec2/ec2iface",
 			"revision": "586c9ba6027a527800564282bb843d7e6e7985c9",
 			"revisionTime": "2018-02-07T00:16:19Z",
 			"version": "v1.12.72",
@@ -1006,12 +1015,6 @@
 			"revisionTime": "2018-02-01T23:52:37Z"
 		},
 		{
-			"checksumSHA1": "0PeWsO2aI+2PgVYlYlDPKfzCLEQ=",
-			"path": "github.com/hashicorp/serf/coordinate",
-			"revision": "984a73625de3138f44deb38d00878fab39eb6447",
-			"revisionTime": "2018-05-30T15:59:58Z"
-		},
-		{
 			"checksumSHA1": "HtpYAWHvd9mq+mHkpo7z8PGzMik=",
 			"path": "github.com/hashicorp/hcl",
 			"revision": "ef8a98b0bbce4a65b5aa4c368430a80ddc533168",
@@ -1064,6 +1067,12 @@
 			"path": "github.com/hashicorp/hcl/json/token",
 			"revision": "ef8a98b0bbce4a65b5aa4c368430a80ddc533168",
 			"revisionTime": "2018-04-04T17:41:02Z"
+		},
+		{
+			"checksumSHA1": "0PeWsO2aI+2PgVYlYlDPKfzCLEQ=",
+			"path": "github.com/hashicorp/serf/coordinate",
+			"revision": "984a73625de3138f44deb38d00878fab39eb6447",
+			"revisionTime": "2018-05-30T15:59:58Z"
 		},
 		{
 			"checksumSHA1": "oi8fnfAPPTf2nN7zptlyu/EsMMs=",
@@ -1313,10 +1322,10 @@
 			"versionExact": "v2.0.0"
 		},
 		{
-			"checksumSHA1": "/NoE6t3UkW4/iKAtbf59GGv6tF8=",
+			"checksumSHA1": "qDOL2Q0BzBA5WwQN06a5/MbEGFQ=",
 			"path": "github.com/packer-community/winrmcp/winrmcp",
-			"revision": "81144009af586de8e7729b829266f09dd0d59701",
-			"revisionTime": "2018-01-02T16:08:24Z"
+			"revision": "0fd363d6159ae26cd0be16262941301e69461641",
+			"revisionTime": "2018-09-21T17:45:48Z"
 		},
 		{
 			"checksumSHA1": "oaXvjFg802gS/wx1bx2gAQwa7XQ=",
@@ -1435,10 +1444,10 @@
 			"revisionTime": "2017-03-21T23:07:31Z"
 		},
 		{
-			"checksumSHA1": "UvMjUbtTEF0wskLTpV8grtBUh7Q=",
+			"checksumSHA1": "17M5pJv8Wr4lIxmINnba9vTozR8=",
 			"path": "github.com/scaleway/scaleway-cli/pkg/api",
-			"revision": "51d0290d9434dc6139dd89001236cfd989521a79",
-			"revisionTime": "2018-03-05T22:44:21Z"
+			"revision": "7b12c9699d70d4ca06140b7d829d09b6a1c8f6f5",
+			"revisionTime": "2018-09-21T09:43:45Z"
 		},
 		{
 			"checksumSHA1": "kveaAmNlnvmIIuEkFcMlB+N7TqY=",
