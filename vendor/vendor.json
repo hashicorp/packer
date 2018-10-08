@@ -1071,10 +1071,10 @@
 			"revisionTime": "2018-02-01T23:52:37Z"
 		},
 		{
-			"checksumSHA1": "HtpYAWHvd9mq+mHkpo7z8PGzMik=",
+			"checksumSHA1": "bWGI7DqWg6IdhfamV96OD+Esa+8=",
 			"path": "github.com/hashicorp/hcl",
-			"revision": "ef8a98b0bbce4a65b5aa4c368430a80ddc533168",
-			"revisionTime": "2018-04-04T17:41:02Z"
+			"revision": "65a6292f0157eff210d03ed1bf6c59b190b8b906",
+			"revisionTime": "2018-09-06T18:38:39Z"
 		},
 		{
 			"checksumSHA1": "XQmjDva9JCGGkIecOgwtBEMCJhU=",
