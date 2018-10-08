@@ -1,0 +1,5 @@
+builders = {
+  name = "{{upper `name`}}"
+
+  type = "test"
+}

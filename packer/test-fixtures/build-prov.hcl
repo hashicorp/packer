@@ -1,0 +1,7 @@
+builders = {
+  type = "test"
+}
+
+provisioners = {
+  type = "test"
+}

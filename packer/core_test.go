@@ -21,9 +21,18 @@ func TestCoreBuildNames(t *testing.T) {
 			nil,
 			[]string{"something"},
 		},
-
+		{
+			"build-names-basic.hcl",
+			nil,
+			[]string{"something"},
+		},
 		{
 			"build-names-func.json",
+			nil,
+			[]string{"TUBES"},
+		},
+		{
+			"build-names-func.hcl",
 			nil,
 			[]string{"TUBES"},
 		},
@@ -51,62 +60,66 @@ func TestCoreBuildNames(t *testing.T) {
 }
 
 func TestCoreBuild_basic(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-basic.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-basic.json", "build-basic.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
 	}
 }
 
 func TestCoreBuild_basicInterpolated(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-basic-interpolated.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-basic-interpolated.json", "build-basic-interpolated.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("NAME")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("NAME")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
 	}
 }
 
@@ -114,317 +127,337 @@ func TestCoreBuild_env(t *testing.T) {
 	os.Setenv("PACKER_TEST_ENV", "test")
 	defer os.Setenv("PACKER_TEST_ENV", "")
 
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-env.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-env.json", "build-env.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	// Interpolate the config
-	var result map[string]interface{}
-	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		// Interpolate the config
+		var result map[string]interface{}
+		err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if result["value"] != "test" {
-		t.Fatalf("bad: %#v", result)
+		if result["value"] != "test" {
+			t.Fatalf("bad: %#v", result)
+		}
 	}
 }
 
 func TestCoreBuild_buildNameVar(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-var-build-name.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-var-build-name.json", "build-var-build-name.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	// Interpolate the config
-	var result map[string]interface{}
-	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		// Interpolate the config
+		var result map[string]interface{}
+		err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if result["value"] != "test" {
-		t.Fatalf("bad: %#v", result)
+		if result["value"] != "test" {
+			t.Fatalf("bad: %#v", result)
+		}
 	}
 }
 
 func TestCoreBuild_buildTypeVar(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-var-build-type.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-var-build-type.json", "build-var-build-type.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	// Interpolate the config
-	var result map[string]interface{}
-	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		// Interpolate the config
+		var result map[string]interface{}
+		err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if result["value"] != "test" {
-		t.Fatalf("bad: %#v", result)
+		if result["value"] != "test" {
+			t.Fatalf("bad: %#v", result)
+		}
 	}
 }
 
 func TestCoreBuild_nonExist(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-basic.json"))
-	TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-basic.json", "build-basic.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	_, err := core.Build("nope")
-	if err == nil {
-		t.Fatal("should error")
+		_, err := core.Build("nope")
+		if err == nil {
+			t.Fatal("should error")
+		}
 	}
 }
 
 func TestCoreBuild_prov(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-prov.json"))
-	b := TestBuilder(t, config, "test")
-	p := TestProvisioner(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-prov.json", "build-prov.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		p := TestProvisioner(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
-	}
-	if !p.ProvCalled {
-		t.Fatal("provisioner not called")
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
+		if !p.ProvCalled {
+			t.Fatal("provisioner not called")
+		}
 	}
 }
 
 func TestCoreBuild_provSkip(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-prov-skip.json"))
-	b := TestBuilder(t, config, "test")
-	p := TestProvisioner(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-prov-skip.json", "build-prov-skip.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		p := TestProvisioner(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
-	}
-	if p.ProvCalled {
-		t.Fatal("provisioner should not be called")
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
+		if p.ProvCalled {
+			t.Fatal("provisioner should not be called")
+		}
 	}
 }
 
 func TestCoreBuild_provSkipInclude(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-prov-skip-include.json"))
-	b := TestBuilder(t, config, "test")
-	p := TestProvisioner(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-prov-skip-include.json", "build-prov-skip-include.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		p := TestProvisioner(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
-	}
-	if !p.ProvCalled {
-		t.Fatal("provisioner should be called")
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
+		if !p.ProvCalled {
+			t.Fatal("provisioner should be called")
+		}
 	}
 }
 
 func TestCoreBuild_provOverride(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-prov-override.json"))
-	b := TestBuilder(t, config, "test")
-	p := TestProvisioner(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-prov-override.json", "build-prov-override.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		p := TestProvisioner(t, config, "test")
+		core := TestCore(t, config)
 
-	b.ArtifactId = "hello"
+		b.ArtifactId = "hello"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(nil, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(nil, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
-	}
-	if !p.ProvCalled {
-		t.Fatal("provisioner not called")
-	}
+		if artifact[0].Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
+		if !p.ProvCalled {
+			t.Fatal("provisioner not called")
+		}
 
-	found := false
-	for _, raw := range p.PrepConfigs {
-		if m, ok := raw.([]map[string]interface{}); ok {
-			for _, m := range m {
-				if _, ok := m["foo"]; ok {
-					found = true
-					break
+		found := false
+		for _, raw := range p.PrepConfigs {
+			if m, ok := raw.([]map[string]interface{}); ok {
+				for _, m := range m {
+					if _, ok := m["foo"]; ok {
+						found = true
+						break
+					}
 				}
 			}
 		}
-	}
-	if !found {
-		t.Fatal("override not called")
+		if !found {
+			t.Fatal("override not called")
+		}
 	}
 }
 
 func TestCoreBuild_postProcess(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-pp.json"))
-	b := TestBuilder(t, config, "test")
-	p := TestPostProcessor(t, config, "test")
-	core := TestCore(t, config)
-	ui := TestUi(t)
+	for _, f := range []string{"build-pp.json", "build-pp.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		p := TestPostProcessor(t, config, "test")
+		core := TestCore(t, config)
+		ui := TestUi(t)
 
-	b.ArtifactId = "hello"
-	p.ArtifactId = "goodbye"
+		b.ArtifactId = "hello"
+		p.ArtifactId = "goodbye"
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	artifact, err := build.Run(ui, nil)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(artifact) != 1 {
-		t.Fatalf("bad: %#v", artifact)
-	}
+		artifact, err := build.Run(ui, nil)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
+		if len(artifact) != 1 {
+			t.Fatalf("bad: %#v", artifact)
+		}
 
-	if artifact[0].Id() != p.ArtifactId {
-		t.Fatalf("bad: %s", artifact[0].Id())
-	}
-	if p.PostProcessArtifact.Id() != b.ArtifactId {
-		t.Fatalf("bad: %s", p.PostProcessArtifact.Id())
+		if artifact[0].Id() != p.ArtifactId {
+			t.Fatalf("bad: %s", artifact[0].Id())
+		}
+		if p.PostProcessArtifact.Id() != b.ArtifactId {
+			t.Fatalf("bad: %s", p.PostProcessArtifact.Id())
+		}
 	}
 }
 
 func TestCoreBuild_templatePath(t *testing.T) {
-	config := TestCoreConfig(t)
-	testCoreTemplate(t, config, fixtureDir("build-template-path.json"))
-	b := TestBuilder(t, config, "test")
-	core := TestCore(t, config)
+	for _, f := range []string{"build-template-path.json", "build-template-path.hcl"} {
+		config := TestCoreConfig(t)
+		testCoreTemplate(t, config, fixtureDir(f))
+		b := TestBuilder(t, config, "test")
+		core := TestCore(t, config)
 
-	expected, _ := filepath.Abs("./test-fixtures")
+		expected, _ := filepath.Abs("./test-fixtures")
 
-	build, err := core.Build("test")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		build, err := core.Build("test")
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if _, err := build.Prepare(); err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		if _, err := build.Prepare(); err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	// Interpolate the config
-	var result map[string]interface{}
-	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+		// Interpolate the config
+		var result map[string]interface{}
+		err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+		if err != nil {
+			t.Fatalf("err: %s", err)
+		}
 
-	if result["value"] != expected {
-		t.Fatalf("bad: %#v", result)
+		if result["value"] != expected {
+			t.Fatalf("bad: %#v", result)
+		}
 	}
 }
 
@@ -436,6 +469,11 @@ func TestCore_pushInterpolate(t *testing.T) {
 	}{
 		{
 			"push-vars.json",
+			map[string]string{"foo": "bar"},
+			template.Push{Name: "bar"},
+		},
+		{
+			"push-vars.hcl",
 			map[string]string{"foo": "bar"},
 			template.Push{Name: "bar"},
 		},
@@ -473,6 +511,11 @@ func TestCoreValidate(t *testing.T) {
 			nil,
 			true,
 		},
+		{
+			"validate-dup-builder.hcl",
+			nil,
+			true,
+		},
 
 		// Required variable not set
 		{
@@ -480,9 +523,19 @@ func TestCoreValidate(t *testing.T) {
 			nil,
 			true,
 		},
+		{
+			"validate-req-variable.hcl",
+			nil,
+			true,
+		},
 
 		{
 			"validate-req-variable.json",
+			map[string]string{"foo": "bar"},
+			false,
+		},
+		{
+			"validate-req-variable.hcl",
 			map[string]string{"foo": "bar"},
 			false,
 		},
@@ -493,9 +546,19 @@ func TestCoreValidate(t *testing.T) {
 			map[string]string{"foo": "bar"},
 			false,
 		},
+		{
+			"validate-min-version.hcl",
+			map[string]string{"foo": "bar"},
+			false,
+		},
 
 		{
 			"validate-min-version-high.json",
+			map[string]string{"foo": "bar"},
+			true,
+		},
+		{
+			"validate-min-version-high.hcl",
 			map[string]string{"foo": "bar"},
 			true,
 		},
@@ -541,9 +604,23 @@ func TestSensitiveVars(t *testing.T) {
 			"bar",
 			false,
 		},
+		{
+			"sensitive-variables.hcl",
+			map[string]string{"foo": "bar"},
+			[]string{"foo"},
+			"bar",
+			false,
+		},
 		// interpolated
 		{
 			"sensitive-variables.json",
+			map[string]string{"foo": "{{build_name}}"},
+			[]string{"foo"},
+			"test",
+			false,
+		},
+		{
+			"sensitive-variables.hcl",
 			map[string]string{"foo": "{{build_name}}"},
 			[]string{"foo"},
 			"test",
