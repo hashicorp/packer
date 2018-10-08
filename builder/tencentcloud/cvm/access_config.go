@@ -1,0 +1,119 @@
+package cvm
+
+import (
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
+	"github.com/hashicorp/packer/template/interpolate"
+	"fmt"
+	"os"
+)
+
+type Region string
+
+// below would be moved to tencentcloud sdk git repo
+const (
+	Bangkok = Region("ap-bangkok")
+	Beijing = Region("ap-beijing")
+	Chengdu = Region("ap-chengdu")
+	Chongqing = Region("ap-chongqing")
+	Guangzhou = Region("ap-guangzhou")
+	GuangzhouOpen = Region("ap-guangzhou-open")
+	Hongkong = Region("ap-hongkong")
+	Mumbai = Region("ap-mumbai")
+	Seoul = Region("seoul")
+	Shanghai = Region("ap-shanghai")
+	ShanghaiFsi = Region("ap-shanghai-fsi")
+	ShenzhenFsi = Region("ap-shenzhen-fsi")
+	Singapore = Region("ap-singapore")
+	Tokyo = Region("ap-tokyo")
+	Frankfurt = Region("eu-frankfurt")
+	Moscow = Region("eu-moscow")
+	Ashburn = Region("na-ashburn")
+	Siliconvalley = Region("na-siliconvalley")
+	Toronto = Region("na-toronto")
+)
+var ValidRegions = []Region{
+	Bangkok, Beijing, Chengdu, Chongqing, Guangzhou, GuangzhouOpen, Hongkong, Shanghai,
+	ShanghaiFsi, ShenzhenFsi,
+	Mumbai, Seoul, Singapore, Tokyo, Moscow,
+	Frankfurt, Ashburn, Siliconvalley, Toronto,
+}
+
+type TencentCloudAccessConfig struct {
+	SecretId 		string `mapstructure:"secret_id"`
+	SecretKey 		string `mapstructure:"secret_key"`
+	Region 			string `mapstructure:"region"`
+	Zone 			string `mapstructure:"zone"`
+	SkipValidation bool 	`mapstructure:"skip_region_validation"`
+}
+
+func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
+	var (
+		err error
+		cvm_client *cvm.Client
+		vpc_client *vpc.Client
+		resp *cvm.DescribeZonesResponse
+	)
+	if err = cf.validateRegion(); err != nil {
+		return nil, nil, err
+	}
+	if cvm_client, err = cvm.NewClientWithSecretId(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
+		return nil, nil, err
+	}
+	if vpc_client, err = vpc.NewClientWithSecretId(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
+		return nil, nil, err
+	}
+	req := cvm.NewDescribeZonesRequest()
+	if resp, err = cvm_client.DescribeZones(req); err != nil {
+		return nil, nil,  err
+	}
+	if cf.Zone != "" {
+		for _, zone := range resp.Response.ZoneSet {
+			if cf.Zone == *zone.Zone {
+				return cvm_client, vpc_client, nil
+			}
+		}
+		return nil, nil, fmt.Errorf("unknown zone: %s", cf.Zone)
+	}
+	return cvm_client, vpc_client, nil
+}
+
+
+func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error{
+	var errs []error
+	if err := cf.Config(); err != nil {
+		errs = append(errs, err)
+	}
+
+	if cf.Region == "" {
+		errs = append(errs, fmt.Errorf("region must be set"))
+	} else if !cf.SkipValidation {
+		if err := cf.validateRegion(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {return errs}
+	return nil
+}
+
+func (cf *TencentCloudAccessConfig) Config() error {
+	if cf.SecretId == "" {
+		cf.SecretId = os.Getenv("TENCETCLOUD_SECRET_ID")
+	}
+	if cf.SecretKey == "" {
+		cf.SecretKey = os.Getenv("TENCENTCLOUD_SECRET_KEY")
+	}
+	if cf.SecretId == "" || cf.SecretKey == "" {
+		return fmt.Errorf("TENCETCLOUD_SECRET_ID and TENCENTCLOUD_SECRET_KEY must be set")
+	}
+	return nil
+}
+
+func (cf *TencentCloudAccessConfig) validateRegion() error {
+	for _, valid := range ValidRegions {
+		if valid == Region(cf.Region) {
+			return nil
+		}
+	}
+	return fmt.Errorf("unknown region: %s", cf.Region)
+}

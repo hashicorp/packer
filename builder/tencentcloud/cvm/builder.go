@@ -1,0 +1,153 @@
+package cvm
+
+import (
+	"log"
+	"fmt"
+	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/helper/communicator"
+	//cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+)
+
+const BuilderId = "tencent.cloud"
+
+type Config struct {
+	common.PackerConfig 		`mapstructure:",squash"`
+	TencentCloudAccessConfig 	`mapstructure:",squash"`
+	TencentCloudImageConfig		`mapstructure:",squash"`
+	TencentCloudRunConfig		`mapstructure:",squash"`
+
+	ctx interpolate.Context
+}
+
+type Builder struct {
+	config Config
+	runner multistep.Runner
+}
+
+func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+	err := config.Decode(&b.config, &config.DecodeOpts{
+		Interpolate:        true,
+		InterpolateContext: &b.config.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"run_command",
+			},
+		},
+	}, raws...)
+	b.config.ctx.EnableEnv = true
+	if err != nil {
+		return nil, err
+	}
+
+	// Accumulate any errors
+	var errs *packer.MultiError
+	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudAccessConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudImageConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.TencentCloudRunConfig.Prepare(&b.config.ctx)...)
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, errs
+	}
+
+	packer.LogSecretFilter.Set(b.config.SecretId, b.config.SecretKey)
+	log.Println(b.config)
+	return nil, nil
+}
+
+func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+	cvmClient, vpcClient, err := b.config.Client()
+	if err != nil {
+		return nil, err
+	}
+	state := new(multistep.BasicStateBag)
+	state.Put("config", &b.config)
+	state.Put("cvm_client", cvmClient)
+	state.Put("vpc_client", vpcClient)
+	state.Put("hook", hook)
+	state.Put("ui", ui)
+	var steps []multistep.Step
+
+	// Build the steps
+	steps = []multistep.Step{
+		&stepCheckSourceImage{b.config.SourceImageId},
+		&stepConfigKeyPair{
+			Debug: b.config.PackerDebug,
+			Comm: &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("cvm_%s.pem", b.config.PackerBuildName),
+		},
+		&stepConfigVPC{
+			VpcId: b.config.VpcId,
+			CidrBlock: b.config.CidrBlock,
+			VpcName: b.config.VpcName,
+		},
+		&stepConfigSubnet{
+			SubnetId: b.config.SubnetId,
+			SubnetCidrBlock: b.config.SubnectCidrBlock,
+			SubnetName: b.config.SubnetName,
+		},
+		&stepConfigSecurityGroup{
+			SecurityGroupId: b.config.SecurityGroupId,
+			SecurityGroupName: b.config.SecurityGroupName,
+			Description: "a simple security group",
+		},
+		&stepRunInstance{
+			InstanceType: b.config.InstanceType,
+			UserData: b.config.UserData,
+			UserDataFile: b.config.UserDataFile,
+			ZoneId: b.config.Zone,
+			InstanceName: b.config.InstanceName,
+			DiskType: b.config.DiskType,
+			DiskSize: b.config.DiskSize,
+			SSHKeyId: b.config.Comm.SSHKeyPairName,
+			HostName: b.config.HostName,
+			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
+			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
+		},
+		&communicator.StepConnect{
+			Config: &b.config.TencentCloudRunConfig.Comm,
+			SSHConfig: b.config.TencentCloudRunConfig.Comm.SSHConfigFunc(),
+			Host: SSHHost(b.config.AssociatePublicIpAddress),
+		},
+		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.TencentCloudRunConfig.Comm},
+		&stepCreateImage{},
+		&stepShareImage{b.config.ImageShareAccounts},
+		&stepCopyImage{
+			DesinationRegions: b.config.ImageCopyRegions,
+			SourceRegion: b.config.Region,
+		},
+	}
+
+	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner.Run(state)
+
+	if rawErr, ok := state.GetOk("error"); ok {
+		return nil, rawErr.(error)
+	}
+
+	if _, ok := state.GetOk("image"); !ok {
+		return nil, nil
+	}
+
+	artifact := &Artifact{
+		TencentCloudImages: state.Get("tencentcloudimages").(map[string]string),
+		BuilderIdValue: BuilderId,
+		Client: cvmClient,
+	}
+	return artifact, nil
+}
+
+func (b *Builder) Cancel() {
+	if b.runner != nil {
+		log.Println("Cancelling the step runner...")
+		b.runner.Cancel()
+	}
+}
+
+
+
