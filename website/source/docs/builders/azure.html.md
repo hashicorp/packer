@@ -33,15 +33,15 @@ builder.
 
 -   `image_publisher` (string) PublisherName for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
-    CLI example `azure vm image list-publishers -l westus`
+    CLI example `az vm image list-publishers --location westus`
 
 -   `image_offer` (string) Offer for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
-    CLI example `azure vm image list-offers -l westus -p Canonical`
+    CLI example `az vm image list-offers --location westus --publisher Canonical`
 
 -   `image_sku` (string) SKU for your base image. See [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/) for details.
 
-    CLI example `azure vm image list-skus -l westus -p Canonical -o UbuntuServer`
+    CLI example `az vm image list-skus --location westus --publisher Canonical --offer UbuntuServer`
 
 #### VHD or Managed Image
 
@@ -87,7 +87,7 @@ To have packer create a resource group you **must** provide:
 
 -   `location` (string) Azure datacenter in which your VM will build.
 
-    CLI example `azure location list`
+    CLI example `az account list-locations`
 
 and optionally:
 
@@ -131,7 +131,7 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     difference in versions available across regions due to image synchronization latency. To ensure a consistent
     version across regions set this value to one that is available in all regions where you are deploying.
 
-    CLI example `azure vm image list -l westus -p Canonical -o UbuntuServer -k 16.04.0-LTS`
+    CLI example `az vm image list --location westus --publisher Canonical --offer UbuntuServer --sku 16.04.0-LTS --all`
 
 -   `image_url` (string) Specify a custom VHD to use. If this value is set, do not set image\_publisher, image\_offer,
     image\_sku, or image\_version.
@@ -213,7 +213,7 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     when you deploy a VM from your VHD. See
     [pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/) information. Defaults to `Standard_A1`.
 
-    CLI example `azure vm sizes -l westus`
+    CLI example `az vm list-sizes --location westus`
 
 -   `async_resourcegroup_delete` (boolean) If you want packer to delete the temporary resource group asynchronously set this value. It's a boolean value
      and defaults to false. **Important** Setting this true means that your builds are faster, however any failed deletes are not reported.
