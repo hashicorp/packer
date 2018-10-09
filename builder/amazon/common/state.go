@@ -217,6 +217,12 @@ func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeIm
 				Argument: "ImportImageTasks[].Status",
 				Expected: "completed",
 			},
+			{
+				State:    request.FailureWaiterState,
+				Matcher:  request.PathAnyWaiterMatch,
+				Argument: "ImportImageTasks[].Status",
+				Expected: "deleted",
+			},
 		},
 		Logger: c.Config.Logger,
 		NewRequest: func(opts []request.Option) (*request.Request, error) {
