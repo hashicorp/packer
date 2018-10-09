@@ -1297,15 +1297,16 @@ func TestConfigShouldAllowAsyncResourceGroupOverrideBadValue(t *testing.T) {
 }
 func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 	config := map[string]interface{}{
-		"location":                      "ignore",
-		"subscription_id":               "ignore",
-		"os_type":                       "linux",
-		"shared_gallery_subscription":   "ignore",
-		"shared_gallery_resource_group": "ignore",
-		"shared_gallery_resource_group": "ignore",
-		"shared_gallery_name":           "ignore",
-		"shared_gallery_image_name":     "ignore",
-		"shared_gallery_image_version":  "ignore",
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         "linux",
+		"shared_image_gallery": {
+			"subscription":   "ignore",
+			"resource_group": "ignore",
+			"gallery_name":   "ignore",
+			"image_name":     "ignore",
+			"image_version":  "ignore",
+		},
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
@@ -1317,19 +1318,20 @@ func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 
 func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 	config := map[string]interface{}{
-		"location":                      "ignore",
-		"subscription_id":               "ignore",
-		"os_type":                       "linux",
-		"shared_gallery_subscription":   "ignore",
-		"shared_gallery_resource_group": "ignore",
-		"shared_gallery_resource_group": "ignore",
-		"shared_gallery_name":           "ignore",
-		"shared_gallery_image_name":     "ignore",
-		"shared_gallery_image_version":  "ignore",
-		"resource_group_name":           "ignore",
-		"storage_account":               "ignore",
-		"capture_container_name":        "ignore",
-		"capture_name_prefix":           "ignore",
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         "linux",
+		"shared_image_gallery": {
+			"subscription":   "ignore",
+			"resource_group": "ignore",
+			"gallery_name":   "ignore",
+			"image_name":     "ignore",
+			"image_version":  "ignore",
+		},
+		"resource_group_name":    "ignore",
+		"storage_account":        "ignore",
+		"capture_container_name": "ignore",
+		"capture_name_prefix":    "ignore",
 	}
 
 	c, _, err := newConfig(config, getPackerConfiguration())
