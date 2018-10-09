@@ -19,7 +19,6 @@ type stepRunInstance struct {
 	InstanceName 		string
 	DiskType 			string
 	DiskSize 			int64
-	SSHKeyId 			string
 	HostName 			string
 	InternetMaxBandwidthOut 	int64
 	AssociatePublicIpAddress 	bool
@@ -28,7 +27,7 @@ type stepRunInstance struct {
 
 
 func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*cvm.Client)
+	client := state.Get("cvm_client").(*cvm.Client)
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 	source_image := state.Get("source_image").(*cvm.Image)
@@ -80,8 +79,8 @@ func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multi
 	if password != "" {
 		loginSettings.Password = &password
 	}
-	if s.SSHKeyId != "" {
-		loginSettings.KeyIds = []*string{&s.SSHKeyId}
+	if config.Comm.SSHKeyPairName != "" {
+		loginSettings.KeyIds = []*string{&config.Comm.SSHKeyPairName}
 	}
 	req.LoginSettings = &loginSettings
 	req.SecurityGroupIds = []*string{&security_group_id}
@@ -143,7 +142,7 @@ func (s *stepRunInstance) Cleanup(state multistep.StateBag) {
 		return
 	}
 	MessageClean(state, "instance")
-	client := state.Get("client").(*cvm.Client)
+	client := state.Get("cvm_client").(*cvm.Client)
 	ui := state.Get("ui").(packer.Ui)
 	req := cvm.NewTerminateInstancesRequest()
 	req.InstanceIds = []*string{&s.instanceId}

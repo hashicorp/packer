@@ -23,6 +23,7 @@ type TencentCloudRunConfig struct {
 	SubnetName 					string 	`mapstructure:"subnet_name"`
 	CidrBlock 					string  `mapstructure:"cidr_block"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
 	SubnectCidrBlock			string	`mapstructure:"subnect_cidr_block"`
+	InternetChargeType 			string  `mapstructure:"internet_charge_type"`
 	InternetMaxBandwidthOut 	int64	`mapstructure:"internet_max_bandwidth_out"`
 	SecurityGroupId 			string 	`mapstructure:"security_group_id"`
 	SecurityGroupName			string  `mapstructure:"security_group_name"`
@@ -42,8 +43,8 @@ var ValidCBSType = []string{
 func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	if cf.Comm.SSHKeyPairName == "" && cf.Comm.SSHTemporaryKeyPairName == "" &&
 		cf.Comm.SSHPrivateKeyFile == "" && cf.Comm.SSHPassword == "" && cf.Comm.WinRMPassword == "" {
-
-		cf.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		//tencentcloud support key pair name length max to 25
+		cf.Comm.SSHTemporaryKeyPairName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID()[:8])
 	}
 
 	errs := cf.Comm.Prepare(ctx)
@@ -111,7 +112,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.InstanceName == "" {
-		cf.InstanceName = fmt.Sprintf("packer_%s", uuid.TimeOrderedUUID())
+		cf.InstanceName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
 	if cf.HostName == "" {

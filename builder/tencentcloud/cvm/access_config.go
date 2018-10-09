@@ -4,6 +4,8 @@ import (
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	"fmt"
 	"os"
 )
@@ -57,14 +59,16 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 	if err = cf.validateRegion(); err != nil {
 		return nil, nil, err
 	}
-	if cvm_client, err = cvm.NewClientWithSecretId(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
+	credential := common.NewCredential(
+		cf.SecretId, cf.SecretKey)
+	cpf := profile.NewClientProfile()
+	if cvm_client, err = cvm.NewClient(credential, cf.Region, cpf); err != nil {
 		return nil, nil, err
 	}
-	if vpc_client, err = vpc.NewClientWithSecretId(cf.SecretId, cf.SecretKey, cf.Region); err != nil {
+	if vpc_client, err = vpc.NewClient(credential, cf.Region, cpf); err != nil {
 		return nil, nil, err
 	}
-	req := cvm.NewDescribeZonesRequest()
-	if resp, err = cvm_client.DescribeZones(req); err != nil {
+	if resp, err = cvm_client.DescribeZones(nil); err != nil {
 		return nil, nil,  err
 	}
 	if cf.Zone != "" {
@@ -74,6 +78,8 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 			}
 		}
 		return nil, nil, fmt.Errorf("unknown zone: %s", cf.Zone)
+	} else {
+		return nil, nil, fmt.Errorf("zone must be set")
 	}
 	return cvm_client, vpc_client, nil
 }

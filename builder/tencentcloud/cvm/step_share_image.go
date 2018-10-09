@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/packer/helper/multistep"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"packer/packer"
+	"github.com/hashicorp/packer/packer"
 	"fmt"
 )
 

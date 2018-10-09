@@ -108,7 +108,8 @@ func (s *stepConfigKeyPair) Cleanup(state multistep.StateBag) {
 	req.KeyIds = []*string{&s.keyID}
 	_, err := client.DeleteKeyPairs(req)
 	if err != nil {
-		ui.Error(fmt.Sprintf("delete keypair failed, please delete it manually, keyId: %s", s.keyID))
+		ui.Error(fmt.Sprintf(
+			"delete keypair failed, please delete it manually, keyId: %s, err: %s", s.keyID, err.Error()))
 	}
 	if s.Debug {
 		if err := os.Remove(s.DebugKeyPath); err != nil {

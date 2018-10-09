@@ -102,7 +102,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceName: b.config.InstanceName,
 			DiskType: b.config.DiskType,
 			DiskSize: b.config.DiskSize,
-			SSHKeyId: b.config.Comm.SSHKeyPairName,
 			HostName: b.config.HostName,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
