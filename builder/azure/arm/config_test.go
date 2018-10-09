@@ -1300,7 +1300,7 @@ func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 		"location":        "ignore",
 		"subscription_id": "ignore",
 		"os_type":         "linux",
-		"shared_image_gallery": {
+		"shared_image_gallery": map[string]string{
 			"subscription":   "ignore",
 			"resource_group": "ignore",
 			"gallery_name":   "ignore",
@@ -1321,7 +1321,7 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 		"location":        "ignore",
 		"subscription_id": "ignore",
 		"os_type":         "linux",
-		"shared_image_gallery": {
+		"shared_image_gallery": map[string]string{
 			"subscription":   "ignore",
 			"resource_group": "ignore",
 			"gallery_name":   "ignore",
