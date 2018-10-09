@@ -76,6 +76,7 @@ import (
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	windowsrestartprovisioner "github.com/hashicorp/packer/provisioner/windows-restart"
 	windowsshellprovisioner "github.com/hashicorp/packer/provisioner/windows-shell"
+	tencentcloudbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 )
 
 type PluginCommand struct {
@@ -110,6 +111,7 @@ var Builders = map[string]packer.Builder{
 	"profitbricks":        new(profitbricksbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"scaleway":            new(scalewaybuilder.Builder),
+	"tencentcloud-cvm":	   new(tencentcloudbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
 	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),

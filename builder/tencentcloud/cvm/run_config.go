@@ -15,7 +15,6 @@ type TencentCloudRunConfig struct {
 	InstanceType 				string 	`mapstructure:"instance_type"`
 	InstanceName 				string 	`mapstructure:"instance_name"`
 	DiskType 					string  `mapstructure:"disk_type"`
-	DiskId 						string  `mapstructure:"disk_id"`
 	DiskSize					int64 	`mapstructure:"disk_size"`
 	VpcId 						string  `mapstructure:"vpc_id"`
 	VpcName 					string  `mapstructure:"vpc_name"`
@@ -24,8 +23,7 @@ type TencentCloudRunConfig struct {
 	SubnetName 					string 	`mapstructure:"subnet_name"`
 	CidrBlock 					string  `mapstructure:"cidr_block"` // 10.0.0.0/16(default), 172.16.0.0/12, 192.168.0.0/16
 	SubnectCidrBlock			string	`mapstructure:"subnect_cidr_block"`
-	InternetChargeType 			string  `mapstructure:"internet_charge_type"`
-	InternetMaxBandwidthOut 	int64		`mapstructure:"internet_max_bandwidth_out"`
+	InternetMaxBandwidthOut 	int64	`mapstructure:"internet_max_bandwidth_out"`
 	SecurityGroupId 			string 	`mapstructure:"security_group_id"`
 	SecurityGroupName			string  `mapstructure:"security_group_name"`
 	UserData 					string  `mapstructure:"user_data"`
