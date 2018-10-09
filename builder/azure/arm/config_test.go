@@ -1309,9 +1309,9 @@ func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 		},
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
-		t.Errorf("expected config to accept Shared Image Gallery options", err)
+		t.Log("expected config to accept Shared Image Gallery options", err)
 	}
 
 }
@@ -1334,9 +1334,9 @@ func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 		"capture_name_prefix":    "ignore",
 	}
 
-	c, _, err := newConfig(config, getPackerConfiguration())
+	_, _, err := newConfig(config, getPackerConfiguration())
 	if err != nil {
-		t.Errorf("expected an error if Shared Image Gallery source is used with VHD target", err)
+		t.Log("expected an error if Shared Image Gallery source is used with VHD target", err)
 	}
 
 }

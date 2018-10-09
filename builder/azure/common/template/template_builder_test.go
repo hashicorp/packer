@@ -183,8 +183,13 @@ func TestBuildWindows02(t *testing.T) {
 }
 
 // Shared Image Gallery Build
-func TestSharedIageGallery00(t *testing.T) {
+func TestSharedImageGallery00(t *testing.T) {
 	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,25 +200,16 @@ func TestSharedIageGallery00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	doc, err := testSubject.ToJSON()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if doc.variables.apiVersion != "2018-04-01" {
+	if (*testSubject.template.Variables)["apiVersion"] != "2018-04-01" {
 		t.Fatal("ARM template for Shared Image Gallery must use apiVersion 2018-04-01")
 	}
 
 	foundImageID := false
-	for i := range doc.resources {
-		if doc.resources[i]["type"] == "Microsoft.Compute/virtualMachines" {
-			storageProfile := doc.resources[i].properties.storageProfile
-			if storageProfile.ImageReference != imageID {
+	resources := (*testSubject.template.Resources)
+	for i := range resources {
+		if (*resources[i].Type) == "Microsoft.Compute/virtualMachines" {
+			storageProfile := resources[i].Properties.StorageProfile
+			if (*storageProfile.ImageReference.ID) != imageID {
 				t.Fatal("ARM template for Shared Image Gallery must have a valid imageID in its storageProfile")
 			}
 			foundImageID = true
