@@ -181,3 +181,46 @@ func TestBuildWindows02(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Shared Image Gallery Build
+func TestSharedIageGallery00(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	imageID := "/subscriptions/ignore/resourceGroups/ignore/providers/Microsoft.Compute/galleries/ignore/images/ignore"
+	err = testSubject.SetSharedGalleryImage("westcentralus", imageID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if doc.variables.apiVersion != "2018-04-01" {
+		t.Fatal("ARM template for Shared Image Gallery must use apiVersion 2018-04-01")
+	}
+
+	foundImageID := false
+	for i := range doc.resources {
+		if doc.resources[i]["type"] == "Microsoft.Compute/virtualMachines" {
+			storageProfile := doc.resources[i].properties.storageProfile
+			if storageProfile.ImageReference != imageID {
+				t.Fatal("ARM template for Shared Image Gallery must have a valid imageID in its storageProfile")
+			}
+			foundImageID = true
+		}
+	}
+
+	if !foundImageID {
+		t.Fatal("ARM template for Shared Image Gallery must have a valid imageID in its storageProfile")
+	}
+}
