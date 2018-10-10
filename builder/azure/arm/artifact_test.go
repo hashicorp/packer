@@ -10,7 +10,7 @@ func getFakeSasUrl(name string) string {
 	return fmt.Sprintf("SAS-%s", name)
 }
 
-func TestArtifactId(t *testing.T) {
+func TestArtifactIdVHD(t *testing.T) {
 	template := CaptureTemplate{
 		Resources: []CaptureResources{
 			{
@@ -34,6 +34,20 @@ func TestArtifactId(t *testing.T) {
 	}
 
 	expected := "https://storage.blob.core.windows.net/system/Microsoft.Compute/Images/images/packer-osDisk.4085bb15-3644-4641-b9cd-f575918640b4.vhd"
+
+	result := artifact.Id()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImage(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := "fakeID"
 
 	result := artifact.Id()
 	if result != expected {
