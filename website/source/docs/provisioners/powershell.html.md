@@ -105,10 +105,15 @@ Optional parameters:
     manually configured by setting the values for `remote_path` and
     `remote_env_var_path` respectively.
 
+    If you use the SSH communicator and have changed your default shell, you
+    may need to modify your `execute_command` to make sure that the command is
+    valid and properly escaped; the default assumes that you have not changed
+    the default shell away from cmd.
+
 -   `elevated_user` and `elevated_password` (string) - If specified, the
     PowerShell script will be run with elevated privileges using the given
     Windows user. If you are running a build on AWS, Azure or Google Compute and would like to run using
-    the generated password that Packer uses to connect to the instance via 
+    the generated password that Packer uses to connect to the instance via
     WinRM, you may do so by using the template variable {{.WinRMPassword}}.
     For example:
 
