@@ -186,6 +186,19 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
        1. PlanPublisher
        1. PlanPromotionCode
 
+-   `shared_image_gallery` (object) Use a [Shared Gallery image](https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-shared-image-gallery/) as the source for this build. *VHD targets are incompatible with this build type* - the target must be a *Managed Image*.
+```
+"shared_image_gallery": {
+    "subscription": "00000000-0000-0000-0000-00000000000",
+    "resource_group": "ResourceGroup",
+    "gallery_name": "GalleryName",
+    "image_name": "ImageName",
+    "image_version": "1.0.0"
+}
+"managed_image_name": "TargetImageName",
+"managed_image_resource_group_name": "TargetResourceGroup"
+```
+
 -   `temp_compute_name` (string) temporary name assigned to the VM.  If this value is not set, a random value will be
     assigned.  Knowing the resource group and VM name allows one to execute commands to update the VM during a Packer
     build, e.g. attach a resource disk to the VM.

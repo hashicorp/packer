@@ -65,6 +65,14 @@ type PlanInformation struct {
 	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
 }
 
+type SharedImageGallery struct {
+	Subscription  string `mapstructure:"subscription"`
+	ResourceGroup string `mapstructure:"resource_group"`
+	GalleryName   string `mapstructure:"gallery_name"`
+	ImageName     string `mapstructure:"image_name"`
+	ImageVersion  string `mapstructure:"image_version"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -78,6 +86,9 @@ type Config struct {
 	// Capture
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
+
+	// Shared Gallery
+	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery"`
 
 	// Compute
 	ImagePublisher string `mapstructure:"image_publisher"`
@@ -572,19 +583,36 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	isImageUrl := c.ImageUrl != ""
 	isCustomManagedImage := c.CustomManagedImageName != "" || c.CustomManagedImageResourceGroupName != ""
+	isSharedGallery := c.SharedGallery.GalleryName != ""
 	isPlatformImage := c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != ""
 
-	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage)
+	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage) + toInt(isSharedGallery)
 
 	if countSourceInputs > 1 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku), a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name), or a Shared Gallery Image (shared_image_gallery)"))
 	}
 
 	if isImageUrl && c.ManagedImageResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
 	}
 
-	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
+	if c.SharedGallery.GalleryName != "" {
+		if c.SharedGallery.Subscription == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.subscription must be specified"))
+		}
+		if c.SharedGallery.ResourceGroup == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.resource_group must be specified"))
+		}
+		if c.SharedGallery.ImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.image_name must be specified"))
+		}
+		if c.CaptureContainerName != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_container_name] is not supported when using Shared Image Gallery as source. Use managed_image_resource_group_name instead."))
+		}
+		if c.CaptureNamePrefix != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_name_prefix] is not supported when using Shared Image Gallery as source. Use managed_image_name instead."))
+		}
+	} else if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
