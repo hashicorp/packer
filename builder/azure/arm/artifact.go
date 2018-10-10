@@ -133,7 +133,10 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.OSDiskUri
+	if a.OSDiskUri != "" {
+		return a.OSDiskUri
+	}
+	return a.ManagedImageId
 }
 
 func (a *Artifact) State(name string) interface{} {
