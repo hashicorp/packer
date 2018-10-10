@@ -16,7 +16,7 @@ The `googlecompute` Packer builder is able to create
 Compute Engine](https://cloud.google.com/products/compute-engine) (GCE) based on
 existing images.
 
-Building images from scratch is possible, but not with the `googlecompute` Packer builder.
+It is possible to build images from scratch, but not with the `googlecompute` Packer builder.
 The process is recommended only for advanced users, please see [Building GCE Images from Scratch]
 (https://cloud.google.com/compute/docs/tutorials/building-images)
 and the [Google Compute Import Post-Processor](/docs/post-processors/googlecompute-import.html)
@@ -72,16 +72,16 @@ straightforwarded, it is documented here.
 
 3.  Click the "Create credentials" button, select "Service account key"
 
-4.  Create new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
+4.  Create a new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
 
-5.  Choose `JSON` as Key type and click "Create".
+5.  Choose `JSON` as the Key type and click "Create".
     A JSON file will be downloaded automatically. This is your *account file*.
 
 ### Precedence of Authentication Methods
 
 Packer looks for credentials in the following places, preferring the first location found:
 
-1.  A `account_file` option in your packer file.
+1.  An `account_file` option in your packer file.
 
 2.  A JSON file (Service Account) whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
@@ -101,10 +101,10 @@ Packer looks for credentials in the following places, preferring the first locat
 
 ### Basic Example
 
-Below is a fully functioning example. It doesn't do anything useful, since no
+Below is a fully functioning example. It doesn't do anything useful since no
 provisioners or startup-script metadata are defined, but it will effectively
 repackage an existing GCE image. The account\_file is obtained in the previous
-section. If it parses as JSON it is assumed to be the file itself, otherwise it
+section. If it parses as JSON it is assumed to be the file itself, otherwise, it
 is assumed to be the path to the file containing the JSON.
 
 ``` json
@@ -212,7 +212,7 @@ builder.
 
 -   `account_file` (string) - The JSON file containing your account credentials.
     Not required if you run Packer on a GCE instance with a service account.
-    Instructions for creating file or using service accounts are above.
+    Instructions for creating the file or using service accounts are above.
 
 -   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
 
@@ -261,7 +261,7 @@ builder.
     instance.
 
 -   `min_cpu_platform` (string) - A Minimum CPU Platform for VM Instance.
-    The avalability and default CPU platforms varies across zones, based on 
+    The availability and default CPU platforms varies across zones, based on 
     the hardware available in each GCP zone. [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
 
 -   `network` (string) - The Google Compute network id or URL to use for the
@@ -286,7 +286,7 @@ builder.
 -   `preemptible` (boolean) - If true, launch a preemptible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
-    to the region hosting the specified `zone`.
+    the region hosting the specified `zone`.
 
 -   `service_account_email` (string) - The service account to be used for launched instance. Defaults to
     the project's default service account unless `disable_default_service_account` is true.
