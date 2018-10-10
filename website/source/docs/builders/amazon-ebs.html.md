@@ -66,6 +66,8 @@ builder.
     created machine. `source_ami_filter` may be used instead to populate this
     automatically.
 
+-   `ssh_username` (string) - The username to connect to SSH with. Required if using SSH.
+
 ### Optional:
 
 -   `ami_block_device_mappings` (array of block device mappings) - Add one or
