@@ -76,9 +76,9 @@ var diskDiscard = map[string]bool{
 }
 
 var diskDZeroes = map[string]bool{
-	"unmap":  true,
-	"on": true,
-	"off": true,
+	"unmap": true,
+	"on":    true,
+	"off":   true,
 }
 
 type Builder struct {
