@@ -77,11 +77,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	// Authentication via OAUTH
-	ClientID       string `mapstructure:"client_id"`
-	ClientSecret   string `mapstructure:"client_secret"`
-	ObjectID       string `mapstructure:"object_id"`
-	TenantID       string `mapstructure:"tenant_id"`
-	SubscriptionID string `mapstructure:"subscription_id"`
+	ClientConfig `mapstructure:",squash"`
 
 	// Capture
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
@@ -150,8 +146,6 @@ type Config struct {
 	tmpSubnetName          string
 	tmpVirtualNetworkName  string
 	tmpWinRMCertificateUrl string
-
-	useDeviceLogin bool
 
 	// Authentication with the VM via SSH
 	sshAuthorizedKey string
@@ -492,40 +486,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 }
 
 func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
-	/////////////////////////////////////////////
-	// Authentication via OAUTH
-
-	// Check if device login is being asked for, and is allowed.
-	//
-	// Device login is enabled if the user only defines SubscriptionID and not
-	// ClientID, ClientSecret, and TenantID.
-	//
-	// Device login is not enabled for Windows because the WinRM certificate is
-	// readable by the ObjectID of the App.  There may be another way to handle
-	// this case, but I am not currently aware of it - send feedback.
-	isUseDeviceLogin := func(c *Config) bool {
-
-		return c.SubscriptionID != "" &&
-			c.ClientID == "" &&
-			c.ClientSecret == "" &&
-			c.TenantID == ""
-	}
-
-	if isUseDeviceLogin(c) {
-		c.useDeviceLogin = true
-	} else {
-		if c.ClientID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id must be specified"))
-		}
-
-		if c.ClientSecret == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_secret must be specified"))
-		}
-
-		if c.SubscriptionID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
-		}
-	}
+	c.ClientConfig.assertRequiredParametersSet(errs)
 
 	/////////////////////////////////////////////
 	// Capture
