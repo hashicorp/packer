@@ -200,23 +200,13 @@ func TestSharedImageGallery00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if (*testSubject.template.Variables)["apiVersion"] != "2018-04-01" {
-		t.Fatal("ARM template for Shared Image Gallery must use apiVersion 2018-04-01")
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	foundImageID := false
-	resources := (*testSubject.template.Resources)
-	for i := range resources {
-		if (*resources[i].Type) == "Microsoft.Compute/virtualMachines" {
-			storageProfile := resources[i].Properties.StorageProfile
-			if (*storageProfile.ImageReference.ID) != imageID {
-				t.Fatal("ARM template for Shared Image Gallery must have a valid imageID in its storageProfile")
-			}
-			foundImageID = true
-		}
-	}
-
-	if !foundImageID {
-		t.Fatal("ARM template for Shared Image Gallery must have a valid imageID in its storageProfile")
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
 	}
 }
