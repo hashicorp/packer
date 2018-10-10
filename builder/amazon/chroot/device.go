@@ -42,7 +42,7 @@ func AvailableDevice() (string, error) {
 // devicePrefix returns the prefix ("sd" or "xvd" or so on) of the devices
 // on the system.
 func devicePrefix() (string, error) {
-	available := []string{"sd", "xvd"}
+	available := []string{"nvme", "sd", "xvd"}
 
 	f, err := os.Open("/sys/block")
 	if err != nil {
