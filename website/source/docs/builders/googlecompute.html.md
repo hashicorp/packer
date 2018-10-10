@@ -305,7 +305,7 @@ builder.
 -   `source_image_project_id` (string) - The project ID of the
     project containing the source image.
 
--   `startup_script_file` (string) - The filepath to a startup script to run on
+-   `startup_script_file` (string) - The path to a startup script to run on
     the VM from which the image will be made.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
