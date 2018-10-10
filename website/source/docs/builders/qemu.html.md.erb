@@ -150,6 +150,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 -   `disk_discard` (string) - The discard mode to use for disk. Allowed values
     include any of `unmap` or `ignore`. By default, this is set to `ignore`.
 
+-   `disk_detect_zeroes` (string) - The detect-zeroes mode to use for disk. 
+    Allowed values include any of `unmap`, `on` or `off`. Defaults to `off`.
+
 -   `disk_image` (boolean) - Packer defaults to building from an ISO file, this
     parameter controls whether the ISO URL supplied is actually a bootable
     QEMU image. When this value is set to `true`, the machine will either clone
