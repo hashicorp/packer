@@ -261,7 +261,7 @@ builder.
     instance.
 
 -   `min_cpu_platform` (string) - A Minimum CPU Platform for VM Instance.
-    The availability and default CPU platforms varies across zones, based on 
+    Availability and default CPU platforms vary across zones, based on 
     the hardware available in each GCP zone. [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
 
 -   `network` (string) - The Google Compute network id or URL to use for the
