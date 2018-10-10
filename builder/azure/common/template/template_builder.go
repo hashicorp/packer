@@ -145,6 +145,21 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 	return nil
 }
 
+func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	s.setVariable("apiVersion", "2018-04-01") // Required for Shared Image Gallery
+	profile := resource.Properties.StorageProfile
+	profile.ImageReference = &compute.ImageReference{ID: &imageID}
+	profile.OsDisk.OsType = s.osType
+	profile.OsDisk.Vhd = nil
+
+	return nil
+}
+
 func (s *TemplateBuilder) SetMarketPlaceImage(publisher, offer, sku, version string) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
