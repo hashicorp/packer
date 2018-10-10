@@ -181,3 +181,32 @@ func TestBuildWindows02(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// Shared Image Gallery Build
+func TestSharedImageGallery00(t *testing.T) {
+	testSubject, err := NewTemplateBuilder(BasicTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = testSubject.BuildLinux("--test-ssh-authorized-key--")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	imageID := "/subscriptions/ignore/resourceGroups/ignore/providers/Microsoft.Compute/galleries/ignore/images/ignore"
+	err = testSubject.SetSharedGalleryImage("westcentralus", imageID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := testSubject.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = approvaltests.VerifyJSONBytes(t, []byte(*doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
