@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
-	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/masterzen/winrm"
 
@@ -32,7 +31,6 @@ import (
 )
 
 const (
-	DefaultCloudEnvironmentName              = "Public"
 	DefaultImageVersion                      = "latest"
 	DefaultUserName                          = "packer"
 	DefaultPrivateVirtualNetworkWithPublicIp = false
@@ -114,8 +112,6 @@ type Config struct {
 	TempResourceGroupName             string             `mapstructure:"temp_resource_group_name"`
 	BuildResourceGroupName            string             `mapstructure:"build_resource_group_name"`
 	storageAccountBlobEndpoint        string
-	CloudEnvironmentName              string `mapstructure:"cloud_environment_name"`
-	cloudEnvironment                  *azure.Environment
 	PrivateVirtualNetworkWithPublicIp bool   `mapstructure:"private_virtual_network_with_public_ip"`
 	VirtualNetworkName                string `mapstructure:"virtual_network_name"`
 	VirtualNetworkSubnetName          string `mapstructure:"virtual_network_subnet_name"`
@@ -275,7 +271,7 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	provideDefaultValues(&c)
 	setRuntimeValues(&c)
 	setUserNamePassword(&c)
-	err = setCloudEnvironment(&c)
+	err = c.ClientConfig.setCloudEnvironment()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -404,40 +400,6 @@ func setUserNamePassword(c *Config) {
 	}
 }
 
-func setCloudEnvironment(c *Config) error {
-	lookup := map[string]string{
-		"CHINA":           "AzureChinaCloud",
-		"CHINACLOUD":      "AzureChinaCloud",
-		"AZURECHINACLOUD": "AzureChinaCloud",
-
-		"GERMAN":           "AzureGermanCloud",
-		"GERMANCLOUD":      "AzureGermanCloud",
-		"AZUREGERMANCLOUD": "AzureGermanCloud",
-
-		"GERMANY":           "AzureGermanCloud",
-		"GERMANYCLOUD":      "AzureGermanCloud",
-		"AZUREGERMANYCLOUD": "AzureGermanCloud",
-
-		"PUBLIC":           "AzurePublicCloud",
-		"PUBLICCLOUD":      "AzurePublicCloud",
-		"AZUREPUBLICCLOUD": "AzurePublicCloud",
-
-		"USGOVERNMENT":           "AzureUSGovernmentCloud",
-		"USGOVERNMENTCLOUD":      "AzureUSGovernmentCloud",
-		"AZUREUSGOVERNMENTCLOUD": "AzureUSGovernmentCloud",
-	}
-
-	name := strings.ToUpper(c.CloudEnvironmentName)
-	envName, ok := lookup[name]
-	if !ok {
-		return fmt.Errorf("There is no cloud environment matching the name '%s'!", c.CloudEnvironmentName)
-	}
-
-	env, err := azure.EnvironmentFromName(envName)
-	c.cloudEnvironment = &env
-	return err
-}
-
 func setCustomData(c *Config) error {
 	if c.CustomDataFile == "" {
 		return nil
@@ -465,9 +427,7 @@ func provideDefaultValues(c *Config) {
 		c.ImageVersion = DefaultImageVersion
 	}
 
-	if c.CloudEnvironmentName == "" {
-		c.CloudEnvironmentName = DefaultCloudEnvironmentName
-	}
+	c.provideDefaultValues()
 }
 
 func assertTagProperties(c *Config, errs *packer.MultiError) {

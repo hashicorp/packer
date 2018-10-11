@@ -379,7 +379,7 @@ func (b *Builder) setImageParameters(stateBag multistep.StateBag) {
 }
 
 func (b *Builder) getServicePrincipalTokens(say func(string)) (*adal.ServicePrincipalToken, *adal.ServicePrincipalToken, error) {
-	return b.config.ClientConfig.getServicePrincipalTokens(*b.config.cloudEnvironment, say)
+	return b.config.ClientConfig.getServicePrincipalTokens(say)
 }
 
 func getObjectIdFromToken(ui packer.Ui, token *adal.ServicePrincipalToken) string {

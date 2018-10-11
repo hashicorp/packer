@@ -12,11 +12,60 @@ import (
 
 // ClientConfig allows for various ways to authenticate Azure clients
 type ClientConfig struct {
+	// Describes where API's are
+
+	CloudEnvironmentName string `mapstructure:"cloud_environment_name"`
+	cloudEnvironment     *azure.Environment
+
+	// Authentication fields
+
 	ClientID       string `mapstructure:"client_id"`
 	ClientSecret   string `mapstructure:"client_secret"`
 	ObjectID       string `mapstructure:"object_id"`
 	TenantID       string `mapstructure:"tenant_id"`
 	SubscriptionID string `mapstructure:"subscription_id"`
+}
+
+const DefaultCloudEnvironmentName = "Public"
+
+func (c *ClientConfig) provideDefaultValues() {
+	if c.CloudEnvironmentName == "" {
+		c.CloudEnvironmentName = DefaultCloudEnvironmentName
+	}
+}
+
+func (c *ClientConfig) setCloudEnvironment() error {
+	lookup := map[string]string{
+		"CHINA":           "AzureChinaCloud",
+		"CHINACLOUD":      "AzureChinaCloud",
+		"AZURECHINACLOUD": "AzureChinaCloud",
+
+		"GERMAN":           "AzureGermanCloud",
+		"GERMANCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANCLOUD": "AzureGermanCloud",
+
+		"GERMANY":           "AzureGermanCloud",
+		"GERMANYCLOUD":      "AzureGermanCloud",
+		"AZUREGERMANYCLOUD": "AzureGermanCloud",
+
+		"PUBLIC":           "AzurePublicCloud",
+		"PUBLICCLOUD":      "AzurePublicCloud",
+		"AZUREPUBLICCLOUD": "AzurePublicCloud",
+
+		"USGOVERNMENT":           "AzureUSGovernmentCloud",
+		"USGOVERNMENTCLOUD":      "AzureUSGovernmentCloud",
+		"AZUREUSGOVERNMENTCLOUD": "AzureUSGovernmentCloud",
+	}
+
+	name := strings.ToUpper(c.CloudEnvironmentName)
+	envName, ok := lookup[name]
+	if !ok {
+		return fmt.Errorf("There is no cloud environment matching the name '%s'!", c.CloudEnvironmentName)
+	}
+
+	env, err := azure.EnvironmentFromName(envName)
+	c.cloudEnvironment = &env
+	return err
 }
 
 func (c ClientConfig) assertRequiredParametersSet(errs *packer.MultiError) {
@@ -55,7 +104,6 @@ func (c ClientConfig) useDeviceLogin() bool {
 }
 
 func (c ClientConfig) getServicePrincipalTokens(
-	cloudEnvironment azure.Environment,
 	say func(string)) (
 	servicePrincipalToken *adal.ServicePrincipalToken,
 	servicePrincipalTokenVault *adal.ServicePrincipalToken,
@@ -68,18 +116,18 @@ func (c ClientConfig) getServicePrincipalTokens(
 
 	if c.useDeviceLogin() {
 		say("Getting auth token for Service management endpoint")
-		servicePrincipalToken, err = packerAzureCommon.Authenticate(cloudEnvironment, tenantID, say, cloudEnvironment.ServiceManagementEndpoint)
+		servicePrincipalToken, err = packerAzureCommon.Authenticate(*c.cloudEnvironment, tenantID, say, c.cloudEnvironment.ServiceManagementEndpoint)
 		if err != nil {
 			return nil, nil, err
 		}
 		say("Getting token for Vault resource")
-		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(cloudEnvironment, tenantID, say, strings.TrimRight(cloudEnvironment.KeyVaultEndpoint, "/"))
+		servicePrincipalTokenVault, err = packerAzureCommon.Authenticate(*c.cloudEnvironment, tenantID, say, strings.TrimRight(c.cloudEnvironment.KeyVaultEndpoint, "/"))
 		if err != nil {
 			return nil, nil, err
 		}
 
 	} else {
-		auth := NewAuthenticate(cloudEnvironment, c.ClientID, c.ClientSecret, tenantID)
+		auth := NewAuthenticate(*c.cloudEnvironment, c.ClientID, c.ClientSecret, tenantID)
 
 		servicePrincipalToken, err = auth.getServicePrincipalToken()
 		if err != nil {
@@ -87,11 +135,10 @@ func (c ClientConfig) getServicePrincipalTokens(
 		}
 
 		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
-			strings.TrimRight(cloudEnvironment.KeyVaultEndpoint, "/"))
+			strings.TrimRight(c.cloudEnvironment.KeyVaultEndpoint, "/"))
 		if err != nil {
 			return nil, nil, err
 		}
-
 	}
 
 	err = servicePrincipalToken.EnsureFresh()

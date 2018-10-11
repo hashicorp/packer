@@ -11,10 +11,11 @@ import (
 func Test_ClientConfig_DeviceLogin(t *testing.T) {
 	getEnvOrSkip(t, "AZURE_DEVICE_LOGIN")
 	cfg := ClientConfig{
-		SubscriptionID: getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
+		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
+		cloudEnvironment: getCloud(),
 	}
 	spt, sptkv, err := cfg.getServicePrincipalTokens(
-		getCloud(), func(s string) { fmt.Printf("SAY: %s\n", s) })
+		func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
 	}
@@ -36,14 +37,14 @@ func Test_ClientConfig_DeviceLogin(t *testing.T) {
 
 func Test_ClientConfig_ClientID_Password(t *testing.T) {
 	cfg := ClientConfig{
-		SubscriptionID: getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
-		ClientID:       getEnvOrSkip(t, "AZURE_CLIENTID"),
-		ClientSecret:   getEnvOrSkip(t, "AZURE_CLIENTSECRET"),
-		TenantID:       getEnvOrSkip(t, "AZURE_TENANTID"),
+		SubscriptionID:   getEnvOrSkip(t, "AZURE_SUBSCRIPTION"),
+		ClientID:         getEnvOrSkip(t, "AZURE_CLIENTID"),
+		ClientSecret:     getEnvOrSkip(t, "AZURE_CLIENTSECRET"),
+		TenantID:         getEnvOrSkip(t, "AZURE_TENANTID"),
+		cloudEnvironment: getCloud(),
 	}
 
-	spt, sptkv, err := cfg.getServicePrincipalTokens(
-		getCloud(), func(s string) { fmt.Printf("SAY: %s\n", s) })
+	spt, sptkv, err := cfg.getServicePrincipalTokens(func(s string) { fmt.Printf("SAY: %s\n", s) })
 	if err != nil {
 		t.Fatalf("Expected nil err, but got: %v", err)
 	}
@@ -71,11 +72,11 @@ func getEnvOrSkip(t *testing.T, envVar string) string {
 	return v
 }
 
-func getCloud() azure.Environment {
+func getCloud() *azure.Environment {
 	cloudName := os.Getenv("AZURE_CLOUD")
 	if cloudName == "" {
 		cloudName = "AZUREPUBLICCLOUD"
 	}
 	c, _ := azure.EnvironmentFromName(cloudName)
-	return c
+	return &c
 }
