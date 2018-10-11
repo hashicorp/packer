@@ -23,6 +23,12 @@ var retryableSleep = 5 * time.Second
 var TryCheckReboot = `shutdown /r /f /t 60 /c "packer restart test"`
 var AbortReboot = `shutdown /a`
 
+var KeyTestCommands = []string{
+	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending"`),
+	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootInProgress"`),
+	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\Pending"`),
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
@@ -35,6 +41,9 @@ type Config struct {
 
 	// The timeout for waiting for the machine to restart
 	RestartTimeout time.Duration `mapstructure:"restart_timeout"`
+
+	// Whether to check the registry (see KeyTestCommand) for pending reboots
+	CheckKey bool `mapstructure:"check_registry"`
 
 	ctx interpolate.Context
 }
@@ -212,7 +221,6 @@ var waitForCommunicator = func(p *Provisioner) error {
 			log.Printf("Connected to machine")
 			runCustomRestartCheck = false
 		}
-
 		// This is the non-user-configurable check that powershell
 		// modules have loaded.
 
@@ -233,6 +241,33 @@ var waitForCommunicator = func(p *Provisioner) error {
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
+		}
+
+		if p.config.CheckKey {
+			log.Printf("Connected to machine")
+			shouldContinue := false
+			for _, KeyTestCommand := range KeyTestCommands {
+				cmdKeyCheck := &packer.RemoteCmd{Command: KeyTestCommand}
+				log.Printf("Checking registry for pending reboots")
+				var buf, buf2 bytes.Buffer
+				cmdKeyCheck.Stdout = &buf
+				cmdKeyCheck.Stdout = io.MultiWriter(cmdKeyCheck.Stdout, &buf2)
+
+				err := cmdKeyCheck.StartWithUi(p.comm, p.ui)
+				if err != nil {
+					log.Printf("Communication connection err: %s", err)
+					shouldContinue = true
+				}
+				stdoutToRead := buf2.String()
+				log.Printf("out is %s", stdoutToRead)
+				if strings.Contains(stdoutToRead, "True") {
+					log.Printf("RegistryKey %s exists; waiting...", KeyTestCommand)
+					shouldContinue = true
+				}
+			}
+			if shouldContinue {
+				continue
+			}
 		}
 		break
 	}
