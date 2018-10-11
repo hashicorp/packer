@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"log"
+	"time"
 )
 
 type stepRunInstance struct {
@@ -147,6 +148,9 @@ func (s *stepRunInstance) Cleanup(state multistep.StateBag) {
 	req := cvm.NewTerminateInstancesRequest()
 	req.InstanceIds = []*string{&s.instanceId}
 	_, err := client.TerminateInstances(req)
+	// The binding relation between instance and vpc would last few minutes after
+	// instance terminate, we sleep here to give more time
+	time.Sleep(2 * time.Minute)
 	if err != nil {
 		ui.Error(fmt.Sprintf("terminate instance(%s) failed: %s", s.instanceId, err.Error()))
 	}

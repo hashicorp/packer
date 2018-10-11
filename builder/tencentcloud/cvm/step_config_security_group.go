@@ -54,17 +54,12 @@ func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBa
 	state.Put("security_group_id", s.SecurityGroupId)
 	s.isCreate = true
 
-	// bind security group police
+	// bind security group ingress police
 	pReq := vpc.NewCreateSecurityGroupPoliciesRequest()
 	ACCEPT := "ACCEPT"
 	DEFAULT_CIDR := "0.0.0.0/0"
+	pReq.SecurityGroupId = &s.SecurityGroupId
 	pReq.SecurityGroupPolicySet = &vpc.SecurityGroupPolicySet{
-		Egress: []*vpc.SecurityGroupPolicy{
-			{
-				CidrBlock: &DEFAULT_CIDR,
-				Action: &ACCEPT,
-			},
-		},
 		Ingress: []*vpc.SecurityGroupPolicy{
 			{
 				CidrBlock: &DEFAULT_CIDR,
@@ -78,6 +73,26 @@ func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBa
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	// bind security group engress police
+	pReq = vpc.NewCreateSecurityGroupPoliciesRequest()
+	pReq.SecurityGroupId = &s.SecurityGroupId
+	pReq.SecurityGroupPolicySet = &vpc.SecurityGroupPolicySet{
+		Egress: []*vpc.SecurityGroupPolicy{
+			{
+				CidrBlock: &DEFAULT_CIDR,
+				Action: &ACCEPT,
+			},
+		},
+	}
+	_, err = vpcClient.CreateSecurityGroupPolicies(pReq)
+	if err != nil {
+		ui.Error(fmt.Sprintf("bind security group police failed: %s", err.Error()))
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+
 
 	return multistep.ActionContinue
 }

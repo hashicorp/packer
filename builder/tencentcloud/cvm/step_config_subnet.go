@@ -13,6 +13,7 @@ type stepConfigSubnet struct {
 	SubnetId		string
 	SubnetCidrBlock string
 	SubnetName		string
+	Zone 			string
 	isCreate		bool
 }
 
@@ -22,7 +23,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 	vpcId := state.Get("vpc_id").(string)
 
 	if len(s.SubnetId) != 0 {  // exist subnet
-		ui.Say(fmt.Sprintf("Try to use existing subnet(%s)", vpcId))
+		ui.Say(fmt.Sprintf("Try to use existing subnet(%s)", s.SubnetId))
 		req := vpc.NewDescribeSubnetsRequest()
 		req.SubnetIds = []*string{&s.SubnetId}
 		resp, err := vpcClient.DescribeSubnets(req)
@@ -54,6 +55,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 		req.VpcId = &vpcId
 		req.SubnetName = &s.SubnetName
 		req.CidrBlock = &s.SubnetCidrBlock
+		req.Zone = &s.Zone
 		resp, err := vpcClient.CreateSubnet(req)
 		if err != nil {
 			ui.Error(fmt.Sprintf("create subnet failed: %s", err.Error()))

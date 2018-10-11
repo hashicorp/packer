@@ -116,7 +116,7 @@ func (cf *TencentCloudRunConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if cf.HostName == "" {
-		cf.HostName = cf.InstanceName
+		cf.HostName = cf.InstanceName[:15]
 	}
 
 	return errs

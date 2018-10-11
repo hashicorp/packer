@@ -88,6 +88,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SubnetId: b.config.SubnetId,
 			SubnetCidrBlock: b.config.SubnectCidrBlock,
 			SubnetName: b.config.SubnetName,
+			Zone: b.config.Zone,
 		},
 		&stepConfigSecurityGroup{
 			SecurityGroupId: b.config.SecurityGroupId,
