@@ -301,14 +301,14 @@ Usage: packer build [options] TEMPLATE
 
 Options:
 
-  -color=false                  Disable color output (on by default)
-  -debug                        Debug mode enabled for builds
-  -except=foo,bar,baz           Build all builds other than these
-  -only=foo,bar,baz             Build only the specified builds
-  -force                        Force a build to continue if artifacts exist, deletes existing artifacts
-  -machine-readable             Machine-readable output
-  -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask
-  -parallel=false               Disable parallelization (on by default)
+  -color=false                  Disable color output. (Default: color)
+  -debug                        Debug mode enabled for builds.
+  -except=foo,bar,baz           Build all builds other than these.
+  -only=foo,bar,baz             Build only the specified builds.
+  -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
+  -machine-readable             Produce machine-readable output.
+  -on-error=[cleanup|abort|ask] If the build fails do: clean up (default), abort, or ask.
+  -parallel=false               Disable parallelization. (Default: parallel)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON file containing user variables.
