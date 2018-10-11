@@ -47,11 +47,11 @@ func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
 	diskPath := d.datastorePath(diskPathLocal)
-	return d.sh("vmkfstools", "--punchzero", diskPath)
+	return d.sh("vmkfstools", "--punchzero", fmt.Sprintf("\"%s\"", diskPath))
 }
 
 func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, adapter_type string, typeId string) error {
-	diskPath := fmt.Sprintf("'%s'", d.datastorePath(diskPathLocal))
+	diskPath := fmt.Sprintf("\"%s\"", d.datastorePath(diskPathLocal))
 	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", adapter_type, diskPath)
 }
 
@@ -113,7 +113,7 @@ func (d *ESX5Driver) Destroy() error {
 }
 
 func (d *ESX5Driver) IsDestroyed() (bool, error) {
-	err := d.sh("test", "!", "-e", d.outputDir)
+	err := d.sh("test", "!", "-e", fmt.Sprintf("\"%s\"", d.outputDir))
 	if err != nil {
 		return false, err
 	}
@@ -142,7 +142,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 func (d *ESX5Driver) RemoveCache(localPath string) error {
 	finalPath := d.cachePath(localPath)
 	log.Printf("Removing remote cache path %s (local %s)", finalPath, localPath)
-	return d.sh("rm", "-f", finalPath)
+	return d.sh("rm", "-f", fmt.Sprintf("\"%s\"", finalPath))
 }
 
 func (d *ESX5Driver) ToolsIsoPath(string) string {
@@ -450,7 +450,7 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 //-------------------------------------------------------------------
 
 func (d *ESX5Driver) DirExists() (bool, error) {
-	err := d.sh("test", "-e", d.outputDir)
+	err := d.sh("test", "-e", fmt.Sprintf("\"%s\"", d.outputDir))
 	return err == nil, nil
 }
 
@@ -482,11 +482,11 @@ func (d *ESX5Driver) MkdirAll() error {
 }
 
 func (d *ESX5Driver) Remove(path string) error {
-	return d.sh("rm", path)
+	return d.sh("rm", fmt.Sprintf("\"%s\"", path))
 }
 
 func (d *ESX5Driver) RemoveAll() error {
-	return d.sh("rm", "-rf", d.outputDir)
+	return d.sh("rm", "-rf", fmt.Sprintf("\"%s\"", d.outputDir))
 }
 
 func (d *ESX5Driver) SetOutputDir(path string) {
@@ -579,7 +579,7 @@ func (d *ESX5Driver) checkGuestIPHackEnabled() error {
 }
 
 func (d *ESX5Driver) mkdir(path string) error {
-	return d.sh("mkdir", "-p", path)
+	return d.sh("mkdir", "-p", fmt.Sprintf("\"%s\"", path))
 }
 
 func (d *ESX5Driver) upload(dst, src string) error {
@@ -593,7 +593,7 @@ func (d *ESX5Driver) upload(dst, src string) error {
 
 func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
 	if ctype == "none" {
-		if err := d.sh("stat", file); err != nil {
+		if err := d.sh("stat", fmt.Sprintf("\"%s\"", file)); err != nil {
 			return false
 		}
 	} else {
