@@ -51,8 +51,7 @@ func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
 }
 
 func (d *ESX5Driver) CreateDisk(diskPathLocal string, size string, adapter_type string, typeId string) error {
-	diskPath := d.datastorePath(diskPathLocal)
-	diskPath = strings.Replace(diskPath, " ", `\ `, -1)
+	diskPath := fmt.Sprintf("'%s'", d.datastorePath(diskPathLocal))
 	return d.sh("vmkfstools", "-c", size, "-d", typeId, "-a", adapter_type, diskPath)
 }
 
