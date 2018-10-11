@@ -10,26 +10,28 @@ _packer () {
   )
 
   local -a build_arguments && build_arguments=(
-    '-debug[Debug mode enabled for builds]'
-    '-force[Force a build to continue if artifacts exist, deletes existing artifacts]'
-    '-machine-readable[Machine-readable output]'
-    '-except=[(foo,bar,baz) Build all builds other than these]'
-    '-only=[(foo,bar,baz) Only build the given builds by name]'
-    '-parallel=[(false) Disable parallelization (on by default)]'
+    '-debug[Debug mode enabled for builds.]'
+    '-force[Force a build to continue if artifacts exist, deletes existing artifacts.]'
+    '-machine-readable[Produce machine-readable output.]'
+    '-color=[(false) Disable color output. (Default: color)]'
+    '-except=[(foo,bar,baz) Build all builds other than these.]'
+    '-on-error=[(cleanup,abort,ask) If the build fails do: clean up (default), abort, or ask.]'
+    '-only=[(foo,bar,baz) Only build the given builds by name.]'
+    '-parallel=[(false) Disable parallelization. (Default: parallel)]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON file containing user variables.]'
     '(-)*:files:_files -g "*.json"'
   )
-  
+
   local -a inspect_arguments && inspect_arguments=(
-    '-machine-readable[Machine-readable output]' 
+    '-machine-readable[Machine-readable output]'
     '(-)*:files:_files -g "*.json"'
   )
 
   local -a validate_arguments && validate_arguments=(
     '-syntax-only[Only check syntax. Do not verify config of the template.]'
-    '-except=[(foo,bar,baz) Validate all builds other than these]'
-    '-only=[(foo,bar,baz) Validate only these builds]'
+    '-except=[(foo,bar,baz) Validate all builds other than these].'
+    '-only=[(foo,bar,baz) Validate only these builds].'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON file containing user variables.]'
     '(-)*:files:_files -g "*.json"'
