@@ -92,7 +92,7 @@ func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
 		return err
 	}
-	r, err := d.run(nil, "vim-cmd", "solo/registervm", vmxPath)
+	r, err := d.run(nil, "vim-cmd", "solo/registervm", fmt.Sprintf("\"%s\"", vmxPath))
 	if err != nil {
 		return err
 	}
