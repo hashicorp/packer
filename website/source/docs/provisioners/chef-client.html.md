@@ -354,7 +354,7 @@ mode, while passing a `run_list` using a variable.
 
 **Local environment variables**
 
-    # Machines Chef directory
+    # Machine's Chef directory
     export PACKER_CHEF_DIR=/var/chef-packer
     # Comma separated run_list
     export PACKER_CHEF_RUN_LIST="recipe[apt],recipe[nginx]"
