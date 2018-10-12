@@ -563,6 +563,8 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
+	log.Printf("DEBUGGING 6794 (7): target dir is %s", target_dir)
+	log.Printf("DEBUGGING 6794 (8): target file is %s", target_file)
 
 	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
