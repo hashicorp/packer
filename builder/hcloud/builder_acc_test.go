@@ -28,8 +28,8 @@ const testBuilderAccBasic = `
 		"location": "nbg1",
 		"server_type": "cx11",
 		"image": "ubuntu-18.04",
-		"user_date": "",
-		"user_date_file": ""
+		"user_data": "",
+		"user_data_file": ""
 	}]
 }
 `

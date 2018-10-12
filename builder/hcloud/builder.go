@@ -36,7 +36,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		hcloud.WithToken(b.config.HCloudToken),
 		hcloud.WithEndpoint(b.config.Endpoint),
 		hcloud.WithPollInterval(b.config.PollInterval),
-		//hcloud.WithApplication("packer-builder-hcloud/" + pluginVersion),
+		//hcloud.WithApplication("packer-builder-hcloud", pluginVersion),
 	}
 	b.hcloudClient = hcloud.NewClient(opts...)
 	// Set up the state
