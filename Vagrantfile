@@ -73,6 +73,12 @@ def configureProviders(vmCfg, cpus: "2", memory: "2048")
 		end
 	end
 
+	vmCfg.vm.provider "docker" do |d, override|
+		d.build_dir = "."
+		d.has_ssh = true
+		override.vm.box = nil
+	end
+
 	return vmCfg
 end
 
