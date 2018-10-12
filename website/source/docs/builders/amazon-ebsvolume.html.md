@@ -63,7 +63,8 @@ builder.
     device mappings to the AMI. The block device mappings allow for keys:
 
     -   `device_name` (string) - The device name exposed to the instance (for
-        example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+        example, `/dev/sdh` or `xvdh`). Required for every device in the
+        block device mapping.
 
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination.
