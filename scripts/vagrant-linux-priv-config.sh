@@ -8,6 +8,7 @@ apt-get install -y software-properties-common
 
 apt-get install -y bzr \
 	curl \
+	gcc \
 	git \
 	make \
 	mercurial \
