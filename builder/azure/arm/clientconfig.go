@@ -3,9 +3,11 @@ package arm
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
+	jwt "github.com/dgrijalva/jwt-go"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/packer"
 )
@@ -19,8 +21,12 @@ type ClientConfig struct {
 
 	// Authentication fields
 
-	ClientID       string `mapstructure:"client_id"`
-	ClientSecret   string `mapstructure:"client_secret"`
+	// Client ID
+	ClientID string `mapstructure:"client_id"`
+	// Client secret/password
+	ClientSecret string `mapstructure:"client_secret"`
+	// JWT bearer token for client auth (RFC 7523, Sec. 2.2)
+	ClientJWT      string `mapstructure:"client_jwt"`
 	ObjectID       string `mapstructure:"object_id"`
 	TenantID       string `mapstructure:"tenant_id"`
 	SubscriptionID string `mapstructure:"subscription_id"`
@@ -81,17 +87,38 @@ func (c ClientConfig) assertRequiredParametersSet(errs *packer.MultiError) {
 	// readable by the ObjectID of the App.  There may be another way to handle
 	// this case, but I am not currently aware of it - send feedback.
 
-	if !c.useDeviceLogin() {
-		if c.ClientID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id must be specified"))
-		}
+	if c.SubscriptionID == "" {
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
+	}
 
-		if c.ClientSecret == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_secret must be specified"))
-		}
+	if c.useDeviceLogin() {
+		// nothing else to check
+		return
+	}
 
-		if c.SubscriptionID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
+	if c.ClientID == "" ||
+		(c.ClientSecret == "" && c.ClientJWT == "") ||
+		(c.ClientSecret != "" && c.ClientJWT != "") {
+		// either client ID was not set, or neither or both secret and JWT are set
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("No valid set of authention methods specified: \n"+
+			"specify either (client_id,client_secret) or (client_id,client_jwt) to use a service principal, \n"+
+			"or specify none of these to use interactive user authentication."))
+	}
+
+	if c.ClientJWT != "" {
+		// should be a JWT that is valid for at least 5 more minutes
+		p := jwt.Parser{}
+		claims := jwt.StandardClaims{}
+		token, _, err := p.ParseUnverified(c.ClientJWT, &claims)
+		if err != nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is not a JWT: %v", err))
+		} else {
+			if claims.ExpiresAt < time.Now().Add(5*time.Minute).Unix() {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt will expire within 5 minutes, please use a JWT that is valid for at least 5 minutes"))
+			}
+			if t, ok := token.Header["x5t"]; !ok || t == "" {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("client_jwt is missing the x5t header value, which is required for bearer JWT client authentication to Azure"))
+			}
 		}
 	}
 }
@@ -100,6 +127,7 @@ func (c ClientConfig) useDeviceLogin() bool {
 	return c.SubscriptionID != "" &&
 		c.ClientID == "" &&
 		c.ClientSecret == "" &&
+		c.ClientJWT == "" &&
 		c.TenantID == ""
 }
 
@@ -110,9 +138,6 @@ func (c ClientConfig) getServicePrincipalTokens(
 	err error) {
 
 	tenantID := c.TenantID
-	if tenantID == "" {
-		tenantID = "common"
-	}
 
 	if c.useDeviceLogin() {
 		say("Getting auth token for Service management endpoint")
@@ -126,8 +151,23 @@ func (c ClientConfig) getServicePrincipalTokens(
 			return nil, nil, err
 		}
 
+	} else if c.ClientSecret != "" {
+		say("Getting tokens using client secret")
+		auth := NewSecretOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientSecret, tenantID)
+
+		servicePrincipalToken, err = auth.getServicePrincipalToken()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		servicePrincipalTokenVault, err = auth.getServicePrincipalTokenWithResource(
+			strings.TrimRight(c.cloudEnvironment.KeyVaultEndpoint, "/"))
+		if err != nil {
+			return nil, nil, err
+		}
 	} else {
-		auth := NewAuthenticate(*c.cloudEnvironment, c.ClientID, c.ClientSecret, tenantID)
+		say("Getting tokens using client bearer JWT")
+		auth := NewJWTOAuthTokenProvider(*c.cloudEnvironment, c.ClientID, c.ClientJWT, tenantID)
 
 		servicePrincipalToken, err = auth.getServicePrincipalToken()
 		if err != nil {
