@@ -1,12 +1,12 @@
 package cvm
 
 import (
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
+	"fmt"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
-	"fmt"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 	"os"
 )
 
@@ -14,26 +14,27 @@ type Region string
 
 // below would be moved to tencentcloud sdk git repo
 const (
-	Bangkok = Region("ap-bangkok")
-	Beijing = Region("ap-beijing")
-	Chengdu = Region("ap-chengdu")
-	Chongqing = Region("ap-chongqing")
-	Guangzhou = Region("ap-guangzhou")
+	Bangkok       = Region("ap-bangkok")
+	Beijing       = Region("ap-beijing")
+	Chengdu       = Region("ap-chengdu")
+	Chongqing     = Region("ap-chongqing")
+	Guangzhou     = Region("ap-guangzhou")
 	GuangzhouOpen = Region("ap-guangzhou-open")
-	Hongkong = Region("ap-hongkong")
-	Mumbai = Region("ap-mumbai")
-	Seoul = Region("seoul")
-	Shanghai = Region("ap-shanghai")
-	ShanghaiFsi = Region("ap-shanghai-fsi")
-	ShenzhenFsi = Region("ap-shenzhen-fsi")
-	Singapore = Region("ap-singapore")
-	Tokyo = Region("ap-tokyo")
-	Frankfurt = Region("eu-frankfurt")
-	Moscow = Region("eu-moscow")
-	Ashburn = Region("na-ashburn")
+	Hongkong      = Region("ap-hongkong")
+	Mumbai        = Region("ap-mumbai")
+	Seoul         = Region("seoul")
+	Shanghai      = Region("ap-shanghai")
+	ShanghaiFsi   = Region("ap-shanghai-fsi")
+	ShenzhenFsi   = Region("ap-shenzhen-fsi")
+	Singapore     = Region("ap-singapore")
+	Tokyo         = Region("ap-tokyo")
+	Frankfurt     = Region("eu-frankfurt")
+	Moscow        = Region("eu-moscow")
+	Ashburn       = Region("na-ashburn")
 	Siliconvalley = Region("na-siliconvalley")
-	Toronto = Region("na-toronto")
+	Toronto       = Region("na-toronto")
 )
+
 var ValidRegions = []Region{
 	Bangkok, Beijing, Chengdu, Chongqing, Guangzhou, GuangzhouOpen, Hongkong, Shanghai,
 	ShanghaiFsi, ShenzhenFsi,
@@ -42,19 +43,19 @@ var ValidRegions = []Region{
 }
 
 type TencentCloudAccessConfig struct {
-	SecretId 		string `mapstructure:"secret_id"`
-	SecretKey 		string `mapstructure:"secret_key"`
-	Region 			string `mapstructure:"region"`
-	Zone 			string `mapstructure:"zone"`
-	SkipValidation bool 	`mapstructure:"skip_region_validation"`
+	SecretId       string `mapstructure:"secret_id"`
+	SecretKey      string `mapstructure:"secret_key"`
+	Region         string `mapstructure:"region"`
+	Zone           string `mapstructure:"zone"`
+	SkipValidation bool   `mapstructure:"skip_region_validation"`
 }
 
 func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 	var (
-		err error
+		err        error
 		cvm_client *cvm.Client
 		vpc_client *vpc.Client
-		resp *cvm.DescribeZonesResponse
+		resp       *cvm.DescribeZonesResponse
 	)
 	if err = cf.validateRegion(); err != nil {
 		return nil, nil, err
@@ -69,7 +70,7 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 		return nil, nil, err
 	}
 	if resp, err = cvm_client.DescribeZones(nil); err != nil {
-		return nil, nil,  err
+		return nil, nil, err
 	}
 	if cf.Zone != "" {
 		for _, zone := range resp.Response.ZoneSet {
@@ -84,8 +85,7 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 	return cvm_client, vpc_client, nil
 }
 
-
-func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error{
+func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
 	if err := cf.Config(); err != nil {
 		errs = append(errs, err)
@@ -98,7 +98,9 @@ func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error{
 			errs = append(errs, err)
 		}
 	}
-	if len(errs) > 0 {return errs}
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 

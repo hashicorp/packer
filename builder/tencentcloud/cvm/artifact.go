@@ -1,18 +1,18 @@
 package cvm
 
 import (
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"fmt"
+	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	"log"
 	"sort"
 	"strings"
-	"log"
-	"github.com/hashicorp/packer/packer"
 )
 
 type Artifact struct {
 	TencentCloudImages map[string]string
-	BuilderIdValue string
-	Client *cvm.Client
+	BuilderIdValue     string
+	Client             *cvm.Client
 }
 
 func (a *Artifact) BuilderId() string {
@@ -121,40 +121,3 @@ func (a *Artifact) stateAtlasMetadata() interface{} {
 	}
 	return metadata
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

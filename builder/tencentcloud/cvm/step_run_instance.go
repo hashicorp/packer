@@ -2,30 +2,28 @@ package cvm
 
 import (
 	"context"
-	"github.com/hashicorp/packer/helper/multistep"
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"github.com/hashicorp/packer/packer"
-	"io/ioutil"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	"io/ioutil"
 	"log"
 	"time"
 )
 
 type stepRunInstance struct {
-	InstanceType		string
-	UserData 			string
-	UserDataFile 		string
-	instanceId 			string
-	ZoneId 				string
-	InstanceName 		string
-	DiskType 			string
-	DiskSize 			int64
-	HostName 			string
-	InternetMaxBandwidthOut 	int64
-	AssociatePublicIpAddress 	bool
-
+	InstanceType             string
+	UserData                 string
+	UserDataFile             string
+	instanceId               string
+	ZoneId                   string
+	InstanceName             string
+	DiskType                 string
+	DiskSize                 int64
+	HostName                 string
+	InternetMaxBandwidthOut  int64
+	AssociatePublicIpAddress bool
 }
-
 
 func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("cvm_client").(*cvm.Client)
@@ -65,13 +63,13 @@ func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multi
 		DiskSize: &s.DiskSize,
 	}
 	req.VirtualPrivateCloud = &cvm.VirtualPrivateCloud{
-		VpcId: &vpc_id,
+		VpcId:    &vpc_id,
 		SubnetId: &subnet_id,
 	}
 	TRAFFIC_POSTPAID_BY_HOUR := "TRAFFIC_POSTPAID_BY_HOUR"
 	if s.AssociatePublicIpAddress {
 		req.InternetAccessible = &cvm.InternetAccessible{
-			InternetChargeType: &TRAFFIC_POSTPAID_BY_HOUR,
+			InternetChargeType:      &TRAFFIC_POSTPAID_BY_HOUR,
 			InternetMaxBandwidthOut: &s.InternetMaxBandwidthOut,
 		}
 	}
@@ -125,9 +123,9 @@ func (s *stepRunInstance) Run(_ context.Context, state multistep.StateBag) multi
 	return multistep.ActionContinue
 }
 
-func (s *stepRunInstance) getUserData(state multistep.StateBag) (string, error){
+func (s *stepRunInstance) getUserData(state multistep.StateBag) (string, error) {
 	userData := s.UserData
-	if userData == ""  && s.UserDataFile != ""{
+	if userData == "" && s.UserDataFile != "" {
 		data, err := ioutil.ReadFile(s.UserDataFile)
 		if err != nil {
 			return "", err

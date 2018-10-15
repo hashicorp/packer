@@ -2,10 +2,10 @@ package cvm
 
 import (
 	"context"
-	"github.com/hashicorp/packer/helper/multistep"
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"github.com/hashicorp/packer/packer"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 type stepShareImage struct {

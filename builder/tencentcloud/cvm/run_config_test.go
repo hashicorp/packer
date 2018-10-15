@@ -1,16 +1,16 @@
 package cvm
 
 import (
-	"testing"
-	"packer/helper/communicator"
 	"io/ioutil"
 	"os"
+	"packer/helper/communicator"
+	"testing"
 )
 
 func testConfig() *TencentCloudRunConfig {
 	return &TencentCloudRunConfig{
-		SourceImageId: 	"img-qwer1234",
-		InstanceType:	"S3.SMALL2",
+		SourceImageId: "img-qwer1234",
+		InstanceType:  "S3.SMALL2",
 		Comm: communicator.Config{
 			SSHUsername: "tencentcloud",
 		},

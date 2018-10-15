@@ -1,24 +1,24 @@
 package cvm
 
 import (
-	"log"
 	"fmt"
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/template/interpolate"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
+	"log"
 	//cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 const BuilderId = "tencent.cloud"
 
 type Config struct {
-	common.PackerConfig 		`mapstructure:",squash"`
-	TencentCloudAccessConfig 	`mapstructure:",squash"`
-	TencentCloudImageConfig		`mapstructure:",squash"`
-	TencentCloudRunConfig		`mapstructure:",squash"`
+	common.PackerConfig      `mapstructure:",squash"`
+	TencentCloudAccessConfig `mapstructure:",squash"`
+	TencentCloudImageConfig  `mapstructure:",squash"`
+	TencentCloudRunConfig    `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -75,42 +75,42 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps = []multistep.Step{
 		&stepCheckSourceImage{b.config.SourceImageId},
 		&stepConfigKeyPair{
-			Debug: b.config.PackerDebug,
-			Comm: &b.config.Comm,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
 			DebugKeyPath: fmt.Sprintf("cvm_%s.pem", b.config.PackerBuildName),
 		},
 		&stepConfigVPC{
-			VpcId: b.config.VpcId,
+			VpcId:     b.config.VpcId,
 			CidrBlock: b.config.CidrBlock,
-			VpcName: b.config.VpcName,
+			VpcName:   b.config.VpcName,
 		},
 		&stepConfigSubnet{
-			SubnetId: b.config.SubnetId,
+			SubnetId:        b.config.SubnetId,
 			SubnetCidrBlock: b.config.SubnectCidrBlock,
-			SubnetName: b.config.SubnetName,
-			Zone: b.config.Zone,
+			SubnetName:      b.config.SubnetName,
+			Zone:            b.config.Zone,
 		},
 		&stepConfigSecurityGroup{
-			SecurityGroupId: b.config.SecurityGroupId,
+			SecurityGroupId:   b.config.SecurityGroupId,
 			SecurityGroupName: b.config.SecurityGroupName,
-			Description: "a simple security group",
+			Description:       "a simple security group",
 		},
 		&stepRunInstance{
-			InstanceType: b.config.InstanceType,
-			UserData: b.config.UserData,
-			UserDataFile: b.config.UserDataFile,
-			ZoneId: b.config.Zone,
-			InstanceName: b.config.InstanceName,
-			DiskType: b.config.DiskType,
-			DiskSize: b.config.DiskSize,
-			HostName: b.config.HostName,
-			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
+			InstanceType:             b.config.InstanceType,
+			UserData:                 b.config.UserData,
+			UserDataFile:             b.config.UserDataFile,
+			ZoneId:                   b.config.Zone,
+			InstanceName:             b.config.InstanceName,
+			DiskType:                 b.config.DiskType,
+			DiskSize:                 b.config.DiskSize,
+			HostName:                 b.config.HostName,
+			InternetMaxBandwidthOut:  b.config.InternetMaxBandwidthOut,
 			AssociatePublicIpAddress: b.config.AssociatePublicIpAddress,
 		},
 		&communicator.StepConnect{
-			Config: &b.config.TencentCloudRunConfig.Comm,
+			Config:    &b.config.TencentCloudRunConfig.Comm,
 			SSHConfig: b.config.TencentCloudRunConfig.Comm.SSHConfigFunc(),
-			Host: SSHHost(b.config.AssociatePublicIpAddress),
+			Host:      SSHHost(b.config.AssociatePublicIpAddress),
 		},
 		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
@@ -119,7 +119,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepShareImage{b.config.ImageShareAccounts},
 		&stepCopyImage{
 			DesinationRegions: b.config.ImageCopyRegions,
-			SourceRegion: b.config.Region,
+			SourceRegion:      b.config.Region,
 		},
 	}
 
@@ -136,8 +136,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	artifact := &Artifact{
 		TencentCloudImages: state.Get("tencentcloudimages").(map[string]string),
-		BuilderIdValue: BuilderId,
-		Client: cvmClient,
+		BuilderIdValue:     BuilderId,
+		Client:             cvmClient,
 	}
 	return artifact, nil
 }
@@ -148,6 +148,3 @@ func (b *Builder) Cancel() {
 		b.runner.Cancel()
 	}
 }
-
-
-

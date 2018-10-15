@@ -1,12 +1,12 @@
 package cvm
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"time"
 )
 
@@ -62,7 +62,7 @@ func WaitForImageReady(client *cvm.Client, imageName string, status string, time
 	FILTER_IMAGE_NAME := "image-name"
 	req.Filters = []*cvm.Filter{
 		{
-			Name: &FILTER_IMAGE_NAME,
+			Name:   &FILTER_IMAGE_NAME,
 			Values: []*string{&imageName},
 		},
 	}
@@ -73,7 +73,7 @@ func WaitForImageReady(client *cvm.Client, imageName string, status string, time
 		}
 		find := false
 		for _, image := range resp.Response.ImageSet {
-			if *image.ImageName == imageName && *image.ImageState == status{
+			if *image.ImageName == imageName && *image.ImageState == status {
 				find = true
 				break
 			}

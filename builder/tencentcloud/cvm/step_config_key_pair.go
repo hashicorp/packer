@@ -1,21 +1,21 @@
 package cvm
 
 import (
-	"github.com/hashicorp/packer/helper/communicator"
 	"context"
+	"fmt"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"io/ioutil"
-	"fmt"
 	"os"
 	"runtime"
 )
 
 type stepConfigKeyPair struct {
-	Debug			bool
-	Comm 			*communicator.Config
-	DebugKeyPath	string
+	Debug        bool
+	Comm         *communicator.Config
+	DebugKeyPath string
 
 	keyID string
 }

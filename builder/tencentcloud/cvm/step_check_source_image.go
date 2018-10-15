@@ -2,10 +2,10 @@ package cvm
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"fmt"
 )
 
 type stepCheckSourceImage struct {
@@ -29,7 +29,7 @@ func (s *stepCheckSourceImage) Run(_ context.Context, state multistep.StateBag) 
 		return multistep.ActionHalt
 	}
 
-	if *resp.Response.TotalCount > 0 {  // public image or private image.
+	if *resp.Response.TotalCount > 0 { // public image or private image.
 		state.Put("source_image", resp.Response.ImageSet[0])
 		ui.Message(fmt.Sprintf("Image found: %s", *resp.Response.ImageSet[0].ImageId))
 		return multistep.ActionContinue

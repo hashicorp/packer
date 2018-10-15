@@ -3,18 +3,18 @@ package cvm
 import (
 	"context"
 
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
-	"fmt"
 	"github.com/pkg/errors"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
 type stepConfigSecurityGroup struct {
-	SecurityGroupId		string
-	SecurityGroupName	string
-	Description 		string
-	isCreate			bool
+	SecurityGroupId   string
+	SecurityGroupName string
+	Description       string
+	isCreate          bool
 }
 
 func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -63,7 +63,7 @@ func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBa
 		Ingress: []*vpc.SecurityGroupPolicy{
 			{
 				CidrBlock: &DEFAULT_CIDR,
-				Action: &ACCEPT,
+				Action:    &ACCEPT,
 			},
 		},
 	}
@@ -81,7 +81,7 @@ func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBa
 		Egress: []*vpc.SecurityGroupPolicy{
 			{
 				CidrBlock: &DEFAULT_CIDR,
-				Action: &ACCEPT,
+				Action:    &ACCEPT,
 			},
 		},
 	}
@@ -91,8 +91,6 @@ func (s *stepConfigSecurityGroup) Run(_ context.Context, state multistep.StateBa
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-
-
 
 	return multistep.ActionContinue
 }

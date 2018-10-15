@@ -7,8 +7,8 @@ import (
 )
 
 type stepPreValidate struct {
-	DestImageName	string
-	ForceDelete		bool
+	DestImageName string
+	ForceDelete   bool
 }
 
 func (s *stepPreValidate) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {

@@ -1,26 +1,26 @@
 package cvm
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
 	"context"
-	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
-	"github.com/hashicorp/packer/packer"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
 type stepConfigVPC struct {
-	VpcId			string
-	CidrBlock 		string
-	VpcName			string
-	isCreate		bool
+	VpcId     string
+	CidrBlock string
+	VpcName   string
+	isCreate  bool
 }
 
 func (s *stepConfigVPC) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	vpcClient := state.Get("vpc_client").(*vpc.Client)
 	ui := state.Get("ui").(packer.Ui)
 
-	if len(s.VpcId) != 0 {  // exist vpc
+	if len(s.VpcId) != 0 { // exist vpc
 		ui.Say(fmt.Sprintf("Try to use existing vpc(%s)", s.VpcId))
 		req := vpc.NewDescribeVpcsRequest()
 		req.VpcIds = []*string{&s.VpcId}
@@ -40,7 +40,7 @@ func (s *stepConfigVPC) Run(_ context.Context, state multistep.StateBag) multist
 		state.Put("error", errors.New(message))
 		ui.Error(message)
 		return multistep.ActionHalt
-	} else {  // create a new vpc, tencentcloud create vpc api is synchronous, no need to wait for create.
+	} else { // create a new vpc, tencentcloud create vpc api is synchronous, no need to wait for create.
 		ui.Say(fmt.Sprintf("Try to create a new vpc"))
 		req := vpc.NewCreateVpcRequest()
 		req.VpcName = &s.VpcName
@@ -77,4 +77,3 @@ func (s *stepConfigVPC) Cleanup(state multistep.StateBag) {
 		return
 	}
 }
-

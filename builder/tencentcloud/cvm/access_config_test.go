@@ -6,7 +6,7 @@ import (
 
 func TestTencentCloudAccessConfig_Prepare(t *testing.T) {
 	cf := TencentCloudAccessConfig{
-		SecretId: "secret-id",
+		SecretId:  "secret-id",
 		SecretKey: "secret-key",
 	}
 

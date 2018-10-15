@@ -10,11 +10,11 @@ import (
 
 type stepCopyImage struct {
 	DesinationRegions []string
-	SourceRegion string
+	SourceRegion      string
 }
 
 func (s *stepCopyImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	if len(s.DesinationRegions) == 0 || (len(s.DesinationRegions) == 1 && s.DesinationRegions[0] == s.SourceRegion){
+	if len(s.DesinationRegions) == 0 || (len(s.DesinationRegions) == 1 && s.DesinationRegions[0] == s.SourceRegion) {
 		return multistep.ActionContinue
 	}
 

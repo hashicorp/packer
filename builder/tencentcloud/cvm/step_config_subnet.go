@@ -1,20 +1,20 @@
 package cvm
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
 	"context"
-	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
-	"github.com/hashicorp/packer/packer"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
+	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
 )
 
 type stepConfigSubnet struct {
-	SubnetId		string
+	SubnetId        string
 	SubnetCidrBlock string
-	SubnetName		string
-	Zone 			string
-	isCreate		bool
+	SubnetName      string
+	Zone            string
+	isCreate        bool
 }
 
 func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -22,7 +22,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packer.Ui)
 	vpcId := state.Get("vpc_id").(string)
 
-	if len(s.SubnetId) != 0 {  // exist subnet
+	if len(s.SubnetId) != 0 { // exist subnet
 		ui.Say(fmt.Sprintf("Try to use existing subnet(%s)", s.SubnetId))
 		req := vpc.NewDescribeSubnetsRequest()
 		req.SubnetIds = []*string{&s.SubnetId}
@@ -35,7 +35,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 		if *resp.Response.TotalCount > 0 {
 			subnet0 := *resp.Response.SubnetSet[0]
 			if *subnet0.VpcId != vpcId {
-				message := fmt.Sprintf("the specified subnet(%s) does not belong to " +
+				message := fmt.Sprintf("the specified subnet(%s) does not belong to "+
 					"the specified vpc(%s)", s.SubnetId, vpcId)
 				ui.Error(message)
 				state.Put("error", errors.New(message))
@@ -49,7 +49,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", errors.New(message))
 		ui.Error(message)
 		return multistep.ActionHalt
-	} else {  // create a new subnet, tencentcloud create subnet api is synchronous, no need to wait for create.
+	} else { // create a new subnet, tencentcloud create subnet api is synchronous, no need to wait for create.
 		ui.Say(fmt.Sprintf("Try to create a new subnet"))
 		req := vpc.NewCreateSubnetRequest()
 		req.VpcId = &vpcId
@@ -88,4 +88,3 @@ func (s *stepConfigSubnet) Cleanup(state multistep.StateBag) {
 		return
 	}
 }
-

@@ -1,21 +1,21 @@
 package cvm
 
 import (
-	"github.com/hashicorp/packer/template/interpolate"
 	"fmt"
+	"github.com/hashicorp/packer/template/interpolate"
 	"regexp"
 )
 
 type TencentCloudImageConfig struct {
-	ImageName 			string	 `mapstructure:"image_name"`
-	ImageDescription 	string	 `mapstructure:"image_description"`
-	Reboot 				bool	 `mapstructure:"reboot"`
-	ForcePoweroff 		bool	 `mapstructure:"force_poweroff"`
-	Sysprep				bool	 `mapstructure:"sysprep"`
-	ImageForceDelete	bool 	 `mapstructure:"image_force_delete"`
-	ImageCopyRegions 	[]string `mapstructure:"image_copy_regions"`
-	ImageShareAccounts 	[]string `mapstructure:"image_share_accounts"`
-	SkipValidation		bool 	 `mapstructure:"skip_region_validation"`
+	ImageName          string   `mapstructure:"image_name"`
+	ImageDescription   string   `mapstructure:"image_description"`
+	Reboot             bool     `mapstructure:"reboot"`
+	ForcePoweroff      bool     `mapstructure:"force_poweroff"`
+	Sysprep            bool     `mapstructure:"sysprep"`
+	ImageForceDelete   bool     `mapstructure:"image_force_delete"`
+	ImageCopyRegions   []string `mapstructure:"image_copy_regions"`
+	ImageShareAccounts []string `mapstructure:"image_share_accounts"`
+	SkipValidation     bool     `mapstructure:"skip_region_validation"`
 }
 
 func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
@@ -56,7 +56,7 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 		cf.ImageCopyRegions = regions
 	}
-	if len(errs) >0 {
+	if len(errs) > 0 {
 		return errs
 	}
 	return nil

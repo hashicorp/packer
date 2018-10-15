@@ -3,10 +3,10 @@ package cvm
 import (
 	"context"
 
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"fmt"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 type stepCreateImage struct {
@@ -40,7 +40,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		req.Reboot = &False
 	}
 
-	if config.Sysprep{
+	if config.Sysprep {
 		req.Sysprep = &True
 	} else {
 		req.Sysprep = &False
@@ -66,7 +66,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	FILTER_IMAGE_NAME := "image-name"
 	describeReq.Filters = []*cvm.Filter{
 		{
-			Name: &FILTER_IMAGE_NAME,
+			Name:   &FILTER_IMAGE_NAME,
 			Values: []*string{&config.ImageName},
 		},
 	}
@@ -114,4 +114,3 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf("delete image(%s) failed", s.imageId))
 	}
 }
-
