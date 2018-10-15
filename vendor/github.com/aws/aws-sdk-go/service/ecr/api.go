@@ -14,8 +14,8 @@ const opBatchCheckLayerAvailability = "BatchCheckLayerAvailability"
 
 // BatchCheckLayerAvailabilityRequest generates a "aws/request.Request" representing the
 // client's request for the BatchCheckLayerAvailability operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -106,8 +106,8 @@ const opBatchDeleteImage = "BatchDeleteImage"
 
 // BatchDeleteImageRequest generates a "aws/request.Request" representing the
 // client's request for the BatchDeleteImage operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -201,8 +201,8 @@ const opBatchGetImage = "BatchGetImage"
 
 // BatchGetImageRequest generates a "aws/request.Request" representing the
 // client's request for the BatchGetImage operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -289,8 +289,8 @@ const opCompleteLayerUpload = "CompleteLayerUpload"
 
 // CompleteLayerUploadRequest generates a "aws/request.Request" representing the
 // client's request for the CompleteLayerUpload operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -399,8 +399,8 @@ const opCreateRepository = "CreateRepository"
 
 // CreateRepositoryRequest generates a "aws/request.Request" representing the
 // client's request for the CreateRepository operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -463,7 +463,7 @@ func (c *ECR) CreateRepositoryRequest(input *CreateRepositoryInput) (req *reques
 //   The operation did not succeed because it would have exceeded a service limit
 //   for your account. For more information, see Amazon ECR Default Service Limits
 //   (http://docs.aws.amazon.com/AmazonECR/latest/userguide/service_limits.html)
-//   in the Amazon EC2 Container Registry User Guide.
+//   in the Amazon Elastic Container Registry User Guide.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/CreateRepository
 func (c *ECR) CreateRepository(input *CreateRepositoryInput) (*CreateRepositoryOutput, error) {
@@ -491,8 +491,8 @@ const opDeleteLifecyclePolicy = "DeleteLifecyclePolicy"
 
 // DeleteLifecyclePolicyRequest generates a "aws/request.Request" representing the
 // client's request for the DeleteLifecyclePolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -581,8 +581,8 @@ const opDeleteRepository = "DeleteRepository"
 
 // DeleteRepositoryRequest generates a "aws/request.Request" representing the
 // client's request for the DeleteRepository operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -673,8 +673,8 @@ const opDeleteRepositoryPolicy = "DeleteRepositoryPolicy"
 
 // DeleteRepositoryPolicyRequest generates a "aws/request.Request" representing the
 // client's request for the DeleteRepositoryPolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -764,8 +764,8 @@ const opDescribeImages = "DescribeImages"
 
 // DescribeImagesRequest generates a "aws/request.Request" representing the
 // client's request for the DescribeImages operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -916,8 +916,8 @@ const opDescribeRepositories = "DescribeRepositories"
 
 // DescribeRepositoriesRequest generates a "aws/request.Request" representing the
 // client's request for the DescribeRepositories operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1059,8 +1059,8 @@ const opGetAuthorizationToken = "GetAuthorizationToken"
 
 // GetAuthorizationTokenRequest generates a "aws/request.Request" representing the
 // client's request for the GetAuthorizationToken operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1149,8 +1149,8 @@ const opGetDownloadUrlForLayer = "GetDownloadUrlForLayer"
 
 // GetDownloadUrlForLayerRequest generates a "aws/request.Request" representing the
 // client's request for the GetDownloadUrlForLayer operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1249,8 +1249,8 @@ const opGetLifecyclePolicy = "GetLifecyclePolicy"
 
 // GetLifecyclePolicyRequest generates a "aws/request.Request" representing the
 // client's request for the GetLifecyclePolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1339,8 +1339,8 @@ const opGetLifecyclePolicyPreview = "GetLifecyclePolicyPreview"
 
 // GetLifecyclePolicyPreviewRequest generates a "aws/request.Request" representing the
 // client's request for the GetLifecyclePolicyPreview operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1429,8 +1429,8 @@ const opGetRepositoryPolicy = "GetRepositoryPolicy"
 
 // GetRepositoryPolicyRequest generates a "aws/request.Request" representing the
 // client's request for the GetRepositoryPolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1520,8 +1520,8 @@ const opInitiateLayerUpload = "InitiateLayerUpload"
 
 // InitiateLayerUploadRequest generates a "aws/request.Request" representing the
 // client's request for the InitiateLayerUpload operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1611,8 +1611,8 @@ const opListImages = "ListImages"
 
 // ListImagesRequest generates a "aws/request.Request" representing the
 // client's request for the ListImages operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1760,8 +1760,8 @@ const opPutImage = "PutImage"
 
 // PutImageRequest generates a "aws/request.Request" representing the
 // client's request for the PutImage operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1837,7 +1837,7 @@ func (c *ECR) PutImageRequest(input *PutImageInput) (req *request.Request, outpu
 //   The operation did not succeed because it would have exceeded a service limit
 //   for your account. For more information, see Amazon ECR Default Service Limits
 //   (http://docs.aws.amazon.com/AmazonECR/latest/userguide/service_limits.html)
-//   in the Amazon EC2 Container Registry User Guide.
+//   in the Amazon Elastic Container Registry User Guide.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/PutImage
 func (c *ECR) PutImage(input *PutImageInput) (*PutImageOutput, error) {
@@ -1865,8 +1865,8 @@ const opPutLifecyclePolicy = "PutLifecyclePolicy"
 
 // PutLifecyclePolicyRequest generates a "aws/request.Request" representing the
 // client's request for the PutLifecyclePolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -1905,7 +1905,8 @@ func (c *ECR) PutLifecyclePolicyRequest(input *PutLifecyclePolicyInput) (req *re
 
 // PutLifecyclePolicy API operation for Amazon EC2 Container Registry.
 //
-// Creates or updates a lifecycle policy.
+// Creates or updates a lifecycle policy. For information about lifecycle policy
+// syntax, see Lifecycle Policy Template (http://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html).
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1952,8 +1953,8 @@ const opSetRepositoryPolicy = "SetRepositoryPolicy"
 
 // SetRepositoryPolicyRequest generates a "aws/request.Request" representing the
 // client's request for the SetRepositoryPolicy operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -2039,8 +2040,8 @@ const opStartLifecyclePolicyPreview = "StartLifecyclePolicyPreview"
 
 // StartLifecyclePolicyPreviewRequest generates a "aws/request.Request" representing the
 // client's request for the StartLifecyclePolicyPreview operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -2134,8 +2135,8 @@ const opUploadLayerPart = "UploadLayerPart"
 
 // UploadLayerPartRequest generates a "aws/request.Request" representing the
 // client's request for the UploadLayerPart operation. The "output" return
-// value will be populated with the request's response once the request complets
-// successfuly.
+// value will be populated with the request's response once the request completes
+// successfully.
 //
 // Use "Send" method on the returned Request to send the API call to the service.
 // the "output" return value is not valid until after Send returns without error.
@@ -2211,7 +2212,7 @@ func (c *ECR) UploadLayerPartRequest(input *UploadLayerPartInput) (req *request.
 //   The operation did not succeed because it would have exceeded a service limit
 //   for your account. For more information, see Amazon ECR Default Service Limits
 //   (http://docs.aws.amazon.com/AmazonECR/latest/userguide/service_limits.html)
-//   in the Amazon EC2 Container Registry User Guide.
+//   in the Amazon Elastic Container Registry User Guide.
 //
 // See also, https://docs.aws.amazon.com/goto/WebAPI/ecr-2015-09-21/UploadLayerPart
 func (c *ECR) UploadLayerPart(input *UploadLayerPartInput) (*UploadLayerPartOutput, error) {
@@ -2246,7 +2247,7 @@ type AuthorizationData struct {
 
 	// The Unix time in seconds and milliseconds when the authorization token expires.
 	// Authorization tokens are valid for 12 hours.
-	ExpiresAt *time.Time `locationName:"expiresAt" type:"timestamp" timestampFormat:"unix"`
+	ExpiresAt *time.Time `locationName:"expiresAt" type:"timestamp"`
 
 	// The registry URL to use for this authorization token in a docker login command.
 	// The Amazon ECR registry URL format is https://aws_account_id.dkr.ecr.region.amazonaws.com.
@@ -2808,8 +2809,7 @@ type DeleteLifecyclePolicyInput struct {
 	// If you do not specify a registry, the default registry is assumed.
 	RegistryId *string `locationName:"registryId" type:"string"`
 
-	// The name of the repository that is associated with the repository policy
-	// to  delete.
+	// The name of the repository.
 	//
 	// RepositoryName is a required field
 	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
@@ -2857,9 +2857,9 @@ type DeleteLifecyclePolicyOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The time stamp of the last time that the lifecycle policy was run.
-	LastEvaluatedAt *time.Time `locationName:"lastEvaluatedAt" type:"timestamp" timestampFormat:"unix"`
+	LastEvaluatedAt *time.Time `locationName:"lastEvaluatedAt" type:"timestamp"`
 
-	// The JSON repository policy text.
+	// The JSON lifecycle policy text.
 	LifecyclePolicyText *string `locationName:"lifecyclePolicyText" min:"100" type:"string"`
 
 	// The registry ID associated with the request.
@@ -3120,13 +3120,15 @@ type DescribeImagesInput struct {
 	// results of the initial request can be seen by sending another DescribeImages
 	// request with the returned nextToken value. This value can be between 1 and
 	// 100. If this parameter is not used, then DescribeImages returns up to 100
-	// results and a nextToken value, if applicable.
+	// results and a nextToken value, if applicable. This option cannot be used
+	// when you specify images with imageIds.
 	MaxResults *int64 `locationName:"maxResults" min:"1" type:"integer"`
 
 	// The nextToken value returned from a previous paginated DescribeImages request
 	// where maxResults was used and the results exceeded the value of that parameter.
 	// Pagination continues from the end of the previous results that returned the
 	// nextToken value. This value is null when there are no more results to return.
+	// This option cannot be used when you specify images with imageIds.
 	NextToken *string `locationName:"nextToken" type:"string"`
 
 	// The AWS account ID associated with the registry that contains the repository
@@ -3253,14 +3255,16 @@ type DescribeRepositoriesInput struct {
 	// element. The remaining results of the initial request can be seen by sending
 	// another DescribeRepositories request with the returned nextToken value. This
 	// value can be between 1 and 100. If this parameter is not used, then DescribeRepositories
-	// returns up to 100 results and a nextToken value, if applicable.
+	// returns up to 100 results and a nextToken value, if applicable. This option
+	// cannot be used when you specify repositories with repositoryNames.
 	MaxResults *int64 `locationName:"maxResults" min:"1" type:"integer"`
 
 	// The nextToken value returned from a previous paginated DescribeRepositories
 	// request where maxResults was used and the results exceeded the value of that
 	// parameter. Pagination continues from the end of the previous results that
 	// returned the nextToken value. This value is null when there are no more results
-	// to return.
+	// to return. This option cannot be used when you specify repositories with
+	// repositoryNames.
 	//
 	// This token should be treated as an opaque identifier that is only used to
 	// retrieve the next items in a list and not for other programmatic purposes.
@@ -3527,7 +3531,7 @@ type GetLifecyclePolicyInput struct {
 	// If you do not specify a registry, the default registry is assumed.
 	RegistryId *string `locationName:"registryId" type:"string"`
 
-	// The name of the repository with the policy to retrieve.
+	// The name of the repository.
 	//
 	// RepositoryName is a required field
 	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
@@ -3575,9 +3579,9 @@ type GetLifecyclePolicyOutput struct {
 	_ struct{} `type:"structure"`
 
 	// The time stamp of the last time that the lifecycle policy was run.
-	LastEvaluatedAt *time.Time `locationName:"lastEvaluatedAt" type:"timestamp" timestampFormat:"unix"`
+	LastEvaluatedAt *time.Time `locationName:"lastEvaluatedAt" type:"timestamp"`
 
-	// The JSON repository policy text.
+	// The JSON lifecycle policy text.
 	LifecyclePolicyText *string `locationName:"lifecyclePolicyText" min:"100" type:"string"`
 
 	// The registry ID associated with the request.
@@ -3638,21 +3642,23 @@ type GetLifecyclePolicyPreviewInput struct {
 	// by sending  another GetLifecyclePolicyPreviewRequest request with the returned
 	// nextToken  value. This value can be between 1 and 100. If this  parameter
 	// is not used, then GetLifecyclePolicyPreviewRequest returns up to  100 results
-	// and a nextToken value, if  applicable.
+	// and a nextToken value, if  applicable. This option cannot be used when you
+	// specify images with imageIds.
 	MaxResults *int64 `locationName:"maxResults" min:"1" type:"integer"`
 
 	// The nextToken value returned from a previous paginated  GetLifecyclePolicyPreviewRequest
 	// request where maxResults was used and the  results exceeded the value of
 	// that parameter. Pagination continues from the end of the  previous results
 	// that returned the nextToken value. This value is  null when there are no
-	// more results to return.
+	// more results to return. This option cannot be used when you specify images
+	// with imageIds.
 	NextToken *string `locationName:"nextToken" type:"string"`
 
 	// The AWS account ID associated with the registry that contains the repository.
 	// If you do not specify a registry, the default registry is assumed.
 	RegistryId *string `locationName:"registryId" type:"string"`
 
-	// The name of the repository with the policy to retrieve.
+	// The name of the repository.
 	//
 	// RepositoryName is a required field
 	RepositoryName *string `locationName:"repositoryName" min:"2" type:"string" required:"true"`
@@ -3729,7 +3735,7 @@ func (s *GetLifecyclePolicyPreviewInput) SetRepositoryName(v string) *GetLifecyc
 type GetLifecyclePolicyPreviewOutput struct {
 	_ struct{} `type:"structure"`
 
-	// The JSON repository policy text.
+	// The JSON lifecycle policy text.
 	LifecyclePolicyText *string `locationName:"lifecyclePolicyText" min:"100" type:"string"`
 
 	// The nextToken value to include in a future GetLifecyclePolicyPreview request.
@@ -3958,7 +3964,7 @@ type ImageDetail struct {
 
 	// The date and time, expressed in standard JavaScript date format, at which
 	// the current image was pushed to the repository.
-	ImagePushedAt *time.Time `locationName:"imagePushedAt" type:"timestamp" timestampFormat:"unix"`
+	ImagePushedAt *time.Time `locationName:"imagePushedAt" type:"timestamp"`
 
 	// The size, in bytes, of the image in the repository.
 	//
@@ -4317,7 +4323,7 @@ type LifecyclePolicyPreviewResult struct {
 
 	// The date and time, expressed in standard JavaScript date format, at which
 	// the current image was pushed to the repository.
-	ImagePushedAt *time.Time `locationName:"imagePushedAt" type:"timestamp" timestampFormat:"unix"`
+	ImagePushedAt *time.Time `locationName:"imagePushedAt" type:"timestamp"`
 
 	// The list of tags associated with this image.
 	ImageTags []*string `locationName:"imageTags" type:"list"`
@@ -4778,7 +4784,7 @@ type Repository struct {
 	_ struct{} `type:"structure"`
 
 	// The date and time, in JavaScript date format, when the repository was created.
-	CreatedAt *time.Time `locationName:"createdAt" type:"timestamp" timestampFormat:"unix"`
+	CreatedAt *time.Time `locationName:"createdAt" type:"timestamp"`
 
 	// The AWS account ID associated with the registry that contains the repository.
 	RegistryId *string `locationName:"registryId" type:"string"`
