@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"sync/atomic"
 
 	"github.com/cheggaaa/pb"
 )
@@ -78,7 +77,7 @@ func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
 }
 
 func (spb *StackableProgressBar) prefix() {
-	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", atomic.LoadInt32(&spb.items)))
+	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", spb.items))
 }
 
 func (spb *StackableProgressBar) Finish() {
