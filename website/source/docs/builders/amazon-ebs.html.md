@@ -221,7 +221,7 @@ builder.
     process). Packer will always run this operation, even if the base
     AMI has an encrypted boot volume to start with. Default `false`.
 
--   `kms_key_id` (string) - The ID of the KMS key to use for boot volume encryption.
+-   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
     will be encrypted by the default EBS KMS key.
 
@@ -247,7 +247,7 @@ builder.
     for more details.
 
 -   `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,
-    along with the custom kms key id to use for encryption for that region.
+    along with the custom kms key id (alias or arn) to use for encryption for that region.
     Keys must match the regions provided in `ami_regions`. If you just want to
     encrypt using a default ID, you can stick with `kms_key_id` and `ami_regions`.
     If you want a region to be encrypted with that region's default key ID, you can
