@@ -66,7 +66,9 @@ func (spb *StackableProgressBar) Start(total int64) {
 func (spb *StackableProgressBar) Add(total int64) {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
-	spb.Bar.Add(total)
+	if spb.Bar.ProgressBar != nil {
+		spb.Bar.Add(total)
+	}
 }
 
 func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
@@ -87,12 +89,13 @@ func (spb *StackableProgressBar) Finish() {
 	if spb.items == 0 {
 		// slef cleanup
 		spb.Bar.ProgressBar.Finish()
-		spb.Bar.ProgressBar = nil
 		spb.started = false
 		spb.total = 0
 		return
 	}
-	spb.prefix()
+	if spb.Bar.ProgressBar != nil {
+		spb.prefix()
+	}
 }
 
 // BasicProgressBar is packer's basic progress bar.
