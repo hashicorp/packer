@@ -3,10 +3,21 @@ package packer
 import (
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/cheggaaa/pb"
 )
 
+func speedyProgressBar(bar *pb.ProgressBar) {
+	bar.SetUnits(pb.U_BYTES)
+	bar.SetRefreshRate(1 * time.Millisecond)
+	bar.NotPrint = true
+}
+
 func TestStackableProgressBar_race(t *testing.T) {
-	bar := &StackableProgressBar{}
+	bar := &StackableProgressBar{
+		ConfigProgressbarFN: speedyProgressBar,
+	}
 
 	start42Fn := func() { bar.Start(42) }
 	finishFn := func() { bar.Finish() }
@@ -24,7 +35,7 @@ func TestStackableProgressBar_race(t *testing.T) {
 		iterations int
 	}{
 		{"all public", fields{nil, []func(){start42Fn, finishFn, add21, add21}, finishFn}, 300},
-		{"all public", fields{start42Fn, []func(){add21, add21}, finishFn}, 300},
+		{"add", fields{start42Fn, []func(){add21}, finishFn}, 300},
 	}
 
 	for _, tt := range tests {
