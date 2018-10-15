@@ -12,6 +12,7 @@ func speedyProgressBar(bar *pb.ProgressBar) {
 	bar.SetUnits(pb.U_BYTES)
 	bar.SetRefreshRate(1 * time.Millisecond)
 	bar.NotPrint = true
+	bar.Format("[\x00=\x00>\x00-\x00]")
 }
 
 func TestStackableProgressBar_race(t *testing.T) {
@@ -36,6 +37,7 @@ func TestStackableProgressBar_race(t *testing.T) {
 	}{
 		{"all public", fields{nil, []func(){start42Fn, finishFn, add21, add21}, finishFn}, 300},
 		{"add", fields{start42Fn, []func(){add21}, finishFn}, 300},
+		{"add start", fields{start42Fn, []func(){start42Fn, add21}, finishFn}, 300},
 	}
 
 	for _, tt := range tests {

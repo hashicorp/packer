@@ -93,16 +93,16 @@ func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
 
-	spb.items--
-	if spb.items == 0 {
+	if spb.items < 0 {
+		spb.items--
+	}
+	if spb.items == 0 && spb.Bar.ProgressBar != nil {
 		// slef cleanup
 		spb.Bar.ProgressBar.Finish()
+		spb.Bar.ProgressBar = nil
 		spb.started = false
 		spb.total = 0
 		return
-	}
-	if spb.Bar.ProgressBar != nil {
-		spb.prefix()
 	}
 }
 
