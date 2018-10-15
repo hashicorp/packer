@@ -35,16 +35,25 @@ type StackableProgressBar struct {
 	items int32
 	total int64
 
-	started bool
+	started             bool
+	ConfigProgressbarFN func(*pb.ProgressBar)
 }
 
 var _ ProgressBar = new(StackableProgressBar)
 
-func (spb *StackableProgressBar) start() {
-	spb.Bar.ProgressBar = pb.New(0)
-	spb.Bar.ProgressBar.SetUnits(pb.U_BYTES)
+func defaultProgressbarConfigFn(bar *pb.ProgressBar) {
+	bar.SetUnits(pb.U_BYTES)
+}
 
-	spb.Bar.ProgressBar.Start()
+func (spb *StackableProgressBar) start() {
+	bar := pb.New(0)
+	if spb.ConfigProgressbarFN == nil {
+		spb.ConfigProgressbarFN = defaultProgressbarConfigFn
+	}
+	spb.ConfigProgressbarFN(bar)
+
+	bar.Start()
+	spb.Bar.ProgressBar = bar
 	spb.started = true
 }
 
