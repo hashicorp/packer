@@ -55,13 +55,17 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	c.AMISkipRegionValidation = true
 
 	var errs []error
+	var err error
 	mockConn := &mockEC2Client{}
 	if errs = c.prepareRegions(mockConn, nil, errs); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
 
 	c.AMISkipRegionValidation = false
-	c.AMIRegions = listEC2Regions(mockConn)
+	c.AMIRegions, err = listEC2Regions(mockConn)
+	if err != nil {
+		t.Fatalf("shouldn't have err: %s", err.Error())
+	}
 	if errs = c.prepareRegions(mockConn, nil, errs); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
