@@ -34,7 +34,6 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 --retry-delay 0 \
 -o {{ .DiskImagePath }} \
 '...'`
-		c.BuilderUploadImageCommand = "false"
 	}
 	/*
 		errs = packer.MultiErrorAppend(errs,
