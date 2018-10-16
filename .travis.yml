@@ -19,6 +19,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install mingw ; fi
 
 script:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export CGO_ENABLED=0 ; fi
   - GOMAXPROCS=2 make ci
 
 branches:
