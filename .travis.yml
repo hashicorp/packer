@@ -2,9 +2,9 @@ env:
   - USER=travis
 
 os:
+  - windows
   - linux
   - osx
-  - windows
 
 sudo: false
 
