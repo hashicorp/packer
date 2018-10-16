@@ -23,6 +23,11 @@ environment:
     CYG_SETUP: setup-x86.exe
     BASH: C:\cygwin\bin\bash
 
+init:
+  # Carriage returns are bad
+  - cmd:
+      'git config --global core.autocrlf input'
+
 # Cache Cygwin files to speed up build
 cache:
     - '%CYG_CACHE%'
