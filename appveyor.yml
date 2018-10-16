@@ -9,8 +9,6 @@ branches:
   only:
     - master
 
-os: Windows Server 2012 R2
-
 environment:
   GOPATH: c:\gopath
   CYG_MIRROR: http://cygwin.mirror.constant.com
