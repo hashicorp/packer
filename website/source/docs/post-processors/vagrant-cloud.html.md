@@ -60,7 +60,7 @@ on Vagrant Cloud, as well as authentication and version information.
 
 -   `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
     Cloud, for example `hashicorp/precise64`, which is short for
-    `https://app.vagrantup.com/hashicorp/boxes/precise64`.
+    `vagrantcloud.com/hashicorp/precise64`.
 
 -   `version` (string) - The version number, typically incrementing a
     previous version. The version string is validated based on [Semantic
