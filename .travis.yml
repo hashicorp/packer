@@ -15,7 +15,8 @@ go:
   - master
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install make ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install make  ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install mingw ; fi
 
 script:
   - GOMAXPROCS=2 make ci
