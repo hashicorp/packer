@@ -21,9 +21,9 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY)
 
 export GOLDFLAGS
 
-default: deps generate test dev
+default: deps generate testrace dev
 
-ci: deps test
+ci: testrace
 
 release: deps test releasebin package ## Build a release build
 
