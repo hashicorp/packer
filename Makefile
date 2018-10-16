@@ -51,7 +51,6 @@ deps:
 	@go get golang.org/x/tools/cmd/stringer
 	@go get -u github.com/mna/pigeon
 	@go get github.com/kardianos/govendor
-	@go get golang.org/x/tools/cmd/goimports
 
 dev: deps ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
