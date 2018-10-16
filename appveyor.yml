@@ -20,18 +20,11 @@ install:
   - echo %Path%
   - go version
   - go env
-  - go get github.com/mitchellh/gox
-  - go get golang.org/x/tools/cmd/stringer
+  - make deps
 
 build_script:
   - git rev-parse HEAD
- # go test $(go list ./... | grep -v vendor)
-  - ps: |
-      go.exe test (go.exe list ./... `
-      |? { -not $_.Contains('/vendor/') } `
-      |? { $_ -ne 'github.com/hashicorp/packer/builder/parallels/common' } `
-      |? { $_ -ne 'github.com/hashicorp/packer/common' }`
-      |? { $_ -ne 'github.com/hashicorp/packer/provisioner/ansible' })
+  - ps: make ci
 
 test: off
 
