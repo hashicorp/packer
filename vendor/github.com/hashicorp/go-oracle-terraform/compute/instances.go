@@ -169,6 +169,8 @@ func (i *InstanceInfo) getInstanceName() string {
 }
 
 type CreateInstanceInput struct {
+	// Optional ImageListEntry number. Default will be used if not specified
+	Entry int `json:"entry,omitempty"`
 	// A dictionary of user-defined attributes to be made available to the instance.
 	// Optional
 	Attributes map[string]interface{} `json:"attributes"`

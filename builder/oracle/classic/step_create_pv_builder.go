@@ -47,7 +47,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 		ImageList:  config.SourceImageList,
 		Attributes: config.attribs,
 		SSHKeys:    []string{config.Comm.SSHKeyPairName},
-		//Entry:      5,
+		Entry:      5,
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
