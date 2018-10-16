@@ -15,23 +15,31 @@ func getValidationSession() *ec2.EC2 {
 	return ec2conn
 }
 
-func listEC2Regions(ec2conn ec2iface.EC2API) []string {
+func listEC2Regions(ec2conn ec2iface.EC2API) ([]string, error) {
 	var regions []string
-	resultRegions, _ := ec2conn.DescribeRegions(nil)
+	resultRegions, err := ec2conn.DescribeRegions(nil)
+	if err != nil {
+		return []string{}, err
+	}
 	for _, region := range resultRegions.Regions {
 		regions = append(regions, *region.RegionName)
 	}
 
-	return regions
+	return regions, nil
 }
 
 // ValidateRegion returns true if the supplied region is a valid AWS
 // region and false if it's not.
-func ValidateRegion(region string, ec2conn ec2iface.EC2API) bool {
-	for _, valid := range listEC2Regions(ec2conn) {
+func ValidateRegion(region string, ec2conn ec2iface.EC2API) (bool, error) {
+	regions, err := listEC2Regions(ec2conn)
+	if err != nil {
+		return false, err
+	}
+
+	for _, valid := range regions {
 		if region == valid {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
