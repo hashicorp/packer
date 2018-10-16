@@ -37,7 +37,7 @@ func (s *stepAttachVolume) Run(_ context.Context, state multistep.StateBag) mult
 
 	state.Put(s.instanceInfoKey+"/attachment", sa)
 
-	ui.Message("Volume to master attached to builder instance")
+	ui.Message("Volume attached to instance.")
 	return multistep.ActionContinue
 }
 
