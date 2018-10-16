@@ -45,7 +45,7 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 		d := commonT.TestConn(t)
 		vm := commonT.GetVM(t, d, artifacts)
 
-		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk")
+		vmInfo, err := vm.Info("name", "parent", "runtime.host", "resourcePool", "datastore", "layoutEx.disk", "config.firmware")
 		if err != nil {
 			t.Fatalf("Cannot read VM properties: %v", err)
 		}
@@ -91,6 +91,11 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 			t.Errorf("Invalid datastore name: expected '%v', got '%v'", datastore, dsInfo.Name)
 		}
 
+		fw := vmInfo.Config.Firmware
+		if fw != "bios" {
+			t.Errorf("Invalid firmware: expected 'bios', got '%v'", fw)
+		}
+
 		return nil
 	}
 }
@@ -111,6 +116,7 @@ func hardwareConfig() string {
 	config["RAM"] = 2048
 	config["RAM_reservation"] = 1024
 	config["NestedHV"] = true
+	config["firmware"] = "efi"
 
 	return commonT.RenderConfig(config)
 }
@@ -153,6 +159,11 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 		nestedHV := vmInfo.Config.NestedHVEnabled
 		if !*nestedHV {
 			t.Errorf("VM should have NestedHV enabled, got %v", nestedHV)
+		}
+
+		fw := vmInfo.Config.Firmware
+		if fw != "efi" {
+			t.Errorf("Invalid firmware: expected 'efi', got '%v'", fw)
 		}
 
 		return nil

@@ -34,8 +34,8 @@ func (c *CreateConfig) Prepare() []error {
 		c.GuestOSType = "otherGuest"
 	}
 
-	if (c.Firmware == "") {
-		c.Firmware = "bios"
+	if (c.Firmware != "" && c.Firmware != "bios" && c.Firmware != "efi") {
+		errs = append(errs, fmt.Errorf("'firmware' must be 'bios' or 'efi'"))
 	}
 
 	return errs
