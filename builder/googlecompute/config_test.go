@@ -329,6 +329,22 @@ func TestConfigPrepareServiceAccount(t *testing.T) {
 	}
 }
 
+func TestConfigPrepareStartupScriptFile(t *testing.T) {
+	config := map[string]interface{}{
+		"project_id":          "project",
+		"source_image":        "foo",
+		"ssh_username":        "packer",
+		"startup_script_file": "no-such-file",
+		"zone":                "us-central1-a",
+	}
+
+	_, _, errs := NewConfig(config)
+
+	if errs == nil || !strings.Contains(errs.Error(), "startup_script_file") {
+		t.Fatalf("should error: startup_script_file")
+	}
+}
+
 func TestConfigDefaults(t *testing.T) {
 	cases := []struct {
 		Read  func(c *Config) interface{}
