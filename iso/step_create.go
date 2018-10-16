@@ -12,6 +12,7 @@ import (
 type CreateConfig struct {
 	Version     uint   `mapstructure:"vm_version"`
 	GuestOSType string `mapstructure:"guest_os_type"`
+	Firmware    string `mapstructure:"firmware"`
 
 	DiskControllerType  string `mapstructure:"disk_controller_type"`
 	DiskSize            int64  `mapstructure:"disk_size"`
@@ -31,6 +32,10 @@ func (c *CreateConfig) Prepare() []error {
 
 	if c.GuestOSType == "" {
 		c.GuestOSType = "otherGuest"
+	}
+
+	if (c.Firmware == "") {
+		c.Firmware = "bios"
 	}
 
 	return errs
@@ -61,6 +66,7 @@ func (s *StepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		NetworkCard:         s.Config.NetworkCard,
 		USBController:       s.Config.USBController,
 		Version:             s.Config.Version,
+		Firmware:            s.Config.Firmware,
 	})
 	if err != nil {
 		state.Put("error", fmt.Errorf("error creating vm: %v", err))

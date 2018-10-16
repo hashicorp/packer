@@ -69,6 +69,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `network`(string) - Set network VM will be connected to.
 * `network_card`(string) - Set VM network card type. Example `vmxnet3`.
 * `usb_controller`(boolean) - Create USB controller for virtual machine. Defaults to `false`.
+* `firmware`(string) - Set the Firmware at machine creation. Example `efi`. Defaults to `bios`
 
 ### Boot (`vsphere-iso` only)
 
