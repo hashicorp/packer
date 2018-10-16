@@ -13,6 +13,7 @@ environment:
   GOPATH: c:\gopath
   CYG_MIRROR: http://cygwin.mirror.constant.com
   CYG_PACKAGES: make
+  HOME: c:\gopath\src\github.com\hashicorp\packer
   matrix:
   - APPVEYOR_BUILD_SYS: Cygwin
     CYG_ROOT: C:\cygwin64
@@ -46,6 +47,8 @@ install:
 
 build_script:
   - git rev-parse HEAD
+  - '%BASH% -lc "pwd"'
+  - '%BASH% -lc "cd"'
   - '%BASH% -lc "pwd"'
   - '%BASH% -lc "cat Makefile"'
   - '%BASH% -lc "make --version"'
