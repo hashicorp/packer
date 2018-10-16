@@ -81,10 +81,12 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		Name:       config.Name,
 		Annotation: config.Annotation,
 		GuestId:    config.GuestOS,
-		Firmware:   config.Firmware,
 	}
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
+	}
+	if config.Firmware != "" {
+		createSpec.Firmware = config.Firmware
 	}
 
 	folder, err := d.FindFolder(config.Folder)
