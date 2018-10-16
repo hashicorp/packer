@@ -1,5 +1,10 @@
 env:
-    - USER=travis
+  - USER=travis
+
+os:
+  - linux
+  - osx
+  - windows
 
 sudo: false
 
@@ -8,9 +13,6 @@ language: go
 go:
   - 1.11.x
   - master
-
-install:
-  - make deps
 
 script:
   - GOMAXPROCS=2 make ci
