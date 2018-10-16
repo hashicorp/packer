@@ -100,12 +100,8 @@ generate: deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
-test: deps fmt-check mode-check ## Run unit tests
+test: deps fmt-check mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
-	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
-		echo "ERROR: Vet found problems in the code."; \
-		exit 1; \
-	fi
 
 # testacc runs acceptance tests
 testacc: deps generate ## Run acceptance tests
@@ -117,6 +113,12 @@ testrace: deps ## Test for race conditions
 
 updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
+
+vet: ## Vet Go code
+	@go tool vet $(VET)  ; if [ $$? -eq 1 ]; then \
+		echo "ERROR: Vet found problems in the code."; \
+		exit 1; \
+	fi
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
