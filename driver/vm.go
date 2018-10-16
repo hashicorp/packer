@@ -55,6 +55,7 @@ type CreateConfig struct {
 	NetworkCard   string // example: vmxnet3
 	USBController bool
 	Version       uint // example: 10
+	Firmware      string // efi or bios
 }
 
 func (d *Driver) NewVM(ref *types.ManagedObjectReference) *VirtualMachine {
@@ -80,6 +81,7 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 		Name:       config.Name,
 		Annotation: config.Annotation,
 		GuestId:    config.GuestOS,
+		Firmware:   config.Firmware,
 	}
 	if config.Version != 0 {
 		createSpec.Version = fmt.Sprintf("%s%d", "vmx-", config.Version)
