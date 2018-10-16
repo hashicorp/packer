@@ -60,6 +60,7 @@ import (
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
+	vmwarevmxpostprocessor "github.com/hashicorp/packer/post-processor/vmware-vmx"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
@@ -150,6 +151,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"shell-local":          new(shelllocalpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
+	"vmware-vmx":           new(vmwarevmxpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 }
