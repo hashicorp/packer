@@ -46,6 +46,8 @@ install:
 
 build_script:
   - git rev-parse HEAD
+  - '%BASH% -lc "pwd"'
+  - '%BASH% -lc "cat Makefile"'
   - '%BASH% -lc "make --version"'
   - '%BASH% -lc "make deps"'
 
