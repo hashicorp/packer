@@ -265,9 +265,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
-			CommConfig:            &b.config.RunConfig.Comm,
-			SecurityGroupIds:      b.config.SecurityGroupIds,
-			VpcId:                 b.config.VpcId,
+			CommConfig:       &b.config.RunConfig.Comm,
+			SecurityGroupIds: b.config.SecurityGroupIds,
+			VpcId:            b.config.VpcId,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
 		instanceStep,
