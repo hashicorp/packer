@@ -39,16 +39,16 @@ clone_folder: c:\gopath\src\github.com\hashicorp\packer
 # Install needed build dependencies
 install:
   - ps: if (Test-Path Env:\CYG_ROOT) { Start-FileDownload "https://cygwin.com/$env:CYG_SETUP" -FileName "$env:CYG_SETUP" }
-  - if defined CYG_ROOT (%CYG_SETUP% --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages "%CYG_PACKAGES%" --upgrade-also)
+  - '%CYG_SETUP% --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages "%CYG_PACKAGES%" --upgrade-also'
   - echo %Path%
   - go version
   - go env
 
 build_script:
   - git rev-parse HEAD
-  - (%BASH% -lc "make deps")
+  - '%BASH% -lc "make deps"'
 
 test_script:
-  - (%BASH% -lc "make ci")
+  - '%BASH% -lc "make ci"'
 
 deploy: off
