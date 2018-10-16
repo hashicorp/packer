@@ -108,7 +108,7 @@ testacc: deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace: deps ## Test for race conditions
+testrace: deps fmt-check mode-check vet ## Test with race detection enabled
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
