@@ -255,7 +255,9 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 
 	var cpuSpec types.ResourceAllocationInfo
 	cpuSpec.Reservation = &config.CPUReservation
-	cpuSpec.Limit = &config.CPULimit
+	if config.CPULimit != 0 {
+		cpuSpec.Limit = &config.CPULimit
+	}
 	confSpec.CpuAllocation = &cpuSpec
 
 	var ramSpec types.ResourceAllocationInfo

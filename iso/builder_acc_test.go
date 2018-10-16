@@ -159,6 +159,40 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 	}
 }
 
+func TestISOBuilderAcc_limit(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: limitConfig(),
+		Check:    checkLimit(t),
+	})
+}
+
+func limitConfig() string {
+	config := defaultConfig()
+	config["CPUs"] = 1 // hardware is customized, but CPU limit is not specified explicitly
+
+	return commonT.RenderConfig(config)
+}
+
+func checkLimit(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+
+		vm := commonT.GetVM(t, d, artifacts)
+		vmInfo, err := vm.Info("config.cpuAllocation")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		limit := *vmInfo.Config.CpuAllocation.Limit
+		if limit != -1 { // must be unlimited
+			t.Errorf("Invalid CPU limit: expected '%v', got '%v'", -1, limit)
+		}
+
+		return nil
+	}
+}
+
 func TestISOBuilderAcc_cdrom(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
