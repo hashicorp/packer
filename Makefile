@@ -101,7 +101,7 @@ generate: deps ## Generate dynamically generated code
 	goimports -w common/bootcommand/boot_command.go
 	gofmt -w command/plugin.go
 
-test: deps fmt-check mode-check vet ## Run unit tests
+test: fmt-check mode-check vet ## Run unit tests
 	@go test $(TEST) $(TESTARGS) -timeout=2m
 
 # testacc runs acceptance tests
@@ -109,7 +109,7 @@ testacc: deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
-testrace: deps fmt-check mode-check vet ## Test with race detection enabled
+testrace: fmt-check mode-check vet ## Test with race detection enabled
 	@go test -race $(TEST) $(TESTARGS) -timeout=2m
 
 updatedeps:
