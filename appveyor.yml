@@ -1,4 +1,5 @@
 # appveyor.yml reference : http://www.appveyor.com/docs/appveyor-yml
+# and https://github.com/unicorn-engine/unicorn/blob/master/.appveyor.yml
 
 version: "{build}"
 
@@ -12,20 +13,36 @@ os: Windows Server 2012 R2
 
 environment:
   GOPATH: c:\gopath
+  CYG_MIRROR: http://cygwin.mirror.constant.com
+  CYG_PACKAGES: make
+  matrix:
+  - CYG_ROOT: C:\cygwin64
+    CYG_CACHE: C:\cygwin64\var\cache\setup
+    CYG_SETUP: setup-x86_64.exe
+    BASH: C:\cygwin64\bin\bash
+  - CYG_ROOT: C:\cygwin
+    CYG_CACHE: C:\cygwin\var\cache\setup
+    CYG_SETUP: setup-x86.exe
+    BASH: C:\cygwin\bin\bash
+
+# Cache Cygwin files to speed up build
+cache:
+    - '%CYG_CACHE%'
 
 clone_folder: c:\gopath\src\github.com\hashicorp\packer
 
 install:
-  - set GO15VENDOREXPERIMENT=1
+  - ps: if (Test-Path Env:\CYG_ROOT) { Start-FileDownload "https://cygwin.com/$env:CYG_SETUP" -FileName "$env:CYG_SETUP" }
+  - %CYG_SETUP% --quiet-mode --no-shortcuts --only-site --root "%CYG_ROOT%" --site "%CYG_MIRROR%" --local-package-dir "%CYG_CACHE%" --packages "%CYG_PACKAGES%" --upgrade-also
   - echo %Path%
   - go version
   - go env
-  - make deps
 
 build_script:
   - git rev-parse HEAD
-  - ps: make ci
+  - make deps
 
-test: off
+test_script:
+  - make ci
 
 deploy: off
