@@ -59,7 +59,8 @@ on Vagrant Cloud, as well as authentication and version information.
     if nothing is found, finally `ATLAS_TOKEN` will be used.
 
 -   `box_tag` (string) - The shorthand tag for your box that maps to Vagrant
-    Cloud, i.e `hashicorp/precise64` for `vagrantcloud.com/hashicorp/precise64`
+    Cloud, for example `hashicorp/precise64`, which is short for
+    `https://app.vagrantup.com/hashicorp/boxes/precise64`.
 
 -   `version` (string) - The version number, typically incrementing a
     previous version. The version string is validated based on [Semantic
