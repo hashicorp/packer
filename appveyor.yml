@@ -1,3 +1,6 @@
 
 skip_commits:
   message: /.*/
+
+build: off
+deploy: off
