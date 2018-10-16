@@ -14,11 +14,13 @@ environment:
   CYG_MIRROR: http://cygwin.mirror.constant.com
   CYG_PACKAGES: make
   matrix:
-  - CYG_ROOT: C:\cygwin64
+  - APPVEYOR_BUILD_SYS: Cygwin
+    CYG_ROOT: C:\cygwin64
     CYG_CACHE: C:\cygwin64\var\cache\setup
     CYG_SETUP: setup-x86_64.exe
     BASH: C:\cygwin64\bin\bash
-  - CYG_ROOT: C:\cygwin
+  - APPVEYOR_BUILD_SYS: Cygwin
+    CYG_ROOT: C:\cygwin
     CYG_CACHE: C:\cygwin\var\cache\setup
     CYG_SETUP: setup-x86.exe
     BASH: C:\cygwin\bin\bash
