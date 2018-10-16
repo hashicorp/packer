@@ -657,12 +657,12 @@
 			"revision": "50da7d4131a3b5c9d063932461cab4d1fafb20b0"
 		},
 		{
-			"checksumSHA1": "7GMQgpfoSQv4QcaREE2GzSZvlQI=",
+			"checksumSHA1": "UBznrWrDuttNZf56nubBl2nG4Ws=",
 			"path": "github.com/cheggaaa/pb",
-			"revision": "2af8bbdea9e99e83b3ac400d8f6b6d1b8cbbf338",
-			"revisionTime": "2018-05-21T09:56:06Z",
-			"version": "v1.0.25",
-			"versionExact": "v1.0.25"
+			"revision": "007b75a044e968336a69a6c0c617251ab62ac14c",
+			"revisionTime": "2018-10-16T15:56:12Z",
+			"version": "v1.0.26",
+			"versionExact": "v1.0.26"
 		},
 		{
 			"checksumSHA1": "X2/71FBrn4pA3WcA620ySVO0uHU=",
