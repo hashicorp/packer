@@ -46,6 +46,7 @@ install:
 
 build_script:
   - git rev-parse HEAD
+  - '%BASH% -lc "make --version"'
   - '%BASH% -lc "make deps"'
 
 test_script:
