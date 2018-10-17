@@ -83,7 +83,8 @@ builder.
         every build.
 
     -   `device_name` (string) - The device name exposed to the instance (for
-        example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+        example, `/dev/sdh` or `xvdh`). Required for every device in the
+        block device mapping.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
