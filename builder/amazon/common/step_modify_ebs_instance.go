@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -37,20 +38,24 @@ func (s *StepModifyEBSBackedInstance) Run(_ context.Context, state multistep.Sta
 		}
 	}
 
-	// Set EnaSupport to true.
+	// Handle EnaSupport flag.
 	// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
+	var prefix string
 	if s.EnableAMIENASupport {
-		ui.Say("Enabling Enhanced Networking (ENA)...")
-		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
-			InstanceId: instance.InstanceId,
-			EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(true)},
-		})
-		if err != nil {
-			err := fmt.Errorf("Error enabling Enhanced Networking (ENA) on %s: %s", *instance.InstanceId, err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
+		prefix = "En"
+	} else {
+		prefix = "Dis"
+	}
+	ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
+	_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
+		InstanceId: instance.InstanceId,
+		EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(s.EnableAMIENASupport)},
+	})
+	if err != nil {
+		err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
