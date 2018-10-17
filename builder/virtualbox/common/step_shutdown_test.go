@@ -134,7 +134,7 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 		t.Fatalf("bad action: %#v", action)
 	}
 	testDuration := time.Since(start)
-	if testDuration < 2500*time.Millisecond || testDuration > 2600*time.Millisecond {
+	if testDuration < 2500*time.Millisecond || testDuration > 2700*time.Millisecond {
 		t.Fatalf("incorrect duration %s", testDuration)
 	}
 
