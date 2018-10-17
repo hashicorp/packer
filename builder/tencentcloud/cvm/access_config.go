@@ -22,7 +22,7 @@ const (
 	GuangzhouOpen = Region("ap-guangzhou-open")
 	Hongkong      = Region("ap-hongkong")
 	Mumbai        = Region("ap-mumbai")
-	Seoul         = Region("seoul")
+	Seoul         = Region("ap-seoul")
 	Shanghai      = Region("ap-shanghai")
 	ShanghaiFsi   = Region("ap-shanghai-fsi")
 	ShenzhenFsi   = Region("ap-shenzhen-fsi")
