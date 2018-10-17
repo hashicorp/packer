@@ -231,6 +231,7 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	// Test good
 	config["iso_checksum_type"] = "mD5"
+	config["switch_name"] = "switch" // to avoid using builder.detectSwitchName which can lock down in CI mode
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
