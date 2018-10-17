@@ -1,7 +1,7 @@
 ---
 description: |
-    The Hetzner Cloud Packer builder is able to create new images for use with
-    DigitalOcean. The builder takes a source image, runs any provisioning
+    The Hetzner Cloud Packer builder is able to create new images for use with the
+    Hetzner Cloud. The builder takes a source image, runs any provisioning
     necessary on the image after launching it, then snapshots it into a reusable
     image. This reusable image can then be used as the foundation of new servers
     that are launched within the Hetzner Cloud.
@@ -39,20 +39,19 @@ builder.
     can also be specified via environment variable `HCLOUD_TOKEN`,
     if set.
 
--   `image` (string) - 	ID or name of location to create server in. 
+-   `image` (string) - ID or name of image to create server in. 
 
--   `location` (string) - The name of the location to launch the
-    droplet in.
+-   `location` (string) - The name of the location to launch the server in.
 
 -   `server_type` (string) - ID or name of the server type this server should be created with.
 
 ### Optional:
 
 -   `endpoint` (string) - Non standard api endpoint URL. Set this if you are
-    using a DigitalOcean API compatible service. It can also be specified via
+    using a Hetzner Cloud API compatible service. It can also be specified via
     environment variable `HCLOUD_ENDPOINT`.
 
--   `server_name` (string) - The name assigned to the droplet. DigitalOcean
+-   `server_name` (string) - The name assigned to the server. The Hetzner Cloud
     sets the hostname of the machine to this value.
 
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
@@ -61,12 +60,10 @@ builder.
 
 -   `poll_interval` (string) - Configures the interval in which actions are polled by the client. Default `500ms`. Increase this interval if you run into rate limiting errors.
 
--   `user_data` (string) - User data to launch with the Droplet.
+-   `user_data` (string) - User data to launch with the server.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
-    data when launching the Droplet.
-
--   `tags` (list) - Tags to apply to the droplet when it is created
+    data when launching the server.
 
 ## Basic Example
 
