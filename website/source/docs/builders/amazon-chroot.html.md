@@ -169,7 +169,8 @@ each category, the available configuration keys are alphabetized.
         every build.
 
     -   `device_name` (string) - The device name exposed to the instance (for
-        example, `/dev/sdh` or `xvdh`). Required when specifying `volume_size`.
+        example, `/dev/sdh` or `xvdh`). Required for every device in the
+        block device mapping.
 
     -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
 
@@ -194,8 +195,8 @@ each category, the available configuration keys are alphabetized.
     -   `volume_size` (number) - The size of the volume, in GiB. Required if not
         specifying a `snapshot_id`
 
-    -   `volume_type` (string) - The volume type. gp2 for General Purpose (SSD)
-        volumes, io1 for Provisioned IOPS (SSD) volumes, and standard for Magnetic
+    -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
+        volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
         volumes
 
 -   `region_kms_key_ids` (map of strings) - a map of regions to copy the ami to,

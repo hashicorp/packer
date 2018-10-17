@@ -88,6 +88,10 @@ func buildBlockDevices(b []BlockDevice) []*ec2.BlockDeviceMapping {
 }
 
 func (b *BlockDevice) Prepare(ctx *interpolate.Context) error {
+	if b.DeviceName == "" {
+		return fmt.Errorf("The `device_name` must be specified " +
+			"for every device in the block device mapping.")
+	}
 	// Warn that encrypted must be true when setting kms_key_id
 	if b.KmsKeyId != "" && b.Encrypted == false {
 		return fmt.Errorf("The device %v, must also have `encrypted: "+
