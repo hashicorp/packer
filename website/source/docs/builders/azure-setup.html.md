@@ -168,7 +168,7 @@ $ az ad app create \
 
 ### Create a Service Principal
 
-You cannot directly grant permissions to an application. Instead, you create a service principal and assign permissions to the service principal. To create a service principal for use with Packer, run the below command sepifying the subscription. This will grant Packer the contributor role to the subscription. The output of this command is your service principal credentials, save these in a safe place as you will need these to configure Packer.
+You cannot directly grant permissions to an application. Instead, you create a service principal and assign permissions to the service principal. To create a service principal for use with Packer, run the below command specifying the subscription. This will grant Packer the contributor role to the subscription. The output of this command is your service principal credentials, save these in a safe place as you will need these to configure Packer.
 
 ```shell
 az ad sp create-for-rbac -n "Packer" --role contributor \
