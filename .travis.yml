@@ -1,5 +1,5 @@
 env:
-  - USER=travis
+  - USER=travis GOMAXPROCS=2
 
 os:
   - windows
@@ -19,11 +19,12 @@ before_install:
     if [[ "$TRAVIS_OS_NAME" == "windows" ]];
     then choco install -y make mingw;
     export PATH=/c/tools/mingw64/bin:"$PATH";
+    export GOMAXPROCS="";
     fi
 
 script:
   - df -h
-  - GOMAXPROCS=2 make ci
+  - make ci
 
 branches:
   only:
