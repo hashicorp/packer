@@ -1,6 +1,38 @@
+# appveyor.yml reference : http://www.appveyor.com/docs/appveyor-yml
 
-skip_commits:
-  message: /.*/
+version: "{build}"
 
-build: off
+skip_tags: true
+
+branches:
+  only:
+    - master
+
+os: Windows Server 2012 R2
+
+environment:
+  GOPATH: c:\gopath
+
+clone_folder: c:\gopath\src\github.com\hashicorp\packer
+
+install:
+  - set GO15VENDOREXPERIMENT=1
+  - echo %Path%
+  - go version
+  - go env
+  - go get github.com/mitchellh/gox
+  - go get golang.org/x/tools/cmd/stringer
+
+build_script:
+  - git rev-parse HEAD
+ # go test $(go list ./... | grep -v vendor)
+  - ps: |
+      go.exe test (go.exe list ./... `
+      |? { -not $_.Contains('/vendor/') } `
+      |? { $_ -ne 'github.com/hashicorp/packer/builder/parallels/common' } `
+      |? { $_ -ne 'github.com/hashicorp/packer/common' }`
+      |? { $_ -ne 'github.com/hashicorp/packer/provisioner/ansible' })
+
+test: off
+
 deploy: off
