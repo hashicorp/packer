@@ -21,6 +21,7 @@ func testConfig() map[string]interface{} {
 		"iso_url":                 "http://www.packer.io",
 		"shutdown_command":        "yes",
 		"ssh_username":            "foo",
+		"switch_name":             "switch", // to avoid using builder.detectSwitchName which can lock down in travis-ci
 		"ram_size":                64,
 		"guest_additions_mode":    "none",
 		"clone_from_vmcx_path":    "generated",
@@ -231,7 +232,6 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 
 	// Test good
 	config["iso_checksum_type"] = "mD5"
-	config["switch_name"] = "switch" // to avoid using builder.detectSwitchName which can lock down in CI mode
 	b = Builder{}
 	warns, err = b.Prepare(config)
 	if len(warns) > 0 {
