@@ -46,6 +46,7 @@ const (
 	ActionResourceTypeImage      ActionResourceType = "image"
 	ActionResourceTypeISO        ActionResourceType = "iso"
 	ActionResourceTypeFloatingIP ActionResourceType = "floating_ip"
+	ActionResourceTypeVolume     ActionResourceType = "volume"
 )
 
 // ActionError is the error of an action.

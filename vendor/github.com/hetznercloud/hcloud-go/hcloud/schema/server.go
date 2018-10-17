@@ -21,6 +21,7 @@ type Server struct {
 	Image           *Image            `json:"image"`
 	Protection      ServerProtection  `json:"protection"`
 	Labels          map[string]string `json:"labels"`
+	Volumes         []int             `json:"volumes"`
 }
 
 // ServerProtection defines the schema of a server's resource protection.

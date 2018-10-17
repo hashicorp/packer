@@ -20,7 +20,7 @@ type Builder struct {
 	hcloudClient *hcloud.Client
 }
 
-var pluginVersion string
+var pluginVersion = "1.0.0"
 
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	config, warnings, errs := NewConfig(raws...)
@@ -36,7 +36,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		hcloud.WithToken(b.config.HCloudToken),
 		hcloud.WithEndpoint(b.config.Endpoint),
 		hcloud.WithPollInterval(b.config.PollInterval),
-		//hcloud.WithApplication("packer-builder-hcloud", pluginVersion),
+		hcloud.WithApplication("hcloud-packer", pluginVersion),
 	}
 	b.hcloudClient = hcloud.NewClient(opts...)
 	// Set up the state

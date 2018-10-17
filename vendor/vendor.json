@@ -1115,10 +1115,10 @@
 			"revision": "df949784da9ed028ee76df44652e42d37a09d7e4"
 		},
 		{
-			"checksumSHA1": "jofBtpmVJ4H9yiesFeuPu8pZaf4=",
+			"checksumSHA1": "lMvR+qhQWll2pXPY3GmJbKqgkUc=",
 			"path": "github.com/hetznercloud/hcloud-go/hcloud",
-			"revision": "62b54b43b09a0e828e6a27e9cc5e6b9dd20d67c6",
-			"revisionTime": "2018-09-24T12:42:35Z"
+			"revision": "eaf050e4f37028d2ca5f99a2fb38ead2c9b293d3",
+			"revisionTime": "2018-10-16T09:48:19Z"
 		},
 		{
 			"checksumSHA1": "3/Bhy+ua/DCv2ElMD5GzOYSGN6g=",
