@@ -74,38 +74,7 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 	// Set the group ID so we can delete it later
 	s.createdGroupId = *groupResp.GroupId
 
-	// Authorize the SSH access for the security group
-	req := &ec2.AuthorizeSecurityGroupIngressInput{
-		GroupId:    groupResp.GroupId,
-		IpProtocol: aws.String("tcp"),
-		FromPort:   aws.Int64(int64(port)),
-		ToPort:     aws.Int64(int64(port)),
-		CidrIp:     aws.String(s.TemporarySGSourceCidr),
-	}
-
-	// We loop and retry this a few times because sometimes the security
-	// group isn't available immediately because AWS resources are eventually
-	// consistent.
-	ui.Say(fmt.Sprintf(
-		"Authorizing access to port %d from %s in the temporary security group...",
-		port, s.TemporarySGSourceCidr))
-	for i := 0; i < 5; i++ {
-		_, err = ec2conn.AuthorizeSecurityGroupIngress(req)
-		if err == nil {
-			break
-		}
-
-		log.Printf("Error authorizing. Will sleep and retry. %s", err)
-		time.Sleep((time.Duration(i) * time.Second) + 1)
-	}
-
-	if err != nil {
-		err := fmt.Errorf("Error creating temporary security group: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
+	// Wait for the security group become available for authorizing
 	log.Printf("[DEBUG] Waiting for temporary security group: %s", s.createdGroupId)
 	err = waitUntilSecurityGroupExists(ec2conn,
 		&ec2.DescribeSecurityGroupsInput{
@@ -118,6 +87,34 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		err := fmt.Errorf("Timed out waiting for security group %s: %s", s.createdGroupId, err)
 		log.Printf("[DEBUG] %s", err.Error())
 		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	// Authorize the SSH access for the security group
+	groupRules := &ec2.AuthorizeSecurityGroupIngressInput{
+		GroupId: groupResp.GroupId,
+		IpPermissions: []*ec2.IpPermission{
+			{
+				FromPort: aws.Int64(int64(port)),
+				ToPort:   aws.Int64(int64(port)),
+				IpRanges: []*ec2.IpRange{
+					{
+						CidrIp: aws.String(s.TemporarySGSourceCidr),
+					},
+				},
+				IpProtocol: aws.String("tcp"),
+			},
+		},
+	}
+
+	ui.Say(fmt.Sprintf(
+		"Authorizing access to port %d from %s in the temporary security group...",
+		port, s.TemporarySGSourceCidr))
+	_, err = ec2conn.AuthorizeSecurityGroupIngress(groupRules)
+	if err != nil {
+		err := fmt.Errorf("Error authorizing temporary security group: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
