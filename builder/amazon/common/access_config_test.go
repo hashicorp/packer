@@ -17,20 +17,20 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 	mockConn := &mockEC2Client{}
 
 	c.RawRegion = "us-east-12"
-	valid, _ := ValidateRegion(c.RawRegion, mockConn)
-	if valid {
+	err := ValidateRegion(c.RawRegion, mockConn)
+	if err == nil {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "us-east-1"
-	valid, _ = ValidateRegion(c.RawRegion, mockConn)
-	if !valid {
+	err = ValidateRegion(c.RawRegion, mockConn)
+	if err != nil {
 		t.Fatalf("shouldn't have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "custom"
-	valid, _ = ValidateRegion(c.RawRegion, mockConn)
-	if valid {
+	err = ValidateRegion(c.RawRegion, mockConn)
+	if err == nil {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 

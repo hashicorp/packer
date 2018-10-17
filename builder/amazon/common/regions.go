@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
@@ -30,16 +31,17 @@ func listEC2Regions(ec2conn ec2iface.EC2API) ([]string, error) {
 
 // ValidateRegion returns true if the supplied region is a valid AWS
 // region and false if it's not.
-func ValidateRegion(region string, ec2conn ec2iface.EC2API) (bool, error) {
+func ValidateRegion(region string, ec2conn ec2iface.EC2API) error {
 	regions, err := listEC2Regions(ec2conn)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	for _, valid := range regions {
 		if region == valid {
-			return true, nil
+			return nil
 		}
 	}
-	return false, nil
+
+	return fmt.Errorf("Invalid region: %s", region)
 }
