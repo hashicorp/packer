@@ -117,11 +117,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6074024c54115955afc83ee5064367523bbc55e4eb0e9cf145e43c9c0371918c"
+  digest = "1:a4826c308e84f5f161b90b54a814f0be7d112b80164b9b884698a6903ea47ab3"
   name = "github.com/hashicorp/yamux"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2658be15c5f05e76244154714161f17e3e77de2e"
+  revision = "2f1d1f20f75d5404f53b9edf6b53ed5505508675"
 
 [[projects]]
   digest = "1:9cedee824c21326bd26950bd9e1ffe9dc4e7ca03dc8634d0e6f954ee6a383172"
