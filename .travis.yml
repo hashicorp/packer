@@ -31,4 +31,5 @@ branches:
 matrix:
   allow_failures:
     - go: master
+    - os: windows
   fast_finish: true
