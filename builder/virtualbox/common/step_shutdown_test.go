@@ -133,9 +133,9 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
-	testDuration := time.Since(start).Seconds()
-	if testDuration < 2.5 || testDuration > 2.6 {
-		t.Fatal("incorrect duration")
+	testDuration := time.Since(start)
+	if testDuration < 2500*time.Millisecond || testDuration > 2600*time.Millisecond {
+		t.Fatalf("incorrect duration %s", testDuration)
 	}
 
 	if _, ok := state.GetOk("error"); ok {
@@ -158,9 +158,9 @@ func TestStepShutdown_shutdownDelay(t *testing.T) {
 	if action := step.Run(context.Background(), state); action != multistep.ActionContinue {
 		t.Fatalf("bad action: %#v", action)
 	}
-	testDuration = time.Since(start).Seconds()
-	if testDuration > 0.6 {
-		t.Fatal("incorrect duration")
+	testDuration = time.Since(start)
+	if testDuration > 600*time.Millisecond {
+		t.Fatalf("incorrect duration %s", testDuration)
 	}
 
 	if _, ok := state.GetOk("error"); ok {
