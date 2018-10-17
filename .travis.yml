@@ -17,8 +17,7 @@ go:
 before_install:
   - >
     if [[ "$TRAVIS_OS_NAME" == "windows" ]];
-    then choco install -y make mingw;
-    export PATH=/c/tools/mingw64/bin:"$PATH";
+    then choco install -y make;
     fi
 
 script:
