@@ -44,7 +44,7 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		UserData:   userData,
 	})
 	if err != nil {
-		err := fmt.Errorf("1Error creating server: %s", err)
+		err := fmt.Errorf("Error creating server: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt

@@ -34,28 +34,28 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	priv, err := rsa.GenerateKey(rand.Reader, 2014)
 
 	// ASN.1 DER encoded form
-	priv_der := x509.MarshalPKCS1PrivateKey(priv)
-	priv_blk := pem.Block{
+	privDER := x509.MarshalPKCS1PrivateKey(priv)
+	privBLK := pem.Block{
 		Type:    "RSA PRIVATE KEY",
 		Headers: nil,
-		Bytes:   priv_der,
+		Bytes:   privDER,
 	}
 
 	// Set the private key in the config for later
-	c.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
+	c.Comm.SSHPrivateKey = pem.EncodeToMemory(&privBLK)
 
 	// Marshal the public key into SSH compatible format
 	// TODO properly handle the public key error
 	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
-	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
+	pubSSHFormat := string(ssh.MarshalAuthorizedKey(pub))
 
-	// The name of the public key on DO
+	// The name of the public key on the Hetzner Cloud
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 
 	// Create the key!
 	key, _, err := client.SSHKey.Create(context.TODO(), hcloud.SSHKeyCreateOpts{
 		Name:      name,
-		PublicKey: pub_sshformat,
+		PublicKey: pubSSHFormat,
 	})
 	if err != nil {
 		err := fmt.Errorf("Error creating temporary SSH key: %s", err)
@@ -83,7 +83,7 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		defer f.Close()
 
 		// Write the key out
-		if _, err := f.Write(pem.EncodeToMemory(&priv_blk)); err != nil {
+		if _, err := f.Write(pem.EncodeToMemory(&privBLK)); err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
 			return multistep.ActionHalt
 		}
@@ -96,7 +96,6 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 			}
 		}
 	}
-	ui.Say("SSH Key OK")
 	return multistep.ActionContinue
 }
 
