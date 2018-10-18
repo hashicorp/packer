@@ -79,10 +79,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				bootable:        true,
 			},
 			&stepCreatePersistentVolume{
-				// We multiple the master volume size by 3, because we need to
-				// copy the original data 3 times: the data itself, the
-				// tarball, and the chunks
-				volumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*3),
+				// We multiple the master volume size by 2, because we need
+				// room to tarball the disk image. We also need to chunk the
+				// tar ball, but we can remove the original disk image first.
+				volumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
 				volumeName: fmt.Sprintf("builder-storage_%s", runID),
 			},
 			&ocommon.StepKeyPair{

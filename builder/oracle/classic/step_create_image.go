@@ -57,6 +57,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	cd /builder
 	dd if=/dev/xvdc bs=8M status=progress | cp --sparse=always /dev/stdin diskimage.raw
 	tar czSf ./diskimage.tar.gz ./diskimage.raw
+	rm diskimage.raw
 	%s`, uploadImageCmd)
 
 	dest := "/tmp/create-packer-diskimage.sh"
