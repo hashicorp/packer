@@ -22,11 +22,11 @@ documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMI
 This builder builds an AMI by launching an EC2 instance from an existing
 instance-storage backed AMI, provisioning that running machine, and then
 bundling and creating a new AMI from that machine. This is all done in your own
-AWS account. The builder will create temporary key pairs, security group rules,
+AWS account. This builder will create temporary key pairs, security group rules,
 etc. that provide it temporary access to the instance while the image is being
 created. This simplifies configuration quite a bit.
 
-The builder does *not* manage AMIs. Once it creates an AMI and stores it in
+This builder does *not* manage AMIs. Once it creates an AMI and stores it in
 your account, it is up to you to use, delete, etc. the AMI.
 
 -&gt; **Note:** Temporary resources are, by default, all created with the prefix
@@ -42,7 +42,7 @@ builder finishes running.
 
 ## Configuration Reference
 
-There are many configuration options available for the builder. They are
+There are many configuration options available for this builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
@@ -299,11 +299,11 @@ builder.
         Any filter described in the docs for [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
         is valid.
 
-    `security_group_ids` take precendense over this.
+    `security_group_ids` take precedence over this.
 
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
@@ -536,7 +536,7 @@ for more information on what environmental variables Packer will look for.
 
 ## Accessing the Instance to Debug
 
-If you need to access the instance to debug for some reason, run the builder
+If you need to access the instance to debug for some reason, run this builder
 with the `-debug` flag. In debug mode, the Amazon builder will save the private
 key in the current directory and will output the DNS or IP information as well.
 You can use this information to access the instance as it is running.

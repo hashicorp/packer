@@ -59,9 +59,9 @@ builder.
     available.
 
 -   `commercial_type` (string) - The name of the server commercial type:
-      `ARM64-128GB`,`ARM64-16GB`,`ARM64-2GB`,`ARM64-32GB`,`ARM64-4GB`, `ARM64-64GB`,
-      `ARM64-8GB`,`C1`,`C2L`,`C2M`,`C2S`,`START1-L`,`START1-M`,`START1-S`,`START1-XS`,
-      `X64-120GB`,`X64-15GB`,`X64-30GB`,`X64-60GB`
+      `ARM64-128GB`, `ARM64-16GB`, `ARM64-2GB`, `ARM64-32GB`, `ARM64-4GB`, `ARM64-64GB`,
+      `ARM64-8GB`, `C1`, `C2L`, `C2M`, `C2S`, `START1-L`, `START1-M`, `START1-S`,
+      `START1-XS`, `X64-120GB`, `X64-15GB`, `X64-30GB`, `X64-60GB`
 
 ### Optional:
 
