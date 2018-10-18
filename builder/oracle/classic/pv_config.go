@@ -63,7 +63,11 @@ curl -v -X PUT \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz?multipart-manifest=put" \
 	-T ./manifest.json
-'...'`
+
+curl -v -X DELETE \
+	-H "X-Auth-Token: $AUTH_TOKEN" \
+	${STORAGE_URL}/{{.Container}}
+`
 	}
 	/*
 		errs = packer.MultiErrorAppend(errs,
