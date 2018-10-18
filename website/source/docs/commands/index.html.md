@@ -71,21 +71,21 @@ This makes it more convenient to parse using standard Unix tools such as `awk` o
 The format is:
 
 ``` text
-timestamp,target,type,data...
+timestamp,,target,type,data...
 ```
 
 Each component is explained below:
 
 -   `timestamp` is a Unix timestamp in UTC of when the message was printed.
 
--   `target` is the target of the following output. This is empty if the message
-    is related to Packer globally. Otherwise, this is generally a build name so
-    you can relate output to a specific build while parallel builds are running.
 
--   `type` is the type of machine-readable message being outputted. There are a
-    set of standard types which are covered later, but each component of Packer
-    (builders, provisioners, etc.) may output their own custom types as well,
-    allowing the machine-readable output to be infinitely flexible.
+-   `target` When you call `packer build` this can be either `''` or individual
+    build names, e.g. `amazon-ebs`. You'll normally see `''` when output from
+    the build process is happening, and the build name when artifacts of
+    particular builds are being referred to.
+
+-   `type` is the type of machine-readable message being outputted. The two most
+    common `type`s are `ui` and `artifact`
 
 -   `data` is zero or more comma-separated values associated with the prior type.
     The exact amount and meaning of this data is type-dependent, so you must read
@@ -101,11 +101,43 @@ become a literal `\r`.
 
 ### Machine-Readable Message Types
 
-The set of machine-readable message types can be found in the
-[machine-readable format](/docs/commands/index.html) complete
-documentation section. This section contains documentation on all the message
-types exposed by Packer core as well as all the components that ship with
-Packer by default.
+There are two common message types for the Machine Readable output:
+
+-  `ui`: this means that the information being provided is a human-readable string
+  that would be sent to stdout even if we aren't in machine-readable mode. There
+  are three "data" subtypes associated with this type:
+
+    -  `say`: in a non-machine-readable format, this would be bolded. Normally it is
+    used for anouncements about beginning new steps in the build process
+
+    -  `message`: the most commonly used message type, used for basic updates during
+    the build process.
+
+    -  `error`: reserved for errors
+
+- `artifact`: This data type tells you information about what Packer created
+  during its build. An example of output follows the pattern
+  `timestamp, buildname, artifact, artifact_number, key, value` where `key` and
+  `value` contain information about the artifact.
+
+  For example:
+
+  ```
+    1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
+    1539967803,amazon-ebs,artifact-count,2
+    1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
+    1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
+    1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+    1539967803,amazon-ebs,artifact,0,files-count,0
+    1539967803,amazon-ebs,artifact,0,end
+    1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+    1539967803,amazon-ebs,artifact,1,builder-id,
+    1539967803,amazon-ebs,artifact,1,id,
+    1539967803,amazon-ebs,artifact,1,string,
+    1539967803,amazon-ebs,artifact,1,files-count,0
+    2018/10/19 09:50:03 waiting for all plugin processes to complete...
+    1539967803,amazon-ebs,artifact,1,end
+  ```
 
 ## Autocompletion
 
