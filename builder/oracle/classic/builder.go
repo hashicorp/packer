@@ -71,6 +71,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 	if b.config.IsPV() {
+		builderCommConfig := b.config.Comm
+		builderCommConfig.SSHPty = true
+
 		steps = []multistep.Step{
 			&stepCreatePersistentVolume{
 				volumeSize:      fmt.Sprintf("%d", b.config.PersistentVolumeSize),
@@ -114,7 +117,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				instanceInfoKey: "builder_instance_info",
 			},
 			&communicator.StepConnect{
-				Config:    &b.config.Comm,
+				Config:    &builderCommConfig,
 				Host:      ocommon.CommHost,
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
