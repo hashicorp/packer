@@ -87,7 +87,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		Account:     fmt.Sprintf("/Compute-%s/cloud_storage", config.IdentityDomain),
 		Description: "Packer generated TODO",
 		// The three-part name of the object
-		Name: config.Identifier(s.imageName),
+		Name: s.imageName,
 		// image_file.tar.gz, where image_file is the .tar.gz name of the machine image file that you have uploaded to Oracle Cloud Infrastructure Object Storage Classic.
 		File: fmt.Sprintf("%s.tar.gz", s.imageName),
 	}
@@ -108,7 +108,6 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	5. Configuration (master/builder images & entry, destination stuff, etc)
 	6. split master/builder image/connection config. i.e. build anything, master only linux
 	7. correct artifact
-	8. hide password from logs
 	*/
 	//machineImageClient.CreateMachineImage()
 
