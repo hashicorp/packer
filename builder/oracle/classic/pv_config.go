@@ -34,6 +34,21 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 # Split diskimage in to 100mb chunks
 split -b 100m diskimage.tar.gz segment_
 
+# Download jq tool
+curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+mv jq-linux64 jq
+chmod u+x jq
+
+# Create manifest file
+(
+for i in segment_*; do
+  ./jq -n --arg path "{{.Container}}/$i" \
+          --arg etag $(md5sum $i | cut -f1 -d' ') \
+		  --arg size_bytes $(stat --printf "%s" $i) \
+		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
+done
+) | ./jq -s . > manifest.json
+
 # Authenticate
 curl -D auth-headers -s -X GET \
 	-H "X-Storage-User: Storage-{{.AccountID}}:{{.Username}}" \
@@ -53,21 +68,6 @@ for i in segment_*; do
 		${STORAGE_URL}/{{.Container}}/$i;
 done
 
-# Download jq tool
-curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-mv jq-linux64 jq
-chmod u+x jq
-
-# Create manifest file
-(
-for i in segment_*; do
-  ./jq -n --arg path "{{.Container}}/$i" \
-          --arg etag $(md5sum $i | cut -f1 -d' ') \
-		  --arg size_bytes $(stat --printf "%s" $i) \
-		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
-done
-) | ./jq -s . > manifest.json
-
 # Create machine image from manifest
 curl -v -X PUT \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
@@ -78,7 +78,6 @@ curl -v -X PUT \
 curl -I -X HEAD \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz"
-
 
 # Delete {{.Container}}
 # following https://docs.oracle.com/en/cloud/iaas/storage-cloud/cssto/deleting-multiple-objects-single-operation.html
