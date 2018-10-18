@@ -28,7 +28,30 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 	}
 
 	if c.BuilderUploadImageCommand == "" {
-		c.BuilderUploadImageCommand = `curl --connect-timeout 5 \
+		c.BuilderUploadImageCommand = `split -b 10m diskimage.tar.gz segment_ 
+
+curl -D auth-headers -s -X GET -H "X-Storage-User: Storage-a459477:jake@hashicorp.com" -H "X-Storage-Pass: ***REMOVED***" https://a459477.storage.oraclecloud.com/auth/v1.0
+
+export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
+export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
+
+curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/mwhooker-test-1
+
+for i in segment_*; do 
+	curl -v -X PUT -T $i \
+		-H "X-Auth-Token: $AUTH_TOKEN" \
+		${STORAGE_URL}/mwhooker-test-1/$i;
+done
+
+(
+echo [
+for i in segment_*; do
+  printf '{"path": "%s", "etag": "%s", "size_bytes": %s},\n' "mwhooker-test-1/$i" $(md5sum $i | cut -f1 -d' ') $(stat --printf "%s" $i)
+done
+echo ]
+) > manifest.json
+
+curl --connect-timeout 5 \
 --max-time 3600 \
 --retry 5 \
 --retry-delay 0 \

@@ -52,7 +52,14 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		Command: fmt.Sprintf("sudo /bin/sh %s", dest),
 	}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
-		err = fmt.Errorf("Problem creating volume: %s", err)
+		err = fmt.Errorf("Problem creating image`: %s", err)
+		ui.Error(err.Error())
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
+	if cmd.ExitStatus != 0 {
+		err = fmt.Errorf("Create Disk Image command failed with exit code %d", cmd.ExitStatus)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
