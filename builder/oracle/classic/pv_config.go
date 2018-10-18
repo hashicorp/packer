@@ -28,8 +28,13 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 	}
 
 	if c.BuilderUploadImageCommand == "" {
-		c.BuilderUploadImageCommand = `split -b 10m diskimage.tar.gz segment_ 
+		c.BuilderUploadImageCommand = `
+# https://www.oracle.com/webfolder/technetwork/tutorials/obe/cloud/objectstorage/upload_files_gt_5GB_REST_API/upload_files_gt_5GB_REST_API.html
 
+# Split diskimage in to 100mb chunks
+split -b 100m diskimage.tar.gz segment_
+
+# Authenticate
 curl -D auth-headers -s -X GET \
 	-H "X-Storage-User: Storage-{{.AccountID}}:{{.Username}}" \
 	-H "X-Storage-Pass: {{.Password}}" \
@@ -38,18 +43,22 @@ curl -D auth-headers -s -X GET \
 export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
+# Create {{.Container}}
 curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.Container}}
 
-for i in segment_*; do 
+# Upload segments
+for i in segment_*; do
 	curl -v -X PUT -T $i \
 		-H "X-Auth-Token: $AUTH_TOKEN" \
 		${STORAGE_URL}/{{.Container}}/$i;
 done
 
+# Download jq tool
 curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
 mv jq-linux64 jq
 chmod u+x jq
 
+# Create manifest file
 (
 for i in segment_*; do
   ./jq -n --arg path "{{.Container}}/$i" \
@@ -59,14 +68,35 @@ for i in segment_*; do
 done
 ) | ./jq -s . > manifest.json
 
+# Create machine image from manifest
 curl -v -X PUT \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz?multipart-manifest=put" \
 	-T ./manifest.json
 
-curl -v -X DELETE \
+# Get uploaded image description
+curl -I -X HEAD \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
-	${STORAGE_URL}/{{.Container}}
+	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz"
+
+
+# Delete {{.Container}}
+# following https://docs.oracle.com/en/cloud/iaas/storage-cloud/cssto/deleting-multiple-objects-single-operation.html
+
+# Collect objects we need to clean up
+printf "{{.Container}}/%s\n" segment_* > objects_to_delete.txt
+
+# Delete objects
+curl -v -s -X DELETE \
+	-H "X-Auth-Token: $AUTH_TOKEN" \
+	-H "Content-Type: text/plain" \
+	-T objects_to_delete.txt \
+	"${STORAGE_URL}/?bulk-delete"
+
+# Delete container
+curl -v -s -X DELETE \
+	-H "X-Auth-Token: $AUTH_TOKEN" \
+	"${STORAGE_URL}/{{.Container}}"
 `
 	}
 	/*
