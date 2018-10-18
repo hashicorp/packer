@@ -83,10 +83,10 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	machineImageClient := client.MachineImages()
 	createMI := &compute.CreateMachineImageInput{
 		// Two-part name of the account
-		Account:     "/Compute-identity_domain/cloud_storage",
+		Account:     fmt.Sprintf("/Compute-%s/cloud_storage", config.IdentityDomain),
 		Description: "Packer generated TODO",
 		// The three-part name of the object
-		Name: "/Compute-identity_domain/user/object",
+		Name: config.Identifier(s.imageName),
 		// image_file.tar.gz, where image_file is the .tar.gz name of the machine image file that you have uploaded to Oracle Cloud Infrastructure Object Storage Classic.
 		File: fmt.Sprintf("%s.tar.gz", s.imageName),
 	}
@@ -105,6 +105,8 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	4. Documentation
 	5. Configuration (master/builder images, entry, destination stuff, etc)
 	6. split master/builder image/connection config. i.e. build anything, master only linux
+	7. correct artifact
+	8. Delete upload container
 	*/
 	//machineImageClient.CreateMachineImage()
 
