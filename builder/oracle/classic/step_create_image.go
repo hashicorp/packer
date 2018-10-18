@@ -50,6 +50,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	command := fmt.Sprintf(`#!/bin/sh
 	set -e
+	set -x
 	mkdir /builder
 	mkfs -t ext3 /dev/xvdb
 	mount /dev/xvdb /builder
@@ -90,6 +91,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		// image_file.tar.gz, where image_file is the .tar.gz name of the machine image file that you have uploaded to Oracle Cloud Infrastructure Object Storage Classic.
 		File: fmt.Sprintf("%s.tar.gz", s.imageName),
 	}
+	log.Printf("CreateMachineImageInput: %+v", createMI)
 	mi, err := machineImageClient.CreateMachineImage(createMI)
 	if err != nil {
 		err = fmt.Errorf("Error creating machine image: %s", err)
@@ -106,6 +108,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	5. Configuration (master/builder images & entry, destination stuff, etc)
 	6. split master/builder image/connection config. i.e. build anything, master only linux
 	7. correct artifact
+	8. hide password from logs
 	*/
 	//machineImageClient.CreateMachineImage()
 
