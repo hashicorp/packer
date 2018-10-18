@@ -52,24 +52,22 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("ssh_key_%s.pem", b.config.PackerBuildName),
 		},
-		new(stepCreateServer),
+		&stepCreateServer{},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      getServerIP,
 			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
-		new(common.StepProvision),
+		&common.StepProvision{},
 		&common.StepCleanupTempKeys{
 			Comm: &b.config.Comm,
 		},
-		new(stepShutdownServer),
-		new(stepCreateSnapshot),
+		&stepShutdownServer{},
+		&stepCreateSnapshot{},
 	}
-	ui.Say("Steps OK")
 	// Run the steps
 	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(state)
-	ui.Say("Run OK")
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
