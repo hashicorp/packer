@@ -29,33 +29,62 @@ func (d *AmiFilterOptions) NoOwner() bool {
 	return len(d.Owners) == 0
 }
 
+type SubnetFilterOptions struct {
+	Filters  map[*string]*string
+	MostFree bool `mapstructure:"most_free"`
+	Random   bool `mapstructure:"random"`
+}
+
+func (d *SubnetFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
+}
+
+type VpcFilterOptions struct {
+	Filters map[*string]*string
+}
+
+func (d *VpcFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
+}
+
+type SecurityGroupFilterOptions struct {
+	Filters map[*string]*string
+}
+
+func (d *SecurityGroupFilterOptions) Empty() bool {
+	return len(d.Filters) == 0
+}
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
-	AssociatePublicIpAddress          bool              `mapstructure:"associate_public_ip_address"`
-	AvailabilityZone                  string            `mapstructure:"availability_zone"`
-	BlockDurationMinutes              int64             `mapstructure:"block_duration_minutes"`
-	DisableStopInstance               bool              `mapstructure:"disable_stop_instance"`
-	EbsOptimized                      bool              `mapstructure:"ebs_optimized"`
-	EnableT2Unlimited                 bool              `mapstructure:"enable_t2_unlimited"`
-	IamInstanceProfile                string            `mapstructure:"iam_instance_profile"`
-	InstanceInitiatedShutdownBehavior string            `mapstructure:"shutdown_behavior"`
-	InstanceType                      string            `mapstructure:"instance_type"`
-	RunTags                           map[string]string `mapstructure:"run_tags"`
-	SecurityGroupId                   string            `mapstructure:"security_group_id"`
-	SecurityGroupIds                  []string          `mapstructure:"security_group_ids"`
-	SourceAmi                         string            `mapstructure:"source_ami"`
-	SourceAmiFilter                   AmiFilterOptions  `mapstructure:"source_ami_filter"`
-	SpotPrice                         string            `mapstructure:"spot_price"`
-	SpotPriceAutoProduct              string            `mapstructure:"spot_price_auto_product"`
-	SpotTags                          map[string]string `mapstructure:"spot_tags"`
-	SubnetId                          string            `mapstructure:"subnet_id"`
-	TemporaryKeyPairName              string            `mapstructure:"temporary_key_pair_name"`
-	TemporarySGSourceCidr             string            `mapstructure:"temporary_security_group_source_cidr"`
-	UserData                          string            `mapstructure:"user_data"`
-	UserDataFile                      string            `mapstructure:"user_data_file"`
-	VpcId                             string            `mapstructure:"vpc_id"`
-	WindowsPasswordTimeout            time.Duration     `mapstructure:"windows_password_timeout"`
+	AssociatePublicIpAddress          bool                       `mapstructure:"associate_public_ip_address"`
+	AvailabilityZone                  string                     `mapstructure:"availability_zone"`
+	BlockDurationMinutes              int64                      `mapstructure:"block_duration_minutes"`
+	DisableStopInstance               bool                       `mapstructure:"disable_stop_instance"`
+	EbsOptimized                      bool                       `mapstructure:"ebs_optimized"`
+	EnableT2Unlimited                 bool                       `mapstructure:"enable_t2_unlimited"`
+	IamInstanceProfile                string                     `mapstructure:"iam_instance_profile"`
+	InstanceInitiatedShutdownBehavior string                     `mapstructure:"shutdown_behavior"`
+	InstanceType                      string                     `mapstructure:"instance_type"`
+	SecurityGroupFilter               SecurityGroupFilterOptions `mapstructure:"security_group_filter"`
+	RunTags                           map[string]string          `mapstructure:"run_tags"`
+	SecurityGroupId                   string                     `mapstructure:"security_group_id"`
+	SecurityGroupIds                  []string                   `mapstructure:"security_group_ids"`
+	SourceAmi                         string                     `mapstructure:"source_ami"`
+	SourceAmiFilter                   AmiFilterOptions           `mapstructure:"source_ami_filter"`
+	SpotPrice                         string                     `mapstructure:"spot_price"`
+	SpotPriceAutoProduct              string                     `mapstructure:"spot_price_auto_product"`
+	SpotTags                          map[string]string          `mapstructure:"spot_tags"`
+	SubnetFilter                      SubnetFilterOptions        `mapstructure:"subnet_filter"`
+	SubnetId                          string                     `mapstructure:"subnet_id"`
+	TemporaryKeyPairName              string                     `mapstructure:"temporary_key_pair_name"`
+	TemporarySGSourceCidr             string                     `mapstructure:"temporary_security_group_source_cidr"`
+	UserData                          string                     `mapstructure:"user_data"`
+	UserDataFile                      string                     `mapstructure:"user_data_file"`
+	VpcFilter                         VpcFilterOptions           `mapstructure:"vpc_filter"`
+	VpcId                             string                     `mapstructure:"vpc_id"`
+	WindowsPasswordTimeout            time.Duration              `mapstructure:"windows_password_timeout"`
 
 	// Communicator settings
 	Comm communicator.Config `mapstructure:",squash"`
