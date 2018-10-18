@@ -119,7 +119,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&stepCreateImage{
-				uploadImageCommand: b.config.BuilderUploadImageCommand,
+				uploadImageCommand:   b.config.BuilderUploadImageCommand,
+				destinationContainer: fmt.Sprintf("packer-pv-image-%s", runID),
 			},
 			&common.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
