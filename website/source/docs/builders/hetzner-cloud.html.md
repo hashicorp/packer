@@ -39,7 +39,7 @@ builder.
     can also be specified via environment variable `HCLOUD_TOKEN`,
     if set.
 
--   `image` (string) - ID or name of image to create server in. 
+-   `image` (string) - ID or name of image to launch server from. 
 
 -   `location` (string) - The name of the location to launch the server in.
 
