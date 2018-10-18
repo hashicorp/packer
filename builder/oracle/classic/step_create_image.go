@@ -94,7 +94,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	log.Printf("CreateMachineImageInput: %+v", createMI)
 	mi, err := machineImageClient.CreateMachineImage(createMI)
 	if err != nil {
-		err = fmt.Errorf("Error creating machine image: %s", err)
+		err = fmt.Errorf("Error creating machine image: %s, %+v", err, mi)
 		ui.Error(err.Error())
 		state.Put("error", err)
 		return multistep.ActionHalt
