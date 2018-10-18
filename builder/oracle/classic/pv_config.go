@@ -43,19 +43,19 @@ for i in segment_*; do
 		${STORAGE_URL}/mwhooker-test-1/$i;
 done
 
-(
-echo [
-for i in segment_*; do
-  printf '{"path": "%s", "etag": "%s", "size_bytes": %s},\n' "mwhooker-test-1/$i" $(md5sum $i | cut -f1 -d' ') $(stat --printf "%s" $i)
-done
-echo ]
-) > manifest.json
+curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+mv jq-linux64 jq
+chmod u+x jq
 
-curl --connect-timeout 5 \
---max-time 3600 \
---retry 5 \
---retry-delay 0 \
--o {{ .DiskImagePath }} \
+(
+for i in segment_*; do
+  ./jq -n --arg path "mwhooker-test-1/$i" --arg etag $(md5sum $i | cut -f1 -d' ') --arg size_bytes $(stat --printf "%s" $i) '{path: $path, etag: $etag, size_bytes: $size_bytes}'
+done
+) | ./jq -s . > manifest.json
+
+curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN"  "${STORAGE_URL}/compute_images/mwhooker-diskimage-01.tar.gz?multipart-manifest=put" -T ./manifest.json
+
+# curl -I -X HEAD -H "X-Auth-Token: $AUTH_TOKEN"  "${STORAGE_URL}/mwhooker-test-1/diskimage.tar.gz"
 '...'`
 	}
 	/*
