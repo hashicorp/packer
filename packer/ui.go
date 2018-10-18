@@ -195,7 +195,12 @@ func (u *TargetedUI) prefixLines(arrow bool, message string) string {
 	var result bytes.Buffer
 
 	for _, line := range strings.Split(message, "\n") {
-		result.WriteString(fmt.Sprintf("%s %s: %s\n", arrowText, u.Target, line))
+		if os.Getenv("PACKER_LOG_TIMESTAMPS") != "" {
+			currentTime := time.Now().Format(time.RFC850)
+			result.WriteString(fmt.Sprintf("%s %s %s: %s\n", arrowText, currentTime, u.Target, line))
+		} else {
+			result.WriteString(fmt.Sprintf("%s %s: %s\n", arrowText, u.Target, line))
+		}
 	}
 
 	return strings.TrimRightFunc(result.String(), unicode.IsSpace)

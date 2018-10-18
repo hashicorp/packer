@@ -23,6 +23,9 @@ each can be found below:
     set for any logging to occur. See the [debugging
     page](/docs/other/debugging.html).
 
+-   `PACKER_LOG_TIMESTAMPS` - Setting this to any value will enable timestamps
+    in the terminal for output.
+
 -   `PACKER_NO_COLOR` - Setting this to any value will disable color in
     the terminal.
 
