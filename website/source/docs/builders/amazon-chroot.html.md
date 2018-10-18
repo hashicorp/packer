@@ -131,9 +131,11 @@ each category, the available configuration keys are alphabetized.
     forces Packer to find an open device automatically.
 
 -   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
-    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
-    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
+    on HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    If false, this will disable enhanced networking in the final AMI as opposed to passing
+    the setting through unchanged from the source. Note: you must make sure enhanced
+    networking is enabled on your instance. See [Amazon's documentation on enabling enhanced
+    networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.

@@ -182,9 +182,11 @@ builder.
     Default `false`.
 
 -   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
-    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
-    Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
-    documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
+    on HVM-compatible AMIs. If set, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    If false, this will disable enhanced networking in the final AMI as opposed to passing
+    the setting through unchanged from the source. Note: you must make sure enhanced
+    networking is enabled on your instance. See [Amazon's documentation on enabling enhanced
+    networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 
 -   `enable_t2_unlimited` (boolean) - Enabling T2 Unlimited allows the source
     instance to burst additional CPU beyond its available [CPU Credits]
