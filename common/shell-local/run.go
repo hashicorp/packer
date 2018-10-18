@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -58,31 +59,50 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		ui.Say(fmt.Sprintf("Running local shell script: %s", script))
 
-		comm := &Communicator{
-			ExecuteCommand: interpolatedCmds,
+		// Check if command can execute against runtime.
+		runCommand := false
+		if len(config.OnlyOn) > 0 {
+			for _, os := range config.OnlyOn {
+				if os == runtime.GOOS {
+					runCommand = true
+				}
+			}
+		} else {
+			runCommand = true
 		}
 
-		// The remoteCmd generated here isn't actually run, but it allows us to
-		// use the same interafce for the shell-local communicator as we use for
-		// the other communicators; ultimately, this command is just used for
-		// buffers and for reading the final exit status.
-		flattenedCmd := strings.Join(interpolatedCmds, " ")
-		cmd := &packer.RemoteCmd{Command: flattenedCmd}
-		log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
-		if err := cmd.StartWithUi(comm, ui); err != nil {
-			return false, fmt.Errorf(
-				"Error executing script: %s\n\n"+
-					"Please see output above for more information.",
-				script)
-		}
-		if cmd.ExitStatus != 0 {
-			return false, fmt.Errorf(
-				"Erroneous exit code %d while executing script: %s\n\n"+
-					"Please see output above for more information.",
-				cmd.ExitStatus,
-				script)
+		if runCommand {
+			ui.Say(fmt.Sprintf("Running local shell script: %s", script))
+
+			comm := &Communicator{
+				ExecuteCommand: interpolatedCmds,
+			}
+
+			// The remoteCmd generated here isn't actually run, but it allows us to
+			// use the same interafce for the shell-local communicator as we use for
+			// the other communicators; ultimately, this command is just used for
+			// buffers and for reading the final exit status.
+			flattenedCmd := strings.Join(interpolatedCmds, " ")
+
+			cmd := &packer.RemoteCmd{Command: flattenedCmd}
+			log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
+			if err := cmd.StartWithUi(comm, ui); err != nil {
+				return false, fmt.Errorf(
+					"Error executing script: %s\n\n"+
+						"Please see output above for more information.",
+					script)
+			}
+			if cmd.ExitStatus != 0 {
+				return false, fmt.Errorf(
+					"Erroneous exit code %d while executing script: %s\n\n"+
+						"Please see output above for more information.",
+					cmd.ExitStatus,
+					script)
+			}
+		} else {
+			ui.Say(fmt.Sprintf("Skipping local shell script due to runtime OS: %s", script))
+			log.Printf("[INFO] (shell-local): skipping command due to runtime OS not specified.")
 		}
 	}
 
