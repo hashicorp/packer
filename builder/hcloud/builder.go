@@ -74,7 +74,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	if _, ok := state.GetOk("snapshot_name"); !ok {
-		log.Println("Failed to find snapshot_name in state. Bug?")
 		return nil, nil
 	}
 
