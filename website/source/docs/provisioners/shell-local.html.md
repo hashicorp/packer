@@ -108,6 +108,14 @@ Optional parameters:
     **Important:** If you customize this, be sure to include something like the
     `-e` flag, otherwise individual steps failing won't fail the provisioner.
 
+-  `onlyon` (array of strings) - This is an array of 
+    [runtime operating systems](https://golang.org/doc/install/source#environment)
+    where `shell-local` will only run on. This allows you to run `shell-local` *only* 
+    on specific compatible operating systems. If specified, shell-local will only
+    execute if runtime operating system is in the list; otherwise it will skip the 
+    `shell-local` command. The default behavior is for `shell-local` to run if 
+    `onlyon` is not specified.
+
 -  `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
    are running Packer in a Windows environment with the Windows Subsystem for
    Linux feature enabled, and would like to invoke a bash script rather than
