@@ -13,9 +13,9 @@ import (
 )
 
 type stepCreateImage struct {
-	uploadImageCommand   string
-	destinationContainer string
-	imageName            string
+	uploadImageCommand string
+	tempContainer      string
+	imageName          string
 }
 
 type uploadCmdData struct {
@@ -37,7 +37,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		Username:  config.Username,
 		Password:  config.Password,
 		AccountID: config.IdentityDomain,
-		Container: s.destinationContainer,
+		Container: s.tempContainer,
 		ImageName: s.imageName,
 	}
 	uploadImageCmd, err := interpolate.Render(s.uploadImageCommand, &config.ctx)
@@ -103,10 +103,9 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	2. re-use step_list_images
 	3. Don't push commits with passwords in them
 	4. Documentation
-	5. Configuration (master/builder images, entry, destination stuff, etc)
+	5. Configuration (master/builder images & entry, destination stuff, etc)
 	6. split master/builder image/connection config. i.e. build anything, master only linux
 	7. correct artifact
-	8. Delete upload container
 	*/
 	//machineImageClient.CreateMachineImage()
 
