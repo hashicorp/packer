@@ -29,7 +29,7 @@ Packer, we recommend starting with the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 
 The builder does *not* manage AMIs. Once it creates an AMI and stores it in your
-account, it is up to you to use, delete, etc. the AMI.
+account, it is up to you to use, delete, etc., the AMI.
 
 ## How Does it Work?
 
@@ -58,20 +58,20 @@ each category, the available configuration keys are alphabetized.
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `ami_name` (string) - The name of the resulting AMI that will appear when
     managing AMIs in the AWS console or via APIs. This must be unique. To help
     make this unique, use a function like `timestamp` (see [template
-    engine](/docs/templates/engine.html) for more info)
+    engine](/docs/templates/engine.html) for more info).
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `source_ami` (string) - The source AMI whose root volume will be copied and
     provisioned on the currently running instance. This must be an EBS-backed AMI
     with a root volume snapshot that you have access to. Note: this is not used
-    when `from_scratch` is set to true.
+    when `from_scratch` is set to `true`.
 
 ### Optional:
 
@@ -97,19 +97,19 @@ each category, the available configuration keys are alphabetized.
 
 -   `ami_virtualization_type` (string) - The type of virtualization for the AMI
     you are building. This option is required to register HVM images. Can be
-    "paravirtual" (default) or "hvm".
+    `paravirtual` (default) or `hvm`.
 
 -   `chroot_mounts` (array of array of strings) - This is a list of devices
     to mount into the chroot environment. This configuration parameter
-    requires some additional documentation which is in the "Chroot Mounts"
-    section below. Please read that section for more information on how to
+    requires some additional documentation which is in the [Chroot Mounts](#Chroot Mounts)
+    section. Please read that section for more information on how to
     use this.
 
 -   `command_wrapper` (string) - How to run shell commands. This defaults to
     `{{.Command}}`. This may be useful to set if you want to set environmental
     variables or perhaps run it with `sudo` or so on. This is a configuration
     template where the `.Command` variable is replaced with the command to
-    be run. Defaults to "{{.Command}}".
+    be run. Defaults to `{{.Command}}`.
 
 -   `copy_files` (array of strings) - Paths to files on the running EC2 instance
     that will be copied into the chroot environment prior to provisioning. Defaults
@@ -131,7 +131,7 @@ each category, the available configuration keys are alphabetized.
     forces Packer to find an open device automatically.
 
 -   `ena_support` (boolean) - Enable enhanced networking (ENA but not SriovNetSupport)
-    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
+    on HVM-compatible AMIs. If `true`, add `ec2:ModifyInstanceAttribute` to your AWS IAM policy.
     Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking). Default `false`.
 
@@ -151,7 +151,7 @@ each category, the available configuration keys are alphabetized.
     will be encrypted by the default EBS KMS key.
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
-    existing AMI root volume snapshot. Default `false`. If true, `source_ami` is
+    existing AMI root volume snapshot. Default `false`. If `true`, `source_ami` is
     no longer used and the following options become required:
     `ami_virtualization_type`, `pre_mount_commands` and `root_volume_size`. The
     below options are also required in this mode only:
@@ -172,28 +172,28 @@ each category, the available configuration keys are alphabetized.
         example, `/dev/sdh` or `xvdh`). Required for every device in the
         block device mapping.
 
-    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `encrypted` (boolean) - Indicates whether or not to encrypt the volume.
 
     -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
         specifying `kms_key_id`, `encrypted` needs to be set to `true`.
 
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
-        [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
-        for more information
+        [IOPS](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
+        for more information.
 
     -   `no_device` (boolean) - Suppresses the specified device included in the
-        block device mapping of the AMI
+        block device mapping of the AMI.
 
-    -   `snapshot_id` (string) - The ID of the snapshot
+    -   `snapshot_id` (string) - The ID of the snapshot.
 
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
-        for more information
+        for more information.
 
     -   `volume_size` (number) - The size of the volume, in GiB. Required if not
-        specifying a `snapshot_id`
+        specifying a `snapshot_id`.
 
     -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
@@ -229,7 +229,7 @@ each category, the available configuration keys are alphabetized.
     to the `mount` command ran by Packer. Because this command is ran in a
     shell, user discretion is advised. See [this manual page for the mount
     command](http://linuxcommand.org/man_pages/mount8.html) for valid file
-    system specific options
+    system specific options.
 
 -   `nvme_device_path` (string) - When we call the mount command (by default
     `mount -o device dir`), the string provided in `nvme_mount_path` will
@@ -262,7 +262,7 @@ each category, the available configuration keys are alphabetized.
 
 -   `root_volume_type` (string) - The type of EBS volume for the chroot environment
      and resulting AMI. The default value is the type of the `source_ami`, unless
-    `from_scratch` is true, in which case the default value is `gp2`. You can only
+    `from_scratch` is `true`, in which case the default value is `gp2`. You can only
      specify `io1` if building based on top of a `source_ami` which is also `io1`.
 
 -   `root_volume_tags` (object of key/value strings) - Tags to apply to the volumes
@@ -270,7 +270,7 @@ each category, the available configuration keys are alphabetized.
     [template engine](/docs/templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
--   `skip_region_validation` (boolean) - Set to true if you want to skip
+-   `skip_region_validation` (boolean) - Set to `true` if you want to skip
     validation of the `ami_regions` configuration option. Default `false`.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
@@ -316,7 +316,7 @@ each category, the available configuration keys are alphabetized.
         for example, "amazon", "aws-marketplace", or "microsoft".
         This option is required for security reasons.
 
-    -   `most_recent` (boolean) - Selects the newest created image when true.
+    -   `most_recent` (boolean) - Selects the newest created image when `true`.
         This is most useful for selecting a daily distro build.
 
     You may set this in place of `source_ami` or in conjunction with it. If you
@@ -326,7 +326,7 @@ each category, the available configuration keys are alphabetized.
     but will cause Packer to fail if the `source_ami` does not exist.
 
 -   `sriov_support` (boolean) - Enable enhanced networking (SriovNetSupport but not ENA)
-    on HVM-compatible AMIs. If true, add `ec2:ModifyInstanceAttribute` to your AWS IAM
+    on HVM-compatible AMIs. If `true`, add `ec2:ModifyInstanceAttribute` to your AWS IAM
     policy. Note: you must make sure enhanced networking is enabled on your instance. See [Amazon's
     documentation on enabling enhanced networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
     Default `false`.
@@ -470,7 +470,7 @@ A working example for mounting an NVMe device is below:
 ```
 
 Note that in the `nvme_device_path` you must end with the `p`; if you try to
-define the partition in this path (e.g. "nvme_device_path": `/dev/nvme1n1p1`)
+define the partition in this path (e.g. `nvme_device_path`: `/dev/nvme1n1p1`)
 and haven't also set the `"mount_partition": 0`, a `1` will be appended to the
 `nvme_device_path` and Packer will fail.
 

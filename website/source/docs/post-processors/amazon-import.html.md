@@ -83,7 +83,7 @@ Optional:
 
 -   `s3_key_name` (string) - The name of the key in `s3_bucket_name` where the
     OVA file will be copied to for import. If not specified, this will default
-    to "packer-import-{{timestamp}}.ova". This key (ie, the uploaded OVA) will
+    to "packer-import-{{timestamp}}.ova". This key (i.e., the uploaded OVA) will
     be removed after import, unless `skip_clean` is `true`.
 
 -   `skip_clean` (boolean) - Whether we should skip removing the OVA file uploaded to S3 after the
