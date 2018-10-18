@@ -29,6 +29,9 @@ type Config struct {
 	// The shebang value used when running inline scripts.
 	InlineShebang string `mapstructure:"inline_shebang"`
 
+	// An array of multiple Runtime OSs to run on.
+	OnlyOn []string
+
 	// The file extension to use for the file generated from the inline commands
 	TempfileExtension string `mapstructure:"tempfile_extension"`
 
