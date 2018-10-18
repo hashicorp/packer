@@ -42,7 +42,7 @@ chmod u+x jq
 # Create manifest file
 (
 for i in segment_*; do
-  ./jq -n --arg path "{{.Container}}/$i" \
+  ./jq -n --arg path "compute_images_segments/{{.ImageName}}/$i" \
           --arg etag $(md5sum $i | cut -f1 -d' ') \
 		  --arg size_bytes $(stat --printf "%s" $i) \
 		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
@@ -58,14 +58,14 @@ curl -D auth-headers -s -X GET \
 export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
-# Create {{.Container}}
-curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.Container}}
+# Create segment directory
+curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/compute_images_segments/{{.ImageName}}
 
 # Upload segments
 for i in segment_*; do
 	curl -v -X PUT -T $i \
 		-H "X-Auth-Token: $AUTH_TOKEN" \
-		${STORAGE_URL}/{{.Container}}/$i;
+		${STORAGE_URL}/compute_images_segments/{{.ImageName}}/$i;
 done
 
 # Create machine image from manifest
@@ -78,24 +78,6 @@ curl -v -X PUT \
 curl -I -X HEAD \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz"
-
-# Delete {{.Container}}
-# following https://docs.oracle.com/en/cloud/iaas/storage-cloud/cssto/deleting-multiple-objects-single-operation.html
-
-# Collect objects we need to clean up
-printf "{{.Container}}/%s\n" segment_* > objects_to_delete.txt
-
-# Delete objects
-curl -v -s -X DELETE \
-	-H "X-Auth-Token: $AUTH_TOKEN" \
-	-H "Content-Type: text/plain" \
-	-T objects_to_delete.txt \
-	"${STORAGE_URL}/?bulk-delete"
-
-# Delete container
-curl -v -s -X DELETE \
-	-H "X-Auth-Token: $AUTH_TOKEN" \
-	"${STORAGE_URL}/{{.Container}}"
 `
 	}
 	/*

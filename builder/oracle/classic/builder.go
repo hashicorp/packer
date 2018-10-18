@@ -123,7 +123,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&stepCreateImage{
 				uploadImageCommand: b.config.BuilderUploadImageCommand,
-				tempContainer:      fmt.Sprintf("packer-pv-image-%s", runID),
 				imageName:          b.config.ImageName,
 			},
 			&common.StepCleanupTempKeys{
