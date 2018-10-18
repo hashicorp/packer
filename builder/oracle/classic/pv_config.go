@@ -30,17 +30,20 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 	if c.BuilderUploadImageCommand == "" {
 		c.BuilderUploadImageCommand = `split -b 10m diskimage.tar.gz segment_ 
 
-curl -D auth-headers -s -X GET -H "X-Storage-User: Storage-a459477:jake@hashicorp.com" -H "X-Storage-Pass: ***REMOVED***" https://a459477.storage.oraclecloud.com/auth/v1.0
+curl -D auth-headers -s -X GET \
+	-H "X-Storage-User: Storage-{{.AccountID}}:{{.Username}}" \
+	-H "X-Storage-Pass: {{.Password}}" \
+	https://{{.AccountID}}.storage.oraclecloud.com/auth/v1.0
 
 export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
-curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/mwhooker-test-1
+curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.Container}}
 
 for i in segment_*; do 
 	curl -v -X PUT -T $i \
 		-H "X-Auth-Token: $AUTH_TOKEN" \
-		${STORAGE_URL}/mwhooker-test-1/$i;
+		${STORAGE_URL}/{{.Container}}/$i;
 done
 
 curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
@@ -49,13 +52,17 @@ chmod u+x jq
 
 (
 for i in segment_*; do
-  ./jq -n --arg path "mwhooker-test-1/$i" --arg etag $(md5sum $i | cut -f1 -d' ') --arg size_bytes $(stat --printf "%s" $i) '{path: $path, etag: $etag, size_bytes: $size_bytes}'
+  ./jq -n --arg path "{{.Container}}/$i" \
+          --arg etag $(md5sum $i | cut -f1 -d' ') \
+		  --arg size_bytes $(stat --printf "%s" $i) \
+		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
 done
 ) | ./jq -s . > manifest.json
 
-curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN"  "${STORAGE_URL}/compute_images/mwhooker-diskimage-01.tar.gz?multipart-manifest=put" -T ./manifest.json
-
-# curl -I -X HEAD -H "X-Auth-Token: $AUTH_TOKEN"  "${STORAGE_URL}/mwhooker-test-1/diskimage.tar.gz"
+curl -v -X PUT \
+	-H "X-Auth-Token: $AUTH_TOKEN" \
+	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz?multipart-manifest=put" \
+	-T ./manifest.json
 '...'`
 	}
 	/*
