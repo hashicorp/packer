@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,8 +18,8 @@ import (
 
 type StepSecurityGroup struct {
 	CommConfig            *communicator.Config
+	SecurityGroupFilter   SecurityGroupFilterOptions
 	SecurityGroupIds      []string
-	VpcId                 string
 	TemporarySGSourceCidr string
 
 	createdGroupId string
@@ -27,6 +28,7 @@ type StepSecurityGroup struct {
 func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
 	ui := state.Get("ui").(packer.Ui)
+	vpcId := state.Get("vpc_id").(string)
 
 	if len(s.SecurityGroupIds) > 0 {
 		_, err := ec2conn.DescribeSecurityGroups(
@@ -45,6 +47,35 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		return multistep.ActionContinue
 	}
 
+	if !s.SecurityGroupFilter.Empty() {
+
+		params := &ec2.DescribeSecurityGroupsInput{}
+		if vpcId != "" {
+			s.SecurityGroupFilter.Filters[aws.String("vpc-id")] = &vpcId
+		}
+		params.Filters = buildEc2Filters(s.SecurityGroupFilter.Filters)
+
+		log.Printf("Using SecurityGroup Filters %v", params)
+
+		sgResp, err := ec2conn.DescribeSecurityGroups(params)
+		if err != nil {
+			err := fmt.Errorf("Couldn't find security groups for filter: %s", err)
+			log.Printf("[DEBUG] %s", err.Error())
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+		securityGroupIds := []string{}
+		for _, sg := range sgResp.SecurityGroups {
+			securityGroupIds = append(securityGroupIds, *sg.GroupId)
+		}
+
+		ui.Message(fmt.Sprintf("Found Security Group(s): %s", strings.Join(securityGroupIds, ", ")))
+		state.Put("securityGroupIds", securityGroupIds)
+
+		return multistep.ActionContinue
+	}
+
 	port := s.CommConfig.Port()
 	if port == 0 {
 		if s.CommConfig.Type != "none" {
@@ -60,9 +91,7 @@ func (s *StepSecurityGroup) Run(_ context.Context, state multistep.StateBag) mul
 		Description: aws.String("Temporary group for Packer"),
 	}
 
-	if s.VpcId != "" {
-		group.VpcId = &s.VpcId
-	}
+	group.VpcId = &vpcId
 
 	groupResp, err := ec2conn.CreateSecurityGroup(group)
 	if err != nil {

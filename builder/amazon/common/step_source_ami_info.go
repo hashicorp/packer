@@ -25,18 +25,6 @@ type StepSourceAMIInfo struct {
 	AmiFilters               AmiFilterOptions
 }
 
-// Build a slice of AMI filter options from the filters provided.
-func buildAmiFilters(input map[*string]*string) []*ec2.Filter {
-	var filters []*ec2.Filter
-	for k, v := range input {
-		filters = append(filters, &ec2.Filter{
-			Name:   k,
-			Values: []*string{v},
-		})
-	}
-	return filters
-}
-
 type imageSort []*ec2.Image
 
 func (a imageSort) Len() int      { return len(a) }
@@ -66,7 +54,7 @@ func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 
 	// We have filters to apply
 	if len(s.AmiFilters.Filters) > 0 {
-		params.Filters = buildAmiFilters(s.AmiFilters.Filters)
+		params.Filters = buildEc2Filters(s.AmiFilters.Filters)
 	}
 	if len(s.AmiFilters.Owners) > 0 {
 		params.Owners = s.AmiFilters.Owners
