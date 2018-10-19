@@ -18,10 +18,11 @@ type stepCreateImage struct {
 }
 
 type uploadCmdData struct {
-	Username  string
-	Password  string
-	AccountID string
-	ImageName string
+	Username    string
+	Password    string
+	AccountID   string
+	ImageFile   string
+	SegmentPath string
 }
 
 func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -30,12 +31,16 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	comm := state.Get("communicator").(packer.Communicator)
 	client := state.Get("client").(*compute.ComputeClient)
 	config := state.Get("config").(*Config)
+	runID := state.Get("run_id").(string)
+
+	imageFile := fmt.Sprintf("%s.tar.gz", s.imageName)
 
 	config.ctx.Data = uploadCmdData{
-		Username:  config.Username,
-		Password:  config.Password,
-		AccountID: config.IdentityDomain,
-		ImageName: s.imageName,
+		Username:    config.Username,
+		Password:    config.Password,
+		AccountID:   config.IdentityDomain,
+		ImageFile:   imageFile,
+		SegmentPath: fmt.Sprintf("compute_images_segments/%s/_segment_/%s", imageFile, runID),
 	}
 	uploadImageCmd, err := interpolate.Render(s.uploadImageCommand, &config.ctx)
 	if err != nil {
@@ -86,7 +91,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		// The three-part name of the object
 		Name: s.imageName,
 		// image_file.tar.gz, where image_file is the .tar.gz name of the machine image file that you have uploaded to Oracle Cloud Infrastructure Object Storage Classic.
-		File: fmt.Sprintf("%s.tar.gz", s.imageName),
+		File: imageFile,
 	}
 	log.Printf("CreateMachineImageInput: %+v", createMI)
 	mi, err := machineImageClient.CreateMachineImage(createMI)

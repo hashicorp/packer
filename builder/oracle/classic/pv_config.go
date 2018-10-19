@@ -42,7 +42,7 @@ chmod u+x jq
 # Create manifest file
 (
 for i in segment_*; do
-  ./jq -n --arg path "compute_images_segments/{{.ImageName}}/$i" \
+  ./jq -n --arg path "{{.SegmentPath}}/$i" \
           --arg etag $(md5sum $i | cut -f1 -d' ') \
 		  --arg size_bytes $(stat --printf "%s" $i) \
 		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
@@ -59,25 +59,25 @@ export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' au
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
 # Create segment directory
-curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/compute_images_segments/{{.ImageName}}
+curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.SegmentPath}}
 
 # Upload segments
 for i in segment_*; do
 	curl -v -X PUT -T $i \
 		-H "X-Auth-Token: $AUTH_TOKEN" \
-		${STORAGE_URL}/compute_images_segments/{{.ImageName}}/$i;
+		${STORAGE_URL}/{{.SegmentPath}}/$i;
 done
 
 # Create machine image from manifest
 curl -v -X PUT \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
-	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz?multipart-manifest=put" \
+	"${STORAGE_URL}/compute_images/{{.ImageFile}}?multipart-manifest=put" \
 	-T ./manifest.json
 
 # Get uploaded image description
 curl -I -X HEAD \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
-	"${STORAGE_URL}/compute_images/{{.ImageName}}.tar.gz"
+	"${STORAGE_URL}/compute_images/{{.ImageFile}}"
 `
 	}
 	/*
