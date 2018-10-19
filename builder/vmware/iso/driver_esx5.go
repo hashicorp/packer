@@ -89,18 +89,13 @@ func (d *ESX5Driver) Stop(vmxPathLocal string) error {
 
 func (d *ESX5Driver) Register(vmxPathLocal string) error {
 	vmxPath := filepath.ToSlash(filepath.Join(d.outputDir, filepath.Base(vmxPathLocal)))
-	log.Printf("DEBUGGING 6794 (1): upload path is: %s", vmxPath)
 	if err := d.upload(vmxPath, vmxPathLocal); err != nil {
-		log.Printf("DEBUGGING 6794 (2): upload errored: %s", err.Error())
 		return err
 	}
-	log.Printf("DEBUGGING 6794 (3): Upload succeeded")
 	r, err := d.run(nil, "vim-cmd", "solo/registervm", fmt.Sprintf("\"%s\"", vmxPath))
 	if err != nil {
-		log.Printf("DEBUGGING 6794 (4): VM registration errorred: %s", err.Error())
 		return err
 	}
-	log.Printf("DEBUGGING 6794 (5): Registration succeeded")
 	d.vmId = strings.TrimRight(r, "\n")
 	return nil
 }
@@ -590,7 +585,6 @@ func (d *ESX5Driver) mkdir(path string) error {
 func (d *ESX5Driver) upload(dst, src string) error {
 	f, err := os.Open(src)
 	if err != nil {
-		log.Printf("DEBUGGING 6794 (6): unable to open src file for scp upload")
 		return err
 	}
 	defer f.Close()
