@@ -71,7 +71,7 @@ This makes it more convenient to parse using standard Unix tools such as `awk` o
 The format is:
 
 ``` text
-timestamp,,target,type,data...
+timestamp,target,type,data...
 ```
 
 Each component is explained below:
@@ -101,7 +101,9 @@ become a literal `\r`.
 
 ### Machine-Readable Message Types
 
-There are two common message types for the Machine Readable output:
+Here's an incomplete list of types you may see in the machine-readable output:
+
+You'll see these data types when you run `packer build`:
 
 -  `ui`: this means that the information being provided is a human-readable string
   that would be sent to stdout even if we aren't in machine-readable mode. There
@@ -115,29 +117,42 @@ There are two common message types for the Machine Readable output:
 
     -  `error`: reserved for errors
 
+- `artifact-count`: This data type tells you how many artifacts a particular
+  build produced.
+
 - `artifact`: This data type tells you information about what Packer created
   during its build. An example of output follows the pattern
   `timestamp, buildname, artifact, artifact_number, key, value` where `key` and
   `value` contain information about the artifact.
 
-  For example:
+      For example:
 
-  ```
-    1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
-    1539967803,amazon-ebs,artifact-count,2
-    1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
-    1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
-    1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
-    1539967803,amazon-ebs,artifact,0,files-count,0
-    1539967803,amazon-ebs,artifact,0,end
-    1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
-    1539967803,amazon-ebs,artifact,1,builder-id,
-    1539967803,amazon-ebs,artifact,1,id,
-    1539967803,amazon-ebs,artifact,1,string,
-    1539967803,amazon-ebs,artifact,1,files-count,0
-    2018/10/19 09:50:03 waiting for all plugin processes to complete...
-    1539967803,amazon-ebs,artifact,1,end
-  ```
+      ```
+        1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
+        1539967803,amazon-ebs,artifact-count,2
+        1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
+        1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
+        1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+        1539967803,amazon-ebs,artifact,0,files-count,0
+        1539967803,amazon-ebs,artifact,0,end
+        1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+        1539967803,amazon-ebs,artifact,1,builder-id,
+        1539967803,amazon-ebs,artifact,1,id,
+        1539967803,amazon-ebs,artifact,1,string,
+        1539967803,amazon-ebs,artifact,1,files-count,0
+        2018/10/19 09:50:03 waiting for all plugin processes to complete...
+        1539967803,amazon-ebs,artifact,1,end
+      ```
+
+You'll see these data types when you run `packer version`:
+
+- `version`: what version of Packer is running
+
+- `version-prerelease`: Data will contain `dev` if version is prerelease, and
+  otherwise will be blank.
+
+- `version-commit`: The git hash for the commit that the branch of Packer is
+  currently on; most useful for Packer developers.
 
 ## Autocompletion
 
