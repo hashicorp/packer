@@ -1,0 +1,3 @@
+[submodule "vendor/github.com/tencentcloud/tencentcloud-sdk-go"]
+	path = vendor/github.com/tencentcloud/tencentcloud-sdk-go
+	url = https://github.com/TencentCloud/tencentcloud-sdk-go.git
