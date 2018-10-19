@@ -563,13 +563,14 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// The target directory and file for talking the SCP protocol
 	target_dir := filepath.Dir(path)
 	target_file := filepath.Base(path)
-	// Escape spaces in remote directory
-	target_dir = strings.Replace(target_dir, " ", "\\ ", -1)
 
 	// On windows, filepath.Dir uses backslash separators (ie. "\tmp").
 	// This does not work when the target host is unix.  Switch to forward slash
 	// which works for unix and windows
 	target_dir = filepath.ToSlash(target_dir)
+
+	// Escape spaces in remote directory
+	target_dir = strings.Replace(target_dir, " ", "\\ ", -1)
 
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		return scpUploadFile(target_file, input, w, stdoutR, fi)
