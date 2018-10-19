@@ -175,7 +175,8 @@ func Validate(config *Config) error {
 				}
 			}
 			if supported_os != true {
-				return fmt.Errorf("Invalid OS specified in only_on: '%s'", provided_os)
+				return fmt.Errorf("Invalid OS specified in only_on: '%s'\n"+
+					"Supported OS names: %v", provided_os, supported_syslist)
 			}
 		}
 	}
