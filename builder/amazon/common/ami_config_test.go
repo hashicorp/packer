@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/awstesting/mock"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
@@ -19,18 +20,20 @@ func testAMIConfig() *AMIConfig {
 func getFakeAccessConfig(region string) *AccessConfig {
 	return &AccessConfig{
 		RawRegion: region,
+		session:   mock.Session,
 	}
 }
 
 func TestAMIConfigPrepare_name(t *testing.T) {
 	c := testAMIConfig()
+	accessConf := getFakeAccessConfig("wherever")
 	c.AMISkipRegionValidation = true
-	if err := c.Prepare(nil, nil); err != nil {
+	if err := c.Prepare(accessConf, nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
 
 	c.AMIName = ""
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("should have error")
 	}
 }
@@ -141,7 +144,8 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 
 	c.AMISkipRegionValidation = true
-	if err := c.Prepare(nil, nil); err == nil {
+	accessConf := getFakeAccessConfig("wherever")
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("should have error b/c theres a region in in ami_regions that isn't in the key map")
 	}
 	c.AMISkipRegionValidation = false
@@ -159,7 +163,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 
 	// allow rawregion to exist in ami_regions list.
-	accessConf := getFakeAccessConfig("us-east-1")
+	accessConf = getFakeAccessConfig("us-east-1")
 	c.AMIRegions = []string{"us-east-1", "us-west-1", "us-east-2"}
 	c.AMIRegionKMSKeyIDs = nil
 	if errs = c.prepareRegions(mockConn, accessConf, errs); len(errs) > 0 {
@@ -173,13 +177,15 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c.AMIUsers = []string{"testAccountID"}
 	c.AMIEncryptBootVolume = true
 
+	accessConf := getFakeAccessConfig("wherever")
+
 	c.AMIKmsKeyId = ""
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
 	}
 
 	c.AMIKmsKeyId = "89c3fb9a-de87-4f2a-aedc-fddc5138193c"
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to share ami with encrypted boot volume")
 	}
 }
@@ -187,8 +193,10 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 func TestAMINameValidation(t *testing.T) {
 	c := testAMIConfig()
 
+	accessConf := getFakeAccessConfig("wherever")
+
 	c.AMIName = "aa"
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to have an ami name with less than 3 characters")
 	}
 
@@ -197,22 +205,22 @@ func TestAMINameValidation(t *testing.T) {
 		longAmiName += "a"
 	}
 	c.AMIName = longAmiName
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to have an ami name with great than 128 characters")
 	}
 
 	c.AMIName = "+aaa"
-	if err := c.Prepare(nil, nil); err == nil {
+	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("shouldn't be able to have an ami name with invalid characters")
 	}
 
 	c.AMIName = "fooBAR1()[] ./-'@_"
-	if err := c.Prepare(nil, nil); err != nil {
+	if err := c.Prepare(accessConf, nil); err != nil {
 		t.Fatal("should be able to use all of the allowed AMI characters")
 	}
 
 	c.AMIName = `xyz-base-2017-04-05-1934`
-	if err := c.Prepare(nil, nil); err != nil {
+	if err := c.Prepare(accessConf, nil); err != nil {
 		t.Fatalf("expected `xyz-base-2017-04-05-1934` to pass validation.")
 	}
 
