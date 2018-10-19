@@ -79,10 +79,10 @@ Each component is explained below:
 -   `timestamp` is a Unix timestamp in UTC of when the message was printed.
 
 
--   `target` When you call `packer build` this can be either `''` or individual
-    build names, e.g. `amazon-ebs`. You'll normally see `''` when output from
-    the build process is happening, and the build name when artifacts of
-    particular builds are being referred to.
+-   `target` When you call `packer build` this can be either empty or individual
+    build names, e.g. `amazon-ebs`. It is normally empty when builds are in
+    progress, and the build name when artifacts of particular builds are being
+    referred to.
 
 -   `type` is the type of machine-readable message being outputted. The two most
     common `type`s are `ui` and `artifact`
