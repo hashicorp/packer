@@ -12,7 +12,7 @@ import (
 )
 
 type StepModifyEBSBackedInstance struct {
-	EnableAMIENASupport      bool
+	EnableAMIENASupport      *bool
 	EnableAMISriovNetSupport bool
 }
 
@@ -40,22 +40,24 @@ func (s *StepModifyEBSBackedInstance) Run(_ context.Context, state multistep.Sta
 
 	// Handle EnaSupport flag.
 	// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
-	var prefix string
-	if s.EnableAMIENASupport {
-		prefix = "En"
-	} else {
-		prefix = "Dis"
-	}
-	ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
-	_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
-		InstanceId: instance.InstanceId,
-		EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(s.EnableAMIENASupport)},
-	})
-	if err != nil {
-		err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if s.EnableAMIENASupport != nil {
+		var prefix string
+		if *s.EnableAMIENASupport {
+			prefix = "En"
+		} else {
+			prefix = "Dis"
+		}
+		ui.Say(fmt.Sprintf("%sabling Enhanced Networking (ENA)...", prefix))
+		_, err := ec2conn.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
+			InstanceId: instance.InstanceId,
+			EnaSupport: &ec2.AttributeBooleanValue{Value: aws.Bool(*s.EnableAMIENASupport)},
+		})
+		if err != nil {
+			err := fmt.Errorf("Error %sabling Enhanced Networking (ENA) on %s: %s", strings.ToLower(prefix), *instance.InstanceId, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
