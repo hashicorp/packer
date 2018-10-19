@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/go-oracle-terraform/opc"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -61,13 +60,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Error creating OPC Compute Client: %s", err)
 	}
 
+	runID := os.Getenv("PACKER_RUN_UUID")
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("client", client)
-	runID := uuid.TimeOrderedUUID()
+	state.Put("run_id", runID)
 
 	var steps []multistep.Step
 	if b.config.IsPV() {
