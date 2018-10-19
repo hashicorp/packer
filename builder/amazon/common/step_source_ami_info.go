@@ -20,7 +20,7 @@ import (
 type StepSourceAMIInfo struct {
 	SourceAmi                string
 	EnableAMISriovNetSupport bool
-	EnableAMIENASupport      bool
+	EnableAMIENASupport      *bool
 	AMIVirtType              string
 	AmiFilters               AmiFilterOptions
 }
@@ -106,7 +106,7 @@ func (s *StepSourceAMIInfo) Run(_ context.Context, state multistep.StateBag) mul
 
 	// Enhanced Networking can only be enabled on HVM AMIs.
 	// See http://goo.gl/icuXh5
-	if s.EnableAMIENASupport || s.EnableAMISriovNetSupport {
+	if (s.EnableAMIENASupport != nil && *s.EnableAMIENASupport) || s.EnableAMISriovNetSupport {
 		err = s.canEnableEnhancedNetworking(image)
 		if err != nil {
 			state.Put("error", err)

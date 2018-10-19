@@ -19,7 +19,7 @@ type AMIConfig struct {
 	AMIRegions              []string          `mapstructure:"ami_regions"`
 	AMISkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AMITags                 TagMap            `mapstructure:"tags"`
-	AMIENASupport           bool              `mapstructure:"ena_support"`
+	AMIENASupport           *bool             `mapstructure:"ena_support"`
 	AMISriovNetSupport      bool              `mapstructure:"sriov_support"`
 	AMIForceDeregister      bool              `mapstructure:"force_deregister"`
 	AMIForceDeleteSnapshot  bool              `mapstructure:"force_delete_snapshot"`
