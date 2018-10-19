@@ -102,13 +102,34 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 	log.Printf("Registered machine image: %+v", mi)
+	/*
+		Registered machine image: &{
+			Account:/Compute-ptstest/cloud_storage
+			Attributes:map[]
+			Audited:
+			Description:Packer generated TODO
+			ErrorReason: Hypervisor:map[mode:hvm]
+			ImageFormat:raw
+			File:mwhooker_test_1539898463.tar.gz
+			Name:mwhooker_test_1539898463
+			NoUpload:true
+			Platform:linux
+			Sizes:map[uploaded:5.79793509e+08 total:5.79793509e+08 decompressed:1.610612736e+10]
+			State:available
+			URI:https://api-z61.compute.us6.oraclecloud.com/machineimage/Compute-ptstest/mhooker%40hashicorp.com/mwhooker_test_1539898463
+		}
+	*/
 	/* TODO:
-	1. POST /machineimage/, POST /imagelist/, and POST /imagelistentry/ methods, in that order.
-	2. re-use step_list_images
-	4. Documentation
-	5. Configuration (master/builder images & entry, destination stuff, etc)
-	6. split master/builder image/connection config. i.e. build anything, master only linux
-	7. correct artifact
+	*	POST /machineimage/ (DONE)
+		POST /imagelist/
+		POST /imagelistentry/
+		in that order.
+	* re-use step_list_images
+	* Documentation
+	* Configuration (master/builder images & entry, destination stuff, etc)
+	* split master/builder image/connection config. i.e. build anything, master only linux
+	* correct artifact
+	* segments go in to sub-directory (entry)
 	*/
 
 	return multistep.ActionContinue
