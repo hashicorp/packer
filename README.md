@@ -95,7 +95,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 
 ### Provision
 
-* `communicator` - `ssh` (default), `winrm`, or `none`.
+* `communicator` - `ssh` (default), `winrm`, or `none` (create/clone, customize hardware, but do not boot).
 
 * `ssh_username`(string) - Username in guest OS.
 * `ssh_password`(string) - Password to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
