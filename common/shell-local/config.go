@@ -30,7 +30,7 @@ type Config struct {
 	InlineShebang string `mapstructure:"inline_shebang"`
 
 	// An array of multiple Runtime OSs to run on.
-	OnlyOn []string
+	OnlyOn []string `mapstructure:"only_on"`
 
 	// The file extension to use for the file generated from the inline commands
 	TempfileExtension string `mapstructure:"tempfile_extension"`
@@ -162,6 +162,25 @@ func Validate(config *Config) error {
 				fmt.Errorf("Bad script '%s': %s", path, err))
 		}
 	}
+
+	// Check for properly formatted go os types
+	supported_syslist := []string{"darwin", "freebsd", "linux", "openbsd", "solaris", "windows"}
+	supported_os := false
+	if len(config.OnlyOn) > 0 {
+		for _, provided_os := range config.OnlyOn {
+			for _, go_os := range supported_syslist {
+				if provided_os == go_os {
+					supported_os = true
+					break
+				}
+				if supported_os != true {
+					errs = packer.MultiErrorAppend(errs,
+						fmt.Errorf("Invalid OS specified in only_on: '%s'", provided_os))
+				}
+			}
+		}
+	}
+
 	if config.UseLinuxPathing {
 		for index, script := range config.Scripts {
 			scriptAbsPath, err := filepath.Abs(script)
