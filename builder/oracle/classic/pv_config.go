@@ -18,6 +18,7 @@ type PVConfig struct {
 	*/
 }
 
+// IsPV tells us if we're using a persistent volume for this build
 func (c *PVConfig) IsPV() bool {
 	return c.PersistentVolumeSize > 0
 }
