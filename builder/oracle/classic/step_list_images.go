@@ -45,12 +45,12 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	}
 
 	// Now create and image list entry for the image into that list.
-	snap := state.Get("snapshot").(*compute.Snapshot)
+	machineImage := state.Get("machine_image").(string)
 	version := len(imList.Entries) + 1
 	entriesClient := client.ImageListEntries()
 	entriesInput := compute.CreateImageListEntryInput{
 		Name:          config.DestImageList,
-		MachineImages: []string{config.Identifier(snap.MachineImage)},
+		MachineImages: []string{config.Identifier(machineImage)},
 		Version:       version,
 	}
 	entryInfo, err := entriesClient.CreateImageListEntry(&entriesInput)
