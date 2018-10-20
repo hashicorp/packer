@@ -125,6 +125,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				uploadImageCommand: b.config.BuilderUploadImageCommand,
 				imageName:          b.config.ImageName,
 			},
+			&stepListImages{},
 			&common.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
 			},
@@ -164,6 +165,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
+	// TODO fix me
 	// If there is no snapshot, then just return
 	if _, ok := state.GetOk("snapshot"); !ok {
 		return nil, nil

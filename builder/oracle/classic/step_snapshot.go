@@ -39,6 +39,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 	state.Put("snapshot", snap)
+	state.Put("machine_image", snap.MachineImage)
 	ui.Message(fmt.Sprintf("Created snapshot: %s.", snap.Name))
 	return multistep.ActionContinue
 }
