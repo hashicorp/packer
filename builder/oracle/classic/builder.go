@@ -121,10 +121,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Host:      ocommon.CommHost,
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
-			&stepCreateImage{
+			&stepUploadImage{
 				uploadImageCommand: b.config.BuilderUploadImageCommand,
-				imageName:          b.config.ImageName,
 			},
+			&stepCreateImage{},
 			&stepListImages{},
 			&common.StepCleanupTempKeys{
 				Comm: &b.config.Comm,
