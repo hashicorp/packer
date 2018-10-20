@@ -165,9 +165,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, rawErr.(error)
 	}
 
-	// TODO fix me
 	// If there is no snapshot, then just return
-	if _, ok := state.GetOk("snapshot"); !ok {
+	if _, ok := state.GetOk("machine_image"); !ok {
 		return nil, nil
 	}
 
@@ -176,7 +175,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ImageListVersion: state.Get("image_list_version").(int),
 		MachineImageName: state.Get("machine_image_name").(string),
 		MachineImageFile: state.Get("machine_image_file").(string),
-		driver:           client,
 	}
 
 	return artifact, nil
