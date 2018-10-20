@@ -102,6 +102,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 	log.Printf("Registered machine image: %+v", mi)
+	state.Put("machine_image", mi.Name)
 	/*
 		Registered machine image: &{
 			Account:/Compute-ptstest/cloud_storage
@@ -120,16 +121,15 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		}
 	*/
 	/* TODO:
-	*	POST /machineimage/ (DONE)
-		POST /imagelist/
-		POST /imagelistentry/
+	*	POST /machineimage/ DONE
+		POST /imagelist/ DONE
+		POST /imagelistentry/ DONE
 		in that order.
-	* re-use step_list_images
+	* re-use step_list_images DONE
 	* Documentation
 	* Configuration (master/builder images & entry, destination stuff, etc)
 	* split master/builder image/connection config. i.e. build anything, master only linux
-	* correct artifact
-	* segments go in to sub-directory (entry)
+	* correct artifact DONE
 	*/
 
 	return multistep.ActionContinue
