@@ -4,83 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type stepCreateImage struct {
-	uploadImageCommand string
-	imageName          string
-}
-
-type uploadCmdData struct {
-	Username    string
-	Password    string
-	AccountID   string
-	ImageFile   string
-	SegmentPath string
 }
 
 func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	//hook := state.Get("hook").(packer.Hook)
 	ui := state.Get("ui").(packer.Ui)
-	comm := state.Get("communicator").(packer.Communicator)
 	client := state.Get("client").(*compute.ComputeClient)
 	config := state.Get("config").(*Config)
-	runID := state.Get("run_id").(string)
-
-	imageFile := fmt.Sprintf("%s.tar.gz", s.imageName)
-
-	config.ctx.Data = uploadCmdData{
-		Username:    config.Username,
-		Password:    config.Password,
-		AccountID:   config.IdentityDomain,
-		ImageFile:   imageFile,
-		SegmentPath: fmt.Sprintf("compute_images_segments/%s/_segment_/%s", imageFile, runID),
-	}
-	uploadImageCmd, err := interpolate.Render(s.uploadImageCommand, &config.ctx)
-	if err != nil {
-		err := fmt.Errorf("Error processing image upload command: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	command := fmt.Sprintf(`#!/bin/sh
-	set -e
-	set -x
-	mkdir /builder
-	mkfs -t ext3 /dev/xvdb
-	mount /dev/xvdb /builder
-	chown opc:opc /builder
-	cd /builder
-	dd if=/dev/xvdc bs=8M status=progress | cp --sparse=always /dev/stdin diskimage.raw
-	tar czSf ./diskimage.tar.gz ./diskimage.raw
-	rm diskimage.raw
-	%s`, uploadImageCmd)
-
-	dest := "/tmp/create-packer-diskimage.sh"
-	comm.Upload(dest, strings.NewReader(command), nil)
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("sudo /bin/sh %s", dest),
-	}
-	if err := cmd.StartWithUi(comm, ui); err != nil {
-		err = fmt.Errorf("Problem creating image`: %s", err)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-
-	if cmd.ExitStatus != 0 {
-		err = fmt.Errorf("Create Disk Image command failed with exit code %d", cmd.ExitStatus)
-		ui.Error(err.Error())
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
+	imageFile := state.Get("image_file").(string)
 
 	// Image uploaded, let's register it
 	machineImageClient := client.MachineImages()
@@ -89,7 +26,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		Account:     fmt.Sprintf("/Compute-%s/cloud_storage", config.IdentityDomain),
 		Description: "Packer generated TODO",
 		// The three-part name of the object
-		Name: s.imageName,
+		Name: config.ImageName,
 		// image_file.tar.gz, where image_file is the .tar.gz name of the machine image file that you have uploaded to Oracle Cloud Infrastructure Object Storage Classic.
 		File: imageFile,
 	}
@@ -128,11 +65,38 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	* re-use step_list_images DONE
 	* Documentation
 	* Configuration (master/builder images & entry, destination stuff, etc)
+		* Image entry for both master/builder
+		https://github.com/hashicorp/packer/issues/6833
 	* split master/builder image/connection config. i.e. build anything, master only linux
 	* correct artifact DONE
+	* Cleanup this step
 	*/
 
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateImage) Cleanup(state multistep.StateBag) {}
+func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
+		return
+	}
+
+	client := state.Get("client").(*compute.ComputeClient)
+	config := state.Get("config").(*Config)
+
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Cleaning up Image...")
+
+	machineImageClient := client.MachineImages()
+	deleteMI := &compute.DeleteMachineImageInput{
+		Name: config.ImageName,
+	}
+
+	if err := machineImageClient.DeleteMachineImage(deleteMI); err != nil {
+		ui.Error(fmt.Sprintf("Error cleaning up machine image: %s", err))
+		return
+	}
+
+	ui.Message(fmt.Sprintf("Deleted Image: %s", config.ImageName))
+}
