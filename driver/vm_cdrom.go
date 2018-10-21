@@ -46,3 +46,22 @@ func (vm *VirtualMachine) CreateCdrom(c *types.VirtualAHCIController) (*types.Vi
 
 	return device, nil
 }
+
+func (vm *VirtualMachine) EjectCdroms() error {
+	devices, err := vm.Devices()
+	if err != nil {
+		return err
+	}
+	cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
+	for _, cd := range cdroms {
+		c := cd.(*types.VirtualCdrom)
+		c.Backing = &types.VirtualCdromRemotePassthroughBackingInfo{}
+		c.Connectable = &types.VirtualDeviceConnectInfo{}
+		err := vm.vm.EditDevice(vm.driver.ctx, c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

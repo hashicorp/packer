@@ -353,6 +353,18 @@ func checkFull(t *testing.T) builderT.TestCheckFunc {
 			t.Errorf("Boot order must be empty")
 		}
 
+		devices, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("Cannot read devices: %v", err)
+		}
+		cdroms := devices.SelectByType((*types.VirtualCdrom)(nil))
+		for _, cd := range cdroms {
+			_, ok := cd.(*types.VirtualCdrom).Backing.(*types.VirtualCdromRemotePassthroughBackingInfo)
+			if !ok {
+				t.Errorf("wrong cdrom backing")
+			}
+		}
+
 		return nil
 	}
 }
