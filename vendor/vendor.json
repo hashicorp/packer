@@ -1485,6 +1485,42 @@
 			"versionExact": "v1.2.1"
 		},
 		{
+			"checksumSHA1": "Tq2BiJUqHH6rryU5xGdD/WQlxSk=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
+			"checksumSHA1": "q+o6CYdmE6zUexIu50LJ8m5V9M8=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
+			"checksumSHA1": "0ZnDtNVslrK0P9j01yquQ0qg4rs=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
+			"checksumSHA1": "C2Ft9SlvvWAuKTymaJxyphqlTY0=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
+			"checksumSHA1": "HtMaGZy24OmXN85TYpsLpfWFNr0=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
+			"checksumSHA1": "Maw/I5DN4rRUO4WEenrg4hgPDJA=",
+			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312",
+			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
+			"revisionTime": "2018-10-19T12:31:15Z"
+		},
+		{
 			"checksumSHA1": "GQ9bu6PuydK3Yor1JgtVKUfEJm8=",
 			"path": "github.com/tent/http-link-go",
 			"revision": "ac974c61c2f990f4115b119354b5e0b47550e888"
