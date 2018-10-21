@@ -231,12 +231,6 @@
 			"revisionTime": "2018-01-10T05:50:12Z"
 		},
 		{
-			"checksumSHA1": "nydW2fZG9mEqb65Wp+Q1HckZZ5Q=",
-			"path": "github.com/TencentCloud/tencentcloud-sdk-go",
-			"revision": "d5ae639b62efcd614c7602ae13c4151c6615fe45",
-			"revisionTime": "2018-10-12T12:20:01Z"
-		},
-		{
 			"checksumSHA1": "HttiPj314X1a0i2Jen1p6lRH/vE=",
 			"path": "github.com/aliyun/aliyun-oss-go-sdk/oss",
 			"revision": "e6dbea820a9f304b43d3b357dd48ced23b86df72",
@@ -1489,30 +1483,6 @@
 			"revisionTime": "2018-01-31T22:23:50Z",
 			"version": "v1.2.1",
 			"versionExact": "v1.2.1"
-		},
-		{
-			"checksumSHA1": "Tq2BiJUqHH6rryU5xGdD/WQlxSk=",
-			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common",
-			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
-			"revisionTime": "2018-10-19T12:31:15Z"
-		},
-		{
-			"checksumSHA1": "C2Ft9SlvvWAuKTymaJxyphqlTY0=",
-			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile",
-			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
-			"revisionTime": "2018-10-19T12:31:15Z"
-		},
-		{
-			"checksumSHA1": "HtMaGZy24OmXN85TYpsLpfWFNr0=",
-			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312",
-			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
-			"revisionTime": "2018-10-19T12:31:15Z"
-		},
-		{
-			"checksumSHA1": "Maw/I5DN4rRUO4WEenrg4hgPDJA=",
-			"path": "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312",
-			"revision": "649583d76d09eff104d18aae17490d2cbf01b373",
-			"revisionTime": "2018-10-19T12:31:15Z"
 		},
 		{
 			"checksumSHA1": "GQ9bu6PuydK3Yor1JgtVKUfEJm8=",
