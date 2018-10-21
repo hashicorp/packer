@@ -1,9 +1,9 @@
 package cvm
 
 import (
+	"github.com/hashicorp/packer/helper/communicator"
 	"io/ioutil"
 	"os"
-	"github.com/hashicorp/packer/helper/communicator"
 	"testing"
 )
 
