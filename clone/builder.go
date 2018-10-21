@@ -52,6 +52,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		steps = append(steps,
 			&common.StepRun{
 				Config: &b.config.RunConfig,
+				SetOrder: false,
 			},
 			&common.StepWaitForIp{},
 			&communicator.StepConnect{

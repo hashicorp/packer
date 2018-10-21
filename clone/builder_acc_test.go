@@ -419,6 +419,7 @@ func TestCloneBuilderAcc_sshPassword(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: sshPasswordConfig(),
+		Check: checkDefaultBootOrder(t),
 	})
 }
 
@@ -428,6 +429,25 @@ func sshPasswordConfig() string {
 	config["ssh_username"] = "root"
 	config["ssh_password"] = "jetbrains"
 	return commonT.RenderConfig(config)
+}
+
+func checkDefaultBootOrder(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("config.bootOptions")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		order := vmInfo.Config.BootOptions.BootOrder
+		if order != nil {
+			t.Errorf("Boot order must be empty")
+		}
+
+		return nil
+	}
 }
 
 func TestCloneBuilderAcc_sshKey(t *testing.T) {
@@ -505,6 +525,44 @@ func checkTemplate(t *testing.T) builderT.TestCheckFunc {
 
 		if vmInfo.Config.Template != true {
 			t.Error("Not a template")
+		}
+
+		return nil
+	}
+}
+
+func TestCloneBuilderAcc_bootOrder(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: bootOrderConfig(),
+		Check:    checkBootOrder(t),
+	})
+}
+
+func bootOrderConfig() string {
+	config := defaultConfig()
+	config["communicator"] = "ssh"
+	config["ssh_username"] = "root"
+	config["ssh_password"] = "jetbrains"
+
+	config["boot_order"] = "disk,cdrom,floppy"
+
+	return commonT.RenderConfig(config)
+}
+
+func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("config.bootOptions")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		order := vmInfo.Config.BootOptions.BootOrder
+		if order == nil {
+			t.Errorf("Boot order must not be empty")
 		}
 
 		return nil

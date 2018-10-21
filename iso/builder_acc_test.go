@@ -1,13 +1,13 @@
 package iso
 
 import (
-	builderT "github.com/hashicorp/packer/helper/builder/testing"
-	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
-	"testing"
-	"github.com/hashicorp/packer/packer"
-	"github.com/vmware/govmomi/vim25/types"
 	"fmt"
+	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
+	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
+	"github.com/vmware/govmomi/vim25/types"
 	"io/ioutil"
+	"testing"
 )
 
 func TestISOBuilderAcc_default(t *testing.T) {
@@ -277,4 +277,112 @@ func createFloppyConfig(filePath string) string {
 	config := defaultConfig()
 	config["floppy_files"] = []string{filePath}
 	return commonT.RenderConfig(config)
+}
+
+func TestISOBuilderAcc_full(t *testing.T) {
+	config := fullConfig()
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: commonT.RenderConfig(config),
+		Check:    checkFull(t),
+	})
+}
+
+func fullConfig() map[string]interface{} {
+	config := map[string]interface{}{
+		"vcenter_server":      "vcenter.vsphere65.test",
+		"username":            "root",
+		"password":            "jetbrains",
+		"insecure_connection": true,
+
+		"vm_name": commonT.NewVMName(),
+		"host":    "esxi-1.vsphere65.test",
+
+		"RAM": 1024,
+		"disk_controller_type":  "pvscsi",
+		"disk_size":             4096,
+		"disk_thin_provisioned": true,
+		"network_card":          "vmxnet3",
+		"guest_os_type":         "ubuntu64Guest",
+
+		"iso_paths": []string{
+			"[datastore1] ISO/ubuntu-16.04.3-server-amd64.iso",
+		},
+		"floppy_files": []string{
+			"preseed.cfg",
+		},
+
+		"boot_command": []string{
+			"<enter><wait><f6><wait><esc><wait>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
+			"<bs><bs><bs>",
+			"/install/vmlinuz",
+			" initrd=/install/initrd.gz",
+			" priority=critical",
+			" locale=en_US",
+			" file=/media/preseed.cfg",
+			"<enter>",
+		},
+
+		"ssh_username": "jetbrains",
+		"ssh_password": "jetbrains",
+	}
+
+	return config
+}
+
+func checkFull(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("config.bootOptions")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		order := vmInfo.Config.BootOptions.BootOrder
+		if order != nil {
+			t.Errorf("Boot order must be empty")
+		}
+
+		return nil
+	}
+}
+
+func TestISOBuilderAcc_bootOrder(t *testing.T) {
+	config := fullConfig()
+	config["boot_order"] = "disk,cdrom,floppy"
+
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: commonT.RenderConfig(config),
+		Check:    checkBootOrder(t),
+	})
+}
+
+func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("config.bootOptions")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		order := vmInfo.Config.BootOptions.BootOrder
+		if order == nil {
+			t.Errorf("Boot order must not be empty")
+		}
+
+		return nil
+	}
 }

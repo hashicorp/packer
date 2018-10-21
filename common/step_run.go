@@ -12,16 +12,9 @@ type RunConfig struct {
 	BootOrder string `mapstructure:"boot_order"` // example: "floppy,cdrom,ethernet,disk"
 }
 
-func (c *RunConfig) Prepare() []error {
-	if c.BootOrder == "" {
-		c.BootOrder = "disk,cdrom"
-	}
-
-	return nil
-}
-
 type StepRun struct {
 	Config *RunConfig
+	SetOrder bool
 }
 
 func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -34,6 +27,14 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 		if err := vm.SetBootOrder(order); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
+		}
+	} else {
+		if s.SetOrder {
+			ui.Say("Set boot order temporary...")
+			if err := vm.SetBootOrder([]string{"disk", "cdrom"}); err != nil {
+				state.Put("error", err)
+				return multistep.ActionHalt
+			}
 		}
 	}
 
@@ -48,14 +49,22 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 }
 
 func (s *StepRun) Cleanup(state multistep.StateBag) {
+	ui := state.Get("ui").(packer.Ui)
+	vm := state.Get("vm").(*driver.VirtualMachine)
+
+	if s.Config.BootOrder == "" && s.SetOrder {
+		ui.Say("Clear boot order...")
+		if err := vm.SetBootOrder([]string{"-"}); err != nil {
+			state.Put("error", err)
+			return
+		}
+	}
+
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 	if !cancelled && !halted {
 		return
 	}
-
-	ui := state.Get("ui").(packer.Ui)
-	vm := state.Get("vm").(*driver.VirtualMachine)
 
 	ui.Say("Power off VM...")
 
