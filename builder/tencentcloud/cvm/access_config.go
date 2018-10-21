@@ -82,7 +82,6 @@ func (cf *TencentCloudAccessConfig) Client() (*cvm.Client, *vpc.Client, error) {
 	} else {
 		return nil, nil, fmt.Errorf("zone must be set")
 	}
-	return cvm_client, vpc_client, nil
 }
 
 func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error {

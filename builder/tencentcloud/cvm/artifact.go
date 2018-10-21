@@ -39,7 +39,7 @@ func (a *Artifact) String() string {
 		parts = append(parts, fmt.Sprintf("%s: %s", region, imageId))
 	}
 	sort.Strings(parts)
-	return fmt.Sprintf("Tencentcloud images were created:\n\n", strings.Join(parts, "\n"))
+	return fmt.Sprintf("Tencentcloud images(%s) were created:\n\n", strings.Join(parts, "\n"))
 }
 
 func (a *Artifact) State(name string) interface{} {

@@ -3,7 +3,7 @@ package cvm
 import (
 	"io/ioutil"
 	"os"
-	"packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/communicator"
 	"testing"
 )
 
