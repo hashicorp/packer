@@ -225,11 +225,11 @@ builder.
         Any filter described in the docs for [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
         is valid.
 
-    `security_group_ids` take precendense over this.
+    `security_group_ids` take precedence over this.
 
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown

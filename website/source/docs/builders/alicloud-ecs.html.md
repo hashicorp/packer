@@ -18,7 +18,7 @@ customized images based on an existing base images.
 
 The following configuration options are available for building Alicloud images.
 In addition to the options listed here,
-a [communicator](/docs/templates/communicator.html) can be configured for this
+a [communicator](../templates/communicator.html) can be configured for this
 builder.
 
 ### Required:
@@ -77,9 +77,9 @@ builder.
     to the image.
 
     -   `disk_category` (string) - Category of the data disk. Optional values are:
-        -   cloud - general cloud disk
-        -   cloud\_efficiency - efficiency cloud disk
-        -   cloud\_ssd - cloud SSD
+        -   `cloud` - general cloud disk
+        -   `cloud_efficiency` - efficiency cloud disk
+        -   `cloud_ssd` - cloud SSD
 
         Default value: cloud.
 
@@ -98,9 +98,9 @@ builder.
         will appear on the console. It cannot begin with `http://` or `https://`.
 
     -   `disk_size` (number) - Size of the system disk, in GB, values range:
-        -   cloud - 5 ~ 2000
-        -   cloud\_efficiency - 20 ~ 2048
-        -   cloud\_ssd - 20 ~ 2048
+        -   `cloud` - 5 ~ 2000
+        -   `cloud_efficiency` - 20 ~ 2048
+        -   `cloud_ssd` - 20 ~ 2048
 
         The value should be equal to or greater than the size of the specific SnapshotId.
 
@@ -135,19 +135,19 @@ builder.
 
 -   `internet_charge_type` (string) - Internet charge type, which can be
     `PayByTraffic` or `PayByBandwidth`. Optional values:
-    -   PayByBandwidth
-    -   PayByTraffic
+    -   `PayByBandwidth`
+    -   `PayByTraffic`
 
     If this parameter is not specified, the default value is `PayByBandwidth`.
     For the regions out of China, currently only support `PayByTraffic`, you must
     set it manfully.
 
 -   `internet_max_bandwidth_out` (string) - Maximum outgoing bandwidth to the public
-    network, measured in Mbps (Mega bit per second).
+    network, measured in Mbps (Mega bits per second).
 
     Value range:
-    -   PayByBandwidth: \[0, 100\]. If this parameter is not specified, API automatically sets it to 0 Mbps.
-    -   PayByTraffic: \[1, 100\]. If this parameter is not specified, an error is returned.
+    -   `PayByBandwidth`: \[0, 100\]. If this parameter is not specified, API automatically sets it to 0 Mbps.
+    -   `PayByTraffic`: \[1, 100\]. If this parameter is not specified, an error is returned.
 
 -   `io_optimized` (boolean) - Whether an ECS instance is I/O optimized or not.
     The default value is `false`.
@@ -165,7 +165,7 @@ builder.
     `_` or `-`. It cannot begin with `http://` or `https://`.
 
 -   `security_token` (string) - STS access token, can be set through template or by exporting
-     as environment variable such "export SecurityToken=value".
+     as environment variable such as `export SecurityToken=value`.
 
 -   `skip_region_validation` (boolean) - The region validation can be skipped if this
     value is true, the default value is false.
@@ -175,7 +175,7 @@ builder.
     where `<UUID>` is a 36 character unique identifier.
 
 -   `TLSHandshakeTimeout` (int) - When happen "net/http: TLS handshake timeout" problem, set this environment variable
-     to a bigger such as "export TLSHandshakeTimeout=30", it will set the TLS handshake timeout value to 30s.
+     to a bigger such as `export TLSHandshakeTimeout=30`, it will set the TLS handshake timeout value to 30s.
 
 -   `user_data` (string) - The UserData of an instance must be encoded in `Base64`
     format, and the maximum size of the raw data is `16 KB`.

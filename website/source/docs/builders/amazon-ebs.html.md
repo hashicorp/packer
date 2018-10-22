@@ -40,18 +40,18 @@ segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
 In addition to the options listed here, a
-[communicator](/docs/templates/communicator.html) can be configured for this
+[communicator](../templates/communicator.html) can be configured for this
 builder.
 
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](amazon.html#specifying-amazon-credentials)
 
 -   `ami_name` (string) - The name of the resulting AMI that will appear when
     managing AMIs in the AWS console or via APIs. This must be unique. To help
     make this unique, use a function like `timestamp` (see [template
-    engine](/docs/templates/engine.html) for more info)
+    engine](../templates/engine.html) for more info).
 
 -   `instance_type` (string) - The EC2 instance type to use while building the
     AMI, such as `t2.small`.
@@ -60,7 +60,7 @@ builder.
     launch the EC2 instance to create the AMI.
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](amazon.html#specifying-amazon-credentials)
 
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine. `source_ami_filter` may be used instead to populate this
@@ -112,7 +112,7 @@ builder.
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
-    [template engine](/docs/templates/engine.html),
+    [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
 -   `ami_groups` (array of strings) - A list of groups that have access to
@@ -160,7 +160,7 @@ builder.
 -   `disable_stop_instance` (boolean) - Packer normally stops the build instance
     after all provisioners have run. For Windows instances, it is sometimes
     desirable to [run Sysprep](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ami-create-standard.html)
-    which will stop the instance for you. If this is set to true, Packer *will not*
+    which will stop the instance for you. If this is set to `true`, Packer *will not*
     stop the instance but will assume that you will send the stop signal
     yourself through your final provisioner. You can do this with a
     [windows-shell provisioner](https://www.packer.io/docs/provisioners/windows-shell.html).
@@ -197,16 +197,16 @@ builder.
     instance to consume up to its available CPU Credits.
     See the AWS documentation for [T2 Unlimited]
     (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html)
-    and the 'T2 Unlimited Pricing' section of the [Amazon EC2 On-Demand
+    and the **T2 Unlimited Pricing** section of the [Amazon EC2 On-Demand
     Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
     information.
     By default this option is disabled and Packer will set up a [T2
     Standard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
     instance instead.
 
-    To use T2 Unlimited you must use a T2 instance type e.g. t2.micro.
+    To use T2 Unlimited you must use a T2 instance type e.g. `t2.micro`.
     Additionally, T2 Unlimited cannot be used in conjunction with Spot
-    Instances e.g. when the `spot_price` option has been configured.
+    Instances, e.g., when the `spot_price` option has been configured.
     Attempting to do so will cause an error.
 
     !&gt; **Warning!** Additional costs may be incurred by enabling T2
@@ -261,13 +261,13 @@ builder.
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [template engine](/docs/templates/engine.html),
+    [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
 -   `run_volume_tags` (object of key/value strings) - Tags to apply to the volumes
     that are *launched* to create the AMI. These tags are *not* applied to the
     resulting AMI unless they're duplicated in `tags`. This is a
-    [template engine](/docs/templates/engine.html),
+    [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
 -   `security_group_id` (string) - The ID (*not* the name) of the security group
@@ -299,11 +299,11 @@ builder.
         Any filter described in the docs for [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
         is valid.
 
-    `security_group_ids` take precendense over this.
+    `security_group_ids` take precedence over this.
 
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
@@ -323,7 +323,7 @@ builder.
 
 -   `snapshot_tags` (object of key/value strings) - Tags to apply to snapshot.
     They will override AMI tags if already applied to snapshot. This is a
-    [template engine](/docs/templates/engine.html),
+    [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
 -   `source_ami_filter` (object) - Filters used to populate the `source_ami` field.
@@ -355,7 +355,7 @@ builder.
     -   `owners` (array of strings) - Filters the images by their owner. You may
         specify one or more AWS account IDs, "self" (which will use the account
         whose credentials you are using to run Packer), or an AWS owner alias:
-        for example, "amazon", "aws-marketplace", or "microsoft".
+        for example, `amazon`, `aws-marketplace`, or `microsoft`.
         This option is required for security reasons.
 
     -   `most_recent` (boolean) - Selects the newest created image when true.
@@ -394,8 +394,8 @@ builder.
     used for SSH with the machine. The key must match a key pair name loaded
     up into Amazon EC2. By default, this is blank, and Packer will
     generate a temporary keypair unless
-    [`ssh_password`](/docs/templates/communicator.html#ssh_password) is used.
-    [`ssh_private_key_file`](/docs/templates/communicator.html#ssh_private_key_file)
+    [`ssh_password`](../templates/communicator.html#ssh_password) is used.
+    [`ssh_private_key_file`](../templates/communicator.html#ssh_private_key_file)
     or `ssh_agent_auth` must be specified when `ssh_keypair_name` is utilized.
 
 -   `ssh_agent_auth` (boolean) - If true, the local SSH agent will be used to
@@ -410,7 +410,7 @@ builder.
     [`ssh_interface`](#ssh_interface). A fixer exists to migrate.
 
 -   `ssh_interface` (string) - One of `public_ip`, `private_ip`,
-    `public_dns` or `private_dns`. If set, either the public IP address,
+    `public_dns`, or `private_dns`. If set, either the public IP address,
     private IP address, public DNS name or private DNS name will used as the host for SSH.
     The default behaviour if inside a VPC is to use the public IP address if available,
     otherwise the private IP address will be used. If not in a VPC the public DNS name
@@ -459,7 +459,7 @@ builder.
 
 -   `tags` (object of key/value strings) - Tags applied to the AMI and
     relevant snapshots. This is a
-    [template engine](/docs/templates/engine.html),
+    [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
 
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair

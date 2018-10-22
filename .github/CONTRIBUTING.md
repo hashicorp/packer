@@ -59,7 +59,7 @@ runtime in order to build packer.
 
 If/when you have go installed you can already `go get` packer and `make` in
 order to compile and test Packer. These instructions target
-POSIX-like environments (Mac OS X, Linux, Cygwin, etc.) so you may need to
+POSIX-like environments (macOS, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
 The instructions below are for go 1.7. or later.
 
@@ -107,6 +107,8 @@ From there, open your fork in your browser to open a new pull-request.
 will break if you `git clone` your fork instead of using `go get` on the main
 Packer project.
 
+**Note:** See [Working on forks](#Working on forks) for a better way to use `git push ...`.
+
 ### Pull Request Lifecycle
 
 1. You are welcome to submit your pull request for commentary or review before
@@ -124,11 +126,11 @@ Packer project.
 
 1. Once all outstanding comments and checklist items have been addressed, your
   contribution will be merged! Merged PRs will be included in the next
-  Packer release. The core team takes care of updating the CHANGELOG as they
-  merge.
+  Packer release. The core team takes care of updating the
+  [CHANGELOG.md](../CHANGELOG.md) as they merge.
 
-1. In rare cases, we might decide that a PR should be closed. We'll make sure to
-  provide clear reasoning when this happens.
+1. In rare cases, we might decide that a PR should be closed without merging.
+  We'll make sure to provide clear reasoning when this happens.
 
 ### Tips for Working on Packer
 
@@ -137,13 +139,25 @@ Packer project.
 The easiest way to work on a fork is to set it as a remote of the Packer
 project. After following the steps in "Setting up Go to work on Packer":
 
-1. Navigate to `$GOPATH/src/github.com/hashicorp/packer`
-2. Add the remote by running
-   `git remote add <name of remote> <github url of fork>`. For example:
-   `git remote add mwhooker https://github.com/mwhooker/packer.git`.
-3. Checkout a feature branch: `git checkout -b new-feature`
-4. Make changes
+1. Navigate to the code:
+
+   `cd $GOPATH/src/github.com/hashicorp/packer`
+
+2. Add the remote by running:
+
+   `git remote add <name of remote> <github url of fork>`
+
+   For example:
+
+   `git remote add mwhooker https://github.com/mwhooker/packer.git`
+
+3. Checkout a feature branch:
+
+   `git checkout -b new-feature`
+
+4. Make changes.
 5. (Optional) Push your changes to the fork:
+
    `git push -u <name of remote> new-feature`
 
 This way you can push to your fork to create a PR, but the code on disk still
@@ -180,7 +194,7 @@ Packer has [acceptance tests](https://en.wikipedia.org/wiki/Acceptance_testing)
 for various builders. These typically require an API key (AWS, GCE), or
 additional software to be installed on your computer (VirtualBox, VMware).
 
-If you're working on a new builder or builder feature and want verify it is
+If you're working on a new builder or builder feature and want to verify it is
 functioning (and also hasn't broken anything else), we recommend running the
 acceptance tests.
 
