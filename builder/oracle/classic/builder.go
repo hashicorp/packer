@@ -97,8 +97,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&stepAddKeysToAPI{},
 			&stepSecurity{},
 			&stepCreatePVMaster{
-				name:       fmt.Sprintf("master-instance_%s", runID),
-				volumeName: fmt.Sprintf("master-storage_%s", runID),
+				Name:       fmt.Sprintf("master-instance_%s", runID),
+				VolumeName: fmt.Sprintf("master-storage_%s", runID),
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
@@ -108,13 +108,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&common.StepProvision{},
 			&stepTerminatePVMaster{},
 			&stepCreatePVBuilder{
-				name:              fmt.Sprintf("builder-instance_%s", runID),
-				builderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
+				Name:              fmt.Sprintf("builder-instance_%s", runID),
+				BuilderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
 			},
 			&stepAttachVolume{
-				volumeName:      fmt.Sprintf("master-storage_%s", runID),
-				index:           2,
-				instanceInfoKey: "builder_instance_info",
+				VolumeName:      fmt.Sprintf("master-storage_%s", runID),
+				Index:           2,
+				InstanceInfoKey: "builder_instance_info",
 			},
 			&communicator.StepConnect{
 				Config:    &builderCommConfig,
@@ -122,7 +122,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				SSHConfig: b.config.Comm.SSHConfigFunc(),
 			},
 			&stepUploadImage{
-				uploadImageCommand: b.config.BuilderUploadImageCommand,
+				UploadImageCommand: b.config.BuilderUploadImageCommand,
 			},
 			&stepCreateImage{},
 			&stepListImages{},
