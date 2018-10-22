@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -57,7 +58,11 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		}
 	}
 
-	ec2conn := getValidationSession()
+	sess, err := accessConfig.Session()
+	if err != nil {
+		errs = append(errs, err)
+	}
+	ec2conn := ec2.New(sess)
 	errs = c.prepareRegions(ec2conn, accessConfig, errs)
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {

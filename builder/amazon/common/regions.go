@@ -2,19 +2,8 @@ package common
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
-
-func getValidationSession() *ec2.EC2 {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	ec2conn := ec2.New(sess)
-	return ec2conn
-}
 
 func listEC2Regions(ec2conn ec2iface.EC2API) ([]string, error) {
 	var regions []string
