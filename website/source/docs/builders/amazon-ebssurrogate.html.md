@@ -19,13 +19,13 @@ then snapshotting and creating the AMI from that volume.
 This builder can therefore be used to bootstrap scratch-build images - for
 example FreeBSD or Ubuntu using ZFS as the root file system.
 
-This is all done in your own AWS account. The builder will create temporary key
-pairs, security group rules, etc. that provide it temporary access to the
+This is all done in your own AWS account. This builder will create temporary key
+pairs, security group rules, etc., that provide it temporary access to the
 instance while the image is being created.
 
 ## Configuration Reference
 
-There are many configuration options available for the builder. They are
+There are many configuration options available for this builder. They are
 segmented below into two categories: required and optional parameters. Within
 each category, the available configuration keys are alphabetized.
 
@@ -36,7 +36,7 @@ builder.
 ### Required:
 
 -   `access_key` (string) - The access key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `instance_type` (string) - The EC2 instance type to use while building the
     AMI, such as `m1.small`.
@@ -45,7 +45,7 @@ builder.
     launch the EC2 instance to create the AMI.
 
 -   `secret_key` (string) - The secret key used to communicate with AWS. [Learn
-    how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+    how to set this](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 -   `source_ami` (string) - The initial AMI used as a base for the newly
     created machine. `source_ami_filter` may be used instead to populate this
@@ -79,29 +79,29 @@ builder.
         example, `/dev/sdh` or `xvdh`). Required for every device in the
         block device mapping.
 
-    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `encrypted` (boolean) - Indicates whether or not to encrypt the volume.
 
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
         [IOPs](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_EbsBlockDevice.html)
-        for more information
+        for more information.
 
     -   `no_device` (boolean) - Suppresses the specified device included in the
-        block device mapping of the AMI
+        block device mapping of the AMI.
 
-    -   `snapshot_id` (string) - The ID of the snapshot
+    -   `snapshot_id` (string) - The ID of the snapshot.
 
     -   `virtual_name` (string) - The virtual device name. See the documentation on
         [Block Device
         Mapping](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_BlockDeviceMapping.html)
-        for more information
+        for more information.
 
     -   `volume_size` (number) - The size of the volume, in GiB. Required if not
-        specifying a `snapshot_id`
+        specifying a `snapshot_id`.
 
-    -   `volume_type` (string) - The volume type. `gp2` for General Purpose (SSD)
+    -   `volume_type` (string) - The volume type. (`gp2` for General Purpose (SSD)
         volumes, `io1` for Provisioned IOPS (SSD) volumes, and `standard` for Magnetic
-        volumes
+        volumes)
 
 -   `ami_description` (string) - The description to set for the
     resulting AMI(s). By default this description is empty. This is a
@@ -190,16 +190,16 @@ builder.
     instance to consume up to its available CPU Credits.
     See the AWS documentation for [T2 Unlimited]
     (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html)
-    and the 'T2 Unlimited Pricing' section of the [Amazon EC2 On-Demand
+    and the **T2 Unlimited Pricing** section of the [Amazon EC2 On-Demand
     Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
     information.
     By default this option is disabled and Packer will set up a [T2
     Standard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
     instance instead.
 
-    To use T2 Unlimited you must use a T2 instance type e.g. t2.micro.
+    To use T2 Unlimited you must use a T2 instance type, e.g., `t2.micro`.
     Additionally, T2 Unlimited cannot be used in conjunction with Spot
-    Instances e.g. when the `spot_price` option has been configured.
+    Instances, e.g., when the `spot_price` option has been configured.
     Attempting to do so will cause an error.
 
     !&gt; **Warning!** Additional costs may be incurred by enabling T2
@@ -292,11 +292,11 @@ builder.
         Any filter described in the docs for [DescribeSecurityGroups](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeSecurityGroups.html)
         is valid.
 
-    `security_group_ids` take precendense over this.
+    `security_group_ids` take precedence over this.
 
 -   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
     access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (ie, allow any IPv4 source). This is only used
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
     when `security_group_id` or `security_group_ids` is not specified.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
@@ -346,9 +346,9 @@ builder.
         is valid.
 
     -   `owners` (array of strings) - Filters the images by their owner. You may
-        specify one or more AWS account IDs, "self" (which will use the account
+        specify one or more AWS account IDs, `self` (which will use the account
         whose credentials you are using to run Packer), or an AWS owner alias:
-        for example, "amazon", "aws-marketplace", or "microsoft".
+        for example, `amazon`, `aws-marketplace`, or `microsoft`.
         This option is required for security reasons.
 
 
@@ -545,7 +545,7 @@ or [for Windows](http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/finding-a
 
 ## Accessing the Instance to Debug
 
-If you need to access the instance to debug for some reason, run the builder
+If you need to access the instance to debug for some reason, run this builder
 with the `-debug` flag. In debug mode, the Amazon builder will save the private
 key in the current directory and will output the DNS or IP information as well.
 You can use this information to access the instance as it is running.

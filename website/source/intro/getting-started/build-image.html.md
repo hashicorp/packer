@@ -56,9 +56,9 @@ briefly. Create a file `example.json` and fill it with the following contents:
     "region": "us-east-1",
     "source_ami_filter": {
       "filters": {
-      "virtualization-type": "hvm",
-      "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
-      "root-device-type": "ebs"
+        "virtualization-type": "hvm",
+        "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+        "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
       "most_recent": true
@@ -274,7 +274,7 @@ Now save the following text in a file named `firstrun.json`:
 and to build, run `packer build firstrun.json`
 
 Note that if you wanted to use a `source_ami` instead of a `source_ami_filter`
-it might look something like this: `"source_ami": "ami-fce3c696",`
+it might look something like this: `"source_ami": "ami-fce3c696"`.
 
 Your output will look like this:
 

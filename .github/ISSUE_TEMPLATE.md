@@ -2,7 +2,7 @@ _Please read these instructions before submitting_
 
 **DELETE THIS TEMPLATE BEFORE SUBMITTING**
 
-_Only use Github issues to report bugs or feature requests, see
+_Only use GitHub issues to report bugs or feature requests, see
 https://www.packer.io/community.html_
 
 For example, _Timeouts waiting for SSH/WinRM_ are generally not bugs within packer and are better addressed by the mailing list. Ask on the mailing list if you are unsure.
