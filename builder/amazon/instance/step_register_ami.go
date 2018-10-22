@@ -12,7 +12,7 @@ import (
 )
 
 type StepRegisterAMI struct {
-	EnableAMIENASupport      bool
+	EnableAMIENASupport      *bool
 	EnableAMISriovNetSupport bool
 }
 
@@ -38,7 +38,7 @@ func (s *StepRegisterAMI) Run(ctx context.Context, state multistep.StateBag) mul
 		// As of February 2017, this applies to C3, C4, D2, I2, R3, and M4 (excluding m4.16xlarge)
 		registerOpts.SriovNetSupport = aws.String("simple")
 	}
-	if s.EnableAMIENASupport {
+	if s.EnableAMIENASupport != nil && *s.EnableAMIENASupport {
 		// Set EnaSupport to true
 		// As of February 2017, this applies to C5, I3, P2, R4, X1, and m4.16xlarge
 		registerOpts.EnaSupport = aws.Bool(true)
