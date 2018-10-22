@@ -164,11 +164,11 @@ func Validate(config *Config) error {
 	}
 
 	// Check for properly formatted go os types
-	supported_syslist := []string{"darwin", "freebsd", "linux", "openbsd", "solaris", "windows"}
+	supportedSyslist := []string{"darwin", "freebsd", "linux", "openbsd", "solaris", "windows"}
 	if len(config.OnlyOn) > 0 {
 		for _, provided_os := range config.OnlyOn {
 			supported_os := false
-			for _, go_os := range supported_syslist {
+			for _, go_os := range supportedSyslist {
 				if provided_os == go_os {
 					supported_os = true
 					break
@@ -176,7 +176,7 @@ func Validate(config *Config) error {
 			}
 			if supported_os != true {
 				return fmt.Errorf("Invalid OS specified in only_on: '%s'\n"+
-					"Supported OS names: %s", provided_os, strings.Join(supported_syslist, ", "))
+					"Supported OS names: %s", provided_os, strings.Join(supportedSyslist, ", "))
 			}
 		}
 	}
