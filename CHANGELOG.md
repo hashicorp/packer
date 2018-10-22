@@ -1,8 +1,45 @@
+## 1.3.2 (upcoming)
+### IMPROVEMENTS:
+* builder/amazon: Clean up security group wait code. [GH-6843]
+* builder/qemu: Add `disk_detect_zeroes` option. [GH-6827]
+* builder/hcloud: Add Hetzner Cloud builder. [GH-6871]
+* builder/amazon: Add suppport for `vpc_filter`, `subnet_filter`, and `security_group_filter`. [GH-6374]
+* provisioner/powershell: Provide better error when Packer can't find Powershell executable. [GH-6817]
+* builder/amazon: Update aws-sdk-go to v1.15.54, adding support for `credential_source`. [GH-6849]
+* builder/googlecompute: Return an error if `startup_script_file` is specified, but file does not exist. [GH-6848]
+* builder/amazon: Add validation for required `device_name` paramater in `block_device_mappings`. [GH-6845]
+* builder/scaleway: Add `boottype` parameter to config. [GH-6772]
+* core: New option to add timestamps to UI output. [GH-6784]
+* builder/azure: Add new `shared_image_gallery` option. [GH-6798]
+* builder/openstack: Add new `disk_format` option. [GH-6702]
+* builder/openstack: Fix bug where `source_image_name` wasn't being used to properly find a UUID. [GH-6751]
+* provisioner/file: Improve error messaging when file destination is a directory with no trailing slash. [GH-6756]
+* builder/alicloud: Add new `disable_stop_instance` option. [GH-6764]
+* builder/scaleway: Update scaleway-cli vendor. [GH-6771]
+
+### BUG FIXES:
+* builder/amazon: Error validating credentials is no longer obscured by a region validation error. [GH-6865]
+* core: Fix race conditions in progress bar code [GH-6858], [GH-6788], [GH-6851]
+* post-processor/manifest: No longer provides an empty ID string for Azure's managed image artifact [GH-6822]
+* provisioner/powershell: Fix a bug in the way we set the ProgressPreference variable in the default `execute_command` [GH-6838]
+* builder/amazon: Fix error calculating defaults in AWS waiters. [GH-6727]
+* provisioner/windows-restart: Fix extraneous break which forced early exit from our wait loop. [GH-6792]
+* builder/azure: Updated Azure/go-ntlmssp dependency to resolve an issue with the winrm communicator not connecting to Windows machines requiring NTLMv2 session security
+* builder/amazon: Waiter now fails rather than hanging for extra time when an image import fails. [GH-6747]
+* core: Fix logger so it doesn't accidentally try to format unescaped strings. [GH-6824]
+* builder/amazon: Increase default wait for image import to one hour. [GH-6818]
+* core: Fix error where logging was always enabled when Packer was run from inside Terraform. [GH-6758]
+* builder/alicloud: Fix type error in step_create_tags [GH-6763]
+* builder/scaleway: Fix issues with ssh keys. [GH-6768]
+* core: Fix various places in multiple builders where config was not being passed as a pointer. [GH-6739]
+
 ## 1.3.1 (September 13, 2018)
+
 ### IMPROVEMENTS:
 * builder/amazon: automatically decode encoded authorization messages if
     possible [GH-5415]
 * builder:amazon: Optional cleanup of the authorized keys file [GH-6713]
+* builder/qemu: Fixed bug where a -device in the qemuargs would override the default network settings, resulting in no network [GH-6807]
 
 ### BUG FIXES:
 * builder/amazon: fix bugs relating to spot instances provisioning [GH-6697]
