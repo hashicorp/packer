@@ -569,6 +569,9 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// which works for unix and windows
 	target_dir = filepath.ToSlash(target_dir)
 
+	// Escape spaces in remote directory
+	target_dir = strings.Replace(target_dir, " ", "\\ ", -1)
+
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		return scpUploadFile(target_file, input, w, stdoutR, fi)
 	}
