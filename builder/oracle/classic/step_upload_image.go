@@ -3,6 +3,7 @@ package classic
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -11,7 +12,8 @@ import (
 )
 
 type stepUploadImage struct {
-	uploadImageCommand string
+	UploadImageCommand string
+	segmentPath        string
 }
 
 type uploadCmdData struct {
@@ -30,15 +32,16 @@ func (s *stepUploadImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	imageFile := fmt.Sprintf("%s.tar.gz", config.ImageName)
 	state.Put("image_file", imageFile)
+	s.segmentPath = fmt.Sprintf("compute_images_segments/%s/_segment_/%s", imageFile, runID)
 
 	config.ctx.Data = uploadCmdData{
 		Username:    config.Username,
 		Password:    config.Password,
 		AccountID:   config.IdentityDomain,
 		ImageFile:   imageFile,
-		SegmentPath: fmt.Sprintf("compute_images_segments/%s/_segment_/%s", imageFile, runID),
+		SegmentPath: s.segmentPath,
 	}
-	uploadImageCmd, err := interpolate.Render(s.uploadImageCommand, &config.ctx)
+	uploadImageCmd, err := interpolate.Render(s.UploadImageCommand, &config.ctx)
 	if err != nil {
 		err := fmt.Errorf("Error processing image upload command: %s", err)
 		state.Put("error", err)
@@ -80,4 +83,11 @@ func (s *stepUploadImage) Run(_ context.Context, state multistep.StateBag) multi
 	return multistep.ActionContinue
 }
 
-func (s *stepUploadImage) Cleanup(state multistep.StateBag) {}
+func (s *stepUploadImage) Cleanup(state multistep.StateBag) {
+	_, cancelled := state.GetOk(multistep.StateCancelled)
+	_, halted := state.GetOk(multistep.StateHalted)
+	if !cancelled && !halted {
+		return
+	}
+	log.Printf("Some segments may need to be manually cleaned at '%s'", s.segmentPath)
+}

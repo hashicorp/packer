@@ -11,8 +11,8 @@ import (
 )
 
 type stepCreatePVBuilder struct {
-	name              string
-	builderVolumeName string
+	Name              string
+	BuilderVolumeName string
 }
 
 func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -30,7 +30,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 
 	// Instances Input
 	input := &compute.CreateInstanceInput{
-		Name:  s.name,
+		Name:  s.Name,
 		Shape: config.Shape,
 		Networking: map[string]compute.NetworkingInfo{
 			"eth0": compute.NetworkingInfo{
@@ -40,7 +40,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 		},
 		Storage: []compute.StorageAttachmentInput{
 			{
-				Volume: s.builderVolumeName,
+				Volume: s.BuilderVolumeName,
 				Index:  1,
 			},
 		},
@@ -80,7 +80,7 @@ func (s *stepCreatePVBuilder) Cleanup(state multistep.StateBag) {
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
-		Name: s.name,
+		Name: s.Name,
 		ID:   instanceID.(string),
 	}
 

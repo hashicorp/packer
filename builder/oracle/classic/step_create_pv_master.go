@@ -10,8 +10,8 @@ import (
 )
 
 type stepCreatePVMaster struct {
-	name       string
-	volumeName string
+	Name       string
+	VolumeName string
 }
 
 func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -29,7 +29,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 
 	// Instances Input
 	input := &compute.CreateInstanceInput{
-		Name:  s.name,
+		Name:  s.Name,
 		Shape: config.Shape,
 		Networking: map[string]compute.NetworkingInfo{
 			"eth0": compute.NetworkingInfo{
@@ -39,7 +39,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 		},
 		Storage: []compute.StorageAttachmentInput{
 			{
-				Volume: s.volumeName,
+				Volume: s.VolumeName,
 				Index:  1,
 			},
 		},
@@ -81,7 +81,7 @@ func (s *stepCreatePVMaster) Cleanup(state multistep.StateBag) {
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
-		Name: s.name,
+		Name: s.Name,
 		ID:   instanceID.(string),
 	}
 
