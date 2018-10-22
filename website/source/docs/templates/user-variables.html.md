@@ -225,6 +225,12 @@ As you can see, the `-var` flag can be specified multiple times in order to set
 multiple variables. Also, variables set later on the command-line override
 any earlier set variable of the same name.
 
+**warning**
+If you are calling Packer from cmd.exe, you should double-quote your variables
+rather than single-quoting them. For example:
+
+`packer build -var "aws_secret_key=foo" template.json`
+
 ### From a File
 
 Variables can also be set from an external JSON file. The `-var-file` flag reads
