@@ -69,7 +69,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		https://github.com/hashicorp/packer/issues/6833
 	* split master/builder image/connection config. i.e. build anything, master only linux
 	* correct artifact DONE
-	* Cleanup this step
+	* Cleanup this step DONE
 	*/
 
 	return multistep.ActionContinue
