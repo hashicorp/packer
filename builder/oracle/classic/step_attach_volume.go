@@ -10,21 +10,21 @@ import (
 )
 
 type stepAttachVolume struct {
-	index           int
-	volumeName      string
-	instanceInfoKey string
+	Index           int
+	VolumeName      string
+	InstanceInfoKey string
 }
 
 func (s *stepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*compute.ComputeClient)
 	ui := state.Get("ui").(packer.Ui)
-	instanceInfo := state.Get(s.instanceInfoKey).(*compute.InstanceInfo)
+	instanceInfo := state.Get(s.InstanceInfoKey).(*compute.InstanceInfo)
 
 	saClient := client.StorageAttachments()
 	saInput := &compute.CreateStorageAttachmentInput{
-		Index:             s.index,
+		Index:             s.Index,
 		InstanceName:      instanceInfo.Name + "/" + instanceInfo.ID,
-		StorageVolumeName: s.volumeName,
+		StorageVolumeName: s.VolumeName,
 	}
 
 	sa, err := saClient.CreateStorageAttachment(saInput)
@@ -35,14 +35,14 @@ func (s *stepAttachVolume) Run(_ context.Context, state multistep.StateBag) mult
 		return multistep.ActionHalt
 	}
 
-	state.Put(s.instanceInfoKey+"/attachment", sa)
+	state.Put(s.InstanceInfoKey+"/attachment", sa)
 
 	ui.Message("Volume attached to instance.")
 	return multistep.ActionContinue
 }
 
 func (s *stepAttachVolume) Cleanup(state multistep.StateBag) {
-	sa, ok := state.GetOk(s.instanceInfoKey + "/attachment")
+	sa, ok := state.GetOk(s.InstanceInfoKey + "/attachment")
 	if !ok {
 		return
 	}
