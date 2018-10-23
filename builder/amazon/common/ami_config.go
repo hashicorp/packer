@@ -58,11 +58,15 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		}
 	}
 
-	sess, err := accessConfig.Session()
-	if err != nil {
-		errs = append(errs, err)
+	var ec2conn *ec2.EC2
+	if !c.AMISkipRegionValidation {
+		sess, err := accessConfig.Session()
+		if err != nil {
+			errs = append(errs, err)
+		}
+		ec2conn = ec2.New(sess)
 	}
-	ec2conn := ec2.New(sess)
+
 	errs = c.prepareRegions(ec2conn, accessConfig, errs)
 
 	if len(c.AMIUsers) > 0 && c.AMIEncryptBootVolume {
