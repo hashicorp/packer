@@ -303,11 +303,6 @@ builder.
 
     `security_group_ids` take precedence over this.
 
--   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
-    access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
-    when `security_group_id` or `security_group_ids` is not specified.
-
 -   `skip_region_validation` (boolean) - Set to true if you want to skip
     validation of the region configuration option. Defaults to `false`.
 
@@ -460,6 +455,11 @@ builder.
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name that looks like
     `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
+
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
 
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates

@@ -227,11 +227,6 @@ builder.
 
     `security_group_ids` take precedence over this.
 
--   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
-    access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
-    when `security_group_id` or `security_group_ids` is not specified.
-
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     in case Packer exits ungracefully. Possible values are `stop` and `terminate`.
     Defaults to `stop`.
@@ -372,6 +367,11 @@ builder.
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name that looks like
     `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
+
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
