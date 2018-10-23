@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/awstesting/mock"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
@@ -20,7 +19,6 @@ func testAMIConfig() *AMIConfig {
 func getFakeAccessConfig(region string) *AccessConfig {
 	return &AccessConfig{
 		RawRegion: region,
-		session:   mock.Session,
 	}
 }
 
@@ -174,6 +172,7 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c := testAMIConfig()
+	c.AMISkipRegionValidation = true
 	c.AMIUsers = []string{"testAccountID"}
 	c.AMIEncryptBootVolume = true
 
@@ -192,6 +191,7 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 
 func TestAMINameValidation(t *testing.T) {
 	c := testAMIConfig()
+	c.AMISkipRegionValidation = true
 
 	accessConf := getFakeAccessConfig("wherever")
 
