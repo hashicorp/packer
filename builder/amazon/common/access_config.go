@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -39,6 +38,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	config := aws.NewConfig().WithCredentialsChainVerboseErrors(true)
+
 	staticCreds := credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token)
 	if _, err := staticCreds.Get(); err != credentials.ErrStaticCredentialsEmpty {
 		config.WithCredentials(staticCreds)
@@ -148,12 +148,8 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.RawRegion != "" && !c.SkipValidation {
-		sess, err := c.Session()
-		if err != nil {
-			errs = append(errs, err)
-		}
-		ec2conn := ec2.New(sess)
-		err = ValidateRegion(c.RawRegion, ec2conn)
+		ec2conn := getValidationSession()
+		err := ValidateRegion(c.RawRegion, ec2conn)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error validating region: %s", err.Error()))
 		}
