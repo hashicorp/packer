@@ -213,16 +213,16 @@ builder.
     Unlimited - even for instances that would usually qualify for the
     [AWS Free Tier](https://aws.amazon.com/free/).
 
--   `force_deregister` (boolean) - Force Packer to first deregister an existing
-    AMI if one with the same name already exists. Default `false`.
-
--   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
-    AMIs, which have been deregistered by `force_deregister`. Default `false`.
-
 -   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
     AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
     process). Packer will always run this operation, even if the base
     AMI has an encrypted boot volume to start with. Default `false`.
+        
+-   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
+    AMIs, which have been deregistered by `force_deregister`. Default `false`.
+    
+-   `force_deregister` (boolean) - Force Packer to first deregister an existing
+    AMI if one with the same name already exists. Default `false`.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
@@ -300,11 +300,6 @@ builder.
         is valid.
 
     `security_group_ids` take precedence over this.
-
--   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
-    access to the instance, when packer is creating a temporary security group.
-    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
-    when `security_group_id` or `security_group_ids` is not specified.
 
 -   `shutdown_behavior` (string) - Automatically terminate instances on shutdown
     in case Packer exits ungracefully. Possible values are "stop" and "terminate",
@@ -461,10 +456,15 @@ builder.
     relevant snapshots. This is a
     [template engine](../templates/engine.html),
     see [Build template data](#build-template-data) for more information.
-
+    
 -   `temporary_key_pair_name` (string) - The name of the temporary key pair
     to generate. By default, Packer generates a name that looks like
     `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
+        
+-   `temporary_security_group_source_cidr` (string) - An IPv4 CIDR block to be authorized
+    access to the instance, when packer is creating a temporary security group.
+    The default is `0.0.0.0/0` (i.e., allow any IPv4 source). This is only used
+    when `security_group_id` or `security_group_ids` is not specified.
 
 -   `token` (string) - The access token to use. This is different from the
     access key and secret key. If you're not sure what this is, then you
