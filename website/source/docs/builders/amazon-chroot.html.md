@@ -137,16 +137,17 @@ each category, the available configuration keys are alphabetized.
     networking is enabled on your instance. See [Amazon's documentation on enabling enhanced
     networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 
+-   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
+    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
+    process). Packer will always run this operation, even if the base
+    AMI has an encrypted boot volume to start with. Default `false`.
+
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
 
 -   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
     AMIs, which have been deregistered by `force_deregister`. Default `false`.
 
--   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy of the
-    AMI with an encrypted boot volume (discarding the initial unencrypted AMI in the
-    process). Packer will always run this operation, even if the base
-    AMI has an encrypted boot volume to start with. Default `false`.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
