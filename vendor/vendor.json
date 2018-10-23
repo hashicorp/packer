@@ -434,22 +434,6 @@
 			"versionExact": "v1.15.54"
 		},
 		{
-			"checksumSHA1": "MxSiiCoPpY1mCRjyEFClUu3e14w=",
-			"path": "github.com/aws/aws-sdk-go/awstesting",
-			"revision": "bf8067ceb6e7f51e150c218972dccfeeed892b85",
-			"revisionTime": "2018-10-12T21:50:02Z",
-			"version": "v1.15.54",
-			"versionExact": "v1.15.54"
-		},
-		{
-			"checksumSHA1": "Til1RNskoxuni9LNTwJWzm1GKrU=",
-			"path": "github.com/aws/aws-sdk-go/awstesting/mock",
-			"revision": "bf8067ceb6e7f51e150c218972dccfeeed892b85",
-			"revisionTime": "2018-10-12T21:50:02Z",
-			"version": "v1.15.54",
-			"versionExact": "v1.15.54"
-		},
-		{
 			"checksumSHA1": "QvKGojx+wCHTDfXQ1aoOYzH3Y88=",
 			"path": "github.com/aws/aws-sdk-go/internal/s3err",
 			"revision": "bf8067ceb6e7f51e150c218972dccfeeed892b85",
@@ -581,14 +565,6 @@
 			"checksumSHA1": "soXVJWQ/xvEB72Mo6FresaQIxLg=",
 			"comment": "v1.7.1",
 			"path": "github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil",
-			"revision": "bf8067ceb6e7f51e150c218972dccfeeed892b85",
-			"revisionTime": "2018-10-12T21:50:02Z",
-			"version": "v1.15.54",
-			"versionExact": "v1.15.54"
-		},
-		{
-			"checksumSHA1": "01b4hmyUzoReoOyEDylDinWBSdA=",
-			"path": "github.com/aws/aws-sdk-go/private/util",
 			"revision": "bf8067ceb6e7f51e150c218972dccfeeed892b85",
 			"revisionTime": "2018-10-12T21:50:02Z",
 			"version": "v1.15.54",
