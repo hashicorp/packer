@@ -151,7 +151,8 @@ each category, the available configuration keys are alphabetized.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
-    will be encrypted by the default EBS KMS key.
+    will be encrypted by the default EBS KMS key. For valid formats see _KmsKeyId_ in the
+    [AWS API docs - CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
 -   `from_scratch` (boolean) - Build a new volume instead of starting from an
     existing AMI root volume snapshot. Default `false`. If `true`, `source_ami` is
@@ -179,6 +180,8 @@ each category, the available configuration keys are alphabetized.
 
     -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
         specifying `kms_key_id`, `encrypted` needs to be set to `true`.
+        For valid formats see _KmsKeyId_ in the
+        [AWS API docs - CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
     -   `iops` (number) - The number of I/O operations per second (IOPS) that the
         volume supports. See the documentation on
@@ -209,7 +212,10 @@ each category, the available configuration keys are alphabetized.
     If you want a region to be encrypted with that region's default key ID, you can
     use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
     However, you cannot use default key IDs if you are using this in conjunction with
-    `snapshot_users` -- in that situation you must use custom keys.
+    `snapshot_users` -- in that situation you must use custom keys. For valid formats
+    see _KmsKeyId_ in the
+    [AWS API docs - CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
+
 
 -   `root_device_name` (string) - The root device name. For example, `xvda`.
 

@@ -226,7 +226,9 @@ builder.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot volume encryption.
     This only applies to the main `region`, other regions where the AMI will be copied
-    will be encrypted by the default EBS KMS key.
+    will be encrypted by the default EBS KMS key. For valid formats
+    see _KmsKeyId_ in the
+    [AWS API docs - CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
 -   `iam_instance_profile` (string) - The name of an [IAM instance
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
@@ -256,7 +258,9 @@ builder.
     If you want a region to be encrypted with that region's default key ID, you can
     use an empty string `""` instead of a key id in this map. (e.g. `"us-east-1": ""`)
     However, you cannot use default key IDs if you are using this in conjunction with
-    `snapshot_users` -- in that situation you must use custom keys.
+    `snapshot_users` -- in that situation you must use custom keys. For valid formats
+    see _KmsKeyId_ in the
+    [AWS API docs - CopyImage](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html).
 
 -   `run_tags` (object of key/value strings) - Tags to apply to the instance
     that is *launched* to create the AMI. These tags are *not* applied to the
