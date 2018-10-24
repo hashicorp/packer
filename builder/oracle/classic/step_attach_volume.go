@@ -16,7 +16,7 @@ type stepAttachVolume struct {
 }
 
 func (s *stepAttachVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ui := state.Get("ui").(packer.Ui)
 	instanceInfo := state.Get(s.InstanceInfoKey).(*compute.InstanceInfo)
 
@@ -46,7 +46,7 @@ func (s *stepAttachVolume) Cleanup(state multistep.StateBag) {
 	if !ok {
 		return
 	}
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ui := state.Get("ui").(packer.Ui)
 
 	saClient := client.StorageAttachments()
