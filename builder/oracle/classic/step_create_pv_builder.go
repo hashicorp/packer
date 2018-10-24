@@ -33,7 +33,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 		Name:  s.Name,
 		Shape: config.BuilderShape,
 		Networking: map[string]compute.NetworkingInfo{
-			"eth0": compute.NetworkingInfo{
+			"eth0": {
 				Nat:      []string{ipAddName},
 				SecLists: []string{secListName},
 			},
