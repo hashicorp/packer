@@ -36,7 +36,7 @@ func (v VagrantCloudErrors) FormatErrors() string {
 	return strings.Join(errs, ". ")
 }
 
-func (v VagrantCloudClient) New(baseUrl string, token string) *VagrantCloudClient {
+func (v VagrantCloudClient) New(baseUrl string, token string) (*VagrantCloudClient, error) {
 	c := &VagrantCloudClient{
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -46,7 +46,8 @@ func (v VagrantCloudClient) New(baseUrl string, token string) *VagrantCloudClien
 		BaseURL:     baseUrl,
 		AccessToken: token,
 	}
-	return c
+
+	return c, c.ValidateAuthentication()
 }
 
 func decodeBody(resp *http.Response, out interface{}) error {
@@ -65,7 +66,19 @@ func encodeBody(obj interface{}) (io.Reader, error) {
 	return buf, nil
 }
 
-func (v VagrantCloudClient) Get(path string) (*http.Response, error) {
+func (v *VagrantCloudClient) ValidateAuthentication() error {
+	resp, err := v.Get("authenticate")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Invalid credentials: %s", resp.Status)
+	}
+	return nil
+}
+
+func (v *VagrantCloudClient) Get(path string) (*http.Response, error) {
 	params := url.Values{}
 	params.Set("access_token", v.AccessToken)
 	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
@@ -83,7 +96,7 @@ func (v VagrantCloudClient) Get(path string) (*http.Response, error) {
 	return resp, err
 }
 
-func (v VagrantCloudClient) Delete(path string) (*http.Response, error) {
+func (v *VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	params := url.Values{}
 	params.Set("access_token", v.AccessToken)
 	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
@@ -101,7 +114,7 @@ func (v VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	return resp, err
 }
 
-func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, error) {
+func (v *VagrantCloudClient) Upload(path string, url string) (*http.Response, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -132,7 +145,7 @@ func (v VagrantCloudClient) Upload(path string, url string) (*http.Response, err
 	return resp, err
 }
 
-func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response, error) {
+func (v *VagrantCloudClient) Post(path string, body interface{}) (*http.Response, error) {
 	params := url.Values{}
 	params.Set("access_token", v.AccessToken)
 	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
@@ -157,7 +170,7 @@ func (v VagrantCloudClient) Post(path string, body interface{}) (*http.Response,
 	return resp, err
 }
 
-func (v VagrantCloudClient) Put(path string) (*http.Response, error) {
+func (v *VagrantCloudClient) Put(path string) (*http.Response, error) {
 	params := url.Values{}
 	params.Set("access_token", v.AccessToken)
 	reqUrl := fmt.Sprintf("%s/%s?%s", v.BaseURL, path, params.Encode())
