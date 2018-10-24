@@ -31,7 +31,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 	// Instances Input
 	input := &compute.CreateInstanceInput{
 		Name:  s.Name,
-		Shape: config.Shape,
+		Shape: config.BuilderShape,
 		Networking: map[string]compute.NetworkingInfo{
 			"eth0": compute.NetworkingInfo{
 				Nat:      []string{ipAddName},
@@ -44,10 +44,9 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 				Index:  1,
 			},
 		},
-		ImageList:  config.SourceImageList,
-		Attributes: config.attribs,
-		SSHKeys:    []string{config.Comm.SSHKeyPairName},
-		Entry:      5,
+		ImageList: config.BuilderImageList,
+		SSHKeys:   []string{config.Comm.SSHKeyPairName},
+		Entry:     config.BuilderImageListEntry,
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)

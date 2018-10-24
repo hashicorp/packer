@@ -1,18 +1,24 @@
 package classic
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+const imageListDefault = "/oracle/public/OL_7.2_UEKR4_x86_64"
+
 type PVConfig struct {
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
 	PersistentVolumeSize      int    `mapstructure:"persistent_volume_size"`
-	BuilderImageList          string `mapstructure:"builder_image_list"`
 	BuilderUploadImageCommand string `mapstructure:"builder_upload_image_command"`
+
+	// Builder Image
+	BuilderShape          string `mapstructure:"builder_shape"`
+	BuilderImageList      string `mapstructure:"builder_image_list"`
+	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
 	/* TODO:
-	default to OL image
-	make sure if set then PVS is above
 	some way to choose which connection to use for master
 	possible ignore everything for builder and always use SSH keys
 	*/
@@ -25,7 +31,29 @@ func (c *PVConfig) IsPV() bool {
 
 func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 	if !c.IsPV() {
-		return nil
+		if c.BuilderShape != "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("`builder_shape` has no meaning when `persistent_volume_size` is not set."))
+		}
+		if c.BuilderImageList != "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("`builder_shape_image_list` has no meaning when `persistent_volume_size` is not set."))
+		}
+		return errs
+	}
+
+	if c.BuilderShape == "" {
+		c.BuilderShape = "oc3"
+	}
+
+	if c.BuilderImageList == "" {
+		c.BuilderImageList = imageListDefault
+	}
+
+	// Entry 5 is a working default, so let's set it if the entry is unset and
+	// we're using the default image list
+	if c.BuilderImageList == imageListDefault && c.BuilderImageListEntry == 0 {
+		c.BuilderImageListEntry = 5
 	}
 
 	if c.BuilderUploadImageCommand == "" {
