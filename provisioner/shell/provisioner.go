@@ -393,7 +393,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	return nil
-
 }
 
 func (p *Provisioner) cleanupRemoteFile(path string, comm packer.Communicator) error {
