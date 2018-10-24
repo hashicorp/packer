@@ -486,7 +486,8 @@ You can use this information to access the instance as it is running.
 
 ## Build template data
 
-The available variables are:
+In configuration directives marked as a template engine above, the
+following variables are available:
 
 - `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
 - `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
