@@ -17,7 +17,7 @@ type stepCreatePersistentVolume struct {
 }
 
 func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Volume...")
@@ -53,7 +53,7 @@ func (s *stepCreatePersistentVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cleaning up Volume...")

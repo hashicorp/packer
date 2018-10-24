@@ -27,7 +27,7 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 
 	ui.Say(fmt.Sprintf("Configuring security lists and rules to enable %s access...", commType))
 
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	runUUID := uuid.TimeOrderedUUID()
 
 	secListName := fmt.Sprintf("Packer_%s_Allow_%s_%s", commType, config.ImageName, runUUID)
@@ -108,7 +108,7 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
