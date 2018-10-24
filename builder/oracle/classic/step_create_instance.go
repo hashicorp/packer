@@ -34,6 +34,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Name:       config.ImageName,
 		Shape:      config.Shape,
 		ImageList:  config.SourceImageList,
+		Entry:      config.SourceImageListEntry,
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
 		Attributes: config.attribs,
 	}
