@@ -58,18 +58,11 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 		}
 	*/
 	/* TODO:
-	*	POST /machineimage/ DONE
-		POST /imagelist/ DONE
-		POST /imagelistentry/ DONE
-		in that order.
-	* re-use step_list_images DONE
 	* Documentation
 	* Configuration (master/builder images & entry, destination stuff, etc)
 		* Image entry for both master/builder
 		https://github.com/hashicorp/packer/issues/6833
 	* split master/builder image/connection config. i.e. build anything, master only linux
-	* correct artifact DONE
-	* Cleanup this step DONE
 	*/
 
 	return multistep.ActionContinue
