@@ -48,7 +48,8 @@ The available configuration options are listed below.
     make the destination a file as well, but if you set your destination as a
     directory, at least make sure that the destination ends in a trailing slash
     so that Packer knows to use the source's basename in the final upload path.
-    Failure to do so may cause Packer to fail on file uploads.
+    Failure to do so may cause Packer to fail on file uploads. If the
+    destination file already exists, it will be overwritten.
 
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload". If it is set to "download" then the file "source" in the machine
