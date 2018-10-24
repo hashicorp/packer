@@ -515,7 +515,8 @@ provisioning commands to install the os and bootloader.
 
 ## Build template data
 
-The available variables are:
+In configuration directives marked as a template engine above, the
+following variables are available:
 
 - `BuildRegion` - The region (for example `eu-central-1`) where Packer is building the AMI.
 - `SourceAMI` - The source AMI ID (for example `ami-a2412fcd`) used to build the AMI.
