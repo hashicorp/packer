@@ -1,24 +1,25 @@
 package compute
 
 const (
-	SecurityRuleDescription   = "security rules"
-	SecurityRuleContainerPath = "/network/v1/secrule/"
-	SecurityRuleResourcePath  = "/network/v1/secrule"
+	securityRuleDescription   = "security rules"
+	securityRuleContainerPath = "/network/v1/secrule/"
+	securityRuleResourcePath  = "/network/v1/secrule"
 )
 
+// SecurityRuleClient defines the security rule client
 type SecurityRuleClient struct {
 	ResourceClient
 }
 
-// SecurityRules() returns an SecurityRulesClient that can be used to access the
+// SecurityRules returns an SecurityRulesClient that can be used to access the
 // necessary CRUD functions for Security Rules.
-func (c *ComputeClient) SecurityRules() *SecurityRuleClient {
+func (c *Client) SecurityRules() *SecurityRuleClient {
 	return &SecurityRuleClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: SecurityRuleDescription,
-			ContainerPath:       SecurityRuleContainerPath,
-			ResourceRootPath:    SecurityRuleResourcePath,
+			Client:              c,
+			ResourceDescription: securityRuleDescription,
+			ContainerPath:       securityRuleContainerPath,
+			ResourceRootPath:    securityRuleResourcePath,
 		},
 	}
 }
@@ -31,27 +32,30 @@ type SecurityRuleInfo struct {
 	// Description of the Security Rule
 	Description string `json:"description"`
 	// List of IP address prefix set names to match the packet's destination IP address.
-	DstIpAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
+	DstIPAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
 	// Name of virtual NIC set containing the packet's destination virtual NIC.
 	DstVnicSet string `json:"dstVnicSet"`
 	// Allows the security rule to be disabled.
 	Enabled bool `json:"enabledFlag"`
 	// Direction of the flow; Can be "egress" or "ingress".
 	FlowDirection string `json:"FlowDirection"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The name of the Security Rule
-	Name string `json:"name"`
+	Name string
 	// List of security protocol names to match the packet's protocol and port.
 	SecProtocols []string `json:"secProtocols"`
 	// List of multipart names of IP address prefix set to match the packet's source IP address.
-	SrcIpAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
+	SrcIPAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
 	// Name of virtual NIC set containing the packet's source virtual NIC.
 	SrcVnicSet string `json:"srcVnicSet"`
 	// Slice of tags associated with the Security Rule
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier for the Security Rule
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
+// CreateSecurityRuleInput defines the attributes needed to create a security rule
 type CreateSecurityRuleInput struct {
 	//Select the name of the access control list (ACL) that you want to add this
 	// security rule to. Security rules are applied to vNIC sets by using ACLs.
@@ -67,7 +71,7 @@ type CreateSecurityRuleInput struct {
 	// When no destination IP address prefix sets are specified, traffic to any
 	// IP address is permitted.
 	// Optional
-	DstIpAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
+	DstIPAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
 
 	// The vNICset to which you want to permit traffic. Only packets to vNICs in the
 	// specified vNICset are permitted. When no destination vNICset is specified, traffic
@@ -108,7 +112,7 @@ type CreateSecurityRuleInput struct {
 	// from IP addresses in the specified IP address prefix sets are permitted. When no source
 	// IP address prefix sets are specified, traffic from any IP address is permitted.
 	// Optional
-	SrcIpAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
+	SrcIPAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
 
 	// The vNICset from which you want to permit traffic. Only packets from vNICs in the
 	// specified vNICset are permitted. When no source vNICset is specified, traffic from any
@@ -121,15 +125,15 @@ type CreateSecurityRuleInput struct {
 	Tags []string `json:"tags"`
 }
 
-// Create a new Security Rule from an SecurityRuleClient and an input struct.
+// CreateSecurityRule creates a new Security Rule from an SecurityRuleClient and an input struct.
 // Returns a populated Info struct for the Security Rule, and any errors
 func (c *SecurityRuleClient) CreateSecurityRule(input *CreateSecurityRuleInput) (*SecurityRuleInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
 	input.ACL = c.getQualifiedName(input.ACL)
 	input.SrcVnicSet = c.getQualifiedName(input.SrcVnicSet)
 	input.DstVnicSet = c.getQualifiedName(input.DstVnicSet)
-	input.SrcIpAddressPrefixSets = c.getQualifiedList(input.SrcIpAddressPrefixSets)
-	input.DstIpAddressPrefixSets = c.getQualifiedList(input.DstIpAddressPrefixSets)
+	input.SrcIPAddressPrefixSets = c.getQualifiedList(input.SrcIPAddressPrefixSets)
+	input.DstIPAddressPrefixSets = c.getQualifiedList(input.DstIPAddressPrefixSets)
 	input.SecProtocols = c.getQualifiedList(input.SecProtocols)
 
 	var securityRuleInfo SecurityRuleInfo
@@ -140,13 +144,14 @@ func (c *SecurityRuleClient) CreateSecurityRule(input *CreateSecurityRuleInput) 
 	return c.success(&securityRuleInfo)
 }
 
+// GetSecurityRuleInput defines which security rule to obtain
 type GetSecurityRuleInput struct {
 	// The name of the Security Rule to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
-// Returns a populated SecurityRuleInfo struct from an input struct
+// GetSecurityRule returns a populated SecurityRuleInfo struct from an input struct
 func (c *SecurityRuleClient) GetSecurityRule(input *GetSecurityRuleInput) (*SecurityRuleInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
 
@@ -174,7 +179,7 @@ type UpdateSecurityRuleInput struct {
 	// When no destination IP address prefix sets are specified, traffic to any
 	// IP address is permitted.
 	// Optional
-	DstIpAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
+	DstIPAddressPrefixSets []string `json:"dstIpAddressPrefixSets"`
 
 	// The vNICset to which you want to permit traffic. Only packets to vNICs in the
 	// specified vNICset are permitted. When no destination vNICset is specified, traffic
@@ -215,7 +220,7 @@ type UpdateSecurityRuleInput struct {
 	// from IP addresses in the specified IP address prefix sets are permitted. When no source
 	// IP address prefix sets are specified, traffic from any IP address is permitted.
 	// Optional
-	SrcIpAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
+	SrcIPAddressPrefixSets []string `json:"srcIpAddressPrefixSets"`
 
 	// The vNICset from which you want to permit traffic. Only packets from vNICs in the
 	// specified vNICset are permitted. When no source vNICset is specified, traffic from any
@@ -228,14 +233,14 @@ type UpdateSecurityRuleInput struct {
 	Tags []string `json:"tags"`
 }
 
-// UpdateSecRule modifies the properties of the sec rule with the given name.
+// UpdateSecurityRule modifies the properties of the sec rule with the given name.
 func (c *SecurityRuleClient) UpdateSecurityRule(updateInput *UpdateSecurityRuleInput) (*SecurityRuleInfo, error) {
 	updateInput.Name = c.getQualifiedName(updateInput.Name)
 	updateInput.ACL = c.getQualifiedName(updateInput.ACL)
 	updateInput.SrcVnicSet = c.getQualifiedName(updateInput.SrcVnicSet)
 	updateInput.DstVnicSet = c.getQualifiedName(updateInput.DstVnicSet)
-	updateInput.SrcIpAddressPrefixSets = c.getQualifiedList(updateInput.SrcIpAddressPrefixSets)
-	updateInput.DstIpAddressPrefixSets = c.getQualifiedList(updateInput.DstIpAddressPrefixSets)
+	updateInput.SrcIPAddressPrefixSets = c.getQualifiedList(updateInput.SrcIPAddressPrefixSets)
+	updateInput.DstIPAddressPrefixSets = c.getQualifiedList(updateInput.DstIPAddressPrefixSets)
 	updateInput.SecProtocols = c.getQualifiedList(updateInput.SecProtocols)
 
 	var securityRuleInfo SecurityRuleInfo
@@ -246,21 +251,24 @@ func (c *SecurityRuleClient) UpdateSecurityRule(updateInput *UpdateSecurityRuleI
 	return c.success(&securityRuleInfo)
 }
 
+// DeleteSecurityRuleInput specifies which security rule to delete
 type DeleteSecurityRuleInput struct {
 	// The name of the Security Rule to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
+// DeleteSecurityRule deletes the specifies security rule
 func (c *SecurityRuleClient) DeleteSecurityRule(input *DeleteSecurityRuleInput) error {
 	return c.deleteResource(input.Name)
 }
 
 // Unqualifies any qualified fields in the IPNetworkExchangeInfo struct
 func (c *SecurityRuleClient) success(info *SecurityRuleInfo) (*SecurityRuleInfo, error) {
-	c.unqualify(&info.Name, &info.ACL, &info.SrcVnicSet, &info.DstVnicSet)
-	info.SrcIpAddressPrefixSets = c.getUnqualifiedList(info.SrcIpAddressPrefixSets)
-	info.DstIpAddressPrefixSets = c.getUnqualifiedList(info.DstIpAddressPrefixSets)
+	info.Name = c.getUnqualifiedName(info.FQDN)
+	c.unqualify(&info.ACL, &info.SrcVnicSet, &info.DstVnicSet)
+	info.SrcIPAddressPrefixSets = c.getUnqualifiedList(info.SrcIPAddressPrefixSets)
+	info.DstIPAddressPrefixSets = c.getUnqualifiedList(info.DstIPAddressPrefixSets)
 	info.SecProtocols = c.getUnqualifiedList(info.SecProtocols)
 	return info, nil
 }
