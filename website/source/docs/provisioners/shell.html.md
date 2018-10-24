@@ -115,6 +115,9 @@ Optional parameters:
     system reboot. Set this to a higher value if reboots take a longer amount
     of time.
 
+-   `pause_after` (string) - Wait the amount of time after provisioning a shell
+    script, this pause be taken if all previous steps were successful.
+
 ## Execute Command Example
 
 To many new users, the `execute_command` is puzzling. However, it provides an
