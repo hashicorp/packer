@@ -15,7 +15,7 @@ type stepCreateImage struct {
 
 func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 	imageFile := state.Get("image_file").(string)
 
@@ -75,7 +75,7 @@ func (s *stepCreateImage) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 
 	ui := state.Get("ui").(packer.Ui)

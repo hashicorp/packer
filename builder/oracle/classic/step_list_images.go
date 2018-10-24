@@ -15,7 +15,7 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ui.Say("Adding image to image list...")
 
 	imageListClient := client.ImageList()

@@ -17,7 +17,7 @@ func (s *stepTerminatePVMaster) Run(_ context.Context, state multistep.StateBag)
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting master Instance...")
 
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	instanceInfo := state.Get("master_instance_info").(*compute.InstanceInfo)
 
 	// get instances client

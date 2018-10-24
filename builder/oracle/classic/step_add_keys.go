@@ -17,7 +17,7 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
 	if config.Comm.Type != "ssh" {
 		ui.Say("Not using SSH communicator; skip generating SSH keys...")
@@ -61,7 +61,7 @@ func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting SSH keys...")
 	deleteInput := compute.DeleteSSHKeyInput{Name: config.Comm.SSHKeyPairName}
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	deleteClient := client.SSHKeys()
 	err := deleteClient.DeleteSSHKey(&deleteInput)
 	if err != nil {

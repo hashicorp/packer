@@ -20,7 +20,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 	ui.Say("Creating master instance...")
 
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
 	secListName := state.Get("security_list").(string)
 
@@ -75,7 +75,7 @@ func (s *stepCreatePVMaster) Cleanup(state multistep.StateBag) {
 
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
 	ui.Say("Terminating builder instance...")
 
