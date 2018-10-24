@@ -10,10 +10,11 @@ import (
 )
 
 type stepCreatePersistentVolume struct {
-	volumeSize      string
-	volumeName      string
-	bootable        bool
-	sourceImageList string
+	VolumeSize     string
+	VolumeName     string
+	Bootable       bool
+	ImageList      string
+	ImageListEntry int
 }
 
 func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -23,11 +24,12 @@ func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.Stat
 	ui.Say("Creating Volume...")
 
 	c := &compute.CreateStorageVolumeInput{
-		Name:       s.volumeName,
-		Size:       s.volumeSize,
-		ImageList:  s.sourceImageList,
-		Properties: []string{"/oracle/public/storage/default"},
-		Bootable:   s.bootable,
+		Name:           s.VolumeName,
+		Size:           s.VolumeSize,
+		ImageList:      s.ImageList,
+		ImageListEntry: s.ImageListEntry,
+		Properties:     []string{"/oracle/public/storage/default"},
+		Bootable:       s.Bootable,
 	}
 
 	sc := client.StorageVolumes()
@@ -59,7 +61,7 @@ func (s *stepCreatePersistentVolume) Cleanup(state multistep.StateBag) {
 	ui.Say("Cleaning up Volume...")
 
 	c := &compute.DeleteStorageVolumeInput{
-		Name: s.volumeName,
+		Name: s.VolumeName,
 	}
 
 	sc := client.StorageVolumes()
@@ -69,5 +71,5 @@ func (s *stepCreatePersistentVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Message(fmt.Sprintf("Deleted volume: %s", s.volumeName))
+	ui.Message(fmt.Sprintf("Deleted volume: %s", s.VolumeName))
 }
