@@ -21,6 +21,11 @@ type PVConfig struct {
 	/* TODO:
 	some way to choose which connection to use for master
 	possible ignore everything for builder and always use SSH keys
+	* Documentation
+	* Configuration (master/builder images & entry, destination stuff, etc)
+		* Image entry for both master/builder
+		https://github.com/hashicorp/packer/issues/6833
+	* split master/builder image/connection config. i.e. build anything, master only linux
 	*/
 }
 
