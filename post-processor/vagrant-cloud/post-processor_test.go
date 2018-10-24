@@ -2,6 +2,9 @@ package vagrantcloud
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -25,9 +28,25 @@ func testBadConfig() map[string]interface{} {
 	}
 }
 
+func newSecureServer(token string, handler http.HandlerFunc) *httptest.Server {
+	token = fmt.Sprintf("Bearer %s", token)
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("authorization") != token {
+			http.Error(rw, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		if handler != nil {
+			handler(rw, req)
+		}
+	}))
+}
+
 func TestPostProcessor_Configure_fromVagrantEnv(t *testing.T) {
 	var p PostProcessor
 	config := testGoodConfig()
+	server := newSecureServer("bar", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
 	config["access_token"] = ""
 	os.Setenv("VAGRANT_CLOUD_TOKEN", "bar")
 	defer func() {
@@ -48,6 +67,9 @@ func TestPostProcessor_Configure_fromAtlasEnv(t *testing.T) {
 	var p PostProcessor
 	config := testGoodConfig()
 	config["access_token"] = ""
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
 	os.Setenv("ATLAS_TOKEN", "foo")
 	defer func() {
 		os.Setenv("ATLAS_TOKEN", "")
@@ -68,15 +90,23 @@ func TestPostProcessor_Configure_fromAtlasEnv(t *testing.T) {
 }
 
 func TestPostProcessor_Configure_Good(t *testing.T) {
+	config := testGoodConfig()
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
 	var p PostProcessor
-	if err := p.Configure(testGoodConfig()); err != nil {
+	if err := p.Configure(config); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestPostProcessor_Configure_Bad(t *testing.T) {
+	config := testBadConfig()
+	server := newSecureServer("foo", nil)
+	defer server.Close()
+	config["vagrant_cloud_url"] = server.URL
 	var p PostProcessor
-	if err := p.Configure(testBadConfig()); err == nil {
+	if err := p.Configure(config); err == nil {
 		t.Fatalf("should have err")
 	}
 }
