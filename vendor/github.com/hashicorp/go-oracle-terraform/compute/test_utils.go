@@ -34,7 +34,7 @@ func newAuthenticatingServer(handler func(w http.ResponseWriter, r *http.Request
 	}))
 }
 
-func getTestClient(c *opc.Config) (*ComputeClient, error) {
+func getTestClient(c *opc.Config) (*Client, error) {
 	// Build up config with default values if omitted
 	if c.APIEndpoint == nil {
 		if os.Getenv("OPC_ENDPOINT") == "" {
@@ -73,7 +73,8 @@ func getTestClient(c *opc.Config) (*ComputeClient, error) {
 	return NewComputeClient(c)
 }
 
-func getBlankTestClient() (*ComputeClient, *httptest.Server, error) {
+// nolint: deadcode
+func getBlankTestClient() (*Client, *httptest.Server, error) {
 	server := newAuthenticatingServer(func(w http.ResponseWriter, r *http.Request) {
 	})
 
@@ -96,23 +97,26 @@ func getBlankTestClient() (*ComputeClient, *httptest.Server, error) {
 }
 
 // Returns a stub client with default values, and a custom API Endpoint
-func getStubClient(endpoint *url.URL) (*ComputeClient, error) {
-	domain := "test"
-	username := "test"
-	password := "test"
+// nolint: deadcode
+func getStubClient(endpoint *url.URL) (*Client, error) {
+	testAttr := "test"
 	config := &opc.Config{
-		IdentityDomain: &domain,
-		Username:       &username,
-		Password:       &password,
+		IdentityDomain: &testAttr,
+		Username:       &testAttr,
+		Password:       &testAttr,
 		APIEndpoint:    endpoint,
 	}
 	return getTestClient(config)
 }
 
+// nolint: deadcode
 func unmarshalRequestBody(t *testing.T, r *http.Request, target interface{}) {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-	err := json.Unmarshal(buf.Bytes(), target)
+	_, err := buf.ReadFrom(r.Body)
+	if err != nil {
+		t.Fatalf("Error reading buffer: %s", err)
+	}
+	err = json.Unmarshal(buf.Bytes(), target)
 	if err != nil {
 		t.Fatalf("Error marshalling request: %s", err)
 	}
