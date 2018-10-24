@@ -32,7 +32,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 		Name:  s.Name,
 		Shape: config.Shape,
 		Networking: map[string]compute.NetworkingInfo{
-			"eth0": compute.NetworkingInfo{
+			"eth0": {
 				Nat:      []string{ipAddName},
 				SecLists: []string{secListName},
 			},

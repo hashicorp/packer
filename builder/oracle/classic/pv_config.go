@@ -19,13 +19,9 @@ type PVConfig struct {
 	BuilderImageList      string `mapstructure:"builder_image_list"`
 	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
 	/* TODO:
-	some way to choose which connection to use for master
-	possible ignore everything for builder and always use SSH keys
 	* Documentation
-	* Configuration (master/builder images & entry, destination stuff, etc)
-		* Image entry for both master/builder
-		https://github.com/hashicorp/packer/issues/6833
 	* split master/builder image/connection config. i.e. build anything, master only linux
+		possible ignore everything for builder and always use SSH keys
 	*/
 }
 
@@ -114,9 +110,6 @@ curl -I -X HEAD \
 	"${STORAGE_URL}/compute_images/{{.ImageFile}}"
 `
 	}
-	/*
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("Persistent storage volumes are only supported on unix, and must use the ssh communicator."))
-	*/
+
 	return
 }
