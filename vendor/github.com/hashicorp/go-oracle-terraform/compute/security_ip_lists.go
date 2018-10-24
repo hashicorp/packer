@@ -7,10 +7,10 @@ type SecurityIPListsClient struct {
 
 // SecurityIPLists obtains a SecurityIPListsClient which can be used to access to the
 // Security IP List functions of the Compute API
-func (c *ComputeClient) SecurityIPLists() *SecurityIPListsClient {
+func (c *Client) SecurityIPLists() *SecurityIPListsClient {
 	return &SecurityIPListsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "security ip list",
 			ContainerPath:       "/seciplist/",
 			ResourceRootPath:    "/seciplist",
@@ -21,8 +21,10 @@ func (c *ComputeClient) SecurityIPLists() *SecurityIPListsClient {
 type SecurityIPListInfo struct {
 	// A description of the security IP list.
 	Description string `json:"description"`
-	// The three-part name of the object (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+	// The name of the object
+	Name string
 	// A comma-separated list of the subnets (in CIDR format) or IPv4 addresses for which you want to create this security IP list.
 	SecIPEntries []string `json:"secipentries"`
 	// Uniform Resource Identifier
@@ -108,6 +110,6 @@ func (c *SecurityIPListsClient) DeleteSecurityIPList(deleteInput *DeleteSecurity
 }
 
 func (c *SecurityIPListsClient) success(listInfo *SecurityIPListInfo) (*SecurityIPListInfo, error) {
-	c.unqualify(&listInfo.Name)
+	listInfo.Name = c.getUnqualifiedName(listInfo.FQDN)
 	return listInfo, nil
 }

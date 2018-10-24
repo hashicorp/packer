@@ -6,45 +6,49 @@ type IPReservationsClient struct {
 }
 
 const (
-	IPReservationDesc          = "ip reservation"
-	IPReservationContainerPath = "/ip/reservation/"
-	IPReservataionResourcePath = "/ip/reservation"
+	iPReservationDesc          = "ip reservation"
+	iPReservationContainerPath = "/ip/reservation/"
+	iPReservataionResourcePath = "/ip/reservation"
 )
 
 // IPReservations obtains an IPReservationsClient which can be used to access to the
 // IP Reservations functions of the Compute API
-func (c *ComputeClient) IPReservations() *IPReservationsClient {
+func (c *Client) IPReservations() *IPReservationsClient {
 	return &IPReservationsClient{
 		ResourceClient: &ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: IPReservationDesc,
-			ContainerPath:       IPReservationContainerPath,
-			ResourceRootPath:    IPReservataionResourcePath,
+			Client:              c,
+			ResourceDescription: iPReservationDesc,
+			ContainerPath:       iPReservationContainerPath,
+			ResourceRootPath:    iPReservataionResourcePath,
 		}}
 }
 
+// IPReservationPool details the constants for the ip reservation pool attribute
 type IPReservationPool string
 
 const (
+	// PublicReservationPool - /oracle/public/ippool
 	PublicReservationPool IPReservationPool = "/oracle/public/ippool"
 )
 
-// IPReservationInput describes an existing IP reservation.
+// IPReservation describes an existing IP reservation.
 type IPReservation struct {
 	// Shows the default account for your identity domain.
 	Account string `json:"account"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// Public IP address.
 	IP string `json:"ip"`
 	// The three-part name of the IP Reservation (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Name string
 	// Pool of public IP addresses
 	ParentPool IPReservationPool `json:"parentpool"`
-	// Is the IP Reservation Persistent (i.e. static) or not (i.e. Dynamic)?
-	Permanent bool `json:"permanent"`
 	// A comma-separated list of strings which helps you to identify IP reservation.
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
+	// Is the IP Reservation Persistent (i.e. static) or not (i.e. Dynamic)?
+	Permanent bool `json:"permanent"`
 	// Is the IP reservation associated with an instance?
 	Used bool `json:"used"`
 }
@@ -142,6 +146,6 @@ func (c *IPReservationsClient) DeleteIPReservation(input *DeleteIPReservationInp
 }
 
 func (c *IPReservationsClient) success(result *IPReservation) (*IPReservation, error) {
-	c.unqualify(&result.Name)
+	result.Name = c.getUnqualifiedName(result.FQDN)
 	return result, nil
 }

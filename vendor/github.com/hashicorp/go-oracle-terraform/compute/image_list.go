@@ -1,9 +1,9 @@
 package compute
 
 const (
-	ImageListDescription   = "Image List"
-	ImageListContainerPath = "/imagelist/"
-	ImageListResourcePath  = "/imagelist"
+	imageListDescription   = "Image List"
+	imageListContainerPath = "/imagelist/"
+	imageListResourcePath  = "/imagelist"
 )
 
 // ImageListClient is a client for the Image List functions of the Compute API.
@@ -13,16 +13,17 @@ type ImageListClient struct {
 
 // ImageList obtains an ImageListClient which can be used to access to the
 // Image List functions of the Compute API
-func (c *ComputeClient) ImageList() *ImageListClient {
+func (c *Client) ImageList() *ImageListClient {
 	return &ImageListClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: ImageListDescription,
-			ContainerPath:       ImageListContainerPath,
-			ResourceRootPath:    ImageListResourcePath,
+			Client:              c,
+			ResourceDescription: imageListDescription,
+			ContainerPath:       imageListContainerPath,
+			ResourceRootPath:    imageListResourcePath,
 		}}
 }
 
+// ImageListEntry details the attributes from an image list entry
 type ImageListEntry struct {
 	// User-defined parameters, in JSON format, that can be passed to an instance of this machine image when it is launched.
 	Attributes map[string]interface{} `json:"attributes"`
@@ -51,8 +52,11 @@ type ImageList struct {
 	// Each machine image in an image list is identified by an image list entry.
 	Entries []ImageListEntry `json:"entries"`
 
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+
 	// The name of the Image List
-	Name string `json:"name"`
+	Name string
 
 	// Uniform Resource Identifier
 	URI string `json:"uri"`
@@ -86,7 +90,7 @@ func (c *ImageListClient) CreateImageList(createInput *CreateImageListInput) (*I
 	return c.success(&imageList)
 }
 
-// DeleteKeyInput describes the image list to delete
+// DeleteImageListInput describes the image list to delete
 type DeleteImageListInput struct {
 	// The name of the Image List
 	Name string `json:"name"`
@@ -144,7 +148,7 @@ func (c *ImageListClient) UpdateImageList(updateInput *UpdateImageListInput) (*I
 }
 
 func (c *ImageListClient) success(imageList *ImageList) (*ImageList, error) {
-	c.unqualify(&imageList.Name)
+	imageList.Name = c.getUnqualifiedName(imageList.FQDN)
 
 	for _, v := range imageList.Entries {
 		v.MachineImages = c.getUnqualifiedList(v.MachineImages)

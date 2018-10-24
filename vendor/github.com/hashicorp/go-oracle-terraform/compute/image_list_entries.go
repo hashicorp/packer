@@ -3,24 +3,25 @@ package compute
 import "fmt"
 
 const (
-	ImageListEntryDescription   = "image list entry"
-	ImageListEntryContainerPath = "/imagelist"
-	ImageListEntryResourcePath  = "/imagelist"
+	imageListEntryDescription   = "image list entry"
+	imageListEntryContainerPath = "/imagelist"
+	imageListEntryResourcePath  = "/imagelist"
 )
 
+// ImageListEntriesClient specifies the parameters for an image list entries client
 type ImageListEntriesClient struct {
 	ResourceClient
 }
 
-// ImageListEntries() returns an ImageListEntriesClient that can be used to access the
+// ImageListEntries returns an ImageListEntriesClient that can be used to access the
 // necessary CRUD functions for Image List Entry's.
-func (c *ComputeClient) ImageListEntries() *ImageListEntriesClient {
+func (c *Client) ImageListEntries() *ImageListEntriesClient {
 	return &ImageListEntriesClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: ImageListEntryDescription,
-			ContainerPath:       ImageListEntryContainerPath,
-			ResourceRootPath:    ImageListEntryResourcePath,
+			Client:              c,
+			ResourceDescription: imageListEntryDescription,
+			ContainerPath:       imageListEntryContainerPath,
+			ResourceRootPath:    imageListEntryResourcePath,
 		},
 	}
 }
@@ -39,11 +40,12 @@ type ImageListEntryInfo struct {
 	// A list of machine images.
 	MachineImages []string `json:"machineimages"`
 	// Uniform Resource Identifier for the Image List Entry
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 	// Version number of these machineImages in the imagelist.
 	Version int `json:"version"`
 }
 
+// CreateImageListEntryInput specifies the parameters needed to creat an image list entry
 type CreateImageListEntryInput struct {
 	// The name of the Image List
 	Name string
@@ -62,7 +64,7 @@ type CreateImageListEntryInput struct {
 	Version int `json:"version"`
 }
 
-// Create a new Image List Entry from an ImageListEntriesClient and an input struct.
+// CreateImageListEntry creates a new Image List Entry from an ImageListEntriesClient and an input struct.
 // Returns a populated Info struct for the Image List Entry, and any errors
 func (c *ImageListEntriesClient) CreateImageListEntry(input *CreateImageListEntryInput) (*ImageListEntryInfo, error) {
 	c.updateClientPaths(input.Name, -1)
@@ -73,6 +75,7 @@ func (c *ImageListEntriesClient) CreateImageListEntry(input *CreateImageListEntr
 	return c.success(&imageListEntryInfo)
 }
 
+// GetImageListEntryInput details the parameters needed to retrive an image list entry
 type GetImageListEntryInput struct {
 	// The name of the Image List
 	Name string
@@ -80,7 +83,7 @@ type GetImageListEntryInput struct {
 	Version int
 }
 
-// Returns a populated ImageListEntryInfo struct from an input struct
+// GetImageListEntry returns a populated ImageListEntryInfo struct from an input struct
 func (c *ImageListEntriesClient) GetImageListEntry(input *GetImageListEntryInput) (*ImageListEntryInfo, error) {
 	c.updateClientPaths(input.Name, input.Version)
 	var imageListEntryInfo ImageListEntryInfo
@@ -90,6 +93,7 @@ func (c *ImageListEntriesClient) GetImageListEntry(input *GetImageListEntryInput
 	return c.success(&imageListEntryInfo)
 }
 
+// DeleteImageListEntryInput details the parameters needed to delete an image list entry
 type DeleteImageListEntryInput struct {
 	// The name of the Image List
 	Name string
@@ -97,6 +101,7 @@ type DeleteImageListEntryInput struct {
 	Version int
 }
 
+// DeleteImageListEntry deletes the specified image list entry
 func (c *ImageListEntriesClient) DeleteImageListEntry(input *DeleteImageListEntryInput) error {
 	c.updateClientPaths(input.Name, input.Version)
 	return c.deleteResource("")
@@ -105,8 +110,8 @@ func (c *ImageListEntriesClient) DeleteImageListEntry(input *DeleteImageListEntr
 func (c *ImageListEntriesClient) updateClientPaths(name string, version int) {
 	var containerPath, resourcePath string
 	name = c.getQualifiedName(name)
-	containerPath = ImageListEntryContainerPath + name + "/entry/"
-	resourcePath = ImageListEntryContainerPath + name + "/entry"
+	containerPath = imageListEntryContainerPath + name + "/entry/"
+	resourcePath = imageListEntryContainerPath + name + "/entry"
 	if version != -1 {
 		containerPath = fmt.Sprintf("%s%d", containerPath, version)
 		resourcePath = fmt.Sprintf("%s/%d", resourcePath, version)
@@ -117,6 +122,6 @@ func (c *ImageListEntriesClient) updateClientPaths(name string, version int) {
 
 // Unqualifies any qualified fields in the IPNetworkInfo struct
 func (c *ImageListEntriesClient) success(info *ImageListEntryInfo) (*ImageListEntryInfo, error) {
-	c.unqualifyUrl(&info.Uri)
+	c.unqualifyURL(&info.URI)
 	return info, nil
 }
