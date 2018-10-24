@@ -85,7 +85,7 @@ type Config struct {
 	MacAddress                     string `mapstructure:"mac_address"`
 	VlanId                         string `mapstructure:"vlan_id"`
 	Cpu                            uint   `mapstructure:"cpu"`
-	Generation                     uint
+	Generation                     uint   `mapstructure:"generation"`
 	EnableMacSpoofing              bool   `mapstructure:"enable_mac_spoofing"`
 	EnableDynamicMemory            bool   `mapstructure:"enable_dynamic_memory"`
 	EnableSecureBoot               bool   `mapstructure:"enable_secure_boot"`
@@ -154,8 +154,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.Cpu < 1 {
 		b.config.Cpu = 1
 	}
-
-	b.config.Generation = 1
 
 	if b.config.CloneFromVMName == "" {
 		if b.config.CloneFromVMCXPath == "" {
