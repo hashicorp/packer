@@ -72,7 +72,7 @@ func (v *VagrantCloudClient) ValidateAuthentication() error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Invalid credentials: %s", resp.Status)
+		return fmt.Errorf(resp.Status)
 	}
 	return nil
 }
