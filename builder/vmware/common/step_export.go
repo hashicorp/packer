@@ -26,7 +26,7 @@ type StepExport struct {
 	OutputDir      string
 }
 
-func (s *StepExport) generateArgs(c *DriverConfig, outputPath string, hidePassword bool) []string {
+func (s *StepExport) generateArgs(c *DriverConfig, displayName string, outputPath string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
 	if hidePassword {
 		password = "****"
@@ -36,7 +36,7 @@ func (s *StepExport) generateArgs(c *DriverConfig, outputPath string, hidePasswo
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
 
-		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + s.VMName,
+		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + displayName,
 		outputPath,
 	}
 	return append(s.OVFToolOptions, args...)

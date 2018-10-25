@@ -1,9 +1,6 @@
 package common
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
@@ -11,37 +8,4 @@ import (
 
 func TestLocalArtifact_impl(t *testing.T) {
 	var _ packer.Artifact = new(artifact)
-}
-
-func TestNewLocalArtifact(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	defer os.RemoveAll(td)
-
-	err = ioutil.WriteFile(filepath.Join(td, "a"), []byte("foo"), 0644)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
-
-	if err := os.Mkdir(filepath.Join(td, "b"), 0755); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	dir := new(LocalOutputDir)
-	dir.SetOutputDir(td)
-	files, err := dir.ListFiles()
-
-	config := make(map[string]string)
-	a, err := NewArtifact("vm1", dir, files, config, false)
-
-	if a.BuilderId() != BuilderId {
-		t.Fatalf("bad: %#v", a.BuilderId())
-	}
-	if a.Id() != "vm1" {
-		t.Fatalf("bad: %#v", a.Id())
-	}
-	if len(a.Files()) != 1 {
-		t.Fatalf("should length 1: %d", len(a.Files()))
-	}
 }

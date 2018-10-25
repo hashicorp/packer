@@ -2,17 +2,17 @@ package common
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+	"strconv"
 
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
-// BuilderId for the local artifacts
-const BuilderId = "mitchellh.vmware"
-const BuilderIdESX = "mitchellh.vmware-esx"
-
 const (
+	// BuilderId for the local artifacts
+	BuilderId    = "mitchellh.vmware"
+	BuilderIdESX = "mitchellh.vmware-esx"
+
 	ArtifactConfFormat         = "artifact.conf.format"
 	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
 	ArtifactConfSkipExport     = "artifact.conf.skip_export"
@@ -23,50 +23,9 @@ const (
 type artifact struct {
 	builderId string
 	id        string
-	dir       string
+	dir       OutputDir
 	f         []string
 	config    map[string]string
-}
-
-// NewLocalArtifact returns a VMware artifact containing the files
-// in the given directory.
-// NewLocalArtifact returns a VMware artifact containing the files
-// in the given directory.
-func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
-	files := make([]string, 0, 5)
-	visit := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			files = append(files, path)
-		}
-		return nil
-	}
-
-	if err := filepath.Walk(dir, visit); err != nil {
-		return nil, err
-	}
-
-	return &artifact{
-		builderId: id,
-		dir:       dir,
-		f:         files,
-	}, nil
-}
-
-func NewArtifact(vmname string, dir OutputDir, files []string, config map[string]string, esxi bool) (packer.Artifact, error) {
-	builderID := BuilderId
-	if esxi {
-		builderID = BuilderIdESX
-	}
-
-	return &artifact{
-		builderId: builderID,
-		id:        vmname,
-		dir:       dir.String(),
-		f:         files,
-	}, nil
 }
 
 func (a *artifact) BuilderId() string {
@@ -90,5 +49,40 @@ func (a *artifact) State(name string) interface{} {
 }
 
 func (a *artifact) Destroy() error {
-	return os.RemoveAll(a.dir)
+	return a.dir.RemoveAll()
+}
+
+func NewArtifact(remoteType string, format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packer.Artifact, error) {
+	var files []string
+	var dir OutputDir
+	var err error
+	if remoteType != "" && format != "" && !skipExport {
+		dir = new(LocalOutputDir)
+		dir.SetOutputDir(exportOutputPath)
+		files, err = dir.ListFiles()
+	} else {
+		files, err = state.Get("dir").(OutputDir).ListFiles()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the proper builder ID
+	builderId := BuilderId
+	if remoteType != "" {
+		builderId = BuilderIdESX
+	}
+
+	config := make(map[string]string)
+	config[ArtifactConfKeepRegistered] = strconv.FormatBool(keepRegistered)
+	config[ArtifactConfFormat] = format
+	config[ArtifactConfSkipExport] = strconv.FormatBool(skipExport)
+
+	return &artifact{
+		builderId: builderId,
+		id:        vmName,
+		dir:       dir,
+		f:         files,
+		config:    config,
+	}, nil
 }

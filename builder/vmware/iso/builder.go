@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -247,8 +246,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		dir = new(vmwcommon.LocalOutputDir)
 	}
 
-	exportOutputPath := b.config.OutputDir
-
 	if b.config.RemoteType != "" {
 		b.config.OutputDir = b.config.VMName
 	}
@@ -394,24 +391,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Compile the artifact list
-	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" && !b.config.SkipExport {
-		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(exportOutputPath)
-		files, err = dir.ListFiles()
-	} else {
-		files, err = state.Get("dir").(vmwcommon.OutputDir).ListFiles()
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	config := make(map[string]string)
-	config[vmwcommon.ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
-	config[vmwcommon.ArtifactConfFormat] = b.config.Format
-	config[vmwcommon.ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
-
-	return vmwcommon.NewArtifact(b.config.VMName, dir, files, config, b.config.RemoteType != "")
+	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, b.config.OutputDir,
+		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 
 func (b *Builder) Cancel() {
