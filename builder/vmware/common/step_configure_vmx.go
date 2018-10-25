@@ -46,7 +46,6 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 	// Create a new UUID for this VM, since it is a new VM
 	vmxData["uuid.action"] = "create"
 
-	vmxData["displayname"] = s.VMName
 	// Delete any generated addresses since we want to regenerate
 	// them. Conflicting MAC addresses is a bad time.
 	addrRegex := regexp.MustCompile(`(?i)^ethernet\d+\.generatedAddress`)
