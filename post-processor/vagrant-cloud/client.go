@@ -82,7 +82,10 @@ func (v *VagrantCloudClient) Get(path string) (*http.Response, error) {
 
 	log.Printf("Post-Processor Vagrant Cloud API GET: %s", reqUrl)
 
-	req, _ := v.newRequest("GET", reqUrl, nil)
+	req, err := v.newRequest("GET", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := v.client.Do(req)
 
 	log.Printf("Post-Processor Vagrant Cloud API Response: \n\n%+v", resp)
@@ -97,7 +100,10 @@ func (v *VagrantCloudClient) Delete(path string) (*http.Response, error) {
 	scrubbedUrl := strings.Replace(reqUrl, v.AccessToken, "ACCESS_TOKEN", -1)
 	log.Printf("Post-Processor Vagrant Cloud API DELETE: %s", scrubbedUrl)
 
-	req, _ := http.NewRequest("DELETE", reqUrl, nil)
+	req, err := http.NewRequest("DELETE", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", v.AccessToken))
 	resp, err := v.client.Do(req)
@@ -149,7 +155,10 @@ func (v *VagrantCloudClient) Post(path string, body interface{}) (*http.Response
 
 	log.Printf("Post-Processor Vagrant Cloud API POST: %s. \n\n Body: %s", reqUrl, encBody)
 
-	req, _ := v.newRequest("POST", reqUrl, encBody)
+	req, err := v.newRequest("POST", reqUrl, encBody)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := v.client.Do(req)
 
@@ -163,7 +172,10 @@ func (v *VagrantCloudClient) Put(path string) (*http.Response, error) {
 
 	log.Printf("Post-Processor Vagrant Cloud API PUT: %s", reqUrl)
 
-	req, _ := v.newRequest("PUT", reqUrl, nil)
+	req, err := v.newRequest("PUT", reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := v.client.Do(req)
 
