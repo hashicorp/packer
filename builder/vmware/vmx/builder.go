@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -105,6 +106,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepRegister{
 			Format:         b.config.Format,
 			KeepRegistered: b.config.KeepRegistered,
+			SkipExport:     b.config.SkipExport,
 		},
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
@@ -191,7 +193,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
-	return vmwcommon.NewArtifact(dir, files, b.config.RemoteType != ""), nil
+	config := make(map[string]string)
+	config[vmwcommon.ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
+	config[vmwcommon.ArtifactConfFormat] = b.config.Format
+	config[vmwcommon.ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
+
+	return vmwcommon.NewArtifact(dir, files, config, b.config.RemoteType != "")
 }
 
 // Cancel.

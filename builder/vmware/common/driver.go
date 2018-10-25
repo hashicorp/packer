@@ -84,6 +84,7 @@ type Driver interface {
 // system, or an error if the driver couldn't be initialized.
 func NewDriver(dconfig *DriverConfig, config *SSHConfig, commConfig *communicator.Config, vmName string) (Driver, error) {
 	drivers := []Driver{}
+
 	if dconfig.RemoteType != "" {
 		drivers = []Driver{
 			&ESX5Driver{
@@ -91,7 +92,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, commConfig *communicato
 				Port:           dconfig.RemotePort,
 				Username:       dconfig.RemoteUser,
 				Password:       dconfig.RemotePassword,
-				PrivateKey:     dconfig.RemotePrivateKey,
+				PrivateKeyFile: dconfig.RemotePrivateKey,
 				Datastore:      dconfig.RemoteDatastore,
 				CacheDatastore: dconfig.RemoteCacheDatastore,
 				CacheDirectory: dconfig.RemoteCacheDirectory,

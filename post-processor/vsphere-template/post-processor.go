@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/builder/vmware/iso"
+	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -19,8 +19,8 @@ import (
 )
 
 var builtins = map[string]string{
-	vsphere.BuilderId: "vmware",
-	iso.BuilderIdESX:  "vmware",
+	vsphere.BuilderId:      "vmware",
+	vmwcommon.BuilderIdESX: "vmware",
 }
 
 type Config struct {
@@ -96,9 +96,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 			"Artifact type %s does not fit this requirement", artifact.BuilderId())
 	}
 
-	f := artifact.State(iso.ArtifactConfFormat)
-	k := artifact.State(iso.ArtifactConfKeepRegistered)
-	s := artifact.State(iso.ArtifactConfSkipExport)
+	f := artifact.State(vmwcommon.ArtifactConfFormat)
+	k := artifact.State(vmwcommon.ArtifactConfKeepRegistered)
+	s := artifact.State(vmwcommon.ArtifactConfSkipExport)
 
 	if f != "" && k != "true" && s == "false" {
 		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
