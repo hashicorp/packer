@@ -411,7 +411,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	config[vmwcommon.ArtifactConfFormat] = b.config.Format
 	config[vmwcommon.ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
 
-	return vmwcommon.NewArtifact(dir, files, config, b.config.RemoteType != "")
+	return vmwcommon.NewArtifact(b.config.VMName, dir, files, config, b.config.RemoteType != "")
 }
 
 func (b *Builder) Cancel() {

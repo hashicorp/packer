@@ -55,7 +55,7 @@ func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
 	}, nil
 }
 
-func NewArtifact(dir OutputDir, files []string, config map[string]string, esxi bool) (packer.Artifact, error) {
+func NewArtifact(vmname string, dir OutputDir, files []string, config map[string]string, esxi bool) (packer.Artifact, error) {
 	builderID := BuilderId
 	if esxi {
 		builderID = BuilderIdESX
@@ -63,13 +63,14 @@ func NewArtifact(dir OutputDir, files []string, config map[string]string, esxi b
 
 	return &artifact{
 		builderId: builderID,
+		id:        vmname,
 		dir:       dir.String(),
 		f:         files,
 	}, nil
 }
 
 func (a *artifact) BuilderId() string {
-	return BuilderId
+	return a.builderId
 }
 
 func (a *artifact) Files() []string {

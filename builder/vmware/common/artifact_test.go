@@ -32,7 +32,8 @@ func TestNewLocalArtifact(t *testing.T) {
 	dir.SetOutputDir(td)
 	files, err := dir.ListFiles()
 
-	a := NewArtifact(dir, files, false)
+	config := make(map[string]string)
+	a, err := NewArtifact("vm1", dir, files, config, false)
 
 	if a.BuilderId() != BuilderId {
 		t.Fatalf("bad: %#v", a.BuilderId())
