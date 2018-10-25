@@ -134,6 +134,32 @@ The SSH communicator has the following options:
 -   `ssh_username` (string) - The username to connect to SSH with. Required
     if using SSH.
 
+### SSH Communicator Details
+
+Packer will only use one authentication method, either `publickey` or if
+`ssh_password` is used packer will offer `password` and `keyboard-interactive`
+both sending the password. In other words Packer will not work with _sshd_
+configured with more than one configured authentication method using
+`AuthenticationMethods`.
+
+Packer supports the following ciphers:
+
+- aes128-ctr
+- aes192-ctr
+- aes256-ctr
+- arcfour128
+- arcfour256
+- arcfour
+- es128-gcm@openssh.com
+- acha20-poly1305@openssh.com
+
+And the following MACs:
+
+- hmac-sha1
+- hmac-sha1-96
+- hmac-sha2-256
+- hmac-sha2-256-etm@openssh.com
+
 ## WinRM Communicator
 
 The WinRM communicator has the following options.
