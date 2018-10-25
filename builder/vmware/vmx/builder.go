@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -180,25 +179,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
 		return nil, errors.New("Build was halted.")
 	}
-	// Compile the artifact list
-	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" {
-		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(b.config.OutputDir)
-		files, err = dir.ListFiles()
-	} else {
-		files, err = state.Get("dir").(vmwcommon.OutputDir).ListFiles()
-	}
-	if err != nil {
-		return nil, err
-	}
 
-	config := make(map[string]string)
-	config[vmwcommon.ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
-	config[vmwcommon.ArtifactConfFormat] = b.config.Format
-	config[vmwcommon.ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
-
-	return vmwcommon.NewArtifact(b.config.VMName, dir, files, config, b.config.RemoteType != "")
+	// Artifact
+	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, b.config.OutputDir,
+		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 
 // Cancel.
