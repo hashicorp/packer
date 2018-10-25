@@ -1,7 +1,6 @@
 package common
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
@@ -29,7 +28,6 @@ type StepConfigureVMX struct {
 func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	log.Printf("Configuring VMX...\n")
 
-	var vmxContents []byte
 	var err error
 	ui := state.Get("ui").(packer.Ui)
 

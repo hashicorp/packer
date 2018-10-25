@@ -13,11 +13,13 @@ type StepRegister struct {
 	registeredPath string
 	Format         string
 	KeepRegistered bool
+	SkipExport     bool
 }
 
 func (s *StepRegister) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
+
 	vmxPath := state.Get("vmx_path").(string)
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
@@ -51,7 +53,7 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 	}
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
-		if s.Format == "" || config.SkipExport {
+		if s.Format == "" || s.SkipExport {
 			ui.Say("Unregistering virtual machine...")
 			if err := remoteDriver.Unregister(s.registeredPath); err != nil {
 				ui.Error(fmt.Sprintf("Error unregistering VM: %s", err))

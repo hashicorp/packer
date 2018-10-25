@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/packer/packer"
 )
@@ -10,6 +11,12 @@ import (
 // BuilderId for the local artifacts
 const BuilderId = "mitchellh.vmware"
 const BuilderIdESX = "mitchellh.vmware-esx"
+
+const (
+	ArtifactConfFormat         = "artifact.conf.format"
+	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
+	ArtifactConfSkipExport     = "artifact.conf.skip_export"
+)
 
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
@@ -48,7 +55,7 @@ func NewLocalArtifact(id string, dir string) (packer.Artifact, error) {
 	}, nil
 }
 
-func NewArtifact(dir OutputDir, files []string, esxi bool) (packer.Artifact, err) {
+func NewArtifact(dir OutputDir, files []string, config map[string]string, esxi bool) (packer.Artifact, error) {
 	builderID := BuilderId
 	if esxi {
 		builderID = BuilderIdESX
@@ -69,7 +76,7 @@ func (a *artifact) Files() []string {
 	return a.f
 }
 
-func (*artifact) Id() string {
+func (a *artifact) Id() string {
 	return a.id
 }
 
@@ -78,7 +85,7 @@ func (a *artifact) String() string {
 }
 
 func (a *artifact) State(name string) interface{} {
-	return nil
+	return a.config[name]
 }
 
 func (a *artifact) Destroy() error {
