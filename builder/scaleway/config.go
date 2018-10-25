@@ -32,6 +32,8 @@ type Config struct {
 	Bootscript   string `mapstructure:"bootscript"`
 	BootType     string `mapstructure:"boottype"`
 
+	CloudInit string `mapstructure:"cloud_init"`
+
 	UserAgent string
 	ctx       interpolate.Context
 }
