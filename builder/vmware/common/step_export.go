@@ -71,7 +71,7 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 
 	// Export the VM
 	if s.OutputDir == "" {
-		s.OutputDir = c.VMName + "." + s.Format
+		s.OutputDir = s.VMName + "." + s.Format
 	}
 
 	if s.Format == "ova" {

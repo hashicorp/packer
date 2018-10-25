@@ -16,7 +16,6 @@ import (
 	"strings"
 	"time"
 
-	commonssh "github.com/hashicorp/packer/common/ssh"
 	"github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -28,7 +27,7 @@ import (
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
 // virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
-	base vmwcommon.VmwareDriver
+	base VmwareDriver
 
 	Host           string
 	Port           uint
@@ -184,13 +183,13 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 }
 
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
-	finalPath := d.cachePath(localPath)
+	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
 
 	log.Printf("Verifying checksum of %s", finalPath)
-	if d.verifyChecksum(checksumType, checksum, finalPath) {
+	if d.VerifyChecksum(checksumType, checksum, finalPath) {
 		log.Println("Initial checksum matched, no upload needed.")
 		return finalPath, nil
 	}
@@ -203,7 +202,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 }
 
 func (d *ESX5Driver) RemoveCache(localPath string) error {
-	finalPath := d.cachePath(localPath)
+	finalPath := d.CachePath(localPath)
 	log.Printf("Removing remote cache path %s (local %s)", finalPath, localPath)
 	return d.sh("rm", "-f", strconv.Quote(finalPath))
 }
@@ -564,7 +563,7 @@ func (d *ESX5Driver) datastorePath(path string) string {
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, dirPath, filepath.Base(path)))
 }
 
-func (d *ESX5Driver) cachePath(path string) string {
+func (d *ESX5Driver) CachePath(path string) string {
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.CacheDatastore, d.CacheDirectory, filepath.Base(path)))
 }
 
@@ -662,7 +661,7 @@ func (d *ESX5Driver) Download(src, dst string) error {
 	return d.comm.Download(d.datastorePath(src), file)
 }
 
-func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
+func (d *ESX5Driver) VerifyChecksum(ctype string, hash string, file string) bool {
 	if ctype == "none" {
 		if err := d.sh("stat", strconv.Quote(file)); err != nil {
 			return false
@@ -731,7 +730,7 @@ func (d *ESX5Driver) esxcli(args ...string) (*esxcliReader, error) {
 	return &esxcliReader{r, header}, nil
 }
 
-func (d *ESX5Driver) GetVmwareDriver() vmwcommon.VmwareDriver {
+func (d *ESX5Driver) GetVmwareDriver() VmwareDriver {
 	return d.base
 }
 

@@ -4,12 +4,6 @@ import (
 	"fmt"
 )
 
-const (
-	ArtifactConfFormat         = "artifact.conf.format"
-	ArtifactConfKeepRegistered = "artifact.conf.keep_registered"
-	ArtifactConfSkipExport     = "artifact.conf.skip_export"
-)
-
 // Artifact is the result of running the VMware builder, namely a set
 // of files associated with the resulting machine.
 type RemoteArtifact struct {
@@ -28,7 +22,7 @@ func (a *RemoteArtifact) Files() []string {
 	return a.f
 }
 
-func (*RemoteArtifact) Id() string {
+func (a *RemoteArtifact) Id() string {
 	return a.id
 }
 
