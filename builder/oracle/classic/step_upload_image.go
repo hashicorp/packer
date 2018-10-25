@@ -51,7 +51,6 @@ func (s *stepUploadImage) Run(_ context.Context, state multistep.StateBag) multi
 
 	command := fmt.Sprintf(`#!/bin/sh
 	set -e
-	set -x
 	mkdir /builder
 	mkfs -t ext3 /dev/xvdb
 	mount /dev/xvdb /builder
