@@ -60,7 +60,7 @@ builder.
     for you, and you need to make sure the instance will be stopped in the final provisioner command. Otherwise,
     Packer will timeout while waiting the instance to be stopped. This option is provided for some specific
     scenarios that you want to stop the instance by yourself. E.g., Sysprep a windows which may shutdown the instance
-    within its command. The default value is `false`.     
+    within its command. The default value is `false`.
 
 -   `image_copy_names` (array of string) - The name of the destination image, \[2,
     128\] English or Chinese characters. It must begin with an uppercase/lowercase
@@ -198,7 +198,7 @@ builder.
 
 -   `ssh_private_ip` (boolean) - If this value is true, packer will connect to the ECS created through private ip
     instead of allocating a public ip or an EIP. The default value is false.
-    
+
 -   `tags` (object of key/value strings) - Tags applied to the destination image.
 
 ## Basic Example

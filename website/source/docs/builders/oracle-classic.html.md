@@ -63,14 +63,14 @@ This builder currently only works with the SSH communicator.
 
 ### Optional
 
- -  `attributes` (string) - (string) - Attributes to apply when launching the 
-    instance. Note that you need to be careful about escaping characters due to 
-    the templates being JSON. It is often more convenient to use 
-    `attributes_file`, instead. You may only define either `attributes`  or 
+ -  `attributes` (string) - (string) - Attributes to apply when launching the
+    instance. Note that you need to be careful about escaping characters due to
+    the templates being JSON. It is often more convenient to use
+    `attributes_file`, instead. You may only define either `attributes` or
     `attributes_file`, not both.
 
- -  `attributes_file` (string) - Path to a json file that will be used for the 
-    attributes when launching the instance. You may only define either 
+ -  `attributes_file` (string) - Path to a json file that will be used for the
+    attributes when launching the instance. You may only define either
     `attributes` or `attributes_file`, not both.
 
  -  `image_description` (string) - a description for your destination
@@ -128,10 +128,10 @@ obfuscated; you will need to add a working `username`, `password`,
 Attributes file is optional for connecting via ssh, but required for winrm.
 
 The following file contains the bare minimum necessary to get winRM working;
-you have to give it the password to give to the "Administrator" user, which 
+you have to give it the password to give to the "Administrator" user, which
 will be the one winrm connects to. You must also whitelist your computer
 to connect via winRM -- the empty braces below whitelist any computer to access
-winRM but you can make it more secure by only allowing your build machine 
+winRM but you can make it more secure by only allowing your build machine
 access. See the [docs](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stcsg/automating-instance-initialization-using-opc-init.html#GUID-A0A107D6-3B38-47F4-8FC8-96D50D99379B)
 for more details on how to define a trusted host.
 
