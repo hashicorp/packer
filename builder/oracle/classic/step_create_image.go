@@ -24,7 +24,7 @@ func (s *stepCreateImage) Run(_ context.Context, state multistep.StateBag) multi
 	createMI := &compute.CreateMachineImageInput{
 		// Two-part name of the account
 		Account:     fmt.Sprintf("/Compute-%s/cloud_storage", config.IdentityDomain),
-		Description: "Packer generated TODO",
+		Description: "Packer generated Machine Image.",
 		// The three-part name of the object
 		Name: config.ImageName,
 		// image_file.tar.gz, where image_file is the .tar.gz name of the

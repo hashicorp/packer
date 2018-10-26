@@ -7,13 +7,12 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type stepSecurity struct {
-	Comm            *communicator.Config
+	CommType        string
 	SecurityListKey string
 	secListName     string
 	secRuleName     string
@@ -37,9 +36,9 @@ func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multiste
 	client := state.Get("client").(*compute.Client)
 
 	commType := ""
-	if s.Comm.Type == "ssh" {
+	if s.CommType == "ssh" {
 		commType = "SSH"
-	} else if s.Comm.Type == "winrm" {
+	} else if s.CommType == "winrm" {
 		commType = "WINRM"
 	}
 	secListName := fmt.Sprintf("Packer_%s_Allow_%s", commType, runID)
@@ -153,7 +152,7 @@ func (s *stepSecurity) Cleanup(state multistep.StateBag) {
 	}
 
 	// Some extra cleanup if we used the winRM communicator
-	if s.Comm.Type == "winrm" {
+	if s.CommType == "winrm" {
 		// Delete the packer-generated application
 		application, ok := state.GetOk("winrm_application")
 		if !ok {

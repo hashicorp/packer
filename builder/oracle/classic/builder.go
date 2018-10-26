@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"golang.org/x/crypto/ssh"
 )
 
 // BuilderId uniquely identifies the builder
@@ -22,6 +23,24 @@ const BuilderId = "packer.oracle.classic"
 type Builder struct {
 	config *Config
 	runner multistep.Runner
+}
+
+// TODO: rename, comment
+type builderConfig struct {
+	*communicator.Config
+}
+
+func (c *builderConfig) sshConfigFunc(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
+	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
+		// copy communicator config by value at the last possible moment,
+		// so we get any values written by prior steps, then change the static
+		// details to make it work correctly.
+		s := *c
+		s.SSHPty = true
+		s.Type = "ssh"
+		s.SSHUsername = username
+		return s.SSHConfigFunc()(state)
+	}
 }
 
 func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
@@ -71,10 +90,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 	if b.config.IsPV() {
-		builderCommConfig := b.config.Comm
-		builderCommConfig.SSHPty = true
-		builderCommConfig.Type = "ssh"
-		builderCommConfig.SSHUsername = b.config.BuilderSSHUsername
+		bc := builderConfig{&b.config.Comm}
 
 		steps = []multistep.Step{
 			&ocommon.StepKeyPair{
@@ -85,7 +101,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&stepCreateIPReservation{},
 			&stepAddKeysToAPI{},
 			&stepSecurity{
-				Comm:            &b.config.Comm,
+				CommType:        b.config.Comm.Type,
 				SecurityListKey: "security_list_master",
 			},
 			&stepCreatePersistentVolume{
@@ -109,7 +125,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&stepTerminatePVMaster{},
 			&stepSecurity{
 				SecurityListKey: "security_list_builder",
-				Comm:            &builderCommConfig,
+				CommType:        "ssh",
 			},
 			&stepCreatePersistentVolume{
 				// We double the master volume size because we need room to
@@ -128,10 +144,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Index:           2,
 				InstanceInfoKey: "builder_instance_info",
 			},
-			&communicator.StepConnect{
-				Config:    &builderCommConfig,
+			&communicator.StepConnectSSH{
+				Config:    &b.config.Comm,
 				Host:      ocommon.CommHost,
-				SSHConfig: builderCommConfig.SSHConfigFunc(),
+				SSHConfig: bc.sshConfigFunc(b.config.BuilderSSHUsername),
 			},
 			&stepUploadImage{
 				UploadImageCommand: b.config.BuilderUploadImageCommand,
@@ -151,10 +167,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
 			},
 			&stepCreateIPReservation{},
-			&stepAddKeysToAPI{},
+			&stepAddKeysToAPI{
+				Skip: b.config.Comm.Type != "ssh",
+			},
 			&stepSecurity{
 				SecurityListKey: "security_list",
-				Comm:            &b.config.Comm,
+				CommType:        b.config.Comm.Type,
 			},
 			&stepCreateInstance{},
 			&communicator.StepConnect{

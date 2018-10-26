@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepAddKeysToAPI struct{}
+type stepAddKeysToAPI struct {
+	Skip bool
+}
 
 func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
@@ -19,12 +21,12 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
 
-	if config.Comm.Type != "ssh" {
-		ui.Say("Not using SSH communicator; skip generating SSH keys...")
+	if s.Skip {
+		ui.Say("Skipping generating SSH keys...")
 		return multistep.ActionContinue
 	}
-
 	// grab packer-generated key from statebag context.
+	// Always check configured communicator for keys
 	sshPublicKey := bytes.TrimSpace(config.Comm.SSHPublicKey)
 
 	// form API call to add key to compute cloud
@@ -52,8 +54,11 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 }
 
 func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
-	// Delete the keys we created during this run
+	if s.Skip {
+		return
+	}
 	config := state.Get("config").(*Config)
+	// Delete the keys we created during this run
 	if len(config.Comm.SSHKeyPairName) == 0 {
 		// No keys were generated; none need to be cleaned up.
 		return
