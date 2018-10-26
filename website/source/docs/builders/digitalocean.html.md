@@ -84,6 +84,8 @@ builder.
     default state timeout is "6m".
 
 -   `user_data` (string) - User data to launch with the Droplet.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
