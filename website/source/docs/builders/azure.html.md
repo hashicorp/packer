@@ -113,7 +113,7 @@ Providing `temp_resource_group_name` or `location` in combination with `build_re
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
 -   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
-    of the file are read, base64 encoded, and injected into the ARM template. The custom data will be passed to
+    of the file are read and injected into the ARM template. The custom data will be passed to
     cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
     to learn more about custom data, and how it can be used to influence the provisioning process.
 
