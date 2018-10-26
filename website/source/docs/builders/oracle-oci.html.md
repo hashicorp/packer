@@ -132,6 +132,8 @@ launched instance.
  - `user_data` (string) - User data to be used by cloud-init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Generally speaking, it is easier to use the `user_data_file`,
    but you can use this option to put either the plaintext data or the base64
    encoded data directly into your Packer config.
+   Packer will not automatically wait for a user script to finish before
+   shutting down the instance this must be handled in a provisioner.
 
  - `user_data_file` (string) - Path to a file to be used as user data by cloud-init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Example:
    `"user_data_file": "./boot_config/myscript.sh"`

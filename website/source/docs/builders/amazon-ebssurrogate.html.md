@@ -474,6 +474,8 @@ builder.
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
     being JSON. It is often more convenient to use `user_data_file`, instead.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
