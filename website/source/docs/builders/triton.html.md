@@ -77,6 +77,7 @@ builder.
     assigned. Maximum 512 characters but should in practice be much shorter
     (think between 5 and 20 characters). For example `postgresql-95-server` for
     an image used as a PostgreSQL 9.5 server.
+
 -   `image_version` (string) - The version string for this image. Maximum 128
     characters. Any string will do but a format of `Major.Minor.Patch` is
     strongly advised by Joyent. See [Semantic Versioning](http://semver.org/)
@@ -93,13 +94,13 @@ builder.
     of `triton_key_id` is stored. For example `/home/soandso/.ssh/id_rsa`. If
     this is not specified, the SSH agent is used to sign requests with the
     `triton_key_id` specified.
-    
+
 -   `triton_user` (string) - The username of a user who has access to your Triton
-    account. 
-    
--   `insecure_skip_tls_verify` - (bool) This allows skipping TLS verification of 
-    the Triton endpoint. It is useful when connecting to a temporary Triton 
-    installation such as Cloud-On-A-Laptop which does not generally use a 
+    account.
+
+-   `insecure_skip_tls_verify` - (bool) This allows skipping TLS verification of
+    the Triton endpoint. It is useful when connecting to a temporary Triton
+    installation such as Cloud-On-A-Laptop which does not generally use a
     certificate signed by a trusted root CA. The default is `false`.
 
 -   `source_machine_firewall_enabled` (boolean) - Whether or not the firewall of
@@ -109,6 +110,7 @@ builder.
     firewall rules. Unless you have a global rule defined in Triton which allows
     SSH traffic enabling the firewall will interfere with the SSH provisioner.
     The default is `false`.
+
 -   `source_machine_metadata` (object of key/value strings) - Triton metadata
     applied to the VM used to create the image. Metadata can be used to pass
     configuration information to the VM without the need for networking. See
@@ -117,30 +119,37 @@ builder.
     Joyent documentation for more information. This can for example be used to
     set the `user-script` metadata key to have Triton start a user supplied
     script after the VM has booted.
+
 -   `source_machine_name` (string) - Name of the VM used for building the image.
     Does not affect (and does not have to be the same) as the name for a VM
     instance running this image. Maximum 512 characters but should in practice
     be much shorter (think between 5 and 20 characters). For example
     `mysql-64-server-image-builder`. When omitted defaults to
     `packer-builder-[image_name]`.
+
 -   `source_machine_networks` (array of strings) - The UUID's of Triton networks
     added to the source machine used for creating the image. For example if any
     of the provisioners which are run need Internet access you will need to add
     the UUID's of the appropriate networks here. If this is not specified,
     instances will be placed into the default Triton public and internal
     networks.
+
 -   `source_machine_tags` (object of key/value strings) - Tags applied to the VM
     used to create the image.
 
 -   `image_acls` (array of strings) - The UUID's of the users which will have
     access to this image. When omitted only the owner (the Triton user whose
     credentials are used) will have access to the image.
+
 -   `image_description` (string) - Description of the image. Maximum 512
     characters.
+
 -   `image_eula_url` (string) - URL of the End User License Agreement (EULA) for
     the image. Maximum 128 characters.
+
 -   `image_homepage` (string) - URL of the homepage where users can find
     information about the image. Maximum 128 characters.
+
 -   `image_tags` (object of key/value strings) - Tag applied to the image.
 
 -   `source_machine_image_filter` (object) - Filters used to populate the `source_machine_image` field.
