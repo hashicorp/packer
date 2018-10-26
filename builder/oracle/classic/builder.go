@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"golang.org/x/crypto/ssh"
 )
 
 // BuilderId uniquely identifies the builder
@@ -23,24 +22,6 @@ const BuilderId = "packer.oracle.classic"
 type Builder struct {
 	config *Config
 	runner multistep.Runner
-}
-
-// TODO: rename, comment
-type builderConfig struct {
-	*communicator.Config
-}
-
-func (c *builderConfig) sshConfigFunc(username string) func(multistep.StateBag) (*ssh.ClientConfig, error) {
-	return func(state multistep.StateBag) (*ssh.ClientConfig, error) {
-		// copy communicator config by value at the last possible moment,
-		// so we get any values written by prior steps, then change the static
-		// details to make it work correctly.
-		s := *c
-		s.SSHPty = true
-		s.Type = "ssh"
-		s.SSHUsername = username
-		return s.SSHConfigFunc()(state)
-	}
 }
 
 func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
@@ -90,8 +71,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	var steps []multistep.Step
 	if b.config.IsPV() {
-		bc := builderConfig{&b.config.Comm}
-
 		steps = []multistep.Step{
 			&ocommon.StepKeyPair{
 				Debug:        b.config.PackerDebug,
@@ -99,7 +78,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
 			},
 			&stepCreateIPReservation{},
-			&stepAddKeysToAPI{},
+			&stepAddKeysToAPI{
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
+			},
 			&stepSecurity{
 				CommType:        b.config.Comm.Type,
 				SecurityListKey: "security_list_master",
@@ -144,10 +125,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 				Index:           2,
 				InstanceInfoKey: "builder_instance_info",
 			},
-			&communicator.StepConnectSSH{
-				Config:    &b.config.Comm,
-				Host:      ocommon.CommHost,
-				SSHConfig: bc.sshConfigFunc(b.config.BuilderSSHUsername),
+			&stepConnectBuilder{
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
+				StepConnectSSH: &communicator.StepConnectSSH{
+					Config:    &b.config.BuilderComm,
+					Host:      ocommon.CommHost,
+					SSHConfig: b.config.BuilderComm.SSHConfigFunc(),
+				},
 			},
 			&stepUploadImage{
 				UploadImageCommand: b.config.BuilderUploadImageCommand,
@@ -168,7 +152,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&stepCreateIPReservation{},
 			&stepAddKeysToAPI{
-				Skip: b.config.Comm.Type != "ssh",
+				Skip:    b.config.Comm.Type != "ssh",
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
 			},
 			&stepSecurity{
 				SecurityListKey: "security_list",
