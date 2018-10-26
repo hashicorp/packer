@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -29,12 +30,15 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	// We need the v2 network client
-	networkClient, err := config.networkV2Client()
-	if err != nil {
-		err = fmt.Errorf("Error initializing network client: %s", err)
-		state.Put("error", err)
-		return multistep.ActionHalt
+	// We might need the v2 network client
+	var networkClient *gophercloud.ServiceClient
+	if s.FloatingIP != "" || s.ReuseIPs || s.FloatingIPNetwork != "" {
+		networkClient, err = config.networkV2Client()
+		if err != nil {
+			err = fmt.Errorf("Error initializing network client: %s", err)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 	}
 
 	var instanceIP floatingips.FloatingIP
@@ -147,15 +151,15 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	// We need the v2 network client
-	client, err := config.networkV2Client()
-	if err != nil {
-		ui.Error(fmt.Sprintf(
-			"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
-		return
-	}
+	if instanceIP.FloatingIP != "" && instanceIP.ID != "" {
+		// We need the v2 network client
+		client, err := config.networkV2Client()
+		if err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
+			return
+		}
 
-	if instanceIP.ID != "" {
 		if err := floatingips.Delete(client, instanceIP.ID).ExtractErr(); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
