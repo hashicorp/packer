@@ -151,7 +151,7 @@ launched instance.
 Here is a basic example. Note that account specific configuration has been
 substituted with the letter `a` and OCIDS have been shortened for brevity.
 
-``` {.json}
+``` json
 {
     "availability_domain": "aaaa:PHX-AD-1",
     "base_image_ocid": "ocid1.image.oc1.phx.aaaaaaaa5yu6pw3riqtuhxzov7fdngi4tsteganmao54nq3pyxu3hxcuzmoa",
