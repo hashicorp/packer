@@ -177,10 +177,12 @@ builder.
 -   `TLSHandshakeTimeout` (int) - When happen "net/http: TLS handshake timeout" problem, set this environment variable
      to a bigger such as `export TLSHandshakeTimeout=30`, it will set the TLS handshake timeout value to 30s.
 
--   `user_data` (string) - The UserData of an instance must be encoded in `Base64`
-    format, and the maximum size of the raw data is `16 KB`.
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use `user_data_file`, instead.
 
--   `user_data_file` (string) - The file name of the userdata.
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
 
 -   `vpc_cidr_block` (string) - Value options: `192.168.0.0/16` and `172.16.0.0/16`.
     When not specified, the default value is `172.16.0.0/16`.
