@@ -60,7 +60,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Error creating OPC Compute Client: %s", err)
 	}
 
-	runID := os.Getenv("PACKER_RUN_UUID")
+	runID := fmt.Sprintf("%s_%s", b.config.ImageName, os.Getenv("PACKER_RUN_UUID"))
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
@@ -73,22 +73,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.IsPV() {
 		builderCommConfig := b.config.Comm
 		builderCommConfig.SSHPty = true
+		builderCommConfig.Type = "ssh"
+		builderCommConfig.SSHUsername = b.config.BuilderSSHUsername
 
 		steps = []multistep.Step{
-			&stepCreatePersistentVolume{
-				VolumeSize:     fmt.Sprintf("%d", b.config.PersistentVolumeSize),
-				VolumeName:     fmt.Sprintf("master-storage_%s", runID),
-				ImageList:      b.config.SourceImageList,
-				ImageListEntry: b.config.SourceImageListEntry,
-				Bootable:       true,
-			},
-			&stepCreatePersistentVolume{
-				// We double the master volume size because we need room to
-				// tarball the disk image. We also need to chunk the tar ball,
-				// but we can remove the original disk image first.
-				VolumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
-				VolumeName: fmt.Sprintf("builder-storage_%s", runID),
-			},
 			&ocommon.StepKeyPair{
 				Debug:        b.config.PackerDebug,
 				Comm:         &b.config.Comm,
@@ -96,10 +84,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&stepCreateIPReservation{},
 			&stepAddKeysToAPI{},
-			&stepSecurity{},
+			&stepSecurity{
+				Comm:            &b.config.Comm,
+				SecurityListKey: "security_list_master",
+			},
+			&stepCreatePersistentVolume{
+				VolumeSize:     fmt.Sprintf("%d", b.config.PersistentVolumeSize),
+				VolumeName:     fmt.Sprintf("master-storage_%s", runID),
+				ImageList:      b.config.SourceImageList,
+				ImageListEntry: b.config.SourceImageListEntry,
+				Bootable:       true,
+			},
 			&stepCreatePVMaster{
-				Name:       fmt.Sprintf("master-instance_%s", runID),
-				VolumeName: fmt.Sprintf("master-storage_%s", runID),
+				Name:            fmt.Sprintf("master-instance_%s", runID),
+				VolumeName:      fmt.Sprintf("master-storage_%s", runID),
+				SecurityListKey: "security_list_master",
 			},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
@@ -108,9 +107,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&common.StepProvision{},
 			&stepTerminatePVMaster{},
+			&stepSecurity{
+				SecurityListKey: "security_list_builder",
+				Comm:            &builderCommConfig,
+			},
+			&stepCreatePersistentVolume{
+				// We double the master volume size because we need room to
+				// tarball the disk image. We also need to chunk the tar ball,
+				// but we can remove the original disk image first.
+				VolumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
+				VolumeName: fmt.Sprintf("builder-storage_%s", runID),
+			},
 			&stepCreatePVBuilder{
 				Name:              fmt.Sprintf("builder-instance_%s", runID),
 				BuilderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
+				SecurityListKey:   "security_list_builder",
 			},
 			&stepAttachVolume{
 				VolumeName:      fmt.Sprintf("master-storage_%s", runID),
@@ -120,7 +131,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&communicator.StepConnect{
 				Config:    &builderCommConfig,
 				Host:      ocommon.CommHost,
-				SSHConfig: b.config.Comm.SSHConfigFunc(),
+				SSHConfig: builderCommConfig.SSHConfigFunc(),
 			},
 			&stepUploadImage{
 				UploadImageCommand: b.config.BuilderUploadImageCommand,
@@ -141,7 +152,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&stepCreateIPReservation{},
 			&stepAddKeysToAPI{},
-			&stepSecurity{},
+			&stepSecurity{
+				SecurityListKey: "security_list",
+				Comm:            &b.config.Comm,
+			},
 			&stepCreateInstance{},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
@@ -167,7 +181,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// If there is no snapshot, then just return
-	if _, ok := state.GetOk("machine_image"); !ok {
+	if _, ok := state.GetOk("machine_image_name"); !ok {
 		return nil, nil
 	}
 

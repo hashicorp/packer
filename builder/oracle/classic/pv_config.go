@@ -8,6 +8,8 @@ import (
 )
 
 const imageListDefault = "/oracle/public/OL_7.2_UEKR4_x86_64"
+const usernameDefault = "opc"
+const shapeDefault = "oc3"
 
 type PVConfig struct {
 	// PersistentVolumeSize lets us control the volume size by using persistent boot storage
@@ -18,6 +20,7 @@ type PVConfig struct {
 	BuilderShape          string `mapstructure:"builder_shape"`
 	BuilderImageList      string `mapstructure:"builder_image_list"`
 	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
+	BuilderSSHUsername    string `mapstructure:"builder_ssh_username"`
 	/* TODO:
 	* Documentation
 	* split master/builder image/connection config. i.e. build anything, master only linux
@@ -44,7 +47,11 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 	}
 
 	if c.BuilderShape == "" {
-		c.BuilderShape = "oc3"
+		c.BuilderShape = shapeDefault
+	}
+
+	if c.BuilderSSHUsername == "" {
+		c.BuilderSSHUsername = usernameDefault
 	}
 
 	if c.BuilderImageList == "" {
