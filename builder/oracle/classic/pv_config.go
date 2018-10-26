@@ -57,13 +57,6 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 			fmt.Errorf("`ssh` is the only valid builder communicator type."))
 	}
 
-	/*
-		s.SSHPty = true
-		s.Type = "ssh"
-		s.SSHUsername = username
-		return s.SSHConfigFunc()(state)
-	*/
-
 	if c.BuilderShape == "" {
 		c.BuilderShape = shapeDefault
 	}
@@ -88,6 +81,7 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 
 # Split diskimage in to 100mb chunks
 split -b 100m diskimage.tar.gz segment_
+printf "Split diskimage into %s segments\n" $(ls segment_* | wc -l)
 
 # Download jq tool
 curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
@@ -113,18 +107,17 @@ curl -D auth-headers -s -X GET \
 export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
-# Create segment directory
-curl -v -X PUT -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.SegmentPath}}
-
 # Upload segments
 for i in segment_*; do
-	curl -v -X PUT -T $i \
+	echo "Uploading segment $i"
+
+	curl -s -X PUT -T $i \
 		-H "X-Auth-Token: $AUTH_TOKEN" \
 		${STORAGE_URL}/{{.SegmentPath}}/$i;
 done
 
 # Create machine image from manifest
-curl -v -X PUT \
+curl -s -X PUT \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageFile}}?multipart-manifest=put" \
 	-T ./manifest.json

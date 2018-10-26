@@ -79,6 +79,9 @@ func (s *stepUploadImage) Run(_ context.Context, state multistep.StateBag) multi
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+
+	ui.Say("Uploaded image to object storage.")
+
 	return multistep.ActionContinue
 }
 
