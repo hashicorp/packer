@@ -42,8 +42,6 @@ func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.Stat
 		return multistep.ActionHalt
 	}
 
-	//TODO: wait to become available
-
 	ui.Message(fmt.Sprintf("Created volume: %s", cc.Name))
 	return multistep.ActionContinue
 }
