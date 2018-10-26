@@ -35,7 +35,6 @@ In addition to the options listed here, a
 builder.
 
 ### Required:
-    
 
 -   `api_access_key` (string) - The organization access key to use to identify your
     organization. It can also be specified via environment variable
