@@ -10,19 +10,19 @@ import (
 )
 
 type stepCreatePVMaster struct {
-	Name       string
-	VolumeName string
+	Name            string
+	VolumeName      string
+	SecurityListKey string
 }
 
 func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating master instance...")
 
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
-	secListName := state.Get("security_list").(string)
+	secListName := state.Get(s.SecurityListKey).(string)
 
 	// get instances client
 	instanceClient := client.Instances()
@@ -45,7 +45,9 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 		},
 		BootOrder:  []int{1},
 		Attributes: config.attribs,
-		SSHKeys:    []string{config.Comm.SSHKeyPairName},
+	}
+	if config.Comm.Type == "ssh" {
+		input.SSHKeys = []string{config.Comm.SSHKeyPairName}
 	}
 
 	instanceInfo, err := instanceClient.CreateInstance(input)
@@ -63,8 +65,7 @@ func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) mu
 }
 
 func (s *stepCreatePVMaster) Cleanup(state multistep.StateBag) {
-	_, deleted := state.GetOk("master_instance_deleted")
-	if deleted {
+	if _, deleted := state.GetOk("master_instance_deleted"); deleted {
 		return
 	}
 

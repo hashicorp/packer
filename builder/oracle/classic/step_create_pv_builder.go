@@ -13,6 +13,7 @@ import (
 type stepCreatePVBuilder struct {
 	Name              string
 	BuilderVolumeName string
+	SecurityListKey   string
 }
 
 func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -23,7 +24,7 @@ func (s *stepCreatePVBuilder) Run(_ context.Context, state multistep.StateBag) m
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
-	secListName := state.Get("security_list").(string)
+	secListName := state.Get(s.SecurityListKey).(string)
 
 	// get instances client
 	instanceClient := client.Instances()
