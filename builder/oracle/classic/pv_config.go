@@ -25,6 +25,8 @@ type PVConfig struct {
 	* Documentation
 	* split master/builder image/connection config. i.e. build anything, master only linux
 		possible ignore everything for builder and always use SSH keys
+	* Need to prepare the ssh config
+	* Possible also to just have nested config?
 	*/
 }
 
