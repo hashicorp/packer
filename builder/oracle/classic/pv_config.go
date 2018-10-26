@@ -3,6 +3,7 @@ package classic
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -21,6 +22,8 @@ type PVConfig struct {
 	BuilderImageList      string `mapstructure:"builder_image_list"`
 	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
 	BuilderSSHUsername    string `mapstructure:"builder_ssh_username"`
+
+	BuilderComm communicator.Config `mapstructure:"builder_communicator"`
 	/* TODO:
 	* Documentation
 	* split master/builder image/connection config. i.e. build anything, master only linux
@@ -48,12 +51,25 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 		return errs
 	}
 
+	c.BuilderComm.SSHPty = true
+	if c.BuilderComm.Type == "winrm" {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("`ssh` is the only valid builder communicator type."))
+	}
+
+	/*
+		s.SSHPty = true
+		s.Type = "ssh"
+		s.SSHUsername = username
+		return s.SSHConfigFunc()(state)
+	*/
+
 	if c.BuilderShape == "" {
 		c.BuilderShape = shapeDefault
 	}
 
-	if c.BuilderSSHUsername == "" {
-		c.BuilderSSHUsername = usernameDefault
+	if c.BuilderComm.SSHUsername == "" {
+		c.BuilderComm.SSHUsername = usernameDefault
 	}
 
 	if c.BuilderImageList == "" {
@@ -118,6 +134,10 @@ curl -I -X HEAD \
 	-H "X-Auth-Token: $AUTH_TOKEN" \
 	"${STORAGE_URL}/compute_images/{{.ImageFile}}"
 `
+	}
+
+	if es := c.BuilderComm.Prepare(ctx); len(es) > 0 {
+		errs = packer.MultiErrorAppend(errs, es...)
 	}
 
 	return

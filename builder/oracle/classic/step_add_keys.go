@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
 type stepAddKeysToAPI struct {
-	Skip bool
+	Skip    bool
+	KeyName string
 }
 
 func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -30,13 +30,12 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 	sshPublicKey := bytes.TrimSpace(config.Comm.SSHPublicKey)
 
 	// form API call to add key to compute cloud
-	sshKeyName := config.Identifier(fmt.Sprintf("packer_generated_key_%s", uuid.TimeOrderedUUID()))
 
-	ui.Say(fmt.Sprintf("Creating temporary key: %s", sshKeyName))
+	ui.Say(fmt.Sprintf("Creating temporary key: %s", s.KeyName))
 
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
-		Name:    sshKeyName,
+		Name:    s.KeyName,
 		Key:     string(sshPublicKey),
 		Enabled: true,
 	}
