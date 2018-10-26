@@ -48,14 +48,12 @@ Platform](https://www.ncloud.com/).
     access source (`0.0.0.0/0`) and allowed port (5985) must be created in
     advance.
 
--   `user_data` (string) - Init script to run when an instance is created.
-    -   For Linux servers, Python, Perl, and Shell scripts can be used. The
-        path of the script to run should be included at the beginning of the
-        script, like \#!/usr/bin/env python, \#!/bin/perl, or \#!/bin/bash.
-    -   For Windows servers, only Visual Basic scripts can be used.
-    -   All scripts must be written in English.
--   `user_data_file` (string) - A path to a file containing a `user_data`
-    script. See above for more information.
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use `user_data_file`, instead.
+
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
 
 -   `region` (string) - Name of the region where you want to create an image.
     (default: Korea)
