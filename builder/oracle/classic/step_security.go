@@ -19,17 +19,6 @@ type stepSecurity struct {
 }
 
 func (s *stepSecurity) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	/*
-		TODO: if both are ssh this duplicates effort. see if it still works
-		// Don't do anything if we've already created the security list
-		if _, ok := state.GetOk(s.SecRuleName); !ok {
-			return multistep.ActionContinue
-		}
-		if _, ok := state.GetOk(s.SecListName); !ok {
-			return multistep.ActionContinue
-		}
-	*/
-
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 	runID := state.Get("run_id").(string)
