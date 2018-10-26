@@ -98,7 +98,7 @@ Here is a basic example. Note that account specific configuration has been
 obfuscated; you will need to add a working `username`, `password`,
 `identity_domain`, and `api_endpoint` in order for the example to work.
 
-``` {.json}
+``` json
 {
     "builders": [
         {
@@ -137,7 +137,7 @@ for more details on how to define a trusted host.
 
 Save this file as `windows_attributes.json`:
 
-```{.json}
+```json
 {
     "userdata": {
         "administrator_password": "password",
@@ -149,7 +149,7 @@ Save this file as `windows_attributes.json`:
 Following is a minimal but working Packer config that references this attributes
 file:
 
-```{.json}
+```json
 {
     "variables": {
         "opc_username": "{{ env `OPC_USERNAME`}}",

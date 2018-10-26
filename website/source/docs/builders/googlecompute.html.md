@@ -140,7 +140,7 @@ Or alternatively by navigating to https://console.cloud.google.com/networking/fi
 Once this is set up, the following is a complete working packer config after
 setting a valid `account_file` and `project_id`:
 
-``` {.json}
+``` json
 {
   "builders": [
     {
