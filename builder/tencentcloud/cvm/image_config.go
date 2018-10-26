@@ -27,7 +27,7 @@ func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	} else {
 		regex := regexp.MustCompile("^[0-9a-zA-Z\\-]+$")
 		if !regex.MatchString(cf.ImageName) {
-			errs = append(errs, fmt.Errorf("image_num can only be composed of letters, numbers and minus sign"))
+			errs = append(errs, fmt.Errorf("image_name can only be composed of letters, numbers and minus sign"))
 		}
 	}
 
