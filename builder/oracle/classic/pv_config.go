@@ -72,7 +72,6 @@ type PVConfig struct {
 	BuilderShape          string `mapstructure:"builder_shape"`
 	BuilderImageList      string `mapstructure:"builder_image_list"`
 	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
-	BuilderSSHUsername    string `mapstructure:"builder_ssh_username"`
 
 	BuilderComm communicator.Config `mapstructure:"builder_communicator"`
 	/* TODO:
