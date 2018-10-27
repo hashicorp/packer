@@ -47,12 +47,6 @@ func (s *stepCreatePersistentVolume) Run(_ context.Context, state multistep.Stat
 }
 
 func (s *stepCreatePersistentVolume) Cleanup(state multistep.StateBag) {
-	_, cancelled := state.GetOk(multistep.StateCancelled)
-	_, halted := state.GetOk(multistep.StateHalted)
-	if !cancelled && !halted {
-		return
-	}
-
 	client := state.Get("client").(*compute.Client)
 
 	ui := state.Get("ui").(packer.Ui)
