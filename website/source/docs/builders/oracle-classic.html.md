@@ -291,7 +291,7 @@ setting.
             "persistent_volume_size": 15,
             "image_name": "Packer_Builder_Test_{{timestamp}}",
             "dest_image_list": "Packer_Builder_Test_List"
-            "ssh_username":"opc",
+            "ssh_username": "opc",
             "shape": "oc3"
         }
     ],
