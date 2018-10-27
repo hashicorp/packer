@@ -9,6 +9,7 @@ import (
 )
 
 const imageListDefault = "/oracle/public/OL_7.2_UEKR4_x86_64"
+const imageListEntryDefault = 5
 const usernameDefault = "opc"
 const shapeDefault = "oc3"
 const uploadImageCommandDefault = `
@@ -71,16 +72,9 @@ type PVConfig struct {
 	// Builder Image
 	BuilderShape          string `mapstructure:"builder_shape"`
 	BuilderImageList      string `mapstructure:"builder_image_list"`
-	BuilderImageListEntry int    `mapstructure:"builder_image_list_entry"`
+	BuilderImageListEntry *int   `mapstructure:"builder_image_list_entry"`
 
 	BuilderComm communicator.Config `mapstructure:"builder_communicator"`
-	/* TODO:
-	* Documentation
-	* split master/builder image/connection config. i.e. build anything, master only linux
-		possible ignore everything for builder and always use SSH keys
-	* Need to prepare the ssh config
-	* Possible also to just have nested config?
-	*/
 }
 
 // IsPV tells us if we're using a persistent volume for this build
@@ -121,8 +115,12 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 
 	// Entry 5 is a working default, so let's set it if the entry is unset and
 	// we're using the default image list
-	if c.BuilderImageList == imageListDefault && c.BuilderImageListEntry == 0 {
-		c.BuilderImageListEntry = 5
+	if c.BuilderImageListEntry == nil {
+		var entry int
+		if c.BuilderImageList == imageListDefault {
+			entry = imageListEntryDefault
+		}
+		c.BuilderImageListEntry = &entry
 	}
 
 	if c.BuilderUploadImageCommand == "" {

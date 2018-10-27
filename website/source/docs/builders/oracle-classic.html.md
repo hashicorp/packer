@@ -59,6 +59,9 @@ builder. This builder currently only works with the SSH communicator.
     CLI, as described
     [here](https://docs.oracle.com/en/cloud/iaas/compute-iaas-cloud/stopc/image-lists-stclr-and-nmcli.html#GUID-DB7E75FE-F752-4FF7-AB70-3C8DCDFCA0FA)
 
+-   `source_image_list_entry` (string) - The entry identifying the machine
+    image to use in the image list. Defaults to the latest available entry.
+
 -   `password` (string) - Your account password.
 
 -   `shape` (string) - The template that determines the number of CPUs, amount
@@ -118,16 +121,20 @@ becomes your machine image. This relies on the disk of the created instance
 being large enough to perform your entire provisioning process. If that disk
 size isn't sufficient, we can build with a persistent volume of arbitrary size.
 
-The way it works is that we create a persistent volume of the requested size.
-This volume is bootable and initialized with your image list. We start an
-instance with this volume as the boot volume. After this instance launches, we
-provision and terminate it, leaving the persistent volume around.
+First, we create a persistent volume of the requested size. This volume is
+bootable and initialized with your image list. We start an instance with this
+volume as the boot volume. After this instance launches, we provision and
+terminate it, leaving the persistent volume around.
 
 Next, we create a second instance, the "builder", this time booting from
-instance storage. We also attach a new persistent volume to it, making it twice
-the size of the original. We connect to this instance and copy the contents of
-the first volume into a tarball file on the second volume. We can upload this
-file to Object Storage Classic, and create a new machine image with it.
+instance storage. We also attach a new persistent volume, making it twice the
+size of the original. We connect to this instance and copy the contents of the
+first volume into a tarball file on the second volume. We then upload this file
+to Object Storage Classic, and create a new machine image with it.
+
+For more details, see this [blog
+post](https://blogs.oracle.com/cloudmarketplace/creating-an-oracle-compute-machine-image-from-an-instance-with-persistent-boot-storage),
+which discusses the strategy used here.
 
 If this is set, a few more options become available.
 
@@ -156,7 +163,8 @@ If this is set, a few more options become available.
 -   `builder_image_list_entry` (string) - The entry identifying the machine
     image to use in the image list. If `builder_image_list` is unset, this
     defaults to `5`, which is a working image as of this time. Otherwise, it
-    defaults to 0, which
+    defaults to the latest entry. Set this to `0` to force it to use the latest
+    entry when using the default `builder_image_list`.
 
 -   `builder_shape` (string) - The template that determines the number of CPUs,
     amount of memory, and other resources allocated to the builder instance.
