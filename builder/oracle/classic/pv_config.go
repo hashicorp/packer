@@ -20,7 +20,7 @@ split -b 100m diskimage.tar.gz segment_
 printf "Split diskimage into %s segments\n" $(ls segment_* | wc -l)
 
 # Download jq tool
-curl -OL https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+curl -OLs https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
 mv jq-linux64 jq
 chmod u+x jq
 
@@ -29,39 +29,39 @@ chmod u+x jq
 for i in segment_*; do
   ./jq -n --arg path "{{.SegmentPath}}/$i" \
           --arg etag $(md5sum $i | cut -f1 -d' ') \
-		  --arg size_bytes $(stat --printf "%s" $i) \
-		  '{path: $path, etag: $etag, size_bytes: $size_bytes}'
+          --arg size_bytes $(stat --printf "%s" $i) \
+          '{path: $path, etag: $etag, size_bytes: $size_bytes}'
 done
 ) | ./jq -s . > manifest.json
 
 # Authenticate
 curl -D auth-headers -s -X GET \
-	-H "X-Storage-User: Storage-{{.AccountID}}:{{.Username}}" \
-	-H "X-Storage-Pass: {{.Password}}" \
-	https://{{.AccountID}}.storage.oraclecloud.com/auth/v1.0
+    -H "X-Storage-User: Storage-{{.AccountID}}:{{.Username}}" \
+    -H "X-Storage-Pass: {{.Password}}" \
+    https://{{.AccountID}}.storage.oraclecloud.com/auth/v1.0
 
 export AUTH_TOKEN=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Auth-Token/{print $2}' auth-headers)
 export STORAGE_URL=$(awk 'BEGIN {FS=": "; RS="\r\n"}/^X-Storage-Url/{print $2}' auth-headers)
 
 # Upload segments
 for i in segment_*; do
-	echo "Uploading segment $i"
+    echo "Uploading segment $i"
 
-	curl -s -X PUT -T $i \
-		-H "X-Auth-Token: $AUTH_TOKEN" \
-		${STORAGE_URL}/{{.SegmentPath}}/$i;
+    curl -s -X PUT -T $i \
+        -H "X-Auth-Token: $AUTH_TOKEN" ${STORAGE_URL}/{{.SegmentPath}}/$i;
 done
 
 # Create machine image from manifest
 curl -s -X PUT \
-	-H "X-Auth-Token: $AUTH_TOKEN" \
-	"${STORAGE_URL}/compute_images/{{.ImageFile}}?multipart-manifest=put" \
-	-T ./manifest.json
+    -H "X-Auth-Token: $AUTH_TOKEN" \
+    "${STORAGE_URL}/compute_images/{{.ImageFile}}?multipart-manifest=put" \
+    -T ./manifest.json
 
 # Get uploaded image description
+echo "Details of ${STORAGE_URL}/compute_images/{{.ImageFile}}:"
 curl -I -X HEAD \
-	-H "X-Auth-Token: $AUTH_TOKEN" \
-	"${STORAGE_URL}/compute_images/{{.ImageFile}}"
+    -H "X-Auth-Token: $AUTH_TOKEN" \
+    "${STORAGE_URL}/compute_images/{{.ImageFile}}"
 `
 
 type PVConfig struct {
