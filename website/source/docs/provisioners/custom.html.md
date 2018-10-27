@@ -14,4 +14,5 @@ sidebar_current: 'docs-provisioners-custom'
 Packer is extensible, allowing you to write new provisioners without having to
 modify the core source code of Packer itself. Documentation for creating new
 provisioners is covered in the [custom
-provisioners](/docs/extending/custom-provisioners.html) page of the Packer plugin section.
+provisioners](/docs/extending/custom-provisioners.html) page of the Packer
+plugin section.

@@ -1,8 +1,8 @@
 ---
 description: |
-    The chef-client Packer provisioner installs and configures software on
-    machines built by Packer using chef-client. Packer configures a Chef client to
-    talk to a remote Chef Server to provision the machine.
+    The chef-client Packer provisioner installs and configures software on machines
+    built by Packer using chef-client. Packer configures a Chef client to talk to a
+    remote Chef Server to provision the machine.
 layout: docs
 page_title: 'Chef Client - Provisioners'
 sidebar_current: 'docs-provisioners-chef-client'
@@ -14,8 +14,8 @@ Type: `chef-client`
 
 The Chef Client Packer provisioner installs and configures software on machines
 built by Packer using [chef-client](https://docs.chef.io/chef_client.html).
-Packer configures a Chef client to talk to a remote Chef Server to provision the
-machine.
+Packer configures a Chef client to talk to a remote Chef Server to provision
+the machine.
 
 The provisioner will even install Chef onto your machine if it isn't already
 installed, using the official Chef installers provided by Chef.
@@ -52,38 +52,36 @@ configuration is actually required.
     Configuration" section below for more details.
 
 -   `encrypted_data_bag_secret_path` (string) - The path to the file containing
-    the secret for encrypted data bags. By default, this is empty, so no
-    secret will be available.
+    the secret for encrypted data bags. By default, this is empty, so no secret
+    will be available.
 
 -   `execute_command` (string) - The command used to execute Chef. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+    various [configuration template variables](/docs/templates/engine.html)
+    available. See below for more information.
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
     Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+    various [configuration template variables](/docs/templates/engine.html)
+    available. See below for more information.
 
 -   `json` (object) - An arbitrary mapping of JSON that will be available as
     node attributes while running Chef.
 
--   `knife_command` (string) - The command used to run Knife during node clean-up. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+-   `knife_command` (string) - The command used to run Knife during node
+    clean-up. This has various [configuration template
+    variables](/docs/templates/engine.html) available. See below for more
+    information.
 
--   `node_name` (string) - The name of the node to register with the
-    Chef Server. This is optional and by default is packer-{{uuid}}.
+-   `node_name` (string) - The name of the node to register with the Chef
+    Server. This is optional and by default is packer-{{uuid}}.
 
-*   `policy_group` (string) - The name of a policy group that exists on the
+-   `policy_group` (string) - The name of a policy group that exists on the
     Chef server. `policy_name` must also be specified.
 
-*   `policy_name` (string) - The name of a policy, as identified by the name
+-   `policy_name` (string) - The name of a policy, as identified by the name
     setting in a `Policyfile.rb` file. `policy_group` must also be specified.
 
 -   `prevent_sudo` (boolean) - By default, the configured commands that are
@@ -93,31 +91,32 @@ configuration is actually required.
 
 -   `run_list` (array of strings) - The [run
     list](http://docs.chef.io/essentials_node_object_run_lists.html) for Chef.
-    By default this is empty, and will use the run list sent down by the
-    Chef Server.
+    By default this is empty, and will use the run list sent down by the Chef
+    Server.
 
 -   `server_url` (string) - The URL to the Chef server. This is required.
 
--   `skip_clean_client` (boolean) - If true, Packer won't remove the client from
+-   `skip_clean_client` (boolean) - If true, Packer won't remove the client
+    from the Chef server after it is done running. By default, this is false.
+
+-   `skip_clean_node` (boolean) - If true, Packer won't remove the node from
     the Chef server after it is done running. By default, this is false.
 
--   `skip_clean_node` (boolean) - If true, Packer won't remove the node from the
-    Chef server after it is done running. By default, this is false.
+-   `skip_clean_staging_directory` (boolean) - If true, Packer won't remove the
+    Chef staging directory from the machine after it is done running. By
+    default, this is false.
 
--   `skip_clean_staging_directory` (boolean) - If true, Packer won't remove the Chef staging
-    directory from the machine after it is done running. By default, this is false.
-
--   `skip_install` (boolean) - If true, Chef will not automatically be installed
-    on the machine using the Chef omnibus installers.
+-   `skip_install` (boolean) - If true, Chef will not automatically be
+    installed on the machine using the Chef omnibus installers.
 
 -   `ssl_verify_mode` (string) - Set to "verify\_none" to skip validation of
-    SSL certificates. If not set, this defaults to "verify\_peer" which validates
-    all SSL certifications.
+    SSL certificates. If not set, this defaults to "verify\_peer" which
+    validates all SSL certifications.
 
--   `trusted_certs_dir` (string) -  This is a directory that contains additional
-    SSL certificates to trust. Any certificates in this directory will be added to
-    whatever CA bundle ruby is using. Use this to add self-signed certs for your
-    Chef Server or local HTTP file servers.
+-   `trusted_certs_dir` (string) - This is a directory that contains additional
+    SSL certificates to trust. Any certificates in this directory will be added
+    to whatever CA bundle ruby is using. Use this to add self-signed certs for
+    your Chef Server or local HTTP file servers.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
@@ -135,10 +134,9 @@ configuration is actually required.
     will be used.
 
 -   `validation_key_path` (string) - Path to the validation key for
-    communicating with the Chef Server. This will be uploaded to the
-    remote machine. If this is NOT set, then it is your responsibility via other
-    means (shell provisioner, etc.) to get a validation key to where Chef
-    expects it.
+    communicating with the Chef Server. This will be uploaded to the remote
+    machine. If this is NOT set, then it is your responsibility via other means
+    (shell provisioner, etc.) to get a validation key to where Chef expects it.
 
 ## Chef Configuration
 
@@ -183,9 +181,8 @@ trusted_certs_dir :{{.TrustedCertsDir}}
 {{end}}
 ```
 
-This template is a [configuration
-template](/docs/templates/engine.html) and has a set of
-variables available to use:
+This template is a [configuration template](/docs/templates/engine.html) and
+has a set of variables available to use:
 
 -   `ChefEnvironment` - The Chef environment name.
 -   `EncryptedDataBagSecretPath` - The path to the secret key file to decrypt
@@ -220,14 +217,14 @@ c:/opscode/chef/bin/chef-client.bat \
   -j {{.JsonPath}}
 ```
 
-This command can be customized using the `execute_command` configuration. As you
-can see from the default value above, the value of this configuration can
+This command can be customized using the `execute_command` configuration. As
+you can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
 
 -   `ConfigPath` - The path to the Chef configuration file.
 -   `JsonPath` - The path to the JSON attributes file for the node.
--   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
-    value of the `prevent_sudo` configuration.
+-   `Sudo` - A boolean of whether to `sudo` the command or not, depending on
+    the value of the `prevent_sudo` configuration.
 
 ## Install Command
 
@@ -274,17 +271,18 @@ This command can be customized using the `knife_command` configuration. As you
 can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
 
--   `Args` - The command arguments that are getting passed to the Knife command.
+-   `Args` - The command arguments that are getting passed to the Knife
+    command.
 -   `Flags` - The command flags that are getting passed to the Knife command..
--   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
-    value of the `prevent_sudo` configuration.
+-   `Sudo` - A boolean of whether to `sudo` the command or not, depending on
+    the value of the `prevent_sudo` configuration.
 
 ## Folder Permissions
 
-!&gt; The `chef-client` provisioner will chmod the directory with your Chef keys
-to 777. This is to ensure that Packer can upload and make use of that directory.
-However, once the machine is created, you usually don't want to keep these
-directories with those permissions. To change the permissions on the
+!&gt; The `chef-client` provisioner will chmod the directory with your Chef
+keys to 777. This is to ensure that Packer can upload and make use of that
+directory. However, once the machine is created, you usually don't want to keep
+these directories with those permissions. To change the permissions on the
 directories, append a shell provisioner after Chef to modify them.
 
 ## Examples
@@ -296,8 +294,8 @@ mode.
 
 **Packer variables**
 
-Set the necessary Packer variables using environment variables or provide a [var
-file](/docs/templates/user-variables.html).
+Set the necessary Packer variables using environment variables or provide a
+[var file](/docs/templates/user-variables.html).
 
 ``` json
 "variables": {
@@ -335,7 +333,7 @@ cookbooks using Berkshelf or some other means.
 
 And ./config/client.rb.template referenced by the above configuration:
 
-```ruby
+``` ruby
 log_level         :info
 log_location      STDOUT
 local_mode        true
@@ -361,8 +359,8 @@ mode, while passing a `run_list` using a variable.
 
 **Packer variables**
 
-Set the necessary Packer variables using environment variables or provide a [var
-file](/docs/templates/user-variables.html).
+Set the necessary Packer variables using environment variables or provide a
+[var file](/docs/templates/user-variables.html).
 
 ``` json
 "variables": {
