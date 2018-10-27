@@ -12,10 +12,10 @@ sidebar_current: 'docs-commands-validate'
 # `validate` Command
 
 The `packer validate` Packer command is used to validate the syntax and
-configuration of a [template](/docs/templates/index.html). The command
-will return a zero exit status on success, and a non-zero exit status on
-failure. Additionally, if a template doesn't validate, any error messages will
-be outputted.
+configuration of a [template](/docs/templates/index.html). The command will
+return a zero exit status on success, and a non-zero exit status on failure.
+Additionally, if a template doesn't validate, any error messages will be
+outputted.
 
 Example usage:
 
@@ -30,12 +30,13 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 
 ## Options
 
--   `-syntax-only` - Only the syntax of the template is checked. The configuration
-    is not validated.
+-   `-syntax-only` - Only the syntax of the template is checked. The
+    configuration is not validated.
 
 -   `-except=foo,bar,baz` - Builds all the builds except those with the given
-    comma-separated names. Build names by default are the names of their builders,
-    unless a specific `name` attribute is specified within the configuration.
+    comma-separated names. Build names by default are the names of their
+    builders, unless a specific `name` attribute is specified within the
+    configuration.
 
 -   `-only=foo,bar,baz` - Only build the builds with the given comma-separated
     names. Build names by default are the names of their builders, unless a
