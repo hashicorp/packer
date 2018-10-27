@@ -91,6 +91,13 @@ builder. This builder currently only works with the SSH communicator.
 
 -   `image_name` (string) - The name to assign to the resulting custom image.
 
+-   `persistent_volume_size` (int) - Size in gigabytes of the persistent boot
+    storage volume to build the image on. Use this if you want a bigger volume
+    than what instance storage provides. Note that using this option puts the
+    builder into a "persistent volume" mode, which is substantially different
+    than the default snapshot mode. Please see the configuration section below
+    for additional configuration options.
+
 -   `snapshot_timeout` (string) - How long to wait for a snapshot to be
     created. Expects a positive golang Time.Duration string, which is a
     sequence of decimal numbers and a unit suffix; valid suffixes are `ns`
@@ -98,6 +105,67 @@ builder. This builder currently only works with the SSH communicator.
     (minutes), and `h` (hours). Examples of valid inputs: `100ms`, `250ms`,
     `1s`, `2.5s`, `2.5m`, `1m30s`. Example: `"snapshot_timeout": "15m"`.
     Default: `20m`.
+
+### Persistent Volume Build
+
+You will use this type of build if you've set the `persistent_volume_size`
+option. If you need a bigger disk than what you normally get with instance
+storage, you'll want to set this.
+
+In the *persistent volume* mode, things are built a little differently.
+Normally, we launch an instance, then provision it and take a snapshot, which
+becomes your machine image. This relies on the disk of the created instance
+being large enough to perform your entire provisioning process. If that disk
+size isn't sufficient, we can build with a persistent volume of arbitrary size.
+
+The way it works is that we create a persistent volume of the requested size.
+This volume is bootable and initialized with your image list. We start an
+instance with this volume as the boot volume. After this instance launches, we
+provision and terminate it, leaving the persistent volume around.
+
+Next, we create a second instance, the "builder", this time booting from
+instance storage. We also attach a new persistent volume to it, making it twice
+the size of the original. We connect to this instance and copy the contents of
+the first volume into a tarball file on the second volume. We can upload this
+file to Object Storage Classic, and create a new machine image with it.
+
+If this is set, a few more options become available.
+
+-   `builder_communicator` (communicator) - This represents an
+    [`ssh communicator`](/docs/templates/communicator.html#ssh-communicator),
+    and can be configured as such. If you use a different builder image, you
+    may need to change the `ssh_username`, for example. That might look like this:
+
+    ```json
+    {
+        "builders": [
+            {
+                "builder_communicator": {
+                    "ssh_username": "soandso"
+                },
+                "type": "oracle-classic"
+            }
+        ]
+    }
+    ```
+
+-   `builder_image_list` (string) - This is the image to use for the builder
+    instance. This *must* be linux instance, and Oracle Linux is recommended.
+    Default: `/oracle/public/OL_7.2_UEKR4_x86_64`.
+
+-   `builder_image_list_entry` (string) - The entry identifying the machine
+    image to use in the image list. If `builder_image_list` is unset, this
+    defaults to `5`, which is a working image as of this time. Otherwise, it
+    defaults to 0, which
+
+-   `builder_shape` (string) - The template that determines the number of CPUs,
+    amount of memory, and other resources allocated to the builder instance.
+    Default: `oc3`.
+
+*   `builder_upload_image_command` (string) - The command to run to upload the
+    image to Object Storage Classic. This is for advanced users only, and you
+    should consult the default in code to decide on the changes to make. For
+    most users the default should suffice.
 
 ## Basic Example
 
@@ -186,6 +254,43 @@ attributes file:
         {
           "type": "powershell",
           "inline": "Write-Output(\"HELLO WORLD\")"
+        }
+    ]
+}
+```
+
+## Persistent Volume Example
+
+Here is an example using a persistent volume. Note the `persistent_volume_size`
+setting.
+
+```json
+{
+    "variables": {
+        "opc_username": "{{ env `OPC_USERNAME`}}",
+        "opc_password": "{{ env `OPC_PASSWORD`}}",
+        "opc_identity_domain": "{{env `OPC_IDENTITY_DOMAIN`}}",
+        "opc_api_endpoint": "{{ env `OPC_ENDPOINT`}}"
+    },
+    "builders": [
+        {
+            "type": "oracle-classic",
+            "username": "{{ user `opc_username`}}",
+            "password": "{{ user `opc_password`}}",
+            "identity_domain": "{{ user `opc_identity_domain`}}",
+            "api_endpoint": "{{ user `opc_api_endpoint`}}",
+            "source_image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
+            "persistent_volume_size": 15,
+            "image_name": "Packer_Builder_Test_{{timestamp}}",
+            "dest_image_list": "Packer_Builder_Test_List"
+            "ssh_username":"opc",
+            "shape": "oc3"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": ["echo hello"]
         }
     ]
 }
