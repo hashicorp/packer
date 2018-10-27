@@ -37,8 +37,8 @@ directory relative to your working directory.
 The reference of available configuration options is listed below. No
 configuration is actually required, but at least `run_list` is recommended.
 
--   `chef_environment` (string) - The name of the `chef_environment` sent to the
-    Chef server. By default this is empty and will not use an environment
+-   `chef_environment` (string) - The name of the `chef_environment` sent to
+    the Chef server. By default this is empty and will not use an environment
 
 -   `config_template` (string) - Path to a template that will be used for the
     Chef configuration file. By default Packer only sets configuration it needs
@@ -49,8 +49,8 @@ configuration is actually required, but at least `run_list` is recommended.
 
 -   `cookbook_paths` (array of strings) - This is an array of paths to
     "cookbooks" directories on your local filesystem. These will be uploaded to
-    the remote machine in the directory specified by the `staging_directory`. By
-    default, this is empty.
+    the remote machine in the directory specified by the `staging_directory`.
+    By default, this is empty.
 
 -   `data_bags_path` (string) - The path to the "data\_bags" directory on your
     local filesystem. These will be uploaded to the remote machine in the
@@ -65,18 +65,16 @@ configuration is actually required, but at least `run_list` is recommended.
     directory specified by the `staging_directory`. By default, this is empty.
 
 -   `execute_command` (string) - The command used to execute Chef. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+    various [configuration template variables](/docs/templates/engine.html)
+    available. See below for more information.
 
 -   `guest_os_type` (string) - The target guest OS type, either "unix" or
     "windows". Setting this to "windows" will cause the provisioner to use
     Windows friendly paths and commands. By default, this is "unix".
 
 -   `install_command` (string) - The command used to install Chef. This has
-    various [configuration template
-    variables](/docs/templates/engine.html) available. See
-    below for more information.
+    various [configuration template variables](/docs/templates/engine.html)
+    available. See below for more information.
 
 -   `json` (object) - An arbitrary mapping of JSON that will be available as
     node attributes while running Chef.
@@ -91,16 +89,16 @@ configuration is actually required, but at least `run_list` is recommended.
     provisioner or step. If specified, Chef will be configured to look for
     cookbooks here. By default, this is empty.
 
--   `roles_path` (string) - The path to the "roles" directory on your
-    local filesystem. These will be uploaded to the remote machine in the
-    directory specified by the `staging_directory`. By default, this is empty.
+-   `roles_path` (string) - The path to the "roles" directory on your local
+    filesystem. These will be uploaded to the remote machine in the directory
+    specified by the `staging_directory`. By default, this is empty.
 
 -   `run_list` (array of strings) - The [run
-    list](https://docs.chef.io/run_lists.html) for Chef. By default this
-    is empty.
+    list](https://docs.chef.io/run_lists.html) for Chef. By default this is
+    empty.
 
--   `skip_install` (boolean) - If true, Chef will not automatically be installed
-    on the machine using the Chef omnibus installers.
+-   `skip_install` (boolean) - If true, Chef will not automatically be
+    installed on the machine using the Chef omnibus installers.
 
 -   `staging_directory` (string) - This is the directory where all the
     configuration of Chef by Packer will be placed. By default this is
@@ -110,8 +108,8 @@ configuration is actually required, but at least `run_list` is recommended.
     able to create directories and write into this folder. If the permissions
     are not correct, use a shell provisioner prior to this to configure it
     properly.
--   `version` (string) - The version of Chef to be installed. By default this is
-    empty which will install the latest version of Chef.
+-   `version` (string) - The version of Chef to be installed. By default this
+    is empty which will install the latest version of Chef.
 
 ## Chef Configuration
 
@@ -126,14 +124,13 @@ The default value for the configuration template is:
 cookbook_path [{{.CookbookPaths}}]
 ```
 
-This template is a [configuration
-template](/docs/templates/engine.html) and has a set of
-variables available to use:
+This template is a [configuration template](/docs/templates/engine.html) and
+has a set of variables available to use:
 
 -   `ChefEnvironment` - The current enabled environment. Only non-empty if the
     environment path is set.
--   `CookbookPaths` is the set of cookbook paths ready to embedded directly into
-    a Ruby array to configure Chef.
+-   `CookbookPaths` is the set of cookbook paths ready to embedded directly
+    into a Ruby array to configure Chef.
 -   `DataBagsPath` is the path to the data bags folder.
 -   `EncryptedDataBagSecretPath` - The path to the encrypted data bag secret
 -   `EnvironmentsPath` - The path to the environments folder.
@@ -162,14 +159,14 @@ c:/opscode/chef/bin/chef-solo.bat \
   -j {{.JsonPath}}
 ```
 
-This command can be customized using the `execute_command` configuration. As you
-can see from the default value above, the value of this configuration can
+This command can be customized using the `execute_command` configuration. As
+you can see from the default value above, the value of this configuration can
 contain various template variables, defined below:
 
 -   `ConfigPath` - The path to the Chef configuration file.
 -   `JsonPath` - The path to the JSON attributes file for the node.
--   `Sudo` - A boolean of whether to `sudo` the command or not, depending on the
-    value of the `prevent_sudo` configuration.
+-   `Sudo` - A boolean of whether to `sudo` the command or not, depending on
+    the value of the `prevent_sudo` configuration.
 
 ## Install Command
 

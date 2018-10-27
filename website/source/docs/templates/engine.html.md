@@ -10,36 +10,42 @@ sidebar_current: 'docs-templates-engine'
 
 # Template Engine
 
-All strings within templates are processed by a common Packer templating engine,
-where variables and functions can be used to modify the value of a
+All strings within templates are processed by a common Packer templating
+engine, where variables and functions can be used to modify the value of a
 configuration parameter at runtime.
 
 The syntax of templates uses the following conventions:
 
 -   Anything template related happens within double-braces: `{{ }}`.
--   Functions are specified directly within the braces, such as `{{timestamp}}`.
+-   Functions are specified directly within the braces, such as
+    `{{timestamp}}`.
 -   Template variables are prefixed with a period and capitalized, such as
     `{{.Variable}}`.
 
 ## Functions
 
-Functions perform operations on and within strings, for example the `{{timestamp}}` function can be used in any string to generate
-the current timestamp. This is useful for configurations that require unique
-keys, such as AMI names. By setting the AMI name to something like `My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second. If you
-need greater than one second granularity, you should use `{{uuid}}`, for
+Functions perform operations on and within strings, for example the
+`{{timestamp}}` function can be used in any string to generate the current
+timestamp. This is useful for configurations that require unique keys, such as
+AMI names. By setting the AMI name to something like
+`My Packer AMI {{timestamp}}`, the AMI name will be unique down to the second.
+If you need greater than one second granularity, you should use `{{uuid}}`, for
 example when you have multiple builders in the same template.
 
 Here is a full list of the available functions for reference.
 
 -   `build_name` - The name of the build being run.
 -   `build_type` - The type of the builder being used currently.
--   `env` - Returns environment variables. See example in [using home variable](/docs/templates/user-variables.html#using-home-variable)
+-   `env` - Returns environment variables. See example in [using home
+    variable](/docs/templates/user-variables.html#using-home-variable)
 -   `isotime [FORMAT]` - UTC time, which can be
     [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
-    examples below in [the `isotime` format reference](/docs/templates/engine.html#isotime-function-format-reference).
+    examples below in [the `isotime` format
+    reference](/docs/templates/engine.html#isotime-function-format-reference).
 -   `lower` - Lowercases the string.
 -   `pwd` - The working directory while executing Packer.
--   `split` - Split an input string using separator and return the requested substring.
+-   `split` - Split an input string using separator and return the requested
+    substring.
 -   `template_dir` - The directory to the template for the build.
 -   `timestamp` - The current Unix timestamp in UTC.
 -   `uuid` - Returns a random UUID.
@@ -50,18 +56,16 @@ Here is a full list of the available functions for reference.
 #### Specific to Amazon builders:
 
 -   `clean_ami_name` - AMI names can only contain certain characters. This
-    function will replace illegal characters with a '-" character. Example usage
-    since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
+    function will replace illegal characters with a '-" character. Example
+    usage since ":" is not a legal AMI name is: `{{isotime | clean_ami_name}}`.
 
 #### Specific to Google Compute builders:
 
--   `clean_image_name` - GCE image names can only contain certain characters and
-    the maximum length is 63. This function will convert upper cases to lower cases
-    and replace illegal characters with a "-" character.
-    Example:
+-   `clean_image_name` - GCE image names can only contain certain characters
+    and the maximum length is 63. This function will convert upper cases to
+    lower cases and replace illegal characters with a "-" character. Example:
 
-    `"mybuild-{{isotime | clean_image_name}}"`
-    will become
+    `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
 
     Note: Valid GCE image names must match the regex
@@ -70,16 +74,15 @@ Here is a full list of the available functions for reference.
     This engine does not guarantee that the final image name will match the
     regex; it will not truncate your name if it exceeds 63 characters, and it
     will not validate that the beginning and end of the engine's output are
-    valid. For example,
-    `"image_name": {{isotime | clean_image_name}}"` will cause your build to
-    fail because the image name will start with a number, which is why in the
-    above example we prepend the isotime with "mybuild".
+    valid. For example, `"image_name": {{isotime | clean_image_name}}"` will
+    cause your build to fail because the image name will start with a number,
+    which is why in the above example we prepend the isotime with "mybuild".
 
 #### Specific to Azure builders:
 
--   `clean_image_name` - Azure managed image names can only contain
-    certain characters and the maximum length is 80. This function
-    will replace illegal characters with a "-" character.  Example:
+-   `clean_image_name` - Azure managed image names can only contain certain
+    characters and the maximum length is 80. This function will replace illegal
+    characters with a "-" character. Example:
 
     `"mybuild-{{isotime | clean_image_name}}"` will become
     `mybuild-2017-10-18t02-06-30z`.
@@ -87,17 +90,24 @@ Here is a full list of the available functions for reference.
     Note: Valid Azure image names must match the regex
     `^[^_\\W][\\w-._)]{0,79}$`
 
-    This engine does not guarantee that the final image name will
-    match the regex; it will not truncate your name if it exceeds 80
-    characters, and it will not validate that the beginning and end of
-    the engine's output are valid.  It will truncate invalid
-    characters from the end of the name when converting illegal
-    characters.  For example, `"managed_image_name: "My-Name::"` will
-    be converted to `"managed_image_name: "My-Name"`
+    This engine does not guarantee that the final image name will match the
+    regex; it will not truncate your name if it exceeds 80 characters, and it
+    will not validate that the beginning and end of the engine's output are
+    valid. It will truncate invalid characters from the end of the name when
+    converting illegal characters. For example,
+    `"managed_image_name: "My-Name::"` will be converted to
+    `"managed_image_name: "My-Name"`
 
 ## Template variables
 
-Template variables are special variables automatically set by Packer at build time. Some builders, provisioners and other components have template variables that are available only for that component. Template variables are recognizable because they're prefixed by a period, such as `{{ .Name }}`. For example, when using the [`shell`](/docs/builders/vmware-iso.html) builder template variables are available to customize the [`execute_command`](/docs/provisioners/shell.html#execute_command) parameter used to determine how Packer will run the shell command.
+Template variables are special variables automatically set by Packer at build
+time. Some builders, provisioners and other components have template variables
+that are available only for that component. Template variables are recognizable
+because they're prefixed by a period, such as `{{ .Name }}`. For example, when
+using the [`shell`](/docs/builders/vmware-iso.html) builder template variables
+are available to customize the
+[`execute_command`](/docs/provisioners/shell.html#execute_command) parameter
+used to determine how Packer will run the shell command.
 
 ``` liquid
 {
@@ -113,9 +123,13 @@ Template variables are special variables automatically set by Packer at build ti
 }
 ```
 
-The `{{ .Vars }}` and `{{ .Path }}` template variables will be replaced with the list of the environment variables and the path to the script to be executed respectively.
+The `{{ .Vars }}` and `{{ .Path }}` template variables will be replaced with
+the list of the environment variables and the path to the script to be executed
+respectively.
 
--&gt; **Note:** In addition to template variables, you can specify your own user variables. See the [user variable](/docs/templates/user-variables.html) documentation for more information on user variables.
+-&gt; **Note:** In addition to template variables, you can specify your own
+user variables. See the [user variable](/docs/templates/user-variables.html)
+documentation for more information on user variables.
 
 # isotime Function Format Reference
 
@@ -214,7 +228,8 @@ Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
 </table>
 *The values in parentheses are the abbreviated, or 24-hour clock values*
 
-Note that "-0700" is always formatted into "+0000" because `isotime` is always UTC time.
+Note that "-0700" is always formatted into "+0000" because `isotime` is always
+UTC time.
 
 Here are some example formatted time, using the above format options:
 
@@ -227,7 +242,8 @@ isotime = June 7, 7:22:43pm 2014
 {{isotime "Hour15Year200603"}} = Hour19Year201407
 ```
 
-Please note that double quote characters need escaping inside of templates (in this case, on the `ami_name` value):
+Please note that double quote characters need escaping inside of templates (in
+this case, on the `ami_name` value):
 
 ``` json
 {
@@ -246,11 +262,14 @@ Please note that double quote characters need escaping inside of templates (in t
 }
 ```
 
--&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html) documentation for more information on how to correctly configure the Amazon builder in this example.
+-&gt; **Note:** See the [Amazon builder](/docs/builders/amazon.html)
+documentation for more information on how to correctly configure the Amazon
+builder in this example.
 
 # split Function Format Reference
 
-The function `split` takes an input string, a seperator string, and a numeric component value and returns the requested substring.
+The function `split` takes an input string, a seperator string, and a numeric
+component value and returns the requested substring.
 
 Here are some examples using the above options:
 
@@ -261,7 +280,8 @@ build_name = foo-bar-provider
 {{split "fixed-string" "-" 1}} = string
 ```
 
-Please note that double quote characters need escaping inside of templates (in this case, on the `fixed-string` value):
+Please note that double quote characters need escaping inside of templates (in
+this case, on the `fixed-string` value):
 
 ``` json
 {
