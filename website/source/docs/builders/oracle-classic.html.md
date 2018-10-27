@@ -290,7 +290,7 @@ setting.
             "source_image_list": "/oracle/public/OL_7.2_UEKR4_x86_64",
             "persistent_volume_size": 15,
             "image_name": "Packer_Builder_Test_{{timestamp}}",
-            "dest_image_list": "Packer_Builder_Test_List"
+            "dest_image_list": "Packer_Builder_Test_List",
             "ssh_username": "opc",
             "shape": "oc3"
         }

@@ -84,8 +84,6 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 		c.SnapshotTimeout = 20 * time.Minute
 	}
 
-	// if using a persistent volume
-
 	// Validate that all required fields are present
 	var errs *packer.MultiError
 	required := map[string]string{
