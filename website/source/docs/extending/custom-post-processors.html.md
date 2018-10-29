@@ -1,7 +1,7 @@
 ---
 description: |
-    Packer Post-processors are the components of Packer that transform one
-    artifact into another, for example by compressing files, or uploading them.
+    Packer Post-processors are the components of Packer that transform one artifact
+    into another, for example by compressing files, or uploading them.
 layout: docs
 page_title: 'Custom Post-Processors - Extending'
 sidebar_current: 'docs-extending-custom-post-processors'
@@ -44,8 +44,8 @@ type PostProcessor interface {
 ### The "Configure" Method
 
 The `Configure` method for each post-processor is called early in the build
-process to configure the post-processor. The configuration is passed in as a raw
-`interface{}`. The configure method is responsible for translating this
+process to configure the post-processor. The configuration is passed in as a
+raw `interface{}`. The configure method is responsible for translating this
 configuration into an internal structure, validating it, and returning any
 errors.
 
@@ -55,27 +55,28 @@ recommended. Mapstructure will take an `interface{}` and decode it into an
 arbitrarily complex struct. If there are any errors, it generates very
 human-friendly errors that can be returned directly from the configure method.
 
-While it is not actively enforced, **no side effects** should occur from running
-the `Configure` method. Specifically, don't create files, don't create network
-connections, etc. Configure's purpose is solely to setup internal state and
-validate the configuration as much as possible.
+While it is not actively enforced, **no side effects** should occur from
+running the `Configure` method. Specifically, don't create files, don't create
+network connections, etc. Configure's purpose is solely to setup internal state
+and validate the configuration as much as possible.
 
-`Configure` being run is not an indication that `PostProcess` will ever run. For
-example, `packer validate` will run `Configure` to verify the configuration
+`Configure` being run is not an indication that `PostProcess` will ever run.
+For example, `packer validate` will run `Configure` to verify the configuration
 validates, but will never actually run the build.
 
 ### The "PostProcess" Method
 
-The `PostProcess` method is where the real work goes. PostProcess is responsible
-for taking one `packer.Artifact` implementation, and transforming it into
-another.
+The `PostProcess` method is where the real work goes. PostProcess is
+responsible for taking one `packer.Artifact` implementation, and transforming
+it into another.
 
 When we say "transform," we don't mean actually modifying the existing
 `packer.Artifact` value itself. We mean taking the contents of the artifact and
-creating a new artifact from that. For example, if we were creating a "compress"
-post-processor that is responsible for compressing files, the transformation
-would be taking the `Files()` from the original artifact, compressing them, and
-creating a new artifact with a single file: the compressed archive.
+creating a new artifact from that. For example, if we were creating a
+"compress" post-processor that is responsible for compressing files, the
+transformation would be taking the `Files()` from the original artifact,
+compressing them, and creating a new artifact with a single file: the
+compressed archive.
 
 The result signature of this method is `(Artifact, bool, error)`. Each return
 value is explained below:
@@ -86,5 +87,5 @@ value is explained below:
     generally want intermediary artifacts. However, some post-processors depend
     on the previous artifact existing. If this is `true`, it forces packer to
     keep the artifact around.
--   `error` - Non-nil if there was an error in any way. If this is the case, the
-    other two return values are ignored.
+-   `error` - Non-nil if there was an error in any way. If this is the case,
+    the other two return values are ignored.
