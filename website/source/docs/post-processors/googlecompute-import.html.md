@@ -2,7 +2,6 @@
 description: |
     The Google Compute Image Import post-processor takes a compressed raw disk
     image and imports it to a GCE image available to Google Compute Engine.
-    
 layout: docs
 page_title: 'Google Compute Image Import - Post-Processors'
 sidebar_current: 'docs-post-processors-googlecompute-import'
@@ -15,52 +14,66 @@ Type: `googlecompute-import`
 The Google Compute Image Import post-processor takes a compressed raw disk
 image and imports it to a GCE image available to Google Compute Engine.
 
-~&gt; This post-processor is for advanced users. Please ensure you read the [GCE import documentation](https://cloud.google.com/compute/docs/images/import-existing-image) before using this post-processor.
+~&gt; This post-processor is for advanced users. Please ensure you read the
+[GCE import
+documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
+before using this post-processor.
 
 ## How Does it Work?
 
-The import process operates by uploading a temporary copy of the compressed raw disk image
-to a GCS bucket, and calling an import task in GCP on the raw disk file. Once completed, a
-GCE image is created containing the converted virtual machine. The temporary raw disk image
-copy in GCS can be discarded after the import is complete.
+The import process operates by uploading a temporary copy of the compressed raw
+disk image to a GCS bucket, and calling an import task in GCP on the raw disk
+file. Once completed, a GCE image is created containing the converted virtual
+machine. The temporary raw disk image copy in GCS can be discarded after the
+import is complete.
 
-Google Cloud has very specific requirements for images being imported. Please see the
-[GCE import documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
+Google Cloud has very specific requirements for images being imported. Please
+see the [GCE import
+documentation](https://cloud.google.com/compute/docs/images/import-existing-image)
 for details.
 
 ## Configuration
 
 ### Required
 
--   `account_file` (string) - The JSON file containing your account credentials.
+-   `account_file` (string) - The JSON file containing your account
+    credentials.
 
 -   `bucket` (string) - The name of the GCS bucket where the raw disk image
-     will be uploaded.
+    will be uploaded.
 
 -   `image_name` (string) - The unique name of the resulting image.
 
 -   `project_id` (string) - The project ID where the GCS bucket exists and
-     where the GCE image is stored.
+    where the GCE image is stored.
 
 ### Optional
 
--   `gcs_object_name` (string) - The name of the GCS object in `bucket` where the RAW disk image will be copied for import. Defaults to "packer-import-{{timestamp}}.tar.gz".
+-   `gcs_object_name` (string) - The name of the GCS object in `bucket` where
+    the RAW disk image will be copied for import. Defaults to
+    "packer-import-{{timestamp}}.tar.gz".
 
 -   `image_description` (string) - The description of the resulting image.
 
--   `image_family` (string) - The name of the image family to which the resulting image belongs.
+-   `image_family` (string) - The name of the image family to which the
+    resulting image belongs.
 
--   `image_labels` (object of key/value strings) - Key/value pair labels to apply to the created image.
+-   `image_labels` (object of key/value strings) - Key/value pair labels to
+    apply to the created image.
 
--   `keep_input_artifact` (boolean) - if true, do not delete the compressed RAW disk image. Defaults to false.
+-   `keep_input_artifact` (boolean) - if true, do not delete the compressed RAW
+    disk image. Defaults to false.
 
--   `skip_clean` (boolean) - Skip removing the TAR file uploaded to the GCS bucket after the import process has completed. "true" means that we should leave it in the GCS bucket, "false" means to clean it out. Defaults to `false`.
-
+-   `skip_clean` (boolean) - Skip removing the TAR file uploaded to the GCS
+    bucket after the import process has completed. "true" means that we should
+    leave it in the GCS bucket, "false" means to clean it out. Defaults to
+    `false`.
 
 ## Basic Example
 
-Here is a basic example. This assumes that the builder has produced an compressed
-raw disk image artifact for us to work with, and that the GCS bucket has been created.
+Here is a basic example. This assumes that the builder has produced an
+compressed raw disk image artifact for us to work with, and that the GCS bucket
+has been created.
 
 ``` json
 {
@@ -70,18 +83,15 @@ raw disk image artifact for us to work with, and that the GCS bucket has been cr
   "bucket": "my-bucket",
   "image_name": "my-gce-image"
 }
-
 ```
 
 ## QEMU Builder Example
 
-Here is a complete example for building a Fedora 28 server GCE image. For this example
-packer was run from a CentOS 7 server with KVM installed. The CentOS 7 server was running
-in GCE with the nested hypervisor feature enabled.
+Here is a complete example for building a Fedora 28 server GCE image. For this
+example packer was run from a CentOS 7 server with KVM installed. The CentOS 7
+server was running in GCE with the nested hypervisor feature enabled.
 
-```
-$ packer build -var serial=$(tty) build.json
-```
+    $ packer build -var serial=$(tty) build.json
 
 ``` json
 {
