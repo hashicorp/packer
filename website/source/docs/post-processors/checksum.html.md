@@ -1,11 +1,11 @@
 ---
 description: |
     The checksum post-processor computes specified checksum for the artifact list
-    from an upstream builder or post-processor. All downstream post-processors
-    will see the new artifacts. The primary use-case is compute checksum for
-    artifacts allows to verify it later. So firstly this post-processor get
-    artifact, compute it checksum and pass to next post-processor original
-    artifacts and checksum files.
+    from an upstream builder or post-processor. All downstream post-processors will
+    see the new artifacts. The primary use-case is compute checksum for artifacts
+    allows to verify it later. So firstly this post-processor get artifact, compute
+    it checksum and pass to next post-processor original artifacts and checksum
+    files.
 layout: docs
 page_title: 'Checksum - Post-Processors'
 sidebar_current: 'docs-post-processors-checksum'
@@ -24,8 +24,8 @@ After computes checksum for artifacts, you can use new artifacts with other
 post-processors like
 [artifice](https://www.packer.io/docs/post-processors/artifice.html),
 [compress](https://www.packer.io/docs/post-processors/compress.html),
-[docker-push](https://www.packer.io/docs/post-processors/docker-push.html),
- or a third-party post-processor.
+[docker-push](https://www.packer.io/docs/post-processors/docker-push.html), or
+a third-party post-processor.
 
 ## Basic example
 
@@ -46,8 +46,8 @@ Optional parameters:
 -   `output` (string) - Specify filename to store checksums. This defaults to
     `packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum`. For
     example, if you had a builder named `database`, you might see the file
-    written as `packer_database_docker_md5.checksum`. The following variables are
-    available to use in the output template:
+    written as `packer_database_docker_md5.checksum`. The following variables
+    are available to use in the output template:
 
     -   `BuildName`: The name of the builder that produced the artifact.
     -   `BuilderType`: The type of builder used to produce the artifact.

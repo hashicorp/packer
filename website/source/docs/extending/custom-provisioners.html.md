@@ -1,8 +1,8 @@
 ---
 description: |
     Packer Provisioners are the components of Packer that install and configure
-    software into a running machine prior to turning that machine into an image.
-    An example of a provisioner is the shell provisioner, which runs shell scripts
+    software into a running machine prior to turning that machine into an image. An
+    example of a provisioner is the shell provisioner, which runs shell scripts
     within the machines.
 layout: docs
 page_title: 'Custom Provisioners - Extending'
@@ -14,8 +14,8 @@ sidebar_current: 'docs-extending-custom-provisioners'
 Packer Provisioners are the components of Packer that install and configure
 software into a running machine prior to turning that machine into an image. An
 example of a provisioner is the [shell
-provisioner](/docs/provisioners/shell.html), which runs shell scripts within the
-machines.
+provisioner](/docs/provisioners/shell.html), which runs shell scripts within
+the machines.
 
 Prior to reading this page, it is assumed you have read the page on [plugin
 development basics](/docs/extending/plugins.html).
@@ -49,8 +49,8 @@ method is responsible for translating this configuration into an internal
 structure, validating it, and returning any errors.
 
 For multiple parameters, they should be merged together into the final
-configuration, with later parameters overwriting any previous configuration. The
-exact semantics of the merge are left to the builder author.
+configuration, with later parameters overwriting any previous configuration.
+The exact semantics of the merge are left to the builder author.
 
 For decoding the `interface{}` into a meaningful structure, the
 [mapstructure](https://github.com/mitchellh/mapstructure) library is
@@ -58,10 +58,10 @@ recommended. Mapstructure will take an `interface{}` and decode it into an
 arbitrarily complex struct. If there are any errors, it generates very human
 friendly errors that can be returned directly from the prepare method.
 
-While it is not actively enforced, **no side effects** should occur from running
-the `Prepare` method. Specifically, don't create files, don't launch virtual
-machines, etc. Prepare's purpose is solely to configure the builder and validate
-the configuration.
+While it is not actively enforced, **no side effects** should occur from
+running the `Prepare` method. Specifically, don't create files, don't launch
+virtual machines, etc. Prepare's purpose is solely to configure the builder and
+validate the configuration.
 
 The `Prepare` method is called very early in the build process so that errors
 may be displayed to the user before anything actually happens.
