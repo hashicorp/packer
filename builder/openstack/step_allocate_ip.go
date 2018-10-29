@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -22,6 +21,17 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 	config := state.Get("config").(*Config)
 	server := state.Get("server").(*servers.Server)
 
+	var instanceIP floatingips.FloatingIP
+
+	// This is here in case we error out before putting instanceIp into the
+	// statebag below, because it is requested by Cleanup()
+	state.Put("access_ip", &instanceIP)
+
+	if s.FloatingIP == "" && !s.ReuseIPs && s.FloatingIPNetwork == "" {
+		ui.Message("Floating IP not required")
+		return multistep.ActionContinue
+	}
+
 	// We need the v2 compute client
 	computeClient, err := config.computeV2Client()
 	if err != nil {
@@ -30,22 +40,13 @@ func (s *StepAllocateIp) Run(_ context.Context, state multistep.StateBag) multis
 		return multistep.ActionHalt
 	}
 
-	// We might need the v2 network client
-	var networkClient *gophercloud.ServiceClient
-	if s.FloatingIP != "" || s.ReuseIPs || s.FloatingIPNetwork != "" {
-		networkClient, err = config.networkV2Client()
-		if err != nil {
-			err = fmt.Errorf("Error initializing network client: %s", err)
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
+	// We need the v2 network client
+	networkClient, err := config.networkV2Client()
+	if err != nil {
+		err = fmt.Errorf("Error initializing network client: %s", err)
+		state.Put("error", err)
+		return multistep.ActionHalt
 	}
-
-	var instanceIP floatingips.FloatingIP
-
-	// This is here in case we error out before putting instanceIp into the
-	// statebag below, because it is requested by Cleanup()
-	state.Put("access_ip", &instanceIP)
 
 	// Try to Use the OpenStack floating IP by checking provided parameters in
 	// the following order:
@@ -146,20 +147,25 @@ func (s *StepAllocateIp) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	instanceIP := state.Get("access_ip").(*floatingips.FloatingIP)
 
+	// Don't clean up if unless required
+	if instanceIP.ID == "" && instanceIP.FloatingIP == "" {
+		return
+	}
+
 	// Don't delete pool addresses we didn't allocate
 	if state.Get("floatingip_istemp") == false {
 		return
 	}
 
-	if instanceIP.FloatingIP != "" && instanceIP.ID != "" {
-		// We need the v2 network client
-		client, err := config.networkV2Client()
-		if err != nil {
-			ui.Error(fmt.Sprintf(
-				"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
-			return
-		}
+	// We need the v2 network client
+	client, err := config.networkV2Client()
+	if err != nil {
+		ui.Error(fmt.Sprintf(
+			"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
+		return
+	}
 
+	if instanceIP.ID != "" {
 		if err := floatingips.Delete(client, instanceIP.ID).ExtractErr(); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error deleting temporary floating IP '%s' (%s)", instanceIP.ID, instanceIP.FloatingIP))
