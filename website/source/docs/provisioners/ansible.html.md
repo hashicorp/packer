@@ -1,7 +1,7 @@
 ---
 description: |
-    The ansible Packer provisioner allows Ansible playbooks to be run to
-    provision the machine.
+    The ansible Packer provisioner allows Ansible playbooks to be run to provision
+    the machine.
 layout: docs
 page_title: 'Ansible - Provisioners'
 sidebar_current: 'docs-provisioners-ansible-remote'
@@ -16,8 +16,9 @@ an Ansible inventory file configured to use SSH, runs an SSH server, executes
 `ansible-playbook`, and marshals Ansible plays through the SSH server to the
 machine being provisioned by Packer.
 
--&gt; **Note:**: Any `remote_user` defined in tasks will be ignored. Packer will
-always connect with the user given in the json config for this provisioner.
+-&gt; **Note:**: Any `remote_user` defined in tasks will be ignored. Packer
+will always connect with the user given in the json config for this
+provisioner.
 
 ## Basic Example
 
@@ -53,26 +54,25 @@ Required Parameters:
 Optional Parameters:
 
 -   `ansible_env_vars` (array of strings) - Environment variables to set before
-    running Ansible.
-    Usage example:
+    running Ansible. Usage example:
 
     ``` json
     {
       "ansible_env_vars": [ "ANSIBLE_HOST_KEY_CHECKING=False", "ANSIBLE_SSH_ARGS='-o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s'", "ANSIBLE_NOCOLOR=True" ]
     }
     ```
-    If you are running a Windows build on AWS, Azure or Google Compute and would
-    like to access the auto-generated password that Packer uses to connect to a
-    Windows instance via WinRM, you can use the template variable
-    {{.WinRMPassword}} in this option.
-    For example:
 
-    ```json
+    If you are running a Windows build on AWS, Azure or Google Compute and
+    would like to access the auto-generated password that Packer uses to
+    connect to a Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option. For example:
+
+    ``` json
     "ansible_env_vars": [ "WINRM_PASSWORD={{.WinRMPassword}}" ],
     ```
 
--   `command` (string) - The command to invoke ansible.
-    Defaults to `ansible-playbook`.
+-   `command` (string) - The command to invoke ansible. Defaults to
+    `ansible-playbook`.
 
 -   `empty_groups` (array of strings) - The groups which should be present in
     inventory file but remain empty.
@@ -81,43 +81,41 @@ Optional Parameters:
     These arguments *will not* be passed through a shell and arguments should
     not be quoted. Usage example:
 
-    ```json
+    ``` json
     {
       "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
     }
     ```
 
-    If you are running a Windows build on AWS, Azure or Google Compute and would
-    like to access the auto-generated password that Packer uses to connect to a
-    Windows instance via WinRM, you can use the template variable
-    {{.WinRMPassword}} in this option.
-    For example:
+    If you are running a Windows build on AWS, Azure or Google Compute and
+    would like to access the auto-generated password that Packer uses to
+    connect to a Windows instance via WinRM, you can use the template variable
+    {{.WinRMPassword}} in this option. For example:
 
-    ```json
+    ``` json
       "extra_arguments": [
         "--extra-vars", "winrm_password={{ .WinRMPassword }}"
       ]
     ```
 
--   `groups` (array of strings) - The groups into which the Ansible host
-    should be placed. When unspecified, the host is not associated with any
-    groups.
+-   `groups` (array of strings) - The groups into which the Ansible host should
+    be placed. When unspecified, the host is not associated with any groups.
 
 -   `inventory_file` (string) - The inventory file to use during provisioning.
     When unspecified, Packer will create a temporary inventory file and will
     use the `host_alias`.
 
--   `host_alias` (string) - The alias by which the Ansible host should be known.
-    Defaults to `default`. This setting is ignored when using a custom inventory
-    file.
+-   `host_alias` (string) - The alias by which the Ansible host should be
+    known. Defaults to `default`. This setting is ignored when using a custom
+    inventory file.
 
 -   `inventory_directory` (string) - The directory in which to place the
     temporary generated Ansible inventory file. By default, this is the
     system-specific temporary file location. The fully-qualified name of this
     temporary file will be passed to the `-i` argument of the `ansible` command
     when this provisioner runs ansible. Specify this if you have an existing
-    inventory directory with `host_vars` `group_vars` that you would like to use
-    in the playbook that this provisioner will run.
+    inventory directory with `host_vars` `group_vars` that you would like to
+    use in the playbook that this provisioner will run.
 
 -   `local_port` (string) - The port on which to attempt to listen for SSH
     connections. This value is a starting point. The provisioner will attempt
@@ -125,20 +123,20 @@ Optional Parameters:
     `local_port`. A system-chosen port is used when `local_port` is missing or
     empty.
 
--   `sftp_command` (string) - The command to run on the machine being provisioned
-    by Packer to handle the SFTP protocol that Ansible will use to transfer
-    files. The command should read and write on stdin and stdout, respectively.
-    Defaults to `/usr/lib/sftp-server -e`.
+-   `sftp_command` (string) - The command to run on the machine being
+    provisioned by Packer to handle the SFTP protocol that Ansible will use to
+    transfer files. The command should read and write on stdin and stdout,
+    respectively. Defaults to `/usr/lib/sftp-server -e`.
 
--   `skip_version_check` (boolean) - Check if ansible is installed prior to running.
-    Set this to `true`, for example, if you're going to install ansible during
-    the packer run.
+-   `skip_version_check` (boolean) - Check if ansible is installed prior to
+    running. Set this to `true`, for example, if you're going to install
+    ansible during the packer run.
 
 -   `ssh_host_key_file` (string) - The SSH key that will be used to run the SSH
-    server on the host machine to forward commands to the target machine. Ansible
-    connects to this server and will validate the identity of the server using
-    the system known\_hosts. The default behavior is to generate and use a
-    onetime key. Host key checking is disabled via the
+    server on the host machine to forward commands to the target machine.
+    Ansible connects to this server and will validate the identity of the
+    server using the system known\_hosts. The default behavior is to generate
+    and use a onetime key. Host key checking is disabled via the
     `ANSIBLE_HOST_KEY_CHECKING` environment variable if the key is generated.
 
 -   `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
@@ -159,9 +157,10 @@ commonly useful Ansible variables:
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly when using a common playbook.
 
--   `packer_builder_type` is the type of the builder that was used to create the
-    machine that the script is running on. This is useful if you want to run
-    only certain parts of the playbook on systems built with certain builders.
+-   `packer_builder_type` is the type of the builder that was used to create
+    the machine that the script is running on. This is useful if you want to
+    run only certain parts of the playbook on systems built with certain
+    builders.
 
 -   `packer_http_addr` If using a builder that provides an http server for file
     transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
@@ -172,9 +171,10 @@ commonly useful Ansible variables:
 
 ## Debugging
 
-To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"` to enable verbose logging.
+To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"`
+to enable verbose logging.
 
-```json
+``` json
 {
   "extra_arguments": [ "-vvvv" ]
 }
@@ -184,7 +184,8 @@ To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"` to
 
 ### Redhat / CentOS
 
-Redhat / CentOS builds have been known to fail with the following error due to `sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
+Redhat / CentOS builds have been known to fail with the following error due to
+`sftp_command`, which should be set to `/usr/libexec/openssh/sftp-server -e`:
 
 ``` text
 ==> virtualbox-ovf: starting sftp subsystem
@@ -193,9 +194,10 @@ Redhat / CentOS builds have been known to fail with the following error due to `
 
 ### chroot communicator
 
-Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible connection to chroot.
+Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible
+connection to chroot.
 
-```json
+``` json
 {
   "builders": [
     {
@@ -220,8 +222,11 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible co
 
 ### winrm communicator
 
-Windows builds require a custom Ansible connection plugin and a particular configuration. Assuming a directory named `connection_plugins` is next to the playbook and contains a file named `packer.py` which implements
-the connection plugin.  On versions of Ansible before 2.4.x, the following works as the connection plugin
+Windows builds require a custom Ansible connection plugin and a particular
+configuration. Assuming a directory named `connection_plugins` is next to the
+playbook and contains a file named `packer.py` which implements the connection
+plugin. On versions of Ansible before 2.4.x, the following works as the
+connection plugin
 
 ``` python
 from __future__ import (absolute_import, division, print_function)
@@ -242,12 +247,16 @@ class Connection(SSHConnection):
         super(Connection, self).__init__(*args, **kwargs)
 ```
 
-Newer versions of Ansible require all plugins to have a documentation string. You can see if there is a
-plugin available for the version of Ansible you are using [here](https://github.com/hashicorp/packer/tree/master/examples/ansible/connection-plugin).
+Newer versions of Ansible require all plugins to have a documentation string.
+You can see if there is a plugin available for the version of Ansible you are
+using
+[here](https://github.com/hashicorp/packer/tree/master/examples/ansible/connection-plugin).
 
-To create the plugin yourself, you will need to copy all of the `options` from the `DOCUMENTATION` string
-from the [ssh.py Ansible connection plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
-of the Ansible version you are using and add it to a packer.py file similar to as follows
+To create the plugin yourself, you will need to copy all of the `options` from
+the `DOCUMENTATION` string from the [ssh.py Ansible connection
+plugin](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/connection/ssh.py)
+of the Ansible version you are using and add it to a packer.py file similar to
+as follows
 
 ``` python
 from __future__ import (absolute_import, division, print_function)
@@ -282,7 +291,8 @@ class Connection(SSHConnection):
         super(Connection, self).__init__(*args, **kwargs)
 ```
 
-This template should build a Windows Server 2012 image on Google Cloud Platform:
+This template should build a Windows Server 2012 image on Google Cloud
+Platform:
 
 ``` json
 {
@@ -318,22 +328,31 @@ This template should build a Windows Server 2012 image on Google Cloud Platform:
 ```
 
 ### Post i/o timeout errors
-If you see `unknown error: Post http://<ip>:<port>/wsman:dial tcp <ip>:<port>: i/o timeout` errors while provisioning a Windows machine, try setting Ansible to copy files over [ssh instead of sftp](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_SCP_IF_SSH).
+
+If you see
+`unknown error: Post http://<ip>:<port>/wsman:dial tcp <ip>:<port>: i/o timeout`
+errors while provisioning a Windows machine, try setting Ansible to copy files
+over [ssh instead of
+sftp](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#envvar-ANSIBLE_SCP_IF_SSH).
 
 ### Too many SSH keys
 
-SSH servers only allow you to attempt to authenticate a certain number of times. All of your loaded keys will be tried before the dynamically generated key. If you have too many SSH keys loaded in your `ssh-agent`, the Ansible provisioner may fail authentication with a message similar to this:
+SSH servers only allow you to attempt to authenticate a certain number of
+times. All of your loaded keys will be tried before the dynamically generated
+key. If you have too many SSH keys loaded in your `ssh-agent`, the Ansible
+provisioner may fail authentication with a message similar to this:
 
-```console
+``` console
     googlecompute: fatal: [default]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Warning: Permanently added '[127.0.0.1]:62684' (RSA) to the list of known hosts.\r\nReceived disconnect from 127.0.0.1 port 62684:2: too many authentication failures\r\nAuthentication failed.\r\n", "unreachable": true}
 ```
 
 To unload all keys from your `ssh-agent`, run:
 
-```console
+``` console
 $ ssh-add -D
 ```
 
 ### Become: yes
 
-We recommend against running Packer as root; if you do then you won't be able to successfully run your ansible playbook as root; `become: yes` will fail.
+We recommend against running Packer as root; if you do then you won't be able
+to successfully run your ansible playbook as root; `become: yes` will fail.

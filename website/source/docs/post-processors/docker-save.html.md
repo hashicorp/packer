@@ -1,9 +1,9 @@
 ---
 description: |
-    The Packer Docker Save post-processor takes an artifact from the docker
-    builder that was committed and saves it to a file. This is similar to
-    exporting the Docker image directly from the builder, except that it preserves
-    the hierarchy of images and metadata.
+    The Packer Docker Save post-processor takes an artifact from the docker builder
+    that was committed and saves it to a file. This is similar to exporting the
+    Docker image directly from the builder, except that it preserves the hierarchy
+    of images and metadata.
 layout: docs
 page_title: 'Docker Save - Post-Processors'
 sidebar_current: 'docs-post-processors-docker-save'
