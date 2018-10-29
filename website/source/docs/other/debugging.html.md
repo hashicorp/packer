@@ -29,25 +29,25 @@ for debugging. The key will only be emitted for cloud-based builders. The
 ephemeral key will be deleted at the end of the packer run during cleanup.
 
 For a local builder, the SSH session initiated will be visible in the detail
-provided when `PACKER_LOG=1` environment variable is set prior to a build,
-and you can connect to the local machine using the userid and password defined
-in the kickstart or preseed associated with initializing the local VM.
+provided when `PACKER_LOG=1` environment variable is set prior to a build, and
+you can connect to the local machine using the userid and password defined in
+the kickstart or preseed associated with initializing the local VM.
 
 It should be noted that one of the options `-on-error` is to `retry`, the retry
 of the step in question has limitations:
 
- * the template packer is building is **not** reloaded from file.
- * the resources specified from builders **are** reloaded from file.
+-   the template packer is building is **not** reloaded from file.
+-   the resources specified from builders **are** reloaded from file.
 
 Check the specfics on your builder to confirm their behavior.
 
 ### Windows
 
 As of Packer 0.8.1 the default WinRM communicator will emit the password for a
-Remote Desktop Connection into your instance. This happens following the several
-minute pause as the instance is booted. Note a .pem key is still created for
-securely transmitting the password. Packer automatically decrypts the password
-for you in debug mode.
+Remote Desktop Connection into your instance. This happens following the
+several minute pause as the instance is booted. Note a .pem key is still
+created for securely transmitting the password. Packer automatically decrypts
+the password for you in debug mode.
 
 ## Debugging Packer
 
@@ -95,9 +95,9 @@ provisioner step:
     amazon-ebs: No candidate version found for build-essential
 
 This, obviously can cause problems where a build is unable to finish
-successfully as the proper packages cannot be provisioned correctly. The problem
-arises when cloud-init has not finished fully running on the source AMI by the
-time that packer starts any provisioning steps.
+successfully as the proper packages cannot be provisioned correctly. The
+problem arises when cloud-init has not finished fully running on the source AMI
+by the time that packer starts any provisioning steps.
 
 Adding the following provisioner to the packer template, allows for the
 cloud-init process to fully finish before packer starts provisioning the source
@@ -124,7 +124,8 @@ error initializing provisioner 'powershell': fork/exec /files/go/bin/packer:
 too many open files
 ```
 
-On Unix systems, you can check what your file descriptor limit is with `ulimit -Sn`. You should check with your OS vendor on how to raise this limit.
+On Unix systems, you can check what your file descriptor limit is with
+`ulimit -Sn`. You should check with your OS vendor on how to raise this limit.
 
 ## Issues when using long temp directory
 

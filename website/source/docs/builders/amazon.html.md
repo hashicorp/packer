@@ -14,9 +14,9 @@ multiple builders depending on the strategy you want to use to build the AMI.
 Packer supports the following builders at the moment:
 
 -   [amazon-ebs](/docs/builders/amazon-ebs.html) - Create EBS-backed AMIs by
-    launching a source AMI and re-packaging it into a new AMI
-    after provisioning. If in doubt, use this builder, which is the easiest to
-    get started with.
+    launching a source AMI and re-packaging it into a new AMI after
+    provisioning. If in doubt, use this builder, which is the easiest to get
+    started with.
 
 -   [amazon-instance](/docs/builders/amazon-instance.html) - Create
     instance-store AMIs by launching and provisioning a source instance, then
@@ -43,9 +43,9 @@ generally recommends EBS-backed images nowadays.
 Packer is able to create Amazon EBS Volumes which are preinitialized with a
 filesystem and data.
 
--   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS volumes
-    by launching a source AMI with block devices mapped. Provision the instance,
-    then destroy it, retaining the EBS volumes.
+-   [amazon-ebsvolume](/docs/builders/amazon-ebsvolume.html) - Create EBS
+    volumes by launching a source AMI with block devices mapped. Provision the
+    instance, then destroy it, retaining the EBS volumes.
 
 <span id="specifying-amazon-credentials"></span>
 
@@ -65,7 +65,7 @@ explained below:
 Static credentials can be provided in the form of an access key id and secret.
 These look like:
 
-```json
+``` json
 {
     "access_key": "AKIAIOSFODNN7EXAMPLE",
     "secret_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
@@ -83,44 +83,38 @@ using either these environment variables will override the use of
 `AWS_SHARED_CREDENTIALS_FILE` and `AWS_PROFILE`. The `AWS_DEFAULT_REGION` and
 `AWS_SESSION_TOKEN` environment variables are also used, if applicable:
 
-
 Usage:
 
-```
-$ export AWS_ACCESS_KEY_ID="anaccesskey"
-$ export AWS_SECRET_ACCESS_KEY="asecretkey"
-$ export AWS_DEFAULT_REGION="us-west-2"
-$ packer build packer.json
-```
+    $ export AWS_ACCESS_KEY_ID="anaccesskey"
+    $ export AWS_SECRET_ACCESS_KEY="asecretkey"
+    $ export AWS_DEFAULT_REGION="us-west-2"
+    $ packer build packer.json
 
 ### Shared Credentials file
 
 You can use an AWS credentials file to specify your credentials. The default
-location is &#36;HOME/.aws/credentials on Linux and OS X, or
-"%USERPROFILE%.aws\credentials" for Windows users. If we fail to detect
+location is $HOME/.aws/credentials on Linux and OS X, or
+"%USERPROFILE%.aws\\credentials" for Windows users. If we fail to detect
 credentials inline, or in the environment, Packer will check this location. You
 can optionally specify a different location in the configuration by setting the
 environment with the `AWS_SHARED_CREDENTIALS_FILE` variable.
 
 The format for the credentials file is like so
 
-```
-[default]
-aws_access_key_id=<your access key id>
-aws_secret_access_key=<your secret access key>
-```
+    [default]
+    aws_access_key_id=<your access key id>
+    aws_secret_access_key=<your secret access key>
 
 You may also configure the profile to use by setting the `profile`
 configuration option, or setting the `AWS_PROFILE` environment variable:
 
-```json
+``` json
 {
     "profile": "customprofile",
     "region": "us-east-1",
     "type": "amazon-ebs"
 }
 ```
-
 
 ### IAM Task or Instance Role
 
@@ -180,17 +174,13 @@ for Packer to work:
 
 Note that if you'd like to create a spot instance, you must also add:
 
-```
-ec2:RequestSpotInstances,
-ec2:CancelSpotInstanceRequests,
-ec2:DescribeSpotInstanceRequests
-```
+    ec2:RequestSpotInstances,
+    ec2:CancelSpotInstanceRequests,
+    ec2:DescribeSpotInstanceRequests
 
 If you have the `spot_price` parameter set to `auto`, you must also add:
 
-```
-ec2:DescribeSpotPriceHistory
-```
+    ec2:DescribeSpotPriceHistory
 
 ## Troubleshooting
 
@@ -228,11 +218,12 @@ fail. If that's the case, you might see an error like this:
     ==> amazon-ebs: Error querying AMI: AuthFailure: AWS was not able to validate the provided access credentials
 
 If you suspect your system's date is wrong, you can compare it against
-<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get the
-current time. If you're on Linux, you can try setting the time with ntp by
+<http://www.time.gov/>. On Linux/OS X, you can run the `date` command to get
+the current time. If you're on Linux, you can try setting the time with ntp by
 running `sudo ntpd -q`.
 
 ### `exceeded wait attempts` while waiting for tasks to complete
+
 We use the AWS SDK's built-in waiters to wait for longer-running tasks to
 complete. These waiters have default delays between queries and maximum number
 of queries that don't always work for our users.
