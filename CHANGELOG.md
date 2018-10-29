@@ -1,5 +1,5 @@
 
-## 1.3.2 (October 26, 2018)
+## 1.3.2 (October 29, 2018)
 ### IMPROVEMENTS:
 * builder/alicloud: Add new `disable_stop_instance` option. [GH-6764]
 * builder/alicloud: Support adding tags to image. [GH-6719]
