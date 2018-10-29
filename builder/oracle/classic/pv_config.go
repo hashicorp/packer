@@ -90,7 +90,12 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 		}
 		if c.BuilderImageList != "" {
 			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("`builder_shape_image_list` has no meaning when `persistent_volume_size` is not set."))
+				fmt.Errorf("`builder_image_list` has no meaning when `persistent_volume_size` is not set."))
+		}
+
+		if c.BuilderImageListEntry != nil {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("`builder_image_list_entry` has no meaning when `persistent_volume_size` is not set."))
 		}
 		return errs
 	}
@@ -113,8 +118,8 @@ func (c *PVConfig) Prepare(ctx *interpolate.Context) (errs *packer.MultiError) {
 		c.BuilderImageList = imageListDefault
 	}
 
-	// Entry 5 is a working default, so let's set it if the entry is unset and
-	// we're using the default image list
+	// Set to known working default if this is unset and we're using the
+	// default image list
 	if c.BuilderImageListEntry == nil {
 		var entry int
 		if c.BuilderImageList == imageListDefault {
