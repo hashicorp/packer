@@ -11,6 +11,7 @@ type ExportConfig struct {
 	OVFToolOptions []string `mapstructure:"ovftool_options"`
 	SkipExport     bool     `mapstructure:"skip_export"`
 	KeepRegistered bool     `mapstructure:"keep_registered"`
+	SkipCompaction bool     `mapstructure:"skip_compaction"`
 }
 
 func (c *ExportConfig) Prepare(ctx *interpolate.Context) []error {
