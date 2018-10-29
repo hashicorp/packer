@@ -72,7 +72,7 @@ func TestESX5Driver_CommHost(t *testing.T) {
 	state := new(multistep.BasicStateBag)
 	sshConfig := SSHConfig{Comm: commConfig}
 	state.Put("sshConfig", &sshConfig)
-	driver := ESX5Driver{CommConfig: commConfig}
+	driver := ESX5Driver{CommConfig: *(&sshConfig.Comm)}
 
 	host, err := driver.CommHost(state)
 	if err != nil {
