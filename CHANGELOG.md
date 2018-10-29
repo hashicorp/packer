@@ -37,7 +37,7 @@
 
 ### BUG FIXES:
 * builder/alicloud: Fix ssh configuration pointer issues that could cause a bug
-    [GH-6729]
+    [GH-6720]
 * builder/alicloud: Fix type error in step_create_tags [GH-6763]
 * builder/amazon: Error validating credentials is no longer obscured by a
     region validation error. and some region validation refactors and
