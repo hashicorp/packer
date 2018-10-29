@@ -65,6 +65,10 @@ Optional:
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `format` (string) - One of: `ova`, `raw`, `vhd`, `vhdx`, or `vmdk`. This specifies
+    the format of the source virtual machine image. The resulting artifact from the builder
+    is assumed to have a file extension matching the format. This defaults to `ova`.
+
 -   `license_type` (string) - The license type to be used for the Amazon Machine
     Image (AMI) after importing. Valid values: `AWS` or `BYOL` (default).
     For more details regarding licensing, see
