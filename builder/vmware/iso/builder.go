@@ -66,16 +66,8 @@ type Config struct {
 	Serial   string `mapstructure:"serial"`
 	Parallel string `mapstructure:"parallel"`
 
-	// booting a guest
-	KeepRegistered bool     `mapstructure:"keep_registered"`
-	OVFToolOptions []string `mapstructure:"ovftool_options"`
-	SkipCompaction bool     `mapstructure:"skip_compaction"`
-	SkipExport     bool     `mapstructure:"skip_export"`
-
 	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string `mapstructure:"vmx_template_path"`
-
-	CommConfig communicator.Config `mapstructure:",squash"`
 
 	ctx interpolate.Context
 }
@@ -232,7 +224,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, &b.config.CommConfig, b.config.VMName)
+	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, b.config.VMName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
@@ -369,6 +361,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipExport:     b.config.SkipExport,
 			VMName:         b.config.VMName,
 			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      b.config.OutputDir,
 		},
 	}
 

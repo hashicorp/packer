@@ -7,7 +7,6 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/bootcommand"
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -28,14 +27,10 @@ type Config struct {
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
 	vmwcommon.ExportConfig   `mapstructure:",squash"`
 
-	Linked         bool     `mapstructure:"linked"`
-	RemoteType     string   `mapstructure:"remote_type"`
-	SkipCompaction bool     `mapstructure:"skip_compaction"`
-	BootCommand    []string `mapstructure:"boot_command"`
-	SourcePath     string   `mapstructure:"source_path"`
-	VMName         string   `mapstructure:"vm_name"`
-
-	CommConfig communicator.Config `mapstructure:",squash"`
+	Linked     bool   `mapstructure:"linked"`
+	RemoteType string `mapstructure:"remote_type"`
+	SourcePath string `mapstructure:"source_path"`
+	VMName     string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }

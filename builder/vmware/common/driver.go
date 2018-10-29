@@ -15,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
@@ -82,7 +81,7 @@ type Driver interface {
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver(dconfig *DriverConfig, config *SSHConfig, commConfig *communicator.Config, vmName string) (Driver, error) {
+func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
 	drivers := []Driver{}
 
 	if dconfig.RemoteType != "" {
@@ -97,7 +96,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, commConfig *communicato
 				CacheDatastore: dconfig.RemoteCacheDatastore,
 				CacheDirectory: dconfig.RemoteCacheDirectory,
 				VMName:         vmName,
-				CommConfig:     *commConfig,
+				CommConfig:     *(&config.Comm),
 			},
 		}
 
