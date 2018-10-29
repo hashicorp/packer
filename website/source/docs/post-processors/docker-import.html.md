@@ -15,8 +15,8 @@ Type: `docker-import`
 
 The Packer Docker import post-processor takes an artifact from the [docker
 builder](/docs/builders/docker.html) and imports it with Docker locally. This
-allows you to apply a repository and tag to the image and lets you use the other
-Docker post-processors such as
+allows you to apply a repository and tag to the image and lets you use the
+other Docker post-processors such as
 [docker-push](/docs/post-processors/docker-push.html) to push the image to a
 registry.
 
@@ -27,7 +27,8 @@ is optional.
 
 -   `repository` (string) - The repository of the imported image.
 
--   `tag` (string) - The tag for the imported image. By default this is not set.
+-   `tag` (string) - The tag for the imported image. By default this is not
+    set.
 
 ## Example
 
