@@ -9,5 +9,5 @@ sidebar_current: 'docs-install'
 
 # Install Packer
 
-For detailed instructions on how to install Packer, see [this page](/intro/getting-started/install.html) in our
-getting-started guide.
+For detailed instructions on how to install Packer, see [this
+page](/intro/getting-started/install.html) in our getting-started guide.
