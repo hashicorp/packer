@@ -25,17 +25,18 @@ that this works with committed resources, rather than exported.
 
 ## Configuration
 
-The configuration for this post-processor requires `repository`, all other settings
-are optional.
+The configuration for this post-processor requires `repository`, all other
+settings are optional.
 
 -   `repository` (string) - The repository of the image.
 
 -   `tag` (string) - The tag for the image. By default this is not set.
 
--   `force` (boolean) - If true, this post-processor forcibly tag the image even
-    if tag name is collided. Default to `false`.
-    But it will be ignored if Docker &gt;= 1.12.0 was detected,
-    since the `force` option was removed after 1.12.0. [reference](https://docs.docker.com/engine/deprecated/#/f-flag-on-docker-tag)
+-   `force` (boolean) - If true, this post-processor forcibly tag the image
+    even if tag name is collided. Default to `false`. But it will be ignored if
+    Docker &gt;= 1.12.0 was detected, since the `force` option was removed
+    after 1.12.0.
+    [reference](https://docs.docker.com/engine/deprecated/#/f-flag-on-docker-tag)
 
 ## Example
 

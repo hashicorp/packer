@@ -10,9 +10,9 @@ sidebar_current: 'docs-templates-post-processors'
 
 # Template Post-Processors
 
-The post-processor section within a template configures any post-processing that
-will be done to images built by the builders. Examples of post-processing would
-be compressing files, uploading artifacts, etc.
+The post-processor section within a template configures any post-processing
+that will be done to images built by the builders. Examples of post-processing
+would be compressing files, uploading artifacts, etc.
 
 Post-processors are *optional*. If no post-processors are defined within a
 template, then no post-processing will be done to the image. The resulting
@@ -34,18 +34,19 @@ Within a template, a section of post-processor definitions looks like this:
 ```
 
 For each post-processor definition, Packer will take the result of each of the
-defined builders and send it through the post-processors. This means that if you
-have one post-processor defined and two builders defined in a template, the
+defined builders and send it through the post-processors. This means that if
+you have one post-processor defined and two builders defined in a template, the
 post-processor will run twice (once for each builder), by default. There are
 ways, which will be covered later, to control what builders post-processors
 apply to, if you wish.
 
 ## Post-Processor Definition
 
-Within the `post-processors` array in a template, there are three ways to define
-a post-processor. There are *simple* definitions, *detailed* definitions, and
-*sequence* definitions. Another way to think about this is that the "simple" and
-"detailed" definitions are shortcuts for the "sequence" definition.
+Within the `post-processors` array in a template, there are three ways to
+define a post-processor. There are *simple* definitions, *detailed*
+definitions, and *sequence* definitions. Another way to think about this is
+that the "simple" and "detailed" definitions are shortcuts for the "sequence"
+definition.
 
 A **simple definition** is just a string; the name of the post-processor. An
 example is shown below. Simple definitions are used when no additional
@@ -61,7 +62,8 @@ A **detailed definition** is a JSON object. It is very similar to a builder or
 provisioner definition. It contains a `type` field to denote the type of the
 post-processor, but may also contain additional configuration for the
 post-processor. A detailed definition is used when additional configuration is
-needed beyond simply the type for the post-processor. An example is shown below.
+needed beyond simply the type for the post-processor. An example is shown
+below.
 
 ``` json
 {
@@ -82,7 +84,8 @@ sequence definition. Sequence definitions are used to chain together multiple
 post-processors. An example is shown below, where the artifact of a build is
 compressed then uploaded, but the compressed result is not kept.
 
-It is very important that any post processors that need to be run in order, be sequenced!
+It is very important that any post processors that need to be run in order, be
+sequenced!
 
 ``` json
 {
@@ -100,13 +103,13 @@ simply shortcuts for a **sequence** definition of only one element.
 
 ## Input Artifacts
 
-When using post-processors, the input artifact (coming from a builder or another
-post-processor) is discarded by default after the post-processor runs. This is
-because generally, you don't want the intermediary artifacts on the way to the
-final artifact created.
+When using post-processors, the input artifact (coming from a builder or
+another post-processor) is discarded by default after the post-processor runs.
+This is because generally, you don't want the intermediary artifacts on the way
+to the final artifact created.
 
-In some cases, however, you may want to keep the intermediary artifacts. You can
-tell Packer to keep these artifacts by setting the `keep_input_artifact`
+In some cases, however, you may want to keep the intermediary artifacts. You
+can tell Packer to keep these artifacts by setting the `keep_input_artifact`
 configuration to `true`. An example is shown below:
 
 ``` json
@@ -152,5 +155,5 @@ configurations. If you have a sequence of post-processors to run, `only` and
 
 The values within `only` or `except` are *build names*, not builder types. If
 you recall, build names by default are just their builder type, but if you
-specify a custom `name` parameter, then you should use that as the value instead
-of the type.
+specify a custom `name` parameter, then you should use that as the value
+instead of the type.

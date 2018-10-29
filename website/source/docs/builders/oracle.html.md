@@ -1,6 +1,5 @@
 ---
-description: |
-  Packer is able to create custom images using Oracle Cloud Infrastructure.
+description: 'Packer is able to create custom images using Oracle Cloud Infrastructure.'
 layout: docs
 page_title: 'Oracle - Builders'
 sidebar_current: 'docs-builders-oracle'
