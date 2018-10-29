@@ -9,9 +9,9 @@ sidebar_current: 'docs-extending-custom-builders'
 
 # Custom Builders
 
-Packer Builders are the components of Packer responsible for creating a machine,
-bringing it to a point where it can be provisioned, and then turning that
-provisioned machine into some sort of machine image. Several builders are
+Packer Builders are the components of Packer responsible for creating a
+machine, bringing it to a point where it can be provisioned, and then turning
+that provisioned machine into some sort of machine image. Several builders are
 officially distributed with Packer itself, such as the AMI builder, the VMware
 builder, etc. However, it is possible to write custom builders using the Packer
 plugin interface, and this page documents how to do that.
@@ -46,8 +46,8 @@ method is responsible for translating this configuration into an internal
 structure, validating it, and returning any errors.
 
 For multiple parameters, they should be merged together into the final
-configuration, with later parameters overwriting any previous configuration. The
-exact semantics of the merge are left to the builder author.
+configuration, with later parameters overwriting any previous configuration.
+The exact semantics of the merge are left to the builder author.
 
 For decoding the `interface{}` into a meaningful structure, the
 [mapstructure](https://github.com/mitchellh/mapstructure) library is
@@ -55,25 +55,25 @@ recommended. Mapstructure will take an `interface{}` and decode it into an
 arbitrarily complex struct. If there are any errors, it generates very human
 friendly errors that can be returned directly from the prepare method.
 
-While it is not actively enforced, **no side effects** should occur from running
-the `Prepare` method. Specifically, don't create files, don't launch virtual
-machines, etc. Prepare's purpose is solely to configure the builder and validate
-the configuration.
+While it is not actively enforced, **no side effects** should occur from
+running the `Prepare` method. Specifically, don't create files, don't launch
+virtual machines, etc. Prepare's purpose is solely to configure the builder and
+validate the configuration.
 
 In addition to normal configuration, Packer will inject a
 `map[string]interface{}` with a key of `packer.DebugConfigKey` set to boolean
 `true` if debug mode is enabled for the build. If this is set to true, then the
-builder should enable a debug mode which assists builder developers and advanced
-users to introspect what is going on during a build. During debug builds,
-parallelism is strictly disabled, so it is safe to request input from stdin and
-so on.
+builder should enable a debug mode which assists builder developers and
+advanced users to introspect what is going on during a build. During debug
+builds, parallelism is strictly disabled, so it is safe to request input from
+stdin and so on.
 
 ### The "Run" Method
 
 `Run` is where all the interesting stuff happens. Run is executed, often in
-parallel for multiple builders, to actually build the machine, provision it, and
-create the resulting machine image, which is returned as an implementation of
-the `packer.Artifact` interface.
+parallel for multiple builders, to actually build the machine, provision it,
+and create the resulting machine image, which is returned as an implementation
+of the `packer.Artifact` interface.
 
 The `Run` method takes three parameters. These are all very useful. The
 `packer.Ui` object is used to send output to the console. `packer.Hook` is used
@@ -117,8 +117,8 @@ follow the practice of making the ID contain my GitHub username and then the
 platform it is building for. For example, the builder ID of the VMware builder
 is "hashicorp.vmware" or something similar.
 
-Post-processors use the builder ID value in order to make some assumptions about
-the artifact results, so it is important it never changes.
+Post-processors use the builder ID value in order to make some assumptions
+about the artifact results, so it is important it never changes.
 
 Other than the builder ID, the rest should be self-explanatory by reading the
 [packer.Artifact interface
@@ -147,22 +147,22 @@ they aren't documented here other than to tell you how to hook in provisioners.
 
 ## Caching Files
 
-It is common for some builders to deal with very large files, or files that take
-a long time to generate. For example, the VMware builder has the capability to
-download the operating system ISO from the internet. This is timely process, so
-it would be convenient to cache the file. This sort of caching is a core part of
-Packer that is exposed to builders.
+It is common for some builders to deal with very large files, or files that
+take a long time to generate. For example, the VMware builder has the
+capability to download the operating system ISO from the internet. This is
+timely process, so it would be convenient to cache the file. This sort of
+caching is a core part of Packer that is exposed to builders.
 
 The cache interface is `packer.Cache`. It behaves much like a Go
-[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock" on
-certain cache keys, and is given exclusive access to that key for the duration
-of the lock. This locking mechanism allows multiple builders to share cache data
-even though they're running in parallel.
+[RWMutex](https://golang.org/pkg/sync/#RWMutex). The builder requests a "lock"
+on certain cache keys, and is given exclusive access to that key for the
+duration of the lock. This locking mechanism allows multiple builders to share
+cache data even though they're running in parallel.
 
 For example, both the VMware and VirtualBox builders support downloading an
-operating system ISO from the internet. Most of the time, this ISO is identical.
-The locking mechanisms of the cache allow one of the builders to download it
-only once, but allow both builders to share the downloaded file.
+operating system ISO from the internet. Most of the time, this ISO is
+identical. The locking mechanisms of the cache allow one of the builders to
+download it only once, but allow both builders to share the downloaded file.
 
 The [documentation for
 packer.Cache](https://github.com/hashicorp/packer/blob/master/packer/cache.go)
