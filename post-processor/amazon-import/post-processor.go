@@ -92,7 +92,9 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 		}
 	}
 
-	if !(p.config.Format == "ova" || p.config.Format == "raw" || p.config.Format == "vmdk" || p.config.Format == "vhd" || p.config.Format == "vhdx") {
+	switch p.config.Format {
+	case "ova", "raw", "vmdk", "vhd", "vhdx":
+	default:
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("invalid format '%s'. Only 'ova', 'raw', 'vhd', 'vhdx', or 'vmdk' are allowed", p.config.Format))
 	}
