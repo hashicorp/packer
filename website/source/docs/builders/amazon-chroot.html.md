@@ -154,6 +154,9 @@ each category, the available configuration keys are alphabetized.
     associated with AMIs, which have been deregistered by `force_deregister`.
     Default `false`.
 
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
+    the AWS EC2 endpoint. The default is `false`.
+
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot
     volume encryption. This only applies to the main `region`, other regions
     where the AMI will be copied will be encrypted by the default EBS KMS key.

@@ -89,6 +89,9 @@ Optional:
     the format of the source virtual machine image. The resulting artifact from the builder
     is assumed to have a file extension matching the format. This defaults to `ova`.
 
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
+    the AWS EC2 endpoint. The default is `false`.
+
 -   `license_type` (string) - The license type to be used for the Amazon
     Machine Image (AMI) after importing. Valid values: `AWS` or `BYOL`
     (default). For more details regarding licensing, see
