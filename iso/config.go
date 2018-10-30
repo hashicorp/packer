@@ -47,6 +47,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.LocationConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.HardwareConfig.Prepare()...)
 
+	errs = packer.MultiErrorAppend(errs, c.CDRomConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.BootConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ShutdownConfig.Prepare()...)

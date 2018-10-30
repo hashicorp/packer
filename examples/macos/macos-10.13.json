@@ -26,6 +26,7 @@
         "ich7m.present": "TRUE",
         "smc.present": "TRUE"
       },
+      "cdrom_type": "sata",
 
       "iso_paths": [
         "[datastore-mac] ISO/macOS 10.13.3.iso",

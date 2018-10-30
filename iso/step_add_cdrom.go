@@ -9,6 +9,7 @@ import (
 )
 
 type CDRomConfig struct {
+	CdromType string `mapstructure:"cdrom_type"`
 	ISOPaths []string `mapstructure:"iso_paths"`
 }
 
@@ -16,19 +17,32 @@ type StepAddCDRom struct {
 	Config *CDRomConfig
 }
 
+func (c *CDRomConfig) Prepare() []error {
+	var errs []error
+
+	if (c.CdromType != "" && c.CdromType != "ide" && c.CdromType != "sata") {
+		errs = append(errs, fmt.Errorf("'cdrom_type' must be 'ide' or 'sata'"))
+	}
+
+	return errs
+}
+
 func (s *StepAddCDRom) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	vm := state.Get("vm").(*driver.VirtualMachine)
 
-	ui.Say("Adding CD-ROM drives...")
-	if err := vm.AddSATAController(); err != nil {
-		state.Put("error", fmt.Errorf("error adding SATA controller: %v", err))
-		return multistep.ActionHalt
+	if s.Config.CdromType == "sata" {
+		ui.Say("Adding SATA controller...")
+		if err := vm.AddSATAController(); err != nil {
+			state.Put("error", fmt.Errorf("error adding SATA controller: %v", err))
+			return multistep.ActionHalt
+		}
 	}
 
+	ui.Say("Mount ISO images...")
 	for _, path := range s.Config.ISOPaths {
-		if err := vm.AddCdrom(path); err != nil {
-			state.Put("error", fmt.Errorf("error adding a cdrom: %v", err))
+		if err := vm.AddCdrom(s.Config.CdromType, path); err != nil {
+			state.Put("error", fmt.Errorf("error mounting an image: %v", err))
 			return multistep.ActionHalt
 		}
 	}
