@@ -43,9 +43,9 @@ each can be found below:
     reasons, you can set this environment variable to `1`.
 
 -   `PACKER_TMP_DIR` - The directory used for temporary files during marshalling.
-    If unset, appends 'packer' to environment variables TEMP, TMP, or LOCALAPPDATA 
-    (Windows) before falling back to the value of `configDir()/tmp` which resolves
-    to `$HOME/.packer.d/` (Unix) or `%APPDAT%\packer.d` (Windows).
+    If unset, appends 'packer' to environment variables TEMP, TMP, or (windows:
+    LOCALAPPDATA) before falling back to the value of `configDir()/tmp` which
+    resolves to (unix: `$HOME/.packer.d`, windows: `%APPDAT%/packer.d`).
     This is not to be confused with the provisionee's temporary directory which
-    is often defined (hard-coded) as '/tmp' or '%SYSTEMROOT%\Temp' per each 
+    is often defined (hard-coded) as '/tmp' or '%SYSTEMROOT%/Temp' per each
     provisioner module.
