@@ -189,6 +189,9 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
+    the AWS EC2 endpoint. The default is `false`.
+
 -   `mfa_code` (string) - The MFA
     [TOTP](https://en.wikipedia.org/wiki/Time-based_One-time_Password_Algorithm)
     code. This should probably be a user variable since it changes all the
