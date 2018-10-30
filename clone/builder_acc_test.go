@@ -3,6 +3,7 @@ package clone
 import (
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
 	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
+	"os"
 
 	"github.com/hashicorp/packer/packer"
 	"testing"
@@ -19,10 +20,19 @@ func TestCloneBuilderAcc_default(t *testing.T) {
 }
 
 func defaultConfig() map[string]interface{} {
+	username := os.Getenv("VSPHERE_USERNAME")
+	if username == "" {
+		username = "root"
+	}
+	password := os.Getenv("VSPHERE_PASSWORD")
+	if password == "" {
+		password = "jetbrains"
+	}
+
 	config := map[string]interface{}{
 		"vcenter_server":      "vcenter.vsphere65.test",
-		"username":            "root",
-		"password":            "jetbrains",
+		"username":            username,
+		"password":            password,
 		"insecure_connection": true,
 
 		"template": "alpine",
