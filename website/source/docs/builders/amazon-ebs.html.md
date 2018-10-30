@@ -242,6 +242,9 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
+    the AWS EC2 endpoint. The default is `false`.
+
 -   `launch_block_device_mappings` (array of block device mappings) - Add one
     or more block devices before the Packer build starts. If you add instance
     store volumes or EBS volumes in addition to the root device volume, the
