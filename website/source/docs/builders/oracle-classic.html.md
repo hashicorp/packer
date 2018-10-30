@@ -157,7 +157,7 @@ If this is set, a few more options become available.
     ```
 
 -   `builder_image_list` (string) - This is the image to use for the builder
-    instance. This *must* be linux instance, and Oracle Linux is recommended.
+    instance. This *must* be a linux instance, and Oracle Linux is recommended.
     Default: `/oracle/public/OL_7.2_UEKR4_x86_64`.
 
 -   `builder_image_list_entry` (string) - The entry identifying the machine
