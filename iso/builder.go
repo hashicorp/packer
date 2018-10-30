@@ -43,6 +43,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepConfigureHardware{
 			Config: &b.config.HardwareConfig,
 		},
+		&StepAddCDRom{
+			Config: &b.config.CDRomConfig,
+		},
 		&common.StepConfigParams{
 			Config: &b.config.ConfigParamsConfig,
 		},
@@ -50,9 +53,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	if b.config.Comm.Type != "none" {
 		steps = append(steps,
-			&StepAddCDRom{
-				Config: &b.config.CDRomConfig,
-			},
 			&packerCommon.StepCreateFloppy{
 				Files:       b.config.FloppyFiles,
 				Directories: b.config.FloppyDirectories,
@@ -79,7 +79,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&common.StepShutdown{
 				Config: &b.config.ShutdownConfig,
 			},
-			&StepRemoveCDRom{},
 			&StepRemoveFloppy{
 				Datastore: b.config.Datastore,
 				Host:      b.config.Host,
@@ -88,6 +87,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	steps = append(steps,
+		&StepRemoveCDRom{},
 		&common.StepCreateSnapshot{
 			CreateSnapshot: b.config.CreateSnapshot,
 		},

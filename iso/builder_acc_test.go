@@ -166,6 +166,19 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 			t.Errorf("Invalid firmware: expected 'efi', got '%v'", fw)
 		}
 
+		l, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("Cannot read VM devices: %v", err)
+		}
+		c := l.PickController((*types.VirtualIDEController)(nil))
+		if c == nil {
+			t.Errorf("VM should have IDE controller")
+		}
+		s := l.PickController((*types.VirtualAHCIController)(nil))
+		if s != nil {
+			t.Errorf("VM should have no SATA controllers")
+		}
+
 		return nil
 	}
 }
@@ -198,6 +211,41 @@ func checkLimit(t *testing.T) builderT.TestCheckFunc {
 		limit := *vmInfo.Config.CpuAllocation.Limit
 		if limit != -1 { // must be unlimited
 			t.Errorf("Invalid CPU limit: expected '%v', got '%v'", -1, limit)
+		}
+
+		return nil
+	}
+}
+
+func TestISOBuilderAcc_sata(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: sataConfig(),
+		Check:    checkSata(t),
+	})
+}
+
+func sataConfig() string {
+	config := defaultConfig()
+	config["cdrom_type"] = "sata"
+
+	return commonT.RenderConfig(config)
+}
+
+func checkSata(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+
+		vm := commonT.GetVM(t, d, artifacts)
+
+		l, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("Cannot read VM devices: %v", err)
+		}
+
+		c := l.PickController((*types.VirtualAHCIController)(nil))
+		if c == nil {
+			t.Errorf("VM has no SATA controllers")
 		}
 
 		return nil

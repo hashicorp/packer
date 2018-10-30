@@ -115,10 +115,6 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 
 	devices := object.VirtualDeviceList{}
 
-	devices, err = addIDE(devices)
-	if err != nil {
-		return nil, err
-	}
 	devices, err = addDisk(d, devices, config)
 	if err != nil {
 		return nil, err
@@ -477,23 +473,34 @@ func addIDE(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) 
 	return devices, nil
 }
 
-func (vm *VirtualMachine) AddCdrom(isoPath string) error {
+func (vm *VirtualMachine) AddCdrom(controllerType string, isoPath string) error {
 	devices, err := vm.vm.Device(vm.driver.ctx)
 	if err != nil {
 		return err
 	}
-	sata, err := vm.FindSATAController()
-	if err != nil {
-		return err
+
+	var controller *types.VirtualController
+	if controllerType == "sata" {
+		c, err := vm.FindSATAController()
+		if err != nil {
+			return err
+		}
+		controller = c.GetVirtualController()
+	} else {
+		c, err := devices.FindIDEController("")
+		if err != nil {
+			return err
+		}
+		controller = c.GetVirtualController()
 	}
 
-	cdrom, err := vm.CreateCdrom(sata)
+	cdrom, err := vm.CreateCdrom(controller)
 	if err != nil {
 		return err
 	}
 
 	if isoPath != "" {
-		cdrom = devices.InsertIso(cdrom, isoPath)
+		devices.InsertIso(cdrom, isoPath)
 	}
 
 	return vm.addDevice(cdrom)

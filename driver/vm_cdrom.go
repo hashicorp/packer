@@ -24,7 +24,7 @@ func (vm *VirtualMachine) FindSATAController() (*types.VirtualAHCIController, er
 	return c.(*types.VirtualAHCIController), nil
 }
 
-func (vm *VirtualMachine) CreateCdrom(c *types.VirtualAHCIController) (*types.VirtualCdrom, error) {
+func (vm *VirtualMachine) CreateCdrom(c *types.VirtualController) (*types.VirtualCdrom, error) {
 	l, err := vm.Devices()
 	if err != nil {
 		return nil, err
