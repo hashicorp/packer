@@ -1,8 +1,10 @@
 package common
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -19,17 +21,18 @@ import (
 
 // AccessConfig is for common configuration related to AWS access
 type AccessConfig struct {
-	AccessKey            string `mapstructure:"access_key"`
-	CustomEndpointEc2    string `mapstructure:"custom_endpoint_ec2"`
-	DecodeAuthZMessages  bool   `mapstructure:"decode_authorization_messages"`
-	MFACode              string `mapstructure:"mfa_code"`
-	ProfileName          string `mapstructure:"profile"`
-	RawRegion            string `mapstructure:"region"`
-	SecretKey            string `mapstructure:"secret_key"`
-	SkipValidation       bool   `mapstructure:"skip_region_validation"`
-	SkipMetadataApiCheck bool   `mapstructure:"skip_metadata_api_check"`
-	Token                string `mapstructure:"token"`
-	session              *session.Session
+	AccessKey             string `mapstructure:"access_key"`
+	CustomEndpointEc2     string `mapstructure:"custom_endpoint_ec2"`
+	DecodeAuthZMessages   bool   `mapstructure:"decode_authorization_messages"`
+	InsecureSkipTLSVerify bool   `mapstructure:"insecure_skip_tls_verify"`
+	MFACode               string `mapstructure:"mfa_code"`
+	ProfileName           string `mapstructure:"profile"`
+	RawRegion             string `mapstructure:"region"`
+	SecretKey             string `mapstructure:"secret_key"`
+	SkipValidation        bool   `mapstructure:"skip_region_validation"`
+	SkipMetadataApiCheck  bool   `mapstructure:"skip_metadata_api_check"`
+	Token                 string `mapstructure:"token"`
+	session               *session.Session
 
 	getEC2Connection func() ec2iface.EC2API
 }
@@ -58,6 +61,14 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
+	}
+
+	if c.InsecureSkipTLSVerify {
+		config := config.WithHTTPClient(cleanhttp.DefaultClient())
+		transport := config.HTTPClient.Transport.(*http.Transport)
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	opts := session.Options{
