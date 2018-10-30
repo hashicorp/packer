@@ -34,19 +34,20 @@ The example below is fully functional.
 ## Configuration Reference
 
 The reference of available configuration options is listed below. The only
-required element is either "inline" or "script". Every other option is optional.
+required element is either "inline" or "script". Every other option is
+optional.
 
 Exactly *one* of the following is required:
 
 -   `inline` (array of strings) - This is an array of commands to execute. The
-    commands are concatenated by newlines and turned into a single file, so they
-    are all executed within the same context. This allows you to change
+    commands are concatenated by newlines and turned into a single file, so
+    they are all executed within the same context. This allows you to change
     directories in one command and use something in the directory in the next
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
 
--   `script` (string) - The path to a script to upload and execute in
-    the machine. This path can be absolute or relative. If it is relative, it is
+-   `script` (string) - The path to a script to upload and execute in the
+    machine. This path can be absolute or relative. If it is relative, it is
     relative to the working directory when Packer is executed.
 
 -   `scripts` (array of strings) - An array of scripts to execute. The scripts
@@ -56,54 +57,56 @@ Exactly *one* of the following is required:
 
 Optional parameters:
 
--   `binary` (boolean) - If true, specifies that the script(s) are binary files,
-    and Packer should therefore not convert Windows line endings to Unix line
-    endings (if there are any). By default this is false.
+-   `binary` (boolean) - If true, specifies that the script(s) are binary
+    files, and Packer should therefore not convert Windows line endings to Unix
+    line endings (if there are any). By default this is false.
 
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the execute\_command. The format should be `key=value`.
-    Packer injects some environmental variables by default into the environment,
-    as well, which are covered in the section below.
+    Packer injects some environmental variables by default into the
+    environment, as well, which are covered in the section below.
 
 -   `use_env_var_file` (boolean) - If true, Packer will write your environment
     variables to a tempfile and source them from that file, rather than
-    declaring them inline in our execute_command. The default `execute_command`
-    will be `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`. This option is
+    declaring them inline in our execute\_command. The default
+    `execute_command` will be
+    `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`. This option is
     unnecessary for most cases, but if you have extra quoting in your custom
-    `execute_command`, then this may be unnecessary for proper script execution.
-    Default: false.
+    `execute_command`, then this may be unnecessary for proper script
+    execution. Default: false.
 
 -   `execute_command` (string) - The command to use to execute the script. By
     default this is `chmod +x {{ .Path }}; {{ .Vars }} {{ .Path }}`, unless the
     user has set `"use_env_var_file": true` -- in that case, the default
     `execute_command` is `chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}`.
-    The value of this is treated as a
-    [configuration template](/docs/templates/engine.html). There are three
-    available variables:
-      *  `Path` is the path to the script to run
-      *  `Vars` is the list of `environment_vars`, if configured.
-      *  `EnvVarFile` is the path to the file containing env vars, if
-            `use_env_var_file` is true.
--   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if the
-    server disconnects us. A disconnect might happen if you restart the ssh
+    The value of this is treated as a [configuration
+    template](/docs/templates/engine.html). There are three available
+    variables:
+    -   `Path` is the path to the script to run
+    -   `Vars` is the list of `environment_vars`, if configured.
+    -   `EnvVarFile` is the path to the file containing env vars, if
+        `use_env_var_file` is true.
+-   `expect_disconnect` (boolean) - Defaults to `false`. Whether to error if
+    the server disconnects us. A disconnect might happen if you restart the ssh
     server or reboot the host.
 
 -   `inline_shebang` (string) - The
-    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
-    running commands specified by `inline`. By default, this is `/bin/sh -e`. If
-    you're not using `inline`, then this configuration has no effect.
-    **Important:** If you customize this, be sure to include something like the
-    `-e` flag, otherwise individual steps failing won't fail the provisioner.
+    [shebang](https://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
+    when running commands specified by `inline`. By default, this is
+    `/bin/sh -e`. If you're not using `inline`, then this configuration has no
+    effect. **Important:** If you customize this, be sure to include something
+    like the `-e` flag, otherwise individual steps failing won't fail the
+    provisioner.
 
--   `remote_folder` (string) - The folder where the uploaded script will reside on
-    the machine. This defaults to '/tmp'.
+-   `remote_folder` (string) - The folder where the uploaded script will reside
+    on the machine. This defaults to '/tmp'.
 
--   `remote_file` (string) - The filename the uploaded script will have on the machine.
-    This defaults to 'script\_nnn.sh'.
+-   `remote_file` (string) - The filename the uploaded script will have on the
+    machine. This defaults to 'script\_nnn.sh'.
 
--   `remote_path` (string) - The full path to the uploaded script will have on the
-    machine. By default this is remote\_folder/remote\_file, if set this option will
-    override both remote\_folder and remote\_file.
+-   `remote_path` (string) - The full path to the uploaded script will have on
+    the machine. By default this is remote\_folder/remote\_file, if set this
+    option will override both remote\_folder and remote\_file.
 
 -   `skip_clean` (boolean) - If true, specifies that the helper scripts
     uploaded to the system will not be removed by Packer. This defaults to
@@ -111,16 +114,19 @@ Optional parameters:
 
 -   `start_retry_timeout` (string) - The amount of time to attempt to *start*
     the remote process. By default this is `5m` or 5 minutes. This setting
-    exists in order to deal with times when SSH may restart, such as a
-    system reboot. Set this to a higher value if reboots take a longer amount
-    of time.
+    exists in order to deal with times when SSH may restart, such as a system
+    reboot. Set this to a higher value if reboots take a longer amount of time.
+
+-   `pause_after` (string) - Wait the amount of time after provisioning a shell
+    script, this pause be taken if all previous steps were successful.
 
 ## Execute Command Example
 
 To many new users, the `execute_command` is puzzling. However, it provides an
 important function: customization of how the command is executed. The most
-common use case for this is dealing with **sudo password prompts**. You may also
-need to customize this if you use a non-POSIX shell, such as `tcsh` on FreeBSD.
+common use case for this is dealing with **sudo password prompts**. You may
+also need to customize this if you use a non-POSIX shell, such as `tcsh` on
+FreeBSD.
 
 ### Sudo Example
 
@@ -135,7 +141,8 @@ Some operating systems default to a non-root user. For example if you login as
 The `-S` flag tells `sudo` to read the password from stdin, which in this case
 is being piped in with the value of `packer`.
 
-The above example won't work if your environment vars contain spaces or single quotes; in these cases try removing the single quotes:
+The above example won't work if your environment vars contain spaces or single
+quotes; in these cases try removing the single quotes:
 
 ``` text
 "echo 'packer' | sudo -S env {{ .Vars }} {{ .Path }}"
@@ -146,8 +153,8 @@ privileges without worrying about password prompts.
 
 ### FreeBSD Example
 
-FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In order
-for packer to pass environment variables you will need to change the
+FreeBSD's default shell is `tcsh`, which deviates from POSIX semantics. In
+order for packer to pass environment variables you will need to change the
 `execute_command` to:
 
 ``` text
@@ -162,14 +169,15 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
--   `PACKER_BUILD_NAME` is set to the
-    [name of the build](/docs/templates/builders.html#named-builds) that Packer is running.
+-   `PACKER_BUILD_NAME` is set to the [name of the
+    build](/docs/templates/builders.html#named-builds) that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 
--   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
-    machine that the script is running on. This is useful if you want to run
-    only certain parts of the script on systems built with certain builders.
+-   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create
+    the machine that the script is running on. This is useful if you want to
+    run only certain parts of the script on systems built with certain
+    builders.
 
 -   `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
     transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
@@ -190,7 +198,8 @@ scripts. The amount of time the provisioner will wait is configured using
 
 Sometimes, when executing a command like `reboot`, the shell script will return
 and Packer will start executing the next one before SSH actually quits and the
-machine restarts. For this, put use "pause\_before" to make Packer wait before executing the next script:
+machine restarts. For this, put use "pause\_before" to make Packer wait before
+executing the next script:
 
 ``` json
 {
@@ -202,8 +211,8 @@ machine restarts. For this, put use "pause\_before" to make Packer wait before e
 
 Some OS configurations don't properly kill all network connections on reboot,
 causing the provisioner to hang despite a reboot occurring. In this case, make
-sure you shut down the network interfaces on reboot or in your shell script. For
-example, on Gentoo:
+sure you shut down the network interfaces on reboot or in your shell script.
+For example, on Gentoo:
 
 ``` text
 /etc/init.d/net.eth0 stop
@@ -214,9 +223,9 @@ example, on Gentoo:
 Some provisioning requires connecting to remote SSH servers from within the
 packer instance. The below example is for pulling code from a private git
 repository utilizing openssh on the client. Make sure you are running
-`ssh-agent` and add your git repo ssh keys into it using `ssh-add /path/to/key`.
-When the packer instance needs access to the ssh keys the agent will forward the
-request back to your `ssh-agent`.
+`ssh-agent` and add your git repo ssh keys into it using
+`ssh-add /path/to/key`. When the packer instance needs access to the ssh keys
+the agent will forward the request back to your `ssh-agent`.
 
 Note: when provisioning via git you should add the git server keys into the
 `~/.ssh/known_hosts` file otherwise the git command could hang awaiting input.
@@ -264,11 +273,11 @@ would be:
 
 *My builds don't always work the same*
 
--   Some distributions start the SSH daemon before other core services which can
-    create race conditions. Your first provisioner can tell the machine to wait
-    until it completely boots.
+-   Some distributions start the SSH daemon before other core services which
+    can create race conditions. Your first provisioner can tell the machine to
+    wait until it completely boots.
 
-```json
+``` json
 {
   "type": "shell",
   "inline": [ "sleep 10" ]
@@ -277,11 +286,10 @@ would be:
 
 ## Quoting Environment Variables
 
-Packer manages quoting for you, so you should't have to worry about it.
-Below is an example of packer template inputs and what you should expect to get
-out:
+Packer manages quoting for you, so you should't have to worry about it. Below
+is an example of packer template inputs and what you should expect to get out:
 
-```json
+``` json
   "provisioners": [
     {
       "type":  "shell",
@@ -304,12 +312,10 @@ out:
 
 Output:
 
-```
-    docker: FOO is foo
-    docker: BAR is bar's
-    docker: BAZ is baz=baz
-    docker: QUX is =qux
-    docker: FOOBAR is foo bar
-    docker: FOOBARBAZ is 'foo bar baz'
-    docker: QUX2 is "qux"
-```
+        docker: FOO is foo
+        docker: BAR is bar's
+        docker: BAZ is baz=baz
+        docker: QUX is =qux
+        docker: FOOBAR is foo bar
+        docker: FOOBARBAZ is 'foo bar baz'
+        docker: QUX2 is "qux"

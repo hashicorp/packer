@@ -25,6 +25,7 @@ import (
 	dockerbuilder "github.com/hashicorp/packer/builder/docker"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
+	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
@@ -95,6 +96,7 @@ var Builders = map[string]packer.Builder{
 	"docker":              new(dockerbuilder.Builder),
 	"file":                new(filebuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
+	"hcloud":              new(hcloudbuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
 	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
 	"lxc":                 new(lxcbuilder.Builder),

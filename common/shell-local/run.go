@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -27,6 +28,22 @@ type EnvVarsTemplate struct {
 }
 
 func Run(ui packer.Ui, config *Config) (bool, error) {
+	// Check if shell-local can even execute against this runtime OS
+	if len(config.OnlyOn) > 0 {
+		runCommand := false
+		for _, os := range config.OnlyOn {
+			if os == runtime.GOOS {
+				runCommand = true
+				break
+			}
+		}
+		if !runCommand {
+			ui.Say(fmt.Sprintf("Skipping shell-local due to runtime OS"))
+			log.Printf("[INFO] (shell-local): skipping shell-local due to missing runtime OS")
+			return true, nil
+		}
+	}
+
 	scripts := make([]string, len(config.Scripts))
 	if len(config.Scripts) > 0 {
 		copy(scripts, config.Scripts)

@@ -208,7 +208,7 @@ func WaitForVolumeToBeDetached(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeV
 func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeImportImageTasksInput, opts ...request.WaiterOption) error {
 	w := request.Waiter{
 		Name:        "DescribeImages",
-		MaxAttempts: 300,
+		MaxAttempts: 720,
 		Delay:       request.ConstantWaiterDelay(5 * time.Second),
 		Acceptors: []request.WaiterAcceptor{
 			{
@@ -216,6 +216,12 @@ func WaitForImageToBeImported(c *ec2.EC2, ctx aws.Context, input *ec2.DescribeIm
 				Matcher:  request.PathAllWaiterMatch,
 				Argument: "ImportImageTasks[].Status",
 				Expected: "completed",
+			},
+			{
+				State:    request.FailureWaiterState,
+				Matcher:  request.PathAnyWaiterMatch,
+				Argument: "ImportImageTasks[].Status",
+				Expected: "deleted",
 			},
 		},
 		Logger: c.Config.Logger,
@@ -289,7 +295,7 @@ func getOverride(varInfo envInfo) envInfo {
 func getEnvOverrides() overridableWaitVars {
 	// Load env vars from environment.
 	envValues := overridableWaitVars{
-		envInfo{"AWS_POLL_DELAY_SECONDS", 0, false},
+		envInfo{"AWS_POLL_DELAY_SECONDS", 2, false},
 		envInfo{"AWS_MAX_ATTEMPTS", 0, false},
 		envInfo{"AWS_TIMEOUT_SECONDS", 0, false},
 	}

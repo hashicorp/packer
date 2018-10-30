@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"sync/atomic"
 
 	"github.com/cheggaaa/pb"
 )
@@ -31,21 +30,30 @@ type ProgressBar interface {
 // StackableProgressBar will clean itself to a default
 // state.
 type StackableProgressBar struct {
-	mtx sync.Mutex // locks in Start & Finish
-	BasicProgressBar
+	mtx   sync.Mutex // locks in Start, Finish, Add & NewProxyReader
+	Bar   BasicProgressBar
 	items int32
 	total int64
 
-	started bool
+	started             bool
+	ConfigProgressbarFN func(*pb.ProgressBar)
 }
 
 var _ ProgressBar = new(StackableProgressBar)
 
-func (spb *StackableProgressBar) start() {
-	spb.BasicProgressBar.ProgressBar = pb.New(0)
-	spb.BasicProgressBar.ProgressBar.SetUnits(pb.U_BYTES)
+func defaultProgressbarConfigFn(bar *pb.ProgressBar) {
+	bar.SetUnits(pb.U_BYTES)
+}
 
-	spb.BasicProgressBar.ProgressBar.Start()
+func (spb *StackableProgressBar) start() {
+	bar := pb.New(0)
+	if spb.ConfigProgressbarFN == nil {
+		spb.ConfigProgressbarFN = defaultProgressbarConfigFn
+	}
+	spb.ConfigProgressbarFN(bar)
+
+	bar.Start()
+	spb.Bar.ProgressBar = bar
 	spb.started = true
 }
 
@@ -58,29 +66,44 @@ func (spb *StackableProgressBar) Start(total int64) {
 	if !spb.started {
 		spb.start()
 	}
-	spb.SetTotal64(spb.total)
+	spb.Bar.SetTotal64(spb.total)
 	spb.prefix()
 	spb.mtx.Unlock()
 }
 
+func (spb *StackableProgressBar) Add(total int64) {
+	spb.mtx.Lock()
+	defer spb.mtx.Unlock()
+	if spb.Bar.ProgressBar != nil {
+		spb.Bar.Add(total)
+	}
+}
+
+func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
+	spb.mtx.Lock()
+	defer spb.mtx.Unlock()
+	return spb.Bar.NewProxyReader(r)
+}
+
 func (spb *StackableProgressBar) prefix() {
-	spb.BasicProgressBar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", atomic.LoadInt32(&spb.items)))
+	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", spb.items))
 }
 
 func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
 
-	spb.items--
-	if spb.items == 0 {
+	if spb.items > 0 {
+		spb.items--
+	}
+	if spb.items == 0 && spb.Bar.ProgressBar != nil {
 		// slef cleanup
-		spb.BasicProgressBar.ProgressBar.Finish()
-		spb.BasicProgressBar.ProgressBar = nil
+		spb.Bar.ProgressBar.Finish()
+		spb.Bar.ProgressBar = nil
 		spb.started = false
 		spb.total = 0
 		return
 	}
-	spb.prefix()
 }
 
 // BasicProgressBar is packer's basic progress bar.
