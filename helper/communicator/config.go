@@ -277,6 +277,18 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKeyFile == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
+		} else if c.SSHBastionPrivateKeyFile != "" {
+			path, err := homedir.Expand(c.SSHBastionPrivateKeyFile)
+			if err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			} else if _, err := os.Stat(path); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			} else if _, err := helperssh.FileSigner(path); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			}
 		}
 	}
 
