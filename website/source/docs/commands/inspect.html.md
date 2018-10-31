@@ -1,10 +1,10 @@
 ---
 description: |
     The `packer inspect` command takes a template and outputs the various
-    components a template defines. This can help you quickly learn about a
-    template without having to dive into the JSON itself. The command will tell
-    you things like what variables a template accepts, the builders it defines,
-    the provisioners it defines and the order they'll run, and more.
+    components a template defines. This can help you quickly learn about a template
+    without having to dive into the JSON itself. The command will tell you things
+    like what variables a template accepts, the builders it defines, the
+    provisioners it defines and the order they'll run, and more.
 layout: docs
 page_title: 'packer inspect - Commands'
 sidebar_current: 'docs-commands-inspect'
@@ -12,19 +12,19 @@ sidebar_current: 'docs-commands-inspect'
 
 # `inspect` Command
 
-The `packer inspect` command takes a template and outputs the various components
-a template defines. This can help you quickly learn about a template without
-having to dive into the JSON itself. The command will tell you things like what
-variables a template accepts, the builders it defines, the provisioners it
-defines and the order they'll run, and more.
+The `packer inspect` command takes a template and outputs the various
+components a template defines. This can help you quickly learn about a template
+without having to dive into the JSON itself. The command will tell you things
+like what variables a template accepts, the builders it defines, the
+provisioners it defines and the order they'll run, and more.
 
-This command is extra useful when used with
-[machine-readable output](/docs/commands/index.html) enabled. The
-command outputs the components in a way that is parseable by machines.
+This command is extra useful when used with [machine-readable
+output](/docs/commands/index.html) enabled. The command outputs the components
+in a way that is parseable by machines.
 
 The command doesn't validate the actual configuration of the various components
-(that is what the `validate` command is for), but it will validate the syntax of
-your template by necessity.
+(that is what the `validate` command is for), but it will validate the syntax
+of your template by necessity.
 
 ## Usage Example
 

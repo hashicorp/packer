@@ -1,8 +1,8 @@
 ---
 description: |
-    The docker Packer builder builds Docker images using Docker. The builder
-    starts a Docker container, runs provisioners within this container, then
-    exports the container for reuse or commits the image.
+    The docker Packer builder builds Docker images using Docker. The builder starts
+    a Docker container, runs provisioners within this container, then exports the
+    container for reuse or commits the image.
 layout: docs
 page_title: 'Docker - Builders'
 sidebar_current: 'docs-builders-docker'
@@ -19,20 +19,19 @@ container, then exports the container for reuse or commits the image.
 Packer builds Docker containers *without* the use of
 [Dockerfiles](https://docs.docker.com/engine/reference/builder/). By not using
 `Dockerfiles`, Packer is able to provision containers with portable scripts or
-configuration management systems that are not tied to Docker in any way. It also
-has a simple mental model: you provision containers much the same way you
+configuration management systems that are not tied to Docker in any way. It
+also has a simple mental model: you provision containers much the same way you
 provision a normal virtualized or dedicated server. For more information, read
 the section on [Dockerfiles](#dockerfiles).
 
 The Docker builder must run on a machine that has Docker Engine installed.
-Therefore the builder only works on machines that support Docker and _does not
-support running on a Docker remote host_. You can learn about what
-[platforms Docker supports and how to install onto them](https://docs.docker.com/engine/installation/)
-in the Docker documentation.
-
+Therefore the builder only works on machines that support Docker and *does not
+support running on a Docker remote host*. You can learn about what [platforms
+Docker supports and how to install onto
+them](https://docs.docker.com/engine/installation/) in the Docker
+documentation.
 
      Please note: Packer does not yet have support for Windows containers.
-
 
 ## Basic Example: Export
 
@@ -49,9 +48,9 @@ provisioners are defined, but it will effectively repackage an image.
 
 ## Basic Example: Commit
 
-Below is another example, the same as above but instead of exporting the running
-container, this one commits the container to an image. The image can then be
-more easily tagged, pushed, etc.
+Below is another example, the same as above but instead of exporting the
+running container, this one commits the container to an image. The image can
+then be more easily tagged, pushed, etc.
 
 ``` json
 {
@@ -102,7 +101,8 @@ Allowed metadata fields that can be changed are:
     -   EX: `"ENTRYPOINT /var/www/start.sh"`
 -   ENV
     -   String, note there is no equal sign:
-    -   EX: `"ENV HOSTNAME www.example.com"` not `"ENV HOSTNAME=www.example.com"`
+    -   EX: `"ENV HOSTNAME www.example.com"` not
+        `"ENV HOSTNAME=www.example.com"`
 -   EXPOSE
     -   String, space separated ports
     -   EX: `"EXPOSE 80 443"`
@@ -131,7 +131,7 @@ Configuration options are organized below into two categories: required and
 optional. Within each category, the available options are alphabetized and
 described.
 
-The Docker builder uses a special Docker communicator _and will not use_ the
+The Docker builder uses a special Docker communicator *and will not use* the
 standard [communicators](/docs/templates/communicator.html).
 
 ### Required:
@@ -145,50 +145,53 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     This is useful for the [artifice
     post-processor](https://www.packer.io/docs/post-processors/artifice.html).
 
--   `export_path` (string) - The path where the final container will be exported
-    as a tar file.
+-   `export_path` (string) - The path where the final container will be
+    exported as a tar file.
 
--   `image` (string) - The base image for the Docker container that will
-    be started. This image will be pulled from the Docker registry if it doesn't
+-   `image` (string) - The base image for the Docker container that will be
+    started. This image will be pulled from the Docker registry if it doesn't
     already exist.
 
 ### Optional:
 
 -   `author` (string) - Set the author (e-mail) of a commit.
 
--   `aws_access_key` (string) - The AWS access key used to communicate with AWS.
-    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+-   `aws_access_key` (string) - The AWS access key used to communicate with
+    AWS. [Learn how to set
+    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `aws_secret_key` (string) - The AWS secret key used to communicate with AWS.
-    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+-   `aws_secret_key` (string) - The AWS secret key used to communicate with
+    AWS. [Learn how to set
+    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `aws_token` (string) - The AWS access token to use. This is different from the
-    access key and secret key. If you're not sure what this is, then you
+-   `aws_token` (string) - The AWS access token to use. This is different from
+    the access key and secret key. If you're not sure what this is, then you
     probably don't need it. This will also be read from the `AWS_SESSION_TOKEN`
     environmental variable.
 
--   `aws_profile` (string) - The AWS shared credentials profile used to communicate with AWS.
-    [Learn how to set this.](/docs/builders/amazon.html#specifying-amazon-credentials)
+-   `aws_profile` (string) - The AWS shared credentials profile used to
+    communicate with AWS. [Learn how to set
+    this.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
--   `changes` (array of strings) - Dockerfile instructions to add to the commit.
-    Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and `EXPOSE`. Example:
-    `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
+-   `changes` (array of strings) - Dockerfile instructions to add to the
+    commit. Example of instructions are `CMD`, `ENTRYPOINT`, `ENV`, and
+    `EXPOSE`. Example: `[ "USER ubuntu", "WORKDIR /app", "EXPOSE 8080" ]`
 
--   `ecr_login` (boolean) - Defaults to false. If true, the builder will login in
-    order to pull the image from
-    [Amazon EC2 Container Registry (ECR)](https://aws.amazon.com/ecr/).
-    The builder only logs in for the duration of the pull. If true
-    `login_server` is required and `login`, `login_username`, and
-    `login_password` will be ignored. For more information see the
-    [section on ECR](#amazon-ec2-container-registry).
+-   `ecr_login` (boolean) - Defaults to false. If true, the builder will login
+    in order to pull the image from [Amazon EC2 Container Registry
+    (ECR)](https://aws.amazon.com/ecr/). The builder only logs in for the
+    duration of the pull. If true `login_server` is required and `login`,
+    `login_username`, and `login_password` will be ignored. For more
+    information see the [section on ECR](#amazon-ec2-container-registry).
 
-*   `exec_user` (string) - Username or UID (format: <name|uid>[:<group|gid>])
-    to run remote commands with. You may need this if you get permission errors
-    trying to run the `shell` or other  provisioners.
+-   `exec_user` (string) - Username or UID (format:
+    &lt;name\|uid&gt;\[:&lt;group\|gid&gt;\]) to run remote commands with. You
+    may need this if you get permission errors trying to run the `shell` or
+    other provisioners.
 
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
-    order to pull the image. The builder only logs in for the duration of
-    the pull. It always logs out afterwards. For log into ECR see `ecr_login`.
+    order to pull the image. The builder only logs in for the duration of the
+    pull. It always logs out afterwards. For log into ECR see `ecr_login`.
 
 -   `login_username` (string) - The username to use to authenticate to login.
 
@@ -211,16 +214,18 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     couple template variables to customize, as well.
 
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
-    mount into this container. The key of the object is the host path, the value
-    is the container path.
+    mount into this container. The key of the object is the host path, the
+    value is the container path.
 
--   `container_dir` (string) - The directory inside container to mount
-     temp directory from host server for work [file provisioner](/docs/provisioners/file.html).
-     By default this is set to `/packer-files`.
+-   `container_dir` (string) - The directory inside container to mount temp
+    directory from host server for work [file
+    provisioner](/docs/provisioners/file.html). By default this is set to
+    `/packer-files`.
 
--   `fix_upload_owner` (boolean) - If true, files uploaded to the container will
-    be owned by the user the container is running as. If false, the owner will depend
-    on the version of docker installed in the system. Defaults to true.
+-   `fix_upload_owner` (boolean) - If true, files uploaded to the container
+    will be owned by the user the container is running as. If false, the owner
+    will depend on the version of docker installed in the system. Defaults to
+    true.
 
 ## Using the Artifact: Export
 
@@ -234,8 +239,8 @@ with the [docker-import](/docs/post-processors/docker-import.html) and
 If you set `commit`, see the next section.
 
 The example below shows a full configuration that would import and push the
-created image. This is accomplished using a sequence definition (a collection of
-post-processors that are treated as as single pipeline, see
+created image. This is accomplished using a sequence definition (a collection
+of post-processors that are treated as as single pipeline, see
 [Post-Processors](/docs/templates/post-processors.html) for more information):
 
 ``` json
@@ -256,8 +261,8 @@ post-processors that are treated as as single pipeline, see
 In the above example, the result of each builder is passed through the defined
 sequence of post-processors starting first with the `docker-import`
 post-processor which will import the artifact as a docker image. The resulting
-docker image is then passed on to the `docker-push` post-processor which handles
-pushing the image to a container repository.
+docker image is then passed on to the `docker-push` post-processor which
+handles pushing the image to a container repository.
 
 If you want to do this manually, however, perhaps from a script, you can import
 the image using the process below:
@@ -273,9 +278,10 @@ and `docker push`, respectively.
 
 If you committed your container to an image, you probably want to tag, save,
 push, etc. Packer can do this automatically for you. An example is shown below
-which tags and pushes an image. This is accomplished using a sequence definition
-(a collection of post-processors that are treated as as single pipeline, see
-[Post-Processors](/docs/templates/post-processors.html) for more information):
+which tags and pushes an image. This is accomplished using a sequence
+definition (a collection of post-processors that are treated as as single
+pipeline, see [Post-Processors](/docs/templates/post-processors.html) for more
+information):
 
 ``` json
 {
@@ -294,9 +300,10 @@ which tags and pushes an image. This is accomplished using a sequence definition
 
 In the above example, the result of each builder is passed through the defined
 sequence of post-processors starting first with the `docker-tag` post-processor
-which tags the committed image with the supplied repository and tag information.
-Once tagged, the resulting artifact is then passed on to the `docker-push`
-post-processor which handles pushing the image to a container repository.
+which tags the committed image with the supplied repository and tag
+information. Once tagged, the resulting artifact is then passed on to the
+`docker-push` post-processor which handles pushing the image to a container
+repository.
 
 Going a step further, if you wanted to tag and push an image to multiple
 container repositories, this could be accomplished by defining two,
@@ -329,10 +336,9 @@ nearly-identical sequence definitions, as demonstrated by the example below:
 
 ## Amazon EC2 Container Registry
 
-Packer can tag and push images for use in
-[Amazon EC2 Container Registry](https://aws.amazon.com/ecr/). The post
-processors work as described above and example configuration properties are
-shown below:
+Packer can tag and push images for use in [Amazon EC2 Container
+Registry](https://aws.amazon.com/ecr/). The post processors work as described
+above and example configuration properties are shown below:
 
 ``` json
 {
@@ -355,7 +361,8 @@ shown below:
 }
 ```
 
-[Learn how to set Amazon AWS credentials.](/docs/builders/amazon.html#specifying-amazon-credentials)
+[Learn how to set Amazon AWS
+credentials.](/docs/builders/amazon.html#specifying-amazon-credentials)
 
 ## Dockerfiles
 
@@ -368,8 +375,8 @@ etc. to provision your Docker container just like you would a regular
 virtualized or dedicated machine.
 
 While Docker has many features, Packer views Docker simply as an container
-runner. To that end, Packer is able to repeatedly build these containers
-using portable provisioning scripts.
+runner. To that end, Packer is able to repeatedly build these containers using
+portable provisioning scripts.
 
 ## Overriding the host directory
 

@@ -1,37 +1,74 @@
-## 1.3.2 (upcoming)
+
+## 1.3.2 (October 29, 2018)
 ### IMPROVEMENTS:
-* builder/amazon: Clean up security group wait code. [GH-6843]
-* builder/qemu: Add `disk_detect_zeroes` option. [GH-6827]
-* builder/hcloud: Add Hetzner Cloud builder. [GH-6871]
-* builder/amazon: Add suppport for `vpc_filter`, `subnet_filter`, and `security_group_filter`. [GH-6374]
-* provisioner/powershell: Provide better error when Packer can't find Powershell executable. [GH-6817]
-* builder/amazon: Update aws-sdk-go to v1.15.54, adding support for `credential_source`. [GH-6849]
-* builder/googlecompute: Return an error if `startup_script_file` is specified, but file does not exist. [GH-6848]
-* builder/amazon: Add validation for required `device_name` paramater in `block_device_mappings`. [GH-6845]
-* builder/scaleway: Add `boottype` parameter to config. [GH-6772]
-* core: New option to add timestamps to UI output. [GH-6784]
-* builder/azure: Add new `shared_image_gallery` option. [GH-6798]
-* builder/openstack: Add new `disk_format` option. [GH-6702]
-* builder/openstack: Fix bug where `source_image_name` wasn't being used to properly find a UUID. [GH-6751]
-* provisioner/file: Improve error messaging when file destination is a directory with no trailing slash. [GH-6756]
 * builder/alicloud: Add new `disable_stop_instance` option. [GH-6764]
+* builder/alicloud: Support adding tags to image. [GH-6719]
+* builder/alicloud: Support ssh with private ip address. [GH-6688]
+* builder/amazon: Add support to explicitly control ENA support [GH-6872]
+* builder/amazon: Add suppport for `vpc_filter`, `subnet_filter`, and
+    `security_group_filter`. [GH-6374]
+* builder/amazon: Add validation for required `device_name` parameter in
+    `block_device_mappings`. [GH-6845]
+* builder/amazon: Clean up security group wait code. [GH-6843]
+* builder/amazon: Update aws-sdk-go to v1.15.54, adding support for
+    `credential_source`. [GH-6849]
+* builder/amazon: Use DescribeRegions for aws region validation. [GH-6512],
+    [GH-6904]
+* builder/azure: Add new `shared_image_gallery` option. [GH-6798]
+* builder/googlecompute: Return an error if `startup_script_file` is specified,
+    but file does not exist. [GH-6848]
+* builder/hcloud: Add Hetzner Cloud builder. [GH-6871]
+* builder/openstack: Add new `disk_format` option. [GH-6702]
+* builder/openstack: Fix bug where `source_image_name` wasn't being used to
+    properly find a UUID. [GH-6751]
+* builder/openstack: Wait for volume availability when cleaning up [GH-6703]
+* builder/qemu: Add `disk_detect_zeroes` option. [GH-6827]
+* builder/scaleway: Add `boottype` parameter to config. [GH-6772]
 * builder/scaleway: Update scaleway-cli vendor. [GH-6771]
+* core: New option to add timestamps to UI output. [GH-6784]
+* post-processor/vagrant-cloud: Validate vagrant cloud auth token doing an auth
+    request [GH-6914]
+* provisioner/file: Improve error messaging when file destination is a
+    directory with no trailing slash. [GH-6756]
+* provisioner/powershell: Provide better error when Packer can't find
+    Powershell executable. [GH-6817]
+* provisioner/shell-local: Add ability to specify OSs where shell-local can run
+    [GH-6878]
 
 ### BUG FIXES:
-* builder/amazon: Error validating credentials is no longer obscured by a region validation error. [GH-6865]
-* core: Fix race conditions in progress bar code [GH-6858], [GH-6788], [GH-6851]
-* post-processor/manifest: No longer provides an empty ID string for Azure's managed image artifact [GH-6822]
-* provisioner/powershell: Fix a bug in the way we set the ProgressPreference variable in the default `execute_command` [GH-6838]
-* builder/amazon: Fix error calculating defaults in AWS waiters. [GH-6727]
-* provisioner/windows-restart: Fix extraneous break which forced early exit from our wait loop. [GH-6792]
-* builder/azure: Updated Azure/go-ntlmssp dependency to resolve an issue with the winrm communicator not connecting to Windows machines requiring NTLMv2 session security
-* builder/amazon: Waiter now fails rather than hanging for extra time when an image import fails. [GH-6747]
-* core: Fix logger so it doesn't accidentally try to format unescaped strings. [GH-6824]
-* builder/amazon: Increase default wait for image import to one hour. [GH-6818]
-* core: Fix error where logging was always enabled when Packer was run from inside Terraform. [GH-6758]
+* builder/alicloud: Fix ssh configuration pointer issues that could cause a bug
+    [GH-6720]
 * builder/alicloud: Fix type error in step_create_tags [GH-6763]
+* builder/amazon: Error validating credentials is no longer obscured by a
+    region validation error. and some region validation refactors and
+    improvements [GH-6865]
+* builder/amazon: Fix error calculating defaults in AWS waiters. [GH-6727]
+* builder/amazon: Increase default wait for image import to one hour. [GH-6818]
+* builder/amazon: Waiter now fails rather than hanging for extra time when an
+    image import fails. [GH-6747]
+* builder/azure: Updated Azure/go-ntlmssp dependency to resolve an issue with
+    the winrm communicator not connecting to Windows machines requiring NTLMv2
+    session security
+* builder/digitalocean: Fix ssh configuration pointer issues that could cause a
+    panic [GH-6729]
+* builder/hyperv/vmcx: Allow to set generation from buildfile [GH-6909]
 * builder/scaleway: Fix issues with ssh keys. [GH-6768]
-* core: Fix various places in multiple builders where config was not being passed as a pointer. [GH-6739]
+* core: Fix error where logging was always enabled when Packer was run from
+    inside Terraform. [GH-6758]
+* core: Fix issue with with names containing spaces in ESX5Driver and in ssh
+    communicator [GH-6891], [GH-6823]
+* core: Fix logger so it doesn't accidentally try to format unescaped strings.
+    [GH-6824]
+* core: Fix race conditions in progress bar code [GH-6858], [GH-6788],
+    [GH-6851]
+* core: Fix various places in multiple builders where config was not being
+    passed as a pointer. [GH-6739]
+* post-processor/manifest: No longer provides an empty ID string for Azure's
+    managed image artifact [GH-6822]
+* provisioner/powershell: Fix a bug in the way we set the ProgressPreference
+    variable in the default `execute_command` [GH-6838]
+* provisioner/windows-restart: Fix extraneous break which forced early exit
+    from our wait loop. [GH-6792]
 
 ## 1.3.1 (September 13, 2018)
 

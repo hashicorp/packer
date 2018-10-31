@@ -45,6 +45,11 @@ type Config struct {
 	// your command(s) are executed.
 	Vars []string `mapstructure:"environment_vars"`
 
+	// A duration of how long to pause after the provisioner
+	RawPauseAfter string `mapstructure:"pause_after"`
+
+	PauseAfter time.Duration
+
 	// Write the Vars to a file and source them from there rather than declaring
 	// inline
 	UseEnvVarFile bool `mapstructure:"use_env_var_file"`
@@ -186,6 +191,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		if err != nil {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("Failed parsing start_retry_timeout: %s", err))
+		}
+	}
+
+	if p.config.RawPauseAfter != "" {
+		p.config.PauseAfter, err = time.ParseDuration(p.config.RawPauseAfter)
+		if err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("Failed parsing pause_after: %s", err))
 		}
 	}
 
@@ -368,6 +381,14 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	if p.config.RawPauseAfter != "" {
+		ui.Say(fmt.Sprintf("Pausing %s after this provisioner...", p.config.PauseAfter))
+		select {
+		case <-time.After(p.config.PauseAfter):
+			return nil
 		}
 	}
 

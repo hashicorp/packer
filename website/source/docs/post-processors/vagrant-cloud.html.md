@@ -2,8 +2,8 @@
 description: |
     The Packer Vagrant Cloud post-processor receives a Vagrant box from the
     `vagrant` post-processor and pushes it to Vagrant Cloud. Vagrant Cloud hosts
-    and serves boxes to Vagrant, allowing you to version and distribute boxes to
-    an organization in a simple way.
+    and serves boxes to Vagrant, allowing you to version and distribute boxes to an
+    organization in a simple way.
 layout: docs
 page_title: 'Vagrant Cloud - Post-Processors'
 sidebar_current: 'docs-post-processors-vagrant-cloud'
@@ -16,8 +16,8 @@ Type: `vagrant-cloud`
 The Packer Vagrant Cloud post-processor receives a Vagrant box from the
 `vagrant` post-processor and pushes it to Vagrant Cloud. [Vagrant
 Cloud](https://app.vagrantup.com/boxes/search) hosts and serves boxes to
-Vagrant, allowing you to version and distribute boxes to an organization in
-a simple way.
+Vagrant, allowing you to version and distribute boxes to an organization in a
+simple way.
 
 You'll need to be familiar with Vagrant Cloud, have an upgraded account to
 enable box hosting, and be distributing your box via the [shorthand
@@ -62,11 +62,11 @@ on Vagrant Cloud, as well as authentication and version information.
     Cloud, for example `hashicorp/precise64`, which is short for
     `vagrantcloud.com/hashicorp/precise64`.
 
--   `version` (string) - The version number, typically incrementing a
-    previous version. The version string is validated based on [Semantic
+-   `version` (string) - The version number, typically incrementing a previous
+    version. The version string is validated based on [Semantic
     Versioning](http://semver.org/). The string must match a pattern that could
-    be semver, and doesn't validate that the version comes after your
-    previous versions.
+    be semver, and doesn't validate that the version comes after your previous
+    versions.
 
 ### Optional:
 
@@ -74,16 +74,16 @@ on Vagrant Cloud, as well as authentication and version information.
     Vagrant Cloud, making it active. You can manually release the version via
     the API or Web UI. Defaults to false.
 
--   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud. This
-    is useful if you're using Vagrant Private Cloud in your own network.
+-   `vagrant_cloud_url` (string) - Override the base URL for Vagrant Cloud.
+    This is useful if you're using Vagrant Private Cloud in your own network.
     Defaults to `https://vagrantcloud.com/api/v1`
 
 -   `version_description` (string) - Optionally markdown text used as a
     full-length and in-depth description of the version, typically for denoting
     changes introduced
 
--   `box_download_url` (string) - Optional URL for a self-hosted box. If this is
-    set the box will not be uploaded to the Vagrant Cloud.
+-   `box_download_url` (string) - Optional URL for a self-hosted box. If this
+    is set the box will not be uploaded to the Vagrant Cloud.
 
 ## Use with Vagrant Post-Processor
 

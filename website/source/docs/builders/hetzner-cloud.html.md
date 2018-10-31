@@ -14,11 +14,11 @@ sidebar_current: 'docs-builders-hetzner-cloud'
 
 Type: `hcloud`
 
-The `hcloud` Packer builder is able to create new images for use with
-[Hetzner Cloud](https://www.hetzner.cloud). The builder takes a source image,
-runs any provisioning necessary on the image after launching it, then snapshots
-it into a reusable image. This reusable image can then be used as the foundation
-of new servers that are launched within the Hetzner Cloud.
+The `hcloud` Packer builder is able to create new images for use with [Hetzner
+Cloud](https://www.hetzner.cloud). The builder takes a source image, runs any
+provisioning necessary on the image after launching it, then snapshots it into
+a reusable image. This reusable image can then be used as the foundation of new
+servers that are launched within the Hetzner Cloud.
 
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
@@ -35,15 +35,15 @@ builder.
 
 ### Required:
 
--   `token` (string) - The client TOKEN to use to access your account. It
-    can also be specified via environment variable `HCLOUD_TOKEN`,
-    if set.
+-   `token` (string) - The client TOKEN to use to access your account. It can
+    also be specified via environment variable `HCLOUD_TOKEN`, if set.
 
 -   `image` (string) - ID or name of image to launch server from.
 
 -   `location` (string) - The name of the location to launch the server in.
 
--   `server_type` (string) - ID or name of the server type this server should be created with.
+-   `server_type` (string) - ID or name of the server type this server should
+    be created with.
 
 ### Optional:
 
@@ -58,7 +58,9 @@ builder.
     appear in your account. Defaults to "packer-{{timestamp}}" (see
     [configuration templates](/docs/templates/engine.html) for more info).
 
--   `poll_interval` (string) - Configures the interval in which actions are polled by the client. Default `500ms`. Increase this interval if you run into rate limiting errors.
+-   `poll_interval` (string) - Configures the interval in which actions are
+    polled by the client. Default `500ms`. Increase this interval if you run
+    into rate limiting errors.
 
 -   `user_data` (string) - User data to launch with the server.
     Packer will not automatically wait for a user script to finish before
