@@ -133,16 +133,22 @@ builder.
     key/value pairs provided in the configuration. While this can be used to
     set metadata\["user\_data"\] the explicit "user\_data" and
     "user\_data\_file" values will have precedence. An instance's metadata can
-    be obtained from at <http://169.254.169.254> on the launched instance.
+    be obtained from at
+    <a href="http://169.254.169.254" class="uri">http://169.254.169.254</a> on
+    the launched instance.
 
- - `user_data` (string) - User data to be used by cloud-init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Generally speaking, it is easier to use the `user_data_file`,
-   but you can use this option to put either the plaintext data or the base64
-   encoded data directly into your Packer config.
-   Packer will not automatically wait for a user script to finish before
-   shutting down the instance this must be handled in a provisioner.
+-   `user_data` (string) - User data to be used by cloud-init. See [the Oracle
+    docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails)
+    for more details. Generally speaking, it is easier to use the
+    `user_data_file`, but you can use this option to put either the plaintext
+    data or the base64 encoded data directly into your Packer config. Packer
+    will not automatically wait for a user script to finish before shutting
+    down the instance this must be handled in a provisioner.
 
- - `user_data_file` (string) - Path to a file to be used as user data by cloud-init. See [the Oracle docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails) for more details. Example:
-   `"user_data_file": "./boot_config/myscript.sh"`
+-   `user_data_file` (string) - Path to a file to be used as user data by
+    cloud-init. See [the Oracle
+    docs](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/LaunchInstanceDetails)
+    for more details. Example: `"user_data_file": "./boot_config/myscript.sh"`
 
 -   `tags` (map of strings) - Add one or more freeform tags to the resulting
     custom image. See [the Oracle

@@ -191,11 +191,11 @@ builder.
 
 -   `enable_t2_unlimited` (boolean) - Enabling T2 Unlimited allows the source
     instance to burst additional CPU beyond its available \[CPU Credits\]
-    (<https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html>)
+    (<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html" class="uri">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html</a>)
     for as long as the demand exists. This is in contrast to the standard
     configuration that only allows an instance to consume up to its available
     CPU Credits. See the AWS documentation for \[T2 Unlimited\]
-    (<https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html>)
+    (<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html" class="uri">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html</a>)
     and the **T2 Unlimited Pricing** section of the [Amazon EC2 On-Demand
     Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
     information. By default this option is disabled and Packer will set up a
@@ -235,8 +235,8 @@ builder.
     profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/instance-profiles.html)
     to launch the EC2 instance with.
 
--   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
-    the AWS EC2 endpoint. The default is `false`.
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+    verification of the AWS EC2 endpoint. The default is `false`.
 
 -   `launch_block_device_mappings` (array of block device mappings) - Add one
     or more block devices before the Packer build starts. If you add instance
