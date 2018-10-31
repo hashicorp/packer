@@ -445,9 +445,29 @@ func addDisk(_ *Driver, devices object.VirtualDeviceList, config *CreateConfig) 
 }
 
 func addNetwork(d *Driver, devices object.VirtualDeviceList, config *CreateConfig) (object.VirtualDeviceList, error) {
-	network, err := d.finder.NetworkOrDefault(d.ctx, config.Network)
-	if err != nil {
-		return nil, err
+	var network object.NetworkReference
+	if config.Network == "" {
+		h, err := d.FindHost(config.Host)
+		if err != nil {
+			return nil, err
+		}
+
+		i, err := h.Info("network")
+		if err != nil {
+			return nil, err
+		}
+
+		if len(i.Network) > 1 {
+			return nil, fmt.Errorf("Host has multiple networks. Specify it explicitly")
+		}
+
+		network = object.NewNetwork(d.client.Client, i.Network[0])
+	} else {
+		var err error
+		network, err = d.finder.Network(d.ctx, config.Network)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	backing, err := network.EthernetCardBackingInfo(d.ctx)
