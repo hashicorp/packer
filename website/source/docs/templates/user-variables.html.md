@@ -12,27 +12,26 @@ sidebar_current: 'docs-templates-user-variables'
 
 # Template User Variables
 
-User variables allow your templates to be further configured with variables from
-the command-line, environment variables, Vault, or files. This lets you parameterize
-your templates so that you can keep secret tokens, environment-specific data,
-and other types of information out of your templates. This maximizes the
-portability of the template.
+User variables allow your templates to be further configured with variables
+from the command-line, environment variables, Vault, or files. This lets you
+parameterize your templates so that you can keep secret tokens,
+environment-specific data, and other types of information out of your
+templates. This maximizes the portability of the template.
 
 Using user variables expects you to know how [configuration
-templates](/docs/templates/engine.html) work. If you don't know
-how configuration templates work yet, please read that page first.
+templates](/docs/templates/engine.html) work. If you don't know how
+configuration templates work yet, please read that page first.
 
 ## Usage
 
-User variables must first be defined in a `variables` section within
-your template. Even if you want a user variable to default to an empty
-string, it must be defined. This explicitness helps reduce the time it
-takes for newcomers to understand what can be modified using variables
-in your template.
+User variables must first be defined in a `variables` section within your
+template. Even if you want a user variable to default to an empty string, it
+must be defined. This explicitness helps reduce the time it takes for newcomers
+to understand what can be modified using variables in your template.
 
-The `variables` section is a key/value mapping of the user variable name
-to a default value. A default value can be the empty string. An example
-is shown below:
+The `variables` section is a key/value mapping of the user variable name to a
+default value. A default value can be the empty string. An example is shown
+below:
 
 ``` json
 {
@@ -50,14 +49,14 @@ is shown below:
 }
 ```
 
-In the above example, the template defines two user variables:
-`aws_access_key` and `aws_secret_key`. They default to empty values.
-Later, the variables are used within the builder we defined in order to
-configure the actual keys for the Amazon builder.
+In the above example, the template defines two user variables: `aws_access_key`
+and `aws_secret_key`. They default to empty values. Later, the variables are
+used within the builder we defined in order to configure the actual keys for
+the Amazon builder.
 
-If the default value is `null`, then the user variable will be
-*required*. This means that the user must specify a value for this
-variable or template validation will fail.
+If the default value is `null`, then the user variable will be *required*. This
+means that the user must specify a value for this variable or template
+validation will fail.
 
 User variables are used by calling the `{{user}}` function in the form of
 <code>{{user \`variable\`}}</code>. This function can be used in *any value*
@@ -72,7 +71,7 @@ The `env` function is available *only* within the default value of a user
 variable, allowing you to default a user variable to an environment variable.
 An example is shown below:
 
-```json
+``` json
 {
   "variables": {
     "my_secret": "{{env `MY_SECRET`}}",
@@ -86,9 +85,9 @@ variable (or an empty string if it does not exist).
 -&gt; **Why can't I use environment variables elsewhere?** User variables are
 the single source of configurable input to a template. We felt that having
 environment variables used *anywhere* in a template would confuse the user
-about the possible inputs to a template. By allowing environment variables
-only within default values for user variables, user variables remain as the
-single source of input to a template that a user can easily discover using
+about the possible inputs to a template. By allowing environment variables only
+within default values for user variables, user variables remain as the single
+source of input to a template that a user can easily discover using
 `packer inspect`.
 
 -&gt; **Why can't I use `~` for home variable?** `~` is an special variable
@@ -101,7 +100,7 @@ Consul keys can be used within your template using the `consul_key` function.
 This function is available *only* within the default value of a user variable,
 for reasons similar to environment variables above.
 
-```json
+``` json
 {
     "variables": {
         "soft_versions": "{{ consul_key `my_image/softs_versions/next` }}"
@@ -109,11 +108,12 @@ for reasons similar to environment variables above.
 }
 ```
 
-This will default `soft_versions` to the value of the key `my_image/softs_versions/next`
-in consul.
+This will default `soft_versions` to the value of the key
+`my_image/softs_versions/next` in consul.
 
-The configuration for consul (address, tokens, ...) must be specified as environment variables,
-as specified in the [Documentation](https://www.consul.io/docs/commands/index.html#environment-variables).
+The configuration for consul (address, tokens, ...) must be specified as
+environment variables, as specified in the
+[Documentation](https://www.consul.io/docs/commands/index.html#environment-variables).
 
 ## Vault Variables
 
@@ -127,37 +127,33 @@ An example of using a v2 kv engine:
 If you store a value in vault using `vault kv put secret/hello foo=world`, you
 can access it using the following template engine:
 
-```json
+``` json
 {
   "variables": {
     "my_secret": "{{ vault `/secret/data/hello` `foo`}}"
   }
 }
 ```
-which will assign "my_secret": "world"
+
+which will assign "my\_secret": "world"
 
 An example of using a v1 kv engine:
 
 If you store a value in vault using:
 
-```
-vault secrets enable -version=1 -path=secrets kv
-vault kv put secrets/hello foo=world
-```
+    vault secrets enable -version=1 -path=secrets kv
+    vault kv put secrets/hello foo=world
 
 You can access it using the following template engine:
 
-```
-{
-  "variables": {
-    "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
-  }
-}
-```
+    {
+      "variables": {
+        "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
+      }
+    }
 
-This example accesses the Vault path
-`secret/data/foo` and returns the value stored at the key `bar`, storing it as
-"my_secret".
+This example accesses the Vault path `secret/data/foo` and returns the value
+stored at the key `bar`, storing it as "my\_secret".
 
 In order for this to work, you must set the environment variables `VAULT_TOKEN`
 and `VAULT_ADDR` to valid values.
@@ -170,7 +166,7 @@ too. For example, the `amazon-ebs` builder has a configuration parameter called
 You can parameterize this by using a variable that is a list of regions, joined
 by a `,`. For example:
 
-```json
+``` json
 {
  "variables": {
         "destination_regions": "us-west-1,us-west-2"
@@ -201,18 +197,17 @@ by a `,`. For example:
 
 ## Setting Variables
 
-Now that we covered how to define and use user variables within a
-template, the next important point is how to actually set these
-variables. Packer exposes two methods for setting user variables: from
-the command line or from a file.
+Now that we covered how to define and use user variables within a template, the
+next important point is how to actually set these variables. Packer exposes two
+methods for setting user variables: from the command line or from a file.
 
 ### From the Command Line
 
-To set user variables from the command line, the `-var` flag is used as
-a parameter to `packer build` (and some other commands). Continuing our
-example above, we could build our template using the command below. The
-command is split across multiple lines for readability, but can of
-course be a single line.
+To set user variables from the command line, the `-var` flag is used as a
+parameter to `packer build` (and some other commands). Continuing our example
+above, we could build our template using the command below. The command is
+split across multiple lines for readability, but can of course be a single
+line.
 
 ``` text
 $ packer build \
@@ -222,19 +217,18 @@ $ packer build \
 ```
 
 As you can see, the `-var` flag can be specified multiple times in order to set
-multiple variables. Also, variables set later on the command-line override
-any earlier set variable of the same name.
+multiple variables. Also, variables set later on the command-line override any
+earlier set variable of the same name.
 
-**warning**
-If you are calling Packer from cmd.exe, you should double-quote your variables
-rather than single-quoting them. For example:
+**warning** If you are calling Packer from cmd.exe, you should double-quote
+your variables rather than single-quoting them. For example:
 
 `packer build -var "aws_secret_key=foo" template.json`
 
 ### From a File
 
-Variables can also be set from an external JSON file. The `-var-file` flag reads
-a file containing a key/value mapping of variables to values and sets
+Variables can also be set from an external JSON file. The `-var-file` flag
+reads a file containing a key/value mapping of variables to values and sets
 those variables. An example JSON file may look like this:
 
 ``` json
@@ -255,14 +249,13 @@ On Windows :
 packer build -var-file variables.json template.json
 ```
 
-The `-var-file` flag can be specified multiple times and variables from multiple
-files will be read and applied. As you'd expect, variables read from files
-specified later override a variable set earlier.
+The `-var-file` flag can be specified multiple times and variables from
+multiple files will be read and applied. As you'd expect, variables read from
+files specified later override a variable set earlier.
 
 Combining the `-var` and `-var-file` flags together also works how you'd
-expect. Variables set later in the command override variables set
-earlier. So, for example, in the following command with the above
-`variables.json` file:
+expect. Variables set later in the command override variables set earlier. So,
+for example, in the following command with the above `variables.json` file:
 
 ``` text
 $ packer build \
@@ -301,7 +294,7 @@ sensitive variables won't get printed to the logs by adding them to the
 
 The above snippet of code will function exactly the same as if you did not set
 "sensitive-variables", except that the Packer UI and logs will replace all
-instances of "bar" and of whatever the value of "my_secret" is with
+instances of "bar" and of whatever the value of "my\_secret" is with
 `<sensitive>`. This allows you to be confident that you are not printing
 secrets in plaintext to our logs by accident.
 
@@ -309,11 +302,11 @@ secrets in plaintext to our logs by accident.
 
 ## Making a provisioner step conditional on the value of a variable
 
-There is no specific syntax in Packer templates for making a provisioner
-step conditional, depending on the value of a variable. However, you may
-be able to do this by referencing the variable within a command that
-you execute. For example, here is how to make a `shell-local`
-provisioner only run if the `do_nexpose_scan` variable is non-empty.
+There is no specific syntax in Packer templates for making a provisioner step
+conditional, depending on the value of a variable. However, you may be able to
+do this by referencing the variable within a command that you execute. For
+example, here is how to make a `shell-local` provisioner only run if the
+`do_nexpose_scan` variable is non-empty.
 
 ``` json
 {

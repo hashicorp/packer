@@ -1,10 +1,10 @@
 ---
 description: |
     The digitalocean Packer builder is able to create new images for use with
-    DigitalOcean. The builder takes a source image, runs any provisioning
-    necessary on the image after launching it, then snapshots it into a reusable
-    image. This reusable image can then be used as the foundation of new servers
-    that are launched within DigitalOcean.
+    DigitalOcean. The builder takes a source image, runs any provisioning necessary
+    on the image after launching it, then snapshots it into a reusable image. This
+    reusable image can then be used as the foundation of new servers that are
+    launched within DigitalOcean.
 layout: docs
 page_title: 'DigitalOcean - Builders'
 sidebar_current: 'docs-builders-digitalocean'
@@ -17,8 +17,8 @@ Type: `digitalocean`
 The `digitalocean` Packer builder is able to create new images for use with
 [DigitalOcean](https://www.digitalocean.com). The builder takes a source image,
 runs any provisioning necessary on the image after launching it, then snapshots
-it into a reusable image. This reusable image can then be used as the foundation
-of new servers that are launched within DigitalOcean.
+it into a reusable image. This reusable image can then be used as the
+foundation of new servers that are launched within DigitalOcean.
 
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
@@ -36,19 +36,19 @@ builder.
 ### Required:
 
 -   `api_token` (string) - The client TOKEN to use to access your account. It
-    can also be specified via environment variable `DIGITALOCEAN_API_TOKEN`,
-    if set.
+    can also be specified via environment variable `DIGITALOCEAN_API_TOKEN`, if
+    set.
 
 -   `image` (string) - The name (or slug) of the base image to use. This is the
     image that will be used to launch a new droplet and provision it. See
     <https://developers.digitalocean.com/documentation/v2/#list-all-images> for
     details on how to get a list of the accepted image names/slugs.
 
--   `region` (string) - The name (or slug) of the region to launch the
-    droplet in. Consequently, this is the region where the snapshot will
-    be available. See
-    <https://developers.digitalocean.com/documentation/v2/#list-all-regions> for
-    the accepted region names/slugs.
+-   `region` (string) - The name (or slug) of the region to launch the droplet
+    in. Consequently, this is the region where the snapshot will be available.
+    See
+    <https://developers.digitalocean.com/documentation/v2/#list-all-regions>
+    for the accepted region names/slugs.
 
 -   `size` (string) - The name (or slug) of the droplet size to use. See
     <https://developers.digitalocean.com/documentation/v2/#list-all-sizes> for
@@ -66,18 +66,18 @@ builder.
 -   `private_networking` (boolean) - Set to `true` to enable private networking
     for the droplet being created. This defaults to `false`, or not enabled.
 
--   `monitoring` (boolean) - Set to `true` to enable monitoring
-    for the droplet being created. This defaults to `false`, or not enabled.
+-   `monitoring` (boolean) - Set to `true` to enable monitoring for the droplet
+    being created. This defaults to `false`, or not enabled.
 
--   `ipv6` (boolean) - Set to `true` to enable ipv6
-    for the droplet being created. This defaults to `false`, or not enabled.
+-   `ipv6` (boolean) - Set to `true` to enable ipv6 for the droplet being
+    created. This defaults to `false`, or not enabled.
 
 -   `snapshot_name` (string) - The name of the resulting snapshot that will
     appear in your account. Defaults to "packer-{{timestamp}}" (see
     [configuration templates](/docs/templates/engine.html) for more info).
 
--   `snapshot_regions` (array of strings) - The regions of the resulting snapshot that will
-    appear in your account.
+-   `snapshot_regions` (array of strings) - The regions of the resulting
+    snapshot that will appear in your account.
 
 -   `state_timeout` (string) - The time to wait, as a duration string, for a
     droplet to enter a desired state (such as "active") before timing out. The

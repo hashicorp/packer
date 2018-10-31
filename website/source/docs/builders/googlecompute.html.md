@@ -1,7 +1,7 @@
 ---
 description: |
-    The googlecompute Packer builder is able to create images for use with
-    Google Cloud Compute Engine (GCE) based on existing images.
+    The googlecompute Packer builder is able to create images for use with Google
+    Cloud Compute Engine (GCE) based on existing images.
 layout: docs
 page_title: 'Google Compute - Builders'
 sidebar_current: 'docs-builders-googlecompute'
@@ -12,21 +12,23 @@ sidebar_current: 'docs-builders-googlecompute'
 Type: `googlecompute`
 
 The `googlecompute` Packer builder is able to create
-[images](https://developers.google.com/compute/docs/images) for use with [Google
-Compute Engine](https://cloud.google.com/products/compute-engine) (GCE) based on
-existing images.
+[images](https://developers.google.com/compute/docs/images) for use with
+[Google Compute Engine](https://cloud.google.com/products/compute-engine) (GCE)
+based on existing images.
 
-It is possible to build images from scratch, but not with the `googlecompute` Packer builder.
-The process is recommended only for advanced users, please see [Building GCE Images from Scratch]
-(https://cloud.google.com/compute/docs/tutorials/building-images)
-and the [Google Compute Import Post-Processor](/docs/post-processors/googlecompute-import.html)
-for more information.
+It is possible to build images from scratch, but not with the `googlecompute`
+Packer builder. The process is recommended only for advanced users, please see
+\[Building GCE Images from Scratch\]
+(<https://cloud.google.com/compute/docs/tutorials/building-images>) and the
+[Google Compute Import
+Post-Processor](/docs/post-processors/googlecompute-import.html) for more
+information.
 
 ## Authentication
 
-Authenticating with Google Cloud services requires at most one JSON file, called
-the *account file*. The *account file* is **not** required if you are running
-the `googlecompute` Packer builder from a GCE instance with a
+Authenticating with Google Cloud services requires at most one JSON file,
+called the *account file*. The *account file* is **not** required if you are
+running the `googlecompute` Packer builder from a GCE instance with a
 properly-configured [Compute Engine Service
 Account](https://cloud.google.com/compute/docs/authentication).
 
@@ -72,10 +74,11 @@ straightforwarded, it is documented here.
 
 3.  Click the "Create credentials" button, select "Service account key"
 
-4.  Create a new service account that at least has `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
+4.  Create a new service account that at least has
+    `Compute Engine Instance Admin (v1)` and `Service Account User` roles.
 
-5.  Choose `JSON` as the Key type and click "Create".
-    A JSON file will be downloaded automatically. This is your *account file*.
+5.  Choose `JSON` as the Key type and click "Create". A JSON file will be
+    downloaded automatically. This is your *account file*.
 
 ### Precedence of Authentication Methods
 
@@ -85,10 +88,10 @@ location found:
 1.  An `account_file` option in your packer file.
 
 2.  A JSON file (Service Account) whose path is specified by the
-`GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+    `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 3.  A JSON file in a location known to the `gcloud` command-line tool.
-(`gcloud` creates it when it's configured)
+    (`gcloud` creates it when it's configured)
 
     On Windows, this is:
 
@@ -99,8 +102,8 @@ location found:
         $HOME/.config/gcloud/application_default_credentials.json
 
 4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches
-credentials from the metadata server. (Needs a correct VM authentication scope
-configuration, see above.)
+    credentials from the metadata server. (Needs a correct VM authentication
+    scope configuration, see above.)
 
 ## Examples
 
@@ -109,8 +112,8 @@ configuration, see above.)
 Below is a fully functioning example. It doesn't do anything useful since no
 provisioners or startup-script metadata are defined, but it will effectively
 repackage an existing GCE image. The account\_file is obtained in the previous
-section. If it parses as JSON it is assumed to be the file itself, otherwise, it
-is assumed to be the path to the file containing the JSON.
+section. If it parses as JSON it is assumed to be the file itself, otherwise,
+it is assumed to be the path to the file containing the JSON.
 
 ``` json
 {
@@ -129,18 +132,19 @@ is assumed to be the path to the file containing the JSON.
 
 ### Windows Example
 
-Before you can provision using the winrm communicator, you need to allow traffic
-through google's firewall on the winrm port (tcp:5986).
-You can do so using the gcloud command.
-```
-gcloud compute firewall-rules create allow-winrm --allow tcp:5986
-```
-Or alternatively by navigating to https://console.cloud.google.com/networking/firewalls/list.
+Before you can provision using the winrm communicator, you need to allow
+traffic through google's firewall on the winrm port (tcp:5986). You can do so
+using the gcloud command.
+
+    gcloud compute firewall-rules create allow-winrm --allow tcp:5986
+
+Or alternatively by navigating to
+<https://console.cloud.google.com/networking/firewalls/list>.
 
 Once this is set up, the following is a complete working packer config after
 setting a valid `account_file` and `project_id`:
 
-``` {.json}
+``` json
 {
   "builders": [
     {
@@ -162,12 +166,15 @@ setting a valid `account_file` and `project_id`:
   ]
 }
 ```
+
 This build can take up to 15 min.
 
 ### Nested Hypervisor Example
 
-This is an example of using the `image_licenses` configuration option to create a GCE image that has nested virtualization enabled. See
-[Enabling Nested Virtualization for VM Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
+This is an example of using the `image_licenses` configuration option to create
+a GCE image that has nested virtualization enabled. See [Enabling Nested
+Virtualization for VM
+Instances](https://cloud.google.com/compute/docs/instances/enable-nested-virtualization-vm-instances)
 for details.
 
 ``` json
@@ -198,8 +205,8 @@ builder.
 
 ### Required:
 
--   `project_id` (string) - The project ID that will be used to launch instances
-    and store images.
+-   `project_id` (string) - The project ID that will be used to launch
+    instances and store images.
 
 -   `source_image` (string) - The source image to use to create the new image
     from. You can also specify `source_image_family` instead. If both
@@ -215,29 +222,35 @@ builder.
 
 ### Optional:
 
--   `account_file` (string) - The JSON file containing your account credentials.
-    Not required if you run Packer on a GCE instance with a service account.
-    Instructions for creating the file or using service accounts are above.
+-   `account_file` (string) - The JSON file containing your account
+    credentials. Not required if you run Packer on a GCE instance with a
+    service account. Instructions for creating the file or using service
+    accounts are above.
 
--   `accelerator_count` (number) - Number of guest accelerator cards to add to the launched instance.
+-   `accelerator_count` (number) - Number of guest accelerator cards to add to
+    the launched instance.
 
--   `accelerator_type` (string) - Full or partial URL of the guest accelerator type. GPU accelerators can only be used with
-    `"on_host_maintenance": "TERMINATE"` option set.
-    Example: `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
+-   `accelerator_type` (string) - Full or partial URL of the guest accelerator
+    type. GPU accelerators can only be used with
+    `"on_host_maintenance": "TERMINATE"` option set. Example:
+    `"projects/project_id/zones/europe-west1-b/acceleratorTypes/nvidia-tesla-k80"`
 
--   `address` (string) - The name of a pre-allocated static external IP address.
-    Note, must be the name and not the actual IP address.
+-   `address` (string) - The name of a pre-allocated static external IP
+    address. Note, must be the name and not the actual IP address.
 
--   `disable_default_service_account` (bool) - If true, the default service account will not be used if `service_account_email`
-    is not specified. Set this value to true and omit `service_account_email` to provision a VM with no service account.
+-   `disable_default_service_account` (bool) - If true, the default service
+    account will not be used if `service_account_email` is not specified. Set
+    this value to true and omit `service_account_email` to provision a VM with
+    no service account.
 
--   `disk_name` (string) - The name of the disk, if unset the instance name will be
-    used.
+-   `disk_name` (string) - The name of the disk, if unset the instance name
+    will be used.
 
 -   `disk_size` (number) - The size of the disk in GB. This defaults to `10`,
     which is 10GB.
 
--   `disk_type` (string) - Type of disk used to back your instance, like `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
+-   `disk_type` (string) - Type of disk used to back your instance, like
+    `pd-ssd` or `pd-standard`. Defaults to `pd-standard`.
 
 -   `image_description` (string) - The description of the resulting image.
 
@@ -249,13 +262,14 @@ builder.
 -   `image_labels` (object of key/value strings) - Key/value pair labels to
     apply to the created image.
 
--   `image_licenses` (array of strings) - Licenses to apply to the created image.
+-   `image_licenses` (array of strings) - Licenses to apply to the created
+    image.
 
 -   `image_name` (string) - The unique name of the resulting image. Defaults to
     `"packer-{{timestamp}}"`.
 
--   `instance_name` (string) - A name to give the launched instance. Beware that
-    this must be unique. Defaults to `"packer-{{uuid}}"`.
+-   `instance_name` (string) - A name to give the launched instance. Beware
+    that this must be unique. Defaults to `"packer-{{uuid}}"`.
 
 -   `labels` (object of key/value strings) - Key/value pair labels to apply to
     the launched instance.
@@ -266,38 +280,40 @@ builder.
     instance.
 
 -   `min_cpu_platform` (string) - A Minimum CPU Platform for VM Instance.
-    Availability and default CPU platforms vary across zones, based on 
-    the hardware available in each GCP zone. [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+    Availability and default CPU platforms vary across zones, based on the
+    hardware available in each GCP zone.
+    [Details](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
 
 -   `network` (string) - The Google Compute network id or URL to use for the
     launched instance. Defaults to `"default"`. If the value is not a URL, it
-    will be interpolated to `projects/((network_project_id))/global/networks/((network))`.
-    This value is not required if a `subnet` is specified.
+    will be interpolated to
+    `projects/((network_project_id))/global/networks/((network))`. This value
+    is not required if a `subnet` is specified.
 
+-   `network_project_id` (string) - The project ID for the network and
+    subnetwork to use for launched instance. Defaults to `project_id`.
 
--   `network_project_id` (string) - The project ID for the network and subnetwork
-    to use for launched instance. Defaults to `project_id`.
-
--   `omit_external_ip` (boolean) - If true, the instance will not have an external IP.
-    `use_internal_ip` must be true if this property is true.
+-   `omit_external_ip` (boolean) - If true, the instance will not have an
+    external IP. `use_internal_ip` must be true if this property is true.
 
 -   `on_host_maintenance` (string) - Sets Host Maintenance Option. Valid
     choices are `MIGRATE` and `TERMINATE`. Please see [GCE Instance Scheduling
     Options](https://cloud.google.com/compute/docs/instances/setting-instance-scheduling-options),
-    as not all machine\_types support `MIGRATE` (i.e. machines with GPUs).
-    If preemptible is true this can only be `TERMINATE`. If preemptible
-    is false, it defaults to `MIGRATE`
+    as not all machine\_types support `MIGRATE` (i.e. machines with GPUs). If
+    preemptible is true this can only be `TERMINATE`. If preemptible is false,
+    it defaults to `MIGRATE`
 
 -   `preemptible` (boolean) - If true, launch a preemptible instance.
 
 -   `region` (string) - The region in which to launch the instance. Defaults to
     the region hosting the specified `zone`.
 
--   `service_account_email` (string) - The service account to be used for launched instance. Defaults to
-    the project's default service account unless `disable_default_service_account` is true.
+-   `service_account_email` (string) - The service account to be used for
+    launched instance. Defaults to the project's default service account unless
+    `disable_default_service_account` is true.
 
--   `scopes` (array of strings) - The service account scopes for launched instance.
-    Defaults to:
+-   `scopes` (array of strings) - The service account scopes for launched
+    instance. Defaults to:
 
     ``` json
     [
@@ -307,21 +323,21 @@ builder.
     ]
     ```
 
--   `source_image_project_id` (string) - The project ID of the
-    project containing the source image.
+-   `source_image_project_id` (string) - The project ID of the project
+    containing the source image.
 
--   `startup_script_file` (string) - The path to a startup script to run on
-    the VM from which the image will be made.
+-   `startup_script_file` (string) - The path to a startup script to run on the
+    VM from which the image will be made.
 
 -   `state_timeout` (string) - The time to wait for instance state changes.
     Defaults to `"5m"`.
 
 -   `subnetwork` (string) - The Google Compute subnetwork id or URL to use for
     the launched instance. Only required if the `network` has been created with
-    custom subnetting. Note, the region of the subnetwork must match the `region`
-    or `zone` in which the VM is launched. If the value is not a URL, it
-    will be interpolated to `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
-
+    custom subnetting. Note, the region of the subnetwork must match the
+    `region` or `zone` in which the VM is launched. If the value is not a URL,
+    it will be interpolated to
+    `projects/((network_project_id))/regions/((region))/subnetworks/((subnetwork))`
 
 -   `tags` (array of strings) - Assign network tags to apply firewall rules to
     VM instance.
@@ -331,33 +347,36 @@ builder.
 
 ## Startup Scripts
 
-Startup scripts can be a powerful tool for configuring the instance from which the image is made.
-The builder will wait for a startup script to terminate. A startup script can be provided via the
-`startup_script_file` or `startup-script` instance creation `metadata` field. Therefore, the build
-time will vary depending on the duration of the startup script. If `startup_script_file` is set,
-the `startup-script` `metadata` field will be overwritten. In other words, `startup_script_file`
-takes precedence.
+Startup scripts can be a powerful tool for configuring the instance from which
+the image is made. The builder will wait for a startup script to terminate. A
+startup script can be provided via the `startup_script_file` or
+`startup-script` instance creation `metadata` field. Therefore, the build time
+will vary depending on the duration of the startup script. If
+`startup_script_file` is set, the `startup-script` `metadata` field will be
+overwritten. In other words, `startup_script_file` takes precedence.
 
-The builder does not check for a pass/fail/error signal from the startup script, at this time. Until
-such support is implemented, startup scripts should be robust, as an image will still be built even
-when a startup script fails.
+The builder does not check for a pass/fail/error signal from the startup
+script, at this time. Until such support is implemented, startup scripts should
+be robust, as an image will still be built even when a startup script fails.
 
 ### Windows
 
-A Windows startup script can only be provided via the `windows-startup-script-cmd` instance
-creation `metadata` field. The builder will *not* wait for a Windows startup script to
-terminate. You have to ensure that it finishes before the instance shuts down.
+A Windows startup script can only be provided via the
+`windows-startup-script-cmd` instance creation `metadata` field. The builder
+will *not* wait for a Windows startup script to terminate. You have to ensure
+that it finishes before the instance shuts down.
 
 ### Logging
 
-Startup script logs can be copied to a Google Cloud Storage (GCS) location specified via the
-`startup-script-log-dest` instance creation `metadata` field. The GCS location must be writeable by
-the credentials provided in the builder config's `account_file`.
+Startup script logs can be copied to a Google Cloud Storage (GCS) location
+specified via the `startup-script-log-dest` instance creation `metadata` field.
+The GCS location must be writeable by the credentials provided in the builder
+config's `account_file`.
 
 ## Gotchas
 
-CentOS and recent Debian images have root ssh access disabled by default. Set `ssh_username` to
-any user, which will be created by packer with sudo access.
+CentOS and recent Debian images have root ssh access disabled by default. Set
+`ssh_username` to any user, which will be created by packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an
 `f1-micro` or `g1-small` to build images.

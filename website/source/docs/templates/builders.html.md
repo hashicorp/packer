@@ -1,7 +1,7 @@
 ---
 description: |
-    Within the template, the builders section contains an array of all the
-    builders that Packer should use to generate machine images for the template.
+    Within the template, the builders section contains an array of all the builders
+    that Packer should use to generate machine images for the template.
 layout: docs
 page_title: 'Builders - Templates'
 sidebar_current: 'docs-templates-builders'
@@ -13,12 +13,12 @@ Within the template, the builders section contains an array of all the builders
 that Packer should use to generate machine images for the template.
 
 Builders are responsible for creating machines and generating images from them
-for various platforms. For example, there are separate builders for EC2, VMware,
-VirtualBox, etc. Packer comes with many builders by default, and can also be
-extended to add new builders.
+for various platforms. For example, there are separate builders for EC2,
+VMware, VirtualBox, etc. Packer comes with many builders by default, and can
+also be extended to add new builders.
 
-This documentation page will cover how to configure a builder in a template. The
-specific configuration options available for each builder, however, must be
+This documentation page will cover how to configure a builder in a template.
+The specific configuration options available for each builder, however, must be
 referenced from the documentation for that specific builder.
 
 Within a template, a section of builder definitions looks like this:
@@ -38,9 +38,9 @@ A single builder definition maps to exactly one
 JSON object that requires at least a `type` key. The `type` is the name of the
 builder that will be used to create a machine image for the build.
 
-In addition to the `type`, other keys configure the builder itself. For example,
-the AWS builder requires an `access_key`, `secret_key`, and some other settings.
-These are placed directly within the builder definition.
+In addition to the `type`, other keys configure the builder itself. For
+example, the AWS builder requires an `access_key`, `secret_key`, and some other
+settings. These are placed directly within the builder definition.
 
 An example builder definition is shown below, in this case configuring the AWS
 builder:

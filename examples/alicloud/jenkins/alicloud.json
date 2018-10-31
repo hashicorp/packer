@@ -9,7 +9,7 @@
     "secret_key":"{{user `secret_key`}}",
     "region":"cn-beijing",
     "image_name":"packer_jenkins",
-    "source_image":"ubuntu_14_0405_64_40G_alibase_20170625.vhd",
+    "source_image":"ubuntu_14_0405_64_20G_alibase_20170824.vhd",
     "ssh_username":"root",
     "instance_type":"ecs.n1.medium",
     "io_optimized":"true",

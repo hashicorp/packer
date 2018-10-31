@@ -93,7 +93,7 @@ func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
 
-	if spb.items < 0 {
+	if spb.items > 0 {
 		spb.items--
 	}
 	if spb.items == 0 && spb.Bar.ProgressBar != nil {
