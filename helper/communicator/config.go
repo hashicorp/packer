@@ -13,6 +13,7 @@ import (
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
+	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -109,12 +110,11 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 
 		var privateKeys [][]byte
 		if c.SSHPrivateKeyFile != "" {
-			// key based auth
-			bytes, err := ioutil.ReadFile(c.SSHPrivateKeyFile)
+			privateKey, err := c.ReadSSHPrivateKeyFile()
 			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+				return nil, err
 			}
-			privateKeys = append(privateKeys, bytes)
+			privateKeys = append(privateKeys, privateKey)
 		}
 
 		// aws,alicloud,cloudstack,digitalOcean,oneAndOne,openstack,oracle & profitbricks key
@@ -260,10 +260,14 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHPrivateKeyFile != "" {
-		if _, err := os.Stat(c.SSHPrivateKeyFile); err != nil {
+		path, err := homedir.Expand(c.SSHPrivateKeyFile)
+		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := helperssh.FileSigner(c.SSHPrivateKeyFile); err != nil {
+		} else if _, err := os.Stat(path); err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_private_key_file is invalid: %s", err))
+		} else if _, err := helperssh.FileSigner(path); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}
