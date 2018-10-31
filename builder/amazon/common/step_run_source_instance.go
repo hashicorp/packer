@@ -20,7 +20,6 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
-	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
 	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
@@ -33,7 +32,6 @@ type StepRunSourceInstance struct {
 	InstanceType                      string
 	IsRestricted                      bool
 	SourceAMI                         string
-	SubnetId                          string
 	Tags                              TagMap
 	UserData                          string
 	UserDataFile                      string
@@ -104,6 +102,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
+	az := state.Get("availability_zone").(string)
 	runOpts := &ec2.RunInstancesInput{
 		ImageId:             &s.SourceAMI,
 		InstanceType:        &s.InstanceType,
@@ -112,7 +111,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		MinCount:            aws.Int64(1),
 		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
-		Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
@@ -153,18 +152,20 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		runOpts.KeyName = &s.Comm.SSHKeyPairName
 	}
 
-	if s.SubnetId != "" && s.AssociatePublicIpAddress {
+	subnetId := state.Get("subnet_id").(string)
+
+	if subnetId != "" && s.AssociatePublicIpAddress {
 		runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
 				DeviceIndex:              aws.Int64(0),
 				AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-				SubnetId:                 &s.SubnetId,
+				SubnetId:                 aws.String(subnetId),
 				Groups:                   securityGroupIds,
 				DeleteOnTermination:      aws.Bool(true),
 			},
 		}
 	} else {
-		runOpts.SubnetId = &s.SubnetId
+		runOpts.SubnetId = aws.String(subnetId)
 		runOpts.SecurityGroupIds = securityGroupIds
 	}
 

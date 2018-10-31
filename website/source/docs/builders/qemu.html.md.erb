@@ -39,21 +39,15 @@ to files, URLS for ISOs and checksums.
       "shutdown_command": "echo 'packer' | sudo -S shutdown -P now",
       "disk_size": 5000,
       "format": "qcow2",
-      "headless": false,
       "accelerator": "kvm",
-      "http_directory": "httpdir",
-      "http_port_min": 10082,
-      "http_port_max": 10089,
-      "ssh_host_port_min": 2222,
-      "ssh_host_port_max": 2229,
+      "http_directory": "path/to/httpdir",
       "ssh_username": "root",
       "ssh_password": "s0m3password",
-      "ssh_port": 22,
-      "ssh_timeout": "30s",
+      "ssh_timeout": "20m",
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
-      "boot_wait": "5s",
+      "boot_wait": "10s",
       "boot_command": [
         "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos6-ks.cfg<enter><wait>"
       ]
@@ -62,11 +56,12 @@ to files, URLS for ISOs and checksums.
 }
 ```
 
-A working CentOS 6.x kickstart file can be found [at this
-URL](https://gist.github.com/mitchellh/7328271/#file-centos6-ks-cfg), adapted
-from an unknown source. Place this file in the http directory with the proper
-name. For the example above, it should go into "httpdir" with a name of
-"centos6-ks.cfg".
+This is an example only, and will time out waiting for SSH because we have not
+provided a kickstart file. You must add a valid kickstart file to the
+"http_directory" and then provide the file in the "boot_command" in order for
+this build to run. We recommend you check out the
+[Community Templates](https://www.packer.io/community-tools.html#templates)
+for a practical usage example.
 
 ## Configuration Reference
 
@@ -149,6 +144,9 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
 
 -   `disk_discard` (string) - The discard mode to use for disk. Allowed values
     include any of `unmap` or `ignore`. By default, this is set to `ignore`.
+
+-   `disk_detect_zeroes` (string) - The detect-zeroes mode to use for disk. 
+    Allowed values include any of `unmap`, `on` or `off`. Defaults to `off`.
 
 -   `disk_image` (boolean) - Packer defaults to building from an ISO file, this
     parameter controls whether the ISO URL supplied is actually a bootable

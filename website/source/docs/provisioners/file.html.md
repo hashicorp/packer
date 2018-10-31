@@ -14,8 +14,8 @@ sidebar_current: 'docs-provisioners-file'
 Type: `file`
 
 The file Packer provisioner uploads files to machines built by Packer. The
-recommended usage of the file provisioner is to use it to upload files, and then
-use [shell provisioner](/docs/provisioners/shell.html) to move them to the
+recommended usage of the file provisioner is to use it to upload files, and
+then use [shell provisioner](/docs/provisioners/shell.html) to move them to the
 proper place, set permissions, etc.
 
 The file provisioner can upload both single files and complete directories.
@@ -36,19 +36,20 @@ The available configuration options are listed below.
 
 ### Required
 
--   `source` (string) - The path to a local file or directory to upload to
-    the machine. The path can be absolute or relative. If it is relative, it is
+-   `source` (string) - The path to a local file or directory to upload to the
+    machine. The path can be absolute or relative. If it is relative, it is
     relative to the working directory when Packer is executed. If this is a
     directory, the existence of a trailing slash is important. Read below on
     uploading directories.
 
--   `destination` (string) - The path where the file will be uploaded to in
-    the machine. This value must be a writable location and any parent
-    directories must already exist. If the source is a file, it's a good idea to
-    make the destination a file as well, but if you set your destination as a
-    directory, at least make sure that the destination ends in a trailing slash
-    so that Packer knows to use the source's basename in the final upload path.
-    Failure to do so may cause Packer to fail on file uploads.
+-   `destination` (string) - The path where the file will be uploaded to in the
+    machine. This value must be a writable location and any parent directories
+    must already exist. If the source is a file, it's a good idea to make the
+    destination a file as well, but if you set your destination as a directory,
+    at least make sure that the destination ends in a trailing slash so that
+    Packer knows to use the source's basename in the final upload path. Failure
+    to do so may cause Packer to fail on file uploads. If the destination file
+    already exists, it will be overwritten.
 
 -   `direction` (string) - The direction of the file transfer. This defaults to
     "upload". If it is set to "download" then the file "source" in the machine
@@ -67,8 +68,8 @@ The available configuration options are listed below.
 ## Directory Uploads
 
 The file provisioner is also able to upload a complete directory to the remote
-machine. When uploading a directory, there are a few important things you should
-know.
+machine. When uploading a directory, there are a few important things you
+should know.
 
 First, the destination directory must already exist. If you need to create it,
 use a shell provisioner just prior to the file provisioner in order to create
@@ -79,10 +80,10 @@ Next, the existence of a trailing slash on the source path will determine
 whether the directory name will be embedded within the destination, or whether
 the destination will be created. An example explains this best:
 
-If the source is `/foo` (no trailing slash), and the destination is `/tmp`, then
-the contents of `/foo` on the local machine will be uploaded to `/tmp/foo` on
-the remote machine. The `foo` directory on the remote machine will be created by
-Packer.
+If the source is `/foo` (no trailing slash), and the destination is `/tmp`,
+then the contents of `/foo` on the local machine will be uploaded to `/tmp/foo`
+on the remote machine. The `foo` directory on the remote machine will be
+created by Packer.
 
 If the source, however, is `/foo/` (a trailing slash is present), and the
 destination is `/tmp`, then the contents of `/foo` will be uploaded into `/tmp`
@@ -96,11 +97,10 @@ the covers, rsync may or may not be used.
 In general, local files used as the source **must** exist before Packer is run.
 This is great for catching typos and ensuring that once a build is started,
 that it will succeed. However, this also means that you can't generate a file
-during your build and then upload it using the file provisioner later.
-A convenient workaround is to upload a directory instead of a file. The
-directory still must exist, but its contents don't. You can write your
-generated file to the directory during the Packer run, and have it be uploaded
-later.
+during your build and then upload it using the file provisioner later. A
+convenient workaround is to upload a directory instead of a file. The directory
+still must exist, but its contents don't. You can write your generated file to
+the directory during the Packer run, and have it be uploaded later.
 
 ## Symbolic link uploads
 

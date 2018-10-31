@@ -5,32 +5,35 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
 
 func testAccessConfig() *AccessConfig {
-	return &AccessConfig{}
+	return &AccessConfig{
+		getEC2Connection: func() ec2iface.EC2API {
+			return &mockEC2Client{}
+		},
+	}
 }
 
 func TestAccessConfigPrepare_Region(t *testing.T) {
 	c := testAccessConfig()
 
-	mockConn := &mockEC2Client{}
-
 	c.RawRegion = "us-east-12"
-	valid := ValidateRegion(c.RawRegion, mockConn)
-	if valid {
+	err := c.ValidateRegion(c.RawRegion)
+	if err == nil {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "us-east-1"
-	valid = ValidateRegion(c.RawRegion, mockConn)
-	if !valid {
+	err = c.ValidateRegion(c.RawRegion)
+	if err != nil {
 		t.Fatalf("shouldn't have region validation err: %s", c.RawRegion)
 	}
 
 	c.RawRegion = "custom"
-	valid = ValidateRegion(c.RawRegion, mockConn)
-	if valid {
+	err = c.ValidateRegion(c.RawRegion)
+	if err == nil {
 		t.Fatalf("should have region validation err: %s", c.RawRegion)
 	}
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"sync/atomic"
 
 	"github.com/cheggaaa/pb"
 )
@@ -36,16 +35,25 @@ type StackableProgressBar struct {
 	items int32
 	total int64
 
-	started bool
+	started             bool
+	ConfigProgressbarFN func(*pb.ProgressBar)
 }
 
 var _ ProgressBar = new(StackableProgressBar)
 
-func (spb *StackableProgressBar) start() {
-	spb.Bar.ProgressBar = pb.New(0)
-	spb.Bar.ProgressBar.SetUnits(pb.U_BYTES)
+func defaultProgressbarConfigFn(bar *pb.ProgressBar) {
+	bar.SetUnits(pb.U_BYTES)
+}
 
-	spb.Bar.ProgressBar.Start()
+func (spb *StackableProgressBar) start() {
+	bar := pb.New(0)
+	if spb.ConfigProgressbarFN == nil {
+		spb.ConfigProgressbarFN = defaultProgressbarConfigFn
+	}
+	spb.ConfigProgressbarFN(bar)
+
+	bar.Start()
+	spb.Bar.ProgressBar = bar
 	spb.started = true
 }
 
@@ -66,7 +74,9 @@ func (spb *StackableProgressBar) Start(total int64) {
 func (spb *StackableProgressBar) Add(total int64) {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
-	spb.Bar.Add(total)
+	if spb.Bar.ProgressBar != nil {
+		spb.Bar.Add(total)
+	}
 }
 
 func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
@@ -76,15 +86,17 @@ func (spb *StackableProgressBar) NewProxyReader(r io.Reader) io.Reader {
 }
 
 func (spb *StackableProgressBar) prefix() {
-	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", atomic.LoadInt32(&spb.items)))
+	spb.Bar.ProgressBar.Prefix(fmt.Sprintf("%d items: ", spb.items))
 }
 
 func (spb *StackableProgressBar) Finish() {
 	spb.mtx.Lock()
 	defer spb.mtx.Unlock()
 
-	spb.items--
-	if spb.items == 0 {
+	if spb.items > 0 {
+		spb.items--
+	}
+	if spb.items == 0 && spb.Bar.ProgressBar != nil {
 		// slef cleanup
 		spb.Bar.ProgressBar.Finish()
 		spb.Bar.ProgressBar = nil
@@ -92,7 +104,6 @@ func (spb *StackableProgressBar) Finish() {
 		spb.total = 0
 		return
 	}
-	spb.prefix()
 }
 
 // BasicProgressBar is packer's basic progress bar.

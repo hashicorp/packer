@@ -12,11 +12,11 @@ sidebar_current: 'docs-commands'
 
 # Packer Commands (CLI)
 
-Packer is controlled using a command-line interface. All interaction with Packer
-is done via the `packer` tool. Like many other command-line tools, the `packer`
-tool takes a subcommand to execute, and that subcommand may have additional
-options as well. Subcommands are executed with `packer SUBCOMMAND`, where
-"SUBCOMMAND" is the actual command you wish to execute.
+Packer is controlled using a command-line interface. All interaction with
+Packer is done via the `packer` tool. Like many other command-line tools, the
+`packer` tool takes a subcommand to execute, and that subcommand may have
+additional options as well. Subcommands are executed with `packer SUBCOMMAND`,
+where "SUBCOMMAND" is the actual command you wish to execute.
 
 If you run `packer` by itself, help will be displayed showing all available
 subcommands and a brief synopsis of what they do. In addition to this, you can
@@ -32,8 +32,8 @@ subcommand using the navigation to the left.
 By default, the output of Packer is very human-readable. It uses nice
 formatting, spacing, and colors in order to make Packer a pleasure to use.
 However, Packer was built with automation in mind. To that end, Packer supports
-a fully machine-readable output setting, allowing you to use Packer in automated
-environments.
+a fully machine-readable output setting, allowing you to use Packer in
+automated environments.
 
 Because the machine-readable output format was made with Unix tools in mind, it
 is `awk`/`sed`/`grep`/etc. friendly and provides a familiar interface without
@@ -58,15 +58,15 @@ The format will be covered in more detail later. But as you can see, the output
 immediately becomes machine-friendly. Try some other commands with the
 `-machine-readable` flag to see!
 
-~&gt; The `-machine-readable` flag is designed for automated environments and is
-mutually-exclusive with the `-debug` flag, which is designed for interactive
+~&gt; The `-machine-readable` flag is designed for automated environments and
+is mutually-exclusive with the `-debug` flag, which is designed for interactive
 environments.
 
 ### Format for Machine-Readable Output
 
 The machine readable format is a line-oriented, comma-delimited text format.
-This makes it more convenient to parse using standard Unix tools such as `awk` or
-`grep` in addition to full programming languages like Ruby or Python.
+This makes it more convenient to parse using standard Unix tools such as `awk`
+or `grep` in addition to full programming languages like Ruby or Python.
 
 The format is:
 
@@ -78,18 +78,17 @@ Each component is explained below:
 
 -   `timestamp` is a Unix timestamp in UTC of when the message was printed.
 
--   `target` is the target of the following output. This is empty if the message
-    is related to Packer globally. Otherwise, this is generally a build name so
-    you can relate output to a specific build while parallel builds are running.
+-   `target` When you call `packer build` this can be either empty or
+    individual build names, e.g. `amazon-ebs`. It is normally empty when builds
+    are in progress, and the build name when artifacts of particular builds are
+    being referred to.
 
--   `type` is the type of machine-readable message being outputted. There are a
-    set of standard types which are covered later, but each component of Packer
-    (builders, provisioners, etc.) may output their own custom types as well,
-    allowing the machine-readable output to be infinitely flexible.
+-   `type` is the type of machine-readable message being outputted. The two
+    most common `type`s are `ui` and `artifact`
 
--   `data` is zero or more comma-separated values associated with the prior type.
-    The exact amount and meaning of this data is type-dependent, so you must read
-    the documentation associated with the type to understand fully.
+-   `data` is zero or more comma-separated values associated with the prior
+    type. The exact amount and meaning of this data is type-dependent, so you
+    must read the documentation associated with the type to understand fully.
 
 Within the format, if data contains a comma, it is replaced with
 `%!(PACKER_COMMA)`. This was preferred over an escape character such as `\'`
@@ -101,23 +100,69 @@ become a literal `\r`.
 
 ### Machine-Readable Message Types
 
-The set of machine-readable message types can be found in the
-[machine-readable format](/docs/commands/index.html) complete
-documentation section. This section contains documentation on all the message
-types exposed by Packer core as well as all the components that ship with
-Packer by default.
+Here's an incomplete list of types you may see in the machine-readable output:
+
+You'll see these data types when you run `packer build`:
+
+-   `ui`: this means that the information being provided is a human-readable
+    string that would be sent to stdout even if we aren't in machine-readable
+    mode. There are three "data" subtypes associated with this type:
+
+    -   `say`: in a non-machine-readable format, this would be bolded. Normally
+        it is used for anouncements about beginning new steps in the build
+        process
+
+    -   `message`: the most commonly used message type, used for basic updates
+        during the build process.
+
+    -   `error`: reserved for errors
+
+-   `artifact-count`: This data type tells you how many artifacts a particular
+    build produced.
+
+-   `artifact`: This data type tells you information about what Packer created
+    during its build. An example of output follows the pattern
+    `timestamp, buildname, artifact, artifact_number, key, value` where `key`
+    and `value` contain information about the artifact.
+
+        For example:
+
+        ```
+          1539967803,,ui,say,\n==> Builds finished. The artifacts of successful builds are:
+          1539967803,amazon-ebs,artifact-count,2
+          1539967803,amazon-ebs,artifact,0,builder-id,mitchellh.amazonebs
+          1539967803,amazon-ebs,artifact,0,id,eu-west-1:ami-04d23aca8bdd36e30
+          1539967803,amazon-ebs,artifact,0,string,AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+          1539967803,amazon-ebs,artifact,0,files-count,0
+          1539967803,amazon-ebs,artifact,0,end
+          1539967803,,ui,say,--> amazon-ebs: AMIs were created:\neu-west-1: ami-04d23aca8bdd36e30\n
+          1539967803,amazon-ebs,artifact,1,builder-id,
+          1539967803,amazon-ebs,artifact,1,id,
+          1539967803,amazon-ebs,artifact,1,string,
+          1539967803,amazon-ebs,artifact,1,files-count,0
+          2018/10/19 09:50:03 waiting for all plugin processes to complete...
+          1539967803,amazon-ebs,artifact,1,end
+        ```
+
+You'll see these data types when you run `packer version`:
+
+-   `version`: what version of Packer is running
+
+-   `version-prerelease`: Data will contain `dev` if version is prerelease, and
+    otherwise will be blank.
+
+-   `version-commit`: The git hash for the commit that the branch of Packer is
+    currently on; most useful for Packer developers.
 
 ## Autocompletion
 
 The `packer` command features opt-in subcommand autocompletion that you can
-enable for your shell with `packer -autocomplete-install`. After doing so,
-you can invoke a new shell and use the feature.
+enable for your shell with `packer -autocomplete-install`. After doing so, you
+can invoke a new shell and use the feature.
 
 For example, assume a tab is typed at the end of each prompt line:
 
-```
-$ packer p
-plugin  build
-$ packer build -
--color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -timestamp          -var               -var-file
-```
+    $ packer p
+    plugin  build
+    $ packer build -
+    -color             -debug             -except            -force             -machine-readable  -on-error          -only              -parallel          -timestamp          -var               -var-file

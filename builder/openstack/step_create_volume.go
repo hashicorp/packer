@@ -102,6 +102,23 @@ func (s *StepCreateVolume) Cleanup(state multistep.StateBag) {
 		return
 	}
 
+	// Wait for volume to become available.
+	status, err := GetVolumeStatus(blockStorageClient, s.volumeID)
+	if err != nil {
+		ui.Error(fmt.Sprintf(
+			"Error getting the volume information. Please delete the volume manually: %s", s.volumeID))
+		return
+	}
+
+	if status != "available" {
+		ui.Say(fmt.Sprintf(
+			"Waiting for volume %s (volume id: %s) to become available...", s.VolumeName, s.volumeID))
+		if err := WaitForVolume(blockStorageClient, s.volumeID); err != nil {
+			ui.Error(fmt.Sprintf(
+				"Error getting the volume information. Please delete the volume manually: %s", s.volumeID))
+			return
+		}
+	}
 	ui.Say(fmt.Sprintf("Deleting volume: %s ...", s.volumeID))
 	err = volumes.Delete(blockStorageClient, s.volumeID).ExtractErr()
 	if err != nil {

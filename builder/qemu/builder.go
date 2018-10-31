@@ -75,6 +75,12 @@ var diskDiscard = map[string]bool{
 	"ignore": true,
 }
 
+var diskDZeroes = map[string]bool{
+	"unmap": true,
+	"on":    true,
+	"off":   true,
+}
+
 type Builder struct {
 	config Config
 	runner multistep.Runner
@@ -94,6 +100,7 @@ type Config struct {
 	DiskSize          uint       `mapstructure:"disk_size"`
 	DiskCache         string     `mapstructure:"disk_cache"`
 	DiskDiscard       string     `mapstructure:"disk_discard"`
+	DetectZeroes      string     `mapstructure:"disk_detect_zeroes"`
 	SkipCompaction    bool       `mapstructure:"skip_compaction"`
 	DiskCompression   bool       `mapstructure:"disk_compression"`
 	Format            string     `mapstructure:"format"`
@@ -155,6 +162,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskDiscard == "" {
 		b.config.DiskDiscard = "ignore"
+	}
+
+	if b.config.DetectZeroes == "" {
+		b.config.DetectZeroes = "off"
 	}
 
 	if b.config.Accelerator == "" {
@@ -284,6 +295,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if _, ok := diskDiscard[b.config.DiskDiscard]; !ok {
 		errs = packer.MultiErrorAppend(
 			errs, errors.New("unrecognized disk discard type"))
+	}
+
+	if _, ok := diskDZeroes[b.config.DetectZeroes]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk detect zeroes setting"))
 	}
 
 	if !b.config.PackerForce {
