@@ -22,15 +22,16 @@ func ConfigDir() (string, error) {
 // ConfigTmpDir returns the configuration tmp directory for Packer
 func ConfigTmpDir() (string, error) {
 	var tmpdir, td, cd string
+	var err error
 
-	cd, err := ConfigDir()
-	for _, tmpdir := range []string{os.Getenv("PACKER_TMP_DIR"), os.TempDir(), cd} {
+	cd, _ = ConfigDir()
+	for _, tmpdir = range []string{os.Getenv("PACKER_TMP_DIR"), os.TempDir(), cd} {
 		if tmpdir != "" {
 			break
 		}
 	}
 
-	if td, err := ioutil.TempDir(tmpdir, "packer"); err != nil {
+	if td, err = ioutil.TempDir(tmpdir, "packer"); err != nil {
 		log.Fatal(err)
 	}
 
