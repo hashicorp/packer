@@ -1,8 +1,9 @@
 package packer
 
 import (
+	"io/ioutil"
+	"log"
 	"os"
-	"path/filepath"
 )
 
 // ConfigFile returns the default path to the configuration file. On
@@ -20,25 +21,20 @@ func ConfigDir() (string, error) {
 
 // ConfigTmpDir returns the configuration tmp directory for Packer
 func ConfigTmpDir() (string, error) {
-	if tmpdir := os.Getenv("PACKER_TMP_DIR"); tmpdir == "" {
-		for _, e := range []string{"TEMP", "TMP", "LOCALAPPDATA"} {
-			if tmpdir, found := os.LookupEnv(e); found {
-				td := filepath.Join(tmpdir, "packer")
-				break
-			}
+	var tmpdir, td, cd string
+
+	cd, err := ConfigDir()
+	for _, tmpdir := range []string{os.Getenv("PACKER_TMP_DIR"), os.TempDir(), cd} {
+		if tmpdir != "" {
+			break
 		}
-	}
-	if tmpdir == "" {
-		td := filepath.Join(ConfigDir(), "tmp")
 	}
 
-	_, err := os.Stat(td)
-	if os.IsNotExist(err) {
-		if err = os.MkdirAll(td, 0700); err != nil {
-			return "", err
-		}
-	} else if err != nil {
-		return "", err
+	if td, err := ioutil.TempDir(tmpdir, "packer"); err != nil {
+		log.Fatal(err)
 	}
+
+	defer os.RemoveAll(td)
+
 	return td, nil
 }
