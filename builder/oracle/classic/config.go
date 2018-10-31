@@ -18,6 +18,7 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	PVConfig            `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
 	attribs             map[string]interface{}
 
@@ -29,11 +30,12 @@ type Config struct {
 	apiEndpointURL *url.URL
 
 	// Image
-	ImageName       string        `mapstructure:"image_name"`
-	Shape           string        `mapstructure:"shape"`
-	SourceImageList string        `mapstructure:"source_image_list"`
-	SnapshotTimeout time.Duration `mapstructure:"snapshot_timeout"`
-	DestImageList   string        `mapstructure:"dest_image_list"`
+	ImageName            string        `mapstructure:"image_name"`
+	Shape                string        `mapstructure:"shape"`
+	SourceImageList      string        `mapstructure:"source_image_list"`
+	SourceImageListEntry int           `mapstructure:"source_image_list_entry"`
+	SnapshotTimeout      time.Duration `mapstructure:"snapshot_timeout"`
+	DestImageList        string        `mapstructure:"dest_image_list"`
 	// Attributes and Attributes file are both optional and mutually exclusive.
 	Attributes     string `mapstructure:"attributes"`
 	AttributesFile string `mapstructure:"attributes_file"`
@@ -47,6 +49,10 @@ type Config struct {
 	SSHSourceList string `mapstructure:"ssh_source_list"`
 
 	ctx interpolate.Context
+}
+
+func (c *Config) Identifier(s string) string {
+	return fmt.Sprintf("/Compute-%s/%s/%s", c.IdentityDomain, c.Username, s)
 }
 
 func NewConfig(raws ...interface{}) (*Config, error) {

@@ -7,17 +7,17 @@ type MachineImagesClient struct {
 
 // MachineImages obtains an MachineImagesClient which can be used to access to the
 // MachineImage functions of the Compute API
-func (c *ComputeClient) MachineImages() *MachineImagesClient {
+func (c *Client) MachineImages() *MachineImagesClient {
 	return &MachineImagesClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "MachineImage",
 			ContainerPath:       "/machineimage/",
 			ResourceRootPath:    "/machineimage",
 		}}
 }
 
-// MahineImage describes an existing Machine Image.
+// MachineImage describes an existing Machine Image.
 type MachineImage struct {
 	// account of the associated Object Storage Classic instance
 	Account string `json:"account"`
@@ -34,6 +34,9 @@ type MachineImage struct {
 	// Description of the state of the machine image if there is an error
 	ErrorReason string `json:"error_reason"`
 
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+
 	//  dictionary of hypervisor-specific attributes
 	Hypervisor map[string]interface{} `json:"hypervisor"`
 
@@ -44,7 +47,7 @@ type MachineImage struct {
 	File string `json:"file"`
 
 	// name of the machine image
-	Name string `json:"name"`
+	Name string
 
 	// Indicates that the image file is available in Object Storage Classic
 	NoUpload bool `json:"no_upload"`
@@ -117,7 +120,7 @@ func (c *MachineImagesClient) DeleteMachineImage(deleteInput *DeleteMachineImage
 	return c.deleteResource(deleteInput.Name)
 }
 
-// GetMachineList describes the MachineImage to get
+// GetMachineImageInput describes the MachineImage to get
 type GetMachineImageInput struct {
 	// account of the associated Object Storage Classic instance
 	Account string `json:"account"`
@@ -138,6 +141,6 @@ func (c *MachineImagesClient) GetMachineImage(getInput *GetMachineImageInput) (*
 }
 
 func (c *MachineImagesClient) success(result *MachineImage) (*MachineImage, error) {
-	c.unqualify(&result.Name)
+	result.Name = c.getUnqualifiedName(result.FQDN)
 	return result, nil
 }

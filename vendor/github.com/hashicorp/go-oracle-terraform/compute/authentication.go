@@ -12,7 +12,7 @@ type AuthenticationReq struct {
 }
 
 // Get a new auth cookie for the compute client
-func (c *ComputeClient) getAuthenticationCookie() error {
+func (c *Client) getAuthenticationCookie() error {
 	req := AuthenticationReq{
 		User:     c.getUserName(),
 		Password: *c.client.Password,
