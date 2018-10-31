@@ -1,11 +1,11 @@
 package driver
 
 import (
+	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/mobile/event/key"
 	"strings"
 	"unicode"
-	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vim25/methods"
-	"golang.org/x/mobile/event/key"
 )
 
 type KeyInput struct {
@@ -26,9 +26,9 @@ func init() {
 	scancodeIndex["!@#$%^&*()"] = key.Code1
 	scancodeIndex[" "] = key.CodeSpacebar
 	scancodeIndex["-=[]\\"] = key.CodeHyphenMinus
-	scancodeIndex["_+{}|" ] = key.CodeHyphenMinus
-	scancodeIndex[ ";'`,./" ] = key.CodeSemicolon
-	scancodeIndex[":\"~<>?" ] = key.CodeSemicolon
+	scancodeIndex["_+{}|"] = key.CodeHyphenMinus
+	scancodeIndex[";'`,./"] = key.CodeSemicolon
+	scancodeIndex[":\"~<>?"] = key.CodeSemicolon
 
 	for chars, start := range scancodeIndex {
 		for i, r := range chars {

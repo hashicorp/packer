@@ -1,8 +1,8 @@
 package driver
 
 import (
-	"github.com/vmware/govmomi/vim25/types"
 	"errors"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func (vm *VirtualMachine) AddSATAController() error {

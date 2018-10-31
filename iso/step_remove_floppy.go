@@ -1,11 +1,11 @@
 package iso
 
 import (
+	"context"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/vmware/govmomi/vim25/types"
-	"context"
 )
 
 type StepRemoveFloppy struct {

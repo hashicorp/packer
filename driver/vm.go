@@ -1,14 +1,14 @@
 package driver
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"time"
 	"strings"
-	"context"
+	"time"
 )
 
 type VirtualMachine struct {
@@ -54,7 +54,7 @@ type CreateConfig struct {
 	Network       string // "" for default network
 	NetworkCard   string // example: vmxnet3
 	USBController bool
-	Version       uint // example: 10
+	Version       uint   // example: 10
 	Firmware      string // efi or bios
 }
 

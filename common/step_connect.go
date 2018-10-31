@@ -1,10 +1,10 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/helper/multistep"
-	"fmt"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"context"
+	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type ConnectConfig struct {

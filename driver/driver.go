@@ -1,16 +1,16 @@
 package driver
 
 import (
+	"context"
+	"fmt"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
-	"context"
-	"net/url"
-	"fmt"
 	"github.com/vmware/govmomi/object"
-	"time"
 	"github.com/vmware/govmomi/session"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
+	"net/url"
+	"time"
 )
 
 type Driver struct {

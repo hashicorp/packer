@@ -2,18 +2,18 @@ package driver
 
 import (
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type Host struct {
 	driver *Driver
-	host *object.HostSystem
+	host   *object.HostSystem
 }
 
 func (d *Driver) NewHost(ref *types.ManagedObjectReference) *Host {
 	return &Host{
-		host: object.NewHostSystem(d.client.Client, *ref),
+		host:   object.NewHostSystem(d.client.Client, *ref),
 		driver: d,
 	}
 }
@@ -29,7 +29,7 @@ func (d *Driver) FindHost(name string) (*Host, error) {
 	}, nil
 }
 
-func (h *Host) Info(params ...string) (*mo.HostSystem, error){
+func (h *Host) Info(params ...string) (*mo.HostSystem, error) {
 	var p []string
 	if len(params) == 0 {
 		p = []string{"*"}

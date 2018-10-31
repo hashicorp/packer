@@ -1,10 +1,10 @@
 package driver
 
 import (
-	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vim25/mo"
 	"fmt"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ResourcePool struct {
@@ -32,7 +32,7 @@ func (d *Driver) FindResourcePool(cluster string, host string, name string) (*Re
 		return nil, err
 	}
 	return &ResourcePool{
-		pool: p,
+		pool:   p,
 		driver: d,
 	}, nil
 }

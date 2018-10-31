@@ -1,16 +1,16 @@
 package iso
 
 import (
+	"context"
+	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/hashicorp/packer/helper/multistep"
-	"fmt"
-	"context"
 )
 
 type CDRomConfig struct {
-	CdromType string `mapstructure:"cdrom_type"`
-	ISOPaths []string `mapstructure:"iso_paths"`
+	CdromType string   `mapstructure:"cdrom_type"`
+	ISOPaths  []string `mapstructure:"iso_paths"`
 }
 
 type StepAddCDRom struct {
@@ -20,7 +20,7 @@ type StepAddCDRom struct {
 func (c *CDRomConfig) Prepare() []error {
 	var errs []error
 
-	if (c.CdromType != "" && c.CdromType != "ide" && c.CdromType != "sata") {
+	if c.CdromType != "" && c.CdromType != "ide" && c.CdromType != "sata" {
 		errs = append(errs, fmt.Errorf("'cdrom_type' must be 'ide' or 'sata'"))
 	}
 
