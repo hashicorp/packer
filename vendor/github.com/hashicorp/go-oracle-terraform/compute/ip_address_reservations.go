@@ -11,21 +11,21 @@ type IPAddressReservationsClient struct {
 }
 
 const (
-	IPAddressReservationDescription   = "IP Address Reservation"
-	IPAddressReservationContainerPath = "/network/v1/ipreservation/"
-	IPAddressReservationResourcePath  = "/network/v1/ipreservation"
-	IPAddressReservationQualifier     = "/oracle/public"
+	iPAddressReservationDescription   = "IP Address Reservation"
+	iPAddressReservationContainerPath = "/network/v1/ipreservation/"
+	iPAddressReservationResourcePath  = "/network/v1/ipreservation"
+	iPAddressReservationQualifier     = "/oracle/public"
 )
 
 // IPAddressReservations returns an IPAddressReservationsClient to manage IP address reservation
 // resources
-func (c *ComputeClient) IPAddressReservations() *IPAddressReservationsClient {
+func (c *Client) IPAddressReservations() *IPAddressReservationsClient {
 	return &IPAddressReservationsClient{
 		ResourceClient: &ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: IPAddressReservationDescription,
-			ContainerPath:       IPAddressReservationContainerPath,
-			ResourceRootPath:    IPAddressReservationResourcePath,
+			Client:              c,
+			ResourceDescription: iPAddressReservationDescription,
+			ContainerPath:       iPAddressReservationContainerPath,
+			ResourceRootPath:    iPAddressReservationResourcePath,
 		},
 	}
 }
@@ -35,6 +35,9 @@ type IPAddressReservation struct {
 	// Description of the IP Address Reservation
 	Description string `json:"description"`
 
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+
 	// Reserved NAT IPv4 address from the IP Address Pool
 	IPAddress string `json:"ipAddress"`
 
@@ -42,17 +45,19 @@ type IPAddressReservation struct {
 	IPAddressPool string `json:"ipAddressPool"`
 
 	// Name of the reservation
-	Name string `json:"name"`
+	Name string
 
 	// Tags associated with the object
 	Tags []string `json:"tags"`
 
 	// Uniform Resource Identified for the reservation
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
 const (
-	PublicIPAddressPool  = "public-ippool"
+	// PublicIPAddressPool - public-ippool
+	PublicIPAddressPool = "public-ippool"
+	// PrivateIPAddressPool - cloud-ippool
 	PrivateIPAddressPool = "cloud-ippool"
 )
 
@@ -81,7 +86,7 @@ type CreateIPAddressReservationInput struct {
 	Tags []string `json:"tags"`
 }
 
-// Takes an input struct, creates an IP Address reservation, and returns the info struct and any errors
+// CreateIPAddressReservation creates an IP Address reservation, and returns the info struct and any errors
 func (c *IPAddressReservationsClient) CreateIPAddressReservation(input *CreateIPAddressReservationInput) (*IPAddressReservation, error) {
 	var ipAddrRes IPAddressReservation
 	// Qualify supplied name
@@ -98,14 +103,14 @@ func (c *IPAddressReservationsClient) CreateIPAddressReservation(input *CreateIP
 	return c.success(&ipAddrRes)
 }
 
-// Parameters to retrieve information on an ip address reservation
+// GetIPAddressReservationInput details the parameters to retrieve information on an ip address reservation
 type GetIPAddressReservationInput struct {
 	// Name of the IP Reservation
 	// Required
 	Name string `json:"name"`
 }
 
-// Returns an IP Address Reservation and any errors
+// GetIPAddressReservation returns an IP Address Reservation and any errors
 func (c *IPAddressReservationsClient) GetIPAddressReservation(input *GetIPAddressReservationInput) (*IPAddressReservation, error) {
 	var ipAddrRes IPAddressReservation
 
@@ -117,7 +122,7 @@ func (c *IPAddressReservationsClient) GetIPAddressReservation(input *GetIPAddres
 	return c.success(&ipAddrRes)
 }
 
-// Parameters to update an IP Address reservation
+// UpdateIPAddressReservationInput details the parameters to update an IP Address reservation
 type UpdateIPAddressReservationInput struct {
 	// Description of the IP Address Reservation
 	// Optional
@@ -142,6 +147,7 @@ type UpdateIPAddressReservationInput struct {
 	Tags []string `json:"tags"`
 }
 
+// UpdateIPAddressReservation updates the specified ip address reservation
 func (c *IPAddressReservationsClient) UpdateIPAddressReservation(input *UpdateIPAddressReservationInput) (*IPAddressReservation, error) {
 	var ipAddrRes IPAddressReservation
 
@@ -159,19 +165,20 @@ func (c *IPAddressReservationsClient) UpdateIPAddressReservation(input *UpdateIP
 	return c.success(&ipAddrRes)
 }
 
-// Parameters to delete an IP Address Reservation
+// DeleteIPAddressReservationInput details the parameters to delete an IP Address Reservation
 type DeleteIPAddressReservationInput struct {
 	// The name of the reservation to delete
 	Name string `json:"name"`
 }
 
+// DeleteIPAddressReservation deletes the specified ip address reservation
 func (c *IPAddressReservationsClient) DeleteIPAddressReservation(input *DeleteIPAddressReservationInput) error {
 	input.Name = c.getQualifiedName(input.Name)
 	return c.deleteResource(input.Name)
 }
 
 func (c *IPAddressReservationsClient) success(result *IPAddressReservation) (*IPAddressReservation, error) {
-	c.unqualify(&result.Name)
+	result.Name = c.getUnqualifiedName(result.FQDN)
 	if result.IPAddressPool != "" {
 		result.IPAddressPool = c.unqualifyIPAddressPool(result.IPAddressPool)
 	}
@@ -181,7 +188,7 @@ func (c *IPAddressReservationsClient) success(result *IPAddressReservation) (*IP
 
 func (c *IPAddressReservationsClient) qualifyIPAddressPool(input string) string {
 	// Add '/oracle/public/'
-	return fmt.Sprintf("%s/%s", IPAddressReservationQualifier, input)
+	return fmt.Sprintf("%s/%s", iPAddressReservationQualifier, input)
 }
 
 func (c *IPAddressReservationsClient) unqualifyIPAddressPool(input string) string {

@@ -12,10 +12,10 @@ type IPAssociationsClient struct {
 
 // IPAssociations obtains a IPAssociationsClient which can be used to access to the
 // IP Association functions of the Compute API
-func (c *ComputeClient) IPAssociations() *IPAssociationsClient {
+func (c *Client) IPAssociations() *IPAssociationsClient {
 	return &IPAssociationsClient{
 		ResourceClient: &ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "ip association",
 			ContainerPath:       "/ip/association/",
 			ResourceRootPath:    "/ip/association",
@@ -26,8 +26,11 @@ func (c *ComputeClient) IPAssociations() *IPAssociationsClient {
 type IPAssociationInfo struct {
 	// TODO: it'd probably make sense to expose the `ip` field here too?
 
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
+
 	// The three-part name of the object (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Name string
 
 	// The three-part name of the IP reservation object in the format (/Compute-identity_domain/user/object).
 	// An IP reservation is a public IP address which is attached to an Oracle Compute Cloud Service instance that requires access to or from the Internet.
@@ -45,6 +48,7 @@ type IPAssociationInfo struct {
 	VCable string `json:"vcable"`
 }
 
+// CreateIPAssociationInput details the attributes neccessary to create an ip association
 type CreateIPAssociationInput struct {
 	// The type of IP Address to associate with this instance
 	// for a Dynamic IP address specify `ippool:/oracle/public/ippool`.
@@ -69,6 +73,7 @@ func (c *IPAssociationsClient) CreateIPAssociation(input *CreateIPAssociationInp
 	return c.success(&assocInfo)
 }
 
+// GetIPAssociationInput details the attributes neccessary to retrieve an ip association
 type GetIPAssociationInput struct {
 	// The three-part name of the IP Association
 	// Required.
@@ -85,6 +90,7 @@ func (c *IPAssociationsClient) GetIPAssociation(input *GetIPAssociationInput) (*
 	return c.success(&assocInfo)
 }
 
+// DeleteIPAssociationInput details the attributes neccessary to delete an ip association
 type DeleteIPAssociationInput struct {
 	// The three-part name of the IP Association
 	// Required.
@@ -112,7 +118,8 @@ func (c *IPAssociationsClient) unqualifyParentPoolName(parentpool *string) {
 
 // Unqualifies identifiers
 func (c *IPAssociationsClient) success(assocInfo *IPAssociationInfo) (*IPAssociationInfo, error) {
-	c.unqualify(&assocInfo.Name, &assocInfo.VCable)
+	assocInfo.Name = c.getUnqualifiedName(assocInfo.FQDN)
+	c.unqualify(&assocInfo.VCable)
 	c.unqualifyParentPoolName(&assocInfo.ParentPool)
 	return assocInfo, nil
 }

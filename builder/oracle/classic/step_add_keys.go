@@ -6,36 +6,36 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-oracle-terraform/compute"
-	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepAddKeysToAPI struct{}
+type stepAddKeysToAPI struct {
+	Skip    bool
+	KeyName string
+}
 
 func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
-	if config.Comm.Type != "ssh" {
-		ui.Say("Not using SSH communicator; skip generating SSH keys...")
+	if s.Skip {
+		ui.Say("Skipping generating SSH keys...")
 		return multistep.ActionContinue
 	}
-
 	// grab packer-generated key from statebag context.
+	// Always check configured communicator for keys
 	sshPublicKey := bytes.TrimSpace(config.Comm.SSHPublicKey)
 
 	// form API call to add key to compute cloud
-	sshKeyName := fmt.Sprintf("/Compute-%s/%s/packer_generated_key_%s",
-		config.IdentityDomain, config.Username, uuid.TimeOrderedUUID())
 
-	ui.Say(fmt.Sprintf("Creating temporary key: %s", sshKeyName))
+	ui.Say(fmt.Sprintf("Creating temporary key: %s", s.KeyName))
 
 	sshKeysClient := client.SSHKeys()
 	sshKeysInput := compute.CreateSSHKeyInput{
-		Name:    sshKeyName,
+		Name:    s.KeyName,
 		Key:     string(sshPublicKey),
 		Enabled: true,
 	}
@@ -53,8 +53,11 @@ func (s *stepAddKeysToAPI) Run(_ context.Context, state multistep.StateBag) mult
 }
 
 func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
-	// Delete the keys we created during this run
+	if s.Skip {
+		return
+	}
 	config := state.Get("config").(*Config)
+	// Delete the keys we created during this run
 	if len(config.Comm.SSHKeyPairName) == 0 {
 		// No keys were generated; none need to be cleaned up.
 		return
@@ -62,7 +65,7 @@ func (s *stepAddKeysToAPI) Cleanup(state multistep.StateBag) {
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting SSH keys...")
 	deleteInput := compute.DeleteSSHKeyInput{Name: config.Comm.SSHKeyPairName}
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	deleteClient := client.SSHKeys()
 	err := deleteClient.DeleteSSHKey(&deleteInput)
 	if err != nil {

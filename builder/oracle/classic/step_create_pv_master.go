@@ -9,33 +9,41 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-type stepCreateInstance struct{}
+type stepCreatePVMaster struct {
+	Name            string
+	VolumeName      string
+	SecurityListKey string
+}
 
-func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	// get variables from state
+func (s *stepCreatePVMaster) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
-	ui.Say("Creating Instance...")
+	ui.Say("Creating master instance...")
 
 	config := state.Get("config").(*Config)
 	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
-	secListName := state.Get("security_list").(string)
-
-	netInfo := compute.NetworkingInfo{
-		Nat:      []string{ipAddName},
-		SecLists: []string{secListName},
-	}
+	secListName := state.Get(s.SecurityListKey).(string)
 
 	// get instances client
 	instanceClient := client.Instances()
 
 	// Instances Input
 	input := &compute.CreateInstanceInput{
-		Name:       config.ImageName,
-		Shape:      config.Shape,
-		ImageList:  config.SourceImageList,
-		Entry:      config.SourceImageListEntry,
-		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
+		Name:  s.Name,
+		Shape: config.Shape,
+		Networking: map[string]compute.NetworkingInfo{
+			"eth0": {
+				Nat:      []string{ipAddName},
+				SecLists: []string{secListName},
+			},
+		},
+		Storage: []compute.StorageAttachmentInput{
+			{
+				Volume: s.VolumeName,
+				Index:  1,
+			},
+		},
+		BootOrder:  []int{1},
 		Attributes: config.attribs,
 	}
 	if config.Comm.Type == "ssh" {
@@ -50,14 +58,18 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	state.Put("instance_info", instanceInfo)
-	state.Put("instance_id", instanceInfo.ID)
-	ui.Message(fmt.Sprintf("Created instance: %s.", instanceInfo.ID))
+	state.Put("master_instance_info", instanceInfo)
+	state.Put("master_instance_id", instanceInfo.ID)
+	ui.Message(fmt.Sprintf("Created master instance: %s.", instanceInfo.Name))
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
-	instanceID, ok := state.GetOk("instance_id")
+func (s *stepCreatePVMaster) Cleanup(state multistep.StateBag) {
+	if _, deleted := state.GetOk("master_instance_deleted"); deleted {
+		return
+	}
+
+	instanceID, ok := state.GetOk("master_instance_id")
 	if !ok {
 		return
 	}
@@ -65,13 +77,12 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
 	client := state.Get("client").(*compute.Client)
-	config := state.Get("config").(*Config)
 
-	ui.Say("Terminating source instance...")
+	ui.Say("Terminating builder instance...")
 
 	instanceClient := client.Instances()
 	input := &compute.DeleteInstanceInput{
-		Name: config.ImageName,
+		Name: s.Name,
 		ID:   instanceID.(string),
 	}
 
@@ -82,5 +93,5 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		state.Put("error", err)
 		return
 	}
-	ui.Say("Terminated instance.")
+	ui.Say("Terminated master instance.")
 }
