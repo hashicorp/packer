@@ -38,7 +38,7 @@ Tools](https://aws.amazon.com/developertools/368) are installed onto the
 machine. This can be done within a provisioner, but must be done before the
 builder finishes running.
 
-~&gt; Instance builds are not supported for Windows. Use
+\~&gt; Instance builds are not supported for Windows. Use
 [`amazon-ebs`](amazon-ebs.html) instead.
 
 ## Configuration Reference
@@ -214,11 +214,11 @@ builder.
 
 -   `enable_t2_unlimited` (boolean) - Enabling T2 Unlimited allows the source
     instance to burst additional CPU beyond its available \[CPU Credits\]
-    (<https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html>)
+    (<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html" class="uri">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html</a>)
     for as long as the demand exists. This is in contrast to the standard
     configuration that only allows an instance to consume up to its available
     CPU Credits. See the AWS documentation for \[T2 Unlimited\]
-    (<https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html>)
+    (<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html" class="uri">https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html</a>)
     and the 'T2 Unlimited Pricing' section of the [Amazon EC2 On-Demand
     Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) document for more
     information. By default this option is disabled and Packer will set up a
@@ -483,6 +483,8 @@ builder.
 -   `user_data` (string) - User data to apply when launching the instance. Note
     that you need to be careful about escaping characters due to the templates
     being JSON. It is often more convenient to use `user_data_file`, instead.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance.
@@ -618,8 +620,8 @@ sudo -i -n ec2-bundle-vol \
 The available template variables should be self-explanatory based on the
 parameters they're used to satisfy the `ec2-bundle-vol` command.
 
-~&gt; **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem and
-.gpg files during the bundling of the AMI, which can cause problems on some
+\~&gt; **Warning!** Some versions of ec2-bundle-vol silently ignore all .pem
+and .gpg files during the bundling of the AMI, which can cause problems on some
 systems, such as Ubuntu. You may want to customize the bundle volume command to
 include those files (see the `--no-filter` option of `ec2-bundle-vol`).
 

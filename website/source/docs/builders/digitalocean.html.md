@@ -41,18 +41,18 @@ builder.
 
 -   `image` (string) - The name (or slug) of the base image to use. This is the
     image that will be used to launch a new droplet and provision it. See
-    <https://developers.digitalocean.com/documentation/v2/#list-all-images> for
-    details on how to get a list of the accepted image names/slugs.
+    <a href="https://developers.digitalocean.com/documentation/v2/#list-all-images" class="uri">https://developers.digitalocean.com/documentation/v2/#list-all-images</a>
+    for details on how to get a list of the accepted image names/slugs.
 
 -   `region` (string) - The name (or slug) of the region to launch the droplet
     in. Consequently, this is the region where the snapshot will be available.
     See
-    <https://developers.digitalocean.com/documentation/v2/#list-all-regions>
+    <a href="https://developers.digitalocean.com/documentation/v2/#list-all-regions" class="uri">https://developers.digitalocean.com/documentation/v2/#list-all-regions</a>
     for the accepted region names/slugs.
 
 -   `size` (string) - The name (or slug) of the droplet size to use. See
-    <https://developers.digitalocean.com/documentation/v2/#list-all-sizes> for
-    the accepted size names/slugs.
+    <a href="https://developers.digitalocean.com/documentation/v2/#list-all-sizes" class="uri">https://developers.digitalocean.com/documentation/v2/#list-all-sizes</a>
+    for the accepted size names/slugs.
 
 ### Optional:
 
@@ -83,7 +83,9 @@ builder.
     droplet to enter a desired state (such as "active") before timing out. The
     default state timeout is "6m".
 
--   `user_data` (string) - User data to launch with the Droplet.
+-   `user_data` (string) - User data to launch with the Droplet. Packer will
+    not automatically wait for a user script to finish before shutting down the
+    instance this must be handled in a provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the Droplet.
