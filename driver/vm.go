@@ -100,7 +100,7 @@ func (d *Driver) CreateVM(config *CreateConfig) (*VirtualMachine, error) {
 	}
 
 	var host *object.HostSystem
-	if config.Host != "" {
+	if config.Cluster != "" && config.Host != "" {
 		h, err := d.FindHost(config.Host)
 		if err != nil {
 			return nil, err
