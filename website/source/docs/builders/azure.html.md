@@ -147,14 +147,19 @@ Providing `temp_resource_group_name` or `location` in combination with
     `USGovernment`. Defaults to `Public`. Long forms such as
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
--   `custom_data_file` (string) Specify a file containing custom data to inject into the cloud-init process. The contents
-    of the file are read and injected into the ARM template. The custom data will be passed to
-    cloud-init for processing at the time of provisioning. See [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
-    to learn more about custom data, and how it can be used to influence the provisioning process.
+-   `custom_data_file` (string) Specify a file containing custom data to inject
+    into the cloud-init process. The contents of the file are read and injected
+    into the ARM template. The custom data will be passed to cloud-init for
+    processing at the time of provisioning. See
+    [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
+    to learn more about custom data, and how it can be used to influence the
+    provisioning process.
 
--   `custom_managed_image_name` (string) Specify the source managed image's name to use.  If this value is set, do not set
-    image_publisher, image_offer, image_sku, or image_version. If this value is set, the value
-    `custom_managed_image_resource_group_name` must also be set. See [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
+-   `custom_managed_image_name` (string) Specify the source managed image's
+    name to use. If this value is set, do not set image\_publisher,
+    image\_offer, image\_sku, or image\_version. If this value is set, the
+    value `custom_managed_image_resource_group_name` must also be set. See
+    [documentation](https://docs.microsoft.com/en-us/azure/storage/storage-managed-disks-overview#images)
     to learn more about managed images.
 
 -   `custom_managed_image_resource_group_name` (string) Specify the source
@@ -245,7 +250,6 @@ Providing `temp_resource_group_name` or `location` in combination with
     type* - the target must be a *Managed Image*.
 
 <!-- -->
-
     "shared_image_gallery": {
         "subscription": "00000000-0000-0000-0000-00000000000",
         "resource_group": "ResourceGroup",
@@ -416,8 +420,8 @@ experience. These values can be changed by the user to more suitable values.
 
 ## Implementation
 
-~&gt; **Warning!** This is an advanced topic. You do not need to understand the
-implementation to use the Azure builder.
+\~&gt; **Warning!** This is an advanced topic. You do not need to understand
+the implementation to use the Azure builder.
 
 The Azure builder uses ARM
 [templates](https://azure.microsoft.com/en-us/documentation/articles/resource-group-authoring-templates/)

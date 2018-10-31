@@ -25,10 +25,10 @@ created. This simplifies configuration quite a bit.
 The builder does *not* manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
-~&gt; **Note:** To use OpenStack builder with the OpenStack Newton (Oct 2016)
+\~&gt; **Note:** To use OpenStack builder with the OpenStack Newton (Oct 2016)
 or earlier, we recommend you use Packer v1.1.2 or earlier version.
 
-~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
+\~&gt; **OpenStack Liberty or later requires OpenSSL!** To use the OpenStack
 builder with OpenStack Liberty (Oct 2015) or later you need to have OpenSSL
 installed *if you are using temporary key pairs*, i.e. don't use
 [`ssh_keypair_name`](openstack.html#ssh_keypair_name) nor
@@ -36,8 +36,9 @@ installed *if you are using temporary key pairs*, i.e. don't use
 OS'es have OpenSSL installed by default except Windows. This have been resolved
 in OpenStack Ocata(Feb 2017).
 
-~&gt; **Note:** OpenStack Block Storage volume support is available only for V3
-Block Storage API. It's available in OpenStack since Mitaka release (Apr 2016).
+\~&gt; **Note:** OpenStack Block Storage volume support is available only for
+V3 Block Storage API. It's available in OpenStack since Mitaka release (Apr
+2016).
 
 ## Configuration Reference
 
@@ -406,7 +407,7 @@ variable `OS_REGION_NAME` or `OS_REGION_ID` and
 `export OS_TENANT_NAME=$OS_PROJECT_NAME` or
 `export OS_TENANT_ID=$OS_PROJECT_ID`.
 
-~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
+\~&gt; `OS_TENANT_NAME` or `OS_TENANT_ID` must be used even with Identity v3,
 `OS_PROJECT_NAME` and `OS_PROJECT_ID` has no effect in Packer.
 
 To troubleshoot authorization issues test you environment variables with the

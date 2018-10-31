@@ -173,10 +173,10 @@ builder.
     `packer_<UUID>`, where &lt;UUID&gt; is a 36 character unique identifier.
 
 -   `user_data` (string) - User data to launch with the instance. This is a
-    [template engine](/docs/templates/engine.html) see _User Data_ bellow for more
-    details.
-    Packer will not automatically wait for a user script to finish before
-    shutting down the instance this must be handled in a provisioner.
+    [template engine](/docs/templates/engine.html) see *User Data* bellow for
+    more details. Packer will not automatically wait for a user script to
+    finish before shutting down the instance this must be handled in a
+    provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the instance. This file will be parsed as a [template
