@@ -1,12 +1,12 @@
 package clone
 
 import (
+	"context"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"fmt"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"context"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type CloneConfig struct {

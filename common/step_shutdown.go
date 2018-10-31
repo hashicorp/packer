@@ -1,21 +1,21 @@
 package common
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"fmt"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"log"
 	"time"
-	"bytes"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"context"
 )
 
 type ShutdownConfig struct {
 	Command    string `mapstructure:"shutdown_command"`
 	RawTimeout string `mapstructure:"shutdown_timeout"`
 
-	Timeout    time.Duration
+	Timeout time.Duration
 }
 
 func (c *ShutdownConfig) Prepare() []error {

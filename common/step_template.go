@@ -1,13 +1,13 @@
 package common
 
 import (
+	"context"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"context"
 )
 
-type StepConvertToTemplate struct{
+type StepConvertToTemplate struct {
 	ConvertToTemplate bool
 }
 

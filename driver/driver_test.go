@@ -2,10 +2,10 @@ package driver
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
-	"math/rand"
 )
 
 // Defines whether acceptance tests should be run

@@ -1,11 +1,11 @@
 package driver
 
 import (
+	"fmt"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
-	"fmt"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type Datastore struct {

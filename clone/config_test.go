@@ -25,7 +25,7 @@ func TestCloneConfig_Timeout(t *testing.T) {
 	raw["shutdown_timeout"] = "3m"
 	conf, warns, err := NewConfig(raw)
 	testConfigOk(t, warns, err)
-	if conf.ShutdownConfig.Timeout != 3 * time.Minute {
+	if conf.ShutdownConfig.Timeout != 3*time.Minute {
 		t.Fatalf("shutdown_timeout sould be equal 3 minutes, got %v", conf.ShutdownConfig.Timeout)
 	}
 }
@@ -41,13 +41,13 @@ func TestCloneConfig_RAMReservation(t *testing.T) {
 func minimalConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"vcenter_server": "vcenter.domain.local",
-		"username":     "root",
-		"password":     "vmware",
-		"template":     "ubuntu",
-		"vm_name":      "vm1",
-		"host":         "esxi1.domain.local",
-		"ssh_username": "root",
-		"ssh_password": "secret",
+		"username":       "root",
+		"password":       "vmware",
+		"template":       "ubuntu",
+		"vm_name":        "vm1",
+		"host":           "esxi1.domain.local",
+		"ssh_username":   "root",
+		"ssh_password":   "secret",
 	}
 }
 

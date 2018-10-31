@@ -1,25 +1,25 @@
 package common
 
 import (
-	"github.com/hashicorp/packer/packer"
-	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"github.com/hashicorp/packer/helper/multistep"
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 )
 
 type HardwareConfig struct {
-	CPUs                int32 `mapstructure:"CPUs"`
-	CPUReservation      int64 `mapstructure:"CPU_reservation"`
-	CPULimit            int64 `mapstructure:"CPU_limit"`
-	CpuHotAddEnabled    bool  `mapstructure:"CPU_hot_plug"`
+	CPUs             int32 `mapstructure:"CPUs"`
+	CPUReservation   int64 `mapstructure:"CPU_reservation"`
+	CPULimit         int64 `mapstructure:"CPU_limit"`
+	CpuHotAddEnabled bool  `mapstructure:"CPU_hot_plug"`
 
 	RAM                 int64 `mapstructure:"RAM"`
 	RAMReservation      int64 `mapstructure:"RAM_reservation"`
 	RAMReserveAll       bool  `mapstructure:"RAM_reserve_all"`
 	MemoryHotAddEnabled bool  `mapstructure:"RAM_hot_plug"`
 
-	NestedHV            bool  `mapstructure:"NestedHV"`
+	NestedHV bool `mapstructure:"NestedHV"`
 }
 
 func (c *HardwareConfig) Prepare() []error {

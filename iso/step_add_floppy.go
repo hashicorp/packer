@@ -1,11 +1,11 @@
 package iso
 
 import (
+	"context"
+	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
-	"fmt"
-	"context"
 )
 
 type FloppyConfig struct {

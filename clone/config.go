@@ -3,10 +3,10 @@ package clone
 import (
 	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
+	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
-	"github.com/hashicorp/packer/helper/config"
 )
 
 type Config struct {
@@ -18,9 +18,9 @@ type Config struct {
 	common.HardwareConfig     `mapstructure:",squash"`
 	common.ConfigParamsConfig `mapstructure:",squash"`
 
-	common.RunConfig         `mapstructure:",squash"`
-	Comm communicator.Config `mapstructure:",squash"`
-	common.ShutdownConfig    `mapstructure:",squash"`
+	common.RunConfig      `mapstructure:",squash"`
+	Comm                  communicator.Config `mapstructure:",squash"`
+	common.ShutdownConfig `mapstructure:",squash"`
 
 	CreateSnapshot    bool `mapstructure:"create_snapshot"`
 	ConvertToTemplate bool `mapstructure:"convert_to_template"`

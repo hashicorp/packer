@@ -1,11 +1,11 @@
 package common
 
 import (
+	"context"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"strings"
-	"context"
 )
 
 type RunConfig struct {
@@ -13,7 +13,7 @@ type RunConfig struct {
 }
 
 type StepRun struct {
-	Config *RunConfig
+	Config   *RunConfig
 	SetOrder bool
 }
 
@@ -41,7 +41,7 @@ func (s *StepRun) Run(_ context.Context, state multistep.StateBag) multistep.Ste
 	ui.Say("Power on VM...")
 	err := vm.PowerOn()
 	if err != nil {
-		state.Put("error",err)
+		state.Put("error", err)
 		return multistep.ActionHalt
 	}
 

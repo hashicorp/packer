@@ -1,11 +1,11 @@
 package driver
 
 import (
+	"context"
 	"log"
 	"net"
 	"testing"
 	"time"
-	"context"
 )
 
 func TestVMAcc_clone(t *testing.T) {
@@ -168,7 +168,7 @@ func configureCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 
 func configureRAMReserveAllCheck(t *testing.T, vm *VirtualMachine, _ *CloneConfig) {
 	log.Printf("[DEBUG] Configuring the vm")
-	vm.Configure(&HardwareConfig{ RAMReserveAll: true })
+	vm.Configure(&HardwareConfig{RAMReserveAll: true})
 
 	log.Printf("[DEBUG] Running checks")
 	vmInfo, err := vm.Info("config")
@@ -237,7 +237,7 @@ func startAndStopCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {
 
 	vm.StartShutdown()
 	log.Printf("[DEBUG] Waiting max 1m0s for shutdown to complete")
-	vm.WaitForShutdown(context.TODO(), 1 * time.Minute)
+	vm.WaitForShutdown(context.TODO(), 1*time.Minute)
 }
 
 func snapshotCheck(t *testing.T, vm *VirtualMachine, config *CloneConfig) {

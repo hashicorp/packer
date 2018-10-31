@@ -2,12 +2,11 @@ package clone
 
 import (
 	builderT "github.com/hashicorp/packer/helper/builder/testing"
+	"github.com/hashicorp/packer/packer"
+	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
 	"os"
-
-	"github.com/hashicorp/packer/packer"
 	"testing"
-	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 )
 
 func TestCloneBuilderAcc_default(t *testing.T) {
@@ -429,7 +428,7 @@ func TestCloneBuilderAcc_sshPassword(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
 		Template: sshPasswordConfig(),
-		Check: checkDefaultBootOrder(t),
+		Check:    checkDefaultBootOrder(t),
 	})
 }
 
