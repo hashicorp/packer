@@ -31,6 +31,13 @@ func (b *Builder) Prepare(rawConfig ...interface{}) ([]string, error) {
 	}
 	b.config = config
 
+	var errs *packer.MultiError
+
+	errs = packer.MultiErrorAppend(errs, b.config.PVConfig.Prepare(&b.config.ctx))
+
+	if errs != nil && len(errs.Errors) > 0 {
+		return nil, errs
+	}
 	return nil, nil
 }
 
@@ -53,38 +60,118 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, fmt.Errorf("Error creating OPC Compute Client: %s", err)
 	}
 
+	runID := fmt.Sprintf("%s_%s", b.config.ImageName, os.Getenv("PACKER_RUN_UUID"))
 	// Populate the state bag
 	state := new(multistep.BasicStateBag)
 	state.Put("config", b.config)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 	state.Put("client", client)
+	state.Put("run_id", runID)
 
-	// Build the steps
-	steps := []multistep.Step{
-		&ocommon.StepKeyPair{
-			Debug:        b.config.PackerDebug,
-			Comm:         &b.config.Comm,
-			DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
-		},
-		&stepCreateIPReservation{},
-		&stepAddKeysToAPI{},
-		&stepSecurity{},
-		&stepCreateInstance{},
-		&communicator.StepConnect{
-			Config:    &b.config.Comm,
-			Host:      ocommon.CommHost,
-			SSHConfig: b.config.Comm.SSHConfigFunc(),
-		},
-		&common.StepProvision{},
-		&common.StepCleanupTempKeys{
-			Comm: &b.config.Comm,
-		},
-		&common.StepCleanupTempKeys{
-			Comm: &b.config.Comm,
-		},
-		&stepSnapshot{},
-		&stepListImages{},
+	var steps []multistep.Step
+	if b.config.IsPV() {
+		steps = []multistep.Step{
+			&ocommon.StepKeyPair{
+				Debug:        b.config.PackerDebug,
+				Comm:         &b.config.Comm,
+				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
+			},
+			&stepCreateIPReservation{},
+			&stepAddKeysToAPI{
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
+			},
+			&stepSecurity{
+				CommType:        b.config.Comm.Type,
+				SecurityListKey: "security_list_master",
+			},
+			&stepCreatePersistentVolume{
+				VolumeSize:     fmt.Sprintf("%d", b.config.PersistentVolumeSize),
+				VolumeName:     fmt.Sprintf("master-storage_%s", runID),
+				ImageList:      b.config.SourceImageList,
+				ImageListEntry: b.config.SourceImageListEntry,
+				Bootable:       true,
+			},
+			&stepCreatePVMaster{
+				Name:            fmt.Sprintf("master-instance_%s", runID),
+				VolumeName:      fmt.Sprintf("master-storage_%s", runID),
+				SecurityListKey: "security_list_master",
+			},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      ocommon.CommHost,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
+			},
+			&common.StepProvision{},
+			&stepTerminatePVMaster{},
+			&stepSecurity{
+				SecurityListKey: "security_list_builder",
+				CommType:        "ssh",
+			},
+			&stepCreatePersistentVolume{
+				// We double the master volume size because we need room to
+				// tarball the disk image. We also need to chunk the tar ball,
+				// but we can remove the original disk image first.
+				VolumeSize: fmt.Sprintf("%d", b.config.PersistentVolumeSize*2),
+				VolumeName: fmt.Sprintf("builder-storage_%s", runID),
+			},
+			&stepCreatePVBuilder{
+				Name:              fmt.Sprintf("builder-instance_%s", runID),
+				BuilderVolumeName: fmt.Sprintf("builder-storage_%s", runID),
+				SecurityListKey:   "security_list_builder",
+			},
+			&stepAttachVolume{
+				VolumeName:      fmt.Sprintf("master-storage_%s", runID),
+				Index:           2,
+				InstanceInfoKey: "builder_instance_info",
+			},
+			&stepConnectBuilder{
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
+				StepConnectSSH: &communicator.StepConnectSSH{
+					Config:    &b.config.BuilderComm,
+					Host:      ocommon.CommHost,
+					SSHConfig: b.config.BuilderComm.SSHConfigFunc(),
+				},
+			},
+			&stepUploadImage{
+				UploadImageCommand: b.config.BuilderUploadImageCommand,
+			},
+			&stepCreateImage{},
+			&stepListImages{},
+			&common.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
+		}
+	} else {
+		// Build the steps
+		steps = []multistep.Step{
+			&ocommon.StepKeyPair{
+				Debug:        b.config.PackerDebug,
+				Comm:         &b.config.Comm,
+				DebugKeyPath: fmt.Sprintf("oci_classic_%s.pem", b.config.PackerBuildName),
+			},
+			&stepCreateIPReservation{},
+			&stepAddKeysToAPI{
+				Skip:    b.config.Comm.Type != "ssh",
+				KeyName: fmt.Sprintf("packer-generated-key_%s", runID),
+			},
+			&stepSecurity{
+				SecurityListKey: "security_list",
+				CommType:        b.config.Comm.Type,
+			},
+			&stepCreateInstance{},
+			&communicator.StepConnect{
+				Config:    &b.config.Comm,
+				Host:      ocommon.CommHost,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
+			},
+			&common.StepProvision{},
+			&common.StepCleanupTempKeys{
+				Comm: &b.config.Comm,
+			},
+			&stepSnapshot{},
+			&stepListImages{},
+		}
 	}
 
 	// Run the steps
@@ -97,7 +184,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// If there is no snapshot, then just return
-	if _, ok := state.GetOk("snapshot"); !ok {
+	if _, ok := state.GetOk("machine_image_name"); !ok {
 		return nil, nil
 	}
 
@@ -106,7 +193,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		ImageListVersion: state.Get("image_list_version").(int),
 		MachineImageName: state.Get("machine_image_name").(string),
 		MachineImageFile: state.Get("machine_image_file").(string),
-		driver:           client,
 	}
 
 	return artifact, nil

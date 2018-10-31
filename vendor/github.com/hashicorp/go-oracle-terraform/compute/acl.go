@@ -6,20 +6,20 @@ type ACLsClient struct {
 }
 
 const (
-	ACLDescription   = "acl"
-	ACLContainerPath = "/network/v1/acl/"
-	ACLResourcePath  = "/network/v1/acl"
+	aclDescription   = "acl"
+	aclContainerPath = "/network/v1/acl/"
+	aclResourcePath  = "/network/v1/acl"
 )
 
 // ACLs obtains a ACLsClient which can be used to access to the
 // ACLs functions of the Compute API
-func (c *ComputeClient) ACLs() *ACLsClient {
+func (c *Client) ACLs() *ACLsClient {
 	return &ACLsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: ACLDescription,
-			ContainerPath:       ACLContainerPath,
-			ResourceRootPath:    ACLResourcePath,
+			Client:              c,
+			ResourceDescription: aclDescription,
+			ContainerPath:       aclContainerPath,
+			ResourceRootPath:    aclResourcePath,
 		}}
 }
 
@@ -29,8 +29,10 @@ type ACLInfo struct {
 	Description string `json:"description"`
 	// Indicates whether the ACL is enabled
 	Enabled bool `json:"enabledFlag"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The name of the ACL
-	Name string `json:"name"`
+	Name string
 	// Tags associated with the ACL
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier for the ACL
@@ -133,6 +135,6 @@ func (c *ACLsClient) DeleteACL(deleteInput *DeleteACLInput) error {
 }
 
 func (c *ACLsClient) success(aclInfo *ACLInfo) (*ACLInfo, error) {
-	aclInfo.Name = c.getUnqualifiedName(aclInfo.Name)
+	aclInfo.Name = c.getUnqualifiedName(aclInfo.FQDN)
 	return aclInfo, nil
 }

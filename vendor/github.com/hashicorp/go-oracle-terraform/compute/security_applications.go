@@ -7,10 +7,10 @@ type SecurityApplicationsClient struct {
 
 // SecurityApplications obtains a SecurityApplicationsClient which can be used to access to the
 // Security Application functions of the Compute API
-func (c *ComputeClient) SecurityApplications() *SecurityApplicationsClient {
+func (c *Client) SecurityApplications() *SecurityApplicationsClient {
 	return &SecurityApplicationsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "security application",
 			ContainerPath:       "/secapplication/",
 			ResourceRootPath:    "/secapplication",
@@ -23,61 +23,92 @@ type SecurityApplicationInfo struct {
 	Description string `json:"description"`
 	// The TCP or UDP destination port number. This can be a port range, such as 5900-5999 for TCP.
 	DPort string `json:"dport"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The ICMP code.
 	ICMPCode SecurityApplicationICMPCode `json:"icmpcode"`
 	// The ICMP type.
 	ICMPType SecurityApplicationICMPType `json:"icmptype"`
 	// The three-part name of the Security Application (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Name string
 	// The protocol to use.
 	Protocol SecurityApplicationProtocol `json:"protocol"`
 	// The Uniform Resource Identifier
 	URI string `json:"uri"`
 }
 
+// SecurityApplicationProtocol defines the constants for a security application protocol
 type SecurityApplicationProtocol string
 
 const (
-	All    SecurityApplicationProtocol = "all"
-	AH     SecurityApplicationProtocol = "ah"
-	ESP    SecurityApplicationProtocol = "esp"
-	ICMP   SecurityApplicationProtocol = "icmp"
+	// All - all
+	All SecurityApplicationProtocol = "all"
+	// AH - ah
+	AH SecurityApplicationProtocol = "ah"
+	// ESP - esp
+	ESP SecurityApplicationProtocol = "esp"
+	// ICMP - icmp
+	ICMP SecurityApplicationProtocol = "icmp"
+	// ICMPV6 - icmpv6
 	ICMPV6 SecurityApplicationProtocol = "icmpv6"
-	IGMP   SecurityApplicationProtocol = "igmp"
-	IPIP   SecurityApplicationProtocol = "ipip"
-	GRE    SecurityApplicationProtocol = "gre"
+	// IGMP - igmp
+	IGMP SecurityApplicationProtocol = "igmp"
+	// IPIP - ipip
+	IPIP SecurityApplicationProtocol = "ipip"
+	// GRE - gre
+	GRE SecurityApplicationProtocol = "gre"
+	// MPLSIP - mplsip
 	MPLSIP SecurityApplicationProtocol = "mplsip"
-	OSPF   SecurityApplicationProtocol = "ospf"
-	PIM    SecurityApplicationProtocol = "pim"
-	RDP    SecurityApplicationProtocol = "rdp"
-	SCTP   SecurityApplicationProtocol = "sctp"
-	TCP    SecurityApplicationProtocol = "tcp"
-	UDP    SecurityApplicationProtocol = "udp"
+	// OSPF - ospf
+	OSPF SecurityApplicationProtocol = "ospf"
+	// PIM - pim
+	PIM SecurityApplicationProtocol = "pim"
+	// RDP - rdp
+	RDP SecurityApplicationProtocol = "rdp"
+	// SCTP - sctp
+	SCTP SecurityApplicationProtocol = "sctp"
+	// TCP - tcp
+	TCP SecurityApplicationProtocol = "tcp"
+	// UDP - udp
+	UDP SecurityApplicationProtocol = "udp"
 )
 
+// SecurityApplicationICMPCode  defines the constants an icmp code can be
 type SecurityApplicationICMPCode string
 
 const (
-	Admin    SecurityApplicationICMPCode = "admin"
-	Df       SecurityApplicationICMPCode = "df"
-	Host     SecurityApplicationICMPCode = "host"
-	Network  SecurityApplicationICMPCode = "network"
-	Port     SecurityApplicationICMPCode = "port"
+	// Admin - admin
+	Admin SecurityApplicationICMPCode = "admin"
+	// Df - df
+	Df SecurityApplicationICMPCode = "df"
+	// Host - host
+	Host SecurityApplicationICMPCode = "host"
+	// Network - network
+	Network SecurityApplicationICMPCode = "network"
+	// Port - port
+	Port SecurityApplicationICMPCode = "port"
+	// Protocol - protocol
 	Protocol SecurityApplicationICMPCode = "protocol"
 )
 
+// SecurityApplicationICMPType defines the constants an icmp type can be
 type SecurityApplicationICMPType string
 
 const (
-	Echo        SecurityApplicationICMPType = "echo"
-	Reply       SecurityApplicationICMPType = "reply"
-	TTL         SecurityApplicationICMPType = "ttl"
-	TraceRoute  SecurityApplicationICMPType = "traceroute"
+	// Echo - echo
+	Echo SecurityApplicationICMPType = "echo"
+	// Reply - reply
+	Reply SecurityApplicationICMPType = "reply"
+	// TTL - ttl
+	TTL SecurityApplicationICMPType = "ttl"
+	// TraceRoute - traceroute
+	TraceRoute SecurityApplicationICMPType = "traceroute"
+	// Unreachable - unreachable
 	Unreachable SecurityApplicationICMPType = "unreachable"
 )
 
 func (c *SecurityApplicationsClient) success(result *SecurityApplicationInfo) (*SecurityApplicationInfo, error) {
-	c.unqualify(&result.Name)
+	result.Name = c.getUnqualifiedName(result.FQDN)
 	return result, nil
 }
 
