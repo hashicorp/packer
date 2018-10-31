@@ -105,13 +105,13 @@ func (cf *TencentCloudAccessConfig) Prepare(ctx *interpolate.Context) []error {
 
 func (cf *TencentCloudAccessConfig) Config() error {
 	if cf.SecretId == "" {
-		cf.SecretId = os.Getenv("TENCETCLOUD_SECRET_ID")
+		cf.SecretId = os.Getenv("TENCENTCLOUD_SECRET_ID")
 	}
 	if cf.SecretKey == "" {
 		cf.SecretKey = os.Getenv("TENCENTCLOUD_SECRET_KEY")
 	}
 	if cf.SecretId == "" || cf.SecretKey == "" {
-		return fmt.Errorf("TENCETCLOUD_SECRET_ID and TENCENTCLOUD_SECRET_KEY must be set")
+		return fmt.Errorf("TENCENTCLOUD_SECRET_ID and TENCENTCLOUD_SECRET_KEY must be set")
 	}
 	return nil
 }

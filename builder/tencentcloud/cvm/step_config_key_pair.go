@@ -3,6 +3,7 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -10,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
+	"strings"
 )
 
 type stepConfigKeyPair struct {
@@ -106,7 +108,17 @@ func (s *stepConfigKeyPair) Cleanup(state multistep.StateBag) {
 	ui.Say("Deleting temporary keypair...")
 	req := cvm.NewDeleteKeyPairsRequest()
 	req.KeyIds = []*string{&s.keyID}
-	_, err := client.DeleteKeyPairs(req)
+	err := common.Retry(5, 5, 60, func(u uint) (bool, error) {
+		_, err := client.DeleteKeyPairs(req)
+		if err == nil {
+			return true, nil
+		}
+		if strings.Index(err.Error(), "NotSupported") != -1 {
+			return false, nil
+		} else {
+			return false, err
+		}
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf(
 			"delete keypair failed, please delete it manually, keyId: %s, err: %s", s.keyID, err.Error()))

@@ -20,6 +20,7 @@ type TencentCloudImageConfig struct {
 
 func (cf *TencentCloudImageConfig) Prepare(ctx *interpolate.Context) []error {
 	var errs []error
+	cf.ForcePoweroff = true
 	if cf.ImageName == "" {
 		errs = append(errs, fmt.Errorf("image_name must be set"))
 	} else if len(cf.ImageName) > 20 {

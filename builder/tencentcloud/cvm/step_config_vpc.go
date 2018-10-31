@@ -3,10 +3,12 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
+	"strings"
 )
 
 type stepConfigVPC struct {
@@ -70,7 +72,17 @@ func (s *stepConfigVPC) Cleanup(state multistep.StateBag) {
 	MessageClean(state, "VPC")
 	req := vpc.NewDeleteVpcRequest()
 	req.VpcId = &s.VpcId
-	_, err := vpcClient.DeleteVpc(req)
+	err := common.Retry(5, 5, 60, func(u uint) (bool, error) {
+		_, err := vpcClient.DeleteVpc(req)
+		if err == nil {
+			return true, nil
+		}
+		if strings.Index(err.Error(), "ResourceInUse") != -1 {
+			return false, nil
+		} else {
+			return false, err
+		}
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("delete vpc(%s) failed: %s, you need to delete it by hand",
 			s.VpcId, err.Error()))

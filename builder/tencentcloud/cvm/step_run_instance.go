@@ -2,6 +2,7 @@ package cvm
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -132,6 +133,7 @@ func (s *stepRunInstance) getUserData(state multistep.StateBag) (string, error) 
 		}
 		userData = string(data)
 	}
+	userData = base64.StdEncoding.EncodeToString([]byte(userData))
 	log.Printf(fmt.Sprintf("user_data: %s", userData))
 	return userData, nil
 }

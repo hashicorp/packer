@@ -3,10 +3,12 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
+	"strings"
 )
 
 type stepConfigSubnet struct {
@@ -81,7 +83,17 @@ func (s *stepConfigSubnet) Cleanup(state multistep.StateBag) {
 	MessageClean(state, "SUBNET")
 	req := vpc.NewDeleteSubnetRequest()
 	req.SubnetId = &s.SubnetId
-	_, err := vpcClient.DeleteSubnet(req)
+	err := common.Retry(5, 5, 60, func(u uint) (bool, error) {
+		_, err := vpcClient.DeleteSubnet(req)
+		if err == nil {
+			return true, nil
+		}
+		if strings.Index(err.Error(), "ResourceInUse") != -1 {
+			return false, nil
+		} else {
+			return false, err
+		}
+	})
 	if err != nil {
 		ui.Error(fmt.Sprintf("delete subnet(%s) failed: %s, you need to delete it by hand",
 			s.SubnetId, err.Error()))
