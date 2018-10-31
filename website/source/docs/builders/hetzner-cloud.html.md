@@ -62,7 +62,9 @@ builder.
     polled by the client. Default `500ms`. Increase this interval if you run
     into rate limiting errors.
 
--   `user_data` (string) - User data to launch with the server.
+-   `user_data` (string) - User data to launch with the server. Packer will not
+    automatically wait for a user script to finish before shutting down the
+    instance this must be handled in a provisioner.
 
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the server.
