@@ -21,6 +21,7 @@ type AlicloudDiskDevice struct {
 }
 
 type AlicloudDiskDevices struct {
+	ECSSystemDiskMapping  AlicloudDiskDevice   `mapstructure:"system_disk_mapping"`
 	ECSImagesDiskMappings []AlicloudDiskDevice `mapstructure:"image_disk_mappings"`
 }
 
