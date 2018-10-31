@@ -35,6 +35,7 @@ type Config struct {
 	Groups      []string          `mapstructure:"ami_groups"`
 	LicenseType string            `mapstructure:"license_type"`
 	RoleName    string            `mapstructure:"role_name"`
+	Format      string            `mapstructure:"format"`
 
 	ctx interpolate.Context
 }
@@ -60,8 +61,12 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	// Set defaults
+	if p.config.Format == "" {
+		p.config.Format = "ova"
+	}
+
 	if p.config.S3Key == "" {
-		p.config.S3Key = "packer-import-{{timestamp}}.ova"
+		p.config.S3Key = "packer-import-{{timestamp}}." + p.config.Format
 	}
 
 	errs := new(packer.MultiError)
@@ -85,6 +90,13 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 			errs = packer.MultiErrorAppend(
 				errs, fmt.Errorf("%s must be set", key))
 		}
+	}
+
+	switch p.config.Format {
+	case "ova", "raw", "vmdk", "vhd", "vhdx":
+	default:
+		errs = packer.MultiErrorAppend(
+			errs, fmt.Errorf("invalid format '%s'. Only 'ova', 'raw', 'vhd', 'vhdx', or 'vmdk' are allowed", p.config.Format))
 	}
 
 	// Anything which flagged return back up the stack
@@ -113,11 +125,11 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	}
 	log.Printf("Rendered s3_key_name as %s", p.config.S3Key)
 
-	log.Println("Looking for OVA in artifact")
+	log.Println("Looking for image in artifact")
 	// Locate the files output from the builder
 	source := ""
 	for _, path := range artifact.Files() {
-		if strings.HasSuffix(path, ".ova") {
+		if strings.HasSuffix(path, "."+p.config.Format) {
 			source = path
 			break
 		}
@@ -125,7 +137,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	// Hope we found something useful
 	if source == "" {
-		return nil, false, fmt.Errorf("No OVA file found in artifact from builder")
+		return nil, false, fmt.Errorf("No %s image file found in artifact from builder", p.config.Format)
 	}
 
 	// open the source file
@@ -137,7 +149,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 
 	ui.Message(fmt.Sprintf("Uploading %s to s3://%s/%s", source, p.config.S3Bucket, p.config.S3Key))
 
-	// Copy the OVA file into the S3 bucket specified
+	// Copy the image file into the S3 bucket specified
 	uploader := s3manager.NewUploader(session)
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Body:   file,
@@ -160,6 +172,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	params := &ec2.ImportImageInput{
 		DiskContainers: []*ec2.ImageDiskContainer{
 			{
+				Format: &p.config.Format,
 				UserBucket: &ec2.UserBucket{
 					S3Bucket: &p.config.S3Bucket,
 					S3Key:    &p.config.S3Key,
