@@ -77,9 +77,8 @@ builder.
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with `http://` or `https://`.
     
-    
 -   `system_disk_mapping` (image disk mapping) - Image disk mapping for system disk.
-    -   `disk_category` (string) - Category of the data disk. Optional values are:
+    -   `disk_category` (string) - Category of the system disk. Optional values are:
         -   `cloud` - general cloud disk
         -   `cloud_efficiency` - efficiency cloud disk
         -   `cloud_ssd` - cloud SSD
