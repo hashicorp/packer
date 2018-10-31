@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
+	"github.com/mitchellh/go-homedir"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/net/proxy"
@@ -226,7 +227,12 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	if config.SSHBastionPrivateKeyFile != "" {
-		signer, err := helperssh.FileSigner(config.SSHBastionPrivateKeyFile)
+		path, err := homedir.Expand(config.SSHBastionPrivateKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error expanding path for SSH bastion private key: %s", err)
+		}
+		signer, err := helperssh.FileSigner(path)
 		if err != nil {
 			return nil, err
 		}
