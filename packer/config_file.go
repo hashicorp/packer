@@ -20,22 +20,19 @@ func ConfigDir() (string, error) {
 
 // ConfigTmpDir returns the configuration tmp directory for Packer
 func ConfigTmpDir() (string, error) {
-	var tmpdir, td string
-	var found bool
-
-	if tmpdir = os.Getenv("PACKER_TMP_DIR"); tmpdir == "" {
-		for e := range []string{"TEMP", "TMP", "LOCALAPPDATA"} {
+	if tmpdir := os.Getenv("PACKER_TMP_DIR"); tmpdir == "" {
+		for _, e := range []string{"TEMP", "TMP", "LOCALAPPDATA"} {
 			if tmpdir, found := os.LookupEnv(e); found {
-				td = filepath.Join(tmpdir, "packer")
+				td := filepath.Join(tmpdir, "packer")
 				break
 			}
 		}
 	}
 	if tmpdir == "" {
-		td = filepath.Join(configDir(), "tmp")
+		td := filepath.Join(ConfigDir(), "tmp")
 	}
 
-	_, err = os.Stat(td)
+	_, err := os.Stat(td)
 	if os.IsNotExist(err) {
 		if err = os.MkdirAll(td, 0700); err != nil {
 			return "", err
