@@ -76,26 +76,32 @@ builder.
 -   `image_description` (string) - The description of the image, with a length
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with `http://` or `https://`.
-    
--   `system_disk_mapping` (image disk mapping) - Image disk mapping for system disk.
-    -   `disk_category` (string) - Category of the system disk. Optional values are:
+
+-   `system_disk_mapping` (image disk mapping) - Image disk mapping for system
+    disk.
+    -   `disk_category` (string) - Category of the system disk. Optional values
+        are:
         -   `cloud` - general cloud disk
         -   `cloud_efficiency` - efficiency cloud disk
         -   `cloud_ssd` - cloud SSD
 
-        For phased-out instance types and non-I/O optimized instances, the default value is cloud.
-        Otherwise, the default value is cloud_efficiency.
-        
-    -   `disk_description` (string) - The value of disk description is blank by default. \[2, 256\] characters. 
-            The disk description will appear on the console. It cannot begin with `http://` or `https://`.
-            
-    -   `disk_name` (string) - The value of disk name is blank by default. \[2, 128\]
-            English or Chinese characters, must begin with an uppercase/lowercase letter
-            or Chinese character. Can contain numbers, `.`, `_` and `-`. The disk name
-            will appear on the console. It cannot begin with `http://` or `https://`.
-    
-    -   `disk_size` (number) - Size of the system disk, measured in GiB. Value range: \[20, 500\]. The specified value 
-        must be equal to or greater than max{20, ImageSize}. Default value: max{40, ImageSize}.
+        For phased-out instance types and non-I/O optimized instances, the
+        default value is cloud. Otherwise, the default value is
+        cloud\_efficiency.
+
+    -   `disk_description` (string) - The value of disk description is blank by
+        default. \[2, 256\] characters. The disk description will appear on the
+        console. It cannot begin with `http://` or `https://`.
+
+    -   `disk_name` (string) - The value of disk name is blank by default. \[2,
+        128\] English or Chinese characters, must begin with an
+        uppercase/lowercase letter or Chinese character. Can contain numbers,
+        `.`, `_` and `-`. The disk name will appear on the console. It cannot
+        begin with `http://` or `https://`.
+
+    -   `disk_size` (number) - Size of the system disk, measured in GiB. Value
+        range: \[20, 500\]. The specified value must be equal to or greater
+        than max{20, ImageSize}. Default value: max{40, ImageSize}.
 
 -   `image_disk_mappings` (array of image disk mappings) - Add one or more data
     disks to the image.
@@ -128,9 +134,9 @@ builder.
         begin with `http://` or `https://`.
 
     -   `disk_size` (number) - Size of the data disk, in GB, values range:
-        -   `cloud` - 5 ~ 2000
-        -   `cloud_efficiency` - 20 ~ 2048
-        -   `cloud_ssd` - 20 ~ 2048
+        -   `cloud` - 5 \~ 2000
+        -   `cloud_efficiency` - 20 \~ 2048
+        -   `cloud_ssd` - 20 \~ 2048
 
         The value should be equal to or greater than the size of the specific
         SnapshotId.
@@ -277,7 +283,7 @@ Here is a basic example for Alicloud.
 }
 ```
 
-~&gt; Note: Images can become deprecated after a while; run
+\~&gt; Note: Images can become deprecated after a while; run
 `aliyun ecs DescribeImages` to find one that exists.
 
 See the
