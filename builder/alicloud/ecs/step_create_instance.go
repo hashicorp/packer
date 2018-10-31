@@ -66,6 +66,7 @@ func (s *stepCreateAlicloudInstance) Run(_ context.Context, state multistep.Stat
 			InstanceName:            s.InstanceName,
 			Password:                password,
 			ZoneId:                  s.ZoneId,
+			SystemDisk:              systemDeviceToDiskType(config.AlicloudImageConfig.ECSSystemDiskMapping),
 			DataDisk:                diskDeviceToDiskType(config.AlicloudImageConfig.ECSImagesDiskMappings),
 		})
 		if err != nil {
@@ -145,6 +146,15 @@ func (s *stepCreateAlicloudInstance) getUserData(state multistep.StateBag) (stri
 	log.Printf(userData)
 	return userData, nil
 
+}
+
+func systemDeviceToDiskType(systemDisk AlicloudDiskDevice) ecs.SystemDiskType {
+	return ecs.SystemDiskType{
+		DiskName:    systemDisk.DiskName,
+		Category:    ecs.DiskCategory(systemDisk.DiskCategory),
+		Size:        systemDisk.DiskSize,
+		Description: systemDisk.Description,
+	}
 }
 
 func diskDeviceToDiskType(diskDevices []AlicloudDiskDevice) []ecs.DataDiskType {

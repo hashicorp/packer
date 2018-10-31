@@ -29,16 +29,17 @@ The example below is fully functional.
 ## Configuration Reference
 
 The reference of available configuration options is listed below. The only
-required element is either "inline" or "script". Every other option is optional.
+required element is either "inline" or "script". Every other option is
+optional.
 
 Exactly *one* of the following is required:
 
--   `command` (string) - This is a single command to execute. It will be written
-    to a temporary file and run using the `execute_command` call below.
+-   `command` (string) - This is a single command to execute. It will be
+    written to a temporary file and run using the `execute_command` call below.
 
 -   `inline` (array of strings) - This is an array of commands to execute. The
-    commands are concatenated by newlines and turned into a single file, so they
-    are all executed within the same context. This allows you to change
+    commands are concatenated by newlines and turned into a single file, so
+    they are all executed within the same context. This allows you to change
     directories in one command and use something in the directory in the next
     and so on. Inline scripts are the easiest way to pull off simple tasks
     within the machine.
@@ -56,17 +57,17 @@ Optional parameters:
 
 -   `environment_vars` (array of strings) - An array of key/value pairs to
     inject prior to the `execute_command`. The format should be `key=value`.
-    Packer injects some environmental variables by default into the environment,
-    as well, which are covered in the section below.
+    Packer injects some environmental variables by default into the
+    environment, as well, which are covered in the section below.
 
--   `execute_command` (array of strings) - The command used to execute the script. By
-    default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
-    on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows.
-    This is treated as a [template engine](/docs/templates/engine.html).
-    There are two available variables: `Script`, which is the path to the script
-    to run, and `Vars`, which is the list of `environment_vars`, if configured.
-    If you choose to set this option, make sure that the first element in the
-    array is the shell program you want to use (for example, "sh" or
+-   `execute_command` (array of strings) - The command used to execute the
+    script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
+    on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows. This is
+    treated as a [template engine](/docs/templates/engine.html). There are two
+    available variables: `Script`, which is the path to the script to run, and
+    `Vars`, which is the list of `environment_vars`, if configured. If you
+    choose to set this option, make sure that the first element in the array is
+    the shell program you want to use (for example, "sh" or
     "/usr/local/bin/zsh" or even "powershell.exe" although anything other than
     a flavor of the shell command language is not explicitly supported and may
     be broken by assumptions made within Packer). It's worth noting that if you
@@ -78,50 +79,54 @@ Optional parameters:
     one element is provided, Packer will replicate past behavior by appending
     your `execute_command` to the array of strings `["sh", "-c"]`. For example,
     if you set `"execute_command": "foo bar"`, the final `execute_command` that
-    Packer runs will be ["sh", "-c", "foo bar"]. If you set `"execute_command": ["foo", "bar"]`,
-    the final execute_command will remain `["foo", "bar"]`.
+    Packer runs will be \["sh", "-c", "foo bar"\]. If you set
+    `"execute_command": ["foo", "bar"]`, the final execute\_command will remain
+    `["foo", "bar"]`.
 
     Again, the above is only provided as a backwards compatibility fix; we
-    strongly recommend that you set execute_command as an array of strings.
+    strongly recommend that you set execute\_command as an array of strings.
 
 -   `inline_shebang` (string) - The
-    [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use when
-    running commands specified by `inline`. By default, this is `/bin/sh -e`. If
-    you're not using `inline`, then this configuration has no effect.
-    **Important:** If you customize this, be sure to include something like the
-    `-e` flag, otherwise individual steps failing won't fail the provisioner.
+    [shebang](http://en.wikipedia.org/wiki/Shebang_%28Unix%29) value to use
+    when running commands specified by `inline`. By default, this is
+    `/bin/sh -e`. If you're not using `inline`, then this configuration has no
+    effect. **Important:** If you customize this, be sure to include something
+    like the `-e` flag, otherwise individual steps failing won't fail the
+    provisioner.
 
--  `only_on` (array of strings) - This is an array of 
-    [runtime operating systems](https://golang.org/doc/install/source#environment)
-    where `shell-local` will execute. This allows you to execute `shell-local` 
-    *only* on specific operating systems. By default, shell-local will always run 
-    if `only_on` is not set."
+-   `only_on` (array of strings) - This is an array of [runtime operating
+    systems](https://golang.org/doc/install/source#environment) where
+    `shell-local` will execute. This allows you to execute `shell-local` *only*
+    on specific operating systems. By default, shell-local will always run if
+    `only_on` is not set."
 
--  `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
-   are running Packer in a Windows environment with the Windows Subsystem for
-   Linux feature enabled, and would like to invoke a bash script rather than
-   invoking a Cmd script, you'll need to set this flag to true; it tells Packer
-   to use the linux subsystem path for your script rather than the Windows path.
-   (e.g. /mnt/c/path/to/your/file instead of C:/path/to/your/file). Please see
-   the example below for more guidance on how to use this feature. If you are
-   not on a Windows host, or you do not intend to use the shell-local
-   post-processor to run a bash script, please ignore this option.
-   If you set this flag to true, you still need to provide the standard windows
-   path to the script when providing a `script`. This is a beta feature.
+-   `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
+    are running Packer in a Windows environment with the Windows Subsystem for
+    Linux feature enabled, and would like to invoke a bash script rather than
+    invoking a Cmd script, you'll need to set this flag to true; it tells
+    Packer to use the linux subsystem path for your script rather than the
+    Windows path. (e.g. /mnt/c/path/to/your/file instead of
+    C:/path/to/your/file). Please see the example below for more guidance on
+    how to use this feature. If you are not on a Windows host, or you do not
+    intend to use the shell-local post-processor to run a bash script, please
+    ignore this option. If you set this flag to true, you still need to provide
+    the standard windows path to the script when providing a `script`. This is
+    a beta feature.
 
 ## Execute Command
 
 To many new users, the `execute_command` is puzzling. However, it provides an
 important function: customization of how the command is executed. The most
-common use case for this is dealing with **sudo password prompts**. You may also
-need to customize this if you use a non-POSIX shell, such as `tcsh` on FreeBSD.
+common use case for this is dealing with **sudo password prompts**. You may
+also need to customize this if you use a non-POSIX shell, such as `tcsh` on
+FreeBSD.
 
 ### The Windows Linux Subsystem
 
-The shell-local post-processor was designed with the idea of allowing you to run
-commands in your local operating system's native shell. For Windows, we've
-assumed in our defaults that this is Cmd. However, it is possible to run a
-bash script as part of the Windows Linux Subsystem from the shell-local
+The shell-local post-processor was designed with the idea of allowing you to
+run commands in your local operating system's native shell. For Windows, we've
+assumed in our defaults that this is Cmd. However, it is possible to run a bash
+script as part of the Windows Linux Subsystem from the shell-local
 post-processor, by modifying the `execute_command` and the `use_linux_pathing`
 options in the post-processor config.
 
@@ -136,32 +141,30 @@ still in beta. There will be some limitations as a result. For example, it will
 likely not work unless both Packer and the scripts you want to run are both on
 the C drive.
 
-```
-{
-    "builders": [
-      {
-        "type":         "null",
-        "communicator": "none"
-      }
-    ],
-    "provisioners": [
-      {
-          "type": "shell-local",
-          "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
-          "use_linux_pathing": true,
-          "scripts": ["C:/Users/me/scripts/example_bash.sh"]
-      },
-      {
-          "type": "shell-local",
-          "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
-          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
-          "use_linux_pathing": true,
-          "script": "C:/Users/me/scripts/example_bash.sh"
-      }
-  ]
-}
-```
+    {
+        "builders": [
+          {
+            "type":         "null",
+            "communicator": "none"
+          }
+        ],
+        "provisioners": [
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+              "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+              "use_linux_pathing": true,
+              "scripts": ["C:/Users/me/scripts/example_bash.sh"]
+          },
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+              "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+              "use_linux_pathing": true,
+              "script": "C:/Users/me/scripts/example_bash.sh"
+          }
+      ]
+    }
 
 ## Default Environmental Variables
 
@@ -169,14 +172,15 @@ In addition to being able to specify custom environmental variables using the
 `environment_vars` configuration, the provisioner automatically defines certain
 commonly useful environmental variables:
 
--   `PACKER_BUILD_NAME` is set to the
-    [name of the build](/docs/templates/builders.html#named-builds) that Packer is running.
+-   `PACKER_BUILD_NAME` is set to the [name of the
+    build](/docs/templates/builders.html#named-builds) that Packer is running.
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly from a common provisioning script.
 
--   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create the
-    machine that the script is running on. This is useful if you want to run
-    only certain parts of the script on systems built with certain builders.
+-   `PACKER_BUILDER_TYPE` is the type of the builder that was used to create
+    the machine that the script is running on. This is useful if you want to
+    run only certain parts of the script on systems built with certain
+    builders.
 
 ## Safely Writing A Script
 
@@ -238,105 +242,83 @@ are cleaned up.
 For a shell script, that means the script **must** exit with a zero code. You
 *must* be extra careful to `exit 0` when necessary.
 
-
 ## Usage Examples:
 
 Example of running a .cmd file on windows:
 
-```
-      {
-          "type": "shell-local",
-          "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
-          "scripts": ["./scripts/test_cmd.cmd"]
-      },
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest1"],
+              "scripts": ["./scripts/test_cmd.cmd"]
+          },
 
-Contents of "test_cmd.cmd":
+Contents of "test\_cmd.cmd":
 
-```
-echo %SHELLLOCALTEST%
-```
+    echo %SHELLLOCALTEST%
 
-Example of running an inline command on windows:
-Required customization: tempfile_extension
+Example of running an inline command on windows: Required customization:
+tempfile\_extension
 
-```
-      {
-          "type": "shell-local",
-          "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
-          "tempfile_extension": ".cmd",
-          "inline": ["echo %SHELLLOCALTEST%"]
-      },
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest2"],
+              "tempfile_extension": ".cmd",
+              "inline": ["echo %SHELLLOCALTEST%"]
+          },
 
-Example of running a bash command on windows using WSL:
-Required customizations: use_linux_pathing and execute_command
+Example of running a bash command on windows using WSL: Required
+customizations: use\_linux\_pathing and execute\_command
 
-```
-      {
-          "type": "shell-local",
-          "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
-          "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
-          "use_linux_pathing": true,
-          "script": "./scripts/example_bash.sh"
-      }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest3"],
+              "execute_command": ["bash", "-c", "{{.Vars}} {{.Script}}"],
+              "use_linux_pathing": true,
+              "script": "./scripts/example_bash.sh"
+          }
 
-Contents of "example_bash.sh":
+Contents of "example\_bash.sh":
 
-```
-#!/bin/bash
-echo $SHELLLOCALTEST
-```
+    #!/bin/bash
+    echo $SHELLLOCALTEST
 
-Example of running a powershell script on windows:
-Required customizations: env_var_format and execute_command
+Example of running a powershell script on windows: Required customizations:
+env\_var\_format and execute\_command
 
-```
 
-      {
-          "type": "shell-local",
-          "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
-          "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-          "env_var_format": "$env:%s=\"%s\"; ",
-          "script": "./scripts/example_ps.ps1"
-      }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest4"],
+              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+              "env_var_format": "$env:%s=\"%s\"; ",
+              "script": "./scripts/example_ps.ps1"
+          }
 
-Example of running a powershell script on windows as "inline":
-Required customizations: env_var_format, tempfile_extension, and execute_command
+Example of running a powershell script on windows as "inline": Required
+customizations: env\_var\_format, tempfile\_extension, and execute\_command
 
-```
-      {
-          "type": "shell-local",
-          "tempfile_extension": ".ps1",
-          "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
-          "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
-          "env_var_format": "$env:%s=\"%s\"; ",
-          "inline": ["write-output $env:SHELLLOCALTEST"]
-      }
-```
-
+          {
+              "type": "shell-local",
+              "tempfile_extension": ".ps1",
+              "environment_vars": ["SHELLLOCALTEST=ShellTest5"],
+              "execute_command": ["powershell.exe", "{{.Vars}} {{.Script}}"],
+              "env_var_format": "$env:%s=\"%s\"; ",
+              "inline": ["write-output $env:SHELLLOCALTEST"]
+          }
 
 Example of running a bash script on linux:
 
-```
-      {
-          "type": "shell-local",
-          "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
-          "scripts": ["./scripts/example_bash.sh"]
-      }
-```
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest1"],
+              "scripts": ["./scripts/example_bash.sh"]
+          }
 
 Example of running a bash "inline" on linux:
 
-```
-      {
-          "type": "shell-local",
-          "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
-          "inline": ["echo hello",
-                     "echo $PROVISIONERTEST"]
-      }
-```
-
-
+          {
+              "type": "shell-local",
+              "environment_vars": ["PROVISIONERTEST=ProvisionerTest2"],
+              "inline": ["echo hello",
+                         "echo $PROVISIONERTEST"]
+          }

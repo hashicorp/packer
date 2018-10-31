@@ -19,7 +19,8 @@ provisioner helps to ease that process.
 
 Packer expects the machine to be ready to continue provisioning after it
 reboots. Packer detects that the reboot has completed by making an RPC call
-through the Windows Remote Management (WinRM) service, not by ACPI functions, so Windows must be completely booted in order to continue.
+through the Windows Remote Management (WinRM) service, not by ACPI functions,
+so Windows must be completely booted in order to continue.
 
 ## Basic Example
 
