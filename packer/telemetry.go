@@ -9,6 +9,7 @@ import (
 	"time"
 
 	checkpoint "github.com/hashicorp/go-checkpoint"
+	"github.com/hashicorp/packer/packer/configfile"
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
@@ -35,7 +36,7 @@ func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
 		return nil
 	}
 
-	configDir, err := ConfigDir()
+	configDir, err := configfile.ConfigDir()
 	if err != nil {
 		log.Printf("[WARN] (telemetry) setup error: %s", err)
 		return nil

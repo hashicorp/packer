@@ -1,6 +1,6 @@
 // +build windows
 
-package packer
+package configfile
 
 import (
 	"path/filepath"

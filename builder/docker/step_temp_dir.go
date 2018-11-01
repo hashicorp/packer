@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 // StepTempDir creates a temporary directory that we use in order to
@@ -24,10 +25,8 @@ func (s *StepTempDir) Run(_ context.Context, state multistep.StateBag) multistep
 	var err error
 	var tempdir string
 
-	configTmpDir, err := packer.ConfigTmpDir()
-	if err == nil {
-		tempdir, err = ioutil.TempDir(configTmpDir, "packer-docker")
-	}
+	prefix, _ := configfile.ConfigTmpDir()
+	tempdir, err = ioutil.TempDir(prefix, "docker")
 	if err != nil {
 		err := fmt.Errorf("Error making temp dir: %s", err)
 		state.Put("error", err)

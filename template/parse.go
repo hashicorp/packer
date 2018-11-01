@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -328,7 +329,8 @@ func ParseFile(path string) (*Template, error) {
 	var err error
 	if path == "-" {
 		// Create a temp file for stdin in case of errors
-		f, err = ioutil.TempFile(os.TempDir(), "packer")
+		prefix, _ := configfile.ConfigTmpDir()
+		f, err = ioutil.TempFile(prefix, "parse")
 		if err != nil {
 			return nil, err
 		}

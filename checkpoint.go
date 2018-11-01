@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/go-checkpoint"
 	"github.com/hashicorp/packer/command"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	packerVersion "github.com/hashicorp/packer/version"
 )
 
@@ -27,7 +27,7 @@ func runCheckpoint(c *config) {
 		return
 	}
 
-	configDir, err := packer.ConfigDir()
+	configDir, err := configfile.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Checkpoint setup error: %s", err)
 		checkpointResult <- nil
