@@ -456,10 +456,18 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	spacesToUnderscores := func(string string) string {
-		return strings.Replace(string, " ", "_", -1)
+	// The value in the Name field returned by 'esxcli network vm list'
+	// corresponds directly to the value of displayName set in the VMX file
+	var displayName string
+	if v, ok := state.GetOk("display_name"); ok {
+		displayName = v.(string)
+	} else {
+		displayName = strings.Replace(d.VMName, " ", "_", -1)
+		log.Printf("No display_name set; falling back to using VMName %s "+
+			"to look for SSH IP", displayName)
 	}
-	record, err := r.find("Name", spacesToUnderscores(d.VMName))
+
+	record, err := r.find("Name", displayName)
 	if err != nil {
 		return "", err
 	}

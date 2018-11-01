@@ -71,7 +71,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 
-	if c.DriverConfig.RemoteType == "" {
+	if c.RemoteType == "" {
 		if c.SourcePath == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
 		} else {
@@ -80,6 +80,26 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 					fmt.Errorf("source_path is invalid: %s", err))
 			}
 		}
+	} else {
+		// Remote configuration validation
+		if c.RemoteHost == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("remote_host must be specified"))
+		}
+
+		if c.RemoteType != "esx5" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+		}
+	}
+
+	if c.Format == "" {
+		c.Format = "ovf"
+	}
+
+	if !(c.Format == "ova" || c.Format == "ovf" || c.Format == "vmx") {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("format must be one of ova, ovf, or vmx"))
 	}
 
 	// Warnings
