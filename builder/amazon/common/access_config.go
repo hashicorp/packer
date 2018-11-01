@@ -48,7 +48,8 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	// default is 3, and when it was causing failures for users being throttled
-	config = config.WithMaxRetries(20)
+	// retries are exponentially backed off.
+	config = config.WithMaxRetries(8)
 
 	region, err := c.region()
 	if err != nil {
