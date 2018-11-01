@@ -44,8 +44,8 @@ each can be found below:
 
 -   `PACKER_TMP_DIR` - The directory used for temporary files during marshalling.
     If unset, resolves to (unix: `$HOME/.packer.d`, windows: `%USERPROFILE%/packer.d`)
-    or finally appending 'packer' to the value of os.TempDir() typically 
-    (unix: `/tmp`, windows: `%TEMP%` or `%LOCALAPPDATA%`).
+    or finally appending 'packer' to the value of [os.TempDir()](https://golang.org/pkg/os/#TempDir)
+    typically (unix: `/tmp`, windows: `%TEMP%` or `%LOCALAPPDATA%`).
     This is not to be confused with the provision target's temporary directory which
-    is often hard-coded as `/tmp` or `%SYSTEMROOT%/Temp` per Provisioner module or
+    is often hard-coded as `/tmp` or `%SYSTEMROOT%/Temp` in Provisioner modules or
     user-supplied template.
