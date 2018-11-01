@@ -456,3 +456,35 @@ func checkBootOrder(t *testing.T) builderT.TestCheckFunc {
 		return nil
 	}
 }
+
+func TestISOBuilderAcc_cluster(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: clusterConfig(),
+	})
+}
+
+func clusterConfig() string {
+	config := defaultConfig()
+	config["cluster"] = "cluster1"
+	config["host"] = "esxi-2.vsphere65.test"
+
+	return commonT.RenderConfig(config)
+}
+
+func TestISOBuilderAcc_clusterDRS(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: clusterDRSConfig(),
+	})
+}
+
+func clusterDRSConfig() string {
+	config := defaultConfig()
+	config["cluster"] = "cluster2"
+	config["host"] = ""
+	config["datastore"] = "datastore3" // bug #183
+	config["network"] = "VM Network"   // bug #183
+
+	return commonT.RenderConfig(config)
+}
