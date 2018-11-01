@@ -16,9 +16,11 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
+//FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
 const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 
 var retryableSleep = 2 * time.Second
@@ -157,7 +159,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 // into a temporary file and returns a string containing the location
 // of said file.
 func extractScript(p *Provisioner) (string, error) {
-	temp, err := ioutil.TempFile(os.TempDir(), "packer-windows-shell-provisioner")
+	prefix, _ := configfile.ConfigTmpDir()
+	temp, err := ioutil.TempFile(prefix, "windows-shell-provisioner")
 	if err != nil {
 		log.Printf("Unable to create temporary file for inline scripts: %s", err)
 		return "", err

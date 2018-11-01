@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 type StepCreateBuildDir struct {
@@ -30,11 +31,11 @@ func (s *StepCreateBuildDir) Run(_ context.Context, state multistep.StateBag) mu
 	ui.Say("Creating build directory...")
 
 	if s.TempPath == "" {
-		s.TempPath = os.TempDir()
+		s.TempPath, _ = configfile.ConfigTmpDir()
 	}
 
 	var err error
-	s.buildDir, err = ioutil.TempDir(s.TempPath, "packerhv")
+	s.buildDir, err = ioutil.TempDir(s.TempPath, "hyperv")
 	if err != nil {
 		err = fmt.Errorf("Error creating build directory: %s", err)
 		state.Put("error", err)

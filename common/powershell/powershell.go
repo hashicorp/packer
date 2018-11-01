@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 const (
@@ -121,7 +123,8 @@ func (ps *PowerShellCmd) getPowerShellPath() (string, error) {
 }
 
 func saveScript(fileContents string) (string, error) {
-	file, err := ioutil.TempFile(os.TempDir(), "ps")
+	prefix, _ := configfile.ConfigTmpDir()
+	file, err := ioutil.TempFile(prefix, "powershell")
 	if err != nil {
 		return "", err
 	}

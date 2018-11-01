@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -30,8 +31,9 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 		t.Fatalf("Should not be error: %s", err)
 	}
 	log.Printf("File: %s", file)
-	if strings.Index(file, os.TempDir()) != 0 {
-		t.Fatalf("Temp file should reside in %s. File location: %s", os.TempDir(), file)
+	tmpdir, _ := configfile.ConfigTmpDir()
+	if strings.Index(file, tmpdir) != 0 {
+		t.Fatalf("Temp file should reside in %s. File location: %s", tmpdir, file)
 	}
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar

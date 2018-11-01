@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func TestStepTempDir_impl(t *testing.T) {
@@ -54,20 +54,18 @@ func TestStepTempDir(t *testing.T) {
 }
 
 func TestStepTempDir_notmpdir(t *testing.T) {
-	tempenv := "PACKER_TMP_DIR"
-
-	oldenv := os.Getenv(tempenv)
-	defer os.Setenv(tempenv, oldenv)
-	os.Setenv(tempenv, "")
+	oldenv := os.Getenv(configfile.EnvPackerTmpDir)
+	defer os.Setenv(configfile.EnvPackerTmpDir, oldenv)
+	os.Setenv(configfile.EnvPackerTmpDir, "")
 
 	dir1 := testStepTempDir_impl(t)
 
-	cd, err := packer.ConfigDir()
+	cd, err := configfile.ConfigDir()
 	if err != nil {
 		t.Fatalf("bad ConfigDir")
 	}
 	td := filepath.Join(cd, "tmp")
-	os.Setenv(tempenv, td)
+	os.Setenv(configfile.EnvPackerTmpDir, td)
 
 	dir2 := testStepTempDir_impl(t)
 
@@ -77,11 +75,9 @@ func TestStepTempDir_notmpdir(t *testing.T) {
 }
 
 func TestStepTempDir_packertmpdir(t *testing.T) {
-	tempenv := "PACKER_TMP_DIR"
-
-	oldenv := os.Getenv(tempenv)
-	defer os.Setenv(tempenv, oldenv)
-	os.Setenv(tempenv, ".")
+	oldenv := os.Getenv(configfile.EnvPackerTmpDir)
+	defer os.Setenv(configfile.EnvPackerTmpDir, oldenv)
+	os.Setenv(configfile.EnvPackerTmpDir, ".")
 
 	dir1 := testStepTempDir_impl(t)
 

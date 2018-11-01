@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 const (
@@ -93,7 +94,8 @@ func (s *StepMountFloppydrive) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepMountFloppydrive) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tempdir, err := ioutil.TempDir(prefix, "hyperv")
 	if err != nil {
 		return "", err
 	}
