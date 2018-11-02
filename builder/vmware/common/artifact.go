@@ -56,7 +56,7 @@ func NewArtifact(remoteType string, format string, exportOutputPath string, vmNa
 	var files []string
 	var dir OutputDir
 	var err error
-	if remoteType != "" && format != "" && !skipExport {
+	if remoteType != "" && !skipExport {
 		dir = new(LocalOutputDir)
 		dir.SetOutputDir(exportOutputPath)
 		files, err = dir.ListFiles()

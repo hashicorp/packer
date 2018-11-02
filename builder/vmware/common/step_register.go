@@ -53,7 +53,7 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 	}
 
 	if remoteDriver, ok := driver.(RemoteDriver); ok {
-		if s.Format == "" || s.SkipExport {
+		if s.SkipExport {
 			ui.Say("Unregistering virtual machine...")
 			if err := remoteDriver.Unregister(s.registeredPath); err != nil {
 				ui.Error(fmt.Sprintf("Error unregistering VM: %s", err))
@@ -71,7 +71,7 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 				if destroyed {
 					break
 				}
-				time.Sleep(150 * time.Millisecond)
+				time.Sleep(1 * time.Second)
 			}
 		}
 	}
