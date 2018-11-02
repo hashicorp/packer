@@ -31,7 +31,10 @@ func TestStepRegister_regularDriver(t *testing.T) {
 
 func TestStepRegister_remoteDriver(t *testing.T) {
 	state := testState(t)
-	step := &StepRegister{KeepRegistered: false}
+	step := &StepRegister{
+		KeepRegistered: false,
+		SkipExport:     true,
+	}
 
 	driver := new(RemoteDriverMock)
 
