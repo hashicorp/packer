@@ -47,7 +47,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
-	if b.config.RemoteType != "" && b.config.Format != "" {
+
+	// The OutputDir will track remote esxi output; exportOutputPath preserves
+	// the path to the output on the machine running Packer.
+	exportOutputPath := b.config.OutputDir
+
+	if b.config.RemoteType != "" {
 		b.config.OutputDir = b.config.VMName
 	}
 	dir.SetOutputDir(b.config.OutputDir)
@@ -159,6 +164,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SkipExport:     b.config.SkipExport,
 			VMName:         b.config.VMName,
 			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      exportOutputPath,
 		},
 	}
 
@@ -181,7 +187,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Artifact
-	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, b.config.OutputDir,
+	log.Printf("Generating artifact...")
+	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, exportOutputPath,
 		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 
