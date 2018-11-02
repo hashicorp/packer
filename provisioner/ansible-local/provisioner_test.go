@@ -281,7 +281,6 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatal("should error if playbook paths is not a dir")
 	}
 
-// XXX was os.TempDir()
 	config["playbook_paths"] = []string{td}
 	err = p.Prepare(config)
 	if err != nil {
@@ -293,7 +292,7 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 	if err == nil {
 		t.Fatal("should error if role paths is not a dir")
 	}
-// XXX was os.TempDir()
+
 	config["role_paths"] = []string{td}
 	err = p.Prepare(config)
 	if err != nil {

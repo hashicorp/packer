@@ -30,7 +30,7 @@ func genTestDirPath(prefix string) string {
 	if prefix == "" {
 		suffix = uuid.TimeOrderedUUID()
 	} else {
-		suffix = prefix+"-"+uuid.TimeOrderedUUID()
+		suffix = prefix + "-" + uuid.TimeOrderedUUID()
 	}
 
 	tdprefix, _ := configfile.ConfigTmpDir()
