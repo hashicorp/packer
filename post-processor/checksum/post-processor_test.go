@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/template"
 )
 
@@ -46,7 +47,13 @@ func TestChecksumSHA1(t *testing.T) {
 func setup(t *testing.T) (packer.Ui, packer.Artifact, error) {
 	// Create fake UI and Cache
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "checksum")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 
 	// Create config for file builder
 	const fileConfig = `{"builders":[{"type":"file","target":"package.txt","content":"Hello world!"}]}`

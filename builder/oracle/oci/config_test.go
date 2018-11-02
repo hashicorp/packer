@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/go-ini/ini"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig(accessConfFile *os.File) map[string]interface{} {
@@ -53,7 +54,8 @@ func TestConfig(t *testing.T) {
 	// Temporarily set $HOME to temp directory to bypass default
 	// access config loading.
 
-	tmpHome, err := ioutil.TempDir("", "packer_config_test")
+	prefix, _ := configfile.ConfigTmpDir()
+	tmpHome, err := ioutil.TempDir(prefix, "oracle")
 	if err != nil {
 		t.Fatalf("Unexpected error when creating temporary directory: %+v", err)
 	}

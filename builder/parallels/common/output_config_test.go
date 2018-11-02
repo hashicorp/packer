@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func TestOutputConfigPrepare(t *testing.T) {
@@ -28,7 +29,8 @@ func TestOutputConfigPrepare(t *testing.T) {
 }
 
 func TestOutputConfigPrepare_exists(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "parallels")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -48,7 +50,8 @@ func TestOutputConfigPrepare_exists(t *testing.T) {
 }
 
 func TestOutputConfigPrepare_forceExists(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "parallels")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 const TestFixtures = "test-fixtures"
@@ -57,9 +58,10 @@ func TestStepCreateFloppy(t *testing.T) {
 	state := testStepCreateFloppyState(t)
 	step := new(StepCreateFloppy)
 
-	dir, err := ioutil.TempDir("", "packer")
+	tdprefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(tdprefix, "common")
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Mkdir failed: %s", err)
 	}
 	defer os.RemoveAll(dir)
 
@@ -73,7 +75,7 @@ func TestStepCreateFloppy(t *testing.T) {
 	for i := 0; i < expected; i++ {
 		files[i] = path.Join(dir, prefix+strconv.Itoa(i)+ext)
 
-		_, err := os.Create(files[i])
+		_, err = os.Create(files[i])
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -120,9 +122,10 @@ func xxxTestStepCreateFloppy_missing(t *testing.T) {
 	state := testStepCreateFloppyState(t)
 	step := new(StepCreateFloppy)
 
-	dir, err := ioutil.TempDir("", "packer")
+	tdprefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(tdprefix, "common")
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Mkdir failed: %s", err)
 	}
 	defer os.RemoveAll(dir)
 
@@ -165,9 +168,10 @@ func xxxTestStepCreateFloppy_notfound(t *testing.T) {
 	state := testStepCreateFloppyState(t)
 	step := new(StepCreateFloppy)
 
-	dir, err := ioutil.TempDir("", "packer")
+	tdprefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(tdprefix, "common")
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Mkdir failed: %s", err)
 	}
 	defer os.RemoveAll(dir)
 

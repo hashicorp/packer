@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -57,7 +58,8 @@ func TestProvisionerPrepare_InvalidSource(t *testing.T) {
 func TestProvisionerPrepare_ValidSource(t *testing.T) {
 	var p Provisioner
 
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "file")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -102,7 +104,9 @@ func TestProvisionerPrepare_EmptyDestination(t *testing.T) {
 
 func TestProvisionerProvision_SendsFile(t *testing.T) {
 	var p Provisioner
-	tf, err := ioutil.TempFile("", "packer")
+
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "file")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -159,11 +163,14 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 		{"path/to/dir"},
 		{"path/to/dir/"},
 	}
-	tmpDir, err := ioutil.TempDir("", "packer-file")
+
+	prefix, _ := configfile.ConfigTmpDir()
+	tmpDir, err := ioutil.TempDir(prefix, "file")
 	if err != nil {
 		t.Fatalf("error tempdir: %s", err)
 	}
 	defer os.RemoveAll(tmpDir)
+
 	tf, err := ioutil.TempFile(tmpDir, "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)

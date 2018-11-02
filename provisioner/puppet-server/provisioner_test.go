@@ -6,10 +6,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() (config map[string]interface{}, tf *os.File) {
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetserver")
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +44,8 @@ func TestProvisionerPrepare_puppetBinDir(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetserver")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -77,7 +80,8 @@ func TestProvisionerPrepare_clientPrivateKeyPath(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetserver")
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
@@ -112,7 +116,8 @@ func TestProvisionerPrepare_clientCertPath(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetserver")
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
@@ -160,7 +165,8 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetserver")
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
