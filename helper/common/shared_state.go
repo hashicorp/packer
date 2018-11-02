@@ -5,13 +5,31 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/hashicorp/packer/packer/configfile"
 )
+
+var sharedStateDir string
 
 // Used to set variables which we need to access later in the build, where
 // state bag and config information won't work
 func sharedStateFilename(suffix string, buildName string) string {
-	uuid := os.Getenv("PACKER_RUN_UUID")
-	return filepath.Join(os.TempDir(), fmt.Sprintf("packer-%s-%s-%s", uuid, suffix, buildName))
+	var uuid string
+
+	if sharedStateDir == "" {
+		prefix, _ := configfile.ConfigTmpDir()
+		sharedStateDir, err := ioutil.TempDir(prefix, "state")
+		if err != nil {
+			return ""
+		}
+		defer os.RemoveAll(sharedStateDir)
+	}
+
+	uuid = os.Getenv("PACKER_RUN_UUID")
+	if uuid == "" {
+		uuid = "none"
+	}
+	return filepath.Join(sharedStateDir, fmt.Sprintf("%s-%s-%s", uuid, suffix, buildName))
 }
 
 func SetSharedState(key string, value string, buildName string) error {

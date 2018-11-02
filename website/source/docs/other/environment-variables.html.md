@@ -42,9 +42,10 @@ each can be found below:
     new versions of Packer. If you want to disable this for security or privacy
     reasons, you can set this environment variable to `1`.
 
--   `TMPDIR` (Unix) / `TMP` (Windows) - The location of the directory used for
-    temporary files (defaults to `/tmp` on Linux/Unix and
-    `%USERPROFILE%\AppData\Local\Temp` on Windows Vista and above). It might be
-    necessary to customize it when working with large files since `/tmp` is a
-    memory-backed filesystem in some Linux distributions in which case
-    `/var/tmp` might be preferred.
+-   `PACKER_TMP_DIR` - The directory used for temporary files during marshalling.
+    If unset, resolves to (unix: `$HOME/.packer.d`, windows: `%USERPROFILE%/packer.d`)
+    or finally appending 'packer' to the value of [os.TempDir()](https://golang.org/pkg/os/#TempDir)
+    typically (unix: `/tmp`, windows: `%TEMP%` or `%LOCALAPPDATA%`).
+    This is not to be confused with the provision target's temporary directory which
+    is often hard-coded as `/tmp` or `%SYSTEMROOT%/Temp` in Provisioner modules or
+    user-supplied template.

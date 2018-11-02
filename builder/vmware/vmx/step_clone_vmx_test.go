@@ -10,6 +10,7 @@ import (
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +27,8 @@ func TestStepCloneVMX_impl(t *testing.T) {
 
 func TestStepCloneVMX(t *testing.T) {
 	// Setup some state
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "vmw-vmx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

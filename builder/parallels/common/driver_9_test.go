@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func TestParallels9Driver_impl(t *testing.T) {
@@ -11,7 +13,8 @@ func TestParallels9Driver_impl(t *testing.T) {
 }
 
 func TestIPAddress(t *testing.T) {
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "parallels")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -61,7 +64,8 @@ func TestIPAddress(t *testing.T) {
 }
 
 func TestXMLParseConfig(t *testing.T) {
-	td, err := ioutil.TempDir("", "configpvs")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "parallels")
 	if err != nil {
 		t.Fatalf("Error creating temp dir: %s", err)
 	}

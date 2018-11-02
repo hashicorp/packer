@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -274,7 +275,8 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	config := testConfig()
 
 	// Test with existing dir
-	dir, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(prefix, "vmw-iso")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

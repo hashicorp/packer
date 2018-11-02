@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func TestOutputConfigPrepare(t *testing.T) {
@@ -26,7 +27,8 @@ func TestOutputConfigPrepare(t *testing.T) {
 }
 
 func TestOutputConfigPrepare_exists(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

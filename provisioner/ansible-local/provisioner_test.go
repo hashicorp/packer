@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/packer/builder/docker"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/provisioner/file"
 	"github.com/hashicorp/packer/template"
 )
@@ -28,7 +29,13 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -61,7 +68,13 @@ func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -90,7 +103,13 @@ func TestProvisionerPrepare_PlaybookFiles(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -123,7 +142,8 @@ func TestProvisionerProvision_PlaybookFiles(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbooks := createTempFiles("", 3)
+	prefix, _ := configfile.ConfigTmpDir()
+	playbooks := createTempFiles(prefix, 3)
 	defer removeFiles(playbooks...)
 
 	config["playbook_files"] = playbooks
@@ -145,7 +165,8 @@ func TestProvisionerProvision_PlaybookFilesWithPlaybookDir(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbook_dir, err := ioutil.TempDir("", "")
+	prefix, _ := configfile.ConfigTmpDir()
+	playbook_dir, err := ioutil.TempDir(prefix, "playbook")
 	if err != nil {
 		t.Fatalf("Failed to create playbook_dir: %s", err)
 	}
@@ -190,7 +211,13 @@ func TestProvisionerPrepare_InventoryFile(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -202,7 +229,7 @@ func TestProvisionerPrepare_InventoryFile(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	inventory_file, err := ioutil.TempFile("", "inventory")
+	inventory_file, err := ioutil.TempFile(td, "inventory")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -230,7 +257,13 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -248,7 +281,8 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatal("should error if playbook paths is not a dir")
 	}
 
-	config["playbook_paths"] = []string{os.TempDir()}
+// XXX was os.TempDir()
+	config["playbook_paths"] = []string{td}
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -259,8 +293,8 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 	if err == nil {
 		t.Fatal("should error if role paths is not a dir")
 	}
-
-	config["role_paths"] = []string{os.TempDir()}
+// XXX was os.TempDir()
+	config["role_paths"] = []string{td}
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -272,7 +306,7 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatalf("should error if group_vars path is not a dir")
 	}
 
-	config["group_vars"] = os.TempDir()
+	config["group_vars"] = td
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -284,7 +318,7 @@ func TestProvisionerPrepare_Dirs(t *testing.T) {
 		t.Fatalf("should error if host_vars path is not a dir")
 	}
 
-	config["host_vars"] = os.TempDir()
+	config["host_vars"] = td
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -295,7 +329,13 @@ func TestProvisionerPrepare_CleanStagingDir(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -328,7 +368,13 @@ func testProvisionerProvisionDockerWithPlaybookFiles(t *testing.T, templateStrin
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 
 	tpl, err := template.Parse(strings.NewReader(templateString))
 	if err != nil {

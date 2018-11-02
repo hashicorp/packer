@@ -7,11 +7,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
+	prefix, _ := configfile.ConfigTmpDir()
+
 	return map[string]interface{}{
-		"local_state_tree": os.TempDir(),
+		"local_state_tree": prefix,
 	}
 }
 
@@ -83,7 +86,8 @@ func TestProvisionerPrepare_MinionConfig(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	tf, err := ioutil.TempFile("", "minion")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "saltmasterless-minion")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -130,7 +134,8 @@ func TestProvisionerPrepare_GrainsFile(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	tf, err := ioutil.TempFile("", "grains")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "saltmasterless-grains")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -153,7 +158,8 @@ func TestProvisionerPrepare_LocalStateTree(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	config["local_state_tree"] = os.TempDir()
+	prefix, _ := configfile.ConfigTmpDir()
+	config["local_state_tree"] = prefix
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -170,7 +176,8 @@ func TestProvisionerPrepare_LocalPillarRoots(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	config["local_pillar_roots"] = os.TempDir()
+	prefix, _ := configfile.ConfigTmpDir()
+	config["local_pillar_roots"] = prefix
 	err = p.Prepare(config)
 	if err != nil {
 		t.Fatalf("err: %s", err)

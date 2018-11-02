@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -44,7 +46,8 @@ func testConfigOk(t *testing.T, warns []string, err error) {
 }
 
 func TestConfigPrepare_exportPath(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "docker")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/kardianos/osext"
 )
@@ -64,7 +65,7 @@ func (c *config) Discover() error {
 	}
 
 	// Next, look in the plugins directory.
-	dir, err := packer.ConfigDir()
+	dir, err := configfile.ConfigDir()
 	if err != nil {
 		log.Printf("[ERR] Error loading config directory: %s", err)
 	} else {

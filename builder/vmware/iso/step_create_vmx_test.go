@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/provisioner/shell"
 	"github.com/hashicorp/packer/template"
 )
@@ -40,13 +41,19 @@ const vmxTestTemplate string = `{"builders":[{%s}],"provisioners":[{%s}]}`
 
 func tmpnam(prefix string) string {
 	var path string
-	var err error
 
 	const length = 16
 
-	dir := os.TempDir()
+	tdprefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(tdprefix, "vmw-iso")
+	if err != nil {
+		// use CWD as last-ditch
+		dir, err = filepath.Abs(".")
+	}
+
 	max := int(math.Pow(2, float64(length)))
 
+	// FIXME use ioutil.TempFile() or at least mimic implementation, this could loop forever
 	n, err := rand.Intn(max), nil
 	for path = filepath.Join(dir, prefix+strconv.Itoa(n)); err == nil; _, err = os.Stat(path) {
 		n = rand.Intn(max)
@@ -173,7 +180,13 @@ func setupVMwareBuild(t *testing.T, builderConfig map[string]string, provisioner
 	}
 
 	// and then finally build it
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "vmw-iso")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 	artifacts, err := b.Run(ui, cache)
 	if err != nil {
 		t.Fatalf("Failed to build artifact: %s", err)

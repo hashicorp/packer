@@ -5,15 +5,15 @@ package iso
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 	"testing"
 
-	"os"
-
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -607,7 +607,13 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-iso")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 	hook := &packer.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 

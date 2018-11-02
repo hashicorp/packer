@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/packer/command"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/packer/plugin"
 	"github.com/hashicorp/packer/version"
 	"github.com/mitchellh/cli"
@@ -294,7 +295,7 @@ func loadConfig() (*config, error) {
 		log.Printf("'PACKER_CONFIG' set, loading config from environment.")
 	} else {
 		var err error
-		configFilePath, err = packer.ConfigFile()
+		configFilePath, err = configfile.ConfigFile()
 
 		if err != nil {
 			log.Printf("Error detecting default config file path: %s", err)

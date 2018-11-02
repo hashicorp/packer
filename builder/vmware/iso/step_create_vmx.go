@@ -12,6 +12,7 @@ import (
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -614,7 +615,8 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	if config.RemoteType != "" {
 		// For remote builds, we just put the VMX in a temporary
 		// directory since it just gets uploaded anyways.
-		vmxDir, err = ioutil.TempDir("", "packer-vmx")
+		prefix, _ := configfile.ConfigTmpDir()
+		vmxDir, err = ioutil.TempDir(prefix, "vmw-iso")
 		if err != nil {
 			err := fmt.Errorf("Error preparing VMX template: %s", err)
 			state.Put("error", err)

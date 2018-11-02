@@ -10,12 +10,14 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/stretchr/testify/assert"
 )
 
 func testConfig() (config map[string]interface{}, tf *os.File) {
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetmasterless")
 	if err != nil {
 		panic(err)
 	}
@@ -185,7 +187,8 @@ func TestProvisionerPrepare_puppetBinDir(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetmasterless")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -212,7 +215,8 @@ func TestProvisionerPrepare_hieraConfigPath(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetmasterless")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -239,7 +243,8 @@ func TestProvisionerPrepare_manifestFile(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "puppetmasterless")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -266,9 +271,10 @@ func TestProvisionerPrepare_manifestDir(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetmasterless")
 	if err != nil {
-		t.Fatalf("error: %s", err)
+		t.Fatalf("err: %s", err)
 	}
 	defer os.RemoveAll(td)
 
@@ -301,7 +307,8 @@ func TestProvisionerPrepare_modulePaths(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetmasterless")
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
@@ -336,7 +343,8 @@ func TestProvisionerPrepare_facterFacts(t *testing.T) {
 	}
 
 	// Test with a good one
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "puppetmasterless")
 	if err != nil {
 		t.Fatalf("error: %s", err)
 	}
