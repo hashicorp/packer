@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 // Be sure to remove the Ansible stub file in each test with:
@@ -53,19 +54,25 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Fatalf("should have error")
 	}
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(publickey_file.Name())
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -95,13 +102,19 @@ func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -115,7 +128,7 @@ func TestProvisionerPrepare_PlaybookFile(t *testing.T) {
 		t.Fatal("should have error")
 	}
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -133,13 +146,19 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(publickey_file.Name())
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -160,7 +179,7 @@ func TestProvisionerPrepare_HostKeyFile(t *testing.T) {
 		t.Fatal("should error if ssh_host_key_file does not exist")
 	}
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -178,13 +197,19 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -205,7 +230,7 @@ func TestProvisionerPrepare_AuthorizedKeyFile(t *testing.T) {
 		t.Errorf("should error if ssh_authorized_key_file does not exist")
 	}
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -223,19 +248,25 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(publickey_file.Name())
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -263,19 +294,25 @@ func TestProvisionerPrepare_InventoryDirectory(t *testing.T) {
 	config := testConfig(t)
 	defer os.Remove(config["command"].(string))
 
-	hostkey_file, err := ioutil.TempFile("", "hostkey")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "ansible")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	hostkey_file, err := ioutil.TempFile(td, "hostkey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(hostkey_file.Name())
 
-	publickey_file, err := ioutil.TempFile("", "publickey")
+	publickey_file, err := ioutil.TempFile(td, "publickey")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
 	defer os.Remove(publickey_file.Name())
 
-	playbook_file, err := ioutil.TempFile("", "playbook")
+	playbook_file, err := ioutil.TempFile(td, "playbook")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -291,7 +328,7 @@ func TestProvisionerPrepare_InventoryDirectory(t *testing.T) {
 		t.Errorf("should error if inventory_directory does not exist")
 	}
 
-	inventoryDirectory, err := ioutil.TempDir("", "some_inventory_dir")
+	inventoryDirectory, err := ioutil.TempDir(prefix, "ansible_inventory")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

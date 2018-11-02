@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 	"github.com/hashicorp/packer/template"
 )
 
@@ -145,7 +146,13 @@ func Test(t TestT, c TestCase) {
 	// Run it! We use a temporary directory for caching and discard
 	// any UI output. We discard since it shows up in logs anyways.
 	log.Printf("[DEBUG] Running 'test' build")
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "packer")
+	if err != nil {
+		t.Fatal("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 	ui := &packer.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      ioutil.Discard,

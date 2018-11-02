@@ -12,6 +12,7 @@ import (
 	hypervcommon "github.com/hashicorp/packer/builder/hyperv/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -42,7 +43,8 @@ func TestBuilderPrepare_Defaults(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -67,7 +69,8 @@ func TestBuilderPrepare_InvalidKey(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -104,7 +107,8 @@ func TestBuilderPrepare_ExportedMachinePathDoesNotExist(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -128,7 +132,8 @@ func TestBuilderPrepare_ExportedMachinePathExists(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -175,7 +180,8 @@ func TestBuilderPrepare_ISOChecksum(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -213,7 +219,8 @@ func TestBuilderPrepare_ISOChecksumType(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -277,7 +284,8 @@ func TestBuilderPrepare_ISOUrl(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -356,7 +364,8 @@ func TestBuilderPrepare_FloppyFiles(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -398,7 +407,8 @@ func TestBuilderPrepare_InvalidFloppies(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -423,7 +433,8 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config := testConfig()
 
 		//Create vmcx folder
-		td, err := ioutil.TempDir("", "packer")
+		prefix, _ := configfile.ConfigTmpDir()
+		td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -460,7 +471,8 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 		config := testConfig()
 
 		//Create vmcx folder
-		td, err := ioutil.TempDir("", "packer")
+		prefix, _ := configfile.ConfigTmpDir()
+		td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 		if err != nil {
 			t.Fatalf("err: %s", err)
 		}
@@ -498,10 +510,12 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	config := testConfig()
 
 	//Create vmcx folder
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "hyperv-vmcx")
 	if err != nil {
-		t.Fatalf("err: %s", err)
+		t.Fatalf("Mkdir failed: %s", err)
 	}
+
 	defer os.RemoveAll(td)
 	config["clone_from_vmcx_path"] = td
 
@@ -517,7 +531,13 @@ func TestUserVariablesInBootCommand(t *testing.T) {
 	}
 
 	ui := packer.TestUi(t)
-	cache := &packer.FileCache{CacheDir: os.TempDir()}
+	prefix, _ = configfile.ConfigTmpDir()
+	td, err = ioutil.TempDir(prefix, "hyperv-vmcx")
+	if err != nil {
+		t.Fatalf("Mkdir failed: %s", err)
+	}
+
+	cache := &packer.FileCache{CacheDir: td}
 	hook := &packer.MockHook{}
 	driver := &hypervcommon.DriverMock{}
 

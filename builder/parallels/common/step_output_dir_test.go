@@ -7,10 +7,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testStepOutputDir(t *testing.T) *StepOutputDir {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "parallels")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

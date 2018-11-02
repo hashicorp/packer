@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 var testPem = `
@@ -336,7 +337,8 @@ func TestBuilderPrepare_OutputDir(t *testing.T) {
 	config := testConfig()
 
 	// Test with existing dir
-	dir, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	dir, err := ioutil.TempDir(prefix, "qemu")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func TestLocalArtifact_impl(t *testing.T) {
@@ -14,7 +15,8 @@ func TestLocalArtifact_impl(t *testing.T) {
 }
 
 func TestNewLocalArtifact(t *testing.T) {
-	td, err := ioutil.TempDir("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	td, err := ioutil.TempDir(prefix, "vmware")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

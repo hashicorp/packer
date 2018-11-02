@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/configfile"
 )
 
 func testConfig() map[string]interface{} {
@@ -53,7 +54,8 @@ func TestProvisionerPrepare_configTemplate(t *testing.T) {
 	}
 
 	// Test with a file
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "chefclient")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -68,7 +70,7 @@ func TestProvisionerPrepare_configTemplate(t *testing.T) {
 	}
 
 	// Test with a directory
-	td, err := ioutil.TempDir("", "packer")
+	td, err := ioutil.TempDir(prefix, "chefclient")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -152,7 +154,8 @@ func TestProvisionerPrepare_encryptedDataBagSecretPath(t *testing.T) {
 	}
 
 	// Test with a file
-	tf, err := ioutil.TempFile("", "packer")
+	prefix, _ := configfile.ConfigTmpDir()
+	tf, err := ioutil.TempFile(prefix, "chefclient")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -167,7 +170,7 @@ func TestProvisionerPrepare_encryptedDataBagSecretPath(t *testing.T) {
 	}
 
 	// Test with a directory
-	td, err := ioutil.TempDir("", "packer")
+	td, err := ioutil.TempDir(prefix, "chefclient")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
