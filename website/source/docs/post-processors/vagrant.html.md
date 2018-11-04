@@ -142,3 +142,8 @@ The following Docker input artifacts are supported:
 -   `docker-import`
 -   `docker-tag`
 -   `docker-push`
+
+### QEMU/libvirt
+
+The `libvirt` provider supports QEMU artifacts built using any these accelerators: none,
+kvm, tcg, or hvf.
