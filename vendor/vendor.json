@@ -1494,6 +1494,12 @@
 			"revisionTime": "2017-01-28T01:21:29Z"
 		},
 		{
+			"checksumSHA1": "4gVuzkHbQoznf+lCSJhIJnvS5tc=",
+			"path": "github.com/rwtodd/Go.Sed/sed",
+			"revision": "d6d5d585814e4c3560c684f52e3d8aeed721313d",
+			"revisionTime": "2017-05-07T04:53:31Z"
+		},
+		{
 			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
 			"path": "github.com/satori/go.uuid",
 			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
