@@ -42,7 +42,7 @@ func TestArtifactIdVHD(t *testing.T) {
 }
 
 func TestArtifactIDManagedImage(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID")
+	artifact, err := NewManagedImageArtifact("Linux","fakeResourceGroup","fakeName","fakeLocation","fakeID","fakeOSDiskSnapshotName","faksOSDiskSnapshotPrefix")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
