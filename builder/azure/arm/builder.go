@@ -166,31 +166,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	deploymentName := b.stateBag.Get(constants.ArmDeploymentName).(string)
 
 	if b.config.OSType == constants.Target_Linux {
-		steps = []multistep.Step{
-			NewStepCreateResourceGroup(azureClient, ui),
-			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
-			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
-			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
-			&communicator.StepConnectSSH{
-				Config:    &b.config.Comm,
-				Host:      lin.SSHHost,
-				SSHConfig: b.config.Comm.SSHConfigFunc(),
-			},
-			&packerCommon.StepProvision{},
-			&packerCommon.StepCleanupTempKeys{
-				Comm: &b.config.Comm,
-			},
-			NewStepGetOSDisk(azureClient, ui),
-			NewStepGetAdditionalDisks(azureClient, ui),
-			NewStepPowerOffCompute(azureClient, ui),
-			NewStepCaptureImage(azureClient, ui),
-			NewStepDeleteResourceGroup(azureClient, ui),
-			NewStepDeleteOSDisk(azureClient, ui),
-			NewStepDeleteAdditionalDisks(azureClient, ui),
-		}
+		steps = append(steps,
+				NewStepCreateResourceGroup(azureClient, ui),
+				NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
+				NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
+				NewStepGetIPAddress(azureClient, ui, endpointConnectType),
+				&communicator.StepConnectSSH{
+					Config:    &b.config.Comm,
+					Host:      lin.SSHHost,
+					SSHConfig: b.config.Comm.SSHConfigFunc(),
+				},
+				&packerCommon.StepProvision{},
+				&packerCommon.StepCleanupTempKeys{
+					Comm: &b.config.Comm,
+				},
+				NewStepGetOSDisk(azureClient, ui),
+				NewStepGetAdditionalDisks(azureClient, ui),
+				NewStepPowerOffCompute(azureClient, ui),
+			)
 	} else if b.config.OSType == constants.Target_Windows {
 		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
-		steps = []multistep.Step{
+		steps = append(steps,
 			NewStepCreateResourceGroup(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
@@ -218,14 +214,35 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
+		)
+	} else  {
+		return nil, fmt.Errorf("Builder does not support the os_type '%s'", b.config.OSType)
+	}
+
+	// if managed image create a new step
+	if b.config.isManagedImage() {
+		steps = append(steps,
+			NewStepSnapshotOSDisk(azureClient, ui),
+			//NewStepSnapshotDataDisk(azureClient, ui),
+			)
+	}
+
+	// then add back the remaining steps
+	if b.config.OSType == constants.Target_Linux {
+		steps = append(steps,
+					NewStepCaptureImage(azureClient, ui),
+					NewStepDeleteResourceGroup(azureClient, ui),
+					NewStepDeleteOSDisk(azureClient, ui),
+					NewStepDeleteAdditionalDisks(azureClient, ui),
+			)
+	} else {
+		steps = append(steps,
 			NewStepPowerOffCompute(azureClient, ui),
 			NewStepCaptureImage(azureClient, ui),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
 			NewStepDeleteAdditionalDisks(azureClient, ui),
-		}
-	} else {
-		return nil, fmt.Errorf("Builder does not support the os_type '%s'", b.config.OSType)
+		)
 	}
 
 	if b.config.PackerDebug {
@@ -259,7 +276,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", b.config.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
-		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID)
+		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
@@ -361,6 +378,8 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
 	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
+	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
+	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
 }
 

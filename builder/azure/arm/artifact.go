@@ -33,18 +33,22 @@ type Artifact struct {
 	ManagedImageName              string
 	ManagedImageLocation          string
 	ManagedImageId                string
+	ManagedImageOSDiskSnapshotName string
+	ManagedImageDataDiskSnapshotPrefix string
 
 	// Additional Disks
 	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
-func NewManagedImageArtifact(osType, resourceGroup, name, location, id string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, osDiskSnapshotPrefix string) (*Artifact, error) {
 	return &Artifact{
 		ManagedImageResourceGroupName: resourceGroup,
 		ManagedImageName:              name,
 		ManagedImageLocation:          location,
 		ManagedImageId:                id,
 		OSType:                        osType,
+		ManagedImageOSDiskSnapshotName: osDiskSnapshotName,
+		ManagedImageDataDiskSnapshotPrefix: osDiskSnapshotPrefix,
 	}, nil
 }
 
@@ -124,6 +128,14 @@ func (a *Artifact) isManagedImage() bool {
 	return a.ManagedImageResourceGroupName != ""
 }
 
+func (a *Artifact) takeOSDiskSnapshot() bool {
+	return a.ManagedImageOSDiskSnapshotName != ""
+}
+
+func (a *Artifact) takeDataDiskSnapshot() bool {
+	return a.ManagedImageDataDiskSnapshotPrefix != ""
+}
+
 func (*Artifact) BuilderId() string {
 	return BuilderId
 }
@@ -158,6 +170,12 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
 		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
+		if a.takeOSDiskSnapshot() {
+			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
+		}
+		if a.takeDataDiskSnapshot() {
+			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
+		}
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
 		buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))

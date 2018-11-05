@@ -35,4 +35,6 @@ const (
 	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
 	ArmManagedImageName              string = "arm.ManagedImageName"
 	ArmAsyncResourceGroupDelete      string = "arm.AsyncResourceGroupDelete"
+	ArmManagedImageOSDiskSnapshotName              string = "arm.ManagedImageOSDiskSnapshotName"
+	ArmManagedImageDataDiskSnapshotPrefix              string = "arm.ManagedImageDataDiskSnapshotPrefix"
 )
