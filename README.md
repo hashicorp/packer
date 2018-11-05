@@ -144,6 +144,7 @@ Only use the `cluster` option. Optionally specify a `resource_pool`:
     Virtual machine -> Snapshot management
     Virtual machine -> Provisioning
     ```
+    Individual privileges are listed in https://github.com/jetbrains-infra/packer-builder-vsphere/issues/97#issuecomment-436063235.
 * Resource pool, host, or cluster (this object): 
     ```
     Resource -> Assign virtual machine to resource pool
