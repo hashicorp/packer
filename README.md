@@ -135,26 +135,45 @@ Only use the `cluster` option. Optionally specify a `resource_pool`:
 ```
 
 ## Required vSphere Permissions
-Read only (without propagation) is required for:
-```
-vcenter -> datacenter -> cluster
-vcenter -> datacenter -> distributed switch
-```
-Required for any: resource pool, folder, distributed port group, datastore or storage cluster (with propagation) used in the builder:
-```
-Datastore ->Allocate space
-Datastore ->Browse datastore
-Datastore ->Low level file operations
-Datastore ->Remove file
-Datastore ->Update virtual machine files
-Datastore ->Update virtual machine metadata
-Network -> Assign network
-Resource -> Assign virtual machine to resource pool
-Virtual machine -> Change Configuration
-Virtual machine -> Edit Inventory
-Virtual machine -> Guest operations
-Virtual machine -> Interaction
-Virtual machine -> Provisioning
-Virtual machine -> Service configuration
-Virtual machine -> Snapshot management
-```
+
+* VM folder (this object and children):
+    ```
+    Virtual machine -> Inventory
+    Virtual machine -> Configuration
+    Virtual machine -> Interaction
+    Virtual machine -> Snapshot management
+    Virtual machine -> Provisioning
+    ```
+* Resource pool, host, or cluster (this object): 
+    ```
+    Resource -> Assign virtual machine to resource pool
+    ```
+* Host in clusters without DRS (this object): 
+    ```
+    Read-only
+    ```
+* Datastore (this object): 
+    ```
+    Datastore -> Allocate space
+    Datastore -> Browse datastore
+    Datastore -> Low level file operations
+    ```  
+* Network (this object): 
+    ```
+    Network -> Assign network
+    ```
+* Distributed switch (this object): 
+    ```
+    Read-only
+    ```
+
+For floppy image upload:
+
+* Datacenter (this object): 
+    ```
+    Datastore -> Low level file operations
+    ```
+* Host (this object): 
+    ```
+    Host -> Configuration -> System Management
+    ```
