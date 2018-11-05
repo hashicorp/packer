@@ -44,6 +44,7 @@ Here is a full list of the available functions for reference.
     reference](/docs/templates/engine.html#isotime-function-format-reference).
 -   `lower` - Lowercases the string.
 -   `pwd` - The working directory while executing Packer.
+-   `sed` - Use [a golang implementation of sed](https://github.com/rwtodd/Go.Sed) to parse an input string.
 -   `split` - Split an input string using separator and return the requested
     substring.
 -   `template_dir` - The directory to the template for the build.
@@ -300,4 +301,20 @@ this case, on the `fixed-string` value):
     ]
   ]
 }
+```
+
+# sed Function Format Reference
+
+See the library documentation https://github.com/rwtodd/Go.Sed for notes about
+the difference between this golang implementation of sed and the regexes you may
+be used to. A very simple example of this functionality:
+
+```
+    "provisioners": [
+      {
+          "type": "shell-local",
+          "environment_vars": ["EXAMPLE={{ sed \"s/null/awesome/\" build_type}}"],
+          "inline": ["echo build_type is $EXAMPLE\n"]
+      }
+    ]
 ```

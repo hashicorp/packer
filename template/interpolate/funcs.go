@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/version"
 	vaultapi "github.com/hashicorp/vault/api"
+	"github.com/rwtodd/Go.Sed/sed"
 )
 
 // InitTime is the UTC time when this package was initialized. It is
@@ -40,6 +41,7 @@ var FuncGens = map[string]FuncGenerator{
 	"packer_version": funcGenPackerVersion,
 	"consul_key":     funcGenConsul,
 	"vault":          funcGenVault,
+	"sed":            funcGenSed,
 
 	"upper": funcGenPrimitive(strings.ToUpper),
 	"lower": funcGenPrimitive(strings.ToLower),
@@ -251,5 +253,27 @@ func funcGenVault(ctx *Context) interface{} {
 
 		value := data.(map[string]interface{})[key].(string)
 		return value, nil
+	}
+}
+
+func funcGenSed(ctx *Context) interface{} {
+	return func(expression string, inputString string) (string, error) {
+		engine, err := sed.New(strings.NewReader(expression))
+
+		if err != nil {
+			return "", err
+		}
+
+		result, err := engine.RunString(inputString)
+
+		if err != nil {
+			return "", err
+		}
+
+		// The sed library adds a \n to all processed strings.
+		resultLength := len(result)
+		result = result[:resultLength-1]
+
+		return result, err
 	}
 }
