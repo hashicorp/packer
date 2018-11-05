@@ -51,13 +51,15 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	}
 
 	// default is 3, and when it was causing failures for users being throttled
-	config = config.WithMaxRetries(20)
+	// retries are exponentially backed off.
+	config = config.WithMaxRetries(8)
 
-	if c.RawRegion != "" {
-		config = config.WithRegion(c.RawRegion)
-	} else if region := c.metadataRegion(); region != "" {
-		config = config.WithRegion(region)
+	region, err := c.region()
+	if err != nil {
+		return nil, fmt.Errorf("Could not get region, "+
+			"probably because it's not set or we're not running on AWS. %s", err)
 	}
+	config = config.WithRegion(region)
 
 	if c.CustomEndpointEc2 != "" {
 		config = config.WithEndpoint(c.CustomEndpointEc2)
@@ -88,8 +90,6 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 
 	if sess, err := session.NewSessionWithOptions(opts); err != nil {
 		return nil, err
-	} else if *sess.Config.Region == "" {
-		return nil, fmt.Errorf("Could not find AWS region, make sure it's set.")
 	} else {
 		log.Printf("Found region %s", *sess.Config.Region)
 		c.session = sess
@@ -130,7 +130,7 @@ func (c *AccessConfig) IsChinaCloud() bool {
 }
 
 // metadataRegion returns the region from the metadata service
-func (c *AccessConfig) metadataRegion() string {
+func (c *AccessConfig) metadataRegion() (string, error) {
 
 	client := cleanhttp.DefaultClient()
 
@@ -139,13 +139,14 @@ func (c *AccessConfig) metadataRegion() string {
 	ec2meta := ec2metadata.New(session.New(), &aws.Config{
 		HTTPClient: client,
 	})
-	region, err := ec2meta.Region()
-	if err != nil {
-		log.Println("Error getting region from metadata service, "+
-			"probably because we're not running on AWS.", err)
-		return ""
+	return ec2meta.Region()
+}
+
+func (c *AccessConfig) region() (string, error) {
+	if c.RawRegion != "" {
+		return c.RawRegion, nil
 	}
-	return region
+	return c.metadataRegion()
 }
 
 func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
