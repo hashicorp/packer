@@ -28,8 +28,6 @@ type Config struct {
 	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
-	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
-	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
 	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
 	SSHClearAuthorizedKeys    bool          `mapstructure:"ssh_clear_authorized_keys"`
@@ -54,6 +52,9 @@ type Config struct {
 	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
 	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
 	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
+	// SSH Internals
+	SSHPublicKey  []byte
+	SSHPrivateKey []byte
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
