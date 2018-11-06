@@ -128,14 +128,6 @@ func (a *Artifact) isManagedImage() bool {
 	return a.ManagedImageResourceGroupName != ""
 }
 
-func (a *Artifact) osDiskSnapshot() bool {
-	return a.ManagedImageOSDiskSnapshotName != ""
-}
-
-func (a *Artifact) dataDiskSnapshot() bool {
-	return a.ManagedImageDataDiskSnapshotPrefix != ""
-}
-
 func (*Artifact) BuilderId() string {
 	return BuilderId
 }
@@ -170,10 +162,10 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
 		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
-		if a.osDiskSnapshot() {
+		if a.ManagedImageOSDiskSnapshotName != "" {
 			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
 		}
-		if a.dataDiskSnapshot() {
+		if a.ManagedImageDataDiskSnapshotPrefix != "" {
 			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
 		}
 	} else {
