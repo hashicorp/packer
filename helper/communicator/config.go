@@ -66,6 +66,23 @@ type Config struct {
 	WinRMTransportDecorator func() winrm.Transporter
 }
 
+// ReadSSHPrivateKeyFile returns the SSH private key bytes
+func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
+	var privateKey []byte
+
+	if c.SSHPrivateKeyFile != "" {
+		keyPath, err := homedir.Expand(c.SSHPrivateKeyFile)
+		if err != nil {
+			return privateKey, fmt.Errorf("Error expanding path for SSH private key: %s", err)
+		}
+		privateKey, err = ioutil.ReadFile(keyPath)
+		if err != nil {
+			return privateKey, fmt.Errorf("Error on reading SSH private key: %s", err)
+		}
+	}
+	return privateKey, nil
+}
+
 // SSHConfigFunc returns a function that can be used for the SSH communicator
 // config for connecting to the instance created over SSH using the private key
 // or password.
