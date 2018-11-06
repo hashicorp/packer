@@ -56,7 +56,8 @@ var (
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnaspshotNameOrPrefix = regexp.MustCompile("^[A-Za-z0-9_]{0,79}$")
+	reSnaspshotName        = regexp.MustCompile("^[A-Za-z0-9_]{10,79}$")
+	reSnaspshotPrefix      = regexp.MustCompile("^[A-Za-z0-9_]{10,59}$")
 )
 
 type PlanInformation struct {
@@ -105,13 +106,13 @@ type Config struct {
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
 
-	ManagedImageResourceGroupName  string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName               string `mapstructure:"managed_image_name"`
-	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type"`
-	ManagedImageOSDiskSnapshotName string `mapstructure:"managed_image_os_disk_snapshot_name"`
+	ManagedImageResourceGroupName      string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName                   string `mapstructure:"managed_image_name"`
+	ManagedImageStorageAccountType     string `mapstructure:"managed_image_storage_account_type"`
+	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
-	managedImageStorageAccountType compute.StorageAccountTypes
-	manageImageLocation            string
+	managedImageStorageAccountType     compute.StorageAccountTypes
+	manageImageLocation                string
 
 	// Deployment
 	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
@@ -692,13 +693,13 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	}
 
 	if c.ManagedImageOSDiskSnapshotName != "" {
-		if ok, err := assertManagedImageOSDiskSnapshotNameOrPrefix(c.ManagedImageOSDiskSnapshotName, "managed_image_os_disk_snapshot_name"); !ok {
+		if ok, err := assertManagedImageOSDiskSnapshotName(c.ManagedImageOSDiskSnapshotName, "managed_image_os_disk_snapshot_name"); !ok {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
 
 	if c.ManagedImageDataDiskSnapshotPrefix != "" {
-		if ok, err := assertManagedImageOSDiskSnapshotNameOrPrefix(c.ManagedImageDataDiskSnapshotPrefix, "managed_image_data_disk_snapshot_prefix"); !ok {
+		if ok, err := assertManagedImageDataDiskSnapshotName(c.ManagedImageDataDiskSnapshotPrefix, "managed_image_data_disk_snapshot_prefix"); !ok {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
 	}
@@ -756,9 +757,16 @@ func assertManagedImageName(name, setting string) (bool, error) {
 	return true, nil
 }
 
-func assertManagedImageOSDiskSnapshotNameOrPrefix(name, setting string) (bool, error) {
-	if !isValidAzureName(reSnaspshotNameOrPrefix, name) {
+func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
+	if !isValidAzureName(reSnaspshotName, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 80 characters", setting)
+	}
+	return true, nil
+}
+
+func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
+	if !isValidAzureName(reSnaspshotPrefix, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
 	}
 	return true, nil
 }

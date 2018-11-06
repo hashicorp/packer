@@ -29,11 +29,11 @@ type Artifact struct {
 	TemplateUriReadOnlySas string
 
 	// Managed Image
-	ManagedImageResourceGroupName string
-	ManagedImageName              string
-	ManagedImageLocation          string
-	ManagedImageId                string
-	ManagedImageOSDiskSnapshotName string
+	ManagedImageResourceGroupName      string
+	ManagedImageName                   string
+	ManagedImageLocation               string
+	ManagedImageId                     string
+	ManagedImageosDiskSnapshotName     string
 	ManagedImageDataDiskSnapshotPrefix string
 
 	// Additional Disks
@@ -47,7 +47,7 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		ManagedImageLocation:          location,
 		ManagedImageId:                id,
 		OSType:                        osType,
-		ManagedImageOSDiskSnapshotName: osDiskSnapshotName,
+		ManagedImageosDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: osDiskSnapshotPrefix,
 	}, nil
 }
@@ -128,11 +128,11 @@ func (a *Artifact) isManagedImage() bool {
 	return a.ManagedImageResourceGroupName != ""
 }
 
-func (a *Artifact) takeOSDiskSnapshot() bool {
-	return a.ManagedImageOSDiskSnapshotName != ""
+func (a *Artifact) osDiskSnapshot() bool {
+	return a.ManagedImageosDiskSnapshotName != ""
 }
 
-func (a *Artifact) takeDataDiskSnapshot() bool {
+func (a *Artifact) dataDiskSnapshot() bool {
 	return a.ManagedImageDataDiskSnapshotPrefix != ""
 }
 
@@ -170,10 +170,10 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
 		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
-		if a.takeOSDiskSnapshot() {
-			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
+		if a.osDiskSnapshot() {
+			buf.WriteString(fmt.Sprintf("ManagedImageosDiskSnapshotName: %s\n", a.ManagedImageosDiskSnapshotName))
 		}
-		if a.takeDataDiskSnapshot() {
+		if a.dataDiskSnapshot() {
 			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
 		}
 	} else {
