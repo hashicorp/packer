@@ -193,7 +193,7 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.SnapshotsClient = compute.NewSnapshotsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.SnapshotsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
 	azureClient.SnapshotsClient.RequestInspector = withInspection(maxlen)
-	azureClient.SnapshotsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
+	azureClient.SnapshotsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.SnapshotsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.SnapshotsClient.UserAgent)
 
 	azureClient.AccountsClient = armStorage.NewAccountsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
