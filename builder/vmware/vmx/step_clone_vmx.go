@@ -3,7 +3,9 @@ package vmx
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 
@@ -18,9 +20,15 @@ type StepCloneVMX struct {
 	Path      string
 	VMName    string
 	Linked    bool
+	tempDir   string
 }
 
 func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+	halt := func(err error) multistep.StepAction {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -29,9 +37,11 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	ui.Say("Cloning source VM...")
 	log.Printf("Cloning from: %s", s.Path)
 	log.Printf("Cloning to: %s", vmxPath)
+
 	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
 		state.Put("error", err)
-		return multistep.ActionHalt
+		return halt(err)
+
 	}
 
 	// Read in the machine configuration from the cloned VMX file
@@ -40,10 +50,22 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	// network type so that it can work out things like IP's and MAC
 	// addresses
 	// * The disk compaction step needs the paths to all attached disks
+	if remoteDriver, ok := driver.(vmwcommon.RemoteDriver); ok {
+		remoteVmxPath := vmxPath
+		tempDir, err := ioutil.TempDir("", "packer-vmx")
+		if err != nil {
+			return halt(err)
+		}
+		s.tempDir = tempDir
+		vmxPath = filepath.Join(tempDir, s.VMName+".vmx")
+		if err = remoteDriver.Download(remoteVmxPath, vmxPath); err != nil {
+			return halt(err)
+		}
+	}
+
 	vmxData, err := vmwcommon.ReadVMX(vmxPath)
 	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
+		return halt(err)
 	}
 
 	var diskFilenames []string
@@ -104,4 +126,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 }
 
 func (s *StepCloneVMX) Cleanup(state multistep.StateBag) {
+	if s.tempDir != "" {
+		os.RemoveAll(s.tempDir)
+	}
 }

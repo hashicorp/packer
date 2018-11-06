@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -18,8 +17,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 )
-
-const BuilderIdESX = "mitchellh.vmware-esx"
 
 type Builder struct {
 	config Config
@@ -39,6 +36,7 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.ExportConfig   `mapstructure:",squash"`
 
 	// disk drives
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
@@ -68,26 +66,8 @@ type Config struct {
 	Serial   string `mapstructure:"serial"`
 	Parallel string `mapstructure:"parallel"`
 
-	// booting a guest
-	KeepRegistered      bool     `mapstructure:"keep_registered"`
-	OVFToolOptions      []string `mapstructure:"ovftool_options"`
-	SkipCompaction      bool     `mapstructure:"skip_compaction"`
-	SkipExport          bool     `mapstructure:"skip_export"`
-	VMXDiskTemplatePath string   `mapstructure:"vmx_disk_template_path"`
-	VMXTemplatePath     string   `mapstructure:"vmx_template_path"`
-
-	// remote vsphere
-	RemoteType           string `mapstructure:"remote_type"`
-	RemoteDatastore      string `mapstructure:"remote_datastore"`
-	RemoteCacheDatastore string `mapstructure:"remote_cache_datastore"`
-	RemoteCacheDirectory string `mapstructure:"remote_cache_directory"`
-	RemoteHost           string `mapstructure:"remote_host"`
-	RemotePort           uint   `mapstructure:"remote_port"`
-	RemoteUser           string `mapstructure:"remote_username"`
-	RemotePassword       string `mapstructure:"remote_password"`
-	RemotePrivateKey     string `mapstructure:"remote_private_key_file"`
-
-	CommConfig communicator.Config `mapstructure:",squash"`
+	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
+	VMXTemplatePath     string `mapstructure:"vmx_template_path"`
 
 	ctx interpolate.Context
 }
@@ -125,6 +105,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
 
 	if b.config.DiskName == "" {
 		b.config.DiskName = "disk"
@@ -175,26 +156,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.Version = "9"
 	}
 
-	if b.config.RemoteUser == "" {
-		b.config.RemoteUser = "root"
-	}
-
-	if b.config.RemoteDatastore == "" {
-		b.config.RemoteDatastore = "datastore1"
-	}
-
-	if b.config.RemoteCacheDatastore == "" {
-		b.config.RemoteCacheDatastore = b.config.RemoteDatastore
-	}
-
-	if b.config.RemoteCacheDirectory == "" {
-		b.config.RemoteCacheDirectory = "packer_cache"
-	}
-
-	if b.config.RemotePort == 0 {
-		b.config.RemotePort = 22
-	}
-
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -221,6 +182,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("remote_host must be specified"))
 		}
+
 		if b.config.RemoteType != "esx5" {
 			errs = packer.MultiErrorAppend(errs,
 				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
@@ -262,20 +224,22 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver, err := NewDriver(&b.config)
+	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, b.config.VMName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
 	// Determine the output dir implementation
-	var dir OutputDir
+	var dir vmwcommon.OutputDir
 	switch d := driver.(type) {
-	case OutputDir:
+	case vmwcommon.OutputDir:
 		dir = d
 	default:
 		dir = new(vmwcommon.LocalOutputDir)
 	}
 
+	// The OutputDir will track remote esxi output; exportOutputPath preserves
+	// the path to the output on the machine running Packer.
 	exportOutputPath := b.config.OutputDir
 
 	if b.config.RemoteType != "" {
@@ -292,6 +256,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("sshConfig", &b.config.SSHConfig)
+	state.Put("driverConfig", &b.config.DriverConfig)
 
 	steps := []multistep.Step{
 		&vmwcommon.StepPrepareTools{
@@ -327,6 +293,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXData,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&common.StepHTTPServer{
@@ -341,8 +308,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			VNCPortMax:         b.config.VNCPortMax,
 			VNCDisablePassword: b.config.VNCDisablePassword,
 		},
-		&StepRegister{
-			Format: b.config.Format,
+		&vmwcommon.StepRegister{
+			Format:         b.config.Format,
+			KeepRegistered: b.config.KeepRegistered,
+			SkipExport:     b.config.SkipExport,
 		},
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
@@ -382,18 +351,21 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&vmwcommon.StepConfigureVMX{
 			CustomData: b.config.VMXDataPost,
 			SkipFloppy: true,
+			VMName:     b.config.VMName,
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
 			VNCEnabled:               !b.config.DisableVNC,
 		},
-		&StepUploadVMX{
+		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
-		&StepExport{
-			Format:     b.config.Format,
-			SkipExport: b.config.SkipExport,
-			OutputDir:  exportOutputPath,
+		&vmwcommon.StepExport{
+			Format:         b.config.Format,
+			SkipExport:     b.config.SkipExport,
+			VMName:         b.config.VMName,
+			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      exportOutputPath,
 		},
 	}
 
@@ -416,36 +388,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	// Compile the artifact list
-	var files []string
-	if b.config.RemoteType != "" && b.config.Format != "" && !b.config.SkipExport {
-		dir = new(vmwcommon.LocalOutputDir)
-		dir.SetOutputDir(exportOutputPath)
-		files, err = dir.ListFiles()
-	} else {
-		files, err = state.Get("dir").(OutputDir).ListFiles()
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	// Set the proper builder ID
-	builderId := vmwcommon.BuilderId
-	if b.config.RemoteType != "" {
-		builderId = BuilderIdESX
-	}
-
-	config := make(map[string]string)
-	config[ArtifactConfKeepRegistered] = strconv.FormatBool(b.config.KeepRegistered)
-	config[ArtifactConfFormat] = b.config.Format
-	config[ArtifactConfSkipExport] = strconv.FormatBool(b.config.SkipExport)
-
-	return &Artifact{
-		builderId: builderId,
-		id:        b.config.VMName,
-		dir:       dir,
-		f:         files,
-		config:    config,
-	}, nil
+	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, exportOutputPath,
+		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 
 func (b *Builder) Cancel() {
