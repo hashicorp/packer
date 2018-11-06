@@ -130,7 +130,7 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 		for _, key := range privateKeys {
 			signer, err := ssh.ParsePrivateKey(key)
 			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+				return nil, fmt.Errorf("Error on parsing SSH private key: %s", err)
 			}
 			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
 		}
