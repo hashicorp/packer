@@ -22,7 +22,7 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 	driver := state.Get("driver").(vmwcommon.Driver)
 	ui := state.Get("ui").(packer.Ui)
 
-	remote, ok := driver.(RemoteDriver)
+	remote, ok := driver.(vmwcommon.RemoteDriver)
 	if !ok {
 		return multistep.ActionContinue
 	}
@@ -36,10 +36,10 @@ func (s *stepRemoteUpload) Run(_ context.Context, state multistep.StateBag) mult
 	checksum := config.ISOChecksum
 	checksumType := config.ISOChecksumType
 
-	if esx5, ok := remote.(*ESX5Driver); ok {
-		remotePath := esx5.cachePath(path)
+	if esx5, ok := remote.(*vmwcommon.ESX5Driver); ok {
+		remotePath := esx5.CachePath(path)
 
-		if esx5.verifyChecksum(checksumType, checksum, remotePath) {
+		if esx5.VerifyChecksum(checksumType, checksum, remotePath) {
 			ui.Say("Remote cache was verified skipping remote upload...")
 			state.Put(s.Key, remotePath)
 			return multistep.ActionContinue
@@ -68,7 +68,7 @@ func (s *stepRemoteUpload) Cleanup(state multistep.StateBag) {
 
 	driver := state.Get("driver").(vmwcommon.Driver)
 
-	remote, ok := driver.(RemoteDriver)
+	remote, ok := driver.(vmwcommon.RemoteDriver)
 	if !ok {
 		return
 	}

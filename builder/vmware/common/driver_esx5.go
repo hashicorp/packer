@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"bufio"
@@ -10,13 +10,14 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/communicator/ssh"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
@@ -26,7 +27,7 @@ import (
 // ESX5 driver talks to an ESXi5 hypervisor remotely over SSH to build
 // virtual machines. This driver can only manage one machine at a time.
 type ESX5Driver struct {
-	base vmwcommon.VmwareDriver
+	base VmwareDriver
 
 	Host           string
 	Port           uint
@@ -36,6 +37,8 @@ type ESX5Driver struct {
 	Datastore      string
 	CacheDatastore string
 	CacheDirectory string
+	VMName         string
+	CommConfig     communicator.Config
 
 	comm      packer.Communicator
 	outputDir string
@@ -43,7 +46,61 @@ type ESX5Driver struct {
 }
 
 func (d *ESX5Driver) Clone(dst, src string, linked bool) error {
-	return errors.New("Cloning is not supported with the ESX driver.")
+
+	linesToArray := func(lines string) []string { return strings.Split(strings.Trim(lines, "\n"), "\n") }
+
+	d.SetOutputDir(path.Dir(filepath.ToSlash(dst)))
+	srcVmx := d.datastorePath(src)
+	dstVmx := d.datastorePath(dst)
+	srcDir := path.Dir(srcVmx)
+	dstDir := path.Dir(dstVmx)
+
+	log.Printf("Source: %s\n", srcVmx)
+	log.Printf("Dest: %s\n", dstVmx)
+
+	err := d.MkdirAll()
+	if err != nil {
+		return fmt.Errorf("Failed to create the destination directory %s: %s", d.outputDir, err)
+	}
+
+	err = d.sh("cp", strconv.Quote(srcVmx), strconv.Quote(dstVmx))
+	if err != nil {
+		return fmt.Errorf("Failed to copy the vmx file %s: %s", srcVmx, err)
+	}
+
+	filesToClone, err := d.run(nil, "find", strconv.Quote(srcDir), "! -name '*.vmdk' ! -name '*.vmx' -type f ! -size 0")
+	if err != nil {
+		return fmt.Errorf("Failed to get the file list to copy: %s", err)
+	}
+
+	for _, f := range linesToArray(filesToClone) {
+		// TODO: linesToArray should really return [] if the string is empty. Instead it returns [""]
+		if f == "" {
+			continue
+		}
+		err := d.sh("cp", strconv.Quote(f), strconv.Quote(dstDir))
+		if err != nil {
+			return fmt.Errorf("Failing to copy %s to %s: %s", f, dstDir, err)
+		}
+	}
+
+	disksToClone, err := d.run(nil, "sed -ne 's/.*file[Nn]ame = \"\\(.*vmdk\\)\"/\\1/p'", strconv.Quote(srcVmx))
+	if err != nil {
+		return fmt.Errorf("Failing to get the vmdk list to clone %s", err)
+	}
+	for _, disk := range linesToArray(disksToClone) {
+		srcDisk := path.Join(srcDir, disk)
+		if path.IsAbs(disk) {
+			srcDisk = disk
+		}
+		destDisk := path.Join(dstDir, path.Base(disk))
+		err = d.sh("vmkfstools", "-d thin", "-i", strconv.Quote(srcDisk), strconv.Quote(destDisk))
+		if err != nil {
+			return fmt.Errorf("Failing to clone disk %s: %s", srcDisk, err)
+		}
+	}
+	log.Printf("Successfully cloned %s to %s\n", src, dst)
+	return nil
 }
 
 func (d *ESX5Driver) CompactDisk(diskPathLocal string) error {
@@ -65,7 +122,11 @@ func (d *ESX5Driver) IsRunning(string) (bool, error) {
 }
 
 func (d *ESX5Driver) ReloadVM() error {
-	return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
+	if d.vmId != "" {
+		return d.sh("vim-cmd", "vmsvc/reload", d.vmId)
+	} else {
+		return nil
+	}
 }
 
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
@@ -122,13 +183,13 @@ func (d *ESX5Driver) IsDestroyed() (bool, error) {
 }
 
 func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType string) (string, error) {
-	finalPath := d.cachePath(localPath)
+	finalPath := d.CachePath(localPath)
 	if err := d.mkdir(filepath.ToSlash(filepath.Dir(finalPath))); err != nil {
 		return "", err
 	}
 
 	log.Printf("Verifying checksum of %s", finalPath)
-	if d.verifyChecksum(checksumType, checksum, finalPath) {
+	if d.VerifyChecksum(checksumType, checksum, finalPath) {
 		log.Println("Initial checksum matched, no upload needed.")
 		return finalPath, nil
 	}
@@ -141,7 +202,7 @@ func (d *ESX5Driver) UploadISO(localPath string, checksum string, checksumType s
 }
 
 func (d *ESX5Driver) RemoveCache(localPath string) error {
-	finalPath := d.cachePath(localPath)
+	finalPath := d.CachePath(localPath)
 	log.Printf("Removing remote cache path %s (local %s)", finalPath, localPath)
 	return d.sh("rm", "-f", strconv.Quote(finalPath))
 }
@@ -375,14 +436,18 @@ func (ESX5Driver) UpdateVMX(_, password string, port uint, data map[string]strin
 }
 
 func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
-	config := state.Get("config").(*Config)
-	sshc := config.SSHConfig.Comm
+	sshc := state.Get("sshConfig").(*SSHConfig).Comm
 	port := sshc.SSHPort
 	if sshc.Type == "winrm" {
 		port = sshc.WinRMPort
 	}
 
-	if address := config.CommConfig.Host(); address != "" {
+	if address, ok := state.GetOk("vm_address"); ok {
+		return address.(string), nil
+	}
+
+	if address := d.CommConfig.Host(); address != "" {
+		state.Put("vm_address", address)
 		return address, nil
 	}
 
@@ -396,7 +461,12 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 	var displayName string
 	if v, ok := state.GetOk("display_name"); ok {
 		displayName = v.(string)
+	} else {
+		displayName = strings.Replace(d.VMName, " ", "_", -1)
+		log.Printf("No display_name set; falling back to using VMName %s "+
+			"to look for SSH IP", displayName)
 	}
+
 	record, err := r.find("Name", displayName)
 	if err != nil {
 		return "", err
@@ -432,14 +502,12 @@ func (d *ESX5Driver) CommHost(state multistep.StateBag) (string, error) {
 				if e.Timeout() {
 					log.Printf("Timeout connecting to %s", record["IPAddress"])
 					continue
-				} else if strings.Contains(e.Error(), "connection refused") {
-					log.Printf("Connection refused when connecting to: %s", record["IPAddress"])
-					continue
 				}
 			}
 		} else {
 			defer conn.Close()
 			address := record["IPAddress"]
+			state.Put("vm_address", address)
 			return address, nil
 		}
 	}
@@ -456,7 +524,7 @@ func (d *ESX5Driver) DirExists() (bool, error) {
 }
 
 func (d *ESX5Driver) ListFiles() ([]string, error) {
-	stdout, err := d.ssh("ls -1p "+d.outputDir, nil)
+	stdout, err := d.ssh("ls -1p "+strconv.Quote(d.outputDir), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +571,7 @@ func (d *ESX5Driver) datastorePath(path string) string {
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.Datastore, dirPath, filepath.Base(path)))
 }
 
-func (d *ESX5Driver) cachePath(path string) string {
+func (d *ESX5Driver) CachePath(path string) string {
 	return filepath.ToSlash(filepath.Join("/vmfs/volumes", d.CacheDatastore, d.CacheDirectory, filepath.Base(path)))
 }
 
@@ -592,7 +660,16 @@ func (d *ESX5Driver) upload(dst, src string) error {
 	return d.comm.Upload(dst, f, nil)
 }
 
-func (d *ESX5Driver) verifyChecksum(ctype string, hash string, file string) bool {
+func (d *ESX5Driver) Download(src, dst string) error {
+	file, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return d.comm.Download(d.datastorePath(src), file)
+}
+
+func (d *ESX5Driver) VerifyChecksum(ctype string, hash string, file string) bool {
 	if ctype == "none" {
 		if err := d.sh("stat", strconv.Quote(file)); err != nil {
 			return false
@@ -661,7 +738,7 @@ func (d *ESX5Driver) esxcli(args ...string) (*esxcliReader, error) {
 	return &esxcliReader{r, header}, nil
 }
 
-func (d *ESX5Driver) GetVmwareDriver() vmwcommon.VmwareDriver {
+func (d *ESX5Driver) GetVmwareDriver() VmwareDriver {
 	return d.base
 }
 
