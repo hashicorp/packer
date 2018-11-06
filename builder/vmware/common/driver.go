@@ -96,7 +96,7 @@ func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver,
 				CacheDatastore: dconfig.RemoteCacheDatastore,
 				CacheDirectory: dconfig.RemoteCacheDirectory,
 				VMName:         vmName,
-				CommConfig:     *(&config.Comm),
+				CommConfig:     config.Comm,
 			},
 		}
 
