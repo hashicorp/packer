@@ -33,7 +33,7 @@ type Artifact struct {
 	ManagedImageName                   string
 	ManagedImageLocation               string
 	ManagedImageId                     string
-	ManagedImageosDiskSnapshotName     string
+	ManagedImageOSDiskSnapshotName     string
 	ManagedImageDataDiskSnapshotPrefix string
 
 	// Additional Disks
@@ -47,7 +47,7 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		ManagedImageLocation:          location,
 		ManagedImageId:                id,
 		OSType:                        osType,
-		ManagedImageosDiskSnapshotName:     osDiskSnapshotName,
+		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: osDiskSnapshotPrefix,
 	}, nil
 }
@@ -129,7 +129,7 @@ func (a *Artifact) isManagedImage() bool {
 }
 
 func (a *Artifact) osDiskSnapshot() bool {
-	return a.ManagedImageosDiskSnapshotName != ""
+	return a.ManagedImageOSDiskSnapshotName != ""
 }
 
 func (a *Artifact) dataDiskSnapshot() bool {
@@ -171,7 +171,7 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
 		if a.osDiskSnapshot() {
-			buf.WriteString(fmt.Sprintf("ManagedImageosDiskSnapshotName: %s\n", a.ManagedImageosDiskSnapshotName))
+			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
 		}
 		if a.dataDiskSnapshot() {
 			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
