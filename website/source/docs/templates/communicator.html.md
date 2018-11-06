@@ -75,8 +75,9 @@ The SSH communicator has the following options:
 -   `ssh_bastion_port` (number) - The port of the bastion host. Defaults to
     `22`.
 
--   `ssh_bastion_private_key_file` (string) - A private key file to use to
-    authenticate with the bastion host.
+-   `ssh_bastion_private_key_file` (string) - Path to a PEM encoded private
+    key file to use to authenticate with the bastion host. The `~` can be used
+    in path and will be expanded to the home directory of current user.
 
 -   `ssh_bastion_username` (string) - The username to connect to the bastion
     host.
@@ -111,7 +112,8 @@ The SSH communicator has the following options:
 -   `ssh_port` (number) - The port to connect to SSH. This defaults to `22`.
 
 -   `ssh_private_key_file` (string) - Path to a PEM encoded private key file to
-    use to authenticate with SSH.
+    use to authenticate with SSH. The `~` can be used in path and will be
+    expanded to the home directory of current user.
 
 -   `ssh_proxy_host` (string) - A SOCKS proxy host to use for SSH connection
 
