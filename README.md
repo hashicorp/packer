@@ -1,5 +1,6 @@
 [![Team project](http://jb.gg/badges/team.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-[![Github All Releases](https://img.shields.io/github/downloads/jetbrains-infra/packer-builder-vsphere/total.svg)](https://github.com/jetbrains-infra/packer-builder-vsphere/releases)
+[![GitHub latest release](https://img.shields.io/github/release/jetbrains-infra/packer-builder-vsphere.svg)](https://github.com/jetbrains-infra/packer-builder-vsphere/releases)
+[![GitHub downloads](https://img.shields.io/github/downloads/jetbrains-infra/packer-builder-vsphere/total.svg)](https://github.com/jetbrains-infra/packer-builder-vsphere/releases)
 [![TeamCity build status](https://img.shields.io/teamcity/http/teamcity.jetbrains.com/s/PackerVSphere_Build.svg)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=PackerVSphere_Build&guest=1)
 
 
@@ -82,7 +83,9 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `network`(string) - Set network VM will be connected to.
 * `network_card`(string) - Set VM network card type. Example `vmxnet3`.
 * `usb_controller`(boolean) - Create USB controller for virtual machine. Defaults to `false`.
-* `firmware`(string) - Set the Firmware at machine creation. Example `efi`. Defaults to `bios`
+* `cdrom_type`(string) - Which controller to use. Example `sata`. Defaults to `ide`.
+* `firmware`(string) - Set the Firmware at machine creation. Example `efi`. Defaults to `bios`.
+
 
 ### Boot (`vsphere-iso` only)
 
