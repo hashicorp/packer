@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"context"
@@ -31,12 +31,12 @@ func TestStepRegister_regularDriver(t *testing.T) {
 
 func TestStepRegister_remoteDriver(t *testing.T) {
 	state := testState(t)
-	step := new(StepRegister)
+	step := &StepRegister{
+		KeepRegistered: false,
+		SkipExport:     true,
+	}
 
 	driver := new(RemoteDriverMock)
-	var config Config
-	config.KeepRegistered = false
-	state.Put("config", &config)
 
 	state.Put("driver", driver)
 	state.Put("vmx_path", "foo")
@@ -71,12 +71,9 @@ func TestStepRegister_remoteDriver(t *testing.T) {
 }
 func TestStepRegister_WithoutUnregister_remoteDriver(t *testing.T) {
 	state := testState(t)
-	step := new(StepRegister)
+	step := &StepRegister{KeepRegistered: true}
 
 	driver := new(RemoteDriverMock)
-	var config Config
-	config.KeepRegistered = true
-	state.Put("config", &config)
 
 	state.Put("driver", driver)
 	state.Put("vmx_path", "foo")

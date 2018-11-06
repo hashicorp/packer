@@ -1,11 +1,7 @@
-package iso
-
-import (
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-)
+package common
 
 type RemoteDriverMock struct {
-	vmwcommon.DriverMock
+	DriverMock
 
 	UploadISOCalled bool
 	UploadISOPath   string
@@ -27,7 +23,8 @@ type RemoteDriverMock struct {
 	IsDestroyedResult bool
 	IsDestroyedErr    error
 
-	uploadErr error
+	UploadErr   error
+	DownloadErr error
 
 	ReloadVMErr error
 }
@@ -61,7 +58,11 @@ func (d *RemoteDriverMock) IsDestroyed() (bool, error) {
 }
 
 func (d *RemoteDriverMock) upload(dst, src string) error {
-	return d.uploadErr
+	return d.UploadErr
+}
+
+func (d *RemoteDriverMock) Download(src, dst string) error {
+	return d.DownloadErr
 }
 
 func (d *RemoteDriverMock) RemoveCache(localPath string) error {

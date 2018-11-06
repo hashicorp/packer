@@ -81,46 +81,64 @@ type Driver interface {
 
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
-func NewDriver(dconfig *DriverConfig, config *SSHConfig) (Driver, error) {
+func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
 	drivers := []Driver{}
 
-	switch runtime.GOOS {
-	case "darwin":
+	if dconfig.RemoteType != "" {
 		drivers = []Driver{
-			&Fusion6Driver{
-				Fusion5Driver: Fusion5Driver{
+			&ESX5Driver{
+				Host:           dconfig.RemoteHost,
+				Port:           dconfig.RemotePort,
+				Username:       dconfig.RemoteUser,
+				Password:       dconfig.RemotePassword,
+				PrivateKeyFile: dconfig.RemotePrivateKey,
+				Datastore:      dconfig.RemoteDatastore,
+				CacheDatastore: dconfig.RemoteCacheDatastore,
+				CacheDirectory: dconfig.RemoteCacheDirectory,
+				VMName:         vmName,
+				CommConfig:     config.Comm,
+			},
+		}
+
+	} else {
+		switch runtime.GOOS {
+		case "darwin":
+			drivers = []Driver{
+				&Fusion6Driver{
+					Fusion5Driver: Fusion5Driver{
+						AppPath:   dconfig.FusionAppPath,
+						SSHConfig: config,
+					},
+				},
+				&Fusion5Driver{
 					AppPath:   dconfig.FusionAppPath,
 					SSHConfig: config,
 				},
-			},
-			&Fusion5Driver{
-				AppPath:   dconfig.FusionAppPath,
-				SSHConfig: config,
-			},
-		}
-	case "linux":
-		fallthrough
-	case "windows":
-		drivers = []Driver{
-			&Workstation10Driver{
-				Workstation9Driver: Workstation9Driver{
+			}
+		case "linux":
+			fallthrough
+		case "windows":
+			drivers = []Driver{
+				&Workstation10Driver{
+					Workstation9Driver: Workstation9Driver{
+						SSHConfig: config,
+					},
+				},
+				&Workstation9Driver{
 					SSHConfig: config,
 				},
-			},
-			&Workstation9Driver{
-				SSHConfig: config,
-			},
-			&Player6Driver{
-				Player5Driver: Player5Driver{
+				&Player6Driver{
+					Player5Driver: Player5Driver{
+						SSHConfig: config,
+					},
+				},
+				&Player5Driver{
 					SSHConfig: config,
 				},
-			},
-			&Player5Driver{
-				SSHConfig: config,
-			},
+			}
+		default:
+			return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 		}
-	default:
-		return nil, fmt.Errorf("can't find driver for OS: %s", runtime.GOOS)
 	}
 
 	errs := ""

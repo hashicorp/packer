@@ -459,13 +459,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 			t.Fatalf("should not have error: %s", err)
 		}
 
-		if b.config.CommConfig.WinRMUser != "username" {
-			t.Errorf("bad winrm_username: %s", b.config.CommConfig.WinRMUser)
+		if b.config.SSHConfig.Comm.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.SSHConfig.Comm.WinRMUser)
 		}
-		if b.config.CommConfig.WinRMPassword != "password" {
-			t.Errorf("bad winrm_password: %s", b.config.CommConfig.WinRMPassword)
+		if b.config.SSHConfig.Comm.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.SSHConfig.Comm.WinRMPassword)
 		}
-		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+		if host := b.config.SSHConfig.Comm.Host(); host != "1.2.3.4" {
 			t.Errorf("bad host: %s", host)
 		}
 	}
@@ -487,13 +487,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 			t.Fatalf("should not have error: %s", err)
 		}
 
-		if b.config.CommConfig.SSHUsername != "username" {
-			t.Errorf("bad ssh_username: %s", b.config.CommConfig.SSHUsername)
+		if b.config.SSHConfig.Comm.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.SSHConfig.Comm.SSHUsername)
 		}
-		if b.config.CommConfig.SSHPassword != "password" {
-			t.Errorf("bad ssh_password: %s", b.config.CommConfig.SSHPassword)
+		if b.config.SSHConfig.Comm.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.SSHConfig.Comm.SSHPassword)
 		}
-		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+		if host := b.config.SSHConfig.Comm.Host(); host != "1.2.3.4" {
 			t.Errorf("bad host: %s", host)
 		}
 	}
