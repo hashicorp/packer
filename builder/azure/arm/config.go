@@ -326,7 +326,7 @@ func setSshValues(c *Config) error {
 	}
 
 	if c.Comm.SSHPrivateKeyFile != "" {
-		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKeyFile)
+		privateKeyBytes, err := c.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
 			return err
 		}

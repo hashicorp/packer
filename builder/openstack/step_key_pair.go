@@ -28,10 +28,10 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	ui := state.Get("ui").(packer.Ui)
 
 	if s.Comm.SSHPrivateKeyFile != "" {
-		privateKeyBytes, err := ioutil.ReadFile(s.Comm.SSHPrivateKeyFile)
+		ui.Say("Using existing SSH private key")
+		privateKeyBytes, err := s.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"Error loading configured private key file: %s", err))
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 
