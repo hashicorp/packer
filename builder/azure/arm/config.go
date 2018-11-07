@@ -56,8 +56,8 @@ var (
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnaspshotName        = regexp.MustCompile("^[A-Za-z0-9_]{10,79}$")
-	reSnaspshotPrefix      = regexp.MustCompile("^[A-Za-z0-9_]{10,59}$")
+	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{10,79}$")
+	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{10,59}$")
 )
 
 type PlanInformation struct {
@@ -758,14 +758,14 @@ func assertManagedImageName(name, setting string) (bool, error) {
 }
 
 func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
-	if !isValidAzureName(reSnaspshotName, name) {
+	if !isValidAzureName(reSnapshotName, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 80 characters", setting)
 	}
 	return true, nil
 }
 
 func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
-	if !isValidAzureName(reSnaspshotPrefix, name) {
+	if !isValidAzureName(reSnapshotPrefix, name) {
 		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
 	}
 	return true, nil
