@@ -13,7 +13,7 @@ import (
 
 type StepSnapshotDataDisks struct {
 	client *AzureClient
-	create    func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
+	create func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
 	say    func(message string)
 	error  func(e error)
 }
@@ -35,7 +35,7 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 		DiskProperties: &compute.DiskProperties{
 			CreationData: &compute.CreationData{
 				CreateOption: compute.Import,
-				SourceURI: to.StringPtr(srcUriVhd),
+				SourceURI:    to.StringPtr(srcUriVhd),
 			},
 		},
 		Location: to.StringPtr(location),
