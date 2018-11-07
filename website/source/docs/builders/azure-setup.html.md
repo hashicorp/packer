@@ -209,7 +209,7 @@ using `openssl rand -base64 24`.
 $ az ad app create \
   --display-name $APPNAME \
   --identifier-uris $APPURL \
-  --home-page $APPURL \
+  --homepage $APPURL \
   --password $PASSWORD
 ```
 
