@@ -110,6 +110,40 @@ func checkDefault(t *testing.T, name string, host string, datastore string) buil
 	}
 }
 
+func TestISOBuilderAcc_notes(t *testing.T) {
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: notesConfig(),
+		Check:    checkNotes(t),
+	})
+}
+
+func notesConfig() string {
+	config := defaultConfig()
+	config["notes"] = "test"
+
+	return commonT.RenderConfig(config)
+}
+
+func checkNotes(t *testing.T) builderT.TestCheckFunc {
+	return func(artifacts []packer.Artifact) error {
+		d := commonT.TestConn(t)
+		vm := commonT.GetVM(t, d, artifacts)
+
+		vmInfo, err := vm.Info("config.annotation")
+		if err != nil {
+			t.Fatalf("Cannot read VM properties: %v", err)
+		}
+
+		notes := vmInfo.Config.Annotation
+		if notes != "test" {
+			t.Errorf("notes should be 'test'")
+		}
+
+		return nil
+	}
+}
+
 func TestISOBuilderAcc_hardware(t *testing.T) {
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
