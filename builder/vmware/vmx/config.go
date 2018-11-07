@@ -93,6 +93,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
+	err = c.DriverConfig.Validate(c.SkipExport)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
 	if c.Format == "" {
 		c.Format = "ovf"
 	}
