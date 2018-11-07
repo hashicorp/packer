@@ -3,7 +3,6 @@ package iso
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -11,12 +10,9 @@ import (
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/common/bootcommand"
 	"github.com/hashicorp/packer/helper/communicator"
-	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type Builder struct {
@@ -24,139 +20,14 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-type Config struct {
-	common.PackerConfig      `mapstructure:",squash"`
-	common.HTTPConfig        `mapstructure:",squash"`
-	common.ISOConfig         `mapstructure:",squash"`
-	common.FloppyConfig      `mapstructure:",squash"`
-	bootcommand.VNCConfig    `mapstructure:",squash"`
-	vmwcommon.DriverConfig   `mapstructure:",squash"`
-	vmwcommon.OutputConfig   `mapstructure:",squash"`
-	vmwcommon.RunConfig      `mapstructure:",squash"`
-	vmwcommon.ShutdownConfig `mapstructure:",squash"`
-	vmwcommon.SSHConfig      `mapstructure:",squash"`
-	vmwcommon.ToolsConfig    `mapstructure:",squash"`
-	vmwcommon.VMXConfig      `mapstructure:",squash"`
-	vmwcommon.ExportConfig   `mapstructure:",squash"`
-
-	// disk drives
-	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
-	DiskAdapterType    string `mapstructure:"disk_adapter_type"`
-	DiskName           string `mapstructure:"vmdk_name"`
-	DiskSize           uint   `mapstructure:"disk_size"`
-	DiskTypeId         string `mapstructure:"disk_type_id"`
-	Format             string `mapstructure:"format"`
-
-	// cdrom drive
-	CdromAdapterType string `mapstructure:"cdrom_adapter_type"`
-
-	// platform information
-	GuestOSType string `mapstructure:"guest_os_type"`
-	Version     string `mapstructure:"version"`
-	VMName      string `mapstructure:"vm_name"`
-
-	// Network adapter and type
-	NetworkAdapterType string `mapstructure:"network_adapter_type"`
-	Network            string `mapstructure:"network"`
-
-	// device presence
-	Sound bool `mapstructure:"sound"`
-	USB   bool `mapstructure:"usb"`
-
-	// communication ports
-	Serial   string `mapstructure:"serial"`
-	Parallel string `mapstructure:"parallel"`
-
-	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
-	VMXTemplatePath     string `mapstructure:"vmx_template_path"`
-
-	ctx interpolate.Context
-}
-
+// Prepare processes the build configuration parameters.
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
-	err := config.Decode(&b.config, &config.DecodeOpts{
-		Interpolate:        true,
-		InterpolateContext: &b.config.ctx,
-		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{
-				"boot_command",
-				"tools_upload_path",
-			},
-		},
-	}, raws...)
-	if err != nil {
-		return nil, err
+	c, warnings, errs := NewConfig(raws...)
+	if errs != nil {
+		return warnings, errs
 	}
 
-	// Accumulate any errors and warnings
-	var errs *packer.MultiError
-	warnings := make([]string, 0)
-
-	isoWarnings, isoErrs := b.config.ISOConfig.Prepare(&b.config.ctx)
-	warnings = append(warnings, isoWarnings...)
-	errs = packer.MultiErrorAppend(errs, isoErrs...)
-	errs = packer.MultiErrorAppend(errs, b.config.HTTPConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.DriverConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs,
-		b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
-	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ToolsConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VMXConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.VNCConfig.Prepare(&b.config.ctx)...)
-	errs = packer.MultiErrorAppend(errs, b.config.ExportConfig.Prepare(&b.config.ctx)...)
-
-	if b.config.DiskName == "" {
-		b.config.DiskName = "disk"
-	}
-
-	if b.config.DiskSize == 0 {
-		b.config.DiskSize = 40000
-	}
-
-	if b.config.DiskAdapterType == "" {
-		// Default is lsilogic
-		b.config.DiskAdapterType = "lsilogic"
-	}
-
-	if !b.config.SkipCompaction {
-		if b.config.RemoteType == "esx5" {
-			if b.config.DiskTypeId == "" {
-				b.config.SkipCompaction = true
-			}
-		}
-	}
-
-	if b.config.DiskTypeId == "" {
-		// Default is growable virtual disk split in 2GB files.
-		b.config.DiskTypeId = "1"
-
-		if b.config.RemoteType == "esx5" {
-			b.config.DiskTypeId = "zeroedthick"
-		}
-	}
-
-	if b.config.RemoteType == "esx5" {
-		if b.config.DiskTypeId != "thin" && !b.config.SkipCompaction {
-			errs = packer.MultiErrorAppend(
-				errs, fmt.Errorf("skip_compaction must be 'true' for disk_type_id: %s", b.config.DiskTypeId))
-		}
-	}
-
-	if b.config.GuestOSType == "" {
-		b.config.GuestOSType = "other"
-	}
-
-	if b.config.VMName == "" {
-		b.config.VMName = fmt.Sprintf("packer-%s", b.config.PackerBuildName)
-	}
-
-	if b.config.Version == "" {
-		b.config.Version = "9"
-	}
-
+	b.config = *c
 	if b.config.VMXTemplatePath != "" {
 		if err := b.validateVMXTemplatePath(); err != nil {
 			errs = packer.MultiErrorAppend(
@@ -168,62 +39,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		if warn != "" {
 			warnings = append(warnings, warn)
 		}
-	}
-
-	if b.config.Network == "" {
-		b.config.Network = "nat"
-	}
-
-	if !b.config.Sound {
-		b.config.Sound = false
-	}
-
-	if !b.config.USB {
-		b.config.USB = false
-	}
-
-	// Remote configuration validation
-	if b.config.RemoteType != "" {
-		if b.config.RemoteHost == "" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("remote_host must be specified"))
-		}
-
-		if b.config.RemoteType != "esx5" {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
-		}
-	}
-
-	if b.config.Format == "" {
-		b.config.Format = "ovf"
-	}
-
-	if !(b.config.Format == "ova" || b.config.Format == "ovf" || b.config.Format == "vmx") {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("format must be one of ova, ovf, or vmx"))
-	}
-
-	if b.config.RemoteType == "esx5" && b.config.SkipExport != true && b.config.RemotePassword == "" {
-		errs = packer.MultiErrorAppend(errs,
-			fmt.Errorf("exporting the vm (with ovftool) requires that you set a value for remote_password"))
-	}
-
-	// Warnings
-	if b.config.ShutdownCommand == "" {
-		warnings = append(warnings,
-			"A shutdown_command was not specified. Without a shutdown command, Packer\n"+
-				"will forcibly halt the virtual machine, which may result in data loss.")
-	}
-
-	if b.config.Headless && b.config.DisableVNC {
-		warnings = append(warnings,
-			"Headless mode uses VNC to retrieve output. Since VNC has been disabled,\n"+
-				"you won't be able to see any output.")
-	}
-
-	if errs != nil && len(errs.Errors) > 0 {
-		return warnings, errs
 	}
 
 	return warnings, nil
