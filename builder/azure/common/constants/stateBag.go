@@ -30,11 +30,11 @@ const (
 	ArmVirtualMachineCaptureParameters string = "arm.VirtualMachineCaptureParameters"
 	ArmIsExistingResourceGroup         string = "arm.IsExistingResourceGroup"
 
-	ArmIsManagedImage                string = "arm.IsManagedImage"
-	ArmManagedImageResourceGroupName string = "arm.ManagedImageResourceGroupName"
-	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
-	ArmManagedImageName              string = "arm.ManagedImageName"
-	ArmAsyncResourceGroupDelete      string = "arm.AsyncResourceGroupDelete"
-	ArmManagedImageOSDiskSnapshotName              string = "arm.ManagedImageOSDiskSnapshotName"
-	ArmManagedImageDataDiskSnapshotPrefix              string = "arm.ManagedImageDataDiskSnapshotPrefix"
+	ArmIsManagedImage                     string = "arm.IsManagedImage"
+	ArmManagedImageResourceGroupName      string = "arm.ManagedImageResourceGroupName"
+	ArmManagedImageLocation               string = "arm.ManagedImageLocation"
+	ArmManagedImageName                   string = "arm.ManagedImageName"
+	ArmAsyncResourceGroupDelete           string = "arm.AsyncResourceGroupDelete"
+	ArmManagedImageOSDiskSnapshotName     string = "arm.ManagedImageOSDiskSnapshotName"
+	ArmManagedImageDataDiskSnapshotPrefix string = "arm.ManagedImageDataDiskSnapshotPrefix"
 )
