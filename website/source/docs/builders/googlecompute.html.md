@@ -91,7 +91,7 @@ location found:
     `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 3.  A JSON file in a location known to the `gcloud` command-line tool.
-    (`gcloud` creates it when it's configured)
+    (`gcloud auth application-default login` creates it)
 
     On Windows, this is:
 
@@ -104,11 +104,6 @@ location found:
 4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches
     credentials from the metadata server. (Needs a correct VM authentication
     scope configuration, see above.)
-    
- ### Alternative Authentication Method 
-   On your computer, if you have made your identity available as the 
-   Application Default Credentials by running gcloud auth application-default login, 
-   the provider will use your identity.
 
 ## Examples
 
