@@ -190,11 +190,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Only one of script or scripts can be specified."))
 	}
 
-	if p.config.ElevatedUser != "" && p.config.ElevatedPassword == "" {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("Must supply an 'elevated_password' if 'elevated_user' provided"))
-	}
-
 	if p.config.ElevatedUser == "" && p.config.ElevatedPassword != "" {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Must supply an 'elevated_user' if 'elevated_password' provided"))
