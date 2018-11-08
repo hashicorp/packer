@@ -19,11 +19,11 @@ $log = [System.Environment]::ExpandEnvironmentVariables("{{.LogFile}}")
 $s = New-Object -ComObject "Schedule.Service"
 $s.Connect()
 $t = $s.NewTask($null)
-$t.XmlText = @'
+$xml = [xml]@'
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-	<Description>{{.TaskDescription}}</Description>
+    <Description>{{.TaskDescription}}</Description>
   </RegistrationInfo>
   <Principals>
     <Principal id="Author">
@@ -59,9 +59,20 @@ $t.XmlText = @'
   </Actions>
 </Task>
 '@
+$logon_type = 1
+$password = "{{.Password}}"
+if ($password.Length -eq 0) {
+  $logon_type = 5
+  $password = $null
+  $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+  $ns.AddNamespace("ns", $xml.DocumentElement.NamespaceURI)
+  $node = $xml.SelectSingleNode("/ns:Task/ns:Principals/ns:Principal/ns:LogonType", $ns)
+  $node.ParentNode.RemoveChild($node) | Out-Null
+}
+$t.XmlText = $xml.OuterXml
 if (Test-Path variable:global:ProgressPreference){$ProgressPreference="SilentlyContinue"}
 $f = $s.GetFolder("\")
-$f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", "{{.Password}}", 1, $null) | Out-Null
+$f.RegisterTaskDefinition($name, $t, 6, "{{.User}}", $password, $logon_type, $null) | Out-Null
 $t = $f.GetTask("\$name")
 $t.Run($null) | Out-Null
 $timeout = 10
