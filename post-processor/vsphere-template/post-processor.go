@@ -31,6 +31,11 @@ type Config struct {
 	Password            string `mapstructure:"password"`
 	Datacenter          string `mapstructure:"datacenter"`
 	Folder              string `mapstructure:"folder"`
+	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
+	SnapshotName        string `mapstructure:"snapshot_name"`
+	SnapshotDescription string `mapstructure:"snapshot_description"`
+	SnapshotMemory      bool   `mapstructure:"snapshot_memory"`
+	SnapshotQuiesce     bool   `mapstructure:"snapshot_quiesce"`
 
 	ctx interpolate.Context
 }
@@ -126,6 +131,7 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 		&stepCreateFolder{
 			Folder: p.config.Folder,
 		},
+		NewStepCreateSnapshot(artifact, p),
 		NewStepMarkAsTemplate(artifact),
 	}
 	runner := common.NewRunnerWithPauseFn(steps, p.config.PackerConfig, ui, state)
