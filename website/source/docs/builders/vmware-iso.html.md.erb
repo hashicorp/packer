@@ -365,6 +365,12 @@ builder.
     Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
     section below for more info.
 
+-   `skip_validate_credentials` (boolean) - When Packer is preparing to run a
+    remote esxi build, and export is not disable, by default it runs a no-op
+    ovftool command to make sure that the remote_username and remote_password
+    given are valid. If you set this flag to `true`, Packer will skip this
+    validation. Default: `false`.
+
 -   `sound` (boolean) - Enable VMware's virtual soundcard device for the VM.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to

@@ -132,6 +132,12 @@ builder.
     the builder. By default this is `output-BUILDNAME` where "BUILDNAME" is the
     name of the build.
 
+-   `skip_validate_credentials` (boolean) - When Packer is preparing to run a
+    remote esxi build, and export is not disable, by default it runs a no-op
+    ovftool command to make sure that the remote_username and remote_password
+    given are valid. If you set this flag to `true`, Packer will skip this
+    validation. Default: `false`.
+
 -   `remote_cache_datastore` (string) - The path to the datastore where
     supporting files will be stored during the build on the remote machine. By
     default this is the same as the `remote_datastore` option. This only has an
