@@ -24,6 +24,7 @@ type CloneConfig struct {
 	ResourcePool string
 	Datastore    string
 	LinkedClone  bool
+	Annotation   string
 }
 
 type HardwareConfig struct {
@@ -217,6 +218,12 @@ func (template *VirtualMachine) Clone(ctx context.Context, config *CloneConfig) 
 			return nil, err
 		}
 		cloneSpec.Snapshot = tpl.Snapshot.CurrentSnapshot
+	}
+
+	if config.Annotation != "" {
+		var configSpec types.VirtualMachineConfigSpec
+		configSpec.Annotation = config.Annotation
+		cloneSpec.Config = &configSpec
 	}
 
 	task, err := template.vm.Clone(template.driver.ctx, folder.folder, config.Name, cloneSpec)
