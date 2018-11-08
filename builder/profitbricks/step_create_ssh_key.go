@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -22,9 +21,9 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	c := state.Get("config").(*Config)
 
 	if c.Comm.SSHPrivateKeyFile != "" {
-		pemBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKeyFile)
-
+		pemBytes, err := c.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
+			state.Put("error", err)
 			ui.Error(err.Error())
 			return multistep.ActionHalt
 		}
