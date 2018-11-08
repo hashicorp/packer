@@ -104,6 +104,11 @@ location found:
 4.  On Google Compute Engine and Google App Engine Managed VMs, it fetches
     credentials from the metadata server. (Needs a correct VM authentication
     scope configuration, see above.)
+    
+ ### Alternative Authentication Method 
+   On your computer, if you have made your identity available as the 
+   Application Default Credentials by running gcloud auth application-default login, 
+   the provider will use your identity.
 
 ## Examples
 
