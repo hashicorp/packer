@@ -13,6 +13,7 @@ import (
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
+	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -27,8 +28,6 @@ type Config struct {
 	SSHPort                   int           `mapstructure:"ssh_port"`
 	SSHUsername               string        `mapstructure:"ssh_username"`
 	SSHPassword               string        `mapstructure:"ssh_password"`
-	SSHPublicKey              []byte        `mapstructure:"ssh_public_key"`
-	SSHPrivateKey             []byte        `mapstructure:"ssh_private_key"`
 	SSHKeyPairName            string        `mapstructure:"ssh_keypair_name"`
 	SSHTemporaryKeyPairName   string        `mapstructure:"temporary_key_pair_name"`
 	SSHClearAuthorizedKeys    bool          `mapstructure:"ssh_clear_authorized_keys"`
@@ -53,6 +52,9 @@ type Config struct {
 	SSHProxyPassword          string        `mapstructure:"ssh_proxy_password"`
 	SSHKeepAliveInterval      time.Duration `mapstructure:"ssh_keep_alive_interval"`
 	SSHReadWriteTimeout       time.Duration `mapstructure:"ssh_read_write_timeout"`
+	// SSH Internals
+	SSHPublicKey  []byte
+	SSHPrivateKey []byte
 
 	// WinRM
 	WinRMUser               string        `mapstructure:"winrm_username"`
@@ -64,6 +66,23 @@ type Config struct {
 	WinRMInsecure           bool          `mapstructure:"winrm_insecure"`
 	WinRMUseNTLM            bool          `mapstructure:"winrm_use_ntlm"`
 	WinRMTransportDecorator func() winrm.Transporter
+}
+
+// ReadSSHPrivateKeyFile returns the SSH private key bytes
+func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
+	var privateKey []byte
+
+	if c.SSHPrivateKeyFile != "" {
+		keyPath, err := homedir.Expand(c.SSHPrivateKeyFile)
+		if err != nil {
+			return privateKey, fmt.Errorf("Error expanding path for SSH private key: %s", err)
+		}
+		privateKey, err = ioutil.ReadFile(keyPath)
+		if err != nil {
+			return privateKey, fmt.Errorf("Error on reading SSH private key: %s", err)
+		}
+	}
+	return privateKey, nil
 }
 
 // SSHConfigFunc returns a function that can be used for the SSH communicator
@@ -92,12 +111,11 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 
 		var privateKeys [][]byte
 		if c.SSHPrivateKeyFile != "" {
-			// key based auth
-			bytes, err := ioutil.ReadFile(c.SSHPrivateKeyFile)
+			privateKey, err := c.ReadSSHPrivateKeyFile()
 			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+				return nil, err
 			}
-			privateKeys = append(privateKeys, bytes)
+			privateKeys = append(privateKeys, privateKey)
 		}
 
 		// aws,alicloud,cloudstack,digitalOcean,oneAndOne,openstack,oracle & profitbricks key
@@ -112,7 +130,7 @@ func (c *Config) SSHConfigFunc() func(multistep.StateBag) (*ssh.ClientConfig, er
 		for _, key := range privateKeys {
 			signer, err := ssh.ParsePrivateKey(key)
 			if err != nil {
-				return nil, fmt.Errorf("Error setting up SSH config: %s", err)
+				return nil, fmt.Errorf("Error on parsing SSH private key: %s", err)
 			}
 			sshConfig.Auth = append(sshConfig.Auth, ssh.PublicKeys(signer))
 		}
@@ -243,10 +261,14 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHPrivateKeyFile != "" {
-		if _, err := os.Stat(c.SSHPrivateKeyFile); err != nil {
+		path, err := homedir.Expand(c.SSHPrivateKeyFile)
+		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
-		} else if _, err := helperssh.FileSigner(c.SSHPrivateKeyFile); err != nil {
+		} else if _, err := os.Stat(path); err != nil {
+			errs = append(errs, fmt.Errorf(
+				"ssh_private_key_file is invalid: %s", err))
+		} else if _, err := helperssh.FileSigner(path); err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
 		}
@@ -256,6 +278,18 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		if c.SSHBastionPassword == "" && c.SSHBastionPrivateKeyFile == "" {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
+		} else if c.SSHBastionPrivateKeyFile != "" {
+			path, err := homedir.Expand(c.SSHBastionPrivateKeyFile)
+			if err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			} else if _, err := os.Stat(path); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			} else if _, err := helperssh.FileSigner(path); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"ssh_bastion_private_key_file is invalid: %s", err))
+			}
 		}
 	}
 
