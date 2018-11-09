@@ -64,7 +64,7 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 		return err
 	}
 
-	s.say(fmt.Sprintf(" -> Managed Image OS Disk Snapshot		: '%s'", *(createdSnapshot.ID)))
+	s.say(fmt.Sprintf(" -> Managed Image Data Disk Snapshot		: '%s'", *(createdSnapshot.ID)))
 
 	return nil
 }
