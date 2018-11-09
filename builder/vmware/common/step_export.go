@@ -74,9 +74,7 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 		s.OutputDir = s.VMName + "." + s.Format
 	}
 
-	if s.Format == "ova" {
-		os.MkdirAll(s.OutputDir, 0755)
-	}
+	os.MkdirAll(s.OutputDir, 0755)
 
 	ui.Say("Exporting virtual machine...")
 	var displayName string
