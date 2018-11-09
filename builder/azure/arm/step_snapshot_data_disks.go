@@ -34,8 +34,8 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 	srcVhdToSnapshot := compute.Snapshot{
 		DiskProperties: &compute.DiskProperties{
 			CreationData: &compute.CreationData{
-				CreateOption: compute.Import,
-				SourceURI:    to.StringPtr(srcUriVhd),
+				CreateOption:     compute.Copy,
+				SourceResourceID: to.StringPtr(srcUriVhd),
 			},
 		},
 		Location: to.StringPtr(location),
