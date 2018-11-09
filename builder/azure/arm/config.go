@@ -514,16 +514,17 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	if isUseDeviceLogin(c) {
 		c.useDeviceLogin = true
 	} else {
-		if c.ClientID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id must be specified"))
+		if (c.ClientID == "" && c.ClientSecret != "") || (c.ClientID != "" && c.ClientSecret == "") {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id and client_secret must be specified together or not specified at all"))
 		}
 
-		if c.ClientSecret == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_secret must be specified"))
+		if c.ClientID != "" && c.SubscriptionID == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified when client_id & client_secret are"))
 		}
 
-		if c.SubscriptionID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
+		if c.SubscriptionID != "" && c.ClientID == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id cannot be specified as it will be taken from MSI"+
+				" (client_id and client_secret are not set)"))
 		}
 	}
 
