@@ -599,14 +599,14 @@ func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T)
 
 func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testing.T) {
 	config := map[string]interface{}{
-		"image_offer":                             "ignore",
-		"image_publisher":                         "ignore",
-		"image_sku":                               "ignore",
-		"location":                                "ignore",
-		"subscription_id":                         "ignore",
-		"communicator":                            "none",
-		"managed_image_resource_group_name":       "ignore",
-		"managed_image_name":                      "ignore",
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
 		"managed_image_data_disk_snapshot_prefix": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -852,13 +852,13 @@ func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageReso
 
 func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageName(t *testing.T) {
 	config := map[string]interface{}{
-		"image_offer":                             "ignore",
-		"image_publisher":                         "ignore",
-		"image_sku":                               "ignore",
-		"location":                                "ignore",
-		"subscription_id":                         "ignore",
-		"communicator":                            "none",
-		"managed_image_resource_group_name":       "ignore",
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
 		"managed_image_data_disk_snapshot_prefix": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -872,13 +872,13 @@ func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageName(t 
 
 func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageResourceGroupName(t *testing.T) {
 	config := map[string]interface{}{
-		"image_offer":                             "ignore",
-		"image_publisher":                         "ignore",
-		"image_sku":                               "ignore",
-		"location":                                "ignore",
-		"subscription_id":                         "ignore",
-		"communicator":                            "none",
-		"managed_image_name":                      "ignore",
+		"image_offer":        "ignore",
+		"image_publisher":    "ignore",
+		"image_sku":          "ignore",
+		"location":           "ignore",
+		"subscription_id":    "ignore",
+		"communicator":       "none",
+		"managed_image_name": "ignore",
 		"managed_image_data_disk_snapshot_prefix": "ignore",
 		// Does not matter for this test case, just pick one.
 		"os_type": constants.Target_Linux,
@@ -1002,7 +1002,7 @@ func TestConfigShouldRejectCustomAndPlatformManagedImageBuild(t *testing.T) {
 
 func TestConfigShouldRejectCustomAndImageUrlForManagedImageBuild(t *testing.T) {
 	config := map[string]interface{}{
-		"image_url":                                "ignore",
+		"image_url": "ignore",
 		"custom_managed_image_resource_group_name": "ignore",
 		"custom_managed_image_name":                "ignore",
 		"location":                                 "ignore",
