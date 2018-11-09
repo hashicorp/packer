@@ -9,7 +9,7 @@ import (
 
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"organization_id": "foo",
+		"api_access_key":  "foo",
 		"api_token":       "bar",
 		"region":          "ams1",
 		"commercial_type": "START1-S",
