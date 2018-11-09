@@ -2,6 +2,7 @@ package arm
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
@@ -46,15 +47,32 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
+		return err
 	}
 
-	return f.WaitForCompletion(ctx, s.client.SnapshotsClient.Client)
+	err = f.WaitForCompletion(ctx, s.client.SnapshotsClient.Client)
+
+	if err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
+
+	createdSnapshot, err := f.Result(s.client.SnapshotsClient)
+
+	if err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
+
+	s.say(fmt.Sprintf(" -> Managed Image OS Disk Snapshot		: '%s'", *(createdSnapshot.ID)))
+
+	return nil
 }
 
 func (s *StepSnapshotDataDisks) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
 	s.say("Taking snapshot of OS disk ...")
 
-	var resourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
+	var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
 	var location = stateBag.Get(constants.ArmLocation).(string)
 	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
 	var additionalDisks = stateBag.Get(constants.ArmAdditionalDiskVhds).([]string)
@@ -70,6 +88,7 @@ func (s *StepSnapshotDataDisks) Run(ctx context.Context, stateBag multistep.Stat
 
 			return multistep.ActionHalt
 		}
+
 	}
 
 	return multistep.ActionContinue

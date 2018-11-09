@@ -2,7 +2,7 @@ package arm
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
@@ -45,15 +45,32 @@ func (s *StepSnapshotOSDisk) createSnapshot(ctx context.Context, resourceGroupNa
 
 	if err != nil {
 		s.say(s.client.LastError.Error())
+		return err
 	}
 
-	return f.WaitForCompletion(ctx, s.client.SnapshotsClient.Client)
+	err = f.WaitForCompletion(ctx, s.client.SnapshotsClient.Client)
+
+	if err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
+
+	createdSnapshot, err := f.Result(s.client.SnapshotsClient)
+
+	if err != nil {
+		s.say(s.client.LastError.Error())
+		return err
+	}
+
+	s.say(fmt.Sprintf(" -> Managed Image OS Disk Snapshot		: '%s'", *(createdSnapshot.ID)))
+
+	return nil
 }
 
 func (s *StepSnapshotOSDisk) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
 	s.say("Taking snapshot of OS disk ...")
 
-	var resourceGroupName = stateBag.Get(constants.ArmResourceGroupName).(string)
+	var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
 	var location = stateBag.Get(constants.ArmLocation).(string)
 	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
 	var srcUriVhd = stateBag.Get(constants.ArmOSDiskVhd).(string)
