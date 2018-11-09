@@ -35,12 +35,11 @@ builder.
 
 ### Required:
 
--   `organization_id` (string) - The organization id to use to identify your
-    organization. It can also be specified via environment variable
-    `SCALEWAY_ORGANIZATION`. Your organization id is available in the
-    ["Account" section](https://cloud.scaleway.com/#/account) of the
+-   `api_access_key` (string) - The organization access key to use to identify
+    your organization. It can also be specified via environment variable
+    `SCALEWAY_API_ACCESS_KEY`. Your access key is available in the
+    ["Credentials" section](https://cloud.scaleway.com/#/credentials) of the
     control panel.
-    Previously named: `api_access_key` with environment variable: `SCALEWAY_API_ACCESS_KEY`
 
 -   `api_token` (string) - The token to use to authenticate with your account.
     It can also be specified via environment variable `SCALEWAY_API_TOKEN`. You
@@ -87,7 +86,7 @@ access tokens:
 ``` json
 {
   "type": "scaleway",
-  "organization_id": "YOUR ORGANIZATION ID",
+  "api_access_key": "YOUR API ACCESS KEY",
   "api_token": "YOUR TOKEN",
   "image": "UUID OF THE BASE IMAGE",
   "region": "par1",
