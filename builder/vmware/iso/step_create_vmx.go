@@ -435,7 +435,7 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// Handle the cdrom adapter type. If the disk adapter type and the
 	//  cdrom adapter type are the same, then ensure that the cdrom is the
-	//  slave device on whatever bus the disk adapter is on.
+	//  secondary device on whatever bus the disk adapter is on.
 	cdromAdapterType := strings.ToLower(config.CdromAdapterType)
 	if cdromAdapterType == "" {
 		cdromAdapterType = templateData.CDROMType
