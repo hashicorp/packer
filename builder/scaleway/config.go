@@ -3,7 +3,6 @@ package scaleway
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/hashicorp/packer/common"
@@ -21,7 +20,7 @@ type Config struct {
 	Comm                communicator.Config `mapstructure:",squash"`
 
 	Token        string `mapstructure:"api_token"`
-	Organization string `mapstructure:"organization_id"`
+	Organization string `mapstructure:"api_access_key"`
 
 	Region         string `mapstructure:"region"`
 	Image          string `mapstructure:"image"`
@@ -58,12 +57,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	c.UserAgent = useragent.String()
 
 	if c.Organization == "" {
-		if os.Getenv("SCALEWAY_ORGANIZATION") != "" {
-			c.Organization = os.Getenv("SCALEWAY_ORGANIZATION")
-		} else {
-			log.Printf("Deprecation warning: Use SCALEWAY_ORGANIZATION environment variable and organization_id argument instead of api_access_key argument and SCALEWAY_API_ACCESS_KEY environment variable.")
-			c.Organization = os.Getenv("SCALEWAY_API_ACCESS_KEY")
-		}
+		c.Organization = os.Getenv("SCALEWAY_API_ACCESS_KEY")
 	}
 
 	if c.Token == "" {
