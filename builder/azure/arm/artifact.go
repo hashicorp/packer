@@ -42,11 +42,11 @@ type Artifact struct {
 
 func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, osDiskSnapshotPrefix string) (*Artifact, error) {
 	return &Artifact{
-		ManagedImageResourceGroupName: resourceGroup,
-		ManagedImageName:              name,
-		ManagedImageLocation:          location,
-		ManagedImageId:                id,
-		OSType:                        osType,
+		ManagedImageResourceGroupName:      resourceGroup,
+		ManagedImageName:                   name,
+		ManagedImageLocation:               location,
+		ManagedImageId:                     id,
+		OSType:                             osType,
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
 		ManagedImageDataDiskSnapshotPrefix: osDiskSnapshotPrefix,
 	}, nil
