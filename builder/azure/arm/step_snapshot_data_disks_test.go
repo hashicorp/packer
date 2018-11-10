@@ -53,7 +53,7 @@ func TestStepSnapshotDataDisksShouldPassIfSnapshotPasses(t *testing.T) {
 func createTestStateBagStepSnapshotDataDisks() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
-	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmManagedImageResourceGroupName, "Unit Test: ResourceGroupName")
 	stateBag.Put(constants.ArmLocation, "Unit Test: Location")
 
 	value := "Unit Test: Tags"
