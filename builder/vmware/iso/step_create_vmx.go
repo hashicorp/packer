@@ -28,10 +28,10 @@ type vmxTemplateData struct {
 	SATA_Present         string
 	NVME_Present         string
 
-	DiskName              string
-	DiskType              string
-	CDROMType             string
-	CDROMType_MasterSlave string
+	DiskName                   string
+	DiskType                   string
+	CDROMType                  string
+	CDROMType_PrimarySecondary string
 
 	Network_Type    string
 	Network_Device  string
@@ -383,10 +383,10 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		SATA_Present:         "FALSE",
 		NVME_Present:         "FALSE",
 
-		DiskType:              "scsi",
-		HDD_BootOrder:         "scsi0:0",
-		CDROMType:             "ide",
-		CDROMType_MasterSlave: "0",
+		DiskType:                   "scsi",
+		HDD_BootOrder:              "scsi0:0",
+		CDROMType:                  "ide",
+		CDROMType_PrimarySecondary: "0",
 
 		Network_Adapter: "e1000",
 
@@ -406,20 +406,20 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 	case "ide":
 		templateData.DiskType = "ide"
 		templateData.CDROMType = "ide"
-		templateData.CDROMType_MasterSlave = "1"
+		templateData.CDROMType_PrimarySecondary = "1"
 		templateData.HDD_BootOrder = "ide0:0"
 	case "sata":
 		templateData.SATA_Present = "TRUE"
 		templateData.DiskType = "sata"
 		templateData.CDROMType = "sata"
-		templateData.CDROMType_MasterSlave = "1"
+		templateData.CDROMType_PrimarySecondary = "1"
 		templateData.HDD_BootOrder = "sata0:0"
 	case "nvme":
 		templateData.NVME_Present = "TRUE"
 		templateData.DiskType = "nvme"
 		templateData.SATA_Present = "TRUE"
 		templateData.CDROMType = "sata"
-		templateData.CDROMType_MasterSlave = "0"
+		templateData.CDROMType_PrimarySecondary = "0"
 		templateData.HDD_BootOrder = "nvme0:0"
 	case "scsi":
 		diskAdapterType = "lsilogic"
@@ -429,20 +429,20 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.SCSI_diskAdapterType = diskAdapterType
 		templateData.DiskType = "scsi"
 		templateData.CDROMType = "ide"
-		templateData.CDROMType_MasterSlave = "0"
+		templateData.CDROMType_PrimarySecondary = "0"
 		templateData.HDD_BootOrder = "scsi0:0"
 	}
 
 	/// Handle the cdrom adapter type. If the disk adapter type and the
 	//  cdrom adapter type are the same, then ensure that the cdrom is the
-	//  slave device on whatever bus the disk adapter is on.
+	//  secondary device on whatever bus the disk adapter is on.
 	cdromAdapterType := strings.ToLower(config.CdromAdapterType)
 	if cdromAdapterType == "" {
 		cdromAdapterType = templateData.CDROMType
 	} else if cdromAdapterType == diskAdapterType {
-		templateData.CDROMType_MasterSlave = "1"
+		templateData.CDROMType_PrimarySecondary = "1"
 	} else {
-		templateData.CDROMType_MasterSlave = "0"
+		templateData.CDROMType_PrimarySecondary = "0"
 	}
 
 	switch cdromAdapterType {
@@ -686,9 +686,9 @@ nvme0.present = "{{ .NVME_Present }}"
 {{ .DiskType }}0:0.present = "TRUE"
 {{ .DiskType }}0:0.fileName = "{{ .DiskName }}.vmdk"
 
-{{ .CDROMType }}0:{{ .CDROMType_MasterSlave }}.present = "TRUE"
-{{ .CDROMType }}0:{{ .CDROMType_MasterSlave }}.fileName = "{{ .ISOPath }}"
-{{ .CDROMType }}0:{{ .CDROMType_MasterSlave }}.deviceType = "cdrom-image"
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.present = "TRUE"
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.fileName = "{{ .ISOPath }}"
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.deviceType = "cdrom-image"
 
 isolation.tools.hgfs.disable = "FALSE"
 memsize = "512"
