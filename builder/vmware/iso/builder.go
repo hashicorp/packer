@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
@@ -162,6 +163,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 				errs, fmt.Errorf("vmx_template_path is invalid: %s", err))
 		}
 
+	} else {
+		warn := b.checkForVMXTemplateAndVMXDataCollisions()
+		if warn != "" {
+			warnings = append(warnings, warn)
+		}
 	}
 
 	if b.config.Network == "" {
@@ -399,6 +405,44 @@ func (b *Builder) Cancel() {
 	}
 }
 
+// Validate the vmx_data option against the default vmx template to warn
+// user if anything is being overridden.
+func (b *Builder) checkForVMXTemplateAndVMXDataCollisions() string {
+	if b.config.VMXTemplatePath != "" {
+		return ""
+	}
+
+	var overridden []string
+	tplLines := strings.Split(DefaultVMXTemplate, "\n")
+	tplLines = append(tplLines,
+		fmt.Sprintf("%s0:0.present", strings.ToLower(b.config.DiskAdapterType)),
+		fmt.Sprintf("%s0:0.fileName", strings.ToLower(b.config.DiskAdapterType)),
+		fmt.Sprintf("%s0:0.deviceType", strings.ToLower(b.config.DiskAdapterType)),
+		fmt.Sprintf("%s0:1.present", strings.ToLower(b.config.DiskAdapterType)),
+		fmt.Sprintf("%s0:1.fileName", strings.ToLower(b.config.DiskAdapterType)),
+		fmt.Sprintf("%s0:1.deviceType", strings.ToLower(b.config.DiskAdapterType)),
+	)
+
+	for _, line := range tplLines {
+		if strings.Contains(line, `{{`) {
+			key := line[:strings.Index(line, " =")]
+			if _, ok := b.config.VMXData[key]; ok {
+				overridden = append(overridden, key)
+			}
+		}
+	}
+
+	if len(overridden) > 0 {
+		warnings := fmt.Sprintf("Your vmx data contains the following "+
+			"variable(s), which Packer normally sets when it generates its "+
+			"own default vmx template. This may cause your build to fail or "+
+			"behave unpredictably: %s", strings.Join(overridden, ", "))
+		return warnings
+	}
+	return ""
+}
+
+// Make sure custom vmx template exists and that data can be read from it
 func (b *Builder) validateVMXTemplatePath() error {
 	f, err := os.Open(b.config.VMXTemplatePath)
 	if err != nil {
