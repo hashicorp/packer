@@ -514,7 +514,7 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	if isUseDeviceLogin(c) {
 		c.useDeviceLogin = true
 	} else {
-		if (c.ClientID == "" && c.ClientSecret != "") || (c.ClientID != "" && c.ClientSecret == "") {
+		if c.ClientID == "" && c.ClientSecret != "" || c.ClientID != "" && c.ClientSecret == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id and client_secret must be specified together or not specified at all"))
 		}
 
