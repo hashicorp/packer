@@ -522,10 +522,6 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified when client_id & client_secret are"))
 		}
 
-		if c.SubscriptionID != "" && c.ClientID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id cannot be specified as it will be taken from MSI"+
-				" (client_id and client_secret are not set)"))
-		}
 	}
 
 	/////////////////////////////////////////////
