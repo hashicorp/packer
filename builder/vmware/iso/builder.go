@@ -298,8 +298,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&stepCreateDisk{},
 		&stepCreateVMX{},
 		&vmwcommon.StepConfigureVMX{
-			CustomData: b.config.VMXData,
-			VMName:     b.config.VMName,
+			CustomData:  b.config.VMXData,
+			VMName:      b.config.VMName,
+			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&common.StepHTTPServer{
@@ -355,9 +356,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Skip: b.config.SkipCompaction,
 		},
 		&vmwcommon.StepConfigureVMX{
-			CustomData: b.config.VMXDataPost,
-			SkipFloppy: true,
-			VMName:     b.config.VMName,
+			CustomData:  b.config.VMXDataPost,
+			SkipFloppy:  true,
+			VMName:      b.config.VMName,
+			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
