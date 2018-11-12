@@ -35,7 +35,7 @@ addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
-### Required:
+### Required ( unless instance has [managed identities](/docs/builders/azure-setup.html#managed-identities-for-azure-resources) enabled):
 
 -   `client_id` (string) The Active Directory service principal associated with
     your builder.
@@ -47,6 +47,8 @@ builder.
     access to this subscription, unless build\_resource\_group\_name option is
     specified in which case it needs to have owner access to the existing
     resource group specified in build\_resource\_group\_name parameter.**
+
+### Required:
 
 -   `image_publisher` (string) PublisherName for your base image. See
     [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
@@ -250,6 +252,7 @@ Providing `temp_resource_group_name` or `location` in combination with
     type* - the target must be a *Managed Image*.
 
 <!-- -->
+
     "shared_image_gallery": {
         "subscription": "00000000-0000-0000-0000-00000000000",
         "resource_group": "ResourceGroup",
