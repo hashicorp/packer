@@ -93,7 +93,6 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 		}
 	}
 
-	log.Printf("%#v", vmxData)
 	err = WriteVMX(vmxPath, vmxData)
 
 	if err != nil {
