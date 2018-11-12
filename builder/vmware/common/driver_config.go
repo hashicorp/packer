@@ -54,48 +54,53 @@ func (c *DriverConfig) Prepare(ctx *interpolate.Context) []error {
 }
 
 func (c *DriverConfig) Validate(SkipExport bool) error {
-	if c.RemoteType == "esx5" && SkipExport != true {
-		if c.RemotePassword == "" {
-			return fmt.Errorf("exporting the vm (with ovftool) requires that " +
-				"you set a value for remote_password")
-		} else if !c.SkipValidateCredentials {
-			// check that password is valid by sending a dummy ovftool command
-			// now, so that we don't fail for a simple mistake after a long
-			// build
-			ovftool := GetOVFTool()
-			ovfToolArgs := []string{"--verifyOnly", fmt.Sprintf("vi://" +
-				url.QueryEscape(c.RemoteUser) + ":" +
-				url.QueryEscape(c.RemotePassword) + "@" +
-				c.RemoteHost)}
+	if c.RemoteType == "" || SkipExport == true {
+		return nil
+	}
+	if c.RemotePassword == "" {
+		return fmt.Errorf("exporting the vm (with ovftool) requires that " +
+			"you set a value for remote_password")
+	}
+	if c.SkipValidateCredentials {
+		return nil
+	}
 
-			var out bytes.Buffer
-			cmdCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-			defer cancel()
-			cmd := exec.CommandContext(cmdCtx, ovftool, ovfToolArgs...)
-			cmd.Stdout = &out
+	// check that password is valid by sending a dummy ovftool command
+	// now, so that we don't fail for a simple mistake after a long
+	// build
+	ovftool := GetOVFTool()
+	ovfToolArgs := []string{"--verifyOnly", fmt.Sprintf("vi://" +
+		url.QueryEscape(c.RemoteUser) + ":" +
+		url.QueryEscape(c.RemotePassword) + "@" +
+		c.RemoteHost)}
 
-			// Need to manually close stdin or else the ofvtool call will hang
-			// forever in a situation where the user has provided an invalid
-			// password or username
-			stdin, _ := cmd.StdinPipe()
-			defer stdin.Close()
+	var out bytes.Buffer
+	cmdCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(cmdCtx, ovftool, ovfToolArgs...)
+	cmd.Stdout = &out
 
-			if err := cmd.Run(); err != nil {
-				outString := out.String()
-				// The command *should* fail with this error, if it
-				// authenticates properly.
-				if !strings.Contains(outString, "Found wrong kind of object") {
-					err := fmt.Errorf("ovftool validation error: %s; %s",
-						err, outString)
-					if strings.Contains(outString,
-						"Enter login information for source") {
-						err = fmt.Errorf("The username or password you " +
-							"provided to ovftool is invalid.")
-					}
-					return err
-				}
+	// Need to manually close stdin or else the ofvtool call will hang
+	// forever in a situation where the user has provided an invalid
+	// password or username
+	stdin, _ := cmd.StdinPipe()
+	defer stdin.Close()
+
+	if err := cmd.Run(); err != nil {
+		outString := out.String()
+		// The command *should* fail with this error, if it
+		// authenticates properly.
+		if !strings.Contains(outString, "Found wrong kind of object") {
+			err := fmt.Errorf("ovftool validation error: %s; %s",
+				err, outString)
+			if strings.Contains(outString,
+				"Enter login information for source") {
+				err = fmt.Errorf("The username or password you " +
+					"provided to ovftool is invalid.")
 			}
+			return err
 		}
 	}
+
 	return nil
 }
