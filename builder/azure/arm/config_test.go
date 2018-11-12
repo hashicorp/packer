@@ -124,6 +124,87 @@ func TestConfigShouldNotDefaultImageVersionIfCustomImage(t *testing.T) {
 	}
 }
 
+func Test_newConfig_MSI(t *testing.T) {
+	baseConfig := map[string]string{
+		"capture_name_prefix":    "ignore",
+		"capture_container_name": "ignore",
+		"location":               "ignore",
+		"image_url":              "ignore",
+		"storage_account":        "ignore",
+		"resource_group_name":    "ignore",
+		"os_type":                constants.Target_Linux,
+	}
+
+	tests := []struct {
+		name    string
+		args    []interface{}
+		wantErr bool
+	}{
+		{
+			name: "no client_id and no client_secret should enable MSI auth",
+			args: []interface{}{
+				baseConfig,
+				getPackerConfiguration(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "subscription_id is will be taken from MSI",
+			args: []interface{}{
+				baseConfig,
+				map[string]string{
+					"subscription_id": "error",
+				},
+				getPackerConfiguration(),
+			},
+			wantErr: false,
+		},
+		{
+			name: "client_id without client_secret should error",
+			args: []interface{}{
+				baseConfig,
+				map[string]string{
+					"client_id": "error",
+				},
+				getPackerConfiguration(),
+			},
+			wantErr: true,
+		},
+		{
+			name: "client_secret without client_id should error",
+			args: []interface{}{
+				baseConfig,
+				map[string]string{
+					"client_secret": "error",
+				},
+				getPackerConfiguration(),
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing subscription_id",
+			args: []interface{}{
+				baseConfig,
+				map[string]string{
+					"client_id":     "ok",
+					"client_secret": "ok",
+				},
+				getPackerConfiguration(),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, err := newConfig(tt.args...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("newConfig() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
 func TestConfigShouldNormalizeOSTypeCase(t *testing.T) {
 	config := map[string]string{
 		"capture_name_prefix":    "ignore",
