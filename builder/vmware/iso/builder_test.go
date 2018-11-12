@@ -441,6 +441,31 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	}
 }
 
+func TestBuilderCheckCollisions(t *testing.T) {
+	config := testConfig()
+	config["vmx_data"] = map[string]string{
+		"no.collision":    "awesomesauce",
+		"ide0:0.fileName": "is a collision",
+		"displayName":     "also a collision",
+	}
+	{
+		var b Builder
+		warns, _ := b.Prepare(config)
+		if len(warns) != 1 {
+			t.Fatalf("Should have warning about two collisions.")
+		}
+	}
+	{
+		config["vmx_template_path"] = "some/path.vmx"
+		var b Builder
+		warns, _ := b.Prepare(config)
+		if len(warns) != 0 {
+			t.Fatalf("Should not check for collisions with custom template.")
+		}
+	}
+
+}
+
 func TestBuilderPrepare_CommConfig(t *testing.T) {
 	// Test Winrm
 	{
