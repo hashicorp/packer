@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/common"
@@ -218,8 +219,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	return c, warnings, nil
 }
 
-// Validate the vmx_data option against the default vmx template to warn
-// user if anything is being overridden.
 func (c *Config) checkForVMXTemplateAndVMXDataCollisions() string {
 	if c.VMXTemplatePath != "" {
 		return ""
@@ -255,6 +254,7 @@ func (c *Config) checkForVMXTemplateAndVMXDataCollisions() string {
 	return ""
 }
 
+// Make sure custom vmx template exists and that data can be read from it
 func (c *Config) validateVMXTemplatePath() error {
 	f, err := os.Open(c.VMXTemplatePath)
 	if err != nil {
