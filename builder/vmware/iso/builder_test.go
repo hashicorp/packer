@@ -146,6 +146,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	config["format"] = "ovf"
 	config["remote_host"] = "foobar.example.com"
 	config["remote_password"] = "supersecret"
+	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_type"] = "foobar"
 	warns, err := b.Prepare(config)
@@ -202,6 +203,7 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 
 	config["remote_type"] = "esx5"
 	config["remote_host"] = "foobar.example.com"
+	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_password"] = ""
 	warns, err := b.Prepare(config)

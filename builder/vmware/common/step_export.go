@@ -26,6 +26,18 @@ type StepExport struct {
 	OutputDir      string
 }
 
+func GetOVFTool() string {
+	ovftool := "ovftool"
+	if runtime.GOOS == "windows" {
+		ovftool = "ovftool.exe"
+	}
+
+	if _, err := exec.LookPath(ovftool); err != nil {
+		return ""
+	}
+	return ovftool
+}
+
 func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
 	if hidePassword {
@@ -57,13 +69,9 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 		return multistep.ActionContinue
 	}
 
-	ovftool := "ovftool"
-	if runtime.GOOS == "windows" {
-		ovftool = "ovftool.exe"
-	}
-
-	if _, err := exec.LookPath(ovftool); err != nil {
-		err = fmt.Errorf("Error %s not found: %s", ovftool, err)
+	ovftool := GetOVFTool()
+	if ovftool == "" {
+		err := fmt.Errorf("Error %s not found: ", ovftool)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
