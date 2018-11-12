@@ -148,8 +148,8 @@ func TestProvisionerPrepare_Elevated(t *testing.T) {
 	config["elevated_user"] = "vagrant"
 	err := p.Prepare(config)
 
-	if err == nil {
-		t.Fatal("should have error (only provided elevated_user)")
+	if err != nil {
+		t.Fatal("should not have error")
 	}
 
 	config["elevated_password"] = "vagrant"

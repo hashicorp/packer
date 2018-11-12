@@ -120,6 +120,14 @@ Optional parameters:
     "elevated_password": "{{.WinRMPassword}}",
     ```
 
+    If you specify an empty `elevated_password` value then the PowerShell
+    script is run as a service account. For example:
+
+    ``` json
+    "elevated_user": "SYSTEM",
+    "elevated_password": "",
+    ```
+
 -   `remote_path` (string) - The path where the PowerShell script will be
     uploaded to within the target build machine. This defaults to
     `C:/Windows/Temp/script-UUID.ps1` where UUID is replaced with a dynamically
