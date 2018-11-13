@@ -40,7 +40,7 @@ func (s *StepAddFloppy) Run(_ context.Context, state multistep.StateBag) multist
 		}
 
 		uploadPath := fmt.Sprintf("%v/packer-tmp-created-floppy.flp", vmDir)
-		if err := ds.UploadFile(floppyPath.(string), uploadPath); err != nil {
+		if err := ds.UploadFile(floppyPath.(string), uploadPath, s.Host); err != nil {
 			state.Put("error", err)
 			return multistep.ActionHalt
 		}
