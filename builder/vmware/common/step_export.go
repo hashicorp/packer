@@ -40,6 +40,8 @@ func GetOVFTool() string {
 
 func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
+	username := url.QueryEscape(c.RemoteUser)
+
 	if hidePassword {
 		password = "****"
 	}
@@ -48,7 +50,7 @@ func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassw
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
 
-		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + displayName,
+		"vi://" + username + ":" + password + "@" + c.RemoteHost + "/" + displayName,
 		s.OutputDir,
 	}
 	return append(s.OVFToolOptions, args...)
