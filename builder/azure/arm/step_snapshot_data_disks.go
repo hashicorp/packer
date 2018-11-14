@@ -13,17 +13,19 @@ import (
 )
 
 type StepSnapshotDataDisks struct {
-	client *AzureClient
-	create func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
-	say    func(message string)
-	error  func(e error)
+	client         *AzureClient
+	create         func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
+	say            func(message string)
+	error          func(e error)
+	isManagedImage bool
 }
 
-func NewStepSnapshotDataDisks(client *AzureClient, ui packer.Ui) *StepSnapshotDataDisks {
+func NewStepSnapshotDataDisks(client *AzureClient, ui packer.Ui, isManagedImage bool) *StepSnapshotDataDisks {
 	var step = &StepSnapshotDataDisks{
-		client: client,
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		client:         client,
+		say:            func(message string) { ui.Say(message) },
+		error:          func(e error) { ui.Error(e.Error()) },
+		isManagedImage: isManagedImage,
 	}
 
 	step.create = step.createDataDiskSnapshot
@@ -70,25 +72,27 @@ func (s *StepSnapshotDataDisks) createDataDiskSnapshot(ctx context.Context, reso
 }
 
 func (s *StepSnapshotDataDisks) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
-	s.say("Taking snapshot of OS disk ...")
+	if s.isManagedImage {
 
-	var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
-	var location = stateBag.Get(constants.ArmLocation).(string)
-	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
-	var additionalDisks = stateBag.Get(constants.ArmAdditionalDiskVhds).([]string)
-	var dstSnapshotPrefix = stateBag.Get(constants.ArmManagedImageDataDiskSnapshotPrefix).(string)
+		s.say("Taking snapshot of data disk ...")
 
-	for i, disk := range additionalDisks {
-		dstSnapshotName := dstSnapshotPrefix + strconv.Itoa(i)
-		err := s.create(ctx, resourceGroupName, disk, location, tags, dstSnapshotName)
+		var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
+		var location = stateBag.Get(constants.ArmLocation).(string)
+		var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
+		var additionalDisks = stateBag.Get(constants.ArmAdditionalDiskVhds).([]string)
+		var dstSnapshotPrefix = stateBag.Get(constants.ArmManagedImageDataDiskSnapshotPrefix).(string)
 
-		if err != nil {
-			stateBag.Put(constants.Error, err)
-			s.error(err)
+		for i, disk := range additionalDisks {
+			dstSnapshotName := dstSnapshotPrefix + strconv.Itoa(i)
+			err := s.create(ctx, resourceGroupName, disk, location, tags, dstSnapshotName)
 
-			return multistep.ActionHalt
+			if err != nil {
+				stateBag.Put(constants.Error, err)
+				s.error(err)
+
+				return multistep.ActionHalt
+			}
 		}
-
 	}
 
 	return multistep.ActionContinue

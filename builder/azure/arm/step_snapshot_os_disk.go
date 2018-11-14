@@ -11,17 +11,19 @@ import (
 )
 
 type StepSnapshotOSDisk struct {
-	client *AzureClient
-	create func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
-	say    func(message string)
-	error  func(e error)
+	client         *AzureClient
+	create         func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
+	say            func(message string)
+	error          func(e error)
+	isManagedImage bool
 }
 
-func NewStepSnapshotOSDisk(client *AzureClient, ui packer.Ui) *StepSnapshotOSDisk {
+func NewStepSnapshotOSDisk(client *AzureClient, ui packer.Ui, isManagedImage bool) *StepSnapshotOSDisk {
 	var step = &StepSnapshotOSDisk{
-		client: client,
-		say:    func(message string) { ui.Say(message) },
-		error:  func(e error) { ui.Error(e.Error()) },
+		client:         client,
+		say:            func(message string) { ui.Say(message) },
+		error:          func(e error) { ui.Error(e.Error()) },
+		isManagedImage: isManagedImage,
 	}
 
 	step.create = step.createSnapshot
@@ -68,21 +70,24 @@ func (s *StepSnapshotOSDisk) createSnapshot(ctx context.Context, resourceGroupNa
 }
 
 func (s *StepSnapshotOSDisk) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
-	s.say("Taking snapshot of OS disk ...")
+	if s.isManagedImage {
 
-	var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
-	var location = stateBag.Get(constants.ArmLocation).(string)
-	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
-	var srcUriVhd = stateBag.Get(constants.ArmOSDiskVhd).(string)
-	var dstSnapshotName = stateBag.Get(constants.ArmManagedImageOSDiskSnapshotName).(string)
+		s.say("Taking snapshot of OS disk ...")
 
-	err := s.create(ctx, resourceGroupName, srcUriVhd, location, tags, dstSnapshotName)
+		var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
+		var location = stateBag.Get(constants.ArmLocation).(string)
+		var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
+		var srcUriVhd = stateBag.Get(constants.ArmOSDiskVhd).(string)
+		var dstSnapshotName = stateBag.Get(constants.ArmManagedImageOSDiskSnapshotName).(string)
 
-	if err != nil {
-		stateBag.Put(constants.Error, err)
-		s.error(err)
+		err := s.create(ctx, resourceGroupName, srcUriVhd, location, tags, dstSnapshotName)
 
-		return multistep.ActionHalt
+		if err != nil {
+			stateBag.Put(constants.Error, err)
+			s.error(err)
+
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue
