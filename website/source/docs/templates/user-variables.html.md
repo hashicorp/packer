@@ -24,10 +24,13 @@ configuration templates work yet, please read that page first.
 
 ## Usage
 
-User variables must first be defined in a `variables` section within your
-template. Even if you want a user variable to default to an empty string, it
-must be defined. This explicitness helps reduce the time it takes for newcomers
-to understand what can be modified using variables in your template.
+In order to set a user variable, you must define it either within the
+`variables` section within your template, or using the command-line `-var` or
+`-var-file` flags.
+
+Even if you want a user variable to default to an empty string, it is best to
+explicitly define it. This explicitness helps reduce the time it takes for
+newcomers to understand what can be modified using variables in your template.
 
 The `variables` section is a key/value mapping of the user variable name to a
 default value. A default value can be the empty string. An example is shown
