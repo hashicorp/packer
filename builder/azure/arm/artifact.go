@@ -40,7 +40,7 @@ type Artifact struct {
 	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
-func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, osDiskSnapshotPrefix string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string) (*Artifact, error) {
 	return &Artifact{
 		ManagedImageResourceGroupName:      resourceGroup,
 		ManagedImageName:                   name,
@@ -48,7 +48,7 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 		ManagedImageId:                     id,
 		OSType:                             osType,
 		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
-		ManagedImageDataDiskSnapshotPrefix: osDiskSnapshotPrefix,
+		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
 	}, nil
 }
 
