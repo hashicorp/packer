@@ -32,13 +32,37 @@ type driverGCE struct {
 	ui        packer.Ui
 }
 
-var DriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
+var DefaultDriverScopes = []string{"https://www.googleapis.com/auth/compute", "https://www.googleapis.com/auth/devstorage.full_control"}
 
 func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
-	var err error
+	client, err := NewClientGCE(ui, p, a, DefaultDriverScopes)
+	if err != nil {
+		return nil, err
+	}
 
+	log.Printf("[INFO] Instantiating GCE client...")
+	service, err := compute.New(client)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set UserAgent
+	service.UserAgent = useragent.String()
+
+	return &driverGCE{
+		projectId: p,
+		service:   service,
+		ui:        ui,
+	}, nil
+}
+
+func NewClientGCE(ui packer.Ui, p string, a *AccountFile, DriverScopes []string) (*http.Client, error) {
+	var err error
 	var client *http.Client
 
+	if len(DriverScopes) == 0 {
+		DriverScopes = DefaultDriverScopes
+	}
 	// Auth with AccountFile first if provided
 	if a.PrivateKey != "" {
 		log.Printf("[INFO] Requesting Google token via AccountFile...")
@@ -77,21 +101,7 @@ func NewDriverGCE(ui packer.Ui, p string, a *AccountFile) (Driver, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("[INFO] Instantiating GCE client...")
-	service, err := compute.New(client)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set UserAgent
-	service.UserAgent = useragent.String()
-
-	return &driverGCE{
-		projectId: p,
-		service:   service,
-		ui:        ui,
-	}, nil
+	return client, nil
 }
 
 func (d *driverGCE) CreateImage(name, description, family, zone, disk string, image_labels map[string]string, image_licenses []string) (<-chan *Image, <-chan error) {
