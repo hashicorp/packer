@@ -628,6 +628,107 @@ func TestConfigShouldRejectMalformedCaptureContainerName(t *testing.T) {
 	}
 }
 
+func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_resource_group_name":   "ignore",
+		"managed_image_name":                  "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedManagedImageOSDiskSnapshotName := []string{
+		"AbcdefghijklmnopqrstuvwX",
+		"underscore_underscore",
+		"0leading_number",
+		"really_loooooooooooooooooooooooooooooooooooooooooooooooooong",
+	}
+
+	for _, x := range wellFormedManagedImageOSDiskSnapshotName {
+		config["managed_image_os_disk_snapshot_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_os_disk_snapshot_name set to %q.", x)
+		}
+	}
+
+	malformedManagedImageOSDiskSnapshotName := []string{
+		"min_ten",
+		"-leading-hyphen",
+		"trailing-hyphen-",
+		"trailing-period.",
+		"punc-!@#$%^&*()_+-=-punc",
+		"really_looooooooooooooooooooooooooooooooooooooooooooooooooooooong_exceeding_80_char_limit",
+	}
+
+	for _, x := range malformedManagedImageOSDiskSnapshotName {
+		config["managed_image_os_disk_snapshot_name"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_os_disk_snapshot_name set to %q.", x)
+		}
+	}
+}
+
+func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_name":                "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	wellFormedManagedImageDataDiskSnapshotPrefix := []string{
+		"min_ten_chars",
+		"AbcdefghijklmnopqrstuvwX",
+		"underscore_underscore",
+		"0leading_number",
+		"less_than_sixty_characters",
+	}
+
+	for _, x := range wellFormedManagedImageDataDiskSnapshotPrefix {
+		config["managed_image_data_disk_snapshot_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err != nil {
+			t.Errorf("Expected test to pass, but it failed with the well-formed managed_image_data_disk_snapshot_prefix set to %q.", x)
+		}
+	}
+
+	malformedManagedImageDataDiskSnapshotPrefix := []string{
+		"more_ten",
+		"-leading-hyphen",
+		"trailing-hyphen-",
+		"trailing-period.",
+		"punc-!@#$%^&*()_+-=-punc",
+		"really_looooooooooooooooooooooooooooooooooooooooooooooooooooooong_exceeding_60_char_limit",
+	}
+
+	for _, x := range malformedManagedImageDataDiskSnapshotPrefix {
+		config["managed_image_data_disk_snapshot_prefix"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+
+		if err == nil {
+			t.Errorf("Expected test to fail, but it succeeded with the malformed managed_image_data_disk_snapshot_prefix set to %q.", x)
+		}
+	}
+}
+
 func TestConfigShouldAcceptTags(t *testing.T) {
 	config := map[string]interface{}{
 		"capture_name_prefix":    "ignore",
@@ -787,6 +888,150 @@ func TestConfigShouldRejectMissingCustomDataFile(t *testing.T) {
 	_, _, err := newConfig(config, getPackerConfiguration())
 	if err == nil {
 		t.Fatal("expected config to reject missing custom data file")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_resource_group_name":   "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image name")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameWithoutManagedImageResourceGroupName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"managed_image_name":                  "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with OS disk snapshot name but without managed image resource group name")
+	}
+}
+
+func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                       "ignore",
+		"image_publisher":                   "ignore",
+		"image_sku":                         "ignore",
+		"location":                          "ignore",
+		"subscription_id":                   "ignore",
+		"communicator":                      "none",
+		"managed_image_resource_group_name": "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image name")
+	}
+}
+
+func TestConfigShouldRejectImageDataDiskSnapshotPrefixWithoutManagedImageResourceGroupName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":        "ignore",
+		"image_publisher":    "ignore",
+		"image_sku":          "ignore",
+		"location":           "ignore",
+		"subscription_id":    "ignore",
+		"communicator":       "none",
+		"managed_image_name": "ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix but without managed image resource group name")
+	}
+}
+
+func TestConfigShouldAcceptManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                             "ignore",
+		"image_publisher":                         "ignore",
+		"image_sku":                               "ignore",
+		"location":                                "ignore",
+		"subscription_id":                         "ignore",
+		"communicator":                            "none",
+		"managed_image_resource_group_name":       "ignore",
+		"managed_image_name":                      "ignore",
+		"managed_image_os_disk_snapshot_name":     "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err != nil {
+		t.Fatal("expected config to accept platform managed image build")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefixWithCaptureContainerName(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"capture_container_name":              "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture container name")
+	}
+}
+
+func TestConfigShouldRejectManagedImageOSDiskSnapshotNameAndManagedImageDataDiskSnapshotPrefixWithCaptureNamePrefix(t *testing.T) {
+	config := map[string]interface{}{
+		"image_offer":                         "ignore",
+		"image_publisher":                     "ignore",
+		"image_sku":                           "ignore",
+		"location":                            "ignore",
+		"subscription_id":                     "ignore",
+		"communicator":                        "none",
+		"capture_name_prefix":                 "ignore",
+		"managed_image_os_disk_snapshot_name": "ignore_ignore",
+		"managed_image_data_disk_snapshot_prefix": "ignore_ignore",
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject Managed Image build with data disk snapshot prefix and OS disk snapshot name with capture name prefix")
 	}
 }
 
