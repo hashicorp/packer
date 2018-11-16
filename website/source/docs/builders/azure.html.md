@@ -306,6 +306,14 @@ Providing `temp_resource_group_name` or `location` in combination with
     value and defaults to false. **Important** Setting this true means that
     your builds are faster, however any failed deletes are not reported.
 
+-   `managed_image_os_disk_snapshot_name` (string) If managed\_image\_os\_disk\_snapshot\_name 
+    is set, a snapshot of the OS disk is created with the same name as this value before the 
+    VM is captured.
+
+-   `managed_image_data_disk_snapshot_prefix` (string)  If managed\_image\_data\_disk\_snapshot\_prefix 
+    is set, snapshot of the data disk(s) is created with the same prefix as this value before the VM 
+    is captured.
+
 ## Basic Example
 
 Here is a basic example for Azure.

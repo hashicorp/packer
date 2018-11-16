@@ -183,6 +183,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
 			NewStepPowerOffCompute(azureClient, ui),
+			NewStepSnapshotOSDisk(azureClient, ui, b.config.isManagedImage()),
+			NewStepSnapshotDataDisks(azureClient, ui, b.config.isManagedImage()),
 			NewStepCaptureImage(azureClient, ui),
 			NewStepDeleteResourceGroup(azureClient, ui),
 			NewStepDeleteOSDisk(azureClient, ui),
@@ -218,6 +220,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&packerCommon.StepProvision{},
 			NewStepGetOSDisk(azureClient, ui),
 			NewStepGetAdditionalDisks(azureClient, ui),
+			NewStepSnapshotOSDisk(azureClient, ui, b.config.isManagedImage()),
+			NewStepSnapshotDataDisks(azureClient, ui, b.config.isManagedImage()),
 			NewStepPowerOffCompute(azureClient, ui),
 			NewStepCaptureImage(azureClient, ui),
 			NewStepDeleteResourceGroup(azureClient, ui),
@@ -259,7 +263,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s", b.config.SubscriptionID, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName)
-		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID)
+		return NewManagedImageArtifact(b.config.OSType, b.config.ManagedImageResourceGroupName, b.config.ManagedImageName, b.config.manageImageLocation, managedImageID, b.config.ManagedImageOSDiskSnapshotName, b.config.ManagedImageDataDiskSnapshotPrefix)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
@@ -361,6 +365,8 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmIsManagedImage, b.config.isManagedImage())
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
 	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
+	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
+	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
 }
 
