@@ -117,6 +117,9 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		s.VMName,
 	}
 
+	reboot := func() error {
+		return driver.Reboot(s.VMName)
+	}
 	d := bootcommand.NewVNCDriver(reboot, c, s.KeyInterval)
 
 	ui.Say("Typing the boot command over VNC...")

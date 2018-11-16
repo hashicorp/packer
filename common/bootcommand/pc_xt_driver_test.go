@@ -130,7 +130,6 @@ func Test_flushes(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-
 func Test_KeyIntervalNotGiven(t *testing.T) {
 	d := NewPCXTDriver(noopReboot, nil, -1, time.Duration(0))
 	assert.Equal(t, d.interval, time.Duration(100)*time.Millisecond)
@@ -139,6 +138,7 @@ func Test_KeyIntervalNotGiven(t *testing.T) {
 func Test_KeyIntervalGiven(t *testing.T) {
 	d := NewPCXTDriver(noopReboot, nil, -1, time.Duration(5000)*time.Millisecond)
 	assert.Equal(t, d.interval, time.Duration(5000)*time.Millisecond)
+}
 
 func Test_pcxtReboot(t *testing.T) {
 	in := "abc123<wait>098<reboot>"
