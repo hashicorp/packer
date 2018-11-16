@@ -18,7 +18,6 @@ jobs:
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
       - checkout
-
       # specify any bash command here prefixed with `run: `
       - run: pwd
       - run: make ci
