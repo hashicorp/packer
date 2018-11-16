@@ -33,14 +33,27 @@ func (c *CloneConfig) Prepare() []error {
 type StepCloneVM struct {
 	Config   *CloneConfig
 	Location *common.LocationConfig
+	Force    bool
 }
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	d := state.Get("driver").(*driver.Driver)
 
-	ui.Say("Cloning VM...")
+	find_vm, err := d.FindVM(s.Location.VMName)
 
+	if s.Force == false && err == nil {
+		state.Put("error", fmt.Errorf("%s already exists, you can use -force flag to destroy it: %v", s.Location.VMName, err))
+		return multistep.ActionHalt
+	} else if s.Force == true && err == nil {
+		ui.Say(fmt.Sprintf("the vm/template %s already exists, but deleting it due to -force flag", s.Location.VMName))
+		err := find_vm.Destroy()
+		if err != nil {
+			state.Put("error", fmt.Errorf("error destroying %s: %v", s.Location.VMName, err))
+		}
+	}
+
+	ui.Say("Cloning VM...")
 	template, err := d.FindVM(s.Config.Template)
 	if err != nil {
 		state.Put("error", err)
