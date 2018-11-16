@@ -42,14 +42,67 @@ func TestArtifactIdVHD(t *testing.T) {
 }
 
 func TestArtifactIDManagedImage(t *testing.T) {
-	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID")
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "fakeDataDiskSnapshotPrefix")
 	if err != nil {
 		t.Fatalf("err=%s", err)
 	}
 
-	expected := "fakeID"
+	expected := `Azure.ResourceManagement.VMImage:
 
-	result := artifact.Id()
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithoutOSDiskSnapshotName(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "", "fakeDataDiskSnapshotPrefix")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageDataDiskSnapshotPrefix: fakeDataDiskSnapshotPrefix
+`
+
+	result := artifact.String()
+	if result != expected {
+		t.Fatalf("bad: %s", result)
+	}
+}
+
+func TestArtifactIDManagedImageWithoutDataDiskSnapshotPrefix(t *testing.T) {
+	artifact, err := NewManagedImageArtifact("Linux", "fakeResourceGroup", "fakeName", "fakeLocation", "fakeID", "fakeOsDiskSnapshotName", "")
+	if err != nil {
+		t.Fatalf("err=%s", err)
+	}
+
+	expected := `Azure.ResourceManagement.VMImage:
+
+OSType: Linux
+ManagedImageResourceGroupName: fakeResourceGroup
+ManagedImageName: fakeName
+ManagedImageId: fakeID
+ManagedImageLocation: fakeLocation
+ManagedImageOSDiskSnapshotName: fakeOsDiskSnapshotName
+`
+
+	result := artifact.String()
 	if result != expected {
 		t.Fatalf("bad: %s", result)
 	}
