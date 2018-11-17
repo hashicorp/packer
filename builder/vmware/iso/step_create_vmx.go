@@ -650,49 +650,50 @@ func (s *stepCreateVMX) Cleanup(multistep.StateBag) {
 // do so by specifying in the builder configuration.
 const DefaultVMXTemplate = `
 .encoding = "UTF-8"
+
+displayName = "{{ .Name }}"
+
+// Hardware
+memsize = "512"
+
+config.version = "8"
+virtualHW.productCompatibility = "hosted"
+virtualHW.version = "{{ .Version }}"
+
+// Bootup
+nvram = "{{ .Name }}.nvram"
+
+floppy0.present = "FALSE"
 bios.bootOrder = "hdd,cdrom"
 bios.hddOrder = "{{ .HDD_BootOrder }}"
-checkpoint.vmState = ""
-cleanShutdown = "TRUE"
-config.version = "8"
-displayName = "{{ .Name }}"
-ehci.pciSlotNumber = "34"
-ehci.present = "TRUE"
-ethernet0.addressType = "generated"
-ethernet0.bsdName = "en0"
-ethernet0.connectionType = "{{ .Network_Type }}"
-ethernet0.vnet = "{{ .Network_Device }}"
-ethernet0.displayName = "Ethernet"
-ethernet0.linkStatePropagation.enable = "FALSE"
-ethernet0.pciSlotNumber = "33"
-ethernet0.present = "TRUE"
-ethernet0.virtualDev = "{{ .Network_Adapter }}"
-ethernet0.wakeOnPcktRcv = "FALSE"
+
+// Configuration
 extendedConfigFile = "{{ .Name }}.vmxf"
-floppy0.present = "FALSE"
-guestOS = "{{ .GuestOS }}"
 gui.fullScreenAtPowerOn = "FALSE"
 gui.viewModeAtPowerOn = "windowed"
 hgfs.linkRootShare = "TRUE"
 hgfs.mapRootShare = "TRUE"
-
-scsi0.present = "{{ .SCSI_Present }}"
-scsi0.virtualDev = "{{ .SCSI_diskAdapterType }}"
-scsi0.pciSlotNumber = "16"
-scsi0:0.redo = ""
-sata0.present = "{{ .SATA_Present }}"
-nvme0.present = "{{ .NVME_Present }}"
-
-{{ .DiskType }}0:0.present = "TRUE"
-{{ .DiskType }}0:0.fileName = "{{ .DiskName }}.vmdk"
-
-{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.present = "TRUE"
-{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.fileName = "{{ .ISOPath }}"
-{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.deviceType = "cdrom-image"
-
 isolation.tools.hgfs.disable = "FALSE"
-memsize = "512"
-nvram = "{{ .Name }}.nvram"
+proxyApps.publishToHost = "FALSE"
+replay.filename = ""
+replay.supported = "FALSE"
+
+checkpoint.vmState = ""
+vmotion.checkpointFBSize = "65536000"
+
+// Power control
+cleanShutdown = "TRUE"
+powerType.powerOff = "soft"
+powerType.powerOn = "soft"
+powerType.reset = "soft"
+powerType.suspend = "soft"
+
+// Tools
+guestOS = "{{ .GuestOS }}"
+tools.syncTime = "TRUE"
+tools.upgrade.policy = "upgradeAtPowerCycle"
+
+// Bus
 pciBridge0.pciSlotNumber = "17"
 pciBridge0.present = "TRUE"
 pciBridge4.functions = "8"
@@ -711,22 +712,46 @@ pciBridge7.functions = "8"
 pciBridge7.pciSlotNumber = "24"
 pciBridge7.present = "TRUE"
 pciBridge7.virtualDev = "pcieRootPort"
-powerType.powerOff = "soft"
-powerType.powerOn = "soft"
-powerType.reset = "soft"
-powerType.suspend = "soft"
-proxyApps.publishToHost = "FALSE"
-replay.filename = ""
-replay.supported = "FALSE"
+
+ehci.present = "TRUE"
+ehci.pciSlotNumber = "34"
+
+vmci0.present = "TRUE"
+vmci0.id = "1861462627"
+vmci0.pciSlotNumber = "35"
+
+// Network Adapter
+ethernet0.addressType = "generated"
+ethernet0.bsdName = "en0"
+ethernet0.connectionType = "{{ .Network_Type }}"
+ethernet0.vnet = "{{ .Network_Device }}"
+ethernet0.displayName = "Ethernet"
+ethernet0.linkStatePropagation.enable = "FALSE"
+ethernet0.pciSlotNumber = "33"
+ethernet0.present = "TRUE"
+ethernet0.virtualDev = "{{ .Network_Adapter }}"
+ethernet0.wakeOnPcktRcv = "FALSE"
+
+// Hard disks
+scsi0.present = "{{ .SCSI_Present }}"
+scsi0.virtualDev = "{{ .SCSI_diskAdapterType }}"
+scsi0.pciSlotNumber = "16"
+scsi0:0.redo = ""
+sata0.present = "{{ .SATA_Present }}"
+nvme0.present = "{{ .NVME_Present }}"
+
+{{ .DiskType }}0:0.present = "TRUE"
+{{ .DiskType }}0:0.fileName = "{{ .DiskName }}.vmdk"
+
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.present = "TRUE"
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.fileName = "{{ .ISOPath }}"
+{{ .CDROMType }}0:{{ .CDROMType_PrimarySecondary }}.deviceType = "cdrom-image"
 
 // Sound
 sound.startConnected = "{{ .Sound_Present }}"
 sound.present = "{{ .Sound_Present }}"
 sound.fileName = "-1"
 sound.autodetect = "TRUE"
-
-tools.syncTime = "TRUE"
-tools.upgrade.policy = "upgradeAtPowerCycle"
 
 // USB
 usb.pciSlotNumber = "32"
@@ -748,13 +773,6 @@ parallel0.startConnected = "{{ .Parallel_Present }}"
 parallel0.fileName = "{{ .Parallel_Filename }}"
 parallel0.autodetect = "{{ .Parallel_Auto }}"
 parallel0.bidirectional = "{{ .Parallel_Bidirectional }}"
-
-virtualHW.productCompatibility = "hosted"
-virtualHW.version = "{{ .Version }}"
-vmci0.id = "1861462627"
-vmci0.pciSlotNumber = "35"
-vmci0.present = "TRUE"
-vmotion.checkpointFBSize = "65536000"
 `
 
 const DefaultAdditionalDiskTemplate = `
