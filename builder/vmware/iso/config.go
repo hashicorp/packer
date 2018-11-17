@@ -21,6 +21,7 @@ type Config struct {
 	common.FloppyConfig      `mapstructure:",squash"`
 	bootcommand.VNCConfig    `mapstructure:",squash"`
 	vmwcommon.DriverConfig   `mapstructure:",squash"`
+	vmwcommon.HWConfig       `mapstructure:",squash"`
 	vmwcommon.OutputConfig   `mapstructure:",squash"`
 	vmwcommon.RunConfig      `mapstructure:",squash"`
 	vmwcommon.ShutdownConfig `mapstructure:",squash"`
@@ -44,18 +45,6 @@ type Config struct {
 	GuestOSType string `mapstructure:"guest_os_type"`
 	Version     string `mapstructure:"version"`
 	VMName      string `mapstructure:"vm_name"`
-
-	// Network adapter and type
-	NetworkAdapterType string `mapstructure:"network_adapter_type"`
-	Network            string `mapstructure:"network"`
-
-	// device presence
-	Sound bool `mapstructure:"sound"`
-	USB   bool `mapstructure:"usb"`
-
-	// communication ports
-	Serial   string `mapstructure:"serial"`
-	Parallel string `mapstructure:"parallel"`
 
 	VMXDiskTemplatePath string `mapstructure:"vmx_disk_template_path"`
 	VMXTemplatePath     string `mapstructure:"vmx_template_path"`
@@ -87,6 +76,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	warnings = append(warnings, isoWarnings...)
 	errs = packer.MultiErrorAppend(errs, isoErrs...)
 	errs = packer.MultiErrorAppend(errs, c.HTTPConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.HWConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.DriverConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs,
 		c.OutputConfig.Prepare(&c.ctx, &c.PackerConfig)...)
@@ -160,16 +150,8 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
-	if c.Network == "" {
-		c.Network = "nat"
-	}
-
-	if !c.Sound {
-		c.Sound = false
-	}
-
-	if !c.USB {
-		c.USB = false
+	if c.HWConfig.Network == "" {
+		c.HWConfig.Network = "nat"
 	}
 
 	// Remote configuration validation
