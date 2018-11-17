@@ -9,8 +9,8 @@ import (
 type HWConfig struct {
 
 	// cpu information
-	CpuCount   int `mapstructure:"cpu_count"`
-	MemorySize int `mapstructure:"memory_size"`
+	CpuCount   int `mapstructure:"cpus"`
+	MemorySize int `mapstructure:"memory"`
 
 	// device presence
 	Sound bool `mapstructure:"sound"`
@@ -22,7 +22,7 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 
 	// Hardware and cpu options
 	if c.CpuCount < 0 {
-		errs = append(errs, fmt.Errorf("An invalid cpu_count was specified (cpu_count < 0): %d", c.CpuCount))
+		errs = append(errs, fmt.Errorf("An invalid number of cpus was specified (cpus < 0): %d", c.CpuCount))
 		c.CpuCount = 0
 	}
 	if c.CpuCount == 0 {
@@ -30,7 +30,7 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 	}
 
 	if c.MemorySize < 0 {
-		errs = append(errs, fmt.Errorf("An invalid memory_size was specified (memory_size < 0): %d", c.MemorySize))
+		errs = append(errs, fmt.Errorf("An invalid memory size was specified (memory < 0): %d", c.MemorySize))
 		c.MemorySize = 0
 	}
 	if c.MemorySize == 0 {
