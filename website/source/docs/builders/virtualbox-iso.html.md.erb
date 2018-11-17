@@ -94,6 +94,9 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
 
+-   `cpu_count` (number) - The number of cpus to use for building the VM.
+    Defaults to building with just one.
+
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is `40000` (about 40 GB).
 
@@ -249,6 +252,9 @@ builder.
 -   `keep_registered` (boolean) - Set this to `true` if you would like to keep
     the VM registered with virtualbox. Defaults to `false`.
 
+-   `memory_size` (number) - The amount of memory to use for building the VM
+    in megabytes. Defaults to `512` megabytes.
+
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
@@ -278,6 +284,10 @@ builder.
     not export the VM. Useful if the build output is not the resultant image,
     but created inside the VM.
 
+-  `sound` (string) - Defaults to `none`. The type of audio device to use for
+    sound when building the VM. Some of the options that are available are
+    `dsound`, `oss`, `alsa`, `pulse`, `coreaudio`, `null`.
+
 -   `ssh_host_port_min` and `ssh_host_port_max` (number) - The minimum and
     maximum port to use for the SSH port on the host machine which is forwarded
     to the SSH port on the guest machine. Because Packer often runs in parallel,
@@ -287,6 +297,9 @@ builder.
 -   `ssh_skip_nat_mapping` (boolean) - Defaults to `false`. When enabled, Packer
     does not setup forwarded port mapping for SSH requests and uses `ssh_port`
     on the host to communicate to the virtual machine.
+
+-   `usb` (boolean) - Specifies whether or not to enable the USB bus when
+    building the VM. Defaults to `false`.
 
 -   `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
     execute in order to further customize the virtual machine being created. The
