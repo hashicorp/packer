@@ -98,6 +98,8 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
 
+-   `cpu_count` (number) - The number of cpus to use for the VM.
+
 -   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
     by the cdrom device. This is chosen by default based on the disk adapter
     type. VMware tends to lean towards `ide` for the cdrom device unless
@@ -220,6 +222,8 @@ builder.
     download or while downloading a single URL, it will move on to the next. All
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
+
+-   `memory_size` (number) - The amount of memory to use for the VM in megabytes.
 
 -   `network` (string) - This is the network type that the virtual machine will
     be created with. This can be one of the generic values that map to a device
@@ -403,7 +407,7 @@ builder.
 
 -   `vmx_data` (object of key/value strings) - Arbitrary key/values to enter
     into the virtual machine VMX file. This is for advanced users who want to
-    set properties such as memory, CPU, etc.
+    set properties that aren't yet supported by the builder.
 
 -   `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
     except that it is run after the virtual machine is shutdown, and before the
