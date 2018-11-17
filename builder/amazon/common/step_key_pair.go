@@ -13,9 +13,9 @@ import (
 )
 
 type StepKeyPair struct {
-	ShowConnectionInfo bool
-	Comm               *communicator.Config
-	DebugKeyPath       string
+	DebugConnection bool
+	Comm            *communicator.Config
+	DebugKeyPath    string
 
 	doCleanup bool
 }
@@ -70,7 +70,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 
 	// If we're upposed to show connection info output the private key to the working
 	// directory.
-	if s.ShowConnectionInfo {
+	if s.DebugConnection {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
@@ -114,7 +114,7 @@ func (s *StepKeyPair) Cleanup(state multistep.StateBag) {
 	}
 
 	// Also remove the physical key if we're debugging.
-	if s.ShowConnectionInfo {
+	if s.DebugConnection {
 		if err := os.Remove(s.DebugKeyPath); err != nil {
 			ui.Error(fmt.Sprintf(
 				"Error removing debug key '%s': %s", s.DebugKeyPath, err))

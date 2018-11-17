@@ -41,8 +41,8 @@ type StepConnect struct {
 	// existing types.
 	CustomConnect map[string]multistep.Step
 
-	// ShowConnectionInfo, if set to true print connection details.
-	ShowConnectionInfo bool
+	// DebugConnection, if set to true print connection details.
+	DebugConnection bool
 
 	substep multistep.Step
 }
@@ -53,18 +53,18 @@ func (s *StepConnect) Run(ctx context.Context, state multistep.StateBag) multist
 	typeMap := map[string]multistep.Step{
 		"none": nil,
 		"ssh": &StepConnectSSH{
-			Config:             s.Config,
-			Host:               s.Host,
-			ShowConnectionInfo: s.ShowConnectionInfo,
-			SSHConfig:          s.SSHConfig,
-			SSHPort:            s.SSHPort,
+			Config:          s.Config,
+			Host:            s.Host,
+			DebugConnection: s.DebugConnection,
+			SSHConfig:       s.SSHConfig,
+			SSHPort:         s.SSHPort,
 		},
 		"winrm": &StepConnectWinRM{
-			Config:             s.Config,
-			Host:               s.Host,
-			ShowConnectionInfo: s.ShowConnectionInfo,
-			WinRMConfig:        s.WinRMConfig,
-			WinRMPort:          s.WinRMPort,
+			Config:          s.Config,
+			Host:            s.Host,
+			DebugConnection: s.DebugConnection,
+			WinRMConfig:     s.WinRMConfig,
+			WinRMPort:       s.WinRMPort,
 		},
 	}
 	for k, v := range s.CustomConnect {

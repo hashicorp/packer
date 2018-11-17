@@ -68,8 +68,8 @@ func (b *build) Run(ui packer.Ui, cache packer.Cache) ([]packer.Artifact, error)
 	return artifacts, nil
 }
 
-func (b *build) SetShowConnectionInfo(val bool) {
-	if err := b.client.Call("Build.SetShowConnectionInfo", val, new(interface{})); err != nil {
+func (b *build) SetDebugConnection(val bool) {
+	if err := b.client.Call("Build.SetDebugConnection", val, new(interface{})); err != nil {
 		panic(err)
 	}
 }
@@ -134,6 +134,11 @@ func (b *BuildServer) Run(streamId uint32, reply *[]uint32) error {
 		(*reply)[i] = streamId
 	}
 
+	return nil
+}
+
+func (b *BuildServer) SetDebugConnection(val *bool, reply *interface{}) error {
+	b.build.SetDebugConnection(*val)
 	return nil
 }
 

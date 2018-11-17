@@ -24,7 +24,7 @@ type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
 	BlockDevices                      BlockDevices
 	BlockDurationMinutes              int64
-	ShowConnectionInfo                bool
+	DebugConnection                   bool
 	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
@@ -340,7 +340,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 
 	}
 
-	if s.ShowConnectionInfo {
+	if s.DebugConnection {
 		if instance.PublicDnsName != nil && *instance.PublicDnsName != "" {
 			ui.Message(fmt.Sprintf("Public DNS: %s", *instance.PublicDnsName))
 		}

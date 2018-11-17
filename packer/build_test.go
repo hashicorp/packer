@@ -29,13 +29,14 @@ func testBuild() *coreBuild {
 
 func testDefaultPackerConfig() map[string]interface{} {
 	return map[string]interface{}{
-		BuildNameConfigKey:     "test",
-		BuilderTypeConfigKey:   "foo",
-		DebugConfigKey:         false,
-		ForceConfigKey:         false,
-		OnErrorConfigKey:       "cleanup",
-		TemplatePathKey:        "",
-		UserVariablesConfigKey: make(map[string]string),
+		BuildNameConfigKey:       "test",
+		BuilderTypeConfigKey:     "foo",
+		DebugConfigKey:           false,
+		DebugConnectionConfigKey: false,
+		ForceConfigKey:           false,
+		OnErrorConfigKey:         "cleanup",
+		TemplatePathKey:          "",
+		UserVariablesConfigKey:   make(map[string]string),
 	}
 }
 func TestBuild_Name(t *testing.T) {

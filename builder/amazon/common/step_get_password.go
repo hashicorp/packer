@@ -21,10 +21,10 @@ import (
 // StepGetPassword reads the password from a Windows server and sets it
 // on the WinRM config.
 type StepGetPassword struct {
-	ShowConnectionInfo bool
-	Comm               *communicator.Config
-	Timeout            time.Duration
-	BuildName          string
+	DebugConnection bool
+	Comm            *communicator.Config
+	Timeout         time.Duration
+	BuildName       string
 }
 
 func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -90,7 +90,7 @@ WaitLoop:
 	}
 
 	// If we're showing connection info, we output the password
-	if s.ShowConnectionInfo {
+	if s.DebugConnection {
 		ui.Message(fmt.Sprintf(
 			"Password (since showing connection info is enabled): %s", s.Comm.WinRMPassword))
 	}

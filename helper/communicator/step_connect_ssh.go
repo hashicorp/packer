@@ -25,11 +25,11 @@ import (
 // In general, you should use StepConnect.
 type StepConnectSSH struct {
 	// All the fields below are documented on StepConnect
-	Config             *Config
-	Host               func(multistep.StateBag) (string, error)
-	ShowConnectionInfo bool
-	SSHConfig          func(multistep.StateBag) (*gossh.ClientConfig, error)
-	SSHPort            func(multistep.StateBag) (int, error)
+	Config          *Config
+	Host            func(multistep.StateBag) (string, error)
+	DebugConnection bool
+	SSHConfig       func(multistep.StateBag) (*gossh.ClientConfig, error)
+	SSHPort         func(multistep.StateBag) (int, error)
 }
 
 func (s *StepConnectSSH) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -191,7 +191,7 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 		}
 
 		log.Println("[INFO] Attempting SSH connection...")
-		if s.ShowConnectionInfo {
+		if s.DebugConnection {
 			ui.Say(fmt.Sprintf("Trying to connect with SSH to: %s", address))
 			ui.Say(fmt.Sprintf("Using username \"%s\" and password \"%s\"", s.Config.SSHUsername, s.Config.SSHPassword))
 			// TODO rickard

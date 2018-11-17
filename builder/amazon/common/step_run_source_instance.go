@@ -23,7 +23,7 @@ type StepRunSourceInstance struct {
 	BlockDevices                      BlockDevices
 	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
-	ShowConnectionInfo                bool
+	DebugConnection                   bool
 	EbsOptimized                      bool
 	EnableT2Unlimited                 bool
 	ExpectedRootDevice                string
@@ -208,7 +208,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 	instance := r.Reservations[0].Instances[0]
 
-	if s.ShowConnectionInfo {
+	if s.DebugConnection {
 		if instance.PublicDnsName != nil && *instance.PublicDnsName != "" {
 			ui.Message(fmt.Sprintf("Public DNS: %s", *instance.PublicDnsName))
 		}

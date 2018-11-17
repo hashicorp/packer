@@ -18,7 +18,7 @@ const (
 
 	// This is the key in configurations that is set to "true" when Packer
 	// show connection information is enabled.
-	ShowConnectionInfoConfigKey = "packer_show_connection_info"
+	DebugConnectionConfigKey = "packer_debug_connection"
 
 	// This is the key in configurations that is set to "true" when Packer
 	// debugging is enabled.
@@ -63,11 +63,11 @@ type Build interface {
 	// is actually completely canceled.
 	Cancel()
 
-	// SetShowConnectionInfo will enable/disable showing connection details.
-	// ShowConnectionInfo is always enabled by adding the additional key
-	// "packer_show_connection_info" to boolean true in the configuration
+	// SetDebugConnection will enable/disable showing connection details.
+	// DebugConnection is always enabled by adding the additional key
+	// "packer_debug_connection" to boolean true in the configuration
 	// of the various components. This must be called prior to Prepare.
-	SetShowConnectionInfo(bool)
+	SetDebugConnection(bool)
 
 	// SetDebug will enable/disable debug mode. Debug mode is always
 	// enabled by adding the additional key "packer_debug" to boolean
@@ -106,12 +106,12 @@ type coreBuild struct {
 	templatePath   string
 	variables      map[string]string
 
-	showConnectionInfo bool
-	debug              bool
-	force              bool
-	onError            string
-	l                  sync.Mutex
-	prepareCalled      bool
+	debugConnection bool
+	debug           bool
+	force           bool
+	onError         string
+	l               sync.Mutex
+	prepareCalled   bool
 }
 
 // Keeps track of the post-processor and the configuration of the
@@ -150,14 +150,14 @@ func (b *coreBuild) Prepare() (warn []string, err error) {
 	b.prepareCalled = true
 
 	packerConfig := map[string]interface{}{
-		BuildNameConfigKey:          b.name,
-		BuilderTypeConfigKey:        b.builderType,
-		ShowConnectionInfoConfigKey: b.showConnectionInfo,
-		DebugConfigKey:              b.debug,
-		ForceConfigKey:              b.force,
-		OnErrorConfigKey:            b.onError,
-		TemplatePathKey:             b.templatePath,
-		UserVariablesConfigKey:      b.variables,
+		BuildNameConfigKey:       b.name,
+		BuilderTypeConfigKey:     b.builderType,
+		DebugConnectionConfigKey: b.debugConnection,
+		DebugConfigKey:           b.debug,
+		ForceConfigKey:           b.force,
+		OnErrorConfigKey:         b.onError,
+		TemplatePathKey:          b.templatePath,
+		UserVariablesConfigKey:   b.variables,
 	}
 
 	// Prepare the builder
@@ -337,12 +337,12 @@ PostProcessorRunSeqLoop:
 	return artifacts, err
 }
 
-func (b *coreBuild) SetShowConnectionInfo(val bool) {
+func (b *coreBuild) SetDebugConnection(val bool) {
 	if b.prepareCalled {
 		panic("prepare has already been called")
 	}
 
-	b.showConnectionInfo = val
+	b.debugConnection = val
 }
 
 func (b *coreBuild) SetDebug(val bool) {
