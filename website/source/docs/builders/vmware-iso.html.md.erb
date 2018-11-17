@@ -98,7 +98,8 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
 
--   `cpu_count` (number) - The number of cpus to use for the VM.
+-   `cpu_count` (number) - The number of cpus to use when building the VM.
+    Defaults to building with just one.
 
 -   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
     by the cdrom device. This is chosen by default based on the disk adapter
@@ -223,7 +224,8 @@ builder.
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
--   `memory_size` (number) - The amount of memory to use for the VM in megabytes.
+-   `memory_size` (number) - The amount of memory to use when building the VM
+    in megabytes. Defaults to `512` megabytes.
 
 -   `network` (string) - This is the network type that the virtual machine will
     be created with. This can be one of the generic values that map to a device
@@ -375,7 +377,8 @@ builder.
     given are valid. If you set this flag to `true`, Packer will skip this
     validation. Default: `false`.
 
--   `sound` (boolean) - Enable VMware's virtual soundcard device for the VM.
+-   `sound` (boolean) - Specify whether to enable VMware's virtual soundcard
+    device when building the VM. Defaults to `false`.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are `darwin`, `linux`, and `windows`. By
@@ -389,9 +392,10 @@ builder.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is `esx5`.
 
--   `usb` (boolean) - Enable VMware's USB bus for the guest VM. To enable usage
-    of the XHCI bus for USB 3 (5 Gbit/s), one can use the `vmx_data` option to
-    enable it by specifying `true` for the `usb_xhci.present` property.
+-   `usb` (boolean) - Enable VMware's USB bus when building the guest VM.
+    Defaults to `false`. To enable usage of the XHCI bus for USB 3 (5 Gbit/s),
+    one can use the `vmx_data` option to enable it by specifying `true` for
+    the `usb_xhci.present` property.
 
 -   `version` (string) - The [vmx hardware
     version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)
