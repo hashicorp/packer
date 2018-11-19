@@ -23,7 +23,7 @@ export GOLDFLAGS
 
 .PHONY: bin checkversion ci default deps fmt fmt-docs fmt-examples generate releasebin test testacc testrace updatedeps
 
-default: deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples 
+default: deps generate testrace dev releasebin package dev fmt fmt-check mode-check fmt-docs fmt-examples
 
 ci: testrace
 
@@ -110,7 +110,7 @@ testacc: deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -v $(TEST) $(TESTARGS) -timeout=45m
 
 testrace: fmt-check mode-check vet ## Test with race detection enabled
-	@go test -race $(TEST) $(TESTARGS) -timeout=2m
+	@go test -race $(TEST) $(TESTARGS) -timeout=2m -p=8
 
 updatedeps:
 	@echo "INFO: Packer deps are managed by govendor. See .github/CONTRIBUTING.md"
