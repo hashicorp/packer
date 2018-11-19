@@ -24,7 +24,7 @@ type resourceResolver struct {
 
 func newResourceResolver(client *AzureClient) *resourceResolver {
 	return &resourceResolver{
-		client: client,
+		client:                          client,
 		findVirtualNetworkResourceGroup: findVirtualNetworkResourceGroup,
 		findVirtualNetworkSubnet:        findVirtualNetworkSubnet,
 	}
