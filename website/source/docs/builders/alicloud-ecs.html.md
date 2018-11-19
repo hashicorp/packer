@@ -147,6 +147,11 @@ builder.
 
         Snapshots from on or before July 15, 2013 cannot be used to create a
         disk.
+        
+-   `image_ignore_data_disks`(boolean) - If this value is true, the image created 
+    will not include any snapshot of data disks. This option would be useful for 
+    any circumstance that default data disks with instance types are not concerned. 
+    The default value is false.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
     image name is duplicated with an existing image, it will delete the
