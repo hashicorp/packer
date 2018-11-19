@@ -169,8 +169,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
 			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
+		})
+
+	if b.config.AlicloudImageIgnoreDataDisks {
+		steps = append(steps, &stepCreateAlicloudSnapshot{})
+	}
+
+	steps = append(steps,
+		&stepCreateAlicloudImage{
+			AlicloudImageIgnoreDataDisks: b.config.AlicloudImageIgnoreDataDisks,
 		},
-		&stepCreateAlicloudImage{},
 		&stepCreateTags{
 			Tags: b.config.AlicloudImageTags,
 		},

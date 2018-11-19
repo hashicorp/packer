@@ -36,6 +36,7 @@ type AlicloudImageConfig struct {
 	AlicloudImageForceDelete          bool              `mapstructure:"image_force_delete"`
 	AlicloudImageForceDeleteSnapshots bool              `mapstructure:"image_force_delete_snapshots"`
 	AlicloudImageForceDeleteInstances bool              `mapstructure:"image_force_delete_instances"`
+	AlicloudImageIgnoreDataDisks      bool              `mapstructure:"image_ignore_data_disks"`
 	AlicloudImageSkipRegionValidation bool              `mapstructure:"skip_region_validation"`
 	AlicloudImageTags                 map[string]string `mapstructure:"tags"`
 	AlicloudDiskDevices               `mapstructure:",squash"`

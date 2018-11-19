@@ -152,3 +152,46 @@ func TestBuilderPrepare_Devices(t *testing.T) {
 		t.Fatalf("data disks are not set properly, actual: %#v", b.config.ECSImagesDiskMappings)
 	}
 }
+
+func TestBuilderPrepare_IgnoreDataDisks(t *testing.T) {
+	var b Builder
+	config := testBuilderConfig()
+
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.AlicloudImageIgnoreDataDisks != false {
+		t.Fatalf("image_ignore_data_disks is not set properly, expect: %t, actual: %t", false, b.config.AlicloudImageIgnoreDataDisks)
+	}
+
+	config["image_ignore_data_disks"] = "false"
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.AlicloudImageIgnoreDataDisks != false {
+		t.Fatalf("image_ignore_data_disks is not set properly, expect: %t, actual: %t", false, b.config.AlicloudImageIgnoreDataDisks)
+	}
+
+	config["image_ignore_data_disks"] = "true"
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.AlicloudImageIgnoreDataDisks != true {
+		t.Fatalf("image_ignore_data_disks is not set properly, expect: %t, actual: %t", true, b.config.AlicloudImageIgnoreDataDisks)
+	}
+}
