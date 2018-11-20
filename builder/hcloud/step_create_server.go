@@ -15,7 +15,7 @@ type stepCreateServer struct {
 	serverId int
 }
 
-func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("hcloudClient").(*hcloud.Client)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
@@ -35,11 +35,22 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 		userData = string(contents)
 	}
 
+	sshKeys := []*hcloud.SSHKey{{ID: sshKeyId}}
+	for _, k := range c.SSHKeys {
+		sshKey, _, err := client.SSHKey.Get(ctx, k)
+		if err != nil {
+			ui.Error(err.Error())
+			state.Put("error", fmt.Errorf("Error fetching SSH key: %s", err))
+			return multistep.ActionHalt
+		}
+		sshKeys = append(sshKeys, sshKey)
+	}
+
 	serverCreateResult, _, err := client.Server.Create(context.TODO(), hcloud.ServerCreateOpts{
 		Name:       c.ServerName,
 		ServerType: &hcloud.ServerType{Name: c.ServerType},
 		Image:      &hcloud.Image{Name: c.Image},
-		SSHKeys:    []*hcloud.SSHKey{{ID: sshKeyId}},
+		SSHKeys:    sshKeys,
 		Location:   &hcloud.Location{Name: c.Location},
 		UserData:   userData,
 	})
