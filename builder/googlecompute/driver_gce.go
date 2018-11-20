@@ -83,7 +83,6 @@ func NewClientGCE(ui packer.Ui, p string, a *AccountFile, DriverScopes []string)
 		client = conf.Client(oauth2.NoContext)
 	} else {
 		log.Printf("[INFO] Requesting Google token via GCE API Default Client Token Source...")
-		client, err = google.DefaultClient(oauth2.NoContext, DriverScopes...)
 		// The DefaultClient uses the DefaultTokenSource of the google lib.
 		// The DefaultTokenSource uses the "Application Default Credentials"
 		// It looks for credentials in the following places, preferring the first location found:
@@ -96,11 +95,12 @@ func NewClientGCE(ui packer.Ui, p string, a *AccountFile, DriverScopes []string)
 		// 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
 		//    credentials from the metadata server.
 		//    (In this final case any provided scopes are ignored.)
+		client, err = google.DefaultClient(oauth2.NoContext, DriverScopes...)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	return client, nil
 }
 
