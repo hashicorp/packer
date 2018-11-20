@@ -69,6 +69,9 @@ builder.
 -   `user_data_file` (string) - Path to a file that will be used for the user
     data when launching the server.
 
+-   `ssh_keys` (array of strings) - List of SSH keys by name or id to be added
+    to image on launch.
+
 ## Basic Example
 
 Here is a basic example. It is completely valid as soon as you enter your own
