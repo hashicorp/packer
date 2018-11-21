@@ -717,11 +717,11 @@
 			"revisionTime": "2018-03-08T23:13:08Z"
 		},
 		{
-			"checksumSHA1": "W1LGm0UNirwMDVCMFv5vZrOpUJI=",
+			"checksumSHA1": "u6kWbz1BRsZT433AooftjLNNtdw=",
 			"comment": "v0.9.0-24-g6ca5b77",
 			"path": "github.com/digitalocean/godo",
-			"revision": "4c04abe183f449bd9ede285f0e5c7ee575d0dbe4",
-			"revisionTime": "2017-04-07T15:15:42Z"
+			"revision": "c4ae66932b5d6fb727d54e9ded9ee722f67f3ca9",
+			"revisionTime": "2018-11-13T19:55:25Z"
 		},
 		{
 			"checksumSHA1": "1n5MBJthemxmfqU2gN3qLCd8s04=",
@@ -1488,16 +1488,16 @@
 			"revisionTime": "2016-03-31T20:48:55Z"
 		},
 		{
-			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
-			"path": "github.com/ryanuber/go-glob",
-			"revision": "256dc444b735e061061cf46c809487313d5b0065",
-			"revisionTime": "2017-01-28T01:21:29Z"
-		},
-		{
 			"checksumSHA1": "4gVuzkHbQoznf+lCSJhIJnvS5tc=",
 			"path": "github.com/rwtodd/Go.Sed/sed",
 			"revision": "d6d5d585814e4c3560c684f52e3d8aeed721313d",
 			"revisionTime": "2017-05-07T04:53:31Z"
+		},
+		{
+			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
+			"path": "github.com/ryanuber/go-glob",
+			"revision": "256dc444b735e061061cf46c809487313d5b0065",
+			"revisionTime": "2017-01-28T01:21:29Z"
 		},
 		{
 			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
