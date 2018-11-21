@@ -3,6 +3,7 @@ package godo
 import (
 	"context"
 	"fmt"
+	"net/http"
 )
 
 // StorageActionsService is an interface for interfacing with the
@@ -76,13 +77,13 @@ func (s *StorageActionsServiceOp) Resize(ctx context.Context, volumeID string, s
 func (s *StorageActionsServiceOp) doAction(ctx context.Context, volumeID string, request *ActionRequest) (*Action, *Response, error) {
 	path := storageAllocationActionPath(volumeID)
 
-	req, err := s.client.NewRequest(ctx, "POST", path, request)
+	req, err := s.client.NewRequest(ctx, http.MethodPost, path, request)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(actionRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -91,13 +92,13 @@ func (s *StorageActionsServiceOp) doAction(ctx context.Context, volumeID string,
 }
 
 func (s *StorageActionsServiceOp) get(ctx context.Context, path string) (*Action, *Response, error) {
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(actionRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -106,13 +107,13 @@ func (s *StorageActionsServiceOp) get(ctx context.Context, path string) (*Action
 }
 
 func (s *StorageActionsServiceOp) list(ctx context.Context, path string) ([]Action, *Response, error) {
-	req, err := s.client.NewRequest(ctx, "GET", path, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	root := new(actionsRoot)
-	resp, err := s.client.Do(req, root)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
 	}
