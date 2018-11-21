@@ -22,7 +22,7 @@ func TestHWConfigPrepare(t *testing.T) {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if c.CpuCount < 1 {
+	if c.CpuCount < 0 {
 		t.Errorf("bad cpu count: %d", c.CpuCount)
 	}
 
