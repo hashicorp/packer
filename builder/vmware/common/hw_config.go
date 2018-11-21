@@ -36,16 +36,10 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 		errs = append(errs, fmt.Errorf("An invalid number of cpus was specified (cpus < 0): %d", c.CpuCount))
 		c.CpuCount = 0
 	}
-	if c.CpuCount == 0 {
-		c.CpuCount = 1
-	}
 
 	if c.MemorySize < 0 {
 		errs = append(errs, fmt.Errorf("An invalid amount of memory was specified (memory < 0): %d", c.MemorySize))
 		c.MemorySize = 0
-	}
-	if c.MemorySize == 0 {
-		c.MemorySize = 512
 	}
 
 	// Peripherals

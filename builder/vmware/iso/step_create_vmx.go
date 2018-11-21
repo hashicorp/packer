@@ -160,9 +160,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		Version:  config.Version,
 		ISOPath:  isoPath,
 
-		CpuCount:   strconv.Itoa(config.HWConfig.CpuCount),
-		MemorySize: strconv.Itoa(config.HWConfig.MemorySize),
-
 		SCSI_Present:         "FALSE",
 		SCSI_diskAdapterType: "lsilogic",
 		SATA_Present:         "FALSE",
@@ -413,8 +410,22 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		s.tempDir = vmxDir
 	}
 
+	/// Now to handle options that will modify the template
+	vmxData := vmwcommon.ParseVMX(vmxContents)
+
+	// Set the number of cpus if it was specified
+	if config.HWConfig.CpuCount > 0 {
+		vmxData["numvcpus"] = strconv.Itoa(config.HWConfig.CpuCount)
+	}
+
+	// Apply the memory size that was specified
+	if config.HWConfig.MemorySize > 0 {
+		vmxData["memsize"] = strconv.Itoa(config.HWConfig.MemorySize)
+	}
+
+	/// Write the vmxData to the vmxPath
 	vmxPath := filepath.Join(vmxDir, config.VMName+".vmx")
-	if err := vmwcommon.WriteVMX(vmxPath, vmwcommon.ParseVMX(vmxContents)); err != nil {
+	if err := vmwcommon.WriteVMX(vmxPath, vmxData); err != nil {
 		err := fmt.Errorf("Error creating VMX file: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
