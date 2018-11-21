@@ -3,6 +3,8 @@ package interpolate
 import (
 	"bytes"
 	"text/template"
+
+	parseargs "github.com/txgruppi/parseargs-go"
 )
 
 // Context is the context that an interpolation is done in. This defines
@@ -34,6 +36,27 @@ type Context struct {
 	BuildName    string
 	BuildType    string
 	TemplatePath string
+}
+
+// ParseArgs transforms a each commands into a list of arguments
+// after interpolation.
+//
+// "a b c" " d  ' e' {{.SomeFString}} " => ["a", "b", "c"]  ["d", " e", "F"]
+func (c *Context) ParseArgs(commands []string) (res [][]string, err error) {
+	res = [][]string{}
+	for _, command := range commands {
+		command, err = Render(command, c)
+		if err != nil {
+			return nil, err
+		}
+
+		commandWords, err := parseargs.Parse(command)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, commandWords)
+	}
+	return
 }
 
 // Render is shorthand for constructing an I and calling Render.

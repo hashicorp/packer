@@ -117,18 +117,18 @@ builder.
     the Parallels Tools ISO will be uploaded to the path specified by
     `parallels_tools_guest_path`. The default value is "upload".
 
--   `prlctl` (array of array of strings) - Custom `prlctl` commands to execute
+    -   `prlctl` (array of strings) - Custom `prlctl` commands to execute
     in order to further customize the virtual machine being created. The value
     of this is an array of commands to execute. The commands are executed in the
     order defined in the template. For each command, the command is defined
-    itself as an array of strings, where each string represents a single
-    argument on the command-line to `prlctl` (but excluding `prlctl` itself).
+    itself a string, each string represents a single `prlctl`
+    command (but excluding `prlctl` itself).
     Each arg is treated as a [configuration
     template](/docs/templates/engine.html), where the `Name`
     variable is replaced with the VM name. More details on how to use `prlctl`
     are below.
 
--   `prlctl_post` (array of array of strings) - Identical to `prlctl`, except
+    -   `prlctl_post` (array of strings) - Identical to `prlctl`, except
     that it is run after the virtual machine is shutdown, and before the virtual
     machine is exported.
 
@@ -200,8 +200,8 @@ virtual machine:
 ``` json
 {
   "prlctl": [
-    ["set", "{{.Name}}", "--memsize", "1024"],
-    ["set", "{{.Name}}", "--cpus", "2"]
+    "set {{.Name}} --memsize 1024",
+    "set {{.Name}} --cpus 2"
   ]
 }
 ```
@@ -210,8 +210,7 @@ The value of `prlctl` is an array of commands to execute. These commands are
 executed in the order defined. So in the above example, the memory will be set
 followed by the CPUs.
 
-Each command itself is an array of strings, where each string is an argument to
-`prlctl`. Each argument is treated as a [configuration
-template](/docs/templates/engine.html). The only available
+Each string is an argument to `prlctl`. Each command is treated as a
+[template engine](/docs/templates/engine.html). The only available
 variable is `Name` which is replaced with the unique name of the VM, which is
 required for many `prlctl` calls.

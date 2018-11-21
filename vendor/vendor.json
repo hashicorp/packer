@@ -1488,16 +1488,16 @@
 			"revisionTime": "2016-03-31T20:48:55Z"
 		},
 		{
-			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
-			"path": "github.com/ryanuber/go-glob",
-			"revision": "256dc444b735e061061cf46c809487313d5b0065",
-			"revisionTime": "2017-01-28T01:21:29Z"
-		},
-		{
 			"checksumSHA1": "4gVuzkHbQoznf+lCSJhIJnvS5tc=",
 			"path": "github.com/rwtodd/Go.Sed/sed",
 			"revision": "d6d5d585814e4c3560c684f52e3d8aeed721313d",
 			"revisionTime": "2017-05-07T04:53:31Z"
+		},
+		{
+			"checksumSHA1": "6JP37UqrI0H80Gpk0Y2P+KXgn5M=",
+			"path": "github.com/ryanuber/go-glob",
+			"revision": "256dc444b735e061061cf46c809487313d5b0065",
+			"revisionTime": "2017-01-28T01:21:29Z"
 		},
 		{
 			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
@@ -1556,6 +1556,12 @@
 			"checksumSHA1": "GQ9bu6PuydK3Yor1JgtVKUfEJm8=",
 			"path": "github.com/tent/http-link-go",
 			"revision": "ac974c61c2f990f4115b119354b5e0b47550e888"
+		},
+		{
+			"checksumSHA1": "Dc9OCjX1M6CVbHjA7JoLHFMrtmo=",
+			"path": "github.com/txgruppi/parseargs-go",
+			"revision": "4cb98496e521562d12f9da481a744ad97e62d90a",
+			"revisionTime": "2017-01-24T21:53:56Z"
 		},
 		{
 			"checksumSHA1": "kHoPkdkwngiWKB27/uwq+T/3qv4=",

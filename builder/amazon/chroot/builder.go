@@ -29,7 +29,7 @@ type Config struct {
 	awscommon.AMIConfig       `mapstructure:",squash"`
 	awscommon.AccessConfig    `mapstructure:",squash"`
 
-	ChrootMounts      [][]string                 `mapstructure:"chroot_mounts"`
+	ChrootMounts      []string                   `mapstructure:"chroot_mounts"`
 	CommandWrapper    string                     `mapstructure:"command_wrapper"`
 	CopyFiles         []string                   `mapstructure:"copy_files"`
 	DevicePath        string                     `mapstructure:"device_path"`
@@ -86,17 +86,13 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	// Defaults
-	if b.config.ChrootMounts == nil {
-		b.config.ChrootMounts = make([][]string, 0)
-	}
-
 	if len(b.config.ChrootMounts) == 0 {
-		b.config.ChrootMounts = [][]string{
-			{"proc", "proc", "/proc"},
-			{"sysfs", "sysfs", "/sys"},
-			{"bind", "/dev", "/dev"},
-			{"devpts", "devpts", "/dev/pts"},
-			{"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"},
+		b.config.ChrootMounts = []string{
+			"proc", "proc", "/proc",
+			"sysfs", "sysfs", "/sys",
+			"bind", "/dev", "/dev",
+			"devpts", "devpts", "/dev/pts",
+			"binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc",
 		}
 	}
 
@@ -128,12 +124,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs,
 		b.config.AMIConfig.Prepare(&b.config.AccessConfig, &b.config.ctx)...)
 
-	for _, mounts := range b.config.ChrootMounts {
-		if len(mounts) != 3 {
-			errs = packer.MultiErrorAppend(
-				errs, errors.New("Each chroot_mounts entry should be three elements."))
-			break
-		}
+	if len(b.config.ChrootMounts)%3 != 0 {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("Each chroot_mounts entry should be three elements."))
 	}
 
 	if b.config.FromScratch {

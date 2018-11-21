@@ -29,8 +29,8 @@ func (s *StepMountExtra) Run(_ context.Context, state multistep.StateBag) multis
 	s.mounts = make([]string, 0, len(config.ChrootMounts))
 
 	ui.Say("Mounting additional paths within the chroot...")
-	for _, mountInfo := range config.ChrootMounts {
-		innerPath := mountPath + mountInfo[2]
+	for i := 0; i < len(config.ChrootMounts); i += 3 {
+		innerPath := mountPath + config.ChrootMounts[i+2]
 
 		if err := os.MkdirAll(innerPath, 0755); err != nil {
 			err := fmt.Errorf("Error creating mount directory: %s", err)
@@ -39,17 +39,17 @@ func (s *StepMountExtra) Run(_ context.Context, state multistep.StateBag) multis
 			return multistep.ActionHalt
 		}
 
-		flags := "-t " + mountInfo[0]
-		if mountInfo[0] == "bind" {
+		flags := "-t " + config.ChrootMounts[i+0]
+		if config.ChrootMounts[i+0] == "bind" {
 			flags = "--bind"
 		}
 
-		ui.Message(fmt.Sprintf("Mounting: %s", mountInfo[2]))
+		ui.Message(fmt.Sprintf("Mounting: %s", config.ChrootMounts[i+2]))
 		stderr := new(bytes.Buffer)
 		mountCommand, err := wrappedCommand(fmt.Sprintf(
 			"mount %s %s %s",
 			flags,
-			mountInfo[1],
+			config.ChrootMounts[i+1],
 			innerPath))
 		if err != nil {
 			err := fmt.Errorf("Error creating mount command: %s", err)

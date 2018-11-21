@@ -112,9 +112,9 @@ builder.
       "export_opts":
       [
         "--manifest",
-        "--vsys", "0",
-        "--description", "{{user `vm_description`}}",
-        "--version", "{{user `vm_version`}}"
+        "--vsys 0",
+        "--description {{user `vm_description`}}",
+        "--version {{user `vm_version`}}"
       ],
       "format": "ova",
     }
@@ -301,11 +301,11 @@ builder.
 -   `usb` (boolean) - Specifies whether or not to enable the USB bus when
     building the VM. Defaults to `false`.
 
--   `vboxmanage` (array of array of strings) - Custom `VBoxManage` commands to
+-   `vboxmanage` (array of strings) - Custom `VBoxManage` commands to
     execute in order to further customize the virtual machine being created. The
     value of this is an array of commands to execute. The commands are executed
     in the order defined in the template. For each command, the command is
-    defined itself as an array of strings, where each string represents a single
+    split to an array of strings (args), where each string represents a single
     argument on the command-line to `VBoxManage` (but excluding
     `VBoxManage` itself). Each arg is treated as a [configuration
     template](/docs/templates/engine.html), where the `Name`
@@ -417,8 +417,8 @@ within the virtual machine:
 ``` json
 {
   "vboxmanage": [
-    ["modifyvm", "{{.Name}}", "--memory", "1024"],
-    ["modifyvm", "{{.Name}}", "--cpus", "2"]
+    "modifyvm {{.Name}} --memory 1024",
+    "modifyvm {{.Name}} --cpus 2"
   ]
 }
 ```

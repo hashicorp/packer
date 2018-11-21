@@ -1,0 +1,7 @@
+package: github.com/txgruppi/parseargs-go
+import: []
+testImport:
+- package: github.com/smartystreets/goconvey
+  version: ~1.6.2
+  subpackages:
+  - convey

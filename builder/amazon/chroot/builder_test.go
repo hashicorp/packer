@@ -80,8 +80,8 @@ func TestBuilderPrepare_ChrootMountsBadDefaults(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()
 
-	config["chroot_mounts"] = [][]string{
-		{"bad"},
+	config["chroot_mounts"] = []string{
+		"bad", "bad", "bad", "bad",
 	}
 	warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -90,7 +90,20 @@ func TestBuilderPrepare_ChrootMountsBadDefaults(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
+
+	config["chroot_mounts"] = []string{
+		"bad", "bad",
+	}
+
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
 }
+
 func TestBuilderPrepare_SourceAmi(t *testing.T) {
 	b := &Builder{}
 	config := testConfig()

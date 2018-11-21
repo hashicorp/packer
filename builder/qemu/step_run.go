@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 // stepRun runs the virtual machine
@@ -183,7 +182,7 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 				Name:      config.VMName,
 			}
 		}
-		newQemuArgs, err := processArgs(config.QemuArgs, &ctx)
+		newQemuArgs, err := ctx.ParseArgs(config.QemuArgs)
 		if err != nil {
 			return nil, err
 		}
@@ -237,26 +236,4 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	}
 
 	return outArgs, nil
-}
-
-func processArgs(args [][]string, ctx *interpolate.Context) ([][]string, error) {
-	var err error
-
-	if args == nil {
-		return make([][]string, 0), err
-	}
-
-	newArgs := make([][]string, len(args))
-	for argsIdx, rowArgs := range args {
-		parms := make([]string, len(rowArgs))
-		newArgs[argsIdx] = parms
-		for i, parm := range rowArgs {
-			parms[i], err = interpolate.Render(parm, ctx)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	return newArgs, err
 }

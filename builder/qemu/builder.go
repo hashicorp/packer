@@ -94,32 +94,32 @@ type Config struct {
 	Comm                  communicator.Config `mapstructure:",squash"`
 	common.FloppyConfig   `mapstructure:",squash"`
 
-	ISOSkipCache      bool       `mapstructure:"iso_skip_cache"`
-	Accelerator       string     `mapstructure:"accelerator"`
-	DiskInterface     string     `mapstructure:"disk_interface"`
-	DiskSize          uint       `mapstructure:"disk_size"`
-	DiskCache         string     `mapstructure:"disk_cache"`
-	DiskDiscard       string     `mapstructure:"disk_discard"`
-	DetectZeroes      string     `mapstructure:"disk_detect_zeroes"`
-	SkipCompaction    bool       `mapstructure:"skip_compaction"`
-	DiskCompression   bool       `mapstructure:"disk_compression"`
-	Format            string     `mapstructure:"format"`
-	Headless          bool       `mapstructure:"headless"`
-	DiskImage         bool       `mapstructure:"disk_image"`
-	UseBackingFile    bool       `mapstructure:"use_backing_file"`
-	MachineType       string     `mapstructure:"machine_type"`
-	NetDevice         string     `mapstructure:"net_device"`
-	OutputDir         string     `mapstructure:"output_directory"`
-	QemuArgs          [][]string `mapstructure:"qemuargs"`
-	QemuBinary        string     `mapstructure:"qemu_binary"`
-	ShutdownCommand   string     `mapstructure:"shutdown_command"`
-	SSHHostPortMin    uint       `mapstructure:"ssh_host_port_min"`
-	SSHHostPortMax    uint       `mapstructure:"ssh_host_port_max"`
-	UseDefaultDisplay bool       `mapstructure:"use_default_display"`
-	VNCBindAddress    string     `mapstructure:"vnc_bind_address"`
-	VNCPortMin        uint       `mapstructure:"vnc_port_min"`
-	VNCPortMax        uint       `mapstructure:"vnc_port_max"`
-	VMName            string     `mapstructure:"vm_name"`
+	ISOSkipCache      bool     `mapstructure:"iso_skip_cache"`
+	Accelerator       string   `mapstructure:"accelerator"`
+	DiskInterface     string   `mapstructure:"disk_interface"`
+	DiskSize          uint     `mapstructure:"disk_size"`
+	DiskCache         string   `mapstructure:"disk_cache"`
+	DiskDiscard       string   `mapstructure:"disk_discard"`
+	DetectZeroes      string   `mapstructure:"disk_detect_zeroes"`
+	SkipCompaction    bool     `mapstructure:"skip_compaction"`
+	DiskCompression   bool     `mapstructure:"disk_compression"`
+	Format            string   `mapstructure:"format"`
+	Headless          bool     `mapstructure:"headless"`
+	DiskImage         bool     `mapstructure:"disk_image"`
+	UseBackingFile    bool     `mapstructure:"use_backing_file"`
+	MachineType       string   `mapstructure:"machine_type"`
+	NetDevice         string   `mapstructure:"net_device"`
+	OutputDir         string   `mapstructure:"output_directory"`
+	QemuArgs          []string `mapstructure:"qemuargs"`
+	QemuBinary        string   `mapstructure:"qemu_binary"`
+	ShutdownCommand   string   `mapstructure:"shutdown_command"`
+	SSHHostPortMin    uint     `mapstructure:"ssh_host_port_min"`
+	SSHHostPortMax    uint     `mapstructure:"ssh_host_port_max"`
+	UseDefaultDisplay bool     `mapstructure:"use_default_display"`
+	VNCBindAddress    string   `mapstructure:"vnc_bind_address"`
+	VNCPortMin        uint     `mapstructure:"vnc_port_min"`
+	VNCPortMax        uint     `mapstructure:"vnc_port_max"`
+	VMName            string   `mapstructure:"vm_name"`
 
 	// These are deprecated, but we keep them around for BC
 	// TODO(@mitchellh): remove
@@ -328,10 +328,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	if b.config.VNCPortMin > b.config.VNCPortMax {
 		errs = packer.MultiErrorAppend(
 			errs, fmt.Errorf("vnc_port_min must be less than vnc_port_max"))
-	}
-
-	if b.config.QemuArgs == nil {
-		b.config.QemuArgs = make([][]string, 0)
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

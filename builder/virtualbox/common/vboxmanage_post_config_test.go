@@ -13,22 +13,18 @@ func TestVBoxManagePostConfigPrepare_VBoxManage(t *testing.T) {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if !reflect.DeepEqual(c.VBoxManagePost, [][]string{}) {
-		t.Fatalf("bad: %#v", c.VBoxManagePost)
-	}
-
 	// Test with a good one
 	c = new(VBoxManagePostConfig)
-	c.VBoxManagePost = [][]string{
-		{"foo", "bar", "baz"},
+	c.VBoxManagePost = []string{
+		"foo", "bar", "baz",
 	}
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	expected := [][]string{
-		{"foo", "bar", "baz"},
+	expected := []string{
+		"foo", "bar", "baz",
 	}
 
 	if !reflect.DeepEqual(c.VBoxManagePost, expected) {

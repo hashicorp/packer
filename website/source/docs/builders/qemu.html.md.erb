@@ -119,7 +119,7 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     -&gt; The `hvf` accelerator is new and experimental as of
     [QEMU 2.12.0](https://wiki.qemu.org/ChangeLog/2.12#Host_support).
     You may encounter issues unrelated to Packer when using it.  You may need to
-    add [ "-global", "virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
+    add [ "-global virtio-pci.disable-modern=on" ] to `qemuargs` depending on the
     guest operating system.
 
 -   `boot_command` (array of strings) - This is an array of commands to type
@@ -254,10 +254,10 @@ Linux server and have not enabled X11 forwarding (`ssh -X`).
     some platforms. For example `qemu-kvm`, or `qemu-system-i386` may be a
     better choice for some systems.
 
--   `qemuargs` (array of array of strings) - Allows complete control over the
-    qemu command line (though not, at this time, qemu-img). Each array of
-    strings makes up a command line switch that overrides matching default
-    switch/value pairs. Any value specified as an empty string is ignored. All
+-   `qemuargs` (array of strings) - Allows complete control over the
+    qemu command line (though not, at this time, qemu-img). Each string is
+    a command that overrides matching default switch/value pairs.
+    Any value specified as an empty string is ignored. All
     values after the switch are concatenated with no separator.
 
 ~&gt; **Warning:** The qemu command line allows extreme flexibility, so beware
@@ -272,15 +272,10 @@ The following shows a sample usage:
 ``` json
 {
   "qemuargs": [
-    [ "-m", "1024M" ],
-    [ "--no-acpi", "" ],
-    [
-       "-netdev",
-      "user,id=mynet0,",
-      "hostfwd=hostip:hostport-guestip:guestport",
-      ""
-    ],
-    [ "-device", "virtio-net,netdev=mynet0" ]
+    "-m 1024M",
+    "--no-acpi",
+    "-netdev user,id=mynet0, hostfwd=hostip:hostport-guestip:guestport",
+    "-device virtio-net,netdev=mynet0"
   ]
 }
 ```
@@ -307,8 +302,8 @@ template that can be invoked by `make` in parallel:
 ``` json
 {
   "qemuargs": [
-    [ "-netdev", "user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward"],
-    [ "-device", "virtio-net,netdev=forward,id=net0"]
+    "-netdev user,hostfwd=tcp::{{ .SSHHostPort }}-:22,id=forward",
+    "-device virtio-net,netdev=forward,id=net0"
   ]
 }
 ```

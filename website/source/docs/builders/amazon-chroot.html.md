@@ -24,7 +24,7 @@ builder is able to build an EBS-backed AMI without launching a new EC2
 instance. This can dramatically speed up AMI builds for organizations who need
 the extra fast build.
 
-~&gt; **This is an advanced builder** If you're just getting started with
+\~&gt; **This is an advanced builder** If you're just getting started with
 Packer, we recommend starting with the [amazon-ebs
 builder](/docs/builders/amazon-ebs.html), which is much easier to use.
 
@@ -100,11 +100,10 @@ each category, the available configuration keys are alphabetized.
     you are building. This option is required to register HVM images. Can be
     `paravirtual` (default) or `hvm`.
 
--   `chroot_mounts` (array of array of strings) - This is a list of devices to
-    mount into the chroot environment. This configuration parameter requires
-    some additional documentation which is in the [Chroot
-    Mounts](#Chroot%20Mounts) section. Please read that section for more
-    information on how to use this.
+-   `chroot_mounts` (array of strings) - This is a list of devices to mount
+    into the chroot environment. This configuration parameter requires some
+    additional documentation which is in the [Chroot Mounts](#Chroot%20Mounts)
+    section. Please read that section for more information on how to use this.
 
 -   `command_wrapper` (string) - How to run shell commands. This defaults to
     `{{.Command}}`. This may be useful to set if you want to set environmental
@@ -154,8 +153,8 @@ each category, the available configuration keys are alphabetized.
     associated with AMIs, which have been deregistered by `force_deregister`.
     Default `false`.
 
--   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
-    the AWS EC2 endpoint. The default is `false`.
+-   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS
+    verification of the AWS EC2 endpoint. The default is `false`.
 
 -   `kms_key_id` (string) - ID, alias or ARN of the KMS key to use for boot
     volume encryption. This only applies to the main `region`, other regions
@@ -396,8 +395,8 @@ mounts `/proc` and `/dev`:
 ``` json
 {
   "chroot_mounts": [
-    ["proc", "proc", "/proc"],
-    ["bind", "/dev", "/dev"]
+    "proc", "proc", "/proc",
+    "bind", "/dev", "/dev"
   ]
 }
 ```

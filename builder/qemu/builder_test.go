@@ -542,13 +542,13 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if !reflect.DeepEqual(b.config.QemuArgs, [][]string{}) {
+	if !reflect.DeepEqual(b.config.QemuArgs, []string(nil)) {
 		t.Fatalf("bad: %#v", b.config.QemuArgs)
 	}
 
 	// Test with a good one
-	config["qemuargs"] = [][]interface{}{
-		{"foo", "bar", "baz"},
+	config["qemuargs"] = []string{
+		"foo", "bar", "baz",
 	}
 
 	b = Builder{}
@@ -560,8 +560,8 @@ func TestBuilderPrepare_QemuArgs(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	expected := [][]string{
-		{"foo", "bar", "baz"},
+	expected := []string{
+		"foo", "bar", "baz",
 	}
 
 	if !reflect.DeepEqual(b.config.QemuArgs, expected) {

@@ -13,22 +13,18 @@ func TestPrlctlPostConfigPrepare_PrlctlPost(t *testing.T) {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	if !reflect.DeepEqual(c.PrlctlPost, [][]string{}) {
-		t.Fatalf("bad: %#v", c.PrlctlPost)
-	}
-
 	// Test with a good one
 	c = new(PrlctlPostConfig)
-	c.PrlctlPost = [][]string{
-		{"foo", "bar", "baz"},
+	c.PrlctlPost = []string{
+		"foo", "bar", "baz",
 	}
 	errs = c.Prepare(testConfigTemplate(t))
 	if len(errs) > 0 {
 		t.Fatalf("err: %#v", errs)
 	}
 
-	expected := [][]string{
-		{"foo", "bar", "baz"},
+	expected := []string{
+		"foo", "bar", "baz",
 	}
 
 	if !reflect.DeepEqual(c.PrlctlPost, expected) {

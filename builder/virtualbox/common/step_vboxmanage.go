@@ -24,7 +24,7 @@ type commandTemplate struct {
 //
 // Produces:
 type StepVBoxManage struct {
-	Commands [][]string
+	Commands []string
 	Ctx      interpolate.Context
 }
 
@@ -41,20 +41,15 @@ func (s *StepVBoxManage) Run(_ context.Context, state multistep.StateBag) multis
 		Name: vmName,
 	}
 
-	for _, originalCommand := range s.Commands {
-		command := make([]string, len(originalCommand))
-		copy(command, originalCommand)
+	commands, err := s.Ctx.ParseArgs(s.Commands)
+	if err != nil {
+		err = fmt.Errorf("Error preparing vboxmanage command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		for i, arg := range command {
-			var err error
-			command[i], err = interpolate.Render(arg, &s.Ctx)
-			if err != nil {
-				err := fmt.Errorf("Error preparing vboxmanage command: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-		}
+	for _, command := range commands {
 
 		ui.Message(fmt.Sprintf("Executing: %s", strings.Join(command, " ")))
 		if err := driver.VBoxManage(command...); err != nil {

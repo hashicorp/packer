@@ -24,7 +24,7 @@ type commandTemplate struct {
 //
 // Produces:
 type StepPrlctl struct {
-	Commands [][]string
+	Commands []string
 	Ctx      interpolate.Context
 }
 
@@ -42,21 +42,15 @@ func (s *StepPrlctl) Run(_ context.Context, state multistep.StateBag) multistep.
 		Name: vmName,
 	}
 
-	for _, originalCommand := range s.Commands {
-		command := make([]string, len(originalCommand))
-		copy(command, originalCommand)
+	commands, err := s.Ctx.ParseArgs(s.Commands)
+	if err != nil {
+		err = fmt.Errorf("Error preparing prlctl command: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
 
-		for i, arg := range command {
-			var err error
-			command[i], err = interpolate.Render(arg, &s.Ctx)
-			if err != nil {
-				err = fmt.Errorf("Error preparing prlctl command: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-		}
-
+	for _, command := range commands {
 		ui.Message(fmt.Sprintf("Executing: prlctl %s", strings.Join(command, " ")))
 		if err := driver.Prlctl(command...); err != nil {
 			err = fmt.Errorf("Error executing command: %s", err)
