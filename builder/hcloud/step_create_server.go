@@ -68,11 +68,12 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	state.Put("server_id", serverCreateResult.Server.ID)
 
 	_, errCh := client.Action.WatchProgress(context.TODO(), serverCreateResult.Action)
+watch:
 	for {
 		select {
 		case err1 := <-errCh:
 			if err1 == nil {
-				return multistep.ActionContinue
+				break watch
 			} else {
 				err := fmt.Errorf("Error creating server: %s", err)
 				state.Put("error", err)
@@ -82,6 +83,17 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 
 		}
 	}
+
+	if c.RescueMode != "" {
+		if err := setRescue(ctx, client, serverCreateResult.Server, c.RescueMode, sshKeys); err != nil {
+			err := fmt.Errorf("Error enabling rescue mode: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	return multistep.ActionContinue
 }
 
 func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
@@ -100,4 +112,49 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error destroying server. Please destroy it manually: %s", err))
 	}
+}
+
+func setRescue(ctx context.Context, client *hcloud.Client, server *hcloud.Server, rescue string, sshKeys []*hcloud.SSHKey) error {
+	rescueChanged := false
+	if server.RescueEnabled {
+		rescueChanged = true
+		action, _, err := client.Server.DisableRescue(ctx, server)
+		if err != nil {
+			return err
+		}
+		if err := waitForServerAction(ctx, client, action, server); err != nil {
+			return err
+		}
+	}
+	if rescue != "" {
+		rescueChanged = true
+		res, _, err := client.Server.EnableRescue(ctx, server, hcloud.ServerEnableRescueOpts{
+			Type:    hcloud.ServerRescueType(rescue),
+			SSHKeys: sshKeys,
+		})
+		if err != nil {
+			return err
+		}
+		if err := waitForServerAction(ctx, client, res.Action, server); err != nil {
+			return err
+		}
+	}
+	if rescueChanged {
+		action, _, err := client.Server.Reset(ctx, server)
+		if err != nil {
+			return err
+		}
+		if err := waitForServerAction(ctx, client, action, server); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func waitForServerAction(ctx context.Context, client *hcloud.Client, action *hcloud.Action, server *hcloud.Server) error {
+	_, errCh := client.Action.WatchProgress(ctx, action)
+	if err := <-errCh; err != nil {
+		return err
+	}
+	return nil
 }

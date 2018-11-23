@@ -35,6 +35,8 @@ type Config struct {
 	UserDataFile string   `mapstructure:"user_data_file"`
 	SSHKeys      []string `mapstructure:"ssh_keys"`
 
+	RescueMode string `mapstructure:"rescue"`
+
 	ctx interpolate.Context
 }
 
