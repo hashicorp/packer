@@ -3,6 +3,8 @@ package iso
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	vboxcommon "github.com/hashicorp/packer/builder/virtualbox/common"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -24,7 +26,7 @@ func (s *stepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 
 	name := config.VMName
 
-	commands := make([][]string, 4)
+	commands := make([][]string, 6)
 	commands[0] = []string{
 		"createvm", "--name", name,
 		"--ostype", config.GuestOSType, "--register",
@@ -33,8 +35,15 @@ func (s *stepCreateVM) Run(_ context.Context, state multistep.StateBag) multiste
 		"modifyvm", name,
 		"--boot1", "disk", "--boot2", "dvd", "--boot3", "none", "--boot4", "none",
 	}
-	commands[2] = []string{"modifyvm", name, "--cpus", "1"}
-	commands[3] = []string{"modifyvm", name, "--memory", "512"}
+	commands[2] = []string{"modifyvm", name, "--cpus", strconv.Itoa(config.HWConfig.CpuCount)}
+	commands[3] = []string{"modifyvm", name, "--memory", strconv.Itoa(config.HWConfig.MemorySize)}
+	commands[4] = []string{"modifyvm", name, "--usb", map[bool]string{true: "on", false: "off"}[config.HWConfig.USB]}
+
+	if strings.ToLower(config.HWConfig.Sound) == "none" {
+		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound}
+	} else {
+		commands[5] = []string{"modifyvm", name, "--audio", config.HWConfig.Sound, "--audioin", "on", "--audioout", "on"}
+	}
 
 	ui.Say("Creating virtual machine...")
 	for _, command := range commands {
