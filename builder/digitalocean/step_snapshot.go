@@ -91,7 +91,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 				return multistep.ActionHalt
 			}
 			ui.Say(fmt.Sprintf("transferring Snapshot ID: %d", imageTransfer.ID))
-			if err := waitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
+			if err := WaitForImageState(godo.ActionCompleted, imageTransfer.ID, action.ID,
 				client, 20*time.Minute); err != nil {
 				// If we get an error the first time, actually report it
 				err := fmt.Errorf("Error waiting for snapshot transfer: %s", err)

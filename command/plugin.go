@@ -51,6 +51,7 @@ import (
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
+	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
@@ -142,6 +143,7 @@ var PostProcessors = map[string]packer.PostProcessor{
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
+	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),
