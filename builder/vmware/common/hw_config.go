@@ -34,12 +34,10 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 	// Hardware and cpu options
 	if c.CpuCount < 0 {
 		errs = append(errs, fmt.Errorf("An invalid number of cpus was specified (cpus < 0): %d", c.CpuCount))
-		c.CpuCount = 0
 	}
 
 	if c.MemorySize < 0 {
 		errs = append(errs, fmt.Errorf("An invalid amount of memory was specified (memory < 0): %d", c.MemorySize))
-		c.MemorySize = 0
 	}
 
 	// Peripherals
@@ -59,7 +57,7 @@ func (c *HWConfig) Prepare(ctx *interpolate.Context) []error {
 		c.Serial = "none"
 	}
 
-	return nil
+	return errs
 }
 
 /* parallel port */
