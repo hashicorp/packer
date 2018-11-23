@@ -102,6 +102,9 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is 10 seconds.
 
+-   `cpus` (number) - The number of cpus to use for building the VM.
+    Defaults to `1`.
+
 -   `disk_size` (number) - The size, in megabytes, of the hard disk to create
     for the VM. By default, this is 40000 (about 40 GB).
 
@@ -173,6 +176,9 @@ builder.
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
 
+-   `memory` (number) - The amount of memory to use for building the VM in
+    megabytes. Defaults to `512` megabytes.
+
 -   `output_directory` (string) - This is the path to the directory where the
     resulting virtual machine will be created. This may be relative or absolute.
     If relative, the path is relative to the working directory when `packer`
@@ -220,6 +226,9 @@ builder.
     machine once all the provisioning is done. By default this is an empty
     string, which tells Packer to just forcefully shut down the machine.
 
+-   `sound` (boolean) - Specifies whether to enable the sound device when
+    building the VM. Defaults to `false`.
+
 -   `shutdown_timeout` (string) - The amount of time to wait after executing the
     `shutdown_command` for the virtual machine to actually shut down. If it
     doesn't shut down in this time, it is an error. By default, the timeout is
@@ -230,6 +239,9 @@ builder.
     `disk_type` is set to `plain`). In certain rare cases, this might corrupt
     the resulting disk image. If you find this to be the case, you can disable
     compaction using this configuration value.
+
+-   `usb` (boolean) - Specifies whether to enable the USB bus when building
+    the VM. Defaults to `false`.
 
 -   `vm_name` (string) - This is the name of the PVM directory for the new
     virtual machine, without the file extension. By default this is
