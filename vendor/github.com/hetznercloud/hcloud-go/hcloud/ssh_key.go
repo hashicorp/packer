@@ -26,7 +26,7 @@ type SSHKeyClient struct {
 	client *Client
 }
 
-// GetByID retrieves a SSH key by its ID.
+// GetByID retrieves a SSH key by its ID. If the SSH key does not exist, nil is returned.
 func (c *SSHKeyClient) GetByID(ctx context.Context, id int) (*SSHKey, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/ssh_keys/%d", id), nil)
 	if err != nil {
@@ -44,7 +44,7 @@ func (c *SSHKeyClient) GetByID(ctx context.Context, id int) (*SSHKey, *Response,
 	return SSHKeyFromSchema(body.SSHKey), resp, nil
 }
 
-// GetByName retrieves a SSH key by its name.
+// GetByName retrieves a SSH key by its name. If the SSH key does not exist, nil is returned.
 func (c *SSHKeyClient) GetByName(ctx context.Context, name string) (*SSHKey, *Response, error) {
 	path := "/ssh_keys?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -64,7 +64,7 @@ func (c *SSHKeyClient) GetByName(ctx context.Context, name string) (*SSHKey, *Re
 	return SSHKeyFromSchema(body.SSHKeys[0]), resp, nil
 }
 
-// GetByFingerprint retreives a SSH key by its fingerprint.
+// GetByFingerprint retreives a SSH key by its fingerprint. If the SSH key does not exist, nil is returned.
 func (c *SSHKeyClient) GetByFingerprint(ctx context.Context, fingerprint string) (*SSHKey, *Response, error) {
 	path := "/ssh_keys?fingerprint=" + url.QueryEscape(fingerprint)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -84,7 +84,8 @@ func (c *SSHKeyClient) GetByFingerprint(ctx context.Context, fingerprint string)
 	return SSHKeyFromSchema(body.SSHKeys[0]), resp, nil
 }
 
-// Get retrieves a SSH key by its ID if the input can be parsed as an integer, otherwise it retrieves a SSH key by its name.
+// Get retrieves a SSH key by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a SSH key by its name. If the SSH key does not exist, nil is returned.
 func (c *SSHKeyClient) Get(ctx context.Context, idOrName string) (*SSHKey, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))
