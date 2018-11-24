@@ -29,7 +29,7 @@ type DatacenterClient struct {
 	client *Client
 }
 
-// GetByID retrieves a datacenter by its ID.
+// GetByID retrieves a datacenter by its ID. If the datacenter does not exist, nil is returned.
 func (c *DatacenterClient) GetByID(ctx context.Context, id int) (*Datacenter, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/datacenters/%d", id), nil)
 	if err != nil {
@@ -47,7 +47,7 @@ func (c *DatacenterClient) GetByID(ctx context.Context, id int) (*Datacenter, *R
 	return DatacenterFromSchema(body.Datacenter), resp, nil
 }
 
-// GetByName retrieves an datacenter by its name.
+// GetByName retrieves an datacenter by its name. If the datacenter does not exist, nil is returned.
 func (c *DatacenterClient) GetByName(ctx context.Context, name string) (*Datacenter, *Response, error) {
 	path := "/datacenters?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -67,7 +67,8 @@ func (c *DatacenterClient) GetByName(ctx context.Context, name string) (*Datacen
 	return DatacenterFromSchema(body.Datacenters[0]), resp, nil
 }
 
-// Get retrieves a datacenter by its ID if the input can be parsed as an integer, otherwise it retrieves a datacenter by its name.
+// Get retrieves a datacenter by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a datacenter by its name. If the datacenter does not exist, nil is returned.
 func (c *DatacenterClient) Get(ctx context.Context, idOrName string) (*Datacenter, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))

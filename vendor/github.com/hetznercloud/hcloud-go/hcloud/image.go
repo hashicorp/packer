@@ -71,7 +71,7 @@ type ImageClient struct {
 	client *Client
 }
 
-// GetByID retrieves an image by its ID.
+// GetByID retrieves an image by its ID. If the image does not exist, nil is returned.
 func (c *ImageClient) GetByID(ctx context.Context, id int) (*Image, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/images/%d", id), nil)
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *ImageClient) GetByID(ctx context.Context, id int) (*Image, *Response, e
 	return ImageFromSchema(body.Image), resp, nil
 }
 
-// GetByName retrieves an image by its name.
+// GetByName retrieves an image by its name. If the image does not exist, nil is returned.
 func (c *ImageClient) GetByName(ctx context.Context, name string) (*Image, *Response, error) {
 	path := "/images?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -109,7 +109,8 @@ func (c *ImageClient) GetByName(ctx context.Context, name string) (*Image, *Resp
 	return ImageFromSchema(body.Images[0]), resp, nil
 }
 
-// Get retrieves an image by its ID if the input can be parsed as an integer, otherwise it retrieves an image by its name.
+// Get retrieves an image by its ID if the input can be parsed as an integer, otherwise it
+// retrieves an image by its name. If the image does not exist, nil is returned.
 func (c *ImageClient) Get(ctx context.Context, idOrName string) (*Image, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))
