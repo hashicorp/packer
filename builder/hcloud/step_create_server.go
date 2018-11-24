@@ -67,20 +67,18 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	// Store the server id for later
 	state.Put("server_id", serverCreateResult.Server.ID)
 
-	_, errCh := client.Action.WatchProgress(context.TODO(), serverCreateResult.Action)
-watch:
-	for {
-		select {
-		case err1 := <-errCh:
-			if err1 == nil {
-				break watch
-			} else {
-				err := fmt.Errorf("Error creating server: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-
+	if err := waitForServerAction(context.TODO(), client, serverCreateResult.Action, serverCreateResult.Server); err != nil {
+		err := fmt.Errorf("Error creating server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	for _, nextAction := range serverCreateResult.NextActions {
+		if err := waitForServerAction(context.TODO(), client, nextAction, serverCreateResult.Server); err != nil {
+			err := fmt.Errorf("Error creating server: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
 
