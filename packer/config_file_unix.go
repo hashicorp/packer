@@ -3,13 +3,10 @@
 package packer
 
 import (
-	"bytes"
-	"errors"
 	"log"
 	"os"
-	"os/exec"
+	"os/user"
 	"path/filepath"
-	"strings"
 )
 
 func configFile() (string, error) {
@@ -31,24 +28,31 @@ func configDir() (string, error) {
 }
 
 func homeDir() (string, error) {
-	// First prefer the HOME environmental variable
-	if home := os.Getenv("HOME"); home != "" {
+	var u *user.User
+
+	/// First prefer the HOME environmental variable
+	if home, ok := os.LookupEnv("HOME"); ok {
 		log.Printf("Detected home directory from env var: %s", home)
 		return home, nil
 	}
 
-	// If that fails, try the shell
-	var stdout bytes.Buffer
-	cmd := exec.Command("sh", "-c", "eval echo ~$USER")
-	cmd.Stdout = &stdout
-	if err := cmd.Run(); err != nil {
+	/// Fall back to the passwd database if not found which follows
+	/// the same semantics as bourne shell
+	var err error
+
+	// Check username specified in the environment first
+	if username, ok := os.LookupEnv("USER"); ok {
+		u, err = user.Lookup(username)
+
+	} else {
+		// Otherwise we assume the current user
+		u, err = user.Current()
+	}
+
+	// Fail if we were unable to read the record
+	if err != nil {
 		return "", err
 	}
 
-	result := strings.TrimSpace(stdout.String())
-	if result == "" {
-		return "", errors.New("blank output")
-	}
-
-	return result, nil
+	return u.HomeDir, nil
 }
