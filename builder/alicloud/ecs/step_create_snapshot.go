@@ -11,7 +11,8 @@ import (
 )
 
 type stepCreateAlicloudSnapshot struct {
-	snapshot *ecs.SnapshotType
+	snapshot                 *ecs.SnapshotType
+	WaitSnapshotReadyTimeout int
 }
 
 func (s *stepCreateAlicloudSnapshot) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -44,8 +45,7 @@ func (s *stepCreateAlicloudSnapshot) Run(_ context.Context, state multistep.Stat
 		return halt(state, err, "Error creating snapshot")
 	}
 
-	err = client.WaitForSnapShotReady(common.Region(config.AlicloudRegion),
-		snapshotId, ALICLOUD_DEFAULT_LONG_TIMEOUT)
+	err = client.WaitForSnapShotReady(common.Region(config.AlicloudRegion), snapshotId, s.WaitSnapshotReadyTimeout)
 	if err != nil {
 		return halt(state, err, "Timeout waiting for snapshot to be created")
 	}
