@@ -195,3 +195,40 @@ func TestBuilderPrepare_IgnoreDataDisks(t *testing.T) {
 		t.Fatalf("image_ignore_data_disks is not set properly, expect: %t, actual: %t", true, b.config.AlicloudImageIgnoreDataDisks)
 	}
 }
+
+func TestBuilderPrepare_WaitSnapshotReadyTimeout(t *testing.T) {
+	var b Builder
+	config := testBuilderConfig()
+
+	warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.WaitSnapshotReadyTimeout != 0 {
+		t.Fatalf("wait_snapshot_ready_timeout is not set properly, expect: %d, actual: %d", 0, b.config.WaitSnapshotReadyTimeout)
+	}
+	if b.getSnapshotReadyTimeout() != ALICLOUD_DEFAULT_LONG_TIMEOUT {
+		t.Fatalf("default timeout is not set properly, expect: %d, actual: %d", ALICLOUD_DEFAULT_LONG_TIMEOUT, b.getSnapshotReadyTimeout())
+	}
+
+	config["wait_snapshot_ready_timeout"] = ALICLOUD_DEFAULT_TIMEOUT
+	warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.WaitSnapshotReadyTimeout != ALICLOUD_DEFAULT_TIMEOUT {
+		t.Fatalf("wait_snapshot_ready_timeout is not set properly, expect: %d, actual: %d", ALICLOUD_DEFAULT_TIMEOUT, b.config.WaitSnapshotReadyTimeout)
+	}
+
+	if b.getSnapshotReadyTimeout() != ALICLOUD_DEFAULT_TIMEOUT {
+		t.Fatalf("default timeout is not set properly, expect: %d, actual: %d", ALICLOUD_DEFAULT_TIMEOUT, b.getSnapshotReadyTimeout())
+	}
+}
