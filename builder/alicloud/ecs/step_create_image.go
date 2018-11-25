@@ -12,6 +12,7 @@ import (
 
 type stepCreateAlicloudImage struct {
 	AlicloudImageIgnoreDataDisks bool
+	WaitSnapshotReadyTimeout     int
 	image                        *ecs.ImageType
 }
 
@@ -49,8 +50,7 @@ func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBa
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	err = client.WaitForImageReady(common.Region(config.AlicloudRegion),
-		imageId, ALICLOUD_DEFAULT_LONG_TIMEOUT)
+	err = client.WaitForImageReady(common.Region(config.AlicloudRegion), imageId, s.WaitSnapshotReadyTimeout)
 	if err != nil {
 		err := fmt.Errorf("Timeout waiting for image to be created: %s", err)
 		state.Put("error", err)
