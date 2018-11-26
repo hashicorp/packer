@@ -49,7 +49,7 @@ type ServerTypeClient struct {
 	client *Client
 }
 
-// GetByID retrieves a server type by its ID.
+// GetByID retrieves a server type by its ID. If the server type does not exist, nil is returned.
 func (c *ServerTypeClient) GetByID(ctx context.Context, id int) (*ServerType, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/server_types/%d", id), nil)
 	if err != nil {
@@ -67,7 +67,7 @@ func (c *ServerTypeClient) GetByID(ctx context.Context, id int) (*ServerType, *R
 	return ServerTypeFromSchema(body.ServerType), resp, nil
 }
 
-// GetByName retrieves a server type by its name.
+// GetByName retrieves a server type by its name. If the server type does not exist, nil is returned.
 func (c *ServerTypeClient) GetByName(ctx context.Context, name string) (*ServerType, *Response, error) {
 	path := "/server_types?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -87,7 +87,8 @@ func (c *ServerTypeClient) GetByName(ctx context.Context, name string) (*ServerT
 	return ServerTypeFromSchema(body.ServerTypes[0]), resp, nil
 }
 
-// Get retrieves a server type by its ID if the input can be parsed as an integer, otherwise it retrieves a server type by its name.
+// Get retrieves a server type by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a server type by its name. If the server type does not exist, nil is returned.
 func (c *ServerTypeClient) Get(ctx context.Context, idOrName string) (*ServerType, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))

@@ -50,7 +50,8 @@ type FloatingIPClient struct {
 	client *Client
 }
 
-// GetByID retrieves a Floating IP by its ID.
+// GetByID retrieves a Floating IP by its ID. If the Floating IP does not exist,
+// nil is returned.
 func (c *FloatingIPClient) GetByID(ctx context.Context, id int) (*FloatingIP, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/floating_ips/%d", id), nil)
 	if err != nil {

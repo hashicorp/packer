@@ -74,7 +74,7 @@ type ActionClient struct {
 	client *Client
 }
 
-// GetByID retrieves an action by its ID.
+// GetByID retrieves an action by its ID. If the action does not exist, nil is returned.
 func (c *ActionClient) GetByID(ctx context.Context, id int) (*Action, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/actions/%d", id), nil)
 	if err != nil {

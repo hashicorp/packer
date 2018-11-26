@@ -67,21 +67,31 @@ func (s *stepCreateServer) Run(ctx context.Context, state multistep.StateBag) mu
 	// Store the server id for later
 	state.Put("server_id", serverCreateResult.Server.ID)
 
-	_, errCh := client.Action.WatchProgress(context.TODO(), serverCreateResult.Action)
-	for {
-		select {
-		case err1 := <-errCh:
-			if err1 == nil {
-				return multistep.ActionContinue
-			} else {
-				err := fmt.Errorf("Error creating server: %s", err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
-
+	if err := waitForAction(context.TODO(), client, serverCreateResult.Action); err != nil {
+		err := fmt.Errorf("Error creating server: %s", err)
+		state.Put("error", err)
+		ui.Error(err.Error())
+		return multistep.ActionHalt
+	}
+	for _, nextAction := range serverCreateResult.NextActions {
+		if err := waitForAction(context.TODO(), client, nextAction); err != nil {
+			err := fmt.Errorf("Error creating server: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
 		}
 	}
+
+	if c.RescueMode != "" {
+		if err := setRescue(context.TODO(), client, serverCreateResult.Server, c.RescueMode, sshKeys); err != nil {
+			err := fmt.Errorf("Error enabling rescue mode: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
+	return multistep.ActionContinue
 }
 
 func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
@@ -100,4 +110,49 @@ func (s *stepCreateServer) Cleanup(state multistep.StateBag) {
 		ui.Error(fmt.Sprintf(
 			"Error destroying server. Please destroy it manually: %s", err))
 	}
+}
+
+func setRescue(ctx context.Context, client *hcloud.Client, server *hcloud.Server, rescue string, sshKeys []*hcloud.SSHKey) error {
+	rescueChanged := false
+	if server.RescueEnabled {
+		rescueChanged = true
+		action, _, err := client.Server.DisableRescue(ctx, server)
+		if err != nil {
+			return err
+		}
+		if err := waitForAction(ctx, client, action); err != nil {
+			return err
+		}
+	}
+	if rescue != "" {
+		rescueChanged = true
+		res, _, err := client.Server.EnableRescue(ctx, server, hcloud.ServerEnableRescueOpts{
+			Type:    hcloud.ServerRescueType(rescue),
+			SSHKeys: sshKeys,
+		})
+		if err != nil {
+			return err
+		}
+		if err := waitForAction(ctx, client, res.Action); err != nil {
+			return err
+		}
+	}
+	if rescueChanged {
+		action, _, err := client.Server.Reset(ctx, server)
+		if err != nil {
+			return err
+		}
+		if err := waitForAction(ctx, client, action); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func waitForAction(ctx context.Context, client *hcloud.Client, action *hcloud.Action) error {
+	_, errCh := client.Action.WatchProgress(ctx, action)
+	if err := <-errCh; err != nil {
+		return err
+	}
+	return nil
 }

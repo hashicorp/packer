@@ -97,7 +97,7 @@ type ServerClient struct {
 	client *Client
 }
 
-// GetByID retrieves a server by its ID.
+// GetByID retrieves a server by its ID. If the server does not exist, nil is returned.
 func (c *ServerClient) GetByID(ctx context.Context, id int) (*Server, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/servers/%d", id), nil)
 	if err != nil {
@@ -115,7 +115,7 @@ func (c *ServerClient) GetByID(ctx context.Context, id int) (*Server, *Response,
 	return ServerFromSchema(body.Server), resp, nil
 }
 
-// GetByName retreives a server by its name.
+// GetByName retreives a server by its name. If the server does not exist, nil is returned.
 func (c *ServerClient) GetByName(ctx context.Context, name string) (*Server, *Response, error) {
 	path := "/servers?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -135,7 +135,8 @@ func (c *ServerClient) GetByName(ctx context.Context, name string) (*Server, *Re
 	return ServerFromSchema(body.Servers[0]), resp, nil
 }
 
-// Get retrieves a server by its ID if the input can be parsed as an integer, otherwise it retrieves a server by its name.
+// Get retrieves a server by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a server by its name. If the server does not exist, nil is returned.
 func (c *ServerClient) Get(ctx context.Context, idOrName string) (*Server, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))
@@ -228,6 +229,7 @@ type ServerCreateResult struct {
 	Server       *Server
 	Action       *Action
 	RootPassword string
+	NextActions  []*Action
 }
 
 // Create creates a new server.
@@ -286,8 +288,9 @@ func (c *ServerClient) Create(ctx context.Context, opts ServerCreateOpts) (Serve
 		return ServerCreateResult{}, resp, err
 	}
 	result := ServerCreateResult{
-		Server: ServerFromSchema(respBody.Server),
-		Action: ActionFromSchema(respBody.Action),
+		Server:      ServerFromSchema(respBody.Server),
+		Action:      ActionFromSchema(respBody.Action),
+		NextActions: ActionsFromSchema(respBody.NextActions),
 	}
 	if respBody.RootPassword != nil {
 		result.RootPassword = *respBody.RootPassword
