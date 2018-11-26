@@ -36,7 +36,7 @@ type VolumeClient struct {
 	client *Client
 }
 
-// GetByID retrieves a volume by its ID.
+// GetByID retrieves a volume by its ID. If the volume does not exist, nil is returned.
 func (c *VolumeClient) GetByID(ctx context.Context, id int) (*Volume, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/volumes/%d", id), nil)
 	if err != nil {
@@ -54,7 +54,7 @@ func (c *VolumeClient) GetByID(ctx context.Context, id int) (*Volume, *Response,
 	return VolumeFromSchema(body.Volume), resp, nil
 }
 
-// GetByName retrieves a volume by its name.
+// GetByName retrieves a volume by its name. If the volume does not exist, nil is returned.
 func (c *VolumeClient) GetByName(ctx context.Context, name string) (*Volume, *Response, error) {
 	path := "/volumes?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -74,8 +74,8 @@ func (c *VolumeClient) GetByName(ctx context.Context, name string) (*Volume, *Re
 	return VolumeFromSchema(body.Volumes[0]), resp, nil
 }
 
-// Get retrieves a volume by its ID if the input can be parsed as an integer,
-// otherwise it retrieves a volume by its name.
+// Get retrieves a volume by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a volume by its name. If the volume does not exist, nil is returned.
 func (c *VolumeClient) Get(ctx context.Context, idOrName string) (*Volume, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))
@@ -161,8 +161,9 @@ func (o VolumeCreateOpts) Validate() error {
 
 // VolumeCreateResult is the result of creating a volume.
 type VolumeCreateResult struct {
-	Volume *Volume
-	Action *Action
+	Volume      *Volume
+	Action      *Action
+	NextActions []*Action
 }
 
 // Create creates a new volume with the given options.
@@ -209,8 +210,9 @@ func (c *VolumeClient) Create(ctx context.Context, opts VolumeCreateOpts) (Volum
 	}
 
 	return VolumeCreateResult{
-		Volume: VolumeFromSchema(respBody.Volume),
-		Action: action,
+		Volume:      VolumeFromSchema(respBody.Volume),
+		Action:      action,
+		NextActions: ActionsFromSchema(respBody.NextActions),
 	}, resp, nil
 }
 
