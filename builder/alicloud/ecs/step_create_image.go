@@ -11,7 +11,9 @@ import (
 )
 
 type stepCreateAlicloudImage struct {
-	image *ecs.ImageType
+	AlicloudImageIgnoreDataDisks bool
+	WaitSnapshotReadyTimeout     int
+	image                        *ecs.ImageType
 }
 
 func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
@@ -24,13 +26,23 @@ func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBa
 	var imageId string
 	var err error
 
-	instance := state.Get("instance").(*ecs.InstanceAttributesType)
-	imageId, err = client.CreateImage(&ecs.CreateImageArgs{
-		RegionId:     common.Region(config.AlicloudRegion),
-		InstanceId:   instance.InstanceId,
-		ImageName:    config.AlicloudImageName,
-		ImageVersion: config.AlicloudImageVersion,
-		Description:  config.AlicloudImageDescription})
+	if s.AlicloudImageIgnoreDataDisks {
+		snapshotId := state.Get("alicloudsnapshot").(string)
+		imageId, err = client.CreateImage(&ecs.CreateImageArgs{
+			RegionId:     common.Region(config.AlicloudRegion),
+			SnapshotId:   snapshotId,
+			ImageName:    config.AlicloudImageName,
+			ImageVersion: config.AlicloudImageVersion,
+			Description:  config.AlicloudImageDescription})
+	} else {
+		instance := state.Get("instance").(*ecs.InstanceAttributesType)
+		imageId, err = client.CreateImage(&ecs.CreateImageArgs{
+			RegionId:     common.Region(config.AlicloudRegion),
+			InstanceId:   instance.InstanceId,
+			ImageName:    config.AlicloudImageName,
+			ImageVersion: config.AlicloudImageVersion,
+			Description:  config.AlicloudImageDescription})
+	}
 
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
@@ -38,8 +50,7 @@ func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBa
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
-	err = client.WaitForImageReady(common.Region(config.AlicloudRegion),
-		imageId, ALICLOUD_DEFAULT_LONG_TIMEOUT)
+	err = client.WaitForImageReady(common.Region(config.AlicloudRegion), imageId, s.WaitSnapshotReadyTimeout)
 	if err != nil {
 		err := fmt.Errorf("Timeout waiting for image to be created: %s", err)
 		state.Put("error", err)
