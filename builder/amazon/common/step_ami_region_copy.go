@@ -37,6 +37,8 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 	var wg sync.WaitGroup
 	var regKeyID string
 	errs := new(packer.MultiError)
+
+	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
 		if region == *ec2conn.Config.Region {
 			ui.Message(fmt.Sprintf(
@@ -44,7 +46,6 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 			continue
 		}
 
-		wg.Add(1)
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
 		if s.EncryptBootVolume {
