@@ -18,6 +18,8 @@ func (s *stepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 	imageId := state.Get("alicloudimage").(string)
+	snapshotIds := state.Get("alicloudsnapshots").([]string)
+
 	if len(s.Tags) == 0 {
 		return multistep.ActionContinue
 	}
@@ -29,11 +31,22 @@ func (s *stepCreateTags) Run(_ context.Context, state multistep.StateBag) multis
 		Tag:          s.Tags,
 	})
 	if err != nil {
-		err := fmt.Errorf("Error Adding tags to image: %s", err)
-		state.Put("error", err)
-		ui.Say(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error Adding tags to image")
 	}
+
+	for _, snapshotId := range snapshotIds {
+		ui.Say(fmt.Sprintf("Adding tags(%s) to snapshot: %s", s.Tags, snapshotId))
+		err = client.AddTags(&ecs.AddTagsArgs{
+			ResourceId:   snapshotId,
+			ResourceType: ecs.TagResourceSnapshot,
+			RegionId:     common.Region(config.AlicloudRegion),
+			Tag:          s.Tags,
+		})
+		if err != nil {
+			return halt(state, err, "Error Adding tags to snapshot")
+		}
+	}
+
 	return multistep.ActionContinue
 }
 func (s *stepCreateTags) Cleanup(state multistep.StateBag) {

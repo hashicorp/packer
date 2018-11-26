@@ -62,11 +62,7 @@ func (s *stepCreateAlicloudSnapshot) Run(_ context.Context, state multistep.Stat
 		return halt(state, err, "Unable to find created snapshot")
 	}
 	s.snapshot = &snapshots[0]
-
 	state.Put("alicloudsnapshot", snapshotId)
-	alicloudSnapshots := make(map[string]string)
-	alicloudSnapshots[config.AlicloudRegion] = snapshotId
-	state.Put("alicloudsnapshots", alicloudSnapshots)
 
 	return multistep.ActionContinue
 }
