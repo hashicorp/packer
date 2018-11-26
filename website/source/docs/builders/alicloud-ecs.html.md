@@ -258,7 +258,7 @@ builder.
     EIP. The default value is false.
 
 -   `tags` (object of key/value strings) - Tags applied to the destination
-    image.
+    image and relevant snapshots.
 
 ## Basic Example
 
