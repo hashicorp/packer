@@ -295,6 +295,11 @@ Here is a basic example for Alicloud.
 \~&gt; Note: Images can become deprecated after a while; run
 `aliyun ecs DescribeImages` to find one that exists.
 
+\~&gt; Note: Since WinRM is closed by default in the system image. If you are planning 
+to use Windows as the base image, you need enable it by userdata in order to connect to 
+the instance, check [alicloud_windows.json](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/alicloud_windows.json) 
+and [winrm_enable_userdata.ps1](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/winrm_enable_userdata.ps1) for details.
+
 See the
 [examples/alicloud](https://github.com/hashicorp/packer/tree/master/examples/alicloud)
 folder in the packer project for more examples.
