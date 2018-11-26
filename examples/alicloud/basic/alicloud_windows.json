@@ -17,10 +17,11 @@
     "communicator": "winrm",
     "winrm_port": 5985,
     "winrm_username": "Administrator",
-    "winrm_password": "Test1234"
+    "winrm_password": "Test1234",
+    "user_data_file": "examples/alicloud/basic/winrm_enable_userdata.ps1"
   }],
   "provisioners": [{
-      "type": "powershell",
-      "inline": ["dir c:\\"]
+    "type": "powershell",
+    "inline": ["dir c:\\"]
   }]
 }
