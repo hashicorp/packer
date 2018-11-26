@@ -138,7 +138,7 @@ func setRescue(ctx context.Context, client *hcloud.Client, server *hcloud.Server
 		}
 	}
 	if rescueChanged {
-		action, _, err := client.Server.Reboot(ctx, server)
+		action, _, err := client.Server.Reset(ctx, server)
 		if err != nil {
 			return err
 		}
