@@ -90,9 +90,10 @@ type ServerCreateRequest struct {
 // ServerCreateResponse defines the schema of the response when
 // creating a server.
 type ServerCreateResponse struct {
-	Server       Server  `json:"server"`
-	Action       Action  `json:"action"`
-	RootPassword *string `json:"root_password"`
+	Server       Server   `json:"server"`
+	Action       Action   `json:"action"`
+	RootPassword *string  `json:"root_password"`
+	NextActions  []Action `json:"next_actions"`
 }
 
 // ServerUpdateRequest defines the schema of the request to update a server.

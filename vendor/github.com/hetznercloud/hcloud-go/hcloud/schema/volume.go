@@ -28,8 +28,9 @@ type VolumeCreateRequest struct {
 // VolumeCreateResponse defines the schema of the response
 // when creating a volume.
 type VolumeCreateResponse struct {
-	Volume Volume  `json:"volume"`
-	Action *Action `json:"action"`
+	Volume      Volume   `json:"volume"`
+	Action      *Action  `json:"action"`
+	NextActions []Action `json:"next_actions"`
 }
 
 // VolumeListResponse defines the schema of the response
