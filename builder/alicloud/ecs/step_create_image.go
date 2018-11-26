@@ -45,38 +45,34 @@ func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBa
 	}
 
 	if err != nil {
-		err := fmt.Errorf("Error creating image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error creating image")
 	}
 	err = client.WaitForImageReady(common.Region(config.AlicloudRegion), imageId, s.WaitSnapshotReadyTimeout)
 	if err != nil {
-		err := fmt.Errorf("Timeout waiting for image to be created: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Timeout waiting for image to be created")
 	}
 
 	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{
 		RegionId: common.Region(config.AlicloudRegion),
 		ImageId:  imageId})
 	if err != nil {
-		err := fmt.Errorf("Error querying created image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error querying created imaged")
 	}
 
 	if len(images) == 0 {
-		err := fmt.Errorf("Unable to find created image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Unable to find created image")
 	}
+
 	s.image = &images[0]
 
+	var snapshotIds = []string{}
+	for _, device := range images[0].DiskDeviceMappings.DiskDeviceMapping {
+		snapshotIds = append(snapshotIds, device.SnapshotId)
+	}
+
 	state.Put("alicloudimage", imageId)
+	state.Put("alicloudsnapshots", snapshotIds)
+
 	alicloudImages := make(map[string]string)
 	alicloudImages[config.AlicloudRegion] = images[0].ImageId
 	state.Put("alicloudimages", alicloudImages)
