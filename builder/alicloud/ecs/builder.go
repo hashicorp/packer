@@ -169,8 +169,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
 			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
+		})
+
+	if b.config.AlicloudImageIgnoreDataDisks {
+		steps = append(steps, &stepCreateAlicloudSnapshot{
+			WaitSnapshotReadyTimeout: b.getSnapshotReadyTimeout(),
+		})
+	}
+
+	steps = append(steps,
+		&stepCreateAlicloudImage{
+			AlicloudImageIgnoreDataDisks: b.config.AlicloudImageIgnoreDataDisks,
+			WaitSnapshotReadyTimeout:     b.getSnapshotReadyTimeout(),
 		},
-		&stepCreateAlicloudImage{},
 		&stepCreateTags{
 			Tags: b.config.AlicloudImageTags,
 		},
@@ -244,4 +255,12 @@ func (b *Builder) isUserDataNeeded() bool {
 
 func (b *Builder) isKeyPairNeeded() bool {
 	return b.config.Comm.SSHKeyPairName != "" || b.config.Comm.SSHTemporaryKeyPairName != ""
+}
+
+func (b *Builder) getSnapshotReadyTimeout() int {
+	if b.config.WaitSnapshotReadyTimeout > 0 {
+		return b.config.WaitSnapshotReadyTimeout
+	}
+
+	return ALICLOUD_DEFAULT_LONG_TIMEOUT
 }

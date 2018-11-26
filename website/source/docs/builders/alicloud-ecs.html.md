@@ -147,6 +147,15 @@ builder.
 
         Snapshots from on or before July 15, 2013 cannot be used to create a
         disk.
+        
+-   `image_ignore_data_disks`(boolean) - If this value is true, the image created 
+    will not include any snapshot of data disks. This option would be useful for 
+    any circumstance that default data disks with instance types are not concerned. 
+    The default value is false.
+
+-   `wait_snapshot_ready_timeout`(number) - Timeout of creating snapshot(s). The 
+    default timeout is 3600 seconds if this option is not set or is set to 0. For 
+    those disks containing lots of data, it may require a higher timeout value.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
     image name is duplicated with an existing image, it will delete the
