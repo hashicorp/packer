@@ -69,7 +69,10 @@ builder.
     -   `delete_on_termination` (boolean) - Indicates whether the EBS volume is
         deleted on instance termination.
 
-    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `encrypted` (boolean) - Indicates whether or not to encrypt the volume.
+        By default, Packer will keep the encryption setting to what it was in
+        the source image. Setting `false` will result in an unencrypted device,
+        and `true` will result in an encrypted one.
 
     -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
         specifying `kms_key_id`, `encrypted` needs to be set to `true`. For
