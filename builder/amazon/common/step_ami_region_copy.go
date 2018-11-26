@@ -16,7 +16,7 @@ type StepAMIRegionCopy struct {
 	AccessConfig      *AccessConfig
 	Regions           []string
 	RegionKeyIds      map[string]string
-	EncryptBootVolume bool
+	EncryptBootVolume *bool // nil means preserve
 	Name              string
 }
 
@@ -26,6 +26,13 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 	amis := state.Get("amis").(map[string]string)
 	snapshots := state.Get("snapshots").(map[string][]string)
 	ami := amis[*ec2conn.Config.Region]
+
+	if s.EncryptBootVolume != nil {
+		// encrypt_boot was set, we now have to copy the temporary
+		// AMI with required encryption setting.
+		// temp image was created by stepCreateAMI.
+		s.Regions = append(s.Regions, *ec2conn.Config.Region)
+	}
 
 	if len(s.Regions) == 0 {
 		return multistep.ActionContinue
@@ -40,7 +47,7 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 	wg.Add(len(s.Regions))
 	for _, region := range s.Regions {
-		if region == *ec2conn.Config.Region {
+		if region == *ec2conn.Config.Region && s.EncryptBootVolume == nil {
 			ui.Message(fmt.Sprintf(
 				"Avoiding copying AMI to duplicate region %s", region))
 			continue
@@ -48,13 +55,13 @@ func (s *StepAMIRegionCopy) Run(ctx context.Context, state multistep.StateBag) m
 
 		ui.Message(fmt.Sprintf("Copying to: %s", region))
 
-		if s.EncryptBootVolume {
+		if s.EncryptBootVolume != nil && *s.EncryptBootVolume {
 			regKeyID = s.RegionKeyIds[region]
 		}
 
 		go func(region string) {
 			defer wg.Done()
-			id, snapshotIds, err := amiRegionCopy(ctx, state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region, regKeyID)
+			id, snapshotIds, err := amiRegionCopy(ctx, state, s.AccessConfig, s.Name, ami, region, *ec2conn.Config.Region, regKeyID, s.EncryptBootVolume)
 			lock.Lock()
 			defer lock.Unlock()
 			amis[region] = id
@@ -86,20 +93,16 @@ func (s *StepAMIRegionCopy) Cleanup(state multistep.StateBag) {
 
 // amiRegionCopy does a copy for the given AMI to the target region and
 // returns the resulting ID and snapshot IDs, or error.
-func amiRegionCopy(ctx context.Context, state multistep.StateBag, config *AccessConfig, name string, imageId string,
-	target string, source string, keyID string) (string, []string, error) {
+func amiRegionCopy(ctx context.Context, state multistep.StateBag, config *AccessConfig, name, imageId,
+	target, source, keyId string, encrypt *bool) (string, []string, error) {
 	snapshotIds := []string{}
-	isEncrypted := false
 
 	// Connect to the region where the AMI will be copied to
 	session, err := config.Session()
 	if err != nil {
 		return "", snapshotIds, err
 	}
-	// if we've provided a map of key ids to regions, use those keys.
-	if len(keyID) > 0 {
-		isEncrypted = true
-	}
+
 	regionconn := ec2.New(session.Copy(&aws.Config{
 		Region:     aws.String(target),
 		HTTPClient: commonhelper.HttpClientWithEnvironmentProxy(),
@@ -109,8 +112,8 @@ func amiRegionCopy(ctx context.Context, state multistep.StateBag, config *Access
 		SourceRegion:  &source,
 		SourceImageId: &imageId,
 		Name:          &name,
-		Encrypted:     aws.Bool(isEncrypted),
-		KmsKeyId:      aws.String(keyID),
+		Encrypted:     encrypt,
+		KmsKeyId:      aws.String(keyId),
 	})
 
 	if err != nil {

@@ -223,12 +223,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Regions:             b.config.AMIRegions,
 		},
 		&stepCreateAMI{},
-		&awscommon.StepCreateEncryptedAMICopy{
-			KeyID:             b.config.AMIKmsKeyId,
-			EncryptBootVolume: b.config.AMIEncryptBootVolume,
-			Name:              b.config.AMIName,
-			AMIMappings:       b.config.AMIBlockDevices.AMIMappings,
-		},
 		&awscommon.StepAMIRegionCopy{
 			AccessConfig:      &b.config.AccessConfig,
 			Regions:           b.config.AMIRegions,

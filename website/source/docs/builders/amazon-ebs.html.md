@@ -91,7 +91,10 @@ builder.
         example, `/dev/sdh` or `xvdh`). Required for every device in the block
         device mapping.
 
-    -   `encrypted` (boolean) - Indicates whether to encrypt the volume or not
+    -   `encrypted` (boolean) - Indicates whether or not to encrypt the volume.
+        By default, Packer will keep the encryption setting to what it was in
+        the source image. Setting `false` will result in an unencrypted device,
+        and `true` will result in an encrypted one.
 
     -   `iops` (number) - The number of I/O operations per second (IOPS) that
         the volume supports. See the documentation on
@@ -220,18 +223,16 @@ builder.
     Attempting to do so will cause an error.
 
     !&gt; **Warning!** Additional costs may be incurred by enabling T2
-    Unlimited - even for instances that would usually qualify for the [AWS Free
-    Tier](https://aws.amazon.com/free/).
+    Unlimited - even for instances that would usually qualify for the
+    [AWS Free Tier](https://aws.amazon.com/free/).
 
--   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy
-    of the AMI with an encrypted boot volume (discarding the initial
-    unencrypted AMI in the process). Packer will always run this operation,
-    even if the base AMI has an encrypted boot volume to start with. Default
-    `false`.
-
--   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots
-    associated with AMIs, which have been deregistered by `force_deregister`.
-    Default `false`.
+-   `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when 
+    copying a provisioned instance to an AMI. By default, Packer will keep the 
+    encryption setting to what it was in the source image. Setting `false` will
+    result in an unencrypted image, and `true` will result in an encrypted one.
+        
+-   `force_delete_snapshot` (boolean) - Force Packer to delete snapshots associated with
+    AMIs, which have been deregistered by `force_deregister`. Default `false`.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.

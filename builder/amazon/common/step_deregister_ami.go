@@ -27,7 +27,7 @@ func (s *StepDeregisterAMI) Run(_ context.Context, state multistep.StateBag) mul
 
 	ui := state.Get("ui").(packer.Ui)
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	// Add the session region to list of regions will will deregister AMIs in
+	// Add the session region to list of regions will deregister AMIs in
 	regions := append(s.Regions, *ec2conn.Config.Region)
 
 	for _, region := range regions {

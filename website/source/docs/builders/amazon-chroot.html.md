@@ -141,11 +141,10 @@ each category, the available configuration keys are alphabetized.
     documentation on enabling enhanced
     networking](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html#enabling_enhanced_networking).
 
--   `encrypt_boot` (boolean) - Instruct packer to automatically create a copy
-    of the AMI with an encrypted boot volume (discarding the initial
-    unencrypted AMI in the process). Packer will always run this operation,
-    even if the base AMI has an encrypted boot volume to start with. Default
-    `false`.
+-   `encrypt_boot` (boolean) - Whether or not to encrypt the resulting AMI when 
+    copying a provisioned instance to an AMI. By default, Packer will keep the 
+    encryption setting to what it was in the source image. Setting `false` will
+    result in an unencrypted image, and `true` will result in an encrypted one.
 
 -   `force_deregister` (boolean) - Force Packer to first deregister an existing
     AMI if one with the same name already exists. Default `false`.
@@ -187,6 +186,9 @@ each category, the available configuration keys are alphabetized.
         device mapping.
 
     -   `encrypted` (boolean) - Indicates whether or not to encrypt the volume.
+        By default, Packer will keep the encryption setting to what it was in
+        the source image. Setting `false` will result in an unencrypted device,
+        and `true` will result in an encrypted one.
 
     -   `kms_key_id` (string) - The ARN for the KMS encryption key. When
         specifying `kms_key_id`, `encrypted` needs to be set to `true`. For
