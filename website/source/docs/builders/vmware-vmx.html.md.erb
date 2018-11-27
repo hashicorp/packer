@@ -82,7 +82,9 @@ builder.
     value in your vmx file. It will also override the "displayname" if you have
     set it in the "vmx_data" Packer option. This option is useful if you are
     chaining vmx builds and want to make sure that the display name of each step
-    in the chain is unique.
+    in the chain is unique: the vmware-vmx builder will use the displayname of
+    the VM being cloned from if it is not explicitly specified via the vmx_data
+    section or the displayname property.
 
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
