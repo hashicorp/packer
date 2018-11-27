@@ -1,3 +1,34 @@
+## 1.3.3 (unreleased)
+### IMPROVEMENTS:
+* builder/alicloud: Apply tags to relevant snapshots [GH-7040]
+* builder/hcloud: Update hcloud-go version and support builds using rescue mode [GH-7034]
+* builder/azure: Add options for Managed Image OS Disk and Data Disk snapshots [GH-6980]
+* builder/alicloud: Support creating image without data disks [GH-7022]
+* builder/vmware: Add configuration options to vmware builder to specify cpu count and memory size [GH-7019]
+* builder/parallels: Add configuration options to parallels builder to specify cpu count and memory size [GH-7018]
+* builder/virtualbox: Add configuration options to virtualbox builder to specify cpu count and memory size [GH-7017]
+* builder/hcloud: Add ssh_keys config to hcloud builder [GH-7028]
+* communicator/ssh: Expand user path for SSH private key [GH-6946]
+* core: More explicit error message in rpc/ui.go [GH-6981]
+* builder/vmware: Warn users if their vmx_data overrides data that Packer uses the template engine to set in its default vmx template. [GH-6987]
+* builder/vmware: Add new display_name template option [GH-6984]
+* builder/vmware: Validate username/password for ovftool during prepare. [GH-6977]
+* provisioner/powershell: Allow Powershell provisioner to use service accounts [GH-6972]
+* core: Update vagrantfile's go version. [GH-6841]
+* core: Add a sed template engine [GH-6580]
+* builder/vmware: Extend vmware-vmx builder to allow esxi builds. [GH-4591] [GH-6927]
+* provisioner/shell: Add PauseAfter option to shell provisioner [GH-6913]
+* builder/amazon: Add option for skipping TLS verification [GH-6842]
+* builder/alicloud: Add options for system disk properties [GH-6939]
+* post-processor/amazon-import: Support ova, raw, vmdk, and vhdx formats in the amazon-import post-processor. [GH-6938]
+* builder/oracle: Parameterized volume size support for Oracle classic builder [GH-6918]
+
+### BUG FIXES:
+* builder/hyperv: Remove -Copy:$false when calling Hyper-V\Compare-VM compatability report [GH-7030]
+* builder/vmware: Escape vSphere username when putting it into the export call [GH-6962]
+* builder/vmware-esxi: Create export directories for vmx and ovf file types [GH-6985]
+* post-processor/vagrant: Add "hvf" as a libvirt driver [GH-6955]
+* builder/amazon: Better error handling of region/credential guessing from metadata [GH-6931]
 
 ## 1.3.2 (October 29, 2018)
 ### IMPROVEMENTS:
