@@ -30,10 +30,11 @@ type Config struct {
 	ServerType string `mapstructure:"server_type"`
 	Image      string `mapstructure:"image"`
 
-	SnapshotName string   `mapstructure:"snapshot_name"`
-	UserData     string   `mapstructure:"user_data"`
-	UserDataFile string   `mapstructure:"user_data_file"`
-	SSHKeys      []string `mapstructure:"ssh_keys"`
+	SnapshotName   string            `mapstructure:"snapshot_name"`
+	SnapshotLabels map[string]string `mapstructure:"snapshot_labels"`
+	UserData       string            `mapstructure:"user_data"`
+	UserDataFile   string            `mapstructure:"user_data_file"`
+	SSHKeys        []string          `mapstructure:"ssh_keys"`
 
 	RescueMode string `mapstructure:"rescue"`
 
