@@ -29,18 +29,10 @@ type StepExport struct {
 
 func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	// If ISO export is configured, ensure this option is propagated to VBoxManage.
-	if s.Bundling.BundleISO {
-		foundISOOption := false
-
-		for _, option := range s.ExportOpts {
-			if option == "--iso" || option == "-I" {
-				foundISOOption = true
-				break
-			}
-		}
-
-		if !foundISOOption {
+	for _, option := range s.ExportOpts {
+		if option == "--iso" || option == "-I" {
 			s.ExportOpts = append(s.ExportOpts, "--iso")
+			break
 		}
 	}
 
