@@ -315,6 +315,18 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.Serial_Host = ""
 		templateData.Serial_Auto = "FALSE"
 
+		// Set the number of cpus if it was specified
+		if config.HWConfig.CpuCount > 0 {
+			templateData.CpuCount = strconv.Itoa(config.HWConfig.CpuCount)
+		}
+
+		// Apply the memory size that was specified
+		if config.HWConfig.MemorySize > 0 {
+			templateData.MemorySize = strconv.Itoa(config.HWConfig.MemorySize)
+		} else {
+			templateData.MemorySize = "512"
+		}
+
 		switch serial.Union.(type) {
 		case *vmwcommon.SerialConfigPipe:
 			templateData.Serial_Type = "pipe"
@@ -412,15 +424,8 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// Now to handle options that will modify the template
 	vmxData := vmwcommon.ParseVMX(vmxContents)
-
-	// Set the number of cpus if it was specified
-	if config.HWConfig.CpuCount > 0 {
-		vmxData["numvcpus"] = strconv.Itoa(config.HWConfig.CpuCount)
-	}
-
-	// Apply the memory size that was specified
-	if config.HWConfig.MemorySize > 0 {
-		vmxData["memsize"] = strconv.Itoa(config.HWConfig.MemorySize)
+	if vmxData["numvcpus"] == "" {
+		delete(vmxData, "numvcpus")
 	}
 
 	/// Write the vmxData to the vmxPath
