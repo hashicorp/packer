@@ -34,8 +34,6 @@ type Config struct {
 	SnapshotEnable      bool   `mapstructure:"snapshot_enable"`
 	SnapshotName        string `mapstructure:"snapshot_name"`
 	SnapshotDescription string `mapstructure:"snapshot_description"`
-	SnapshotMemory      bool   `mapstructure:"snapshot_memory"`
-	SnapshotQuiesce     bool   `mapstructure:"snapshot_quiesce"`
 
 	ctx interpolate.Context
 }

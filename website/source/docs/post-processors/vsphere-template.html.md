@@ -61,20 +61,14 @@ Optional:
 -   `insecure` (boolean) - If it's true skip verification of server
     certificate. Default is false
     
--   `snapshot_enable` (boolean) - Enable snapshot creation before marking as a 
+-   `snapshot_enable` (boolean) - Create a snapshot before marking as a 
     template. Default is false
     
 -   `snapshot_name` (string) - Name for the snapshot. 
-    Require when `snapshot_enable` is enabled
+    Required when `snapshot_enable` is `true`
     
 -   `snapshot_description` (string) - Description for the snapshot. 
-    Require when `snapshot_enable` is enabled
-    
--   `snapshot_memory` (boolean) - Enable memory option for the snapshot. 
-    Default is false
-    
--   `snapshot_quiesce` (boolean) - Enable quiesce option for the snapshot. 
-    Default is false
+    Required when `snapshot_enable` is `true`
     
 ## Using the vSphere Template with local builders
 
