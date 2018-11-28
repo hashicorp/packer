@@ -86,10 +86,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-
 	session, err := b.config.Session()
 	if err != nil {
 		return nil, err
+	}
+	if !b.config.AMISkipRegionValidation {
+		regionsToValidate := append(b.config.AMIRegions, b.config.RawRegion)
+		err := b.config.AccessConfig.ValidateRegion(regionsToValidate...)
+		if err != nil {
+			return nil, fmt.Errorf("error validating regions: %v", err)
+		}
 	}
 	ec2conn := ec2.New(session)
 
