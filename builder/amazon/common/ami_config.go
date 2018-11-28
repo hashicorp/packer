@@ -96,14 +96,6 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 	if len(c.AMIRegions) > 0 {
-		if !c.AMISkipRegionValidation {
-			// Verify the regions are real
-			err := accessConfig.ValidateRegion(c.AMIRegions...)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("error validating regions: %v", err))
-			}
-		}
-
 		regionSet := make(map[string]struct{})
 		regions := make([]string, 0, len(c.AMIRegions))
 
