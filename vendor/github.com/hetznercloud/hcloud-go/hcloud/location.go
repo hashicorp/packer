@@ -25,7 +25,7 @@ type LocationClient struct {
 	client *Client
 }
 
-// GetByID retrieves a location by its ID.
+// GetByID retrieves a location by its ID. If the location does not exist, nil is returned.
 func (c *LocationClient) GetByID(ctx context.Context, id int) (*Location, *Response, error) {
 	req, err := c.client.NewRequest(ctx, "GET", fmt.Sprintf("/locations/%d", id), nil)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *LocationClient) GetByID(ctx context.Context, id int) (*Location, *Respo
 	return LocationFromSchema(body.Location), resp, nil
 }
 
-// GetByName retrieves an location by its name.
+// GetByName retrieves an location by its name. If the location does not exist, nil is returned.
 func (c *LocationClient) GetByName(ctx context.Context, name string) (*Location, *Response, error) {
 	path := "/locations?name=" + url.QueryEscape(name)
 	req, err := c.client.NewRequest(ctx, "GET", path, nil)
@@ -63,7 +63,8 @@ func (c *LocationClient) GetByName(ctx context.Context, name string) (*Location,
 	return LocationFromSchema(body.Locations[0]), resp, nil
 }
 
-// Get retrieves a location by its ID if the input can be parsed as an integer, otherwise it retrieves a location by its name.
+// Get retrieves a location by its ID if the input can be parsed as an integer, otherwise it
+// retrieves a location by its name. If the location does not exist, nil is returned.
 func (c *LocationClient) Get(ctx context.Context, idOrName string) (*Location, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
 		return c.GetByID(ctx, int(id))

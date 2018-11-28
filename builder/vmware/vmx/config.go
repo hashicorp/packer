@@ -25,12 +25,12 @@ type Config struct {
 	vmwcommon.SSHConfig      `mapstructure:",squash"`
 	vmwcommon.ToolsConfig    `mapstructure:",squash"`
 	vmwcommon.VMXConfig      `mapstructure:",squash"`
+	vmwcommon.ExportConfig   `mapstructure:",squash"`
 
-	Linked         bool   `mapstructure:"linked"`
-	RemoteType     string `mapstructure:"remote_type"`
-	SkipCompaction bool   `mapstructure:"skip_compaction"`
-	SourcePath     string `mapstructure:"source_path"`
-	VMName         string `mapstructure:"vm_name"`
+	Linked     bool   `mapstructure:"linked"`
+	RemoteType string `mapstructure:"remote_type"`
+	SourcePath string `mapstructure:"source_path"`
+	VMName     string `mapstructure:"vm_name"`
 
 	ctx interpolate.Context
 }
@@ -69,14 +69,42 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	errs = packer.MultiErrorAppend(errs, c.VMXConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.FloppyConfig.Prepare(&c.ctx)...)
 	errs = packer.MultiErrorAppend(errs, c.VNCConfig.Prepare(&c.ctx)...)
+	errs = packer.MultiErrorAppend(errs, c.ExportConfig.Prepare(&c.ctx)...)
 
-	if c.SourcePath == "" {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
-	} else {
-		if _, err := os.Stat(c.SourcePath); err != nil {
-			errs = packer.MultiErrorAppend(errs,
-				fmt.Errorf("source_path is invalid: %s", err))
+	if c.RemoteType == "" {
+		if c.SourcePath == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("source_path is blank, but is required"))
+		} else {
+			if _, err := os.Stat(c.SourcePath); err != nil {
+				errs = packer.MultiErrorAppend(errs,
+					fmt.Errorf("source_path is invalid: %s", err))
+			}
 		}
+	} else {
+		// Remote configuration validation
+		if c.RemoteHost == "" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("remote_host must be specified"))
+		}
+
+		if c.RemoteType != "esx5" {
+			errs = packer.MultiErrorAppend(errs,
+				fmt.Errorf("Only 'esx5' value is accepted for remote_type"))
+		}
+	}
+
+	err = c.DriverConfig.Validate(c.SkipExport)
+	if err != nil {
+		errs = packer.MultiErrorAppend(errs, err)
+	}
+
+	if c.Format == "" {
+		c.Format = "ovf"
+	}
+
+	if !(c.Format == "ova" || c.Format == "ovf" || c.Format == "vmx") {
+		errs = packer.MultiErrorAppend(errs,
+			fmt.Errorf("format must be one of ova, ovf, or vmx"))
 	}
 
 	// Warnings

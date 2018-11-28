@@ -91,7 +91,7 @@ location found:
     `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
 3.  A JSON file in a location known to the `gcloud` command-line tool.
-    (`gcloud` creates it when it's configured)
+    (`gcloud auth application-default login` creates it)
 
     On Windows, this is:
 

@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -28,10 +27,9 @@ func (s *stepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 
 	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(config.Comm.SSHPrivateKeyFile)
+		privateKeyBytes, err := config.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"Error loading configured private key file: %s", err))
+			state.Put("error", err)
 			return multistep.ActionHalt
 		}
 

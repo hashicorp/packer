@@ -76,26 +76,32 @@ builder.
 -   `image_description` (string) - The description of the image, with a length
     limit of 0 to 256 characters. Leaving it blank means null, which is the
     default value. It cannot begin with `http://` or `https://`.
-    
--   `system_disk_mapping` (image disk mapping) - Image disk mapping for system disk.
-    -   `disk_category` (string) - Category of the system disk. Optional values are:
+
+-   `system_disk_mapping` (image disk mapping) - Image disk mapping for system
+    disk.
+    -   `disk_category` (string) - Category of the system disk. Optional values
+        are:
         -   `cloud` - general cloud disk
         -   `cloud_efficiency` - efficiency cloud disk
         -   `cloud_ssd` - cloud SSD
 
-        For phased-out instance types and non-I/O optimized instances, the default value is cloud.
-        Otherwise, the default value is cloud_efficiency.
-        
-    -   `disk_description` (string) - The value of disk description is blank by default. \[2, 256\] characters. 
-            The disk description will appear on the console. It cannot begin with `http://` or `https://`.
-            
-    -   `disk_name` (string) - The value of disk name is blank by default. \[2, 128\]
-            English or Chinese characters, must begin with an uppercase/lowercase letter
-            or Chinese character. Can contain numbers, `.`, `_` and `-`. The disk name
-            will appear on the console. It cannot begin with `http://` or `https://`.
-    
-    -   `disk_size` (number) - Size of the system disk, measured in GiB. Value range: \[20, 500\]. The specified value 
-        must be equal to or greater than max{20, ImageSize}. Default value: max{40, ImageSize}.
+        For phased-out instance types and non-I/O optimized instances, the
+        default value is cloud. Otherwise, the default value is
+        cloud\_efficiency.
+
+    -   `disk_description` (string) - The value of disk description is blank by
+        default. \[2, 256\] characters. The disk description will appear on the
+        console. It cannot begin with `http://` or `https://`.
+
+    -   `disk_name` (string) - The value of disk name is blank by default. \[2,
+        128\] English or Chinese characters, must begin with an
+        uppercase/lowercase letter or Chinese character. Can contain numbers,
+        `.`, `_` and `-`. The disk name will appear on the console. It cannot
+        begin with `http://` or `https://`.
+
+    -   `disk_size` (number) - Size of the system disk, measured in GiB. Value
+        range: \[20, 500\]. The specified value must be equal to or greater
+        than max{20, ImageSize}. Default value: max{40, ImageSize}.
 
 -   `image_disk_mappings` (array of image disk mappings) - Add one or more data
     disks to the image.
@@ -128,9 +134,9 @@ builder.
         begin with `http://` or `https://`.
 
     -   `disk_size` (number) - Size of the data disk, in GB, values range:
-        -   `cloud` - 5 ~ 2000
-        -   `cloud_efficiency` - 20 ~ 2048
-        -   `cloud_ssd` - 20 ~ 2048
+        -   `cloud` - 5 \~ 2000
+        -   `cloud_efficiency` - 20 \~ 2048
+        -   `cloud_ssd` - 20 \~ 2048
 
         The value should be equal to or greater than the size of the specific
         SnapshotId.
@@ -141,6 +147,15 @@ builder.
 
         Snapshots from on or before July 15, 2013 cannot be used to create a
         disk.
+        
+-   `image_ignore_data_disks`(boolean) - If this value is true, the image created 
+    will not include any snapshot of data disks. This option would be useful for 
+    any circumstance that default data disks with instance types are not concerned. 
+    The default value is false.
+
+-   `wait_snapshot_ready_timeout`(number) - Timeout of creating snapshot(s). The 
+    default timeout is 3600 seconds if this option is not set or is set to 0. For 
+    those disks containing lots of data, it may require a higher timeout value.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
     image name is duplicated with an existing image, it will delete the
@@ -214,10 +229,14 @@ builder.
     `export TLSHandshakeTimeout=30`, it will set the TLS handshake timeout
     value to 30s.
 
--   `user_data` (string) - The UserData of an instance must be encoded in
-    `Base64` format, and the maximum size of the raw data is `16 KB`.
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use `user_data_file`, instead.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
 
--   `user_data_file` (string) - The file name of the userdata.
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
 
 -   `vpc_cidr_block` (string) - Value options: `192.168.0.0/16` and
     `172.16.0.0/16`. When not specified, the default value is `172.16.0.0/16`.
@@ -239,7 +258,7 @@ builder.
     EIP. The default value is false.
 
 -   `tags` (object of key/value strings) - Tags applied to the destination
-    image.
+    image and relevant snapshots.
 
 ## Basic Example
 
@@ -273,8 +292,13 @@ Here is a basic example for Alicloud.
 }
 ```
 
-~&gt; Note: Images can become deprecated after a while; run
+\~&gt; Note: Images can become deprecated after a while; run
 `aliyun ecs DescribeImages` to find one that exists.
+
+\~&gt; Note: Since WinRM is closed by default in the system image. If you are planning 
+to use Windows as the base image, you need enable it by userdata in order to connect to 
+the instance, check [alicloud_windows.json](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/alicloud_windows.json) 
+and [winrm_enable_userdata.ps1](https://github.com/hashicorp/packer/tree/master/examples/alicloud/basic/winrm_enable_userdata.ps1) for details.
 
 See the
 [examples/alicloud](https://github.com/hashicorp/packer/tree/master/examples/alicloud)

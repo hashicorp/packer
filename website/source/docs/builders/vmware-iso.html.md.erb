@@ -98,6 +98,8 @@ builder.
     five seconds and one minute 30 seconds, respectively. If this isn't
     specified, the default is `10s` or 10 seconds.
 
+-   `cpus` (number) - The number of cpus to use when building the VM.
+
 -   `cdrom_adapter_type` (string) - The adapter type (or bus) that will be used
     by the cdrom device. This is chosen by default based on the disk adapter
     type. VMware tends to lean towards `ide` for the cdrom device unless
@@ -153,6 +155,13 @@ builder.
     For more information, please consult the [Virtual Disk Manager User's
     Guide](https://www.vmware.com/pdf/VirtualDiskManager.pdf) for desktop
     VMware clients. For ESXi, refer to the proper ESXi documentation.
+
+-   `display_name` (string) - The name that will appear in your vSphere client,
+    and will be used for the vmx basename. This will override the "displayname"
+    value in your vmx file. It will also override the "displayname" if you have
+    set it in the "vmx_data" Packer option. This option is useful if you are
+    chaining vmx builds and want to make sure that the display name of each step
+    in the chain is unique.
 
 -   `floppy_dirs` (array of strings) - A list of directories to place onto
     the floppy disk recursively. This is similar to the `floppy_files` option
@@ -213,6 +222,9 @@ builder.
     download or while downloading a single URL, it will move on to the next. All
     URLs must point to the same file (same checksum). By default this is empty
     and `iso_url` is used. Only one of `iso_url` or `iso_urls` can be specified.
+
+-   `memory` (number) - The amount of memory to use when building the VM
+    in megabytes.
 
 -   `network` (string) - This is the network type that the virtual machine will
     be created with. This can be one of the generic values that map to a device
@@ -358,7 +370,14 @@ builder.
     Hypervisor](/docs/builders/vmware-iso.html#building-on-a-remote-vsphere-hypervisor)
     section below for more info.
 
--   `sound` (boolean) - Enable VMware's virtual soundcard device for the VM.
+-   `skip_validate_credentials` (boolean) - When Packer is preparing to run a
+    remote esxi build, and export is not disable, by default it runs a no-op
+    ovftool command to make sure that the remote_username and remote_password
+    given are valid. If you set this flag to `true`, Packer will skip this
+    validation. Default: `false`.
+
+-   `sound` (boolean) - Specify whether to enable VMware's virtual soundcard
+    device when building the VM. Defaults to `false`.
 
 -   `tools_upload_flavor` (string) - The flavor of the VMware Tools ISO to
     upload into the VM. Valid values are `darwin`, `linux`, and `windows`. By
@@ -372,9 +391,10 @@ builder.
     By default the upload path is set to `{{.Flavor}}.iso`. This setting is not
     used when `remote_type` is `esx5`.
 
--   `usb` (boolean) - Enable VMware's USB bus for the guest VM. To enable usage
-    of the XHCI bus for USB 3 (5 Gbit/s), one can use the `vmx_data` option to
-    enable it by specifying `true` for the `usb_xhci.present` property.
+-   `usb` (boolean) - Enable VMware's USB bus when building the guest VM.
+    Defaults to `false`. To enable usage of the XHCI bus for USB 3 (5 Gbit/s),
+    one can use the `vmx_data` option to enable it by specifying `true` for
+    the `usb_xhci.present` property.
 
 -   `version` (string) - The [vmx hardware
     version](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1003746)
@@ -390,7 +410,7 @@ builder.
 
 -   `vmx_data` (object of key/value strings) - Arbitrary key/values to enter
     into the virtual machine VMX file. This is for advanced users who want to
-    set properties such as memory, CPU, etc.
+    set properties that aren't yet supported by the builder.
 
 -   `vmx_data_post` (object of key/value strings) - Identical to `vmx_data`,
     except that it is run after the virtual machine is shutdown, and before the

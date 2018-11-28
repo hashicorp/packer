@@ -1,11 +1,10 @@
-package iso
+package common
 
 import (
 	"context"
 	"fmt"
 	"path/filepath"
 
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )
@@ -24,7 +23,7 @@ type StepUploadVMX struct {
 }
 
 func (c *StepUploadVMX) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	driver := state.Get("driver").(vmwcommon.Driver)
+	driver := state.Get("driver").(Driver)
 
 	ui := state.Get("ui").(packer.Ui)
 	vmxPath := state.Get("vmx_path").(string)

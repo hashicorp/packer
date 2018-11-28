@@ -35,6 +35,15 @@ func ActionFromSchema(s schema.Action) *Action {
 	return action
 }
 
+// ActionsFromSchema converts a slice of schema.Action to a slice of Action.
+func ActionsFromSchema(s []schema.Action) []*Action {
+	var actions []*Action
+	for _, a := range s {
+		actions = append(actions, ActionFromSchema(a))
+	}
+	return actions
+}
+
 // FloatingIPFromSchema converts a schema.FloatingIP to a FloatingIP.
 func FloatingIPFromSchema(s schema.FloatingIP) *FloatingIP {
 	f := &FloatingIP{

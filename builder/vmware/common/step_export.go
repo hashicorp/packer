@@ -1,4 +1,4 @@
-package iso
+package common
 
 import (
 	"bytes"
@@ -19,13 +19,29 @@ import (
 // Uses:
 //   display_name string
 type StepExport struct {
-	Format     string
-	SkipExport bool
-	OutputDir  string
+	Format         string
+	SkipExport     bool
+	VMName         string
+	OVFToolOptions []string
+	OutputDir      string
 }
 
-func (s *StepExport) generateArgs(c *Config, displayName string, hidePassword bool) []string {
+func GetOVFTool() string {
+	ovftool := "ovftool"
+	if runtime.GOOS == "windows" {
+		ovftool = "ovftool.exe"
+	}
+
+	if _, err := exec.LookPath(ovftool); err != nil {
+		return ""
+	}
+	return ovftool
+}
+
+func (s *StepExport) generateArgs(c *DriverConfig, displayName string, hidePassword bool) []string {
 	password := url.QueryEscape(c.RemotePassword)
+	username := url.QueryEscape(c.RemoteUser)
+
 	if hidePassword {
 		password = "****"
 	}
@@ -33,18 +49,19 @@ func (s *StepExport) generateArgs(c *Config, displayName string, hidePassword bo
 		"--noSSLVerify=true",
 		"--skipManifestCheck",
 		"-tt=" + s.Format,
-		"vi://" + c.RemoteUser + ":" + password + "@" + c.RemoteHost + "/" + displayName,
+
+		"vi://" + username + ":" + password + "@" + c.RemoteHost + "/" + displayName,
 		s.OutputDir,
 	}
-	return append(c.OVFToolOptions, args...)
+	return append(s.OVFToolOptions, args...)
 }
 
 func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	c := state.Get("config").(*Config)
+	c := state.Get("driverConfig").(*DriverConfig)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip export if requested
-	if c.SkipExport {
+	if s.SkipExport {
 		ui.Say("Skipping export of virtual machine...")
 		return multistep.ActionContinue
 	}
@@ -54,13 +71,9 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 		return multistep.ActionContinue
 	}
 
-	ovftool := "ovftool"
-	if runtime.GOOS == "windows" {
-		ovftool = "ovftool.exe"
-	}
-
-	if _, err := exec.LookPath(ovftool); err != nil {
-		err := fmt.Errorf("Error %s not found: %s", ovftool, err)
+	ovftool := GetOVFTool()
+	if ovftool == "" {
+		err := fmt.Errorf("Error %s not found: ", ovftool)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -68,12 +81,10 @@ func (s *StepExport) Run(_ context.Context, state multistep.StateBag) multistep.
 
 	// Export the VM
 	if s.OutputDir == "" {
-		s.OutputDir = c.VMName + "." + s.Format
+		s.OutputDir = s.VMName + "." + s.Format
 	}
 
-	if s.Format == "ova" {
-		os.MkdirAll(s.OutputDir, 0755)
-	}
+	os.MkdirAll(s.OutputDir, 0755)
 
 	ui.Say("Exporting virtual machine...")
 	var displayName string

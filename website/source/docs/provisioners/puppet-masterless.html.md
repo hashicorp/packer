@@ -73,7 +73,7 @@ Optional parameters:
         ]
 
 -   `facter` (object of key:value strings) - Additional
-    [facts](https://puppetlabs.com/facter) to make available to the Puppet run.
+    [facts](https://docs.puppet.com/facter/) to make available to the Puppet run.
 
 -   `guest_os_type` (string) - The remote host's OS type ('windows' or 'unix')
     to tailor command-line and path separators. (default: unix).

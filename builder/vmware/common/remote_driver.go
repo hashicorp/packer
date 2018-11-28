@@ -1,11 +1,7 @@
-package iso
-
-import (
-	vmwcommon "github.com/hashicorp/packer/builder/vmware/common"
-)
+package common
 
 type RemoteDriver interface {
-	vmwcommon.Driver
+	Driver
 
 	// UploadISO uploads a local ISO to the remote side and returns the
 	// new path that should be used in the VMX along with an error if it
@@ -29,6 +25,9 @@ type RemoteDriver interface {
 
 	// Uploads a local file to remote side.
 	upload(dst, src string) error
+
+	// Download a remote file to a local file.
+	Download(src, dst string) error
 
 	// Reload VM on remote side.
 	ReloadVM() error

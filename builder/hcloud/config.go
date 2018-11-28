@@ -30,9 +30,12 @@ type Config struct {
 	ServerType string `mapstructure:"server_type"`
 	Image      string `mapstructure:"image"`
 
-	SnapshotName string `mapstructure:"snapshot_name"`
-	UserData     string `mapstructure:"user_data"`
-	UserDataFile string `mapstructure:"user_data_file"`
+	SnapshotName string   `mapstructure:"snapshot_name"`
+	UserData     string   `mapstructure:"user_data"`
+	UserDataFile string   `mapstructure:"user_data_file"`
+	SSHKeys      []string `mapstructure:"ssh_keys"`
+
+	RescueMode string `mapstructure:"rescue"`
 
 	ctx interpolate.Context
 }

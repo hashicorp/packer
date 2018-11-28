@@ -85,6 +85,10 @@ Optional:
     provider whose API is compatible with aws EC2. Specify another endpoint
     like this `https://ec2.custom.endpoint.com`.
 
+-   `format` (string) - One of: `ova`, `raw`, `vhd`, `vhdx`, or `vmdk`. This specifies
+    the format of the source virtual machine image. The resulting artifact from the builder
+    is assumed to have a file extension matching the format. This defaults to `ova`.
+
 -   `insecure_skip_tls_verify` (boolean) - This allows skipping TLS verification of
     the AWS EC2 endpoint. The default is `false`.
 

@@ -15,7 +15,7 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	// get variables from state
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ui.Say("Adding image to image list...")
 
 	imageListClient := client.ImageList()
@@ -45,14 +45,13 @@ func (s *stepListImages) Run(_ context.Context, state multistep.StateBag) multis
 	}
 
 	// Now create and image list entry for the image into that list.
-	snap := state.Get("snapshot").(*compute.Snapshot)
+	machineImage := state.Get("machine_image").(string)
 	version := len(imList.Entries) + 1
 	entriesClient := client.ImageListEntries()
 	entriesInput := compute.CreateImageListEntryInput{
-		Name: config.DestImageList,
-		MachineImages: []string{fmt.Sprintf("/Compute-%s/%s/%s",
-			config.IdentityDomain, config.Username, snap.MachineImage)},
-		Version: version,
+		Name:          config.DestImageList,
+		MachineImages: []string{config.Identifier(machineImage)},
+		Version:       version,
 	}
 	entryInfo, err := entriesClient.CreateImageListEntry(&entriesInput)
 	if err != nil {

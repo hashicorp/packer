@@ -34,13 +34,27 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 // Run executes a Packer build and returns a packer.Artifact representing
 // a VMware image.
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
-	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig)
+	driver, err := vmwcommon.NewDriver(&b.config.DriverConfig, &b.config.SSHConfig, b.config.VMName)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating VMware driver: %s", err)
 	}
 
-	// Setup the directory
-	dir := new(vmwcommon.LocalOutputDir)
+	// Determine the output dir implementation
+	var dir vmwcommon.OutputDir
+	switch d := driver.(type) {
+	case vmwcommon.OutputDir:
+		dir = d
+	default:
+		dir = new(vmwcommon.LocalOutputDir)
+	}
+
+	// The OutputDir will track remote esxi output; exportOutputPath preserves
+	// the path to the output on the machine running Packer.
+	exportOutputPath := b.config.OutputDir
+
+	if b.config.RemoteType != "" {
+		b.config.OutputDir = b.config.VMName
+	}
 	dir.SetOutputDir(b.config.OutputDir)
 
 	// Set up the state.
@@ -51,6 +65,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("driver", driver)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
+	state.Put("sshConfig", &b.config.SSHConfig)
+	state.Put("driverConfig", &b.config.DriverConfig)
 
 	// Build the steps.
 	steps := []multistep.Step{
@@ -72,7 +88,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Linked:    b.config.Linked,
 		},
 		&vmwcommon.StepConfigureVMX{
-			CustomData: b.config.VMXData,
+			CustomData:  b.config.VMXData,
+			VMName:      b.config.VMName,
+			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&common.StepHTTPServer{
@@ -80,12 +98,20 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
+		&vmwcommon.StepUploadVMX{
+			RemoteType: b.config.RemoteType,
+		},
 		&vmwcommon.StepConfigureVNC{
 			Enabled:            !b.config.DisableVNC,
 			VNCBindAddress:     b.config.VNCBindAddress,
 			VNCPortMin:         b.config.VNCPortMin,
 			VNCPortMax:         b.config.VNCPortMax,
 			VNCDisablePassword: b.config.VNCDisablePassword,
+		},
+		&vmwcommon.StepRegister{
+			Format:         b.config.Format,
+			KeepRegistered: b.config.KeepRegistered,
+			SkipExport:     b.config.SkipExport,
 		},
 		&vmwcommon.StepRun{
 			DurationBeforeStop: 5 * time.Second,
@@ -123,12 +149,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Skip: b.config.SkipCompaction,
 		},
 		&vmwcommon.StepConfigureVMX{
-			CustomData: b.config.VMXDataPost,
-			SkipFloppy: true,
+			CustomData:  b.config.VMXDataPost,
+			SkipFloppy:  true,
+			VMName:      b.config.VMName,
+			DisplayName: b.config.VMXDisplayName,
 		},
 		&vmwcommon.StepCleanVMX{
 			RemoveEthernetInterfaces: b.config.VMXConfig.VMXRemoveEthernet,
 			VNCEnabled:               !b.config.DisableVNC,
+		},
+		&vmwcommon.StepUploadVMX{
+			RemoteType: b.config.RemoteType,
+		},
+		&vmwcommon.StepExport{
+			Format:         b.config.Format,
+			SkipExport:     b.config.SkipExport,
+			VMName:         b.config.VMName,
+			OVFToolOptions: b.config.OVFToolOptions,
+			OutputDir:      exportOutputPath,
 		},
 	}
 
@@ -150,7 +188,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, errors.New("Build was halted.")
 	}
 
-	return vmwcommon.NewLocalArtifact(b.config.VMName, b.config.OutputDir)
+	// Artifact
+	log.Printf("Generating artifact...")
+	return vmwcommon.NewArtifact(b.config.RemoteType, b.config.Format, exportOutputPath,
+		b.config.VMName, b.config.SkipExport, b.config.KeepRegistered, state)
 }
 
 // Cancel.

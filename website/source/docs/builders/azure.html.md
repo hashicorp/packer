@@ -35,7 +35,7 @@ addition to the options listed here, a
 [communicator](/docs/templates/communicator.html) can be configured for this
 builder.
 
-### Required:
+### Required ( unless instance has [managed identities](/docs/builders/azure-setup.html#managed-identities-for-azure-resources) enabled):
 
 -   `client_id` (string) The Active Directory service principal associated with
     your builder.
@@ -47,6 +47,8 @@ builder.
     access to this subscription, unless build\_resource\_group\_name option is
     specified in which case it needs to have owner access to the existing
     resource group specified in build\_resource\_group\_name parameter.**
+
+### Required:
 
 -   `image_publisher` (string) PublisherName for your base image. See
     [documentation](https://azure.microsoft.com/en-us/documentation/articles/resource-groups-vm-searching/)
@@ -148,9 +150,9 @@ Providing `temp_resource_group_name` or `location` in combination with
     `USGovernmentCloud` and `AzureUSGovernmentCloud` are also supported.
 
 -   `custom_data_file` (string) Specify a file containing custom data to inject
-    into the cloud-init process. The contents of the file are read, base64
-    encoded, and injected into the ARM template. The custom data will be passed
-    to cloud-init for processing at the time of provisioning. See
+    into the cloud-init process. The contents of the file are read and injected
+    into the ARM template. The custom data will be passed to cloud-init for
+    processing at the time of provisioning. See
     [documentation](http://cloudinit.readthedocs.io/en/latest/topics/examples.html)
     to learn more about custom data, and how it can be used to influence the
     provisioning process.
@@ -304,6 +306,14 @@ Providing `temp_resource_group_name` or `location` in combination with
     value and defaults to false. **Important** Setting this true means that
     your builds are faster, however any failed deletes are not reported.
 
+-   `managed_image_os_disk_snapshot_name` (string) If managed\_image\_os\_disk\_snapshot\_name 
+    is set, a snapshot of the OS disk is created with the same name as this value before the 
+    VM is captured.
+
+-   `managed_image_data_disk_snapshot_prefix` (string)  If managed\_image\_data\_disk\_snapshot\_prefix 
+    is set, snapshot of the data disk(s) is created with the same prefix as this value before the VM 
+    is captured.
+
 ## Basic Example
 
 Here is a basic example for Azure.
@@ -421,8 +431,8 @@ experience. These values can be changed by the user to more suitable values.
 
 ## Implementation
 
-~&gt; **Warning!** This is an advanced topic. You do not need to understand the
-implementation to use the Azure builder.
+\~&gt; **Warning!** This is an advanced topic. You do not need to understand
+the implementation to use the Azure builder.
 
 The Azure builder uses ARM
 [templates](https://azure.microsoft.com/en-us/documentation/articles/resource-group-authoring-templates/)

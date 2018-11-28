@@ -17,7 +17,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 	ui.Say("Creating Instance...")
 
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	ipAddName := state.Get("ipres_name").(string)
 	secListName := state.Get("security_list").(string)
 
@@ -34,6 +34,7 @@ func (s *stepCreateInstance) Run(_ context.Context, state multistep.StateBag) mu
 		Name:       config.ImageName,
 		Shape:      config.Shape,
 		ImageList:  config.SourceImageList,
+		Entry:      config.SourceImageListEntry,
 		Networking: map[string]compute.NetworkingInfo{"eth0": netInfo},
 		Attributes: config.attribs,
 	}
@@ -63,7 +64,7 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 
 	// terminate instance
 	ui := state.Get("ui").(packer.Ui)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	config := state.Get("config").(*Config)
 
 	ui.Say("Terminating source instance...")
@@ -81,6 +82,5 @@ func (s *stepCreateInstance) Cleanup(state multistep.StateBag) {
 		state.Put("error", err)
 		return
 	}
-	// TODO wait for instance state to change to deleted?
 	ui.Say("Terminated instance.")
 }

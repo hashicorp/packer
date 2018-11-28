@@ -59,14 +59,30 @@ mode.
 > Device login mode is for the Public and US Gov clouds only.
 
 The device login flow asks that you open a web browser, navigate to
-<http://aka.ms/devicelogin>, and input the supplied code. This authorizes the
-Packer for Azure application to act on your behalf. An OAuth token will be
-created, and stored in the user's home directory
-(~/.azure/packer/oauth-TenantID.json). This token is used if the token file
-exists, and it is refreshed as necessary. The token file prevents the need to
-continually execute the device login flow. Packer will ask for two device login
-auth, one for service management endpoint and another for accessing temp
-keyvault secrets that it creates.
+<a href="http://aka.ms/devicelogin" class="uri">http://aka.ms/devicelogin</a>,
+and input the supplied code. This authorizes the Packer for Azure application
+to act on your behalf. An OAuth token will be created, and stored in the user's
+home directory (\~/.azure/packer/oauth-TenantID.json). This token is used if
+the token file exists, and it is refreshed as necessary. The token file
+prevents the need to continually execute the device login flow. Packer will ask
+for two device login auth, one for service management endpoint and another for
+accessing temp keyvault secrets that it creates.
+
+## Managed identities for Azure resources
+
+-&gt; Managed identities for Azure resources is the new name for the service
+formerly known as Managed Service Identity (MSI).
+
+Managed identities is an alternative way to authorize in Azure Packer. Managed
+identities for Azure resources are automatically managed by Azure and enable
+you to authenticate to services that support Azure AD authentication without
+needing to insert credentials into your buildfile. Navigate to
+<a href="https://docs.microsoft.com/en-gb/azure/active-directory/managed-identities-azure-resources/overview" 
+class="uri">managed identities azure resources overview</a> to learn more about
+this feature.
+
+This feature will be used when no `subscription_id`, `client_id` or
+`client_secret` is set in your buildfile.
 
 ## Install the Azure CLI
 
@@ -209,7 +225,7 @@ using `openssl rand -base64 24`.
 $ az ad app create \
   --display-name $APPNAME \
   --identifier-uris $APPURL \
-  --home-page $APPURL \
+  --homepage $APPURL \
   --password $PASSWORD
 ```
 

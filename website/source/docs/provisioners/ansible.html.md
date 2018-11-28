@@ -142,7 +142,7 @@ Optional Parameters:
 -   `ssh_authorized_key_file` (string) - The SSH public key of the Ansible
     `ssh_user`. The default behavior is to generate and use a onetime key. If
     this key is generated, the corresponding private key is passed to
-    `ansible-playbook` with the `--private-key` option.
+    `ansible-playbook` with the `-e ansible_ssh_private_key_file` option.
 
 -   `user` (string) - The `ansible_user` to use. Defaults to the user running
     packer.

@@ -1,24 +1,25 @@
 package compute
 
 const (
-	SecurityProtocolDescription   = "security protocol"
-	SecurityProtocolContainerPath = "/network/v1/secprotocol/"
-	SecurityProtocolResourcePath  = "/network/v1/secprotocol"
+	securityProtocolDescription   = "security protocol"
+	securityProtocolContainerPath = "/network/v1/secprotocol/"
+	securityProtocolResourcePath  = "/network/v1/secprotocol"
 )
 
+// SecurityProtocolsClient details the security protocols client
 type SecurityProtocolsClient struct {
 	ResourceClient
 }
 
-// SecurityProtocols() returns an SecurityProtocolsClient that can be used to access the
+// SecurityProtocols returns an SecurityProtocolsClient that can be used to access the
 // necessary CRUD functions for Security Protocols.
-func (c *ComputeClient) SecurityProtocols() *SecurityProtocolsClient {
+func (c *Client) SecurityProtocols() *SecurityProtocolsClient {
 	return &SecurityProtocolsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
-			ResourceDescription: SecurityProtocolDescription,
-			ContainerPath:       SecurityProtocolContainerPath,
-			ResourceRootPath:    SecurityProtocolResourcePath,
+			Client:              c,
+			ResourceDescription: securityProtocolDescription,
+			ContainerPath:       securityProtocolContainerPath,
+			ResourceRootPath:    securityProtocolResourcePath,
 		},
 	}
 }
@@ -32,16 +33,19 @@ type SecurityProtocolInfo struct {
 	IPProtocol string `json:"ipProtocol"`
 	// List of port numbers or port range strings to match the packet's source port.
 	SrcPortSet []string `json:"srcPortSet"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The name of the Security Protocol
-	Name string `json:"name"`
+	Name string
 	// Description of the Security Protocol
 	Description string `json:"description"`
 	// Slice of tags associated with the Security Protocol
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier for the Security Protocol
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 }
 
+// CreateSecurityProtocolInput details the attributes of the security protocol to create
 type CreateSecurityProtocolInput struct {
 	// The name of the Security Protocol to create. Object names can only contain alphanumeric,
 	// underscore, dash, and period characters. Names are case-sensitive.
@@ -86,7 +90,7 @@ type CreateSecurityProtocolInput struct {
 	Tags []string `json:"tags"`
 }
 
-// Create a new Security Protocol from an SecurityProtocolsClient and an input struct.
+// CreateSecurityProtocol creates a new Security Protocol from an SecurityProtocolsClient and an input struct.
 // Returns a populated Info struct for the Security Protocol, and any errors
 func (c *SecurityProtocolsClient) CreateSecurityProtocol(input *CreateSecurityProtocolInput) (*SecurityProtocolInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
@@ -99,13 +103,14 @@ func (c *SecurityProtocolsClient) CreateSecurityProtocol(input *CreateSecurityPr
 	return c.success(&ipInfo)
 }
 
+// GetSecurityProtocolInput details the security protocol input to retrive
 type GetSecurityProtocolInput struct {
 	// The name of the Security Protocol to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
-// Returns a populated SecurityProtocolInfo struct from an input struct
+// GetSecurityProtocol returns a populated SecurityProtocolInfo struct from an input struct
 func (c *SecurityProtocolsClient) GetSecurityProtocol(input *GetSecurityProtocolInput) (*SecurityProtocolInfo, error) {
 	input.Name = c.getQualifiedName(input.Name)
 
@@ -170,18 +175,20 @@ func (c *SecurityProtocolsClient) UpdateSecurityProtocol(updateInput *UpdateSecu
 	return c.success(&ipInfo)
 }
 
+// DeleteSecurityProtocolInput details the security protocal to delete
 type DeleteSecurityProtocolInput struct {
 	// The name of the Security Protocol to query for. Case-sensitive
 	// Required
 	Name string `json:"name"`
 }
 
+// DeleteSecurityProtocol deletes the specified security protocol
 func (c *SecurityProtocolsClient) DeleteSecurityProtocol(input *DeleteSecurityProtocolInput) error {
 	return c.deleteResource(input.Name)
 }
 
 // Unqualifies any qualified fields in the SecurityProtocolInfo struct
 func (c *SecurityProtocolsClient) success(info *SecurityProtocolInfo) (*SecurityProtocolInfo, error) {
-	c.unqualify(&info.Name)
+	info.Name = c.getUnqualifiedName(info.FQDN)
 	return info, nil
 }
