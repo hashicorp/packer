@@ -65,7 +65,8 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	// Connect to VNC
-	ui.Say("Connecting to VM via VNC")
+	ui.Say(fmt.Sprintf("Connecting to VM via VNC (%s:%d)", vncIP, vncPort))
+
 	nc, err := net.Dial("tcp", fmt.Sprintf("%s:%d", vncIP, vncPort))
 	if err != nil {
 		err := fmt.Errorf("Error connecting to VNC: %s", err)
