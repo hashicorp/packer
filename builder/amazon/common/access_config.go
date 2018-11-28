@@ -162,13 +162,6 @@ func (c *AccessConfig) Prepare(ctx *interpolate.Context) []error {
 			fmt.Errorf("`access_key` and `secret_key` must both be either set or not set."))
 	}
 
-	if c.RawRegion != "" && !c.SkipValidation {
-		err := c.ValidateRegion(c.RawRegion)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("error validating region: %s", err.Error()))
-		}
-	}
-
 	return errs
 }
 
