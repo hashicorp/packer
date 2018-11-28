@@ -169,6 +169,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
 			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
+			AlicloudImageDestinationRegions:   b.config.AlicloudImageConfig.AlicloudImageDestinationRegions,
+			AlicloudImageDestinationNames:     b.config.AlicloudImageConfig.AlicloudImageDestinationNames,
 		})
 
 	if b.config.AlicloudImageIgnoreDataDisks {
