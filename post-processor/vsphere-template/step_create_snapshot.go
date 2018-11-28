@@ -15,8 +15,6 @@ type stepCreateSnapshot struct {
 	RemoteFolder        string
 	SnapshotName        string
 	SnapshotDescription string
-	SnapshotMemory      bool
-	SnapshotQuiesce     bool
 	SnapshotEnable      bool
 }
 
@@ -36,8 +34,6 @@ func NewStepCreateSnapshot(artifact packer.Artifact, p *PostProcessor) *stepCrea
 		SnapshotEnable:      p.config.SnapshotEnable,
 		SnapshotName:        p.config.SnapshotName,
 		SnapshotDescription: p.config.SnapshotDescription,
-		SnapshotMemory:      p.config.SnapshotMemory,
-		SnapshotQuiesce:     p.config.SnapshotQuiesce,
 	}
 }
 
@@ -47,7 +43,6 @@ func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	dcPath := state.Get("dcPath").(string)
 
 	if !s.SnapshotEnable {
-		ui.Message("Snapshot Not Enabled, Continue...")
 		return multistep.ActionContinue
 	}
 
@@ -61,7 +56,7 @@ func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	task, err := vm.CreateSnapshot(context.Background(), s.SnapshotName, s.SnapshotDescription, s.SnapshotMemory, s.SnapshotQuiesce)
+	task, err := vm.CreateSnapshot(context.Background(), s.SnapshotName, s.SnapshotDescription, false, false)
 
 	if err != nil {
 		state.Put("error", err)
