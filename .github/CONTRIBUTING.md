@@ -37,7 +37,7 @@ can quickly merge or address your contributions.
 
 2. The issue is verified and categorized by a Packer collaborator.
    Categorization is done via tags. For example, bugs are marked as "bugs" and
-   easy fixes are marked as "easy".
+   simple fixes are marked as "good first issue".
 
 3. Unless it is critical, the issue is left for a period of time (sometimes many
    weeks), giving outside contributors a chance to address the issue.
@@ -116,23 +116,65 @@ Packer project.
   "[WIP]" to indicate this. It's also a good idea to include specific questions
   or items you'd like feedback on.
 
-1. Once you believe your pull request is ready to be merged, you can remove any
-  "[WIP]" prefix from the title and a core team member will review. 
+2. Once you believe your pull request is ready to be merged, you can remove any
+  "[WIP]" prefix from the title and a core team member will review.
 
-1. One of Packer's core team members will look over your contribution and
-  either provide comments letting you know if there is anything left to do. We
-  do our best to provide feedback in a timely manner, but it may take some time
-  for us to respond.
+3. One of Packer's core team members will look over your contribution and
+  either merge, or provide comments letting you know if there is anything left
+  to do. We do our best to provide feedback in a timely manner, but it may take
+  some time for us to respond. We may also have questions that we need answered
+  about the code, either because something doesn't make sense to us or because
+  we want to understand your thought process.
 
-1. Once all outstanding comments and checklist items have been addressed, your
+4. If we have requested changes, you can either make those changes or, if you
+  disagree with the suggested changes, we can have a conversation about our reasoning and agree on a path forward. This may be a multi-step process. Our view is that pull requests are a chance to collaborate, and we welcome
+  conversations about how to do things better.
+
+5. Once all outstanding comments and checklist items have been addressed, your
   contribution will be merged! Merged PRs will be included in the next
   Packer release. The core team takes care of updating the
   [CHANGELOG.md](../CHANGELOG.md) as they merge.
 
-1. In rare cases, we might decide that a PR should be closed without merging.
+6. In rare cases, we might decide that a PR should be closed without merging.
   We'll make sure to provide clear reasoning when this happens.
 
+
 ### Tips for Working on Packer
+
+#### Getting Your Pull Requests Merged Faster
+
+It is much easier to review pull requests that are:
+
+1. Well-documented: Try to explain in the pull request comments what your
+   change does, why you have made the change, and provide instructions for how
+   to produce the new behavior introduced in the pull request. If you can,
+   provide screen captures or terminal output to show what the changes look
+   like. This helps the reviewers understand and test the change.
+
+2. Small: Try to only make one change per pull request. If you found two bugs
+   and want to fix them both, that's _awesome_, but it's still best to submit
+   the fixes as separate pull requests. This makes it much easier for reviewers
+   to keep in their heads all of the implications of individual code changes,
+   and that means the PR takes less effort and energy to merge. In general, the
+   smaller the pull request, the sooner reviewers will be able to make time to
+   review it.
+
+3. Passing Tests: Based on how much time we have, we may not review pull
+   requests which aren't passing our tests. (Look below for advice on how to
+   run unit tests). If you need help figuring out why tests are failing, please
+   feel free to ask, but while we're happy to give guidance it is generally
+   your responsibility to make sure that tests are passing. If your pull request
+   changes an interface or invalidates an assumption that causes a bunch of
+   tests to fail, then you need to fix those tests before we can merge your PR.
+
+If we request changes, try to make those changes in a timely manner. Otherwise,
+PRs can go stale and be a lot more work for all of us to merge in the future.
+
+Even with everyone making their best effort to be responsive, it can be
+time-consuming to get a PR merged. It can be frustrating to deal with
+the back-and-forth as we make sure that we understand the changes fully. Please
+bear with us, and please know that we appreciate the time and energy you put
+into the project.
 
 #### Working on forks
 
