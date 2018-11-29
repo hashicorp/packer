@@ -14,8 +14,8 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	// The local path of the file to upload.
-	Note string `mapstructure:"note"`
+	Note    string `mapstructure:"note"`
+	Disable bool   `mapstructure:"disable"`
 
 	ctx interpolate.Context
 }
@@ -40,6 +40,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+	if p.config.Disable {
+		if p.config.Note != "" {
+			ui.Say(fmt.Sprintf(
+				"Breakpoint provisioner with note \"%s\" disabled; continuing...",
+				p.config.Note))
+		} else {
+			ui.Say("Breakpoint provisioner disabled; continuing...")
+		}
+
+		return nil
+	}
 	if p.config.Note != "" {
 		ui.Say(fmt.Sprintf("Pausing at breakpoint provisioner with note \"%s\".", p.config.Note))
 	} else {
