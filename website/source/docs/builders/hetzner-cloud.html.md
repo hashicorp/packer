@@ -58,7 +58,7 @@ builder.
     appear in your account. Defaults to "packer-{{timestamp}}" (see
     [configuration templates](/docs/templates/engine.html) for more info).
 
--   `snapshot_labels` (object of key/value strings) - Key/value pair labels to
+-   `snapshot_labels` (map of key/value strings) - Key/value pair labels to
     apply to the created image.
 
 -   `poll_interval` (string) - Configures the interval in which actions are
