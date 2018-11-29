@@ -21,6 +21,7 @@ func (s *stepCreateSnapshot) Run(_ context.Context, state multistep.StateBag) mu
 	ui.Say("This can take some time")
 	result, _, err := client.Server.CreateImage(context.TODO(), &hcloud.Server{ID: serverID}, &hcloud.ServerCreateImageOpts{
 		Type:        hcloud.ImageTypeSnapshot,
+		Labels:      c.SnapshotLabels,
 		Description: hcloud.String(c.SnapshotName),
 	})
 	if err != nil {
