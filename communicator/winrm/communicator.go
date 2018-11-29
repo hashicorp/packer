@@ -71,7 +71,7 @@ func New(config *Config) (*Communicator, error) {
 		client:   client,
 		endpoint: endpoint,
 	}
-	cmd := &packer.RemoteCmd{Command: winrm.Powershell(`echo "${env:COMPUTERNAME} connected to winrm."`)}
+	cmd := &packer.RemoteCmd{Command: `echo "${env:COMPUTERNAME} connected to winrm.`}
 	err = comm.Start(cmd)
 	if err != nil {
 		return nil, err
