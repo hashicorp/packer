@@ -66,11 +66,18 @@ func New(config *Config) (*Communicator, error) {
 		return nil, err
 	}
 
-	return &Communicator{
+	comm := &Communicator{
 		config:   config,
 		client:   client,
 		endpoint: endpoint,
-	}, nil
+	}
+	cmd := &packer.RemoteCmd{Command: winrm.Powershell(`echo "${env:COMPUTERNAME} connected to winrm."`)}
+	err = comm.Start(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	return comm, nil
 }
 
 // Start implementation of communicator.Communicator interface
