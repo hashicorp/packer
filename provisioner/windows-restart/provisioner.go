@@ -25,8 +25,8 @@ var AbortReboot = `shutdown /a`
 
 var KeyTestCommands = []string{
 	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending"`),
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootInProgress"`),
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\Pending"`),
+	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootInProgress"`),
+	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\Pending"`),
 }
 
 type Config struct {
