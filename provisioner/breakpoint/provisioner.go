@@ -74,8 +74,6 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	case <-result:
 		return nil
 	}
-
-	return nil
 }
 
 func (p *Provisioner) Cancel() {
