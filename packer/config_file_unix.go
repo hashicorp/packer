@@ -28,25 +28,21 @@ func configDir() (string, error) {
 }
 
 func homeDir() (string, error) {
-	var u *user.User
 
-	/// First prefer the HOME environmental variable
-	if home, ok := os.LookupEnv("HOME"); ok {
+	// First prefer the HOME environmental variable
+	if home := os.Getenv("HOME"); home != "" {
 		log.Printf("Detected home directory from env var: %s", home)
 		return home, nil
 	}
 
-	/// Fall back to the passwd database if not found which follows
-	/// the same semantics as bourne shell
-	var err error
+	// Fall back to the passwd database if not found which follows
+	// the same semantics as bourne shell
+	u, err := user.Current()
 
-	// Check username specified in the environment first
-	if username, ok := os.LookupEnv("USER"); ok {
+	// Get homedir from specified username
+	// if it is set and different than what we have
+	if username := os.Getenv("USER"); username != "" && err == nil && u.Username != username {
 		u, err = user.Lookup(username)
-
-	} else {
-		// Otherwise we assume the current user
-		u, err = user.Current()
 	}
 
 	// Fail if we were unable to read the record
