@@ -48,6 +48,10 @@ func TestConfigShouldProvideReasonableDefaultValues(t *testing.T) {
 	if c.managedImageStorageAccountType == "" {
 		t.Errorf("Expected 'managedImageStorageAccountType' to be populated, but it was empty!")
 	}
+
+	if c.diskCachingType == "" {
+		t.Errorf("Expected 'diskCachingType' to be populated, but it was empty!")
+	}
 }
 
 func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
@@ -57,6 +61,7 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 	builderValues["vm_size"] = "override_vm_size"
 	builderValues["communicator"] = "ssh"
 	builderValues["managed_image_storage_account_type"] = "Premium_LRS"
+	builderValues["disk_caching_type"] = "None"
 
 	c, _, err := newConfig(builderValues, getPackerConfiguration())
 
@@ -86,6 +91,10 @@ func TestConfigShouldBeAbleToOverrideDefaultedValues(t *testing.T) {
 
 	if c.managedImageStorageAccountType != compute.StorageAccountTypesPremiumLRS {
 		t.Errorf("Expected 'managed_image_storage_account_type' to be set to 'Premium_LRS', but found %q!", c.managedImageStorageAccountType)
+	}
+
+	if c.diskCachingType != compute.CachingTypesNone {
+		t.Errorf("Expected 'disk_caching_type' to be set to 'None', but found %q!", c.diskCachingType)
 	}
 }
 
@@ -1165,6 +1174,27 @@ func TestConfigShouldRejectMalformedManageImageStorageAccountTypes(t *testing.T)
 	}
 }
 
+func TestConfigShouldRejectMalformedDiskCachingType(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+		"disk_caching_type":                        "--invalid--",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	_, _, err := newConfig(config, getPackerConfiguration())
+	if err == nil {
+		t.Fatal("expected config to reject custom and platform input for a managed image build")
+	}
+}
+
 func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 	config := map[string]interface{}{
 		"custom_managed_image_resource_group_name": "ignore",
@@ -1186,6 +1216,31 @@ func TestConfigShouldAcceptManagedImageStorageAccountTypes(t *testing.T) {
 		_, _, err := newConfig(config, getPackerConfiguration())
 		if err != nil {
 			t.Fatalf("expected config to accept a managed_image_storage_account_type of %q", x)
+		}
+	}
+}
+
+func TestConfigShouldAcceptDiskCachingTypes(t *testing.T) {
+	config := map[string]interface{}{
+		"custom_managed_image_resource_group_name": "ignore",
+		"custom_managed_image_name":                "ignore",
+		"location":                                 "ignore",
+		"subscription_id":                          "ignore",
+		"communicator":                             "none",
+		"managed_image_resource_group_name":        "ignore",
+		"managed_image_name":                       "ignore",
+
+		// Does not matter for this test case, just pick one.
+		"os_type": constants.Target_Linux,
+	}
+
+	storage_account_types := []string{"None", "ReadOnly", "ReadWrite"}
+
+	for _, x := range storage_account_types {
+		config["disk_caching_type"] = x
+		_, _, err := newConfig(config, getPackerConfiguration())
+		if err != nil {
+			t.Fatalf("expected config to accept a disk_caching_type of %q", x)
 		}
 	}
 }
