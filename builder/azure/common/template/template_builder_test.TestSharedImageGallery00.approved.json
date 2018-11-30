@@ -139,7 +139,7 @@
             "id": "/subscriptions/ignore/resourceGroups/ignore/providers/Microsoft.Compute/galleries/ignore/images/ignore"
           },
           "osDisk": {
-            "caching": "ReadWrite",
+            "caching": "ReadOnly",
             "createOption": "FromImage",
             "name": "[parameters('osDiskName')]",
             "osType": "Linux"
