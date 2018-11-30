@@ -2,8 +2,9 @@ package breakpoint
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
@@ -60,20 +61,22 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	message := fmt.Sprintf(
 		"Press enter to continue.")
 
+	var g errgroup.Group
 	result := make(chan string, 1)
-	go func() {
+	g.Go(func() error {
 		line, err := ui.Ask(message)
 		if err != nil {
-			log.Printf("Error asking for input: %s", err)
+			return fmt.Errorf("Error asking for input: %s", err)
 		}
 
 		result <- line
-	}()
-
-	select {
-	case <-result:
 		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return err
 	}
+	return nil
 }
 
 func (p *Provisioner) Cancel() {
