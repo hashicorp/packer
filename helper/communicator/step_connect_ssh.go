@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,7 +16,6 @@ import (
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
 	"github.com/hashicorp/packer/packer"
-	"github.com/mitchellh/go-homedir"
 	gossh "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/net/proxy"
@@ -178,9 +179,9 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 
 		// Then we attempt to connect via SSH
 		config := &ssh.Config{
-			Connection:             connFunc,
-			SSHConfig:              sshConfig,
-			Pty:                    s.Config.SSHPty,
+			Connection: connFunc,
+			SSHConfig:  sshConfig,
+			Pty:        s.Config.SSHPty,
 			DisableAgentForwarding: s.Config.SSHDisableAgentForwarding,
 			UseSftp:                s.Config.SSHFileTransferMethod == "sftp",
 			KeepAliveInterval:      s.Config.SSHKeepAliveInterval,
@@ -227,11 +228,17 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	if config.SSHBastionPrivateKeyFile != "" {
-		path, err := homedir.Expand(config.SSHBastionPrivateKeyFile)
+		u, err := user.Current()
 		if err != nil {
-			return nil, fmt.Errorf(
-				"Error expanding path for SSH bastion private key: %s", err)
+			return nil, fmt.Errorf("Unable to determine the current user for the SSH bastion private key: %s", err)
 		}
+
+		if u.HomeDir == "" {
+			return nil, fmt.Errorf("Unable to determine the current user's home directory for the SSH bastion private key.")
+		}
+
+		path := filepath.Join(u.HomeDir, config.SSHBastionPrivateKeyFile)
+
 		signer, err := helperssh.FileSigner(path)
 		if err != nil {
 			return nil, err
