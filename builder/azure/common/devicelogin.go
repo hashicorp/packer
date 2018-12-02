@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/hashicorp/packer/helper/useragent"
-	"github.com/mitchellh/go-homedir"
 )
 
 var (
@@ -148,9 +148,13 @@ func tokenFromDeviceFlow(say func(string), oauthCfg adal.OAuthConfig, clientID, 
 // tokenCachePath returns the full path the OAuth 2.0 token should be saved at
 // for given tenant ID.
 func tokenCachePath(tenantID string) string {
-	dir, err := homedir.Dir()
-	if err != nil {
+	var dir string
+
+	u, err := user.Current()
+	if err != nil || u.HomeDir == "" {
 		dir, _ = filepath.Abs(os.Args[0])
+	} else {
+		dir = u.HomeDir
 	}
 
 	return filepath.Join(dir, ".azure", "packer", fmt.Sprintf("oauth-%s.json", tenantID))
