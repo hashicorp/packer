@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 // ConfigFile returns the default path to the configuration file. On
@@ -83,4 +84,47 @@ func configDir() (string, error) {
 	}
 
 	return filepath.Join(dir, defaultConfigDir), nil
+}
+
+// Given a path, check to see if it's using ~ to reference a user directory.
+// If so, then replace that component with the requrested user's directory.
+func ExpandUser(path string) (string, error) {
+	var (
+		u   *user.User
+		err error
+	)
+
+	// refuse to do anything with a zero-length path
+	if len(path) == 0 {
+		return path, nil
+	}
+
+	// If no expansion was specified, then refuse that too
+	if path[0] != '~' {
+		return path, nil
+	}
+
+	// Grab everything up to the first filepath.Separator
+	idx := strings.IndexAny(path, `/\`)
+	if idx == -1 {
+		idx = len(path)
+	}
+
+	// Now we should be able to extract the username
+	username := path[:idx]
+
+	// Check if the current user was requested
+	if username == "~" {
+		u, err = user.Current()
+	} else {
+		u, err = user.Lookup(username[1:])
+	}
+
+	// If we couldn't figure that out, then fail here
+	if err != nil {
+		return "", err
+	}
+
+	// Now we can replace the path with u.HomeDir
+	return filepath.Join(u.HomeDir, path[idx:]), nil
 }
