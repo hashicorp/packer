@@ -65,13 +65,22 @@ func (s *StepConfigureVMX) Run(_ context.Context, state multistep.StateBag) mult
 
 	// Set a floppy disk, but only if we should
 	if !s.SkipFloppy {
+		// Grab list of temporary builder devices so we can append the floppy to it
+		tmpBuildDevices := state.Get("temporaryDevices").([]string)
+
 		// Set a floppy disk if we have one
 		if floppyPathRaw, ok := state.GetOk("floppy_path"); ok {
 			log.Println("Floppy path present, setting in VMX")
 			vmxData["floppy0.present"] = "TRUE"
 			vmxData["floppy0.filetype"] = "file"
 			vmxData["floppy0.filename"] = floppyPathRaw.(string)
+
+			// Add it to our list of build devices to later remove
+			tmpBuildDevices = append(tmpBuildDevices, "floppy0")
 		}
+
+		// Build the list back in our statebag
+		state.Put("temporaryDevices", tmpBuildDevices)
 	}
 
 	// If the build is taking place on a remote ESX server, the displayName
