@@ -67,6 +67,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 	state.Put("sshConfig", &b.config.SSHConfig)
 	state.Put("driverConfig", &b.config.DriverConfig)
+	state.Put("temporaryDevices", []string{}) // Devices (in .vmx) created by packer during building
 
 	// Build the steps.
 	steps := []multistep.Step{
