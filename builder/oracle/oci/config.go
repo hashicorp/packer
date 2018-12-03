@@ -94,7 +94,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	var keyContent []byte
 	if c.KeyFile != "" {
-		path, err := common.ExpandUser(c.KeyFile)
+		path, err := packer.ExpandUser(c.KeyFile)
 		if err != nil {
 			return nil, err
 		}

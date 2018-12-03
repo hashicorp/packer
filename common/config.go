@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/user"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -206,45 +205,4 @@ func FileExistsLocally(original string) bool {
 		return false
 	}
 	return true
-}
-
-func ExpandUser(path string) (string, error) {
-	var (
-		u   *user.User
-		err error
-	)
-
-	// refuse to do anything with a zero-length path
-	if len(path) == 0 {
-		return path
-	}
-
-	// If no expansion was specified, then refuse that too
-	if path[0] != "~" {
-		return path, nil
-	}
-
-	// Grab everything up to the first filepath.Separator
-	idx := strings.IndexAny(path, `/\`)
-	if idx == -1 {
-		idx = len(path)
-	}
-
-	// Now we should be able to extract the username
-	username := path[:idx]
-
-	// Check if the current user was requested
-	if username == "~" {
-		u, err = user.Current()
-	} else {
-		u, err = user.Lookup(username[1:])
-	}
-
-	// If we couldn't figure that out, then fail here
-	if err != nil {
-		return "", err
-	}
-
-	// Now we can replace the path with u.HomeDir
-	return filepath.Join(u.HomeDir, path[idx:])
 }
