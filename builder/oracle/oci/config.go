@@ -94,19 +94,9 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	var keyContent []byte
 	if c.KeyFile != "" {
-		u, err := user.Current()
+		path, err := common.ExpandUser(c.KeyFile)
 		if err != nil {
 			return nil, err
-		}
-
-		if u.HomeDir == "" {
-			return nil, fmt.Errorf("Unable to determine the home directory for the current user.")
-		}
-
-		// If c.KeyFile is not an absolute path, then it's relative so prefix it relative to the home directory
-		path := c.KeyFile
-		if !filepath.IsAbs(c.KeyFile) {
-			path = filepath.Join(u.HomeDir, c.KeyFile)
 		}
 
 		// Read API signing key

@@ -6,10 +6,9 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"os/user"
-	"path/filepath"
 	"time"
 
+	"github.com/hashicorp/packer/common"
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
@@ -74,19 +73,9 @@ func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
 	var privateKey []byte
 
 	if c.SSHPrivateKeyFile != "" {
-		u, err := user.Current()
+		keyPath, err := common.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
-			return []byte{}, fmt.Errorf("Error trying to determine the current user for the SSH private key: %s", err)
-		}
-
-		if u.HomeDir == "" {
-			return []byte{}, fmt.Errorf("Error locating home directory for the SSH private key")
-		}
-
-		// If c.SSHPrivateKeyFile is not an absolute path, then it's relative and should be prefixed with u.HomeDir
-		keyPath := c.SSHPrivateKeyFile
-		if !filepath.IsAbs(c.SSHPrivateKeyFile) {
-			keyPath = filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
+			return []byte{}, fmt.Errorf("Error expanding path for SSH private key: %s", err)
 		}
 
 		privateKey, err = ioutil.ReadFile(keyPath)
@@ -272,24 +261,8 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 		errs = append(errs, errors.New("An ssh_username must be specified\n  Note: some builders used to default ssh_username to \"root\"."))
 	}
 
-	// Figure out the current user's home directory
-	u, err := user.Current()
-	if err != nil {
-		errs = append(errs, fmt.Errorf("Unable to determine the current user from : %s", err))
-	} else if u.HomeDir == "" {
-		// If the home directory is empty, then set `err` so that later a failure will happen
-		err = fmt.Errorf("Unable to determine the home directory for the current user.")
-	}
-
 	if c.SSHPrivateKeyFile != "" {
-		path := c.SSHPrivateKeyFile
-
-		// If c.SSHPrivateKeyFile is not an absolute path, then it's relative and should be prefixed with u.HomeDir
-		if err == nil && !filepath.IsAbs(c.SSHPrivateKeyFile) {
-			path = filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
-		}
-
-		// The `err` variable here comes from the empty home directory above
+		path, err := common.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
@@ -307,9 +280,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		} else if c.SSHBastionPrivateKeyFile != "" {
-			path := filepath.Join(u.HomeDir, c.SSHBastionPrivateKeyFile)
-
-			// The `err` variable here comes from an empty home directory
+			path, err := common.ExpandUser(c.SSHBastionPrivateKeyFile)
 			if err != nil {
 				errs = append(errs, fmt.Errorf(
 					"ssh_bastion_private_key_file is invalid: %s", err))
