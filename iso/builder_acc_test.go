@@ -381,10 +381,19 @@ func TestISOBuilderAcc_full(t *testing.T) {
 }
 
 func fullConfig() map[string]interface{} {
+	username := os.Getenv("VSPHERE_USERNAME")
+	if username == "" {
+		username = "root"
+	}
+	password := os.Getenv("VSPHERE_PASSWORD")
+	if password == "" {
+		password = "jetbrains"
+	}
+
 	config := map[string]interface{}{
 		"vcenter_server":      "vcenter.vsphere65.test",
-		"username":            "root",
-		"password":            "jetbrains",
+		"username":            username,
+		"password":            password,
 		"insecure_connection": true,
 
 		"vm_name": commonT.NewVMName(),

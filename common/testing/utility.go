@@ -7,6 +7,7 @@ import (
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 )
@@ -33,10 +34,19 @@ func RenderConfig(config map[string]interface{}) string {
 }
 
 func TestConn(t *testing.T) *driver.Driver {
+	username := os.Getenv("VSPHERE_USERNAME")
+	if username == "" {
+		username = "root"
+	}
+	password := os.Getenv("VSPHERE_PASSWORD")
+	if password == "" {
+		password = "jetbrains"
+	}
+
 	d, err := driver.NewDriver(&driver.ConnectConfig{
 		VCenterServer:      "vcenter.vsphere65.test",
-		Username:           "root",
-		Password:           "jetbrains",
+		Username:           username,
+		Password:           password,
 		InsecureConnection: true,
 	})
 	if err != nil {
