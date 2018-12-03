@@ -226,7 +226,7 @@ func sshBastionConfig(config *Config) (*gossh.ClientConfig, error) {
 	}
 
 	if config.SSHBastionPrivateKeyFile != "" {
-		path, err := common.ExpandUser(config.SSHBastionPrivateKeyFile)
+		path, err := packer.ExpandUser(config.SSHBastionPrivateKeyFile)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"Error expanding path for SSH bastion private key: %s", err)
