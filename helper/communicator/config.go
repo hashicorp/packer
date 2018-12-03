@@ -83,7 +83,12 @@ func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
 			return []byte{}, fmt.Errorf("Error locating home directory for the SSH private key")
 		}
 
-		keyPath := filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
+		// If c.SSHPrivateKeyFile is not an absolute path, then it's relative and should be prefixed with u.HomeDir
+		keyPath := c.SSHPrivateKeyFile
+		if !filepath.IsAbs(c.SSHPrivateKeyFile) {
+			keyPath = filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
+		}
+
 		privateKey, err = ioutil.ReadFile(keyPath)
 		if err != nil {
 			return privateKey, fmt.Errorf("Error on reading SSH private key: %s", err)
@@ -277,9 +282,14 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHPrivateKeyFile != "" {
-		path := filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
+		path := c.SSHPrivateKeyFile
 
-		// The `err` variable here comes from an empty home directory
+		// If c.SSHPrivateKeyFile is not an absolute path, then it's relative and should be prefixed with u.HomeDir
+		if err == nil && !filepath.IsAbs(c.SSHPrivateKeyFile) {
+			path = filepath.Join(u.HomeDir, c.SSHPrivateKeyFile)
+		}
+
+		// The `err` variable here comes from the empty home directory above
 		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))

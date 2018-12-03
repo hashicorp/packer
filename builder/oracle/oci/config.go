@@ -103,7 +103,11 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 			return nil, fmt.Errorf("Unable to determine the home directory for the current user.")
 		}
 
-		path := filepath.Join(u.HomeDir, c.KeyFile)
+		// If c.KeyFile is not an absolute path, then it's relative so prefix it relative to the home directory
+		path := c.KeyFile
+		if !filepath.IsAbs(c.KeyFile) {
+			path = filepath.Join(u.HomeDir, c.KeyFile)
+		}
 
 		// Read API signing key
 		keyContent, err = ioutil.ReadFile(path)
