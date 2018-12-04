@@ -97,9 +97,18 @@ func getCommandArgs(bootDrive string, state multistep.StateBag) ([]string, error
 	if qemuMajor >= 2 {
 		if config.DiskInterface == "virtio-scsi" {
 			deviceArgs = append(deviceArgs, "virtio-scsi-pci,id=scsi0", "scsi-hd,bus=scsi0.0,drive=drive0")
-			driveArgs = append(driveArgs, fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s,detect-zeroes=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format, config.DetectZeroes))
+			driveArgumentString := fmt.Sprintf("if=none,file=%s,id=drive0,cache=%s,discard=%s,format=%s", imgPath, config.DiskCache, config.DiskDiscard, config.Format)
+			if config.DetectZeroes != "off" {
+				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			}
+			driveArgs = append(driveArgs, driveArgumentString)
 		} else {
-			driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s,detect-zeroes=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format, config.DetectZeroes))
+			driveArgumentString := fmt.Sprintf("file=%s,if=%s,cache=%s,discard=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.DiskDiscard, config.Format)
+			if config.DetectZeroes != "off" {
+				driveArgumentString = fmt.Sprintf("%s,detect-zeroes=%s", driveArgumentString, config.DetectZeroes)
+			}
+			driveArgs = append(driveArgs, driveArgumentString)
+
 		}
 	} else {
 		driveArgs = append(driveArgs, fmt.Sprintf("file=%s,if=%s,cache=%s,format=%s", imgPath, config.DiskInterface, config.DiskCache, config.Format))
