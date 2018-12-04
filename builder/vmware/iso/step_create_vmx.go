@@ -243,6 +243,13 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 
+	/// Now that we figured out the CDROM device to add, store it
+	/// to the list of temporary build devices in our statebag
+	tmpBuildDevices := state.Get("temporaryDevices").([]string)
+	tmpCdromDevice := fmt.Sprintf("%s0:%s", templateData.CDROMType, templateData.CDROMType_PrimarySecondary)
+	tmpBuildDevices = append(tmpBuildDevices, tmpCdromDevice)
+	state.Put("temporaryDevices", tmpBuildDevices)
+
 	/// Assign the network adapter type into the template if one was specified.
 	network_adapter := strings.ToLower(config.HWConfig.NetworkAdapterType)
 	if network_adapter != "" {
