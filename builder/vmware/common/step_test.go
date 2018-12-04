@@ -15,5 +15,6 @@ func testState(t *testing.T) multistep.StateBag {
 		Reader: new(bytes.Buffer),
 		Writer: new(bytes.Buffer),
 	})
+	state.Put("temporaryDevices", []string{})
 	return state
 }
