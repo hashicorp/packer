@@ -22,6 +22,12 @@
 * builder/alicloud: Add options for system disk properties [GH-6939]
 * post-processor/amazon-import: Support ova, raw, vmdk, and vhdx formats in the amazon-import post-processor. [GH-6938]
 * builder/oracle: Parameterized volume size support for Oracle classic builder [GH-6918]
+* provisioner/breakpoint: Add a new breakpoint provisioner. [GH-7058]
+* core: Replaced unsafe method of determining homedir with os/user implementation [GH-7036]
+* builder/virtualbox: expose the VBoxManage export --iso option [GH-5950]
+* post-processor/vsphere-template: Add option to snapshot vm before marking as template [GH-6969]
+* builder/hcloud: Add `snapshot_labels` option to hcloud builder [GH-7046]
+
 
 ### BUG FIXES:
 * builder/hyperv: Remove -Copy:$false when calling Hyper-V\Compare-VM compatability report [GH-7030]
@@ -29,6 +35,9 @@
 * builder/vmware-esxi: Create export directories for vmx and ovf file types [GH-6985]
 * post-processor/vagrant: Add "hvf" as a libvirt driver [GH-6955]
 * builder/amazon: Better error handling of region/credential guessing from metadata [GH-6931]
+* provisioner/ansible: inventory is no longer set to inventory_directory [GH-7065]
+* builder/qemu: Do not set detect-zeroes option when we want it "off" [GH-7064]
+* builder/vmware: Correctly parse version for VMware Fusion Tech Preview [GH-7016]
 
 ## 1.3.2 (October 29, 2018)
 ### IMPROVEMENTS:
