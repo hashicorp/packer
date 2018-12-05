@@ -1,4 +1,4 @@
-## 1.3.3 (unreleased)
+## 1.3.3 (December 5, 2018)
 ### IMPROVEMENTS:
 * builder/alicloud: Add options for system disk properties [GH-6939]
 * builder/alicloud: Apply tags to relevant snapshots [GH-7040]
@@ -44,6 +44,8 @@
 ### BUG FIXES:
 * builder/amazon: Better error handling of region/credential guessing from
     metadata [GH-6931]
+* builder.amazon: move region validation to run so that we don't break
+    validation when no credentials are set [GH-7032]
 * builder/hyperv: Remove -Copy:$false when calling Hyper-V\Compare-VM
     compatability report [GH-7030]
 * builder/qemu: Do not set detect-zeroes option when we want it "off" [GH-7064]
