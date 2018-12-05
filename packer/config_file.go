@@ -87,7 +87,10 @@ func configDir() (string, error) {
 }
 
 // Given a path, check to see if it's using ~ to reference a user directory.
-// If so, then replace that component with the requrested user's directory.
+// If so, then replace that component with the requested user directory.
+// In "~/", "~" gets replaced by current user's home dir.
+// In "~root/", "~user" gets replaced by root's home dir.
+// ~ has to be the first character of path for ExpandUser change it.
 func ExpandUser(path string) (string, error) {
 	var (
 		u   *user.User
