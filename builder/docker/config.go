@@ -73,7 +73,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 
 	// Defaults
 	if len(c.RunCommand) == 0 {
-		c.RunCommand = []string{"-d", "-i", "-t", "{{.Image}}", "/bin/bash"}
+		c.RunCommand = []string{"-d", "-i", "-t", "{{.Image}}", "/bin/sh"}
 	}
 
 	// Default Pull if it wasn't set
