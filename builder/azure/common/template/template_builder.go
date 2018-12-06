@@ -14,7 +14,6 @@ const (
 	jsonIndent = "  "
 
 	resourceKeyVaults         = "Microsoft.KeyVault/vaults"
-	resourceManagedDisk       = "Microsoft.Compute/images"
 	resourceNetworkInterfaces = "Microsoft.Network/networkInterfaces"
 	resourcePublicIPAddresses = "Microsoft.Network/publicIPAddresses"
 	resourceVirtualMachine    = "Microsoft.Compute/virtualMachines"
@@ -101,7 +100,7 @@ func (s *TemplateBuilder) BuildWindows(keyVaultName, winRMCertificateUrl string)
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccountType compute.StorageAccountTypes) error {
+func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccountType compute.StorageAccountTypes, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -114,6 +113,7 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccoun
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
+	profile.OsDisk.Caching = cachingType
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
 	}
@@ -121,7 +121,7 @@ func (s *TemplateBuilder) SetManagedDiskUrl(managedImageId string, storageAccoun
 	return nil
 }
 
-func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version, imageID string, storageAccountType compute.StorageAccountTypes) error {
+func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer, sku, version, imageID string, storageAccountType compute.StorageAccountTypes, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -133,11 +133,11 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 		Offer:     &offer,
 		Sku:       &sku,
 		Version:   &version,
-		//ID:        &imageID,
 	}
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.CreateOption = compute.DiskCreateOptionTypesFromImage
 	profile.OsDisk.Vhd = nil
+	profile.OsDisk.Caching = cachingType
 	profile.OsDisk.ManagedDisk = &compute.ManagedDiskParameters{
 		StorageAccountType: storageAccountType,
 	}
@@ -145,7 +145,7 @@ func (s *TemplateBuilder) SetManagedMarketplaceImage(location, publisher, offer,
 	return nil
 }
 
-func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error {
+func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -156,17 +156,19 @@ func (s *TemplateBuilder) SetSharedGalleryImage(location, imageID string) error 
 	profile.ImageReference = &compute.ImageReference{ID: &imageID}
 	profile.OsDisk.OsType = s.osType
 	profile.OsDisk.Vhd = nil
+	profile.OsDisk.Caching = cachingType
 
 	return nil
 }
 
-func (s *TemplateBuilder) SetMarketPlaceImage(publisher, offer, sku, version string) error {
+func (s *TemplateBuilder) SetMarketPlaceImage(publisher, offer, sku, version string, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
 	}
 
 	profile := resource.Properties.StorageProfile
+	profile.OsDisk.Caching = cachingType
 	profile.ImageReference = &compute.ImageReference{
 		Publisher: to.StringPtr(publisher),
 		Offer:     to.StringPtr(offer),
@@ -177,7 +179,7 @@ func (s *TemplateBuilder) SetMarketPlaceImage(publisher, offer, sku, version str
 	return nil
 }
 
-func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingSystemTypes) error {
+func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingSystemTypes, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -185,6 +187,8 @@ func (s *TemplateBuilder) SetImageUrl(imageUrl string, osType compute.OperatingS
 
 	profile := resource.Properties.StorageProfile
 	profile.OsDisk.OsType = osType
+	profile.OsDisk.Caching = cachingType
+
 	profile.OsDisk.Image = &compute.VirtualHardDisk{
 		URI: to.StringPtr(imageUrl),
 	}
@@ -224,7 +228,7 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
-func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool) error {
+func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool, cachingType compute.CachingTypes) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
 		return err
@@ -233,12 +237,12 @@ func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool)
 	profile := resource.Properties.StorageProfile
 	dataDisks := make([]DataDiskUnion, len(diskSizeGB))
 
-	for i, additionalsize := range diskSizeGB {
-		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalsize)
+	for i, additionalSize := range diskSizeGB {
+		dataDisks[i].DiskSizeGB = to.Int32Ptr(additionalSize)
 		dataDisks[i].Lun = to.IntPtr(i)
 		dataDisks[i].Name = to.StringPtr(fmt.Sprintf("datadisk-%d", i+1))
 		dataDisks[i].CreateOption = "Empty"
-		dataDisks[i].Caching = "ReadWrite"
+		dataDisks[i].Caching = cachingType
 		if isManaged {
 			dataDisks[i].Vhd = nil
 			dataDisks[i].ManagedDisk = profile.OsDisk.ManagedDisk
