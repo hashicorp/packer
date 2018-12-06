@@ -49,7 +49,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	// the path to the output on the machine running Packer.
 	exportOutputPath := b.config.OutputDir
 
-	if b.config.RemoteType != "" {
+	if b.config.RemoteType != "" && b.config.OutputDir == "" {
 		b.config.OutputDir = b.config.VMName
 	}
 	dir.SetOutputDir(b.config.OutputDir)
