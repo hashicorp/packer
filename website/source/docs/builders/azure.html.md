@@ -190,6 +190,9 @@ Providing `temp_resource_group_name` or `location` in combination with
 -   `os_disk_size_gb` (number) Specify the size of the OS disk in GB
     (gigabytes). Values of zero or less than zero are ignored.
 
+-   `disk_caching_type` (string) Specify the disk caching type. Valid values are None, ReadOnly,
+     and ReadWrite. The default value is ReadWrite.
+
 -   `disk_additional_size` (array of integers) - The size(s) of any additional
     hard disks for the VM in gigabytes. If this is not specified then the VM
     will only contain an OS disk. The number of additional disks and maximum

@@ -59,9 +59,9 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if config.ImageUrl != "" {
-		builder.SetImageUrl(config.ImageUrl, osType)
+		builder.SetImageUrl(config.ImageUrl, osType, config.diskCachingType)
 	} else if config.CustomManagedImageName != "" {
-		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType)
+		builder.SetManagedDiskUrl(config.customManagedImageID, config.managedImageStorageAccountType, config.diskCachingType)
 	} else if config.ManagedImageName != "" && config.ImagePublisher != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Compute/locations/%s/publishers/%s/ArtifactTypes/vmimage/offers/%s/skus/%s/versions/%s",
 			config.SubscriptionID,
@@ -71,7 +71,7 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.ImageSku,
 			config.ImageVersion)
 
-		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID, config.managedImageStorageAccountType)
+		builder.SetManagedMarketplaceImage(config.Location, config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, imageID, config.managedImageStorageAccountType, config.diskCachingType)
 	} else if config.SharedGallery.Subscription != "" {
 		imageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/galleries/%s/images/%s",
 			config.SharedGallery.Subscription,
@@ -83,9 +83,9 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 				config.SharedGallery.ImageVersion)
 		}
 
-		builder.SetSharedGalleryImage(config.Location, imageID)
+		builder.SetSharedGalleryImage(config.Location, imageID, config.diskCachingType)
 	} else {
-		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion)
+		builder.SetMarketPlaceImage(config.ImagePublisher, config.ImageOffer, config.ImageSku, config.ImageVersion, config.diskCachingType)
 	}
 
 	if config.OSDiskSizeGB > 0 {
@@ -93,7 +93,8 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 	}
 
 	if len(config.AdditionalDiskSize) > 0 {
-		builder.SetAdditionalDisks(config.AdditionalDiskSize, config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != ""))
+		isManaged := config.CustomManagedImageName != "" || (config.ManagedImageName != "" && config.ImagePublisher != "")
+		builder.SetAdditionalDisks(config.AdditionalDiskSize, isManaged, config.diskCachingType)
 	}
 
 	if config.customData != "" {

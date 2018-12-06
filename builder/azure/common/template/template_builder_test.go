@@ -20,7 +20,7 @@ func TestBuildLinux00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetMarketPlaceImage("Canonical", "UbuntuServer", "16.04", "latest")
+	err = testSubject.SetMarketPlaceImage("Canonical", "UbuntuServer", "16.04", "latest", compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestBuildLinux01(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetImageUrl("http://azure/custom.vhd", compute.Linux)
+	err = testSubject.SetImageUrl("http://azure/custom.vhd", compute.Linux, compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestBuildLinux02(t *testing.T) {
 	}
 
 	testSubject.BuildLinux("--test-ssh-authorized-key--")
-	testSubject.SetImageUrl("http://azure/custom.vhd", compute.Linux)
+	testSubject.SetImageUrl("http://azure/custom.vhd", compute.Linux, compute.CachingTypesReadWrite)
 	testSubject.SetOSDiskSizeGB(100)
 
 	err = testSubject.SetVirtualNetwork("--virtual-network-resource-group--", "--virtual-network--", "--subnet-name--")
@@ -105,7 +105,7 @@ func TestBuildWindows00(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetMarketPlaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest")
+	err = testSubject.SetMarketPlaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest", compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,12 +133,12 @@ func TestBuildWindows01(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetManagedMarketplaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest", "2015-1", "1", "Premium_LRS")
+	err = testSubject.SetManagedMarketplaceImage("MicrosoftWindowsServer", "WindowsServer", "2012-R2-Datacenter", "latest", "2015-1", "1", "Premium_LRS", compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetAdditionalDisks([]int32{32, 64}, true)
+	err = testSubject.SetAdditionalDisks([]int32{32, 64}, true, compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestBuildWindows02(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = testSubject.SetAdditionalDisks([]int32{32, 64}, false)
+	err = testSubject.SetAdditionalDisks([]int32{32, 64}, false, compute.CachingTypesReadWrite)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +195,7 @@ func TestSharedImageGallery00(t *testing.T) {
 	}
 
 	imageID := "/subscriptions/ignore/resourceGroups/ignore/providers/Microsoft.Compute/galleries/ignore/images/ignore"
-	err = testSubject.SetSharedGalleryImage("westcentralus", imageID)
+	err = testSubject.SetSharedGalleryImage("westcentralus", imageID, compute.CachingTypesReadOnly)
 	if err != nil {
 		t.Fatal(err)
 	}
