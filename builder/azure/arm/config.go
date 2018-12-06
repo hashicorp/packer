@@ -109,9 +109,9 @@ type Config struct {
 	ManagedImageResourceGroupName      string `mapstructure:"managed_image_resource_group_name"`
 	ManagedImageName                   string `mapstructure:"managed_image_name"`
 	ManagedImageStorageAccountType     string `mapstructure:"managed_image_storage_account_type"`
+	managedImageStorageAccountType     compute.StorageAccountTypes
 	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
 	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
-	managedImageStorageAccountType     compute.StorageAccountTypes
 	manageImageLocation                string
 
 	// Deployment
@@ -138,6 +138,8 @@ type Config struct {
 
 	// Additional Disks
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
+	DiskCachingType    string  `mapstructure:"disk_caching_type"`
+	diskCachingType    compute.CachingTypes
 
 	// Runtime Values
 	UserName               string
@@ -471,6 +473,10 @@ func provideDefaultValues(c *Config) {
 		c.managedImageStorageAccountType = compute.StorageAccountTypesStandardLRS
 	}
 
+	if c.DiskCachingType == "" {
+		c.diskCachingType = compute.CachingTypesReadWrite
+	}
+
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
@@ -744,6 +750,17 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		c.managedImageStorageAccountType = compute.StorageAccountTypesPremiumLRS
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
+	}
+
+	switch c.DiskCachingType {
+	case string(compute.CachingTypesNone):
+		c.diskCachingType = compute.CachingTypesNone
+	case string(compute.CachingTypesReadOnly):
+		c.diskCachingType = compute.CachingTypesReadOnly
+	case "", string(compute.CachingTypesReadWrite):
+		c.diskCachingType = compute.CachingTypesReadWrite
+	default:
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The disk_caching_type %q is invalid", c.DiskCachingType))
 	}
 }
 
