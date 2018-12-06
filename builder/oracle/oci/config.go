@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -16,8 +17,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	ocicommon "github.com/oracle/oci-go-sdk/common"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 type Config struct {
@@ -95,7 +94,7 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 
 	var keyContent []byte
 	if c.KeyFile != "" {
-		path, err := homedir.Expand(c.KeyFile)
+		path, err := packer.ExpandUser(c.KeyFile)
 		if err != nil {
 			return nil, err
 		}
@@ -249,15 +248,19 @@ func NewConfig(raws ...interface{}) (*Config, error) {
 	return c, nil
 }
 
-// getDefaultOCISettingsPath uses mitchellh/go-homedir to compute the default
+// getDefaultOCISettingsPath uses os/user to compute the default
 // config file location ($HOME/.oci/config).
 func getDefaultOCISettingsPath() (string, error) {
-	home, err := homedir.Dir()
+	u, err := user.Current()
 	if err != nil {
 		return "", err
 	}
 
-	path := filepath.Join(home, ".oci", "config")
+	if u.HomeDir == "" {
+		return "", fmt.Errorf("Unable to determine the home directory for the current user.")
+	}
+
+	path := filepath.Join(u.HomeDir, ".oci", "config")
 	if _, err := os.Stat(path); err != nil {
 		return "", err
 	}
