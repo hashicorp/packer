@@ -11,9 +11,9 @@ import (
 	packerssh "github.com/hashicorp/packer/communicator/ssh"
 	"github.com/hashicorp/packer/helper/multistep"
 	helperssh "github.com/hashicorp/packer/helper/ssh"
+	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/masterzen/winrm"
-	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -73,10 +73,11 @@ func (c *Config) ReadSSHPrivateKeyFile() ([]byte, error) {
 	var privateKey []byte
 
 	if c.SSHPrivateKeyFile != "" {
-		keyPath, err := homedir.Expand(c.SSHPrivateKeyFile)
+		keyPath, err := packer.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
-			return privateKey, fmt.Errorf("Error expanding path for SSH private key: %s", err)
+			return []byte{}, fmt.Errorf("Error expanding path for SSH private key: %s", err)
 		}
+
 		privateKey, err = ioutil.ReadFile(keyPath)
 		if err != nil {
 			return privateKey, fmt.Errorf("Error on reading SSH private key: %s", err)
@@ -261,7 +262,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 	}
 
 	if c.SSHPrivateKeyFile != "" {
-		path, err := homedir.Expand(c.SSHPrivateKeyFile)
+		path, err := packer.ExpandUser(c.SSHPrivateKeyFile)
 		if err != nil {
 			errs = append(errs, fmt.Errorf(
 				"ssh_private_key_file is invalid: %s", err))
@@ -279,7 +280,7 @@ func (c *Config) prepareSSH(ctx *interpolate.Context) []error {
 			errs = append(errs, errors.New(
 				"ssh_bastion_password or ssh_bastion_private_key_file must be specified"))
 		} else if c.SSHBastionPrivateKeyFile != "" {
-			path, err := homedir.Expand(c.SSHBastionPrivateKeyFile)
+			path, err := packer.ExpandUser(c.SSHBastionPrivateKeyFile)
 			if err != nil {
 				errs = append(errs, fmt.Errorf(
 					"ssh_bastion_private_key_file is invalid: %s", err))
