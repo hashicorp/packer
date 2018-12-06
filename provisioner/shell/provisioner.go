@@ -463,9 +463,19 @@ func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {
 	// Always available Packer provided env vars
 	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", p.config.PackerBuildName)
 	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", p.config.PackerBuilderType)
+
+	// expose ip address variables
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = fmt.Sprintf("%s", httpAddr)
+		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
+	httpIP := common.GetHTTPIP()
+	if httpIP != "" {
+		envVars["PACKER_HTTP_IP"] = httpIP
+	}
+	httpPort := common.GetHTTPPort()
+	if httpPort != "" {
+		envVars["PACKER_HTTP_PORT"] = httpPort
 	}
 
 	// Split vars into key/value components
