@@ -3,16 +3,28 @@
 package puppetserver
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/common/uuid"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner"
 	"github.com/hashicorp/packer/template/interpolate"
+)
+
+var psEscape = strings.NewReplacer(
+	"$", "`$",
+	"\"", "`\"",
+	"`", "``",
+	"'", "`'",
 )
 
 type Config struct {
@@ -63,6 +75,12 @@ type Config struct {
 	// The directory from which the command will be executed.
 	// Packer requires the directory to exist when running puppet.
 	WorkingDir string `mapstructure:"working_directory"`
+
+	// Instructs the communicator to run the remote script as a Windows
+	// scheduled task, effectively elevating the remote user by impersonating
+	// a logged-in user
+	ElevatedUser     string `mapstructure:"elevated_user"`
+	ElevatedPassword string `mapstructure:"elevated_password"`
 }
 
 type guestOSTypeConfig struct {
@@ -112,6 +130,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 
 type Provisioner struct {
 	config            Config
+	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
 }
@@ -129,7 +148,17 @@ type ExecuteTemplate struct {
 	WorkingDir           string
 }
 
+type EnvVarsTemplate struct {
+	WinRMPassword string
+}
+
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
+
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -210,6 +239,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	ui.Say("Provisioning with Puppet...")
+	p.communicator = comm
 	ui.Message("Creating Puppet staging directory...")
 	if err := p.createDir(ui, comm, p.config.StagingDir); err != nil {
 		return fmt.Errorf("Error creating staging directory: %s", err)
@@ -269,6 +299,13 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
+	if p.config.ElevatedUser != "" {
+		command, err = p.createCommandTextPrivileged(command)
+		if err != nil {
+			return err
+		}
+	}
+
 	cmd := &packer.RemoteCmd{
 		Command: command,
 	}
@@ -321,10 +358,7 @@ func (p *Provisioner) createDir(ui packer.Ui, comm packer.Communicator, dir stri
 }
 
 func (p *Provisioner) removeDir(ui packer.Ui, comm packer.Communicator, dir string) error {
-	cmd := &packer.RemoteCmd{
-		Command: fmt.Sprintf("rm -fr '%s'", dir),
-	}
-
+	cmd := &packer.RemoteCmd{Command: p.guestCommands.RemoveDir(dir)}
 	if err := cmd.StartWithUi(comm, ui); err != nil {
 		return err
 	}
@@ -348,4 +382,99 @@ func (p *Provisioner) uploadDirectory(ui packer.Ui, comm packer.Communicator, ds
 	}
 
 	return comm.UploadDir(dst, src, nil)
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
+	return winRMPass
+}
+
+func (p *Provisioner) createCommandTextPrivileged(input string) (output string, err error) {
+	// OK so we need an elevated shell runner to wrap our command, this is
+	// going to have its own path generate the script and update the command
+	// runner in the process
+	path, err := p.generateElevatedRunner(input)
+	if err != nil {
+		return "", fmt.Errorf("Error generating elevated runner: %s", err)
+	}
+
+	// Return the path to the elevated shell wrapper
+	output = fmt.Sprintf("powershell -executionpolicy bypass -file \"%s\"", path)
+
+	return output, err
+}
+
+func (p *Provisioner) generateElevatedRunner(command string) (uploadedPath string, err error) {
+	log.Printf("Building elevated command wrapper for: %s", command)
+
+	var buffer bytes.Buffer
+
+	// Output from the elevated command cannot be returned directly to the
+	// Packer console. In order to be able to view output from elevated
+	// commands and scripts an indirect approach is used by which the commands
+	// output is first redirected to file. The output file is then 'watched'
+	// by Packer while the elevated command is running and any content
+	// appearing in the file is written out to the console.  Below the portion
+	// of command required to redirect output from the command to file is
+	// built and appended to the existing command string
+	taskName := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
+	// Only use %ENVVAR% format for environment variables when setting the log
+	// file path; Do NOT use $env:ENVVAR format as it won't be expanded
+	// correctly in the elevatedTemplate
+	logFile := `%SYSTEMROOT%/Temp/` + taskName + ".out"
+	command += fmt.Sprintf(" > %s 2>&1", logFile)
+
+	// elevatedTemplate wraps the command in a single quoted XML text string
+	// so we need to escape characters considered 'special' in XML.
+	err = xml.EscapeText(&buffer, []byte(command))
+	if err != nil {
+		return "", fmt.Errorf("Error escaping characters special to XML in command %s: %s", command, err)
+	}
+	escapedCommand := buffer.String()
+	log.Printf("Command [%s] converted to [%s] for use in XML string", command, escapedCommand)
+	buffer.Reset()
+
+	// Escape chars special to PowerShell in the ElevatedUser string
+	escapedElevatedUser := psEscape.Replace(p.config.ElevatedUser)
+	if escapedElevatedUser != p.config.ElevatedUser {
+		log.Printf("Elevated user %s converted to %s after escaping chars special to PowerShell",
+			p.config.ElevatedUser, escapedElevatedUser)
+	}
+	// Replace ElevatedPassword for winrm users who used this feature
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
+	}
+
+	p.config.ElevatedPassword, _ = interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
+
+	// Escape chars special to PowerShell in the ElevatedPassword string
+	escapedElevatedPassword := psEscape.Replace(p.config.ElevatedPassword)
+	if escapedElevatedPassword != p.config.ElevatedPassword {
+		log.Printf("Elevated password %s converted to %s after escaping chars special to PowerShell",
+			p.config.ElevatedPassword, escapedElevatedPassword)
+	}
+
+	// Generate command
+	err = elevatedTemplate.Execute(&buffer, elevatedOptions{
+		User:              escapedElevatedUser,
+		Password:          escapedElevatedPassword,
+		TaskName:          taskName,
+		TaskDescription:   "Packer elevated task",
+		LogFile:           logFile,
+		XMLEscapedCommand: escapedCommand,
+	})
+
+	if err != nil {
+		fmt.Printf("Error creating elevated template: %s", err)
+		return "", err
+	}
+	uuid := uuid.TimeOrderedUUID()
+	path := fmt.Sprintf(`C:/Windows/Temp/packer-elevated-shell-%s.ps1`, uuid)
+	log.Printf("Uploading elevated shell wrapper for command [%s] to [%s]", command, path)
+	err = p.communicator.Upload(path, &buffer, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error preparing elevated powershell script: %s", err)
+	}
+	return path, err
 }
