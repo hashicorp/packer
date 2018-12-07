@@ -36,18 +36,22 @@ type Builder struct {
 	runner multistep.Runner
 }
 
+type EngineVarsTemplate struct {
+	BuildRegion string
+	SourceAMI   string
+}
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
+	// Create passthrough for {{ .BuildRegion }} and {{ .SourceAMI }} variables
+	// so we can fill them in later
+	b.config.ctx.Data = &EngineVarsTemplate{
+		BuildRegion: `{{ .BuildRegion }}`,
+		SourceAMI:   `{{ .SourceAMI }} `,
+	}
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
-		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{
-				"run_tags",
-				"spot_tags",
-				"ebs_volumes",
-			},
-		},
 	}, raws...)
 	if err != nil {
 		return nil, err
