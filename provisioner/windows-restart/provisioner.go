@@ -24,10 +24,10 @@ var TryCheckReboot = `shutdown /r /f /t 60 /c "packer restart test"`
 var AbortReboot = `shutdown /a`
 
 var KeyTestCommands = []string{
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending"`),
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackagePending"`),
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootInProgress"`),
-	winrm.Powershell(`Test-Path "HKEY_LOCAL_MACHINE:SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\Pending"`),
+	winrm.Powershell(`Test-Path "HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending"`),
+	winrm.Powershell(`Test-Path "HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\PackagesPending"`),
+	winrm.Powershell(`Test-Path "HKLM:Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootInProgress"`),
+	winrm.Powershell(`Test-Path "HKLM:SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\Pending"`),
 }
 
 type Config struct {
