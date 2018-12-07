@@ -96,7 +96,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 && cmd.ExitStatus != 1115 && cmd.ExitStatus != 1190 && cmd.ExitStatus != 1717 {
+	if cmd.ExitStatus != 0 && cmd.ExitStatus != 1115 && cmd.ExitStatus != 1190 {
 		return fmt.Errorf("Restart script exited with non-zero exit status: %d", cmd.ExitStatus)
 	}
 
