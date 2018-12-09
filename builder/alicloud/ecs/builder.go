@@ -57,6 +57,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, err
 	}
 
+	if b.config.PackerConfig.PackerForce {
+		b.config.AlicloudImageForceDelete = true
+		b.config.AlicloudImageForceDeleteSnapshots = true
+	}
+
 	// Accumulate any errors
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, b.config.AlicloudAccessConfig.Prepare(&b.config.ctx)...)
@@ -169,6 +174,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			AlicloudImageForceDeleteSnapshots: b.config.AlicloudImageForceDeleteSnapshots,
 			AlicloudImageForceDelete:          b.config.AlicloudImageForceDelete,
 			AlicloudImageName:                 b.config.AlicloudImageName,
+			AlicloudImageDestinationRegions:   b.config.AlicloudImageConfig.AlicloudImageDestinationRegions,
+			AlicloudImageDestinationNames:     b.config.AlicloudImageConfig.AlicloudImageDestinationNames,
 		})
 
 	if b.config.AlicloudImageIgnoreDataDisks {
