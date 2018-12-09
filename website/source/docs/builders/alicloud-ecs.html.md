@@ -158,13 +158,17 @@ builder.
     those disks containing lots of data, it may require a higher timeout value.
 
 -   `image_force_delete` (boolean) - If this value is true, when the target
-    image name is duplicated with an existing image, it will delete the
-    existing image and then create the target image, otherwise, the creation
-    will fail. The default value is false.
+    image names including those copied are duplicated with existing images, 
+    it will delete the existing images and then create the target images, 
+    otherwise, the creation will fail. The default value is false. Check 
+    `image_name` and `image_copy_names` options for names of target images.
+    If [-force](https://packer.io/docs/commands/build.html#force) option is provided
+    in `build` command, this option can be omitted and taken as true.
 
 -   `image_force_delete_snapshots` (boolean) - If this value is true, when
-    delete the duplicated existing image, the source snapshot of this image
-    will be delete either.
+    delete the duplicated existing images, the source snapshots of those images
+    will be delete either. If [-force](https://packer.io/docs/commands/build.html#force) 
+    option is provided in `build` command, this option can be omitted and taken as true.
 
 -   `image_share_account` (array of string) - The IDs of to-be-added Aliyun
     accounts to which the image is shared. The number of accounts is 1 to 10.
