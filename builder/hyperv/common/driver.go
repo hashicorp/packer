@@ -74,7 +74,7 @@ type Driver interface {
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
 
 	DeleteVirtualMachine(string) error
 
