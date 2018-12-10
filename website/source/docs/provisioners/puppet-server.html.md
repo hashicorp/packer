@@ -81,7 +81,8 @@ listed below:
 -   `puppet_bin_dir` (string) - Path to the Puppet binary. Ideally the program
     should be on the system (unix: `$PATH`, windows: `%PATH%`), but some
     builders (eg. Docker) do not run profile-setup scripts and therefore PATH
-    might be empty or minimal.
+    might be empty or minimal. On Windows, spaces should be `^`-escaped, i.e.
+    `c:/program^ files/puppet^ labs/puppet/bin`.
 
 -   `puppet_node` (string) - The name of the node. If this isn't set, the fully
     qualified domain name will be used.
