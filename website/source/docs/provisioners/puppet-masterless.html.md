@@ -101,7 +101,8 @@ manifests you should use `manifest_file` instead.
 -   `puppet_bin_dir` (string) - Path to the Puppet binary. Ideally the program
     should be on the system (unix: `$PATH`, windows: `%PATH%`), but some
     builders (eg. Docker) do not run profile-setup scripts and therefore PATH
-    might be empty or minimal.
+    might be empty or minimal. On Windows, spaces should be `^`-escaped, i.e.
+    `c:/program^ files/puppet^ labs/puppet/bin`.
 
 -   `staging_directory` (string) - Directory to where uploaded files will be
     placed (unix: "/tmp/packer-puppet-masterless", windows:
