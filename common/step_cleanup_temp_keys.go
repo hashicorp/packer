@@ -19,13 +19,6 @@ func (s *StepCleanupTempKeys) Run(_ context.Context, state multistep.StateBag) m
 	// so there's no realistic situation where these keys can cause issues.
 	// However, it's nice to clean up after yourself.
 
-	if s.Comm.Type == "none" {
-		return multistep.ActionContinue
-	}
-
-	comm := state.Get("communicator").(packer.Communicator)
-	ui := state.Get("ui").(packer.Ui)
-
 	if !s.Comm.SSHClearAuthorizedKeys {
 		return multistep.ActionContinue
 	}
@@ -37,6 +30,9 @@ func (s *StepCleanupTempKeys) Run(_ context.Context, state multistep.StateBag) m
 	if s.Comm.SSHTemporaryKeyPairName == "" {
 		return multistep.ActionContinue
 	}
+
+	comm := state.Get("communicator").(packer.Communicator)
+	ui := state.Get("ui").(packer.Ui)
 
 	cmd := new(packer.RemoteCmd)
 
