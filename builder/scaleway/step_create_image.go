@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/dustin/go-humanize"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/scaleway/scaleway-cli/pkg/api"
@@ -18,22 +19,40 @@ func (s *stepImage) Run(_ context.Context, state multistep.StateBag) multistep.S
 	c := state.Get("config").(*Config)
 	snapshotID := state.Get("snapshot_id").(string)
 	bootscriptID := ""
+	arch := ""
 
 	ui.Say(fmt.Sprintf("Creating image: %v", c.ImageName))
 
-	image, err := client.GetImage(c.Image)
+	_, err := humanize.ParseBytes(c.Image)
 	if err != nil {
-		err := fmt.Errorf("Error getting initial image info: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		image, err := client.GetImage(c.Image)
+		if err != nil {
+			err := fmt.Errorf("Error getting initial image info: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		if image.DefaultBootscript != nil {
+			bootscriptID = image.DefaultBootscript.Identifier
+		}
+		arch = image.Arch
+	} else {
+		// default to bootscript arch to find the arch of the image
+		if c.Bootscript != "" {
+			bootscripts, err := client.ResolveBootscript(c.Bootscript)
+			if err != nil || len(bootscripts) == 0 {
+				err := fmt.Errorf("Error getting arch from bootscript: %s", err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+			// pick the first one anyways
+			arch = bootscripts[0].Arch
+		}
 	}
 
-	if image.DefaultBootscript != nil {
-		bootscriptID = image.DefaultBootscript.Identifier
-	}
-
-	imageID, err := client.PostImage(snapshotID, c.ImageName, bootscriptID, image.Arch)
+	imageID, err := client.PostImage(snapshotID, c.ImageName, bootscriptID, arch)
 	if err != nil {
 		err := fmt.Errorf("Error creating image: %s", err)
 		state.Put("error", err)
