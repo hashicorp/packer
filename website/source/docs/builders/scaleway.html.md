@@ -49,7 +49,8 @@ builder.
 -   `image` (string) - The UUID of the base image to use. This is the image
     that will be used to launch a new server and provision it. See
     <https://api-marketplace.scaleway.com/images> get the complete list of the
-    accepted image UUID.
+    accepted image UUID. You can also specify a size compatible with the
+    instance type which will then creae a blank base image.
 
 -   `region` (string) - The name of the region to launch the server in (`par1`
     or `ams1`). Consequently, this is the region where the snapshot will be
@@ -88,7 +89,7 @@ access tokens:
   "type": "scaleway",
   "api_access_key": "YOUR API ACCESS KEY",
   "api_token": "YOUR TOKEN",
-  "image": "UUID OF THE BASE IMAGE",
+  "image": "UUID OF THE BASE IMAGE OR SIZE FOR A BLANK IMAGE",
   "region": "par1",
   "commercial_type": "START1-S",
   "ssh_username": "root",
