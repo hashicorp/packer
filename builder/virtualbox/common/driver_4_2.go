@@ -25,7 +25,7 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 	}
 
 	portCountArg := "--sataportcount"
-	if strings.HasPrefix(version, "4.3") || strings.HasPrefix(version, "5.") {
+	if strings.HasPrefix(version, "4.3") || strings.HasPrefix(version, "5.") || strings.HasPrefix(version, "6.") {
 		portCountArg = "--portcount"
 	}
 
