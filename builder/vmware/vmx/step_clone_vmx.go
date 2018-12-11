@@ -39,9 +39,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	log.Printf("Cloning to: %s", vmxPath)
 
 	if err := driver.Clone(vmxPath, s.Path, s.Linked); err != nil {
-		state.Put("error", err)
 		return halt(err)
-
 	}
 
 	// Read in the machine configuration from the cloned VMX file
@@ -102,8 +100,7 @@ func (s *StepCloneVMX) Run(_ context.Context, state multistep.StateBag) multiste
 	}
 
 	if len(diskFullPaths) == 0 {
-		state.Put("error", fmt.Errorf("Could not enumerate disk info from the vmx file"))
-		return multistep.ActionHalt
+		return halt(fmt.Errorf("Could not enumerate disk info from the vmx file"))
 	}
 
 	// Determine the network type by reading out of the .vmx
