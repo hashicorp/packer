@@ -18,7 +18,7 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	client := state.Get("client").(*api.ScalewayAPI)
 	ui := state.Get("ui").(packer.Ui)
 	c := state.Get("config").(*Config)
-	tags := []string{}
+	env := ""
 	var bootscript *string
 
 	ui.Say("Creating server...")
@@ -28,18 +28,21 @@ func (s *stepCreateServer) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	if c.Comm.SSHPublicKey != nil {
-		tags = []string{fmt.Sprintf("AUTHORIZED_KEY=%s", strings.Replace(strings.TrimSpace(string(c.Comm.SSHPublicKey)), " ", "_", -1))}
+		env = fmt.Sprintf("AUTHORIZED_KEY=%s", strings.Replace(strings.TrimSpace(string(c.Comm.SSHPublicKey)), " ", "_", -1))
 	}
 
-	server, err := client.PostServer(api.ScalewayServerDefinition{
-		Name:           c.ServerName,
-		Image:          &c.Image,
-		Organization:   c.Organization,
-		CommercialType: c.CommercialType,
-		Tags:           tags,
-		Bootscript:     bootscript,
-		BootType:       c.BootType,
-	})
+	serverconfig := api.ConfigCreateServer{
+		ImageName:         c.Image,
+		Name:              c.ServerName,
+		IP:                "",
+		DynamicIPRequired: true,
+		CommercialType:    c.CommercialType,
+		Env:               env,
+		Bootscript:        *bootscript,
+		BootType:          c.BootType,
+	}
+
+	server, err := api.CreateServer(client, &serverconfig)
 
 	if err != nil {
 		err := fmt.Errorf("Error creating server: %s", err)
