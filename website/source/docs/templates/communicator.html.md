@@ -170,6 +170,8 @@ And the following MACs:
 The WinRM communicator has the following options.
 
 -   `winrm_host` (string) - The address for WinRM to connect to.
+    
+    NOTE: If using an Amazon EBS builder, you can specify the interface WinRM connects to via [`ssh_interface`](https://www.packer.io/docs/builders/amazon-ebs.html#ssh_interface)
 
 -   `winrm_insecure` (boolean) - If `true`, do not check server certificate
     chain and host name.
