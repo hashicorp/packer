@@ -110,6 +110,7 @@ func (c *AccessConfig) Session() (*session.Session, error) {
 	if c.DecodeAuthZMessages {
 		DecodeAuthZMessages(c.session)
 	}
+	LogEnvOverrideWarnings()
 
 	return c.session, nil
 }
