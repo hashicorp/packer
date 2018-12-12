@@ -185,8 +185,8 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
     information see the [section on ECR](#amazon-ec2-container-registry).
 
 -   `exec_user` (string) - Username or UID (format:
-    &lt;name\|uid&gt;\[:&lt;group\|gid&gt;\]) to run remote commands with. You
-    may need this if you get permission errors trying to run the `shell` or
+    &lt;name\\\|uid&gt;\[:&lt;group\\\|gid&gt;\]) to run remote commands with.
+    You may need this if you get permission errors trying to run the `shell` or
     other provisioners.
 
 -   `login` (boolean) - Defaults to false. If true, the builder will login in
@@ -380,8 +380,9 @@ portable provisioning scripts.
 
 ## Overriding the host directory
 
-By default, Packer creates a temporary folder under your system temporary directory, 
-and uses that to stage files for uploading into the container. If you would like to
-change the path to this temporary folder, you can set the `TMP_DIR`
-environment variable. This can be useful, for example, if you have your home
-directory permissions set up to disallow access from the docker daemon.
+By default, Packer creates a temporary folder under your system temporary
+directory, and uses that to stage files for uploading into the container. If
+you would like to change the path to this temporary folder, you can set
+environment variable `TMPDIR` (Unix) / `TMP` `TEMP` `USERPROFILE` (Windows) .
+This can be useful, for example, if you have your home directory permissions
+set up to disallow access from the docker daemon.
