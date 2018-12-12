@@ -21,29 +21,7 @@ func ConfigDir() (string, error) {
 	return configDir()
 }
 
-// ConfigTmpDir returns the configuration tmp directory for Packer
-func ConfigTmpDir() (string, error) {
-	if tmpdir := os.Getenv("PACKER_TMP_DIR"); tmpdir != "" {
-		return filepath.Abs(tmpdir)
-	}
-	configdir, err := configDir()
-	if err != nil {
-		return "", err
-	}
-	td := filepath.Join(configdir, "tmp")
-	_, err = os.Stat(td)
-	if os.IsNotExist(err) {
-		if err = os.MkdirAll(td, 0755); err != nil {
-			return "", err
-		}
-	} else if err != nil {
-		return "", err
-	}
-	return td, nil
-}
-
 func homeDir() (string, error) {
-
 	// First prefer the HOME environmental variable
 	if home := os.Getenv("HOME"); home != "" {
 		log.Printf("Detected home directory from env var: %s", home)

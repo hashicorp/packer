@@ -3,11 +3,11 @@ package docker
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 // StepTempDir creates a temporary directory that we use in order to
@@ -21,13 +21,7 @@ func (s *StepTempDir) Run(_ context.Context, state multistep.StateBag) multistep
 
 	ui.Say("Creating a temporary directory for sharing data...")
 
-	var err error
-	var tempdir string
-
-	configTmpDir, err := packer.ConfigTmpDir()
-	if err == nil {
-		tempdir, err = ioutil.TempDir(configTmpDir, "packer-docker")
-	}
+	tempdir, err := tmp.Dir("packer-docker")
 	if err != nil {
 		err := fmt.Errorf("Error making temp dir: %s", err)
 		state.Put("error", err)

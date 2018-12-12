@@ -29,6 +29,7 @@ import (
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -499,7 +500,7 @@ func newUserKey(pubKeyFile string) (*userKey, error) {
 		Headers: nil,
 		Bytes:   privateKeyDer,
 	}
-	tf, err := ioutil.TempFile("", "ansible-key")
+	tf, err := tmp.File("ansible-key")
 	if err != nil {
 		return nil, errors.New("failed to create temp file for generated key")
 	}
