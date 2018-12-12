@@ -1,27 +1,24 @@
 // Package tmp provides temporary directory helpers.
 //
 // tmp stores temporary items in the system's
-// temporary directory ( see os.TempDir ).
+// temporary directory ( see os.TempDir ) unless
+// a corresponding environment variable is set.git
 //
-// When the $TMPDIR_SUFFIX environment variable
-// is set, tmp will return paths under $TMPDIR_SUFFIX
-// inside the system temporary directory.
+// On Unix systems, it uses $TMPDIR if non-empty, else /tmp.
+// On Windows, it uses GetTempPath, returning the first non-empty
+// value from %TMP%, %TEMP%, %USERPROFILE%, or the Windows directory.
+// On Plan 9, it returns /tmp.
 //
+// The directory is neither guaranteed to exist nor have accessible
+// permissions.
 package tmp
 
 import (
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 var tmpDir = os.TempDir()
-
-func init() {
-	if d := os.Getenv("TMPDIR_SUFFIX"); d != "" {
-		tmpDir = filepath.Join(tmpDir, d)
-	}
-}
 
 // Dir creates a new temporary directory in the system temporary
 // directory with a name beginning with prefix and returns the path

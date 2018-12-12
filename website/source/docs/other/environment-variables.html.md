@@ -48,7 +48,3 @@ each can be found below:
     might be necessary to customize it when working with large files since
     `/tmp` is a memory-backed filesystem in some Linux distributions in which
     case `/var/tmp` might be preferred.
-
--   `TMPDIR_SUFFIX` - When set, packer will put temporary files under system
-    temporary directory + `TMPDIR_SUFFIX`. This allows to create & to give
-    specific rights to a directory ie: `chmod 777 $TMPDIR/$TMPDIR_SUFFIX/`
