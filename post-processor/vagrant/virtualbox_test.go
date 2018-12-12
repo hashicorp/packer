@@ -1,11 +1,11 @@
 package vagrant
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,8 +14,10 @@ func TestVBoxProvider_impl(t *testing.T) {
 }
 
 func TestDecomressOVA(t *testing.T) {
-	td, err := ioutil.TempDir("", "pp-vagrant-virtualbox")
+	td, err := tmp.Dir("pp-vagrant-virtualbox")
 	assert.NoError(t, err)
+	defer os.RemoveAll(td)
+
 	fixture := "../../common/test-fixtures/decompress-tar/outside_parent.tar"
 	err = DecompressOva(td, fixture)
 	assert.NoError(t, err)
@@ -23,5 +25,4 @@ func TestDecomressOVA(t *testing.T) {
 	assert.Error(t, err)
 	_, err = os.Stat(filepath.Join(td, "demo.poc"))
 	assert.NoError(t, err)
-	os.RemoveAll(td)
 }

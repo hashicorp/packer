@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -153,7 +153,7 @@ func (s *StepDownloadGuestAdditions) downloadAdditionsSHA256(ctx context.Context
 		"https://download.virtualbox.org/virtualbox/%s/SHA256SUMS",
 		additionsVersion)
 
-	checksumsFile, err := ioutil.TempFile("", "packer")
+	checksumsFile, err := tmp.File("packer")
 	if err != nil {
 		state.Put("error", fmt.Errorf(
 			"Failed creating temporary file to store guest addition checksums: %s",

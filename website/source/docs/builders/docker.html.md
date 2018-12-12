@@ -380,8 +380,8 @@ portable provisioning scripts.
 
 ## Overriding the host directory
 
-By default, Packer creates a temporary folder under your home directory, and
-uses that to stage files for uploading into the container. If you would like to
-change the path to this temporary folder, you can set the `PACKER_TMP_DIR`
+By default, Packer creates a temporary folder under your system temporary directory, 
+and uses that to stage files for uploading into the container. If you would like to
+change the path to this temporary folder, you can set the `TMP_DIR`
 environment variable. This can be useful, for example, if you have your home
 directory permissions set up to disallow access from the docker daemon.
