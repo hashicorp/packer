@@ -8,7 +8,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sort"
@@ -20,6 +19,7 @@ import (
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -233,7 +233,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 // Takes the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
 func extractScript(p *Provisioner) (string, error) {
-	temp, err := ioutil.TempFile(os.TempDir(), "packer-powershell-provisioner")
+	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
 	}

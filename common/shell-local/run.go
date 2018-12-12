@@ -3,7 +3,6 @@ package shell_local
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -107,7 +107,7 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 }
 
 func createInlineScriptFile(config *Config) (string, error) {
-	tf, err := ioutil.TempFile("", "packer-shell")
+	tf, err := tmp.File("packer-shell")
 	if err != nil {
 		return "", fmt.Errorf("Error preparing shell script: %s", err)
 	}

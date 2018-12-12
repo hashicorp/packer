@@ -2,7 +2,6 @@ package ansiblelocal
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -212,7 +212,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if len(p.config.InventoryFile) == 0 {
-		tf, err := ioutil.TempFile("", "packer-provisioner-ansible-local")
+		tf, err := tmp.File("packer-provisioner-ansible-local")
 		if err != nil {
 			return fmt.Errorf("Error preparing inventory file: %s", err)
 		}

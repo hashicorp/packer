@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/hashicorp/packer/template/interpolate"
 )
 
@@ -216,7 +216,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	// If we have an inline script, then turn that into a temporary
 	// shell script and use that.
 	if p.config.Inline != nil {
-		tf, err := ioutil.TempFile("", "packer-shell")
+		tf, err := tmp.File("packer-shell")
 		if err != nil {
 			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
@@ -242,7 +242,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 	}
 
 	if p.config.UseEnvVarFile == true {
-		tf, err := ioutil.TempFile("", "packer-shell-vars")
+		tf, err := tmp.File("packer-shell-vars")
 		if err != nil {
 			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
