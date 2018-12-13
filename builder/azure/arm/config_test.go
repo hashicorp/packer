@@ -669,7 +669,6 @@ func TestConfigShouldRejectMalformedManagedImageOSDiskSnapshotName(t *testing.T)
 	}
 
 	malformedManagedImageOSDiskSnapshotName := []string{
-		"min_ten",
 		"-leading-hyphen",
 		"trailing-hyphen-",
 		"trailing-period.",
@@ -720,7 +719,6 @@ func TestConfigShouldRejectMalformedManagedImageDataDiskSnapshotPrefix(t *testin
 	}
 
 	malformedManagedImageDataDiskSnapshotPrefix := []string{
-		"more_ten",
 		"-leading-hyphen",
 		"trailing-hyphen-",
 		"trailing-period.",
