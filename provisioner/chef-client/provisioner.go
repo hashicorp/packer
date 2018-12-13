@@ -14,6 +14,7 @@ import (
 
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
+	commonhelper "github.com/hashicorp/packer/helper/common"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/provisioner"
@@ -50,6 +51,8 @@ type Config struct {
 	ChefEnvironment            string   `mapstructure:"chef_environment"`
 	ClientKey                  string   `mapstructure:"client_key"`
 	ConfigTemplate             string   `mapstructure:"config_template"`
+	ElevatedUser               string   `mapstructure:"elevated_user"`
+	ElevatedPassword           string   `mapstructure:"elevated_password"`
 	EncryptedDataBagSecretPath string   `mapstructure:"encrypted_data_bag_secret_path"`
 	ExecuteCommand             string   `mapstructure:"execute_command"`
 	GuestOSType                string   `mapstructure:"guest_os_type"`
@@ -76,6 +79,7 @@ type Config struct {
 
 type Provisioner struct {
 	config            Config
+	communicator      packer.Communicator
 	guestOSTypeConfig guestOSTypeConfig
 	guestCommands     *provisioner.GuestCommands
 }
@@ -92,6 +96,10 @@ type ConfigTemplate struct {
 	TrustedCertsDir            string
 	ValidationClientName       string
 	ValidationKeyPath          string
+}
+
+type EnvVarsTemplate struct {
+	WinRMPassword string
 }
 
 type ExecuteTemplate struct {
@@ -111,6 +119,12 @@ type KnifeTemplate struct {
 }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
+	// Create passthrough for winrm password so we can fill it in once we know
+	// it
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: `{{.WinRMPassword}}`,
+	}
+
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
@@ -220,6 +234,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
+
+	p.communicator = comm
 
 	nodeName := p.config.NodeName
 	if nodeName == "" {
@@ -551,6 +567,13 @@ func (p *Provisioner) executeChef(ui packer.Ui, comm packer.Communicator, config
 		return err
 	}
 
+	if p.config.ElevatedUser != "" {
+		command, err = provisioner.GenerateElevatedRunner(command, p)
+		if err != nil {
+			return err
+		}
+	}
+
 	ui.Message(fmt.Sprintf("Executing Chef: %s", command))
 
 	cmd := &packer.RemoteCmd{
@@ -674,6 +697,31 @@ func (p *Provisioner) processJsonUserVars() (map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+func getWinRMPassword(buildName string) string {
+	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
+	return winRMPass
+}
+
+func (p *Provisioner) Communicator() packer.Communicator {
+	return p.communicator
+}
+
+func (p *Provisioner) ElevatedUser() string {
+	return p.config.ElevatedUser
+}
+
+func (p *Provisioner) ElevatedPassword() string {
+	// Replace ElevatedPassword for winrm users who used this feature
+	p.config.ctx.Data = &EnvVarsTemplate{
+		WinRMPassword: getWinRMPassword(p.config.PackerBuildName),
+	}
+
+	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
+
+	return elevatedPassword
 }
 
 var DefaultConfigTemplate = `
