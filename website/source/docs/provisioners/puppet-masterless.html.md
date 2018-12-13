@@ -116,7 +116,7 @@ manifests you should use `manifest_file` instead.
 
 -   `elevated_user` and `elevated_password` (string) - If specified, Puppet
     will be run with elevated privileges using the given Windows user. See the
-    [powershell](/docs/provisioners/powershell.html) provider for the full
+    [powershell](/docs/provisioners/powershell.html) provisioner for the full
     details.
 
 ## Execute Command
