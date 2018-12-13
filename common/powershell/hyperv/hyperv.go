@@ -395,7 +395,7 @@ if (!$VirtualMachinePath){
     $VirtualMachinePath = Get-ChildItem -Path $importPath -Filter *.xml -Recurse -ErrorAction SilentlyContinue | select -First 1 | %{$_.FullName}
 }
 
-$compatibilityReport = Hyper-V\Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId
+$compatibilityReport = Hyper-V\Compare-VM -Path $VirtualMachinePath -VirtualMachinePath $importPath -SmartPagingFilePath $importPath -SnapshotFilePath $importPath -VhdDestinationPath $VirtualHarddisksPath -GenerateNewId -Copy
 if ($vhdPath){
 	Copy-Item -Path $harddrivePath -Destination $vhdPath
 	$existingFirstHarddrive = $compatibilityReport.VM.HardDrives | Select -First 1
