@@ -104,7 +104,9 @@ func (p *PostProcessor) PostProcess(ui packer.Ui, artifact packer.Artifact) (pac
 	s := artifact.State(vmwcommon.ArtifactConfSkipExport)
 
 	if f != "" && k != "true" && s == "false" {
-		return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
+		if artifact.BuilderId() == vmwcommon.BuilderIdESX {
+			return nil, false, errors.New("To use this post-processor with exporting behavior you need set keep_registered as true")
+		}
 	}
 
 	// In some occasions the VM state is powered on and if we immediately try to mark as template
