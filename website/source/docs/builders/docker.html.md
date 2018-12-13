@@ -210,7 +210,7 @@ You must specify (only) one of `commit`, `discard`, or `export_path`.
 
 -   `run_command` (array of strings) - An array of arguments to pass to
     `docker run` in order to run the container. By default this is set to
-    `["-d", "-i", "-t", "{{.Image}}", "/bin/bash"]`. As you can see, you have a
+    `["-d", "-i", "-t", "{{.Image}}", "/bin/sh"]`. As you can see, you have a
     couple template variables to customize, as well.
 
 -   `volumes` (map of strings to strings) - A mapping of additional volumes to
