@@ -56,8 +56,8 @@ var (
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
-	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{10,79}$")
-	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{10,59}$")
+	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{1,79}$")
+	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{1,59}$")
 )
 
 type PlanInformation struct {
