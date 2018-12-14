@@ -200,6 +200,43 @@ func TestFuncTemplatePath(t *testing.T) {
 	}
 }
 
+func TestFuncSplit(t *testing.T) {
+	cases := []struct {
+		Input         string
+		Output        string
+		ErrorExpected bool
+	}{
+		{
+			`{{split build_name "-" 0}}`,
+			"foo",
+			false,
+		},
+		{
+			`{{split build_name "-" 1}}`,
+			"bar",
+			false,
+		},
+		{
+			`{{split build_name "-" 2}}`,
+			"",
+			true,
+		},
+	}
+
+	ctx := &Context{BuildName: "foo-bar"}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if (err == nil) == tc.ErrorExpected {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
+	}
+}
+
 func TestFuncTimestamp(t *testing.T) {
 	expected := strconv.FormatInt(InitTime.Unix(), 10)
 
@@ -276,5 +313,44 @@ func TestFuncPackerVersion(t *testing.T) {
 	if !strings.HasPrefix(result, version.Version) {
 		t.Fatalf("Expected input to include: %s\n\nGot: %s",
 			version.Version, result)
+	}
+}
+
+func TestFuncSed(t *testing.T) {
+	cases := []struct {
+		Input  string
+		Output string
+	}{
+		{
+			`{{sed "s|hello|world|" "hello"}}`,
+			`world`,
+		},
+
+		{
+			`{{sed "s|foo|bar|" "hello"}}`,
+			`hello`,
+		},
+
+		{
+			`{{user "foo" | sed "s|foo|bar|"}}`,
+			`bar`,
+		},
+	}
+
+	ctx := &Context{
+		UserVariables: map[string]string{
+			"foo": "foo",
+		},
+	}
+	for _, tc := range cases {
+		i := &I{Value: tc.Input}
+		result, err := i.Render(ctx)
+		if err != nil {
+			t.Fatalf("Input: %s\n\nerr: %s", tc.Input, err)
+		}
+
+		if result != tc.Output {
+			t.Fatalf("Input: %s\n\nGot: %s", tc.Input, result)
+		}
 	}
 }

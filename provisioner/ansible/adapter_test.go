@@ -24,7 +24,7 @@ func TestAdapter_Serve(t *testing.T) {
 
 	config := &ssh.ServerConfig{}
 
-	ui := new(ui)
+	ui := new(packer.NoopUi)
 
 	sut := newAdapter(done, &l, config, "", newUi(ui), communicator{})
 	go func() {
@@ -91,36 +91,6 @@ func (a addr) Network() string {
 
 func (a addr) String() string {
 	return "test"
-}
-
-type ui int
-
-func (u *ui) Ask(s string) (string, error) {
-	*u++
-	return s, nil
-}
-
-func (u *ui) Say(s string) {
-	*u++
-	log.Println(s)
-}
-
-func (u *ui) Message(s string) {
-	*u++
-	log.Println(s)
-}
-
-func (u *ui) Error(s string) {
-	*u++
-	log.Println(s)
-}
-
-func (u *ui) Machine(s1 string, s2 ...string) {
-	*u++
-	log.Println(s1)
-	for _, s := range s2 {
-		log.Println(s)
-	}
 }
 
 type communicator struct{}

@@ -22,7 +22,7 @@ type StepGetPassword struct {
 }
 
 func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// Skip if we're not using winrm
@@ -49,7 +49,7 @@ func (s *StepGetPassword) Run(_ context.Context, state multistep.StateBag) multi
 	server := state.Get("server").(*servers.Server)
 	var password string
 
-	privateKey, err := ssh.ParseRawPrivateKey([]byte(state.Get("privateKey").(string)))
+	privateKey, err := ssh.ParseRawPrivateKey(s.Comm.SSHPrivateKey)
 	if err != nil {
 		err = fmt.Errorf("Error parsing private key: %s", err)
 		state.Put("error", err)

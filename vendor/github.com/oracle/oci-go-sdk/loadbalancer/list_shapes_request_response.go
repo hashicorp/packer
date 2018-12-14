@@ -25,10 +25,24 @@ type ListShapesRequest struct {
 	// The value of the `opc-next-page` response header from the previous "List" call.
 	// Example: `3`
 	Page *string `mandatory:"false" contributesTo:"query" name:"page"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListShapesRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListShapesRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListShapesRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListShapesResponse wrapper for the ListShapes operation
@@ -37,7 +51,7 @@ type ListShapesResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []LoadBalancerShape instance
+	// A list of []LoadBalancerShape instances
 	Items []LoadBalancerShape `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -52,4 +66,9 @@ type ListShapesResponse struct {
 
 func (response ListShapesResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListShapesResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }

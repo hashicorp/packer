@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -13,22 +14,23 @@ import (
 )
 
 type StepRunSourceServer struct {
-	Name             string
-	SourceImage      string
-	SourceImageName  string
-	SecurityGroups   []string
-	Networks         []string
-	AvailabilityZone string
-	UserData         string
-	UserDataFile     string
-	ConfigDrive      bool
-	InstanceMetadata map[string]string
-	server           *servers.Server
+	Name                  string
+	SecurityGroups        []string
+	Networks              []string
+	Ports                 []string
+	AvailabilityZone      string
+	UserData              string
+	UserDataFile          string
+	ConfigDrive           bool
+	InstanceMetadata      map[string]string
+	UseBlockStorageVolume bool
+	server                *servers.Server
 }
 
 func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	flavor := state.Get("flavor_id").(string)
+	sourceImage := state.Get("source_image").(string)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client
@@ -39,9 +41,13 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 		return multistep.ActionHalt
 	}
 
-	networks := make([]servers.Network, len(s.Networks))
-	for i, networkUuid := range s.Networks {
-		networks[i].UUID = networkUuid
+	networks := make([]servers.Network, len(s.Networks)+len(s.Ports))
+	i := 0
+	for ; i < len(s.Ports); i++ {
+		networks[i].Port = s.Ports[i]
+	}
+	for ; i < len(networks); i++ {
+		networks[i].UUID = s.Networks[i]
 	}
 
 	userData := []byte(s.UserData)
@@ -58,8 +64,7 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 
 	serverOpts := servers.CreateOpts{
 		Name:             s.Name,
-		ImageRef:         s.SourceImage,
-		ImageName:        s.SourceImageName,
+		ImageRef:         sourceImage,
 		FlavorRef:        flavor,
 		SecurityGroups:   s.SecurityGroups,
 		Networks:         networks,
@@ -71,16 +76,39 @@ func (s *StepRunSourceServer) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	var serverOptsExt servers.CreateOptsBuilder
-	keyName, hasKey := state.GetOk("keyPair")
-	if hasKey {
-		serverOptsExt = keypairs.CreateOptsExt{
+
+	// Create root volume in the Block Storage service if required.
+	// Add block device mapping v2 to the server create options if required.
+	if s.UseBlockStorageVolume {
+		volume := state.Get("volume_id").(string)
+		blockDeviceMappingV2 := []bootfromvolume.BlockDevice{
+			{
+				BootIndex:       0,
+				DestinationType: bootfromvolume.DestinationVolume,
+				SourceType:      bootfromvolume.SourceVolume,
+				UUID:            volume,
+			},
+		}
+		// ImageRef and block device mapping is an invalid options combination.
+		serverOpts.ImageRef = ""
+		serverOptsExt = bootfromvolume.CreateOptsExt{
 			CreateOptsBuilder: serverOpts,
-			KeyName:           keyName.(string),
+			BlockDevice:       blockDeviceMappingV2,
 		}
 	} else {
 		serverOptsExt = serverOpts
 	}
 
+	// Add keypair to the server create options.
+	keyName := config.Comm.SSHKeyPairName
+	if keyName != "" {
+		serverOptsExt = keypairs.CreateOptsExt{
+			CreateOptsBuilder: serverOptsExt,
+			KeyName:           keyName,
+		}
+	}
+
+	ui.Say("Launching server...")
 	s.server, err = servers.Create(computeClient, serverOptsExt).Extract()
 	if err != nil {
 		err := fmt.Errorf("Error launching source server: %s", err)
@@ -118,7 +146,7 @@ func (s *StepRunSourceServer) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
 	// We need the v2 compute client

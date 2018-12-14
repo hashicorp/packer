@@ -19,7 +19,8 @@ provisioner helps to ease that process.
 
 Packer expects the machine to be ready to continue provisioning after it
 reboots. Packer detects that the reboot has completed by making an RPC call
-through the Windows Remote Management (WinRM) service, not by ACPI functions, so Windows must be completely booted in order to continue.
+through the Windows Remote Management (WinRM) service, not by ACPI functions,
+so Windows must be completely booted in order to continue.
 
 ## Basic Example
 
@@ -36,6 +37,28 @@ The example below is fully functional.
 The reference of available configuration options is listed below.
 
 Optional parameters:
+
+-   `check_registry` (bool) - if `true`, checks for several registry keys that
+    indicate that the system is going to reboot. This is useful if an
+    installation kicks off a reboot and you want the provisioner to wait for
+    that reboot to complete before reconnecting. Please note that this option is
+    a beta feature, and we generally recommend that you finish installs that
+    auto-reboot (like windows updates) during your autounattend phase before our
+    winrm provisioner connects.
+
+-   `registry_keys` (array of strings) - if `check-registry` is `true`,
+    windows-restart will not reconnect until after all of the listed keys are
+    no longer present in the registry.
+
+    default:
+
+    ```
+    var DefaultRegistryKeys = []string{
+      "HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootPending",
+      "HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\PackagesPending",
+      "HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootInProgress",
+    }
+    ```
 
 -   `restart_command` (string) - The command to execute to initiate the
     restart. By default this is `shutdown /r /f /t 0 /c "packer restart"`.

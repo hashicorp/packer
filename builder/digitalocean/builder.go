@@ -71,7 +71,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	// Set up the state
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("client", client)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -87,9 +87,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      commHost,
-			SSHConfig: sshConfig,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		new(stepShutdown),
 		new(stepPowerOff),
 		new(stepSnapshot),

@@ -64,12 +64,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HTTPPortMax: b.config.HTTPPortMax,
 		},
 		&stepKeypair{
-			Debug:                b.config.PackerDebug,
-			DebugKeyPath:         fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
-			KeyPair:              b.config.Keypair,
-			PrivateKeyFile:       b.config.Comm.SSHPrivateKey,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			TemporaryKeyPairName: b.config.TemporaryKeypairName,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.Comm,
+			DebugKeyPath: fmt.Sprintf("cs_%s.pem", b.config.PackerBuildName),
 		},
 		&stepCreateSecurityGroup{},
 		&stepCreateInstance{
@@ -78,16 +75,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 		&stepSetupNetworking{},
 		&communicator.StepConnect{
-			Config: &b.config.Comm,
-			Host:   commHost,
-			SSHConfig: sshConfig(
-				b.config.Comm.SSHAgentAuth,
-				b.config.Comm.SSHUsername,
-				b.config.Comm.SSHPassword),
+			Config:    &b.config.Comm,
+			Host:      commHost,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			SSHPort:   commPort,
 			WinRMPort: commPort,
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 		&stepShutdownInstance{},
 		&stepCreateTemplate{},
 	}

@@ -44,8 +44,8 @@ Any [communicator](/docs/templates/communicator.html) defined is ignored.
 
 ### Optional:
 
-You can only define one of `source` or `content`. If none of them is
-defined the artifact will be empty.
+You can only define one of `source` or `content`. If none of them is defined
+the artifact will be empty.
 
 -   `source` (string) - The path for a file which will be copied as the
     artifact.

@@ -1,13 +1,15 @@
 package compute
 
+// VirtNICSetsClient defines a virtual set nic client
 type VirtNICSetsClient struct {
 	ResourceClient
 }
 
-func (c *ComputeClient) VirtNICSets() *VirtNICSetsClient {
+// VirtNICSets returns a virtual nic sets client
+func (c *Client) VirtNICSets() *VirtNICSetsClient {
 	return &VirtNICSetsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "Virtual NIC Set",
 			ContainerPath:       "/network/v1/vnicset/",
 			ResourceRootPath:    "/network/v1/vnicset",
@@ -15,22 +17,25 @@ func (c *ComputeClient) VirtNICSets() *VirtNICSetsClient {
 	}
 }
 
-// Describes an existing virtual nic set
+// VirtualNICSet describes an existing virtual nic set
 type VirtualNICSet struct {
 	// List of ACLs applied to the VNICs in the set.
 	AppliedACLs []string `json:"appliedAcls"`
 	// Description of the VNIC Set.
 	Description string `json:"description"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// Name of the VNIC set.
-	Name string `json:"name"`
+	Name string
 	// The three-part name (/Compute-identity_domain/user/object) of the virtual NIC set.
 	Tags []string `json:"tags"`
 	// Uniform Resource Identifier
-	Uri string `json:"uri"`
+	URI string `json:"uri"`
 	// List of VNICs associated with this VNIC set.
 	VirtualNICs []string `json:"vnics"`
 }
 
+// CreateVirtualNICSetInput specifies the details of the virutal nic set to create
 type CreateVirtualNICSetInput struct {
 	// List of ACLs applied to the VNICs in the set.
 	// Optional
@@ -50,6 +55,7 @@ type CreateVirtualNICSetInput struct {
 	VirtualNICs []string `json:"vnics"`
 }
 
+// CreateVirtualNICSet creates a new virtual nic set
 func (c *VirtNICSetsClient) CreateVirtualNICSet(input *CreateVirtualNICSetInput) (*VirtualNICSet, error) {
 	input.Name = c.getQualifiedName(input.Name)
 	input.AppliedACLs = c.getQualifiedAcls(input.AppliedACLs)
@@ -66,12 +72,14 @@ func (c *VirtNICSetsClient) CreateVirtualNICSet(input *CreateVirtualNICSetInput)
 	return c.success(&virtNicSet)
 }
 
+// GetVirtualNICSetInput specifies which virutal nic to obtain
 type GetVirtualNICSetInput struct {
 	// The three-part name (/Compute-identity_domain/user/object) of the virtual NIC set.
 	// Required
 	Name string `json:"name"`
 }
 
+// GetVirtualNICSet retrieves the specified virtual nic set
 func (c *VirtNICSetsClient) GetVirtualNICSet(input *GetVirtualNICSetInput) (*VirtualNICSet, error) {
 	var virtNicSet VirtualNICSet
 	// Qualify Name
@@ -83,6 +91,7 @@ func (c *VirtNICSetsClient) GetVirtualNICSet(input *GetVirtualNICSetInput) (*Vir
 	return c.success(&virtNicSet)
 }
 
+// UpdateVirtualNICSetInput specifies the information that will be updated in the virtual nic set
 type UpdateVirtualNICSetInput struct {
 	// List of ACLs applied to the VNICs in the set.
 	// Optional
@@ -102,6 +111,7 @@ type UpdateVirtualNICSetInput struct {
 	VirtualNICs []string `json:"vnics"`
 }
 
+// UpdateVirtualNICSet updates the specified virtual nic set
 func (c *VirtNICSetsClient) UpdateVirtualNICSet(input *UpdateVirtualNICSetInput) (*VirtualNICSet, error) {
 	input.Name = c.getQualifiedName(input.Name)
 	input.AppliedACLs = c.getQualifiedAcls(input.AppliedACLs)
@@ -119,12 +129,14 @@ func (c *VirtNICSetsClient) UpdateVirtualNICSet(input *UpdateVirtualNICSetInput)
 	return c.success(&virtNICSet)
 }
 
+// DeleteVirtualNICSetInput specifies the virtual nic set to delete
 type DeleteVirtualNICSetInput struct {
 	// The name of the virtual NIC set.
 	// Required
 	Name string `json:"name"`
 }
 
+// DeleteVirtualNICSet deletes the specified virtual nic set
 func (c *VirtNICSetsClient) DeleteVirtualNICSet(input *DeleteVirtualNICSetInput) error {
 	input.Name = c.getQualifiedName(input.Name)
 	return c.deleteResource(input.Name)
@@ -147,7 +159,7 @@ func (c *VirtNICSetsClient) unqualifyAcls(acls []string) []string {
 }
 
 func (c *VirtNICSetsClient) success(info *VirtualNICSet) (*VirtualNICSet, error) {
-	c.unqualify(&info.Name)
+	info.Name = c.getUnqualifiedName(info.FQDN)
 	info.AppliedACLs = c.unqualifyAcls(info.AppliedACLs)
 	info.VirtualNICs = c.getUnqualifiedList(info.VirtualNICs)
 	return info, nil

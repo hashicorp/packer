@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-const WaitForSnapshotCompleteTimeout = time.Duration(600 * time.Second)
+const waitForSnapshotCompletePollInterval = 30 * time.Second
+const waitForSnapshotCompleteTimeout = 600 * time.Second
 
 // SnapshotsClient is a client for the Snapshot functions of the Compute API.
 type SnapshotsClient struct {
@@ -14,32 +15,39 @@ type SnapshotsClient struct {
 
 // Snapshots obtains an SnapshotsClient which can be used to access to the
 // Snapshot functions of the Compute API
-func (c *ComputeClient) Snapshots() *SnapshotsClient {
+func (c *Client) Snapshots() *SnapshotsClient {
 	return &SnapshotsClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "Snapshot",
 			ContainerPath:       "/snapshot/",
 			ResourceRootPath:    "/snapshot",
 		}}
 }
 
+// SnapshotState defines the constant states a snapshot can be in
 type SnapshotState string
 
 const (
-	SnapshotActive   SnapshotState = "active"
+	// SnapshotActive - active
+	SnapshotActive SnapshotState = "active"
+	// SnapshotComplete - complete
 	SnapshotComplete SnapshotState = "complete"
-	SnapshotQueued   SnapshotState = "queued"
-	SnapshotError    SnapshotState = "error"
+	// SnapshotQueued - queued
+	SnapshotQueued SnapshotState = "queued"
+	// SnapshotError - error
+	SnapshotError SnapshotState = "error"
 )
 
+// SnapshotDelay defines the constant values snapshot delay can be
 type SnapshotDelay string
 
 const (
+	// SnapshotDelayShutdown - shutdown
 	SnapshotDelayShutdown SnapshotDelay = "shutdown"
 )
 
-// SnapshotInfo describes an existing Snapshot.
+// Snapshot describes an existing Snapshot.
 type Snapshot struct {
 	// Shows the default account for your identity domain.
 	Account string `json:"account"`
@@ -49,12 +57,14 @@ type Snapshot struct {
 	Delay SnapshotDelay `json:"delay"`
 	// A description of the reason this request entered "error" state.
 	ErrorReason string `json:"error_reason"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// Name of the instance
 	Instance string `json:"instance"`
 	// Name of the machine image generated from the instance snapshot request.
 	MachineImage string `json:"machineimage"`
 	// Name of the instance snapshot request.
-	Name string `json:"name"`
+	Name string
 	// Not used
 	Quota string `json:"quota"`
 	// The state of the request.
@@ -88,6 +98,8 @@ type CreateSnapshotInput struct {
 	// If you don't specify a name for this object, then the name is generated automatically.
 	// Optional
 	MachineImage string `json:"machineimage,omitempty"`
+	// Time to wait between polling snapshot status
+	PollInterval time.Duration `json:"-"`
 	// Time to wait for snapshot to be completed
 	Timeout time.Duration `json:"-"`
 }
@@ -108,12 +120,15 @@ func (c *SnapshotsClient) CreateSnapshot(input *CreateSnapshotInput) (*Snapshot,
 		Name: snapshotInfo.Name,
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForSnapshotCompletePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForSnapshotCompleteTimeout
+		input.Timeout = waitForSnapshotCompleteTimeout
 	}
 
 	// Wait for snapshot to be complete and return the result
-	return c.WaitForSnapshotComplete(getInput, input.Timeout)
+	return c.WaitForSnapshotComplete(getInput, input.PollInterval, input.Timeout)
 }
 
 // GetSnapshotInput describes the snapshot to get
@@ -142,6 +157,8 @@ type DeleteSnapshotInput struct {
 	// The name of the machine image
 	// Required
 	MachineImage string
+	// Time to wait between polls to check snapshot status
+	PollInterval time.Duration
 	// Time to wait for snapshot to be deleted
 	Timeout time.Duration
 }
@@ -154,11 +171,14 @@ func (c *SnapshotsClient) DeleteSnapshot(machineImagesClient *MachineImagesClien
 		Name: input.Snapshot,
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForSnapshotCompletePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForSnapshotCompleteTimeout
+		input.Timeout = waitForSnapshotCompleteTimeout
 	}
 
-	if _, err := c.WaitForSnapshotComplete(getInput, input.Timeout); err != nil {
+	if _, err := c.WaitForSnapshotComplete(getInput, input.PollInterval, input.Timeout); err != nil {
 		return fmt.Errorf("Could not delete snapshot: %s", err)
 	}
 
@@ -186,11 +206,14 @@ func (c *SnapshotsClient) DeleteSnapshotResourceOnly(input *DeleteSnapshotInput)
 		Name: input.Snapshot,
 	}
 
+	if input.PollInterval == 0 {
+		input.PollInterval = waitForSnapshotCompletePollInterval
+	}
 	if input.Timeout == 0 {
-		input.Timeout = WaitForSnapshotCompleteTimeout
+		input.Timeout = waitForSnapshotCompleteTimeout
 	}
 
-	if _, err := c.WaitForSnapshotComplete(getInput, input.Timeout); err != nil {
+	if _, err := c.WaitForSnapshotComplete(getInput, input.PollInterval, input.Timeout); err != nil {
 		return fmt.Errorf("Could not delete snapshot: %s", err)
 	}
 
@@ -202,10 +225,10 @@ func (c *SnapshotsClient) DeleteSnapshotResourceOnly(input *DeleteSnapshotInput)
 }
 
 // WaitForSnapshotComplete waits for an snapshot to be completely initialized and available.
-func (c *SnapshotsClient) WaitForSnapshotComplete(input *GetSnapshotInput, timeout time.Duration) (*Snapshot, error) {
+func (c *SnapshotsClient) WaitForSnapshotComplete(input *GetSnapshotInput, pollInterval, timeout time.Duration) (*Snapshot, error) {
 	var info *Snapshot
 	var getErr error
-	err := c.client.WaitFor("snapshot to be complete", timeout, func() (bool, error) {
+	err := c.client.WaitFor("snapshot to be complete", pollInterval, timeout, func() (bool, error) {
 		info, getErr = c.GetSnapshot(input)
 		if getErr != nil {
 			return false, getErr
@@ -237,6 +260,6 @@ func (c *SnapshotsClient) success(snapshotInfo *Snapshot) (*Snapshot, error) {
 	c.unqualify(&snapshotInfo.Account)
 	c.unqualify(&snapshotInfo.Instance)
 	c.unqualify(&snapshotInfo.MachineImage)
-	c.unqualify(&snapshotInfo.Name)
+	snapshotInfo.Name = c.getUnqualifiedName(snapshotInfo.FQDN)
 	return snapshotInfo, nil
 }

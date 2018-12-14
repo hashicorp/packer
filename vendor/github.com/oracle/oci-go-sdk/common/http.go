@@ -72,8 +72,8 @@ func addBinaryBody(request *http.Request, value reflect.Value) (e error) {
 	request.Body = readCloser
 
 	//Set the default content type to application/octet-stream if not set
-	if request.Header.Get("Content-Type") == "" {
-		request.Header.Set("Content-Type", "application/octet-stream")
+	if request.Header.Get(requestHeaderContentType) == "" {
+		request.Header.Set(requestHeaderContentType, "application/octet-stream")
 	}
 	return nil
 }
@@ -128,7 +128,7 @@ func isNillableType(value *reflect.Value) bool {
 	return false
 }
 
-// omitNilFieldsInJSON, removes json keys whose struct value is nil, and the field is tag with the json and
+// omitNilFieldsInJSON, removes json keys whose struct value is nil, and the field is tagged with the json and
 // mandatory:false tags
 func omitNilFieldsInJSON(data interface{}, value reflect.Value) (interface{}, error) {
 	switch value.Kind() {
@@ -157,6 +157,12 @@ func omitNilFieldsInJSON(data interface{}, value reflect.Value) (interface{}, er
 			//Delete the struct field from the json representation
 			if ok {
 				delete(jsonMap, jsonFieldName)
+				continue
+			}
+
+			// Check to make sure the field is part of the json representation of the value
+			if _, contains := jsonMap[jsonFieldName]; !contains {
+				Debugf("Field %s is not present in json, omitting", jsonFieldName)
 				continue
 			}
 
@@ -239,8 +245,8 @@ func addToBody(request *http.Request, value reflect.Value, field reflect.StructF
 	Debugf("Marshaled body is: %s", string(marshaled))
 	bodyBytes := bytes.NewReader(marshaled)
 	request.ContentLength = int64(bodyBytes.Len())
-	request.Header.Set("Content-Length", strconv.FormatInt(request.ContentLength, 10))
-	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set(requestHeaderContentLength, strconv.FormatInt(request.ContentLength, 10))
+	request.Header.Set(requestHeaderContentType, "application/json")
 	request.Body = ioutil.NopCloser(bodyBytes)
 	request.GetBody = func() (io.ReadCloser, error) {
 		return ioutil.NopCloser(bodyBytes), nil
@@ -269,11 +275,35 @@ func addToQuery(request *http.Request, value reflect.Value, field reflect.Struct
 
 	//if not mandatory and nil. Omit
 	if !mandatory && isNil(value) {
-		Debugf("Query parameter value is not mandatory and is nil pointer in field: %s. Skipping header", field.Name)
+		Debugf("Query parameter value is not mandatory and is nil pointer in field: %s. Skipping query", field.Name)
 		return
 	}
 
-	if queryParameterValue, e = toStringValue(value, field); e != nil {
+	encoding := strings.ToLower(field.Tag.Get("collectionFormat"))
+	var collectionFormatStringValues []string
+	switch encoding {
+	case "csv", "multi":
+		if value.Kind() != reflect.Slice && value.Kind() != reflect.Array {
+			e = fmt.Errorf("query parameter is tagged as csv or multi yet its type is neither an Array nor a Slice: %s", field.Name)
+			break
+		}
+
+		numOfElements := value.Len()
+		collectionFormatStringValues = make([]string, numOfElements)
+		for i := 0; i < numOfElements; i++ {
+			collectionFormatStringValues[i], e = toStringValue(value.Index(i), field)
+			if e != nil {
+				break
+			}
+		}
+		queryParameterValue = strings.Join(collectionFormatStringValues, ",")
+	case "":
+		queryParameterValue, e = toStringValue(value, field)
+	default:
+		e = fmt.Errorf("encoding of type %s is not supported for query param: %s", encoding, field.Name)
+	}
+
+	if e != nil {
 		return
 	}
 
@@ -282,16 +312,26 @@ func addToQuery(request *http.Request, value reflect.Value, field reflect.Struct
 	if omitEmpty, present := field.Tag.Lookup("omitEmpty"); present {
 		omitEmptyBool, _ := strconv.ParseBool(strings.ToLower(omitEmpty))
 		if queryParameterValue != "" || !omitEmptyBool {
-			query.Set(queryParameterName, queryParameterValue)
+			addToQueryForEncoding(&query, encoding, queryParameterName, queryParameterValue, collectionFormatStringValues)
 		} else {
 			Debugf("Omitting %s, is empty and omitEmpty tag is set", field.Name)
 		}
 	} else {
-		query.Set(queryParameterName, queryParameterValue)
+		addToQueryForEncoding(&query, encoding, queryParameterName, queryParameterValue, collectionFormatStringValues)
 	}
 
 	request.URL.RawQuery = query.Encode()
 	return
+}
+
+func addToQueryForEncoding(query *url.Values, encoding string, queryParameterName string, queryParameterValue string, collectionFormatStringValues []string) {
+	if encoding == "multi" {
+		for _, stringValue := range collectionFormatStringValues {
+			query.Add(queryParameterName, stringValue)
+		}
+	} else {
+		query.Set(queryParameterName, queryParameterValue)
+	}
 }
 
 // Adds to the path of the url in the order they appear in the structure
@@ -299,6 +339,11 @@ func addToPath(request *http.Request, value reflect.Value, field reflect.StructF
 	var additionalURLPathPart string
 	if additionalURLPathPart, e = toStringValue(value, field); e != nil {
 		return fmt.Errorf("can not marshal to path in request for field %s. Due to %s", field.Name, e.Error())
+	}
+
+	// path should not be empty for any operations
+	if len(additionalURLPathPart) == 0 {
+		return fmt.Errorf("value cannot be empty for field %s in path", field.Name)
 	}
 
 	if request.URL == nil {
@@ -355,6 +400,9 @@ func addToHeader(request *http.Request, value reflect.Value, field reflect.Struc
 	if mandatory && isNil(value) {
 		return fmt.Errorf("marshaling request to a header requires not nil pointer for field: %s", field.Name)
 	}
+
+	// generate opc-request-id if header value is nil and header name matches
+	value = generateOpcRequestID(headerName, value)
 
 	//if not mandatory and nil. Omit
 	if !mandatory && isNil(value) {
@@ -471,8 +519,8 @@ func structToRequestPart(request *http.Request, val reflect.Value) (err error) {
 	}
 
 	//If headers are and the content type was not set, we default to application/json
-	if request.Header != nil && request.Header.Get("Content-Type") == "" {
-		request.Header.Set("Content-Type", "application/json")
+	if request.Header != nil && request.Header.Get(requestHeaderContentType) == "" {
+		request.Header.Set(requestHeaderContentType, "application/json")
 	}
 
 	return
@@ -511,10 +559,10 @@ func MakeDefaultHTTPRequest(method, path string) (httpRequest http.Request) {
 		URL:        &url.URL{},
 	}
 
-	httpRequest.Header.Set("Content-Length", "0")
-	httpRequest.Header.Set("Date", time.Now().UTC().Format(http.TimeFormat))
-	httpRequest.Header.Set("Opc-Client-Info", strings.Join([]string{defaultSDKMarker, Version()}, "/"))
-	httpRequest.Header.Set("Accept", "*/*")
+	httpRequest.Header.Set(requestHeaderContentLength, "0")
+	httpRequest.Header.Set(requestHeaderDate, time.Now().UTC().Format(http.TimeFormat))
+	httpRequest.Header.Set(requestHeaderOpcClientInfo, strings.Join([]string{defaultSDKMarker, Version()}, "/"))
+	httpRequest.Header.Set(requestHeaderAccept, "*/*")
 	httpRequest.Method = method
 	httpRequest.URL.Path = path
 	return
@@ -860,4 +908,25 @@ func UnmarshalResponseWithPolymorphicBody(httpResponse *http.Response, responseS
 	}
 
 	return nil
+}
+
+// generate request id if user not provided and for each retry operation re-gen a new request id
+func generateOpcRequestID(headerName string, value reflect.Value) (newValue reflect.Value) {
+	newValue = value
+	isNilValue := isNil(newValue)
+	isOpcRequestIDHeader := headerName == requestHeaderOpcRequestID || headerName == requestHeaderOpcClientRequestID
+
+	if isNilValue && isOpcRequestIDHeader {
+		requestID, err := generateRandUUID()
+
+		if err != nil {
+			// this will not fail the request, just skip add opc-request-id
+			Debugf("unable to generate opc-request-id. %s", err.Error())
+		} else {
+			newValue = reflect.ValueOf(String(requestID))
+			Debugf("add request id for header: %s, with value: %s", headerName, requestID)
+		}
+	}
+
+	return
 }

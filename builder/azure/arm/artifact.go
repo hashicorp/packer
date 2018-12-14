@@ -29,22 +29,26 @@ type Artifact struct {
 	TemplateUriReadOnlySas string
 
 	// Managed Image
-	ManagedImageResourceGroupName string
-	ManagedImageName              string
-	ManagedImageLocation          string
-	ManagedImageId                string
+	ManagedImageResourceGroupName      string
+	ManagedImageName                   string
+	ManagedImageLocation               string
+	ManagedImageId                     string
+	ManagedImageOSDiskSnapshotName     string
+	ManagedImageDataDiskSnapshotPrefix string
 
 	// Additional Disks
 	AdditionalDisks *[]AdditionalDiskArtifact
 }
 
-func NewManagedImageArtifact(osType, resourceGroup, name, location, id string) (*Artifact, error) {
+func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSnapshotName, dataDiskSnapshotPrefix string) (*Artifact, error) {
 	return &Artifact{
-		ManagedImageResourceGroupName: resourceGroup,
-		ManagedImageName:              name,
-		ManagedImageLocation:          location,
-		ManagedImageId:                id,
-		OSType:                        osType,
+		ManagedImageResourceGroupName:      resourceGroup,
+		ManagedImageName:                   name,
+		ManagedImageLocation:               location,
+		ManagedImageId:                     id,
+		OSType:                             osType,
+		ManagedImageOSDiskSnapshotName:     osDiskSnapshotName,
+		ManagedImageDataDiskSnapshotPrefix: dataDiskSnapshotPrefix,
 	}, nil
 }
 
@@ -133,7 +137,10 @@ func (*Artifact) Files() []string {
 }
 
 func (a *Artifact) Id() string {
-	return a.OSDiskUri
+	if a.OSDiskUri != "" {
+		return a.OSDiskUri
+	}
+	return a.ManagedImageId
 }
 
 func (a *Artifact) State(name string) interface{} {
@@ -155,6 +162,12 @@ func (a *Artifact) String() string {
 		buf.WriteString(fmt.Sprintf("ManagedImageName: %s\n", a.ManagedImageName))
 		buf.WriteString(fmt.Sprintf("ManagedImageId: %s\n", a.ManagedImageId))
 		buf.WriteString(fmt.Sprintf("ManagedImageLocation: %s\n", a.ManagedImageLocation))
+		if a.ManagedImageOSDiskSnapshotName != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageOSDiskSnapshotName: %s\n", a.ManagedImageOSDiskSnapshotName))
+		}
+		if a.ManagedImageDataDiskSnapshotPrefix != "" {
+			buf.WriteString(fmt.Sprintf("ManagedImageDataDiskSnapshotPrefix: %s\n", a.ManagedImageDataDiskSnapshotPrefix))
+		}
 	} else {
 		buf.WriteString(fmt.Sprintf("StorageAccountLocation: %s\n", a.StorageAccountLocation))
 		buf.WriteString(fmt.Sprintf("OSDiskUri: %s\n", a.OSDiskUri))

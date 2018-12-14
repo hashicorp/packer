@@ -31,6 +31,10 @@ func (a *Authenticate) getServicePrincipalTokenWithResource(resource string) (*a
 		return nil, err
 	}
 
+	if a.clientID == "" && a.clientSecret == "" {
+		return adal.NewServicePrincipalTokenFromMSI("http://169.254.169.254/metadata/identity/oauth2/token", resource)
+	}
+
 	spt, err := adal.NewServicePrincipalToken(
 		*oauthConfig,
 		a.clientID,

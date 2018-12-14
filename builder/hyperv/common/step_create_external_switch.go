@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// This step creates switch for VM.
+// This step creates an external switch for the VM.
 //
 // Produces:
 //   SwitchName string - The name of the Switch
@@ -18,6 +18,9 @@ type StepCreateExternalSwitch struct {
 	oldSwitchName string
 }
 
+// Run runs the step required to create an external switch. Depending on
+// the connectivity of the host machine, the external switch will allow the
+// build VM to connect to the outside world.
 func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	driver := state.Get("driver").(Driver)
 	ui := state.Get("ui").(packer.Ui)
@@ -30,10 +33,12 @@ func (s *StepCreateExternalSwitch) Run(_ context.Context, state multistep.StateB
 
 	packerExternalSwitchName := "paes_" + uuid.TimeOrderedUUID()
 
+	// CreateExternalVirtualSwitch checks for an existing external switch,
+	// creating one if required, and connects the VM to it
 	err = driver.CreateExternalVirtualSwitch(vmName, packerExternalSwitchName)
 	if err != nil {
-		err := fmt.Errorf("Error creating switch: %s", err)
-		state.Put(errorMsg, err)
+		err := fmt.Errorf(errorMsg, err)
+		state.Put("error", err)
 		ui.Error(err.Error())
 		s.SwitchName = ""
 		return multistep.ActionHalt

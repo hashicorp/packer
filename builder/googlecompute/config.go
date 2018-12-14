@@ -3,6 +3,7 @@ package googlecompute
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"time"
 
@@ -42,6 +43,7 @@ type Config struct {
 	Labels                       map[string]string `mapstructure:"labels"`
 	MachineType                  string            `mapstructure:"machine_type"`
 	Metadata                     map[string]string `mapstructure:"metadata"`
+	MinCpuPlatform               string            `mapstructure:"min_cpu_platform"`
 	Network                      string            `mapstructure:"network"`
 	NetworkProjectId             string            `mapstructure:"network_project_id"`
 	OmitExternalIP               bool              `mapstructure:"omit_external_ip"`
@@ -228,6 +230,13 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	// If DisableDefaultServiceAccount is provided, don't allow a value for ServiceAccountEmail
 	if c.DisableDefaultServiceAccount && c.ServiceAccountEmail != "" {
 		errs = packer.MultiErrorAppend(fmt.Errorf("you may not specify a 'service_account_email' when 'disable_default_service_account' is true"))
+	}
+
+	if c.StartupScriptFile != "" {
+		if _, err := os.Stat(c.StartupScriptFile); err != nil {
+			errs = packer.MultiErrorAppend(
+				errs, fmt.Errorf("startup_script_file: %v", err))
+		}
 	}
 
 	// Check for any errors.

@@ -48,12 +48,15 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      commHost,
-			SSHConfig: sshConfig(&b.config.Comm),
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
 			CustomConnect: map[string]multistep.Step{
 				"docker": &StepConnectDocker{},
 			},
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	}
 
 	if b.config.Discard {

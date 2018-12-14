@@ -68,8 +68,8 @@ func TestUploadDownload(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{upload, nil, ""},
-				{download, nil, ""},
+				{Provisioner: upload, Config: nil, TypeName: ""},
+				{Provisioner: download, Config: nil, TypeName: ""},
 			},
 		},
 	}
@@ -157,9 +157,9 @@ func TestLargeDownload(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{shell, nil, ""},
-				{downloadCupcake, nil, ""},
-				{downloadBigcake, nil, ""},
+				{Provisioner: shell, Config: nil, TypeName: ""},
+				{Provisioner: downloadCupcake, Config: nil, TypeName: ""},
+				{Provisioner: downloadBigcake, Config: nil, TypeName: ""},
 			},
 		},
 	}
@@ -266,10 +266,10 @@ func TestFixUploadOwner(t *testing.T) {
 	hooks[packer.HookProvision] = []packer.Hook{
 		&packer.ProvisionHook{
 			Provisioners: []*packer.HookedProvisioner{
-				{fileProvisioner, nil, ""},
-				{dirProvisioner, nil, ""},
-				{shellProvisioner, nil, ""},
-				{verifyProvisioner, nil, ""},
+				{Provisioner: fileProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: dirProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: shellProvisioner, Config: nil, TypeName: ""},
+				{Provisioner: verifyProvisioner, Config: nil, TypeName: ""},
 			},
 		},
 	}

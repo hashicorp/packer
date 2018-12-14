@@ -43,10 +43,28 @@ type ListInstancesRequest struct {
 
 	// A filter to only return resources that match the given lifecycle state.  The state value is case-insensitive.
 	LifecycleState InstanceLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListInstancesRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListInstancesRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListInstancesRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListInstancesResponse wrapper for the ListInstances operation
@@ -55,7 +73,7 @@ type ListInstancesResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []Instance instance
+	// A list of []Instance instances
 	Items []Instance `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -70,6 +88,11 @@ type ListInstancesResponse struct {
 
 func (response ListInstancesResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListInstancesResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
 
 // ListInstancesSortByEnum Enum with underlying type: string

@@ -16,7 +16,7 @@ func (s *stepCreateIPReservation) Run(_ context.Context, state multistep.StateBa
 	ui := state.Get("ui").(packer.Ui)
 
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	iprClient := client.IPReservations()
 	// TODO: add optional Name and Tags
 
@@ -49,7 +49,7 @@ func (s *stepCreateIPReservation) Cleanup(state multistep.StateBag) {
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cleaning up IP reservations...")
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 
 	input := compute.DeleteIPReservationInput{Name: ipResName.(string)}
 	ipClient := client.IPReservations()

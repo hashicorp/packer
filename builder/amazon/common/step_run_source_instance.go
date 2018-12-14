@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -19,8 +20,8 @@ import (
 
 type StepRunSourceInstance struct {
 	AssociatePublicIpAddress          bool
-	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
+	Comm                              *communicator.Config
 	Ctx                               interpolate.Context
 	Debug                             bool
 	EbsOptimized                      bool
@@ -31,7 +32,6 @@ type StepRunSourceInstance struct {
 	InstanceType                      string
 	IsRestricted                      bool
 	SourceAMI                         string
-	SubnetId                          string
 	Tags                              TagMap
 	UserData                          string
 	UserDataFile                      string
@@ -42,10 +42,7 @@ type StepRunSourceInstance struct {
 
 func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	var keyName string
-	if name, ok := state.GetOk("keyPair"); ok {
-		keyName = name.(string)
-	}
+
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
 	ui := state.Get("ui").(packer.Ui)
 
@@ -105,6 +102,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		return multistep.ActionHalt
 	}
 
+	az := state.Get("availability_zone").(string)
 	runOpts := &ec2.RunInstancesInput{
 		ImageId:             &s.SourceAMI,
 		InstanceType:        &s.InstanceType,
@@ -113,7 +111,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		MinCount:            aws.Int64(1),
 		IamInstanceProfile:  &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
-		Placement:           &ec2.Placement{AvailabilityZone: &s.AvailabilityZone},
+		Placement:           &ec2.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
@@ -150,22 +148,24 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		volTags.Report(ui)
 	}
 
-	if keyName != "" {
-		runOpts.KeyName = &keyName
+	if s.Comm.SSHKeyPairName != "" {
+		runOpts.KeyName = &s.Comm.SSHKeyPairName
 	}
 
-	if s.SubnetId != "" && s.AssociatePublicIpAddress {
+	subnetId := state.Get("subnet_id").(string)
+
+	if subnetId != "" && s.AssociatePublicIpAddress {
 		runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
 				DeviceIndex:              aws.Int64(0),
 				AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-				SubnetId:                 &s.SubnetId,
+				SubnetId:                 aws.String(subnetId),
 				Groups:                   securityGroupIds,
 				DeleteOnTermination:      aws.Bool(true),
 			},
 		}
 	} else {
-		runOpts.SubnetId = &s.SubnetId
+		runOpts.SubnetId = aws.String(subnetId)
 		runOpts.SecurityGroupIds = securityGroupIds
 	}
 

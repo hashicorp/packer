@@ -40,6 +40,7 @@ type AzureClient struct {
 	common.VaultClient
 	armStorage.AccountsClient
 	compute.DisksClient
+	compute.SnapshotsClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -188,6 +189,12 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.VirtualMachinesClient.RequestInspector = withInspection(maxlen)
 	azureClient.VirtualMachinesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
 	azureClient.VirtualMachinesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.VirtualMachinesClient.UserAgent)
+
+	azureClient.SnapshotsClient = compute.NewSnapshotsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.SnapshotsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.SnapshotsClient.RequestInspector = withInspection(maxlen)
+	azureClient.SnapshotsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.SnapshotsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.SnapshotsClient.UserAgent)
 
 	azureClient.AccountsClient = armStorage.NewAccountsClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.AccountsClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)

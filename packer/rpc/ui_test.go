@@ -1,8 +1,11 @@
 package rpc
 
 import (
+	"io"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 type testUi struct {
@@ -17,6 +20,12 @@ type testUi struct {
 	messageMessage string
 	sayCalled      bool
 	sayMessage     string
+
+	progressBarCalled               bool
+	progressBarStartCalled          bool
+	progressBarAddCalled            bool
+	progressBarFinishCalled         bool
+	progressBarNewProxyReaderCalled bool
 }
 
 func (u *testUi) Ask(query string) (string, error) {
@@ -44,6 +53,28 @@ func (u *testUi) Message(message string) {
 func (u *testUi) Say(message string) {
 	u.sayCalled = true
 	u.sayMessage = message
+}
+
+func (u *testUi) ProgressBar() packer.ProgressBar {
+	u.progressBarCalled = true
+	return u
+}
+
+func (u *testUi) Start(int64) {
+	u.progressBarStartCalled = true
+}
+
+func (u *testUi) Add(int64) {
+	u.progressBarAddCalled = true
+}
+
+func (u *testUi) Finish() {
+	u.progressBarFinishCalled = true
+}
+
+func (u *testUi) NewProxyReader(r io.Reader) io.Reader {
+	u.progressBarNewProxyReaderCalled = true
+	return r
 }
 
 func TestUiRPC(t *testing.T) {
@@ -86,6 +117,26 @@ func TestUiRPC(t *testing.T) {
 	uiClient.Say("message")
 	if ui.sayMessage != "message" {
 		t.Fatalf("bad: %#v", ui.errorMessage)
+	}
+
+	bar := uiClient.ProgressBar()
+	if ui.progressBarCalled != true {
+		t.Errorf("ProgressBar not called.")
+	}
+
+	bar.Start(100)
+	if ui.progressBarStartCalled != true {
+		t.Errorf("progressBar.Start not called.")
+	}
+
+	bar.Add(1)
+	if ui.progressBarAddCalled != true {
+		t.Errorf("progressBar.Add not called.")
+	}
+
+	bar.Finish()
+	if ui.progressBarFinishCalled != true {
+		t.Errorf("progressBar.Finish not called.")
 	}
 
 	uiClient.Machine("foo", "bar", "baz")

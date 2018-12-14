@@ -28,7 +28,7 @@ func TestFixerParallelsDeprecations_Fix_parallels_tools_guest_path(t *testing.T)
 		// parallels_tools_host_path field
 		{
 			Input: map[string]interface{}{
-				"type": "parallels-iso",
+				"type":                      "parallels-iso",
 				"parallels_tools_host_path": "/Path...",
 			},
 

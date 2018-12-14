@@ -17,7 +17,7 @@ to running the tests. Additionally, many tests will leave left-over artifacts
 ### Required Software
 
 Before running the tests, you'll need the following installed. If you're
-running on Mac OS X, most of these are available with `brew`:
+running on macOS, most of these are available with `brew`:
 
 * [Bats](https://github.com/sstephenson/bats)
 

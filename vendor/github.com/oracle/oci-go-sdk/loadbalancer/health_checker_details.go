@@ -20,7 +20,7 @@ type HealthCheckerDetails struct {
 	Protocol *string `mandatory:"true" json:"protocol"`
 
 	// The interval between health checks, in milliseconds.
-	// Example: `30000`
+	// Example: `10000`
 	IntervalInMillis *int `mandatory:"false" json:"intervalInMillis"`
 
 	// The backend server port against which to run the health check. If the port is not specified, the load balancer uses the
@@ -29,7 +29,7 @@ type HealthCheckerDetails struct {
 	Port *int `mandatory:"false" json:"port"`
 
 	// A regular expression for parsing the response body from the backend server.
-	// Example: `^(500|40[1348])$`
+	// Example: `^((?!false).|\s)*$`
 	ResponseBodyRegex *string `mandatory:"false" json:"responseBodyRegex"`
 
 	// The number of retries to attempt before a backend server is considered "unhealthy".
@@ -42,7 +42,7 @@ type HealthCheckerDetails struct {
 
 	// The maximum time, in milliseconds, to wait for a reply to a health check. A health check is successful only if a reply
 	// returns within this timeout period.
-	// Example: `6000`
+	// Example: `3000`
 	TimeoutInMillis *int `mandatory:"false" json:"timeoutInMillis"`
 
 	// The path against which to run the health check.
