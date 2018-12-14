@@ -96,11 +96,6 @@ type Config struct {
 	EnableVirtualizationExtensions bool   `mapstructure:"enable_virtualization_extensions"`
 	TempPath                       string `mapstructure:"temp_path"`
 
-	// A separate path can be used for storing the VM's disk image. The purpose is to enable
-	// reading and writing to take place on different physical disks (read from VHD temp path
-	// write to regular temp path while exporting the VM) to eliminate a single-disk bottleneck.
-	VhdTempPath string `mapstructure:"vhd_temp_path"`
-
 	Communicator string `mapstructure:"communicator"`
 
 	AdditionalDiskSize []uint `mapstructure:"disk_additional_size"`
@@ -150,7 +145,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 
-	if len(b.config.ISOConfig.ISOUrls) < 1 || (strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" && strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
+	if len(b.config.ISOConfig.ISOUrls) < 1 ||
+		(strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhd" &&
+			strings.ToLower(filepath.Ext(b.config.ISOConfig.ISOUrls[0])) != ".vhdx") {
 		//We only create a new hard drive if an existing one to copy from does not exist
 		err = b.checkDiskSize()
 		if err != nil {
@@ -254,25 +251,35 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.Generation < 2 && numberOfIsos > 2 {
 		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, "+
+				"so we can't support guest additions and these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are only 2 ide controllers available, "+
+				"so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
 		}
 	} else if b.config.Generation > 1 && len(b.config.SecondaryDvdImages) > 16 {
 		if b.config.GuestAdditionsMode == "attach" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available "+
+				"for scsi (limited to 16), so we can't support guest additions and these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		} else {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available for scsi (limited to 16), so we can't support these secondary dvds: %s", strings.Join(b.config.SecondaryDvdImages, ", ")))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("There are not enough drive letters available "+
+				"for scsi (limited to 16), so we can't support these secondary dvds: %s",
+				strings.Join(b.config.SecondaryDvdImages, ", ")))
 		}
 	}
 
 	if b.config.EnableVirtualizationExtensions {
 		hasVirtualMachineVirtualizationExtensions, err := powershell.HasVirtualMachineVirtualizationExtensions()
 		if err != nil {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization extensions support: %s", err))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("Failed detecting virtual machine virtualization "+
+				"extensions support: %s", err))
 		} else {
 			if !hasVirtualMachineVirtualizationExtensions {
-				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support virtual machine virtualization extension. Please use Windows 10 or Windows Server 2016 or newer."))
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("This version of Hyper-V does not support "+
+					"virtual machine virtualization extension. Please use Windows 10 or Windows Server "+
+					"2016 or newer."))
 			}
 		}
 	}
@@ -307,24 +314,29 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.EnableVirtualizationExtensions {
 		if b.config.EnableDynamicMemory {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, dynamic memory should not be allowed.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"dynamic memory should not be allowed.")
 			warnings = appendWarnings(warnings, warning)
 		}
 
 		if !b.config.EnableMacSpoofing {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, mac spoofing should be allowed.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"mac spoofing should be allowed.")
 			warnings = appendWarnings(warnings, warning)
 		}
 
 		if b.config.RamSize < MinNestedVirtualizationRamSize {
-			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start any nested VMs.")
+			warning = fmt.Sprintf("For nested virtualization, when virtualization extension is enabled, " +
+				"there should be 4GB or more memory set for the vm, otherwise Hyper-V may fail to start " +
+				"any nested VMs.")
 			warnings = appendWarnings(warnings, warning)
 		}
 	}
 
 	if b.config.SwitchVlanId != "" {
 		if b.config.SwitchVlanId != b.config.VlanId {
-			warning = fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor vlan. The switch will not be able to see traffic from the VM.")
+			warning = fmt.Sprintf("Switch network adaptor vlan should match virtual machine network adaptor " +
+				"vlan. The switch will not be able to see traffic from the VM.")
 			warnings = appendWarnings(warnings, warning)
 		}
 	}
@@ -355,9 +367,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	state.Put("ui", ui)
 
 	steps := []multistep.Step{
-		&hypervcommon.StepCreateTempDir{
-			TempPath:    b.config.TempPath,
-			VhdTempPath: b.config.VhdTempPath,
+		&hypervcommon.StepCreateBuildDir{
+			TempPath: b.config.TempPath,
 		},
 		&hypervcommon.StepOutputDir{
 			Force: b.config.PackerForce,
@@ -399,8 +410,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
-			SkipExport:                     b.config.SkipExport,
-			OutputDir:                      b.config.OutputDir,
 			MacAddress:                     b.config.MacAddress,
 			FixedVHD:                       b.config.FixedVHD,
 		},
@@ -434,21 +443,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		},
 
 		&hypervcommon.StepTypeBootCommand{
-			BootCommand: b.config.FlatBootCommand(),
-			BootWait:    b.config.BootWait,
-			SwitchName:  b.config.SwitchName,
-			Ctx:         b.config.ctx,
+			BootCommand:   b.config.FlatBootCommand(),
+			BootWait:      b.config.BootWait,
+			SwitchName:    b.config.SwitchName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},
 
 		// configure the communicator ssh, winrm
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      hypervcommon.CommHost,
-			SSHConfig: hypervcommon.SSHConfigFunc(&b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 
 		// provision requires communicator to be setup
 		&common.StepProvision{},
+
+		// Remove ephemeral key from authorized_hosts if using SSH communicator
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 
 		&hypervcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
@@ -466,10 +481,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&hypervcommon.StepUnmountFloppyDrive{
 			Generation: b.config.Generation,
 		},
-		&hypervcommon.StepExportVm{
-			OutputDir:      b.config.OutputDir,
+		&hypervcommon.StepCompactDisk{
 			SkipCompaction: b.config.SkipCompaction,
-			SkipExport:     b.config.SkipExport,
+		},
+		&hypervcommon.StepExportVm{
+			OutputDir:  b.config.OutputDir,
+			SkipExport: b.config.SkipExport,
+		},
+		&hypervcommon.StepCollateArtifacts{
+			OutputDir:  b.config.OutputDir,
+			SkipExport: b.config.SkipExport,
 		},
 
 		// the clean up actions for each step will be executed reverse order
@@ -526,11 +547,14 @@ func (b *Builder) checkDiskSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "DiskSize", b.config.DiskSize))
 
 	if b.config.DiskSize < MinDiskSize {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v", MinDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size: Virtual machine requires disk space >= %v GB, but defined: %v",
+			MinDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxDiskSize && !b.config.FixedVHD {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxDiskSize, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v",
+			MaxDiskSize, b.config.DiskSize/1024)
 	} else if b.config.DiskSize > MaxVHDSize && b.config.FixedVHD {
-		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v", MaxVHDSize/1024, b.config.DiskSize/1024)
+		return fmt.Errorf("disk_size: Virtual machine requires disk space <= %v GB, but defined: %v",
+			MaxVHDSize/1024, b.config.DiskSize/1024)
 	}
 
 	return nil
@@ -544,9 +568,11 @@ func (b *Builder) checkDiskBlockSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "DiskBlockSize", b.config.DiskBlockSize))
 
 	if b.config.DiskBlockSize < MinDiskBlockSize {
-		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size >= %v MB, but defined: %v", MinDiskBlockSize, b.config.DiskBlockSize)
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size >= %v MB, but defined: %v",
+			MinDiskBlockSize, b.config.DiskBlockSize)
 	} else if b.config.DiskBlockSize > MaxDiskBlockSize {
-		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size <= %v MB, but defined: %v", MaxDiskBlockSize, b.config.DiskBlockSize)
+		return fmt.Errorf("disk_block_size: Virtual machine requires disk block size <= %v MB, but defined: %v",
+			MaxDiskBlockSize, b.config.DiskBlockSize)
 	}
 
 	return nil
@@ -560,9 +586,11 @@ func (b *Builder) checkRamSize() error {
 	log.Println(fmt.Sprintf("%s: %v", "RamSize", b.config.RamSize))
 
 	if b.config.RamSize < MinRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v", MinRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size >= %v MB, but defined: %v",
+			MinRamSize, b.config.RamSize)
 	} else if b.config.RamSize > MaxRamSize {
-		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v", MaxRamSize, b.config.RamSize)
+		return fmt.Errorf("ram_size: Virtual machine requires memory size <= %v MB, but defined: %v",
+			MaxRamSize, b.config.RamSize)
 	}
 
 	return nil

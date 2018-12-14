@@ -7,24 +7,26 @@ type SSHKeysClient struct {
 
 // SSHKeys obtains an SSHKeysClient which can be used to access to the
 // SSH key functions of the Compute API
-func (c *ComputeClient) SSHKeys() *SSHKeysClient {
+func (c *Client) SSHKeys() *SSHKeysClient {
 	return &SSHKeysClient{
 		ResourceClient: ResourceClient{
-			ComputeClient:       c,
+			Client:              c,
 			ResourceDescription: "SSH key",
 			ContainerPath:       "/sshkey/",
 			ResourceRootPath:    "/sshkey",
 		}}
 }
 
-// SSHKeyInfo describes an existing SSH key.
+// SSHKey describes an existing SSH key.
 type SSHKey struct {
 	// Indicates whether the key is enabled (true) or disabled.
 	Enabled bool `json:"enabled"`
+	// Fully Qualified Domain Name
+	FQDN string `json:"name"`
 	// The SSH public key value.
 	Key string `json:"key"`
 	// The three-part name of the SSH Key (/Compute-identity_domain/user/object).
-	Name string `json:"name"`
+	Name string
 	// Unique Resource Identifier
 	URI string `json:"uri"`
 }
@@ -107,7 +109,7 @@ func (c *SSHKeysClient) UpdateSSHKey(updateInput *UpdateSSHKeyInput) (*SSHKey, e
 	return c.success(&keyInfo)
 }
 
-// DeleteKeyInput describes the ssh key to delete
+// DeleteSSHKeyInput describes the ssh key to delete
 type DeleteSSHKeyInput struct {
 	// The three-part name of the SSH Key (/Compute-identity_domain/user/object).
 	Name string `json:"name"`
@@ -119,6 +121,6 @@ func (c *SSHKeysClient) DeleteSSHKey(deleteInput *DeleteSSHKeyInput) error {
 }
 
 func (c *SSHKeysClient) success(keyInfo *SSHKey) (*SSHKey, error) {
-	c.unqualify(&keyInfo.Name)
+	keyInfo.Name = c.getUnqualifiedName(keyInfo.FQDN)
 	return keyInfo, nil
 }

@@ -19,15 +19,17 @@ type Core struct {
 	variables  map[string]string
 	builds     map[string]*template.Builder
 	version    string
+	secrets    []string
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
 // is used to initialize a Core, it shouldn't be re-used or modified again.
 type CoreConfig struct {
-	Components ComponentFinder
-	Template   *template.Template
-	Variables  map[string]string
-	Version    string
+	Components         ComponentFinder
+	Template           *template.Template
+	Variables          map[string]string
+	SensitiveVariables []string
+	Version            string
 }
 
 // The function type used to lookup Builder implementations.
@@ -60,11 +62,15 @@ func NewCore(c *CoreConfig) (*Core, error) {
 		variables:  c.Variables,
 		version:    c.Version,
 	}
+
 	if err := result.validate(); err != nil {
 		return nil, err
 	}
 	if err := result.init(); err != nil {
 		return nil, err
+	}
+	for _, secret := range result.secrets {
+		LogSecretFilter.Set(secret)
 	}
 
 	// Go through and interpolate all the build names. We should be able
@@ -300,6 +306,16 @@ func (c *Core) init() error {
 		}
 
 		c.variables[k] = def
+	}
+
+	for _, v := range c.Template.SensitiveVariables {
+		def, err := interpolate.Render(v.Default, ctx)
+		if err != nil {
+			return fmt.Errorf(
+				"error interpolating default value for '%#v': %s",
+				v, err)
+		}
+		c.secrets = append(c.secrets, def)
 	}
 
 	// Interpolate the push configuration

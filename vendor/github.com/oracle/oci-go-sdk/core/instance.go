@@ -48,6 +48,11 @@ type Instance struct {
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
 	// A user-friendly name. Does not have to be unique, and it's changeable.
 	// Avoid entering confidential information.
 	// Example: `My bare metal instance`
@@ -57,6 +62,12 @@ type Instance struct {
 	// They are distinguished from 'metadata' fields in that these can be nested JSON objects (whereas 'metadata' fields are string/string maps only).
 	// If you don't need nested metadata values, it is strongly advised to avoid using this object and use the Metadata object instead.
 	ExtendedMetadata map[string]interface{} `mandatory:"false" json:"extendedMetadata"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// Deprecated. Use `sourceDetails` instead.
 	ImageId *string `mandatory:"false" json:"imageId"`
@@ -81,6 +92,14 @@ type Instance struct {
 	// For more information about iPXE, see http://ipxe.org.
 	IpxeScript *string `mandatory:"false" json:"ipxeScript"`
 
+	// Specifies the configuration mode for launching virtual machine (VM) instances. The configuration modes are:
+	// * `NATIVE` - VM instances launch with iSCSI boot and VFIO devices. The default value for Oracle-provided images.
+	// * `EMULATED` - VM instances launch with emulated devices, such as the E1000 network driver and emulated SCSI disk controller.
+	// * `CUSTOM` - VM instances launch with custom configuration settings specified in the `LaunchOptions` parameter.
+	LaunchMode InstanceLaunchModeEnum `mandatory:"false" json:"launchMode,omitempty"`
+
+	LaunchOptions *LaunchOptions `mandatory:"false" json:"launchOptions"`
+
 	// Custom metadata that you provide.
 	Metadata map[string]string `mandatory:"false" json:"metadata"`
 
@@ -95,35 +114,43 @@ func (m Instance) String() string {
 // UnmarshalJSON unmarshals from json
 func (m *Instance) UnmarshalJSON(data []byte) (e error) {
 	model := struct {
-		DisplayName        *string                    `json:"displayName"`
-		ExtendedMetadata   map[string]interface{}     `json:"extendedMetadata"`
-		ImageId            *string                    `json:"imageId"`
-		IpxeScript         *string                    `json:"ipxeScript"`
-		Metadata           map[string]string          `json:"metadata"`
-		SourceDetails      instancesourcedetails      `json:"sourceDetails"`
-		AvailabilityDomain *string                    `json:"availabilityDomain"`
-		CompartmentId      *string                    `json:"compartmentId"`
-		Id                 *string                    `json:"id"`
-		LifecycleState     InstanceLifecycleStateEnum `json:"lifecycleState"`
-		Region             *string                    `json:"region"`
-		Shape              *string                    `json:"shape"`
-		TimeCreated        *common.SDKTime            `json:"timeCreated"`
+		DefinedTags        map[string]map[string]interface{} `json:"definedTags"`
+		DisplayName        *string                           `json:"displayName"`
+		ExtendedMetadata   map[string]interface{}            `json:"extendedMetadata"`
+		FreeformTags       map[string]string                 `json:"freeformTags"`
+		ImageId            *string                           `json:"imageId"`
+		IpxeScript         *string                           `json:"ipxeScript"`
+		LaunchMode         InstanceLaunchModeEnum            `json:"launchMode"`
+		LaunchOptions      *LaunchOptions                    `json:"launchOptions"`
+		Metadata           map[string]string                 `json:"metadata"`
+		SourceDetails      instancesourcedetails             `json:"sourceDetails"`
+		AvailabilityDomain *string                           `json:"availabilityDomain"`
+		CompartmentId      *string                           `json:"compartmentId"`
+		Id                 *string                           `json:"id"`
+		LifecycleState     InstanceLifecycleStateEnum        `json:"lifecycleState"`
+		Region             *string                           `json:"region"`
+		Shape              *string                           `json:"shape"`
+		TimeCreated        *common.SDKTime                   `json:"timeCreated"`
 	}{}
 
 	e = json.Unmarshal(data, &model)
 	if e != nil {
 		return
 	}
+	m.DefinedTags = model.DefinedTags
 	m.DisplayName = model.DisplayName
 	m.ExtendedMetadata = model.ExtendedMetadata
+	m.FreeformTags = model.FreeformTags
 	m.ImageId = model.ImageId
 	m.IpxeScript = model.IpxeScript
+	m.LaunchMode = model.LaunchMode
+	m.LaunchOptions = model.LaunchOptions
 	m.Metadata = model.Metadata
 	nn, e := model.SourceDetails.UnmarshalPolymorphicJSON(model.SourceDetails.JsonData)
 	if e != nil {
 		return
 	}
-	m.SourceDetails = nn
+	m.SourceDetails = nn.(InstanceSourceDetails)
 	m.AvailabilityDomain = model.AvailabilityDomain
 	m.CompartmentId = model.CompartmentId
 	m.Id = model.Id
@@ -132,6 +159,31 @@ func (m *Instance) UnmarshalJSON(data []byte) (e error) {
 	m.Shape = model.Shape
 	m.TimeCreated = model.TimeCreated
 	return
+}
+
+// InstanceLaunchModeEnum Enum with underlying type: string
+type InstanceLaunchModeEnum string
+
+// Set of constants representing the allowable values for InstanceLaunchMode
+const (
+	InstanceLaunchModeNative   InstanceLaunchModeEnum = "NATIVE"
+	InstanceLaunchModeEmulated InstanceLaunchModeEnum = "EMULATED"
+	InstanceLaunchModeCustom   InstanceLaunchModeEnum = "CUSTOM"
+)
+
+var mappingInstanceLaunchMode = map[string]InstanceLaunchModeEnum{
+	"NATIVE":   InstanceLaunchModeNative,
+	"EMULATED": InstanceLaunchModeEmulated,
+	"CUSTOM":   InstanceLaunchModeCustom,
+}
+
+// GetInstanceLaunchModeEnumValues Enumerates the set of values for InstanceLaunchMode
+func GetInstanceLaunchModeEnumValues() []InstanceLaunchModeEnum {
+	values := make([]InstanceLaunchModeEnum, 0)
+	for _, v := range mappingInstanceLaunchMode {
+		values = append(values, v)
+	}
+	return values
 }
 
 // InstanceLifecycleStateEnum Enum with underlying type: string

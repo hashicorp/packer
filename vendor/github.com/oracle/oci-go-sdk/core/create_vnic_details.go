@@ -32,15 +32,31 @@ type CreateVnicDetails struct {
 	// a public IP address is assigned. If set to true and
 	// `prohibitPublicIpOnVnic` = true, an error is returned.
 	// **Note:** This public IP address is associated with the primary private IP
-	// on the VNIC. Secondary private IPs cannot have public IP
-	// addresses associated with them. For more information, see
+	// on the VNIC. For more information, see
 	// IP Addresses (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Tasks/managingIPaddresses.htm).
+	// **Note:** There's a limit to the number of PublicIp
+	// a VNIC or instance can have. If you try to create a secondary VNIC
+	// with an assigned public IP for an instance that has already
+	// reached its public IP limit, an error is returned. For information
+	// about the public IP limits, see
+	// Public IP Addresses (https://docs.us-phoenix-1.oraclecloud.com/Content/Network/Tasks/managingpublicIPs.htm).
 	// Example: `false`
 	AssignPublicIp *bool `mandatory:"false" json:"assignPublicIp"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
 
 	// A user-friendly name for the VNIC. Does not have to be unique.
 	// Avoid entering confidential information.
 	DisplayName *string `mandatory:"false" json:"displayName"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no
+	// predefined name, type, or namespace. For more information, see
+	// Resource Tags (https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
 
 	// The hostname for the VNIC's primary private IP. Used for DNS. The value is the hostname
 	// portion of the primary private IP's fully qualified domain name (FQDN)

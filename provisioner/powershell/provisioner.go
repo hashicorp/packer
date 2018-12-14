@@ -147,11 +147,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}';exit $LastExitCode }"`
+		p.config.ExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
 	}
 
 	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+		p.config.ElevatedExecuteCommand = `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -188,11 +188,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	if p.config.Script != "" && len(p.config.Scripts) > 0 {
 		errs = packer.MultiErrorAppend(errs,
 			errors.New("Only one of script or scripts can be specified."))
-	}
-
-	if p.config.ElevatedUser != "" && p.config.ElevatedPassword == "" {
-		errs = packer.MultiErrorAppend(errs,
-			errors.New("Must supply an 'elevated_password' if 'elevated_user' provided"))
 	}
 
 	if p.config.ElevatedUser == "" && p.config.ElevatedPassword != "" {
@@ -385,9 +380,18 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 	envVars["PACKER_BUILD_NAME"] = p.config.PackerBuildName
 	envVars["PACKER_BUILDER_TYPE"] = p.config.PackerBuilderType
 
+	// expose ip address variables
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
 		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
+	httpIP := common.GetHTTPIP()
+	if httpIP != "" {
+		envVars["PACKER_HTTP_IP"] = httpIP
+	}
+	httpPort := common.GetHTTPPort()
+	if httpPort != "" {
+		envVars["PACKER_HTTP_PORT"] = httpPort
 	}
 
 	// interpolate environment variables
@@ -481,6 +485,7 @@ func (p *Provisioner) createCommandTextNonPrivileged() (command string, err erro
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }
 

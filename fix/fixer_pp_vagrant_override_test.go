@@ -1,8 +1,9 @@
 package fix
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFixerVagrantPPOverride_Impl(t *testing.T) {
@@ -69,11 +70,7 @@ func TestFixerVagrantPPOverride_Fix(t *testing.T) {
 	}
 
 	output, err := f.Fix(input)
-	if err != nil {
-		t.Fatalf("err: %s", err)
-	}
+	assert.NoError(t, err)
 
-	if !reflect.DeepEqual(output, expected) {
-		t.Fatalf("unexpected: %#v\nexpected: %#v\n", output, expected)
-	}
+	assert.Equal(t, expected, output)
 }

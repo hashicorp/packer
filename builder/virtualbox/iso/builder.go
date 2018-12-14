@@ -35,9 +35,11 @@ type Config struct {
 	vboxcommon.RunConfig            `mapstructure:",squash"`
 	vboxcommon.ShutdownConfig       `mapstructure:",squash"`
 	vboxcommon.SSHConfig            `mapstructure:",squash"`
+	vboxcommon.HWConfig             `mapstructure:",squash"`
 	vboxcommon.VBoxManageConfig     `mapstructure:",squash"`
 	vboxcommon.VBoxManagePostConfig `mapstructure:",squash"`
 	vboxcommon.VBoxVersionConfig    `mapstructure:",squash"`
+	vboxcommon.VBoxBundleConfig     `mapstructure:",squash"`
 
 	DiskSize               uint   `mapstructure:"disk_size"`
 	GuestAdditionsMode     string `mapstructure:"guest_additions_mode"`
@@ -92,6 +94,8 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.RunConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.ShutdownConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.SSHConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.HWConfig.Prepare(&b.config.ctx)...)
+	errs = packer.MultiErrorAppend(errs, b.config.VBoxBundleConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManageConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxManagePostConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.VBoxVersionConfig.Prepare(&b.config.ctx)...)
@@ -245,15 +249,16 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Headless: b.config.Headless,
 		},
 		&vboxcommon.StepTypeBootCommand{
-			BootWait:    b.config.BootWait,
-			BootCommand: b.config.FlatBootCommand(),
-			VMName:      b.config.VMName,
-			Ctx:         b.config.ctx,
+			BootWait:      b.config.BootWait,
+			BootCommand:   b.config.FlatBootCommand(),
+			VMName:        b.config.VMName,
+			Ctx:           b.config.ctx,
+			GroupInterval: b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      vboxcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
-			SSHConfig: vboxcommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.SSHPort,
 			WinRMPort: vboxcommon.SSHPort,
 		},
@@ -266,12 +271,17 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                b.config.ctx,
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&vboxcommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,
 			Delay:   b.config.PostShutdownDelay,
 		},
-		new(vboxcommon.StepRemoveDevices),
+		&vboxcommon.StepRemoveDevices{
+			Bundling: b.config.VBoxBundleConfig,
+		},
 		&vboxcommon.StepVBoxManage{
 			Commands: b.config.VBoxManagePost,
 			Ctx:      b.config.ctx,
@@ -280,6 +290,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Format:         b.config.Format,
 			OutputDir:      b.config.OutputDir,
 			ExportOpts:     b.config.ExportOpts.ExportOpts,
+			Bundling:       b.config.VBoxBundleConfig,
 			SkipNatMapping: b.config.SSHSkipNatMapping,
 			SkipExport:     b.config.SkipExport,
 		},

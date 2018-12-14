@@ -114,7 +114,8 @@ func (s *Server) RegisterProvisioner(p packer.Provisioner) {
 
 func (s *Server) RegisterUi(ui packer.Ui) {
 	s.server.RegisterName(DefaultUiEndpoint, &UiServer{
-		ui: ui,
+		ui:       ui,
+		register: s.server.RegisterName,
 	})
 }
 

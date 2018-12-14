@@ -17,11 +17,17 @@ import (
 	"github.com/masterzen/winrm"
 )
 
-var DefaultRestartCommand = "shutdown /r /f /t 0 /c \"packer restart\""
+var DefaultRestartCommand = `shutdown /r /f /t 0 /c "packer restart"`
 var DefaultRestartCheckCommand = winrm.Powershell(`echo "${env:COMPUTERNAME} restarted."`)
 var retryableSleep = 5 * time.Second
-var TryCheckReboot = "shutdown.exe -f -r -t 60"
-var AbortReboot = "shutdown.exe -a"
+var TryCheckReboot = `shutdown /r /f /t 60 /c "packer restart test"`
+var AbortReboot = `shutdown /a`
+
+var DefaultRegistryKeys = []string{
+	"HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootPending",
+	"HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\PackagesPending",
+	"HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootInProgress",
+}
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
@@ -35,6 +41,12 @@ type Config struct {
 
 	// The timeout for waiting for the machine to restart
 	RestartTimeout time.Duration `mapstructure:"restart_timeout"`
+
+	// Whether to check the registry (see RegistryKeys) for pending reboots
+	CheckKey bool `mapstructure:"check_registry"`
+
+	// custom keys to check for
+	RegistryKeys []string `mapstructure:"registry_keys"`
 
 	ctx interpolate.Context
 }
@@ -73,6 +85,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.RestartTimeout = 5 * time.Minute
 	}
 
+	if len(p.config.RegistryKeys) == 0 {
+		p.config.RegistryKeys = DefaultRegistryKeys
+	}
+
 	return nil
 }
 
@@ -96,7 +112,7 @@ func (p *Provisioner) Provision(ui packer.Ui, comm packer.Communicator) error {
 		return err
 	}
 
-	if cmd.ExitStatus != 0 {
+	if cmd.ExitStatus != 0 && cmd.ExitStatus != 1115 && cmd.ExitStatus != 1190 {
 		return fmt.Errorf("Restart script exited with non-zero exit status: %d", cmd.ExitStatus)
 	}
 
@@ -129,8 +145,12 @@ var waitForRestart = func(p *Provisioner, comm packer.Communicator) error {
 			// Couldn't execute, we assume machine is rebooting already
 			break
 		}
-
-		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 {
+		if cmd.ExitStatus == 1 {
+			// SSH provisioner, and we're already rebooting. SSH can reconnect
+			// without our help; exit this wait loop.
+			break
+		}
+		if cmd.ExitStatus == 1115 || cmd.ExitStatus == 1190 || cmd.ExitStatus == 1717 {
 			// Reboot already in progress but not completed
 			log.Printf("Reboot already in progress, waiting...")
 			time.Sleep(10 * time.Second)
@@ -175,7 +195,6 @@ WaitLoop:
 			return fmt.Errorf("Interrupt detected, quitting waiting for machine to restart")
 		}
 	}
-
 	return nil
 
 }
@@ -209,7 +228,6 @@ var waitForCommunicator = func(p *Provisioner) error {
 			log.Printf("Connected to machine")
 			runCustomRestartCheck = false
 		}
-
 		// This is the non-user-configurable check that powershell
 		// modules have loaded.
 
@@ -230,6 +248,37 @@ var waitForCommunicator = func(p *Provisioner) error {
 		if !strings.Contains(stdoutToRead, "restarted.") {
 			log.Printf("echo didn't succeed; retrying...")
 			continue
+		}
+
+		if p.config.CheckKey {
+			log.Printf("Connected to machine")
+			shouldContinue := false
+			for _, RegKey := range p.config.RegistryKeys {
+				KeyTestCommand := winrm.Powershell(fmt.Sprintf(`Test-Path "%s"`, RegKey))
+				cmdKeyCheck := &packer.RemoteCmd{Command: KeyTestCommand}
+				log.Printf("Checking registry for pending reboots")
+				var buf, buf2 bytes.Buffer
+				cmdKeyCheck.Stdout = &buf
+				cmdKeyCheck.Stdout = io.MultiWriter(cmdKeyCheck.Stdout, &buf2)
+
+				err := p.comm.Start(cmdKeyCheck)
+				if err != nil {
+					log.Printf("Communication connection err: %s", err)
+					shouldContinue = true
+				}
+				cmdKeyCheck.Wait()
+
+				stdoutToRead := buf2.String()
+				if strings.Contains(stdoutToRead, "True") {
+					log.Printf("RegistryKey %s exists; waiting...", KeyTestCommand)
+					shouldContinue = true
+				} else {
+					log.Printf("No Registry keys found; exiting wait loop")
+				}
+			}
+			if shouldContinue {
+				continue
+			}
 		}
 		break
 	}

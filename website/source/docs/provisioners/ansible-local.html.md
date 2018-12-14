@@ -1,10 +1,10 @@
 ---
 description: |
-    The ansible-local Packer provisioner will run ansible in ansible's "local"
-    mode on the remote/guest VM using Playbook and Role files that exist on the
-    guest VM. This means ansible must be installed on the remote/guest VM.
-    Playbooks and Roles can be uploaded from your build machine
-    (the one running Packer) to the vm.
+    The ansible-local Packer provisioner will run ansible in ansible's "local" mode
+    on the remote/guest VM using Playbook and Role files that exist on the guest
+    VM. This means ansible must be installed on the remote/guest VM. Playbooks and
+    Roles can be uploaded from your build machine (the one running Packer) to the
+    vm.
 layout: docs
 page_title: 'Ansible Local - Provisioners'
 sidebar_current: 'docs-provisioners-ansible-local'
@@ -15,18 +15,18 @@ sidebar_current: 'docs-provisioners-ansible-local'
 Type: `ansible-local`
 
 The `ansible-local` Packer provisioner will run ansible in ansible's "local"
-    mode on the remote/guest VM using Playbook and Role files that exist on the
-    guest VM. This means ansible must be installed on the remote/guest VM.
-    Playbooks and Roles can be uploaded from your build machine
-    (the one running Packer) to the vm. Ansible is then run on the guest machine
-    in [local mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks) via the
-`ansible-playbook` command.
+mode on the remote/guest VM using Playbook and Role files that exist on the
+guest VM. This means ansible must be installed on the remote/guest VM.
+Playbooks and Roles can be uploaded from your build machine (the one running
+Packer) to the vm. Ansible is then run on the guest machine in [local
+mode](https://docs.ansible.com/ansible/playbooks_delegation.html#local-playbooks)
+via the `ansible-playbook` command.
 
 -&gt; **Note:** Ansible will *not* be installed automatically by this
 provisioner. This provisioner expects that Ansible is already installed on the
 guest/remote machine. It is common practice to use the [shell
-provisioner](/docs/provisioners/shell.html) before the Ansible provisioner to do
-this.
+provisioner](/docs/provisioners/shell.html) before the Ansible provisioner to
+do this.
 
 ## Basic Example
 
@@ -45,26 +45,27 @@ The reference of available configuration options is listed below.
 
 Required:
 
--   `playbook_file` (string) - The playbook file to be executed by ansible. This
-    file must exist on your local system and will be uploaded to the
+-   `playbook_file` (string) - The playbook file to be executed by ansible.
+    This file must exist on your local system and will be uploaded to the
     remote machine. This option is exclusive with `playbook_files`.
-    
--   `playbook_files` (array of strings) - The playbook files to be executed by ansible.
-    These files must exist on your local system. If the files don't exist in the `playbook_dir`
-    or you don't set `playbook_dir` they will be uploaded to the remote machine. This option
-    is exclusive with `playbook_file`.
+
+-   `playbook_files` (array of strings) - The playbook files to be executed by
+    ansible. These files must exist on your local system. If the files don't
+    exist in the `playbook_dir` or you don't set `playbook_dir` they will be
+    uploaded to the remote machine. This option is exclusive with
+    `playbook_file`.
 
 Optional:
 
--   `command` (string) - The command to invoke ansible. Defaults
-    to "ANSIBLE\_FORCE\_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook".
-    Note, This disregards the value of `-color` when passed to `packer build`.
-    To disable colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
+-   `command` (string) - The command to invoke ansible. Defaults to
+    "ANSIBLE\_FORCE\_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook". Note, This
+    disregards the value of `-color` when passed to `packer build`. To disable
+    colors, set this to `PYTHONUNBUFFERED=1 ansible-playbook`.
 
 -   `extra_arguments` (array of strings) - An array of extra arguments to pass
     to the ansible command. By default, this is empty. These arguments *will*
-    be passed through a shell and arguments should be quoted accordingly.
-    Usage example:
+    be passed through a shell and arguments should be quoted accordingly. Usage
+    example:
 
 <!-- -->
     "extra_arguments": [ "--extra-vars \"Region={{user `Region`}} Stage={{user `Stage`}}\"" ]
@@ -81,8 +82,8 @@ Optional:
 ```
 
 -   `inventory_file` (string) - The inventory file to be used by ansible. This
-    file must exist on your local system and will be uploaded to the
-    remote machine.
+    file must exist on your local system and will be uploaded to the remote
+    machine.
 
 When using an inventory file, it's also required to `--limit` the hosts to the
 specified host you're building. The `--limit` argument can be provided in the
@@ -110,21 +111,21 @@ chi-dbservers
 chi-appservers
 ```
 
--   `playbook_dir` (string) - a path to the complete ansible directory structure
-    on your local system to be copied to the remote machine as the
+-   `playbook_dir` (string) - a path to the complete ansible directory
+    structure on your local system to be copied to the remote machine as the
     `staging_directory` before all other files and directories.
 
--   `playbook_paths` (array of strings) - An array of directories of playbook files on
-    your local system. These will be uploaded to the remote machine under
-    `staging_directory`/playbooks. By default, this is empty.
+-   `playbook_paths` (array of strings) - An array of directories of playbook
+    files on your local system. These will be uploaded to the remote machine
+    under `staging_directory`/playbooks. By default, this is empty.
 
--   `galaxy_file` (string) - A requirements file which provides a way to install
-    roles with the [ansible-galaxy
+-   `galaxy_file` (string) - A requirements file which provides a way to
+    install roles with the [ansible-galaxy
     cli](http://docs.ansible.com/ansible/galaxy.html#the-ansible-galaxy-command-line-tool)
     on the remote machine. By default, this is empty.
 
--   `galaxycommand` (string) - The command to invoke ansible-galaxy.
-    By default, this is ansible-galaxy.
+-   `galaxycommand` (string) - The command to invoke ansible-galaxy. By
+    default, this is ansible-galaxy.
 
 -   `group_vars` (string) - a path to the directory containing ansible group
     variables on your local system to be copied to the remote machine. By
@@ -149,9 +150,9 @@ chi-appservers
     are not correct, use a shell provisioner prior to this to configure it
     properly.
 
--   `clean_staging_directory` (boolean) - If set to `true`, the content of
-     the `staging_directory` will be removed after executing ansible. By
-     default, this is set to `false`.
+-   `clean_staging_directory` (boolean) - If set to `true`, the content of the
+    `staging_directory` will be removed after executing ansible. By default,
+    this is set to `false`.
 
 ## Default Extra Variables
 
@@ -163,9 +164,10 @@ commonly useful Ansible variables:
     This is most useful when Packer is making multiple builds and you want to
     distinguish them slightly when using a common playbook.
 
--   `packer_builder_type` is the type of the builder that was used to create the
-    machine that the script is running on. This is useful if you want to run
-    only certain parts of the playbook on systems built with certain builders.
+-   `packer_builder_type` is the type of the builder that was used to create
+    the machine that the script is running on. This is useful if you want to
+    run only certain parts of the playbook on systems built with certain
+    builders.
 
 -   `packer_http_addr` If using a builder that provides an http server for file
     transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this

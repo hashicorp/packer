@@ -66,8 +66,17 @@ func (d *Fusion6Driver) Verify() error {
 		return err
 	}
 
+	// Example: VMware Fusion e.x.p build-6048684 Release
+	techPreviewRe := regexp.MustCompile(`(?i)VMware [a-z0-9-]+ e\.x\.p `)
+	matches := techPreviewRe.FindStringSubmatch(stderr.String())
+	if matches != nil {
+		log.Printf("Detected VMware version: e.x.p (Tech Preview)")
+		return nil
+	}
+
+	// Example: VMware Fusion 7.1.3 build-3204469 Release
 	versionRe := regexp.MustCompile(`(?i)VMware [a-z0-9-]+ (\d+)\.`)
-	matches := versionRe.FindStringSubmatch(stderr.String())
+	matches = versionRe.FindStringSubmatch(stderr.String())
 	if matches == nil {
 		return fmt.Errorf(
 			"Couldn't find VMware version in output: %s", stderr.String())

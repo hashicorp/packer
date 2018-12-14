@@ -30,6 +30,7 @@ type StepTypeBootCommand struct {
 	BootWait    time.Duration
 	VMName      string
 	Ctx         interpolate.Context
+	KeyInterval time.Duration
 }
 type bootCommandTemplateData struct {
 	HTTPIP   string
@@ -69,6 +70,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 	// Connect to VNC
 	ui.Say(fmt.Sprintf("Connecting to VM via VNC (%s:%d)", vncIp, vncPort))
+
 	nc, err := net.Dial("tcp", fmt.Sprintf("%s:%d", vncIp, vncPort))
 	if err != nil {
 		err := fmt.Errorf("Error connecting to VNC: %s", err)
@@ -115,7 +117,7 @@ func (s *StepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 		s.VMName,
 	}
 
-	d := bootcommand.NewVNCDriver(c)
+	d := bootcommand.NewVNCDriver(c, s.KeyInterval)
 
 	ui.Say("Typing the boot command over VNC...")
 	command, err := interpolate.Render(s.BootCommand, &s.Ctx)

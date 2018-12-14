@@ -3,7 +3,7 @@
 
 // Object Storage Service API
 //
-// APIs for managing buckets and objects.
+// Common set of Object and Archive Storage APIs for managing buckets and objects.
 //
 
 package objectstorage
@@ -17,20 +17,21 @@ import (
 // Getting Started with Policies (https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Concepts/policygetstarted.htm).
 type CreateMultipartUploadDetails struct {
 
-	// the name of the object to which this multi-part upload is targetted.
+	// The name of the object to which this multi-part upload is targeted. Avoid entering confidential information.
+	// Example: test/object1.log
 	Object *string `mandatory:"true" json:"object"`
 
-	// the content type of the object to upload.
+	// The content type of the object to upload.
 	ContentType *string `mandatory:"false" json:"contentType"`
 
-	// the content language of the object to upload.
+	// The content language of the object to upload.
 	ContentLanguage *string `mandatory:"false" json:"contentLanguage"`
 
-	// the content encoding of the object to upload.
+	// The content encoding of the object to upload.
 	ContentEncoding *string `mandatory:"false" json:"contentEncoding"`
 
 	// Arbitrary string keys and values for the user-defined metadata for the object.
-	// Keys must be in "opc-meta-*" format.
+	// Keys must be in "opc-meta-*" format. Avoid entering confidential information.
 	Metadata map[string]string `mandatory:"false" json:"metadata"`
 }
 

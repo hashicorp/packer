@@ -39,7 +39,7 @@ func (ps *PowerShellCmd) Run(fileContents string, params ...string) error {
 func (ps *PowerShellCmd) Output(fileContents string, params ...string) (string, error) {
 	path, err := ps.getPowerShellPath()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Cannot find PowerShell in the path")
 	}
 
 	filename, err := saveScript(fileContents)
@@ -239,7 +239,7 @@ param([string]$moduleName)
 
 func HasVirtualMachineVirtualizationExtensions() (bool, error) {
 
-	var script = `	
+	var script = `
 (GET-Command Hyper-V\Set-VMProcessor).parameters.keys -contains "ExposeVirtualizationExtensions"
 `
 
@@ -344,7 +344,7 @@ param([string]$path,[string]$productKey)
 $unattend = [xml](Get-Content -Path $path)
 $ns = @{ un = 'urn:schemas-microsoft-com:unattend' }
 
-$setupNode = $unattend | 
+$setupNode = $unattend |
   Select-Xml -XPath '//un:settings[@pass = "specialize"]/un:component[@name = "Microsoft-Windows-Shell-Setup"]' -Namespace $ns |
   Select-Object -ExpandProperty Node
 

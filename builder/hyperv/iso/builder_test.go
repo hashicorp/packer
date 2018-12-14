@@ -1,3 +1,5 @@
+// +build !windows
+
 package iso
 
 import (
@@ -104,7 +106,8 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 		t.Fatalf("bad err: %s", err)
 	}
 	if b.config.DiskBlockSize != expected_default_block_size {
-		t.Fatalf("bad default block size with empty config: %d. Expected %d", b.config.DiskBlockSize, expected_default_block_size)
+		t.Fatalf("bad default block size with empty config: %d. Expected %d", b.config.DiskBlockSize,
+			expected_default_block_size)
 	}
 
 	test_sizes := []uint{0, 1, 32, 256, 512, 1 * 1024, 32 * 1024}
@@ -117,7 +120,8 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 				t.Fatalf("bad, should have no warns: %#v", warns)
 			}
 			if err == nil {
-				t.Fatalf("bad, should have error but didn't. disk_block_size=%d outside expected valid range [%d,%d]", test_size, expected_min_block_size, expected_max_block_size)
+				t.Fatalf("bad, should have error. disk_block_size=%d outside expected valid range [%d,%d]",
+					test_size, expected_min_block_size, expected_max_block_size)
 			}
 		} else {
 			if len(warns) > 0 {
@@ -128,11 +132,13 @@ func TestBuilderPrepare_DiskBlockSize(t *testing.T) {
 			}
 			if test_size == 0 {
 				if b.config.DiskBlockSize != expected_default_block_size {
-					t.Fatalf("bad default block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+					t.Fatalf("bad default block size with 0 value config: %d. Expected: %d",
+						b.config.DiskBlockSize, expected_default_block_size)
 				}
 			} else {
 				if b.config.DiskBlockSize != test_size {
-					t.Fatalf("bad block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize, expected_default_block_size)
+					t.Fatalf("bad block size with 0 value config: %d. Expected: %d", b.config.DiskBlockSize,
+						expected_default_block_size)
 				}
 			}
 		}
@@ -147,7 +153,8 @@ func TestBuilderPrepare_FixedVHDFormat(t *testing.T) {
 	config["skip_compaction"] = true
 	config["differencing_disk"] = false
 
-	//use_fixed_vhd_format should work with generation = 1, skip_compaction = true, and differencing_disk = false
+	// use_fixed_vhd_format should work with generation = 1, skip_compaction
+	// = true, and differencing_disk = false
 	warns, err := b.Prepare(config)
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)

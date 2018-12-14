@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/packer/common"
@@ -35,6 +36,7 @@ type Config struct {
 	DropletName       string        `mapstructure:"droplet_name"`
 	UserData          string        `mapstructure:"user_data"`
 	UserDataFile      string        `mapstructure:"user_data_file"`
+	Tags              []string      `mapstructure:"tags"`
 
 	ctx interpolate.Context
 }
@@ -121,10 +123,21 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		}
 	}
 
+	if c.Tags == nil {
+		c.Tags = make([]string, 0)
+	}
+	tagRe := regexp.MustCompile("^[[:alnum:]:_-]{1,255}$")
+
+	for _, t := range c.Tags {
+		if !tagRe.MatchString(t) {
+			errs = packer.MultiErrorAppend(errs, errors.New(fmt.Sprintf("invalid tag: %s", t)))
+		}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
 
-	common.ScrubConfig(c, c.APIToken)
+	packer.LogSecretFilter.Set(c.APIToken)
 	return c, nil, nil
 }

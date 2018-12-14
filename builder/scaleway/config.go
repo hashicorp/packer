@@ -30,6 +30,7 @@ type Config struct {
 	ImageName    string `mapstructure:"image_name"`
 	ServerName   string `mapstructure:"server_name"`
 	Bootscript   string `mapstructure:"bootscript"`
+	BootType     string `mapstructure:"boottype"`
 
 	UserAgent string
 	ctx       interpolate.Context
@@ -86,6 +87,10 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		c.ServerName = fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
 	}
 
+	if c.BootType == "" {
+		c.BootType = "bootscript"
+	}
+
 	var errs *packer.MultiError
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packer.MultiErrorAppend(errs, es...)
@@ -119,6 +124,6 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, errs
 	}
 
-	common.ScrubConfig(c, c.Token)
+	packer.LogSecretFilter.Set(c.Token)
 	return c, nil, nil
 }

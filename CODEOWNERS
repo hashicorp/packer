@@ -2,7 +2,7 @@
 
 # builders
 
-/builder/alicloud/                      dongxiao.zzh@alibaba-inc.com
+/builder/alicloud/                      @chhaj5236
 /builder/amazon/ebssurrogate/           @jen20
 /builder/amazon/ebsvolume/              @jen20
 /builder/azure/                         @boumenot
@@ -14,7 +14,8 @@
 /builder/profitbricks/                  @jasmingacic
 /builder/triton/                        @jen20 @sean-
 /builder/ncloud/                        @YuSungDuk
-/builder/scaleway/                      @dimtion @edouardb
+/builder/scaleway/                      @sieben @mvaude @jqueuniet @fflorens @brmzkw
+/builder/hcloud/                        @LKaemmerling
 
 # provisioners
 

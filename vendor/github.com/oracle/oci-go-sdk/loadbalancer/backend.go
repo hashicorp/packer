@@ -18,25 +18,25 @@ type Backend struct {
 
 	// Whether the load balancer should treat this server as a backup unit. If `true`, the load balancer forwards no ingress
 	// traffic to this backend server unless all other backend servers not marked as "backup" fail the health check policy.
-	// Example: `true`
+	// Example: `false`
 	Backup *bool `mandatory:"true" json:"backup"`
 
 	// Whether the load balancer should drain this server. Servers marked "drain" receive no new
 	// incoming traffic.
-	// Example: `true`
+	// Example: `false`
 	Drain *bool `mandatory:"true" json:"drain"`
 
 	// The IP address of the backend server.
-	// Example: `10.10.10.4`
+	// Example: `10.0.0.3`
 	IpAddress *string `mandatory:"true" json:"ipAddress"`
 
 	// A read-only field showing the IP address and port that uniquely identify this backend server in the backend set.
-	// Example: `10.10.10.4:8080`
+	// Example: `10.0.0.3:8080`
 	Name *string `mandatory:"true" json:"name"`
 
 	// Whether the load balancer should treat this server as offline. Offline servers receive no incoming
 	// traffic.
-	// Example: `true`
+	// Example: `false`
 	Offline *bool `mandatory:"true" json:"offline"`
 
 	// The communication port for the backend server.

@@ -24,7 +24,7 @@ type Config struct {
 	awscommon.RunConfig    `mapstructure:",squash"`
 
 	VolumeMappings     []BlockDevice `mapstructure:"ebs_volumes"`
-	AMIENASupport      bool          `mapstructure:"ena_support"`
+	AMIENASupport      *bool         `mapstructure:"ena_support"`
 	AMISriovNetSupport bool          `mapstructure:"sriov_support"`
 
 	launchBlockDevices awscommon.BlockDevices
@@ -36,18 +36,22 @@ type Builder struct {
 	runner multistep.Runner
 }
 
+type EngineVarsTemplate struct {
+	BuildRegion string
+	SourceAMI   string
+}
+
 func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	b.config.ctx.Funcs = awscommon.TemplateFuncs
+	// Create passthrough for {{ .BuildRegion }} and {{ .SourceAMI }} variables
+	// so we can fill them in later
+	b.config.ctx.Data = &EngineVarsTemplate{
+		BuildRegion: `{{ .BuildRegion }}`,
+		SourceAMI:   `{{ .SourceAMI }} `,
+	}
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
-		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{
-				"run_tags",
-				"spot_tags",
-				"ebs_volumes",
-			},
-		},
 	}, raws...)
 	if err != nil {
 		return nil, err
@@ -70,7 +74,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packer.MultiErrorAppend(errs, err)
 	}
 
-	if b.config.IsSpotInstance() && (b.config.AMIENASupport || b.config.AMISriovNetSupport) {
+	if b.config.IsSpotInstance() && ((b.config.AMIENASupport != nil && *b.config.AMIENASupport) || b.config.AMISriovNetSupport) {
 		errs = packer.MultiErrorAppend(errs,
 			fmt.Errorf("Spot instances do not support modification, which is required "+
 				"when either `ena_support` or `sriov_support` are set. Please ensure "+
@@ -81,7 +85,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		return nil, errs
 	}
 
-	log.Println(common.ScrubConfig(b.config, b.config.AccessKey, b.config.SecretKey, b.config.Token))
+	packer.LogSecretFilter.Set(b.config.AccessKey, b.config.SecretKey, b.config.Token)
 	return nil, nil
 }
 
@@ -92,26 +96,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 	ec2conn := ec2.New(session)
 
-	// If the subnet is specified but not the VpcId or AZ, try to determine them automatically
-	if b.config.SubnetId != "" && (b.config.AvailabilityZone == "" || b.config.VpcId == "") {
-		log.Printf("[INFO] Finding AZ and VpcId for the given subnet '%s'", b.config.SubnetId)
-		resp, err := ec2conn.DescribeSubnets(&ec2.DescribeSubnetsInput{SubnetIds: []*string{&b.config.SubnetId}})
-		if err != nil {
-			return nil, err
-		}
-		if b.config.AvailabilityZone == "" {
-			b.config.AvailabilityZone = *resp.Subnets[0].AvailabilityZone
-			log.Printf("[INFO] AvailabilityZone found: '%s'", b.config.AvailabilityZone)
-		}
-		if b.config.VpcId == "" {
-			b.config.VpcId = *resp.Subnets[0].VpcId
-			log.Printf("[INFO] VpcId found: '%s'", b.config.VpcId)
-		}
-	}
-
 	// Setup the state bag and initial state for the steps
 	state := new(multistep.BasicStateBag)
-	state.Put("config", b.config)
+	state.Put("config", &b.config)
 	state.Put("ec2", ec2conn)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -121,9 +108,10 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.IsSpotInstance() {
 		instanceStep = &awscommon.StepRunSpotInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			AvailabilityZone:                  b.config.AvailabilityZone,
 			BlockDevices:                      b.config.launchBlockDevices,
+			BlockDurationMinutes:              b.config.BlockDurationMinutes,
 			Ctx:                               b.config.ctx,
+			Comm:                              &b.config.RunConfig.Comm,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
 			ExpectedRootDevice:                "ebs",
@@ -134,7 +122,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			SpotPrice:                         b.config.SpotPrice,
 			SpotPriceProduct:                  b.config.SpotPriceAutoProduct,
 			SpotTags:                          b.config.SpotTags,
-			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
@@ -142,8 +129,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	} else {
 		instanceStep = &awscommon.StepRunSourceInstance{
 			AssociatePublicIpAddress:          b.config.AssociatePublicIpAddress,
-			AvailabilityZone:                  b.config.AvailabilityZone,
 			BlockDevices:                      b.config.launchBlockDevices,
+			Comm:                              &b.config.RunConfig.Comm,
 			Ctx:                               b.config.ctx,
 			Debug:                             b.config.PackerDebug,
 			EbsOptimized:                      b.config.EbsOptimized,
@@ -154,7 +141,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			InstanceType:                      b.config.InstanceType,
 			IsRestricted:                      b.config.IsChinaCloud() || b.config.IsGovCloud(),
 			SourceAMI:                         b.config.SourceAmi,
-			SubnetId:                          b.config.SubnetId,
 			Tags:                              b.config.RunTags,
 			UserData:                          b.config.UserData,
 			UserDataFile:                      b.config.UserDataFile,
@@ -169,18 +155,24 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableAMIENASupport:      b.config.AMIENASupport,
 			AmiFilters:               b.config.SourceAmiFilter,
 		},
+		&awscommon.StepNetworkInfo{
+			VpcId:               b.config.VpcId,
+			VpcFilter:           b.config.VpcFilter,
+			SecurityGroupIds:    b.config.SecurityGroupIds,
+			SecurityGroupFilter: b.config.SecurityGroupFilter,
+			SubnetId:            b.config.SubnetId,
+			SubnetFilter:        b.config.SubnetFilter,
+			AvailabilityZone:    b.config.AvailabilityZone,
+		},
 		&awscommon.StepKeyPair{
-			Debug:                b.config.PackerDebug,
-			SSHAgentAuth:         b.config.Comm.SSHAgentAuth,
-			DebugKeyPath:         fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
-			KeyPairName:          b.config.SSHKeyPairName,
-			TemporaryKeyPairName: b.config.TemporaryKeyPairName,
-			PrivateKeyFile:       b.config.RunConfig.Comm.SSHPrivateKey,
+			Debug:        b.config.PackerDebug,
+			Comm:         &b.config.RunConfig.Comm,
+			DebugKeyPath: fmt.Sprintf("ec2_%s.pem", b.config.PackerBuildName),
 		},
 		&awscommon.StepSecurityGroup{
-			SecurityGroupIds: b.config.SecurityGroupIds,
-			CommConfig:       &b.config.RunConfig.Comm,
-			VpcId:            b.config.VpcId,
+			SecurityGroupFilter:   b.config.SecurityGroupFilter,
+			SecurityGroupIds:      b.config.SecurityGroupIds,
+			CommConfig:            &b.config.RunConfig.Comm,
 			TemporarySGSourceCidr: b.config.TemporarySGSourceCidr,
 		},
 		instanceStep,
@@ -198,13 +190,13 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Config: &b.config.RunConfig.Comm,
 			Host: awscommon.SSHHost(
 				ec2conn,
-				b.config.SSHInterface),
-			SSHConfig: awscommon.SSHConfig(
-				b.config.RunConfig.Comm.SSHAgentAuth,
-				b.config.RunConfig.Comm.SSHUsername,
-				b.config.RunConfig.Comm.SSHPassword),
+				b.config.Comm.SSHInterface),
+			SSHConfig: b.config.RunConfig.Comm.SSHConfigFunc(),
 		},
 		&common.StepProvision{},
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.RunConfig.Comm,
+		},
 		&awscommon.StepStopEBSBackedInstance{
 			Skip:                b.config.IsSpotInstance(),
 			DisableStopInstance: b.config.DisableStopInstance,

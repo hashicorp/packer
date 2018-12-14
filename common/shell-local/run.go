@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -27,6 +28,22 @@ type EnvVarsTemplate struct {
 }
 
 func Run(ui packer.Ui, config *Config) (bool, error) {
+	// Check if shell-local can even execute against this runtime OS
+	if len(config.OnlyOn) > 0 {
+		runCommand := false
+		for _, os := range config.OnlyOn {
+			if os == runtime.GOOS {
+				runCommand = true
+				break
+			}
+		}
+		if !runCommand {
+			ui.Say(fmt.Sprintf("Skipping shell-local due to runtime OS"))
+			log.Printf("[INFO] (shell-local): skipping shell-local due to missing runtime OS")
+			return true, nil
+		}
+	}
+
 	scripts := make([]string, len(config.Scripts))
 	if len(config.Scripts) > 0 {
 		copy(scripts, config.Scripts)
@@ -70,12 +87,7 @@ func Run(ui packer.Ui, config *Config) (bool, error) {
 		// buffers and for reading the final exit status.
 		flattenedCmd := strings.Join(interpolatedCmds, " ")
 		cmd := &packer.RemoteCmd{Command: flattenedCmd}
-		sanitized := flattenedCmd
-		if len(getWinRMPassword(config.PackerBuildName)) > 0 {
-			sanitized = strings.Replace(flattenedCmd,
-				getWinRMPassword(config.PackerBuildName), "*****", -1)
-		}
-		log.Printf("[INFO] (shell-local): starting local command: %s", sanitized)
+		log.Printf("[INFO] (shell-local): starting local command: %s", flattenedCmd)
 		if err := cmd.StartWithUi(comm, ui); err != nil {
 			return false, fmt.Errorf(
 				"Error executing script: %s\n\n"+
@@ -166,10 +178,18 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 	envVars["PACKER_BUILD_NAME"] = fmt.Sprintf("%s", config.PackerBuildName)
 	envVars["PACKER_BUILDER_TYPE"] = fmt.Sprintf("%s", config.PackerBuilderType)
 
-	// expose PACKER_HTTP_ADDR
+	// expose ip address variables
 	httpAddr := common.GetHTTPAddr()
 	if httpAddr != "" {
-		envVars["PACKER_HTTP_ADDR"] = fmt.Sprintf("%s", httpAddr)
+		envVars["PACKER_HTTP_ADDR"] = httpAddr
+	}
+	httpIP := common.GetHTTPIP()
+	if httpIP != "" {
+		envVars["PACKER_HTTP_IP"] = httpIP
+	}
+	httpPort := common.GetHTTPPort()
+	if httpPort != "" {
+		envVars["PACKER_HTTP_PORT"] = httpPort
 	}
 
 	// interpolate environment variables
@@ -204,5 +224,6 @@ func createFlattenedEnvVars(config *Config) (string, error) {
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }

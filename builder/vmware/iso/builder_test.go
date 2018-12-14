@@ -146,6 +146,7 @@ func TestBuilderPrepare_RemoteType(t *testing.T) {
 	config["format"] = "ovf"
 	config["remote_host"] = "foobar.example.com"
 	config["remote_password"] = "supersecret"
+	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_type"] = "foobar"
 	warns, err := b.Prepare(config)
@@ -202,6 +203,7 @@ func TestBuilderPrepare_RemoteExport(t *testing.T) {
 
 	config["remote_type"] = "esx5"
 	config["remote_host"] = "foobar.example.com"
+	config["skip_validate_credentials"] = true
 	// Bad
 	config["remote_password"] = ""
 	warns, err := b.Prepare(config)
@@ -441,6 +443,31 @@ func TestBuilderPrepare_VNCPort(t *testing.T) {
 	}
 }
 
+func TestBuilderCheckCollisions(t *testing.T) {
+	config := testConfig()
+	config["vmx_data"] = map[string]string{
+		"no.collision":    "awesomesauce",
+		"ide0:0.fileName": "is a collision",
+		"displayName":     "also a collision",
+	}
+	{
+		var b Builder
+		warns, _ := b.Prepare(config)
+		if len(warns) != 1 {
+			t.Fatalf("Should have warning about two collisions.")
+		}
+	}
+	{
+		config["vmx_template_path"] = "some/path.vmx"
+		var b Builder
+		warns, _ := b.Prepare(config)
+		if len(warns) != 0 {
+			t.Fatalf("Should not check for collisions with custom template.")
+		}
+	}
+
+}
+
 func TestBuilderPrepare_CommConfig(t *testing.T) {
 	// Test Winrm
 	{
@@ -459,13 +486,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 			t.Fatalf("should not have error: %s", err)
 		}
 
-		if b.config.CommConfig.WinRMUser != "username" {
-			t.Errorf("bad winrm_username: %s", b.config.CommConfig.WinRMUser)
+		if b.config.SSHConfig.Comm.WinRMUser != "username" {
+			t.Errorf("bad winrm_username: %s", b.config.SSHConfig.Comm.WinRMUser)
 		}
-		if b.config.CommConfig.WinRMPassword != "password" {
-			t.Errorf("bad winrm_password: %s", b.config.CommConfig.WinRMPassword)
+		if b.config.SSHConfig.Comm.WinRMPassword != "password" {
+			t.Errorf("bad winrm_password: %s", b.config.SSHConfig.Comm.WinRMPassword)
 		}
-		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+		if host := b.config.SSHConfig.Comm.Host(); host != "1.2.3.4" {
 			t.Errorf("bad host: %s", host)
 		}
 	}
@@ -487,13 +514,13 @@ func TestBuilderPrepare_CommConfig(t *testing.T) {
 			t.Fatalf("should not have error: %s", err)
 		}
 
-		if b.config.CommConfig.SSHUsername != "username" {
-			t.Errorf("bad ssh_username: %s", b.config.CommConfig.SSHUsername)
+		if b.config.SSHConfig.Comm.SSHUsername != "username" {
+			t.Errorf("bad ssh_username: %s", b.config.SSHConfig.Comm.SSHUsername)
 		}
-		if b.config.CommConfig.SSHPassword != "password" {
-			t.Errorf("bad ssh_password: %s", b.config.CommConfig.SSHPassword)
+		if b.config.SSHConfig.Comm.SSHPassword != "password" {
+			t.Errorf("bad ssh_password: %s", b.config.SSHConfig.Comm.SSHPassword)
 		}
-		if host := b.config.CommConfig.Host(); host != "1.2.3.4" {
+		if host := b.config.SSHConfig.Comm.Host(); host != "1.2.3.4" {
 			t.Errorf("bad host: %s", host)
 		}
 	}

@@ -29,6 +29,7 @@ type Config struct {
 	common.FloppyConfig                 `mapstructure:",squash"`
 	bootcommand.BootConfig              `mapstructure:",squash"`
 	parallelscommon.OutputConfig        `mapstructure:",squash"`
+	parallelscommon.HWConfig            `mapstructure:",squash"`
 	parallelscommon.PrlctlConfig        `mapstructure:",squash"`
 	parallelscommon.PrlctlPostConfig    `mapstructure:",squash"`
 	parallelscommon.PrlctlVersionConfig `mapstructure:",squash"`
@@ -76,6 +77,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	errs = packer.MultiErrorAppend(errs, b.config.FloppyConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(
 		errs, b.config.OutputConfig.Prepare(&b.config.ctx, &b.config.PackerConfig)...)
+	errs = packer.MultiErrorAppend(errs, b.config.HWConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlPostConfig.Prepare(&b.config.ctx)...)
 	errs = packer.MultiErrorAppend(errs, b.config.PrlctlVersionConfig.Prepare(&b.config.ctx)...)
@@ -192,11 +194,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			HostInterfaces: b.config.HostInterfaces,
 			VMName:         b.config.VMName,
 			Ctx:            b.config.ctx,
+			GroupInterval:  b.config.BootConfig.BootGroupInterval,
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
 			Host:      parallelscommon.CommHost,
-			SSHConfig: parallelscommon.SSHConfigFunc(b.config.SSHConfig),
+			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 		&parallelscommon.StepUploadVersion{
 			Path: b.config.PrlctlVersionFile,
@@ -208,6 +211,9 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			Ctx:                     b.config.ctx,
 		},
 		new(common.StepProvision),
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.SSHConfig.Comm,
+		},
 		&parallelscommon.StepShutdown{
 			Command: b.config.ShutdownCommand,
 			Timeout: b.config.ShutdownTimeout,

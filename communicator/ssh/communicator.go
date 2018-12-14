@@ -569,6 +569,9 @@ func (c *comm) scpUploadSession(path string, input io.Reader, fi *os.FileInfo) e
 	// which works for unix and windows
 	target_dir = filepath.ToSlash(target_dir)
 
+	// Escape spaces in remote directory
+	target_dir = strings.Replace(target_dir, " ", "\\ ", -1)
+
 	scpFunc := func(w io.Writer, stdoutR *bufio.Reader) error {
 		return scpUploadFile(target_file, input, w, stdoutR, fi)
 	}
@@ -801,7 +804,10 @@ func scpUploadFile(dst string, src io.Reader, w io.Writer, r *bufio.Reader, fi *
 
 		log.Println("[DEBUG] Copying input data into temporary file so we can read the length")
 		if _, err := io.Copy(tf, src); err != nil {
-			return err
+			return fmt.Errorf("Error copying input data into local temporary "+
+				"file. Check that TEMPDIR has enough space. Please see "+
+				"https://www.packer.io/docs/other/environment-variables.html#tmpdir"+
+				"for more info. Error: %s", err)
 		}
 
 		// Sync the file so that the contents are definitely on disk, then

@@ -20,3 +20,15 @@ func message(state multistep.StateBag, module string) {
 	}
 
 }
+
+func halt(state multistep.StateBag, err error, prefix string) multistep.StepAction {
+	ui := state.Get("ui").(packer.Ui)
+
+	if prefix != "" {
+		err = fmt.Errorf("%s: %s", prefix, err)
+	}
+
+	state.Put("error", err)
+	ui.Error(err.Error())
+	return multistep.ActionHalt
+}

@@ -351,9 +351,7 @@ func (p *Provisioner) Cancel() {
 func (p *Provisioner) executeAnsible(ui packer.Ui, comm packer.Communicator, privKeyFile string) error {
 	playbook, _ := filepath.Abs(p.config.PlaybookFile)
 	inventory := p.config.InventoryFile
-	if len(p.config.InventoryDirectory) > 0 {
-		inventory = p.config.InventoryDirectory
-	}
+
 	var envvars []string
 
 	args := []string{"--extra-vars", fmt.Sprintf("packer_build_name=%s packer_builder_type=%s",
@@ -555,6 +553,7 @@ func newSigner(privKeyFile string) (*signer, error) {
 
 func getWinRMPassword(buildName string) string {
 	winRMPass, _ := commonhelper.RetrieveSharedState("winrm_password", buildName)
+	packer.LogSecretFilter.Set(winRMPass)
 	return winRMPass
 }
 
@@ -598,4 +597,8 @@ func (ui *Ui) Machine(t string, args ...string) {
 	ui.sem <- 1
 	ui.ui.Machine(t, args...)
 	<-ui.sem
+}
+
+func (ui *Ui) ProgressBar() packer.ProgressBar {
+	return new(packer.NoopProgressBar)
 }

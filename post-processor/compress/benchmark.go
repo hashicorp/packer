@@ -105,6 +105,16 @@ func main() {
 	c.Close()
 	fmt.Printf("lz4:\twriter %s\treader %s\tsize %d\n", resw.T.String(), resr.T.String(), c.sw)
 
+	c, err = NewCompressor("/tmp/image.r", "/tmp/image.w")
+	if err != nil {
+		panic(err)
+	}
+	resw = testing.Benchmark(c.BenchmarkXZWriter)
+	c.w.Seek(0, 0)
+	resr = testing.Benchmark(c.BenchmarkXZReader)
+	c.Close()
+	fmt.Printf("xz:\twriter %s\treader %s\tsize %d\n", resw.T.String(), resr.T.String(), c.sw)
+
 }
 
 func (c *Compressor) BenchmarkGZIPWriter(b *testing.B) {
@@ -188,6 +198,28 @@ func (c *Compressor) BenchmarkLZ4Writer(b *testing.B) {
 
 func (c *Compressor) BenchmarkLZ4Reader(b *testing.B) {
 	cr := lz4.NewReader(c.w)
+	b.ResetTimer()
+
+	_, err := io.Copy(ioutil.Discard, cr)
+	if err != nil {
+		b.Fatal(err)
+	}
+}
+
+func (c *Compressor) BenchmarkXZWriter(b *testing.B) {
+	cw := xz.NewWriter(c.w)
+	b.ResetTimer()
+
+	_, err := io.Copy(cw, c.r)
+	if err != nil {
+		b.Fatal(err)
+	}
+	cw.Close()
+	c.w.Sync()
+}
+
+func (c *Compressor) BenchmarkXZReader(b *testing.B) {
+	cr := xz.NewReader(c.w)
 	b.ResetTimer()
 
 	_, err := io.Copy(ioutil.Discard, cr)

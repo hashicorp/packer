@@ -41,12 +41,33 @@ type ListVolumesRequest struct {
 	// is case sensitive.
 	SortOrder ListVolumesSortOrderEnum `mandatory:"false" contributesTo:"query" name:"sortOrder" omitEmpty:"true"`
 
+	// The OCID of the volume group.
+	VolumeGroupId *string `mandatory:"false" contributesTo:"query" name:"volumeGroupId"`
+
 	// A filter to only return resources that match the given lifecycle state.  The state value is case-insensitive.
 	LifecycleState VolumeLifecycleStateEnum `mandatory:"false" contributesTo:"query" name:"lifecycleState" omitEmpty:"true"`
+
+	// Unique Oracle-assigned identifier for the request.
+	// If you need to contact Oracle about a particular request, please provide the request ID.
+	OpcRequestId *string `mandatory:"false" contributesTo:"header" name:"opc-request-id"`
+
+	// Metadata about the request. This information will not be transmitted to the service, but
+	// represents information that the SDK will consume to drive retry behavior.
+	RequestMetadata common.RequestMetadata
 }
 
 func (request ListVolumesRequest) String() string {
 	return common.PointerString(request)
+}
+
+// HTTPRequest implements the OCIRequest interface
+func (request ListVolumesRequest) HTTPRequest(method, path string) (http.Request, error) {
+	return common.MakeDefaultHTTPRequestWithTaggedStruct(method, path, request)
+}
+
+// RetryPolicy implements the OCIRetryableRequest interface. This retrieves the specified retry policy.
+func (request ListVolumesRequest) RetryPolicy() *common.RetryPolicy {
+	return request.RequestMetadata.RetryPolicy
 }
 
 // ListVolumesResponse wrapper for the ListVolumes operation
@@ -55,7 +76,7 @@ type ListVolumesResponse struct {
 	// The underlying http response
 	RawResponse *http.Response
 
-	// The []Volume instance
+	// A list of []Volume instances
 	Items []Volume `presentIn:"body"`
 
 	// For pagination of a list of items. When paging through a list, if this header appears in the response,
@@ -70,6 +91,11 @@ type ListVolumesResponse struct {
 
 func (response ListVolumesResponse) String() string {
 	return common.PointerString(response)
+}
+
+// HTTPResponse implements the OCIResponse interface
+func (response ListVolumesResponse) HTTPResponse() *http.Response {
+	return response.RawResponse
 }
 
 // ListVolumesSortByEnum Enum with underlying type: string

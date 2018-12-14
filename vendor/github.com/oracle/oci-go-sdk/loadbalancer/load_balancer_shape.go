@@ -19,6 +19,7 @@ import (
 type LoadBalancerShape struct {
 
 	// The name of the shape.
+	// Example: `100Mbps`
 	Name *string `mandatory:"true" json:"name"`
 }
 

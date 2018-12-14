@@ -56,6 +56,8 @@ var (
 	reCaptureNamePrefix    = regexp.MustCompile("^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{0,23}$")
 	reManagedDiskName      = regexp.MustCompile(validManagedDiskName)
 	reResourceGroupName    = regexp.MustCompile(validResourceGroupNameRe)
+	reSnapshotName         = regexp.MustCompile("^[A-Za-z0-9_]{10,79}$")
+	reSnapshotPrefix       = regexp.MustCompile("^[A-Za-z0-9_]{10,59}$")
 )
 
 type PlanInformation struct {
@@ -63,6 +65,14 @@ type PlanInformation struct {
 	PlanProduct       string `mapstructure:"plan_product"`
 	PlanPublisher     string `mapstructure:"plan_publisher"`
 	PlanPromotionCode string `mapstructure:"plan_promotion_code"`
+}
+
+type SharedImageGallery struct {
+	Subscription  string `mapstructure:"subscription"`
+	ResourceGroup string `mapstructure:"resource_group"`
+	GalleryName   string `mapstructure:"gallery_name"`
+	ImageName     string `mapstructure:"image_name"`
+	ImageVersion  string `mapstructure:"image_version"`
 }
 
 type Config struct {
@@ -79,6 +89,9 @@ type Config struct {
 	CaptureNamePrefix    string `mapstructure:"capture_name_prefix"`
 	CaptureContainerName string `mapstructure:"capture_container_name"`
 
+	// Shared Gallery
+	SharedGallery SharedImageGallery `mapstructure:"shared_image_gallery"`
+
 	// Compute
 	ImagePublisher string `mapstructure:"image_publisher"`
 	ImageOffer     string `mapstructure:"image_offer"`
@@ -93,11 +106,13 @@ type Config struct {
 	Location string `mapstructure:"location"`
 	VMSize   string `mapstructure:"vm_size"`
 
-	ManagedImageResourceGroupName  string `mapstructure:"managed_image_resource_group_name"`
-	ManagedImageName               string `mapstructure:"managed_image_name"`
-	ManagedImageStorageAccountType string `mapstructure:"managed_image_storage_account_type"`
-	managedImageStorageAccountType compute.StorageAccountTypes
-	manageImageLocation            string
+	ManagedImageResourceGroupName      string `mapstructure:"managed_image_resource_group_name"`
+	ManagedImageName                   string `mapstructure:"managed_image_name"`
+	ManagedImageStorageAccountType     string `mapstructure:"managed_image_storage_account_type"`
+	managedImageStorageAccountType     compute.StorageAccountTypes
+	ManagedImageOSDiskSnapshotName     string `mapstructure:"managed_image_os_disk_snapshot_name"`
+	ManagedImageDataDiskSnapshotPrefix string `mapstructure:"managed_image_data_disk_snapshot_prefix"`
+	manageImageLocation                string
 
 	// Deployment
 	AzureTags                         map[string]*string `mapstructure:"azure_tags"`
@@ -123,6 +138,8 @@ type Config struct {
 
 	// Additional Disks
 	AdditionalDiskSize []int32 `mapstructure:"disk_additional_size"`
+	DiskCachingType    string  `mapstructure:"disk_caching_type"`
+	diskCachingType    compute.CachingTypes
 
 	// Runtime Values
 	UserName               string
@@ -144,7 +161,6 @@ type Config struct {
 
 	// Authentication with the VM via SSH
 	sshAuthorizedKey string
-	sshPrivateKey    string
 
 	// Authentication with the VM via WinRM
 	winrmCertificate string
@@ -315,8 +331,8 @@ func setSshValues(c *Config) error {
 		c.Comm.SSHTimeout = 20 * time.Minute
 	}
 
-	if c.Comm.SSHPrivateKey != "" {
-		privateKeyBytes, err := ioutil.ReadFile(c.Comm.SSHPrivateKey)
+	if c.Comm.SSHPrivateKeyFile != "" {
+		privateKeyBytes, err := c.Comm.ReadSSHPrivateKeyFile()
 		if err != nil {
 			return err
 		}
@@ -330,7 +346,7 @@ func setSshValues(c *Config) error {
 			publicKey.Type(),
 			base64.StdEncoding.EncodeToString(publicKey.Marshal()),
 			time.Now().Format(time.RFC3339))
-		c.sshPrivateKey = string(privateKeyBytes)
+		c.Comm.SSHPrivateKey = privateKeyBytes
 
 	} else {
 		sshKeyPair, err := NewOpenSshKeyPair()
@@ -339,7 +355,7 @@ func setSshValues(c *Config) error {
 		}
 
 		c.sshAuthorizedKey = sshKeyPair.AuthorizedKey()
-		c.sshPrivateKey = sshKeyPair.PrivateKey()
+		c.Comm.SSHPrivateKey = sshKeyPair.PrivateKey()
 	}
 
 	return nil
@@ -363,6 +379,7 @@ func setRuntimeValues(c *Config) {
 	c.tmpAdminPassword = tempName.AdminPassword
 	// store so that we can access this later during provisioning
 	commonhelper.SetSharedState("winrm_password", c.tmpAdminPassword, c.PackerConfig.PackerBuildName)
+	packer.LogSecretFilter.Set(c.tmpAdminPassword)
 
 	c.tmpCertificatePassword = tempName.CertificatePassword
 	if c.TempComputeName == "" {
@@ -456,6 +473,10 @@ func provideDefaultValues(c *Config) {
 		c.managedImageStorageAccountType = compute.StorageAccountTypesStandardLRS
 	}
 
+	if c.DiskCachingType == "" {
+		c.diskCachingType = compute.CachingTypesReadWrite
+	}
+
 	if c.ImagePublisher != "" && c.ImageVersion == "" {
 		c.ImageVersion = DefaultImageVersion
 	}
@@ -475,7 +496,7 @@ func assertTagProperties(c *Config, errs *packer.MultiError) {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 512 character limit", k, len(k)))
 		}
 		if len(*v) > 256 {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", v, len(*v)))
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("the tag name %q exceeds (%d) the 256 character limit", *v, len(*v)))
 		}
 	}
 }
@@ -503,17 +524,14 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	if isUseDeviceLogin(c) {
 		c.useDeviceLogin = true
 	} else {
-		if c.ClientID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id must be specified"))
+		if c.ClientID == "" && c.ClientSecret != "" || c.ClientID != "" && c.ClientSecret == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_id and client_secret must be specified together or not specified at all"))
 		}
 
-		if c.ClientSecret == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A client_secret must be specified"))
+		if c.ClientID != "" && c.SubscriptionID == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified when client_id & client_secret are"))
 		}
 
-		if c.SubscriptionID == "" {
-			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A subscription_id must be specified"))
-		}
 	}
 
 	/////////////////////////////////////////////
@@ -572,19 +590,36 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 
 	isImageUrl := c.ImageUrl != ""
 	isCustomManagedImage := c.CustomManagedImageName != "" || c.CustomManagedImageResourceGroupName != ""
+	isSharedGallery := c.SharedGallery.GalleryName != ""
 	isPlatformImage := c.ImagePublisher != "" || c.ImageOffer != "" || c.ImageSku != ""
 
-	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage)
+	countSourceInputs := toInt(isImageUrl) + toInt(isCustomManagedImage) + toInt(isPlatformImage) + toInt(isSharedGallery)
 
 	if countSourceInputs > 1 {
-		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku) or a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name"))
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("Specify either a VHD (image_url), Image Reference (image_publisher, image_offer, image_sku), a Managed Disk (custom_managed_disk_image_name, custom_managed_disk_resource_group_name), or a Shared Gallery Image (shared_image_gallery)"))
 	}
 
 	if isImageUrl && c.ManagedImageResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("A managed image must be created from a managed image, it cannot be created from a VHD."))
 	}
 
-	if c.ImageUrl == "" && c.CustomManagedImageName == "" {
+	if c.SharedGallery.GalleryName != "" {
+		if c.SharedGallery.Subscription == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.subscription must be specified"))
+		}
+		if c.SharedGallery.ResourceGroup == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.resource_group must be specified"))
+		}
+		if c.SharedGallery.ImageName == "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("A shared_image_gallery.image_name must be specified"))
+		}
+		if c.CaptureContainerName != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_container_name] is not supported when using Shared Image Gallery as source. Use managed_image_resource_group_name instead."))
+		}
+		if c.CaptureNamePrefix != "" {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("VHD Target [capture_name_prefix] is not supported when using Shared Image Gallery as source. Use managed_image_name instead."))
+		}
+	} else if c.ImageUrl == "" && c.CustomManagedImageName == "" {
 		if c.ImagePublisher == "" {
 			errs = packer.MultiErrorAppend(errs, fmt.Errorf("An image_publisher must be specified"))
 		}
@@ -660,6 +695,18 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		}
 	}
 
+	if c.ManagedImageOSDiskSnapshotName != "" {
+		if ok, err := assertManagedImageOSDiskSnapshotName(c.ManagedImageOSDiskSnapshotName, "managed_image_os_disk_snapshot_name"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
+	if c.ManagedImageDataDiskSnapshotPrefix != "" {
+		if ok, err := assertManagedImageDataDiskSnapshotName(c.ManagedImageDataDiskSnapshotPrefix, "managed_image_data_disk_snapshot_prefix"); !ok {
+			errs = packer.MultiErrorAppend(errs, err)
+		}
+	}
+
 	if c.VirtualNetworkName == "" && c.VirtualNetworkResourceGroupName != "" {
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("If virtual_network_resource_group_name is specified, so must virtual_network_name"))
 	}
@@ -704,11 +751,36 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
 	}
+
+	switch c.DiskCachingType {
+	case string(compute.CachingTypesNone):
+		c.diskCachingType = compute.CachingTypesNone
+	case string(compute.CachingTypesReadOnly):
+		c.diskCachingType = compute.CachingTypesReadOnly
+	case "", string(compute.CachingTypesReadWrite):
+		c.diskCachingType = compute.CachingTypesReadWrite
+	default:
+		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The disk_caching_type %q is invalid", c.DiskCachingType))
+	}
 }
 
 func assertManagedImageName(name, setting string) (bool, error) {
 	if !isValidAzureName(reManagedDiskName, name) {
 		return false, fmt.Errorf("The setting %s must match the regular expression %q, and not end with a '-' or '.'.", setting, validManagedDiskName)
+	}
+	return true, nil
+}
+
+func assertManagedImageOSDiskSnapshotName(name, setting string) (bool, error) {
+	if !isValidAzureName(reSnapshotName, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length is 80 characters", setting)
+	}
+	return true, nil
+}
+
+func assertManagedImageDataDiskSnapshotName(name, setting string) (bool, error) {
+	if !isValidAzureName(reSnapshotPrefix, name) {
+		return false, fmt.Errorf("The setting %s must only contain characters from a-z, A-Z, 0-9 and _ and the maximum length (excluding the prefix) is 60 characters", setting)
 	}
 	return true, nil
 }

@@ -55,15 +55,25 @@ func TestRunConfigPrepare_InstanceType(t *testing.T) {
 func TestRunConfigPrepare_SourceAmi(t *testing.T) {
 	c := testConfig()
 	c.SourceAmi = ""
-	if err := c.Prepare(nil); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 2 {
 		t.Fatalf("Should error if a source_ami (or source_ami_filter) is not specified")
 	}
 }
 
 func TestRunConfigPrepare_SourceAmiFilterBlank(t *testing.T) {
 	c := testConfigFilter()
-	if err := c.Prepare(nil); len(err) != 1 {
+	if err := c.Prepare(nil); len(err) != 2 {
 		t.Fatalf("Should error if source_ami_filter is empty or not specified (and source_ami is not specified)")
+	}
+}
+
+func TestRunConfigPrepare_SourceAmiFilterOwnersBlank(t *testing.T) {
+	c := testConfigFilter()
+	filter_key := "name"
+	filter_value := "foo"
+	c.SourceAmiFilter = AmiFilterOptions{Filters: map[*string]*string{&filter_key: &filter_value}}
+	if err := c.Prepare(nil); len(err) != 1 {
+		t.Fatalf("Should error if Owners is not specified)")
 	}
 }
 
@@ -196,27 +206,27 @@ func TestRunConfigPrepare_UserDataFile(t *testing.T) {
 
 func TestRunConfigPrepare_TemporaryKeyPairName(t *testing.T) {
 	c := testConfig()
-	c.TemporaryKeyPairName = ""
+	c.Comm.SSHTemporaryKeyPairName = ""
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.TemporaryKeyPairName == "" {
+	if c.Comm.SSHTemporaryKeyPairName == "" {
 		t.Fatal("keypair name is empty")
 	}
 
 	// Match prefix and UUID, e.g. "packer_5790d491-a0b8-c84c-c9d2-2aea55086550".
 	r := regexp.MustCompile(`\Apacker_(?:(?i)[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}?)\z`)
-	if !r.MatchString(c.TemporaryKeyPairName) {
+	if !r.MatchString(c.Comm.SSHTemporaryKeyPairName) {
 		t.Fatal("keypair name is not valid")
 	}
 
-	c.TemporaryKeyPairName = "ssh-key-123"
+	c.Comm.SSHTemporaryKeyPairName = "ssh-key-123"
 	if err := c.Prepare(nil); len(err) != 0 {
 		t.Fatalf("err: %s", err)
 	}
 
-	if c.TemporaryKeyPairName != "ssh-key-123" {
+	if c.Comm.SSHTemporaryKeyPairName != "ssh-key-123" {
 		t.Fatal("keypair name does not match")
 	}
 }

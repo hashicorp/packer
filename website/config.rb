@@ -2,7 +2,7 @@ set :base_url, "https://www.packer.io/"
 
 activate :hashicorp do |h|
   h.name         = "packer"
-  h.version      = "1.2.5"
+  h.version      = "1.3.3"
   h.github_slug  = "hashicorp/packer"
   h.website_root = "website"
 end
@@ -109,3 +109,6 @@ helpers do
     return classes.join(" ")
   end
 end
+
+# Netlify redirects/headers
+proxy '_redirects', 'netlify-redirects', ignore: true

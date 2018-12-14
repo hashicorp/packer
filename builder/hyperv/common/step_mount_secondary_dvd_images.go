@@ -58,7 +58,8 @@ func (s *StepMountSecondaryDvdImages) Run(_ context.Context, state multistep.Sta
 			return multistep.ActionHalt
 		}
 
-		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber, controllerLocation))
+		log.Println(fmt.Sprintf("ISO %s mounted on DVD controller %v, location %v", isoPath, controllerNumber,
+			controllerLocation))
 	}
 
 	return multistep.ActionContinue

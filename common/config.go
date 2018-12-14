@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/packer/packer"
 )
 
 // PackerKeyEnv is used to specify the key interval (delay) between keystrokes
@@ -19,19 +21,6 @@ const PackerKeyEnv = "PACKER_KEY_INTERVAL"
 // PackerKeyDefault 100ms is appropriate for shared build infrastructure while a
 // shorter delay (e.g. 10ms) can be used on a workstation. See PackerKeyEnv.
 const PackerKeyDefault = 100 * time.Millisecond
-
-// ScrubConfig is a helper that returns a string representation of
-// any struct with the given values stripped out.
-func ScrubConfig(target interface{}, values ...string) string {
-	conf := fmt.Sprintf("Config: %+v", target)
-	for _, value := range values {
-		if value == "" {
-			continue
-		}
-		conf = strings.Replace(conf, value, "<Filtered>", -1)
-	}
-	return conf
-}
 
 // ChooseString returns the first non-empty value.
 func ChooseString(vals ...string) string {
@@ -54,7 +43,7 @@ func SupportedProtocol(u *url.URL) bool {
 
 	// build a dummy NewDownloadClient since this is the only place that valid
 	// protocols are actually exposed.
-	cli := NewDownloadClient(&DownloadConfig{})
+	cli := NewDownloadClient(&DownloadConfig{}, new(packer.NoopUi))
 
 	// Iterate through each downloader to see if a protocol was found.
 	ok := false
@@ -186,7 +175,7 @@ func FileExistsLocally(original string) bool {
 
 	// First create a dummy downloader so we can figure out which
 	// protocol to use.
-	cli := NewDownloadClient(&DownloadConfig{})
+	cli := NewDownloadClient(&DownloadConfig{}, new(packer.NoopUi))
 	d, ok := cli.config.DownloaderMap[u.Scheme]
 	if !ok {
 		return false

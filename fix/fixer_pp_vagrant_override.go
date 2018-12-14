@@ -1,8 +1,6 @@
 package fix
 
-import (
-	"github.com/mitchellh/mapstructure"
-)
+import "github.com/mitchellh/mapstructure"
 
 // FixerVagrantPPOverride is a Fixer that replaces the provider-specific
 // overrides for the Vagrant post-processor with the new style introduced
@@ -10,9 +8,13 @@ import (
 type FixerVagrantPPOverride struct{}
 
 func (FixerVagrantPPOverride) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+	if input["post-processors"] == nil {
+		return input, nil
+	}
+
 	// Our template type we'll use for this fixer only
 	type template struct {
-		PostProcessors []interface{} `mapstructure:"post-processors"`
+		PP `mapstructure:",squash"`
 	}
 
 	// Decode the input into our structure, if we can
@@ -21,21 +23,7 @@ func (FixerVagrantPPOverride) Fix(input map[string]interface{}) (map[string]inte
 		return nil, err
 	}
 
-	// Go through each post-processor and get out all the complex configs
-	pps := make([]map[string]interface{}, 0, len(tpl.PostProcessors))
-	for _, rawPP := range tpl.PostProcessors {
-		switch pp := rawPP.(type) {
-		case string:
-		case map[string]interface{}:
-			pps = append(pps, pp)
-		case []interface{}:
-			for _, innerRawPP := range pp {
-				if innerPP, ok := innerRawPP.(map[string]interface{}); ok {
-					pps = append(pps, innerPP)
-				}
-			}
-		}
-	}
+	pps := tpl.ppList()
 
 	// Go through each post-processor and make the fix if necessary
 	possible := []string{"aws", "digitalocean", "virtualbox", "vmware"}

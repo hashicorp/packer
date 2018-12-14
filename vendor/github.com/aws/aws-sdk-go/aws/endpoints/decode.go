@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 )
@@ -85,32 +84,10 @@ func decodeV3Endpoints(modelDef modelDefinition, opts DecodeModelOptions) (Resol
 		custAddEC2Metadata(p)
 		custAddS3DualStack(p)
 		custRmIotDataService(p)
-
-		custFixCloudHSMv2SigningName(p)
+		custFixAppAutoscalingChina(p)
 	}
 
 	return ps, nil
-}
-
-func custFixCloudHSMv2SigningName(p *partition) {
-	// Workaround for aws/aws-sdk-go#1745 until the endpoint model can be
-	// fixed upstream. TODO remove this once the endpoints model is updated.
-
-	s, ok := p.Services["cloudhsmv2"]
-	if !ok {
-		return
-	}
-
-	if len(s.Defaults.CredentialScope.Service) != 0 {
-		fmt.Fprintf(os.Stderr, "cloudhsmv2 signing name already set, ignoring override.\n")
-		// If the value is already set don't override
-		return
-	}
-
-	s.Defaults.CredentialScope.Service = "cloudhsm"
-	fmt.Fprintf(os.Stderr, "cloudhsmv2 signing name not set, overriding.\n")
-
-	p.Services["cloudhsmv2"] = s
 }
 
 func custAddS3DualStack(p *partition) {
@@ -144,6 +121,27 @@ func custAddEC2Metadata(p *partition) {
 
 func custRmIotDataService(p *partition) {
 	delete(p.Services, "data.iot")
+}
+
+func custFixAppAutoscalingChina(p *partition) {
+	if p.ID != "aws-cn" {
+		return
+	}
+
+	const serviceName = "application-autoscaling"
+	s, ok := p.Services[serviceName]
+	if !ok {
+		return
+	}
+
+	const expectHostname = `autoscaling.{region}.amazonaws.com`
+	if e, a := s.Defaults.Hostname, expectHostname; e != a {
+		fmt.Printf("custFixAppAutoscalingChina: ignoring customization, expected %s, got %s\n", e, a)
+		return
+	}
+
+	s.Defaults.Hostname = expectHostname + ".cn"
+	p.Services[serviceName] = s
 }
 
 type decodeModelError struct {

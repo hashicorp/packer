@@ -11,11 +11,13 @@ import (
 )
 
 type stepCreateAlicloudImage struct {
-	image *ecs.ImageType
+	AlicloudImageIgnoreDataDisks bool
+	WaitSnapshotReadyTimeout     int
+	image                        *ecs.ImageType
 }
 
 func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
 
@@ -24,48 +26,53 @@ func (s *stepCreateAlicloudImage) Run(_ context.Context, state multistep.StateBa
 	var imageId string
 	var err error
 
-	instance := state.Get("instance").(*ecs.InstanceAttributesType)
-	imageId, err = client.CreateImage(&ecs.CreateImageArgs{
-		RegionId:     common.Region(config.AlicloudRegion),
-		InstanceId:   instance.InstanceId,
-		ImageName:    config.AlicloudImageName,
-		ImageVersion: config.AlicloudImageVersion,
-		Description:  config.AlicloudImageDescription})
+	if s.AlicloudImageIgnoreDataDisks {
+		snapshotId := state.Get("alicloudsnapshot").(string)
+		imageId, err = client.CreateImage(&ecs.CreateImageArgs{
+			RegionId:     common.Region(config.AlicloudRegion),
+			SnapshotId:   snapshotId,
+			ImageName:    config.AlicloudImageName,
+			ImageVersion: config.AlicloudImageVersion,
+			Description:  config.AlicloudImageDescription})
+	} else {
+		instance := state.Get("instance").(*ecs.InstanceAttributesType)
+		imageId, err = client.CreateImage(&ecs.CreateImageArgs{
+			RegionId:     common.Region(config.AlicloudRegion),
+			InstanceId:   instance.InstanceId,
+			ImageName:    config.AlicloudImageName,
+			ImageVersion: config.AlicloudImageVersion,
+			Description:  config.AlicloudImageDescription})
+	}
 
 	if err != nil {
-		err := fmt.Errorf("Error creating image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error creating image")
 	}
-	err = client.WaitForImageReady(common.Region(config.AlicloudRegion),
-		imageId, ALICLOUD_DEFAULT_LONG_TIMEOUT)
+	err = client.WaitForImageReady(common.Region(config.AlicloudRegion), imageId, s.WaitSnapshotReadyTimeout)
 	if err != nil {
-		err := fmt.Errorf("Timeout waiting for image to be created: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Timeout waiting for image to be created")
 	}
 
 	images, _, err := client.DescribeImages(&ecs.DescribeImagesArgs{
 		RegionId: common.Region(config.AlicloudRegion),
 		ImageId:  imageId})
 	if err != nil {
-		err := fmt.Errorf("Error querying created image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Error querying created imaged")
 	}
 
 	if len(images) == 0 {
-		err := fmt.Errorf("Unable to find created image: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return halt(state, err, "Unable to find created image")
 	}
+
 	s.image = &images[0]
 
+	var snapshotIds = []string{}
+	for _, device := range images[0].DiskDeviceMappings.DiskDeviceMapping {
+		snapshotIds = append(snapshotIds, device.SnapshotId)
+	}
+
 	state.Put("alicloudimage", imageId)
+	state.Put("alicloudsnapshots", snapshotIds)
+
 	alicloudImages := make(map[string]string)
 	alicloudImages[config.AlicloudRegion] = images[0].ImageId
 	state.Put("alicloudimages", alicloudImages)
@@ -85,7 +92,7 @@ func (s *stepCreateAlicloudImage) Cleanup(state multistep.StateBag) {
 
 	client := state.Get("client").(*ecs.Client)
 	ui := state.Get("ui").(packer.Ui)
-	config := state.Get("config").(Config)
+	config := state.Get("config").(*Config)
 
 	ui.Say("Deleting the image because of cancellation or error...")
 	if err := client.DeleteImage(common.Region(config.AlicloudRegion), s.image.ImageId); err != nil {

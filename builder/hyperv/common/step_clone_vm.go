@@ -16,12 +16,13 @@ import (
 // Produces:
 //   VMName string - The name of the VM
 type StepCloneVM struct {
-	CloneFromVMXCPath              string
+	CloneFromVMCXPath              string
 	CloneFromVMName                string
 	CloneFromSnapshotName          string
 	CloneAllSnapshots              bool
 	VMName                         string
 	SwitchName                     string
+	CompareCopy                    bool
 	RamSize                        uint
 	Cpu                            uint
 	EnableMacSpoofing              bool
@@ -37,7 +38,7 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Cloning virtual machine...")
 
-	path := state.Get("packerTempDir").(string)
+	path := state.Get("build_dir").(string)
 
 	// Determine if we even have an existing virtual harddrive to attach
 	harddrivePath := ""
@@ -55,7 +56,9 @@ func (s *StepCloneVM) Run(_ context.Context, state multistep.StateBag) multistep
 	// convert the MB to bytes
 	ramSize := int64(s.RamSize * 1024 * 1024)
 
-	err := driver.CloneVirtualMachine(s.CloneFromVMXCPath, s.CloneFromVMName, s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path, harddrivePath, ramSize, s.SwitchName)
+	err := driver.CloneVirtualMachine(s.CloneFromVMCXPath, s.CloneFromVMName,
+		s.CloneFromSnapshotName, s.CloneAllSnapshots, s.VMName, path,
+		harddrivePath, ramSize, s.SwitchName, s.CompareCopy)
 	if err != nil {
 		err := fmt.Errorf("Error cloning virtual machine: %s", err)
 		state.Put("error", err)

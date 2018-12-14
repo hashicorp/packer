@@ -1,6 +1,7 @@
 ---
 description: |
-    The ncloud builder allows you to create server images using the NAVER Cloud Platform.
+    The ncloud builder allows you to create server images using the NAVER Cloud
+    Platform.
 layout: docs
 page_title: 'Naver Cloud Platform - Builders'
 sidebar_current: 'docs-builders-ncloud'
@@ -16,12 +17,12 @@ Platform](https://www.ncloud.com/).
 ### Required:
 
 -   `ncloud_access_key` (string) - User's access key. Go to [\[Account
-    Management \> Authentication
+    Management &gt; Authentication
     Key\]](https://www.ncloud.com/mypage/manage/authkey) to create and view
     your authentication key.
 
 -   `ncloud_secret_key` (string) - User's secret key paired with the access
-    key. Go to [\[Account Management \> Authentication
+    key. Go to [\[Account Management &gt; Authentication
     Key\]](https://www.ncloud.com/mypage/manage/authkey) to create and view
     your authentication key.
 
@@ -48,79 +49,74 @@ Platform](https://www.ncloud.com/).
     access source (`0.0.0.0/0`) and allowed port (5985) must be created in
     advance.
 
--   `user_data` (string) - Init script to run when an instance is created.
-    -   For Linux servers, Python, Perl, and Shell scripts can be used. The
-        path of the script to run should be included at the beginning of the
-        script, like \#!/usr/bin/env python, \#!/bin/perl, or \#!/bin/bash.
-    -   For Windows servers, only Visual Basic scripts can be used.
-    -   All scripts must be written in English.
--   `user_data_file` (string) - A path to a file containing a `user_data`
-    script. See above for more information.
+-   `user_data` (string) - User data to apply when launching the instance. Note
+    that you need to be careful about escaping characters due to the templates
+    being JSON. It is often more convenient to use `user_data_file`, instead.
+    Packer will not automatically wait for a user script to finish before
+    shutting down the instance this must be handled in a provisioner.
+
+-   `user_data_file` (string) - Path to a file that will be used for the user
+    data when launching the instance.
 
 -   `region` (string) - Name of the region where you want to create an image.
     (default: Korea)
     -   values: Korea / US-West / HongKong / Singapore / Japan / Germany
 
-
 ## Sample code of template.json
 
-```
-{
-  "variables": {
-    "ncloud_access_key": "FRxhOQRNjKVMqIz3sRLY",
-    "ncloud_secret_key": "xd6kTO5iNcLookBx0D8TDKmpLj2ikxqEhc06MQD2"
-  },
-  "builders": [
     {
-      "type": "ncloud",
-      "access_key": "{{user `ncloud_access_key`}}",
-      "secret_key": "{{user `ncloud_secret_key`}}",
+      "variables": {
+        "ncloud_access_key": "FRxhOQRNjKVMqIz3sRLY",
+        "ncloud_secret_key": "xd6kTO5iNcLookBx0D8TDKmpLj2ikxqEhc06MQD2"
+      },
+      "builders": [
+        {
+          "type": "ncloud",
+          "access_key": "{{user `ncloud_access_key`}}",
+          "secret_key": "{{user `ncloud_secret_key`}}",
 
-      "server_image_product_code": "SPSW0WINNT000016",
-      "server_product_code": "SPSVRSSD00000011",
-      "member_server_image_no": "4223",
-      "server_image_name": "packer-test {{timestamp}}",
-      "server_description": "server description",
-      "user_data": "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm quickconfig -q & sc config WinRM start= auto & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm get winrm/config/service\")",
-      "region": "US-West"
+          "server_image_product_code": "SPSW0WINNT000016",
+          "server_product_code": "SPSVRSSD00000011",
+          "member_server_image_no": "4223",
+          "server_image_name": "packer-test {{timestamp}}",
+          "server_description": "server description",
+          "user_data": "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm quickconfig -q & sc config WinRM start= auto & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm get winrm/config/service\")",
+          "region": "US-West"
+        }
+      ]
     }
-  ]
-}
-```
 
 ## Requirements for creating Windows images
 
 You should include the following code in the packer configuration file for
 provision when creating a Windows server.
 
-```
-  "builders": [
-    {
-      "type": "ncloud",
-      ...
-      "user_data":
-        "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm quickconfig -q & sc config WinRM start= auto & winrm get winrm/config/service\")",
-      "communicator": "winrm",
-      "winrm_username": "Administrator"
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "powershell",
-      "inline": [
-        "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
+      "builders": [
+        {
+          "type": "ncloud",
+          ...
+          "user_data":
+            "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm quickconfig -q & sc config WinRM start= auto & winrm get winrm/config/service\")",
+          "communicator": "winrm",
+          "winrm_username": "Administrator"
+        }
+      ],
+      "provisioners": [
+        {
+          "type": "powershell",
+          "inline": [
+            "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
+          ]
+        }
       ]
-    }
-  ]
-```
 
 ## Note
 
-* You can only create as many public IP addresses as the number of server
-  instances you own. Before running Packer, please make sure that the number of
-  public IP addresses previously created is not larger than the number of
-  server instances (including those to be used to create server images).
-* When you forcibly terminate the packer process or close the terminal
-  (command) window where the process is running, the resources may not be
-  cleaned up as the packer process no longer runs. In this case, you should
-  manually clean up the resources associated with the process.
+-   You can only create as many public IP addresses as the number of server
+    instances you own. Before running Packer, please make sure that the number
+    of public IP addresses previously created is not larger than the number of
+    server instances (including those to be used to create server images).
+-   When you forcibly terminate the packer process or close the terminal
+    (command) window where the process is running, the resources may not be
+    cleaned up as the packer process no longer runs. In this case, you should
+    manually clean up the resources associated with the process.

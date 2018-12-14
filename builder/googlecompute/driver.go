@@ -69,6 +69,7 @@ type InstanceConfig struct {
 	Labels                       map[string]string
 	MachineType                  string
 	Metadata                     map[string]string
+	MinCpuPlatform               string
 	Name                         string
 	Network                      string
 	NetworkProjectId             string

@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 
 	retry "github.com/hashicorp/packer/common"
+	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
@@ -21,9 +22,10 @@ import (
 
 type StepRunSpotInstance struct {
 	AssociatePublicIpAddress          bool
-	AvailabilityZone                  string
 	BlockDevices                      BlockDevices
+	BlockDurationMinutes              int64
 	Debug                             bool
+	Comm                              *communicator.Config
 	EbsOptimized                      bool
 	ExpectedRootDevice                string
 	IamInstanceProfile                string
@@ -33,7 +35,6 @@ type StepRunSpotInstance struct {
 	SpotPrice                         string
 	SpotPriceProduct                  string
 	SpotTags                          TagMap
-	SubnetId                          string
 	Tags                              TagMap
 	VolumeTags                        TagMap
 	UserData                          string
@@ -46,10 +47,6 @@ type StepRunSpotInstance struct {
 
 func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ec2conn := state.Get("ec2").(*ec2.EC2)
-	var keyName string
-	if name, ok := state.GetOk("keyPair"); ok {
-		keyName = name.(string)
-	}
 	securityGroupIds := aws.StringSlice(state.Get("securityGroupIds").([]string))
 	ui := state.Get("ui").(packer.Ui)
 
@@ -87,7 +84,12 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 	}
 
 	spotPrice := s.SpotPrice
-	availabilityZone := s.AvailabilityZone
+	azConfig := ""
+	if azRaw, ok := state.GetOk("availability_zone"); ok {
+		azConfig = azRaw.(string)
+	}
+	az := azConfig
+
 	if spotPrice == "auto" {
 		ui.Message(fmt.Sprintf(
 			"Finding spot price for %s %s...",
@@ -98,7 +100,7 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		resp, err := ec2conn.DescribeSpotPriceHistory(&ec2.DescribeSpotPriceHistoryInput{
 			InstanceTypes:       []*string{&s.InstanceType},
 			ProductDescriptions: []*string{&s.SpotPriceProduct},
-			AvailabilityZone:    &s.AvailabilityZone,
+			AvailabilityZone:    &az,
 			StartTime:           &startTime,
 		})
 		if err != nil {
@@ -118,8 +120,8 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 			}
 			if price == 0 || current < price {
 				price = current
-				if s.AvailabilityZone == "" {
-					availabilityZone = *history.AvailabilityZone
+				if azConfig == "" {
+					az = *history.AvailabilityZone
 				}
 			}
 		}
@@ -163,35 +165,41 @@ func (s *StepRunSpotInstance) Run(ctx context.Context, state multistep.StateBag)
 		UserData:           &userData,
 		IamInstanceProfile: &ec2.IamInstanceProfileSpecification{Name: &s.IamInstanceProfile},
 		Placement: &ec2.SpotPlacement{
-			AvailabilityZone: &availabilityZone,
+			AvailabilityZone: &az,
 		},
 		BlockDeviceMappings: s.BlockDevices.BuildLaunchDevices(),
 		EbsOptimized:        &s.EbsOptimized,
 	}
 
-	if s.SubnetId != "" && s.AssociatePublicIpAddress {
+	subnetId := state.Get("subnet_id").(string)
+
+	if subnetId != "" && s.AssociatePublicIpAddress {
 		runOpts.NetworkInterfaces = []*ec2.InstanceNetworkInterfaceSpecification{
 			{
 				DeviceIndex:              aws.Int64(0),
 				AssociatePublicIpAddress: &s.AssociatePublicIpAddress,
-				SubnetId:                 &s.SubnetId,
+				SubnetId:                 &subnetId,
 				Groups:                   securityGroupIds,
 				DeleteOnTermination:      aws.Bool(true),
 			},
 		}
 	} else {
-		runOpts.SubnetId = &s.SubnetId
+		runOpts.SubnetId = &subnetId
 		runOpts.SecurityGroupIds = securityGroupIds
 	}
 
-	if keyName != "" {
-		runOpts.KeyName = &keyName
+	if s.Comm.SSHKeyPairName != "" {
+		runOpts.KeyName = &s.Comm.SSHKeyPairName
+	}
+	spotInstanceInput := &ec2.RequestSpotInstancesInput{
+		LaunchSpecification: runOpts,
+		SpotPrice:           &spotPrice,
+	}
+	if s.BlockDurationMinutes != 0 {
+		spotInstanceInput.BlockDurationMinutes = &s.BlockDurationMinutes
 	}
 
-	runSpotResp, err := ec2conn.RequestSpotInstances(&ec2.RequestSpotInstancesInput{
-		SpotPrice:           &spotPrice,
-		LaunchSpecification: runOpts,
-	})
+	runSpotResp, err := ec2conn.RequestSpotInstances(spotInstanceInput)
 	if err != nil {
 		err := fmt.Errorf("Error launching source spot instance: %s", err)
 		state.Put("error", err)

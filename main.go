@@ -37,6 +37,11 @@ func main() {
 // realMain is executed from main and returns the exit status to exit with.
 func realMain() int {
 	var wrapConfig panicwrap.WrapConfig
+	// When following env variable is set, packer
+	// wont panic wrap itself as it's already wrapped.
+	// i.e.: when terraform runs it.
+	wrapConfig.CookieKey = "PACKER_WRAP_COOKIE"
+	wrapConfig.CookieValue = "49C22B1A-3A93-4C98-97FA-E07D18C787B5"
 
 	if !panicwrap.Wrapped(&wrapConfig) {
 		// Generate a UUID for this packer run and pass it to the environment.
@@ -54,6 +59,10 @@ func realMain() int {
 		if logWriter == nil {
 			logWriter = ioutil.Discard
 		}
+
+		packer.LogSecretFilter.SetOutput(logWriter)
+
+		//packer.LogSecrets.
 
 		// Disable logging here
 		log.SetOutput(ioutil.Discard)
@@ -87,7 +96,7 @@ func realMain() int {
 
 		// Create the configuration for panicwrap and wrap our executable
 		wrapConfig.Handler = panicHandler(logTempFile)
-		wrapConfig.Writer = io.MultiWriter(logTempFile, logWriter)
+		wrapConfig.Writer = io.MultiWriter(logTempFile, &packer.LogSecretFilter)
 		wrapConfig.Stdout = outW
 		wrapConfig.DetectDuration = 500 * time.Millisecond
 		wrapConfig.ForwardSignals = []os.Signal{syscall.SIGTERM}
@@ -125,7 +134,8 @@ func wrappedMain() int {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	log.SetOutput(os.Stderr)
+	packer.LogSecretFilter.SetOutput(os.Stderr)
+	log.SetOutput(&packer.LogSecretFilter)
 
 	log.Printf("[INFO] Packer version: %s", version.FormattedVersion())
 	log.Printf("Packer Target OS/Arch: %s %s", runtime.GOOS, runtime.GOARCH)

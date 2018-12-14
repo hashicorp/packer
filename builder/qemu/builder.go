@@ -75,6 +75,12 @@ var diskDiscard = map[string]bool{
 	"ignore": true,
 }
 
+var diskDZeroes = map[string]bool{
+	"unmap": true,
+	"on":    true,
+	"off":   true,
+}
+
 type Builder struct {
 	config Config
 	runner multistep.Runner
@@ -94,6 +100,7 @@ type Config struct {
 	DiskSize          uint       `mapstructure:"disk_size"`
 	DiskCache         string     `mapstructure:"disk_cache"`
 	DiskDiscard       string     `mapstructure:"disk_discard"`
+	DetectZeroes      string     `mapstructure:"disk_detect_zeroes"`
 	SkipCompaction    bool       `mapstructure:"skip_compaction"`
 	DiskCompression   bool       `mapstructure:"disk_compression"`
 	Format            string     `mapstructure:"format"`
@@ -155,6 +162,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.DiskDiscard == "" {
 		b.config.DiskDiscard = "ignore"
+	}
+
+	if b.config.DetectZeroes == "" {
+		b.config.DetectZeroes = "off"
 	}
 
 	if b.config.Accelerator == "" {
@@ -286,6 +297,11 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			errs, errors.New("unrecognized disk discard type"))
 	}
 
+	if _, ok := diskDZeroes[b.config.DetectZeroes]; !ok {
+		errs = packer.MultiErrorAppend(
+			errs, errors.New("unrecognized disk detect zeroes setting"))
+	}
+
 	if !b.config.PackerForce {
 		if _, err := os.Stat(b.config.OutputDir); err == nil {
 			errs = packer.MultiErrorAppend(
@@ -393,7 +409,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
 				Host:      commHost,
-				SSHConfig: sshConfig,
+				SSHConfig: b.config.Comm.SSHConfigFunc(),
 				SSHPort:   commPort,
 				WinRMPort: commPort,
 			},
@@ -402,6 +418,12 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 
 	steps = append(steps,
 		new(common.StepProvision),
+	)
+
+	steps = append(steps,
+		&common.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
 	)
 	steps = append(steps,
 		new(stepShutdown),

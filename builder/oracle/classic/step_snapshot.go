@@ -18,7 +18,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Creating Snapshot...")
 	config := state.Get("config").(*Config)
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	instanceID := state.Get("instance_id").(string)
 
 	// get instances client
@@ -39,6 +39,7 @@ func (s *stepSnapshot) Run(_ context.Context, state multistep.StateBag) multiste
 		return multistep.ActionHalt
 	}
 	state.Put("snapshot", snap)
+	state.Put("machine_image", snap.MachineImage)
 	ui.Message(fmt.Sprintf("Created snapshot: %s.", snap.Name))
 	return multistep.ActionContinue
 }
@@ -54,7 +55,7 @@ func (s *stepSnapshot) Cleanup(state multistep.StateBag) {
 
 	ui := state.Get("ui").(packer.Ui)
 	ui.Say("Deleting Snapshot...")
-	client := state.Get("client").(*compute.ComputeClient)
+	client := state.Get("client").(*compute.Client)
 	snapClient := client.Snapshots()
 	snapInput := compute.DeleteSnapshotInput{
 		Snapshot:     snap.Name,
