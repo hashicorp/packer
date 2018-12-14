@@ -190,9 +190,9 @@ func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, hardd
 
 func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string,
-	ram int64, switchName string) error {
+	ram int64, switchName string, copyTF bool) error {
 	return hyperv.CloneVirtualMachine(cloneFromVmcxPath, cloneFromVmName, cloneFromSnapshotName,
-		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
+		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName, copyTF)
 }
 
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {

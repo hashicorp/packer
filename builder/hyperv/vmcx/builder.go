@@ -81,6 +81,7 @@ type Config struct {
 	DifferencingDisk bool `mapstructure:"differencing_disk"`
 
 	SwitchName                     string `mapstructure:"switch_name"`
+	CompareCopy                    bool   `mapstructure:"copy_in_compare"`
 	SwitchVlanId                   string `mapstructure:"switch_vlan_id"`
 	MacAddress                     string `mapstructure:"mac_address"`
 	VlanId                         string `mapstructure:"vlan_id"`
@@ -430,6 +431,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			CloneAllSnapshots:              b.config.CloneAllSnapshots,
 			VMName:                         b.config.VMName,
 			SwitchName:                     b.config.SwitchName,
+			CompareCopy:                    b.config.CompareCopy,
 			RamSize:                        b.config.RamSize,
 			Cpu:                            b.config.Cpu,
 			EnableMacSpoofing:              b.config.EnableMacSpoofing,
