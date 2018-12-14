@@ -17,15 +17,20 @@ func TestMuxBroker(t *testing.T) {
 	go bc.Run()
 	go bs.Run()
 
+	errChan := make(chan error, 1)
 	go func() {
 		c, err := bc.Dial(5)
 		if err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- fmt.Errorf("err dialing: %s", err)
+			close(errChan)
+			return
 		}
 
 		if _, err := c.Write([]byte{42}); err != nil {
-			t.Fatalf("err: %s", err)
+			errChan <- fmt.Errorf("err writing: %s", err)
 		}
+
+		close(errChan)
 	}()
 
 	client, err := bs.Accept(5)
@@ -40,6 +45,15 @@ func TestMuxBroker(t *testing.T) {
 
 	if data[0] != 42 {
 		t.Fatalf("bad: %d", data[0])
+	}
+
+	for {
+		err, open := <-errChan
+		if !open {
+			if err != nil {
+				t.Fatalf(err)
+			}
+		}
 	}
 }
 
