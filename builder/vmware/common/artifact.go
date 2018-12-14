@@ -62,10 +62,10 @@ func NewArtifact(remoteType string, format string, exportOutputPath string, vmNa
 	if remoteType != "" && !skipExport {
 		dir = new(LocalOutputDir)
 		dir.SetOutputDir(exportOutputPath)
-		files, err = dir.ListFiles()
 	} else {
-		files, err = state.Get("dir").(OutputDir).ListFiles()
+		dir = state.Get("dir").(OutputDir)
 	}
+	files, err = dir.ListFiles()
 	if err != nil {
 		return nil, err
 	}
