@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"net"
 	"testing"
 
@@ -21,13 +22,13 @@ func TestMuxBroker(t *testing.T) {
 	go func() {
 		c, err := bc.Dial(5)
 		if err != nil {
-			errChan <- fmt.Errorf("err dialing: %s", err)
+			errChan <- fmt.Errorf("err dialing: %s", err.Error())
 			close(errChan)
 			return
 		}
 
 		if _, err := c.Write([]byte{42}); err != nil {
-			errChan <- fmt.Errorf("err writing: %s", err)
+			errChan <- fmt.Errorf("err writing: %s", err.Error())
 		}
 
 		close(errChan)
@@ -51,8 +52,9 @@ func TestMuxBroker(t *testing.T) {
 		err, open := <-errChan
 		if !open {
 			if err != nil {
-				t.Fatalf(err)
+				t.Fatalf(err.Error())
 			}
+			break
 		}
 	}
 }
