@@ -654,30 +654,6 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 	}
 }
 
-func TestProvision_generateElevatedShellRunner(t *testing.T) {
-
-	// Non-elevated
-	config := testConfig()
-	p := new(Provisioner)
-	p.Prepare(config)
-	comm := new(packer.MockCommunicator)
-	p.communicator = comm
-	path, err := p.generateElevatedRunner("whoami")
-
-	if err != nil {
-		t.Fatalf("Did not expect error: %s", err.Error())
-	}
-
-	if comm.UploadCalled != true {
-		t.Fatalf("Should have uploaded file")
-	}
-
-	matched, _ := regexp.MatchString("C:/Windows/Temp/packer-elevated-shell.*", path)
-	if !matched {
-		t.Fatalf("Got unexpected file: %s", path)
-	}
-}
-
 func TestRetryable(t *testing.T) {
 	config := testConfig()
 
