@@ -34,3 +34,15 @@ func (t *MockProvisioner) Provision(ui Ui, comm Communicator) error {
 func (t *MockProvisioner) Cancel() {
 	t.CancelCalled = true
 }
+
+func (t *MockProvisioner) Communicator() Communicator {
+	return t.ProvCommunicator
+}
+
+func (t *MockProvisioner) ElevatedUser() string {
+	return "user"
+}
+
+func (t *MockProvisioner) ElevatedPassword() string {
+	return "password"
+}
