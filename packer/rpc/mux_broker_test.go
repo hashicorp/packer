@@ -20,18 +20,16 @@ func TestMuxBroker(t *testing.T) {
 
 	errChan := make(chan error, 1)
 	go func() {
+		defer close(errChan)
 		c, err := bc.Dial(5)
 		if err != nil {
 			errChan <- fmt.Errorf("err dialing: %s", err.Error())
-			close(errChan)
 			return
 		}
 
 		if _, err := c.Write([]byte{42}); err != nil {
 			errChan <- fmt.Errorf("err writing: %s", err.Error())
 		}
-
-		close(errChan)
 	}()
 
 	client, err := bs.Accept(5)
