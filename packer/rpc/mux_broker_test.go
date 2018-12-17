@@ -18,7 +18,7 @@ func TestMuxBroker(t *testing.T) {
 	go bc.Run()
 	go bs.Run()
 
-	errChan := make(chan error, 1)
+	errChan := make(chan error, 2)
 	go func() {
 		defer close(errChan)
 		c, err := bc.Dial(5)
