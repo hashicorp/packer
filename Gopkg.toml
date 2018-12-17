@@ -4,7 +4,7 @@
 
 [[constraint]]
   name = "github.com/vmware/govmomi"
-  version = "~0.17"
+  version = "~0.19"
 
 [[override]]
   name = "github.com/masterzen/azure-sdk-for-go"
