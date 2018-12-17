@@ -18,8 +18,8 @@ func SshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
 
 	var auth []ssh.AuthMethod
 
-	if comm.SSHPrivateKey != "" {
-		privateKey, err := ioutil.ReadFile(comm.SSHPrivateKey)
+	if comm.SSHPrivateKeyFile != "" {
+		privateKey, err := ioutil.ReadFile(comm.SSHPrivateKeyFile)
 		if err != nil {
 			return nil, fmt.Errorf("Error loading configured private key file: %s", err)
 		}
