@@ -1,16 +1,27 @@
 version: '2'
 services:
   build:
-    image: jetbrainsinfra/golang:1.10.4
+    image: jetbrainsinfra/golang:1.11.4
     volumes:
-      - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
-    working_dir: /go/src/github.com/jetbrains-infra/packer-builder-vsphere
+      - .:/work
+      - modules:/go/pkg/mod
+      - cache:/root/.cache
+    working_dir: /work
     command: ./build.sh
 
   test:
-    image: jetbrainsinfra/golang:1.10.4
+    image: jetbrainsinfra/golang:1.11.4
     volumes:
-      - .:/go/src/github.com/jetbrains-infra/packer-builder-vsphere
-    working_dir: /go/src/github.com/jetbrains-infra/packer-builder-vsphere
+      - .:/work
+      - modules:/go/pkg/mod
+      - cache:/root/.cache
+    working_dir: /work
 #    network_mode: "container:vpn"
+    environment:
+      VSPHERE_USERNAME:
+      VSPHERE_PASSWORD:
     command: ./test.sh
+
+volumes:
+  modules:
+  cache:
