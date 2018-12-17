@@ -37,6 +37,7 @@ type HardwareConfig struct {
 	NestedHV            bool
 	CpuHotAddEnabled    bool
 	MemoryHotAddEnabled bool
+	VideoRAM            int64
 }
 
 type CreateConfig struct {
@@ -276,6 +277,26 @@ func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 
 	confSpec.CpuHotAddEnabled = &config.CpuHotAddEnabled
 	confSpec.MemoryHotAddEnabled = &config.MemoryHotAddEnabled
+
+	if config.VideoRAM != 0 {
+		devices, err := vm.vm.Device(vm.driver.ctx)
+		if err != nil {
+			return err
+		}
+		l := devices.SelectByType((*types.VirtualMachineVideoCard)(nil))
+		if len(l) != 1 {
+			return err
+		}
+		card := l[0].(*types.VirtualMachineVideoCard)
+
+		card.VideoRamSizeInKB = config.VideoRAM
+
+		spec := &types.VirtualDeviceConfigSpec{
+			Device:    card,
+			Operation: types.VirtualDeviceConfigSpecOperationEdit,
+		}
+		confSpec.DeviceChange = append(confSpec.DeviceChange, spec)
+	}
 
 	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
 	if err != nil {

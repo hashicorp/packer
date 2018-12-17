@@ -161,6 +161,7 @@ func hardwareConfig() string {
 	config["RAM_reservation"] = 1024
 	config["NestedHV"] = true
 	config["firmware"] = "efi"
+	config["video_ram"] = 8192
 
 	return commonT.RenderConfig(config)
 }
@@ -221,6 +222,14 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 		s := l.PickController((*types.VirtualAHCIController)(nil))
 		if s != nil {
 			t.Errorf("VM should have no SATA controllers")
+		}
+
+		v := l.SelectByType((*types.VirtualMachineVideoCard)(nil))
+		if len(v) != 1 {
+			t.Errorf("VM should have one video card")
+		}
+		if v[0].(*types.VirtualMachineVideoCard).VideoRamSizeInKB != 8192 {
+			t.Errorf("Video RAM should be equal 8192")
 		}
 
 		return nil
