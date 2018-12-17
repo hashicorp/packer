@@ -1,3 +1,28 @@
+## 1.3.4 (upcoming)
+### IMPROVEMENTS:
+* builder/alicloud: delete copied image and snapshots if corresponding options
+    are specified [GH-7050]
+* builder/amazon: allow to interpolate more variables [GH-7059]
+* builder/amazon: Check that the KMS key ID is valid [GH-7090]
+* builder/amazon: Clean up logging for aws waiters so that it only runs once
+    per builder [GH-7080]
+* builder/amazon: don't Cleanup Temp Keys when there is no communicator to
+    avoid a panic [GH-7100] [GH-7095]
+* builder/azure: allow to configure disk caching [GH-7061]
+* core/shell: Add env vars "PACKER_HTTP_IP" and "PACKER_HTTP_PORT" to shell
+    provisioners [GH-7075]
+* core: Deprecate mitchellh/go-homedir package in favor of os/user [GH-7062]
+* core: make packer inspect not print sensitive variables [GH-7084]
+* provisioner/ansible-remote: add `-o IdentitiesOnly=yes`as a default flag
+    [GH-7115]
+* provisioner/windows-restart: wait for already-scheduled reboot [GH-7056] and
+    ignore reboot specific errors [GH-7071]
+
+### BUG FIXES:
+* builder/hcloud: fix go mod dependency [GH-7099]
+* builder/hcloud: prevent panic when ssh key was not passed [GH-7118]
+* core: removed a flaky race condition in tests [GH-7119]
+
 ## 1.3.3 (December 5, 2018)
 ### IMPROVEMENTS:
 * builder/alicloud: Add options for system disk properties [GH-6939]
