@@ -631,3 +631,41 @@ func checkNotes(t *testing.T) builderT.TestCheckFunc {
 		return nil
 	}
 }
+
+func TestCloneBuilderAcc_windows(t *testing.T) {
+	t.Skip("test is too slow")
+	config := windowsConfig()
+	builderT.Test(t, builderT.TestCase{
+		Builder:  &Builder{},
+		Template: commonT.RenderConfig(config),
+	})
+}
+
+func windowsConfig() map[string]interface{} {
+	username := os.Getenv("VSPHERE_USERNAME")
+	if username == "" {
+		username = "root"
+	}
+	password := os.Getenv("VSPHERE_PASSWORD")
+	if password == "" {
+		password = "jetbrains"
+	}
+
+	config := map[string]interface{}{
+		"vcenter_server":      "vcenter.vsphere65.test",
+		"username":            username,
+		"password":            password,
+		"insecure_connection": true,
+
+		"vm_name":      commonT.NewVMName(),
+		"template":     "windows",
+		"host":         "esxi-1.vsphere65.test",
+		"linked_clone": true, // speed up
+
+		"communicator":   "winrm",
+		"winrm_username": "jetbrains",
+		"winrm_password": "jetbrains",
+	}
+
+	return config
+}
