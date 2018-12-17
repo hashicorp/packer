@@ -46,13 +46,9 @@ func TestMuxBroker(t *testing.T) {
 		t.Fatalf("bad: %d", data[0])
 	}
 
-	for {
-		err, open := <-errChan
-		if !open {
-			if err != nil {
-				t.Fatalf(err.Error())
-			}
-			break
+	for err := range errChan {
+		if err != nil {
+			t.Fatalf(err.Error())
 		}
 	}
 }
