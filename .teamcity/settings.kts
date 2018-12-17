@@ -13,11 +13,9 @@ project {
     description = "https://github.com/jetbrains-infra/packer-builder-vsphere"
 
     vcsRoot(GitHub)
-
     buildType(Build)
 
     features {
-
         feature {
             type = "IssueTracker"
             param("type", "GithubIssues")
@@ -35,13 +33,12 @@ object GitHub : GitVcsRoot({
 })
 
 object Build : BuildType({
-    val path = "src/github.com/jetbrains-infra/packer-builder-vsphere"
-    val golangImage = "jetbrainsinfra/golang:1.10.4"
+    val golangImage = "jetbrainsinfra/golang:1.11.4"
 
     name = "Build"
 
     vcs {
-        root(GitHub, "+:. => $path")
+        root(GitHub)
     }
 
     requirements {
@@ -52,18 +49,17 @@ object Build : BuildType({
     }
 
     params {
+        param("env.GOPATH", "%teamcity.build.checkoutDir%/build/modules")
+        param("env.GOCACHE", "%teamcity.build.checkoutDir%/build/cache")
+
         password("env.VPN_PASSWORD", "credentialsJSON:8c355e81-9a26-4788-8fea-c854cd646c35")
         param   ("env.VSPHERE_USERNAME", """vsphere65.test\teamcity""")
         password("env.VSPHERE_PASSWORD", "credentialsJSON:3e99d6c8-b66f-410a-a865-eaf1b12664ad")
-
-        param("env.GOPATH", "%teamcity.build.checkoutDir%")
-        param("env.GOCACHE", "%teamcity.build.checkoutDir%/build")
     }
 
     steps {
         script {
             name = "Build"
-            workingDir = path
             scriptContent = "./build.sh"
             dockerImage = golangImage
             dockerPull = true
@@ -71,12 +67,11 @@ object Build : BuildType({
 
         dockerCompose {
             name = "Start VPN tunnel"
-            file = "$path/teamcity-services.yml"
+            file = "teamcity-services.yml"
         }
 
         script {
             name = "Test"
-            workingDir = path
             scriptContent = """
                 set -eux
                 
@@ -93,7 +88,6 @@ object Build : BuildType({
         script {
             name = "gofmt"
             executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-            workingDir = path
             scriptContent = "./gofmt.sh"
             dockerImage = golangImage
             dockerPull = true
@@ -132,6 +126,6 @@ object Build : BuildType({
     }
     maxRunningBuilds = 2
 
-    artifactRules = "$path/bin/* => packer-builder-vsphere-%build.number%.zip"
+    artifactRules = "bin/* => packer-builder-vsphere-%build.number%.zip"
     allowExternalStatus = true
 })
