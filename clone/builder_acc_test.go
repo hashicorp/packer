@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/packer/packer"
 	"github.com/jetbrains-infra/packer-builder-vsphere/common"
 	commonT "github.com/jetbrains-infra/packer-builder-vsphere/common/testing"
+	"github.com/vmware/govmomi/vim25/types"
 	"os"
 	"testing"
 )
@@ -338,6 +339,7 @@ func hardwareConfig() string {
 	config["RAM_reservation"] = 1024
 	config["CPU_hot_plug"] = true
 	config["RAM_hot_plug"] = true
+	config["video_ram"] = 8192
 
 	return commonT.RenderConfig(config)
 }
@@ -385,6 +387,18 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 		memoryHotAdd := vmInfo.Config.MemoryHotAddEnabled
 		if !*memoryHotAdd {
 			t.Errorf("VM should have Memory hot add enabled, got %v", memoryHotAdd)
+		}
+
+		l, err := vm.Devices()
+		if err != nil {
+			t.Fatalf("Cannot read VM devices: %v", err)
+		}
+		v := l.SelectByType((*types.VirtualMachineVideoCard)(nil))
+		if len(v) != 1 {
+			t.Errorf("VM should have one video card")
+		}
+		if v[0].(*types.VirtualMachineVideoCard).VideoRamSizeInKB != 8192 {
+			t.Errorf("Video RAM should be equal 8192")
 		}
 
 		return nil

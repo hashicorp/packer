@@ -19,7 +19,8 @@ type HardwareConfig struct {
 	RAMReserveAll       bool  `mapstructure:"RAM_reserve_all"`
 	MemoryHotAddEnabled bool  `mapstructure:"RAM_hot_plug"`
 
-	NestedHV bool `mapstructure:"NestedHV"`
+	VideoRAM int64 `mapstructure:"video_ram"`
+	NestedHV bool  `mapstructure:"NestedHV"`
 }
 
 func (c *HardwareConfig) Prepare() []error {
@@ -53,6 +54,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 			NestedHV:            s.Config.NestedHV,
 			CpuHotAddEnabled:    s.Config.CpuHotAddEnabled,
 			MemoryHotAddEnabled: s.Config.MemoryHotAddEnabled,
+			VideoRAM:            s.Config.VideoRAM,
 		})
 		if err != nil {
 			state.Put("error", err)
