@@ -13,9 +13,9 @@ func TestStepSnapshotDataDisksShouldFailIfSnapshotFails(t *testing.T) {
 		create: func(context.Context, string, string, string, map[string]*string, string) error {
 			return fmt.Errorf("!! Unit Test FAIL !!")
 		},
-		say:            func(message string) {},
-		error:          func(e error) {},
-		isManagedImage: true,
+		say:    func(message string) {},
+		error:  func(e error) {},
+		enable: func() bool { return true },
 	}
 
 	stateBag := createTestStateBagStepSnapshotDataDisks()
@@ -30,14 +30,30 @@ func TestStepSnapshotDataDisksShouldFailIfSnapshotFails(t *testing.T) {
 	}
 }
 
+func TestStepSnapshotDataDisksShouldNotExecute(t *testing.T) {
+	var testSubject = &StepSnapshotDataDisks{
+		create: func(context.Context, string, string, string, map[string]*string, string) error {
+			return fmt.Errorf("!! Unit Test FAIL !!")
+		},
+		say:    func(message string) {},
+		error:  func(e error) {},
+		enable: func() bool { return false },
+	}
+
+	var result = testSubject.Run(context.Background(), nil)
+	if result != multistep.ActionContinue {
+		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
+	}
+}
+
 func TestStepSnapshotDataDisksShouldPassIfSnapshotPasses(t *testing.T) {
 	var testSubject = &StepSnapshotDataDisks{
 		create: func(context.Context, string, string, string, map[string]*string, string) error {
 			return nil
 		},
-		say:            func(message string) {},
-		error:          func(e error) {},
-		isManagedImage: true,
+		say:    func(message string) {},
+		error:  func(e error) {},
+		enable: func() bool { return true },
 	}
 
 	stateBag := createTestStateBagStepSnapshotDataDisks()
