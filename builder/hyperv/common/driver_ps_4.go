@@ -151,6 +151,11 @@ func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac strin
 	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
 }
 
+//Replace the network adapter with a (non-)legacy adapter
+func (d *HypervPS4Driver) ReplaceVirtualMachineNetworkAdapter(vmName string, virtual bool) error {
+	return hyperv.ReplaceVirtualMachineNetworkAdapter(vmName, virtual)
+}
+
 func (d *HypervPS4Driver) UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) error {
 	return hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 }
