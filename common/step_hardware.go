@@ -10,6 +10,7 @@ import (
 
 type HardwareConfig struct {
 	CPUs             int32 `mapstructure:"CPUs"`
+	CpuCores         int32 `mapstructure:"cpu_cores"`
 	CPUReservation   int64 `mapstructure:"CPU_reservation"`
 	CPULimit         int64 `mapstructure:"CPU_limit"`
 	CpuHotAddEnabled bool  `mapstructure:"CPU_hot_plug"`
@@ -46,6 +47,7 @@ func (s *StepConfigureHardware) Run(_ context.Context, state multistep.StateBag)
 
 		err := vm.Configure(&driver.HardwareConfig{
 			CPUs:                s.Config.CPUs,
+			CpuCores:            s.Config.CpuCores,
 			CPUReservation:      s.Config.CPUReservation,
 			CPULimit:            s.Config.CPULimit,
 			RAM:                 s.Config.RAM,
