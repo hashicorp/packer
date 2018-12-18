@@ -343,7 +343,7 @@ func (d *DriverMock) GetVirtualMachineNetworkAdapterAddress(vmName string) (stri
 func (d *DriverMock) ReplaceVirtualMachineNetworkAdapter(vmName string, replace bool) error {
 	d.ReplaceVirtualMachineNetworkAdapter_Called = true
 	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
-	d.ReplaceVirtualMachineNetworkAdapter_Replace = vmName
+	d.ReplaceVirtualMachineNetworkAdapter_Replace = replace
 	return d.ReplaceVirtualMachineNetworkAdapter_Err
 }
 
