@@ -11,19 +11,19 @@ import (
 )
 
 type StepSnapshotOSDisk struct {
-	client         *AzureClient
-	create         func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
-	say            func(message string)
-	error          func(e error)
-	isManagedImage bool
+	client *AzureClient
+	create func(ctx context.Context, resourceGroupName string, srcUriVhd string, location string, tags map[string]*string, dstSnapshotName string) error
+	say    func(message string)
+	error  func(e error)
+	enable func() bool
 }
 
-func NewStepSnapshotOSDisk(client *AzureClient, ui packer.Ui, isManagedImage bool) *StepSnapshotOSDisk {
+func NewStepSnapshotOSDisk(client *AzureClient, ui packer.Ui, config *Config) *StepSnapshotOSDisk {
 	var step = &StepSnapshotOSDisk{
-		client:         client,
-		say:            func(message string) { ui.Say(message) },
-		error:          func(e error) { ui.Error(e.Error()) },
-		isManagedImage: isManagedImage,
+		client: client,
+		say:    func(message string) { ui.Say(message) },
+		error:  func(e error) { ui.Error(e.Error()) },
+		enable: func() bool { return config.isManagedImage() && config.ManagedImageOSDiskSnapshotName != "" },
 	}
 
 	step.create = step.createSnapshot
@@ -64,30 +64,31 @@ func (s *StepSnapshotOSDisk) createSnapshot(ctx context.Context, resourceGroupNa
 		return err
 	}
 
-	s.say(fmt.Sprintf(" -> Managed Image OS Disk Snapshot		: '%s'", *(createdSnapshot.ID)))
-
+	s.say(fmt.Sprintf(" -> Snapshot ID : '%s'", *(createdSnapshot.ID)))
 	return nil
 }
 
 func (s *StepSnapshotOSDisk) Run(ctx context.Context, stateBag multistep.StateBag) multistep.StepAction {
-	if s.isManagedImage {
+	if !s.enable() {
+		return multistep.ActionContinue
+	}
 
-		s.say("Taking snapshot of OS disk ...")
+	s.say("Snapshotting OS disk ...")
 
-		var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
-		var location = stateBag.Get(constants.ArmLocation).(string)
-		var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
-		var srcUriVhd = stateBag.Get(constants.ArmOSDiskVhd).(string)
-		var dstSnapshotName = stateBag.Get(constants.ArmManagedImageOSDiskSnapshotName).(string)
+	var resourceGroupName = stateBag.Get(constants.ArmManagedImageResourceGroupName).(string)
+	var location = stateBag.Get(constants.ArmLocation).(string)
+	var tags = stateBag.Get(constants.ArmTags).(map[string]*string)
+	var srcUriVhd = stateBag.Get(constants.ArmOSDiskVhd).(string)
+	var dstSnapshotName = stateBag.Get(constants.ArmManagedImageOSDiskSnapshotName).(string)
 
-		err := s.create(ctx, resourceGroupName, srcUriVhd, location, tags, dstSnapshotName)
+	s.say(fmt.Sprintf(" -> OS Disk     : '%s'", srcUriVhd))
+	err := s.create(ctx, resourceGroupName, srcUriVhd, location, tags, dstSnapshotName)
 
-		if err != nil {
-			stateBag.Put(constants.Error, err)
-			s.error(err)
+	if err != nil {
+		stateBag.Put(constants.Error, err)
+		s.error(err)
 
-			return multistep.ActionHalt
-		}
+		return multistep.ActionHalt
 	}
 
 	return multistep.ActionContinue
