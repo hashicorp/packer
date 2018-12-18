@@ -66,6 +66,11 @@ type DriverMock struct {
 	GetVirtualMachineNetworkAdapterAddress_Return string
 	GetVirtualMachineNetworkAdapterAddress_Err    error
 
+	ReplaceVirtualMachineNetworkAdapter_Called  bool
+	ReplaceVirtualMachineNetworkAdapter_VmName  string
+	ReplaceVirtualMachineNetworkAdapter_Replace bool
+	ReplaceVirtualMachineNetworkAdapter_Err     error
+
 	SetNetworkAdapterVlanId_Called     bool
 	SetNetworkAdapterVlanId_SwitchName string
 	SetNetworkAdapterVlanId_VlanId     string
@@ -333,6 +338,13 @@ func (d *DriverMock) GetVirtualMachineNetworkAdapterAddress(vmName string) (stri
 	d.GetVirtualMachineNetworkAdapterAddress_Called = true
 	d.GetVirtualMachineNetworkAdapterAddress_VmName = vmName
 	return d.GetVirtualMachineNetworkAdapterAddress_Return, d.GetVirtualMachineNetworkAdapterAddress_Err
+}
+
+func (d *DriverMock) ReplaceVirtualMachineNetworkAdapter(vmName string, replace bool) error {
+	d.ReplaceVirtualMachineNetworkAdapter_Called = true
+	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
+	d.ReplaceVirtualMachineNetworkAdapter_Replace = replace
+	return d.ReplaceVirtualMachineNetworkAdapter_Err
 }
 
 func (d *DriverMock) SetNetworkAdapterVlanId(switchName string, vlanId string) error {
