@@ -272,6 +272,11 @@ builder in this example.
 The function `split` takes an input string, a seperator string, and a numeric
 component value and returns the requested substring.
 
+Please note that you cannot use the `split` function on user variables,
+because we can't nest the functions currently. This function is indended to
+be used on builder variables like build_name. If you need a split user
+variable, the best way to do it is to create a separate variable.
+
 Here are some examples using the above options:
 
 ``` liquid
@@ -292,7 +297,7 @@ this case, on the `fixed-string` value):
         "type": "vagrant",
         "compression_level": 9,
         "keep_input_artifact": false,
-        "vagrantfile_template": "tpl/{{split build_name \"-\" 1}.rb",
+        "vagrantfile_template": "tpl/{{split build_name \"-\" 1}}.rb",
         "output": "output/{{build_name}}.box",
         "only": [
             "org-name-provider"
