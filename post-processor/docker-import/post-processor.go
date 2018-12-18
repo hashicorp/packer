@@ -16,9 +16,9 @@ const BuilderId = "packer.post-processor.docker-import"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Repository string `mapstructure:"repository"`
-	Tag        string `mapstructure:"tag"`
-	Changes    []string
+	Repository string   `mapstructure:"repository"`
+	Tag        string   `mapstructure:"tag"`
+	Changes    []string `mapstructure:"changes"`
 
 	ctx interpolate.Context
 }
