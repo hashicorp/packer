@@ -189,10 +189,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 			err = errors.New("Generation 2 vms don't support floppy drives. Use ISO image instead.")
 			errs = packer.MultiErrorAppend(errs, err)
 		}
-    if b.config.UseLegacyNetworkAdapter {
-      err = errors.New("Generation 2 vms don't support legacy network adapters.")
-      errs = packer.MultiErrorAppend(errs, err)
-    }
+		if b.config.UseLegacyNetworkAdapter {
+			err = errors.New("Generation 2 vms don't support legacy network adapters.")
+			errs = packer.MultiErrorAppend(errs, err)
+		}
 	}
 
 	if len(b.config.AdditionalDiskSize) > 64 {
@@ -413,7 +413,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			EnableSecureBoot:               b.config.EnableSecureBoot,
 			SecureBootTemplate:             b.config.SecureBootTemplate,
 			EnableVirtualizationExtensions: b.config.EnableVirtualizationExtensions,
-      UseLegacyNetworkAdapter:        b.config.UseLegacyNetworkAdapter,
+			UseLegacyNetworkAdapter:        b.config.UseLegacyNetworkAdapter,
 			AdditionalDiskSize:             b.config.AdditionalDiskSize,
 			DifferencingDisk:               b.config.DifferencingDisk,
 			MacAddress:                     b.config.MacAddress,
