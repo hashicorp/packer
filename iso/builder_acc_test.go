@@ -155,6 +155,7 @@ func TestISOBuilderAcc_hardware(t *testing.T) {
 func hardwareConfig() string {
 	config := defaultConfig()
 	config["CPUs"] = 2
+	config["cpu_cores"] = 2
 	config["CPU_reservation"] = 1000
 	config["CPU_limit"] = 1500
 	config["RAM"] = 2048
@@ -179,6 +180,11 @@ func checkHardware(t *testing.T) builderT.TestCheckFunc {
 		cpuSockets := vmInfo.Config.Hardware.NumCPU
 		if cpuSockets != 2 {
 			t.Errorf("VM should have 2 CPU sockets, got %v", cpuSockets)
+		}
+
+		cpuCores := vmInfo.Config.Hardware.NumCoresPerSocket
+		if cpuCores != 2 {
+			t.Errorf("VM should have 2 CPU cores per socket, got %v", cpuCores)
 		}
 
 		cpuReservation := *vmInfo.Config.CpuAllocation.Reservation

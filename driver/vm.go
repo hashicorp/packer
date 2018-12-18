@@ -29,6 +29,7 @@ type CloneConfig struct {
 
 type HardwareConfig struct {
 	CPUs                int32
+	CpuCores            int32
 	CPUReservation      int64
 	CPULimit            int64
 	RAM                 int64
@@ -259,6 +260,7 @@ func (vm *VirtualMachine) Destroy() error {
 func (vm *VirtualMachine) Configure(config *HardwareConfig) error {
 	var confSpec types.VirtualMachineConfigSpec
 	confSpec.NumCPUs = config.CPUs
+	confSpec.NumCoresPerSocket = config.CpuCores
 	confSpec.MemoryMB = config.RAM
 
 	var cpuSpec types.ResourceAllocationInfo
