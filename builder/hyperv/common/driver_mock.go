@@ -341,10 +341,10 @@ func (d *DriverMock) GetVirtualMachineNetworkAdapterAddress(vmName string) (stri
 }
 
 func (d *DriverMock) ReplaceVirtualMachineNetworkAdapter(vmName string, replace bool) error {
-  d.ReplaceVirtualMachineNetworkAdapter_Called = true
-  d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
-  d.ReplaceVirtualMachineNetworkAdapter_Replace = vmName
-  return d.ReplaceVirtualMachineNetworkAdapter_Err
+	d.ReplaceVirtualMachineNetworkAdapter_Called = true
+	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
+	d.ReplaceVirtualMachineNetworkAdapter_Replace = vmName
+	return d.ReplaceVirtualMachineNetworkAdapter_Err
 }
 
 func (d *DriverMock) SetNetworkAdapterVlanId(switchName string, vlanId string) error {
