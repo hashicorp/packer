@@ -99,13 +99,6 @@ func (d *DockerDriver) Export(id string, dst io.Writer) error {
 
 func (d *DockerDriver) Import(path string, changes []string, repo string) (string, error) {
 	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	stdin, err := cmd.StdinPipe()
-
-	if err != nil {
-		return "", err
-	}
 
 	args := []string{"import"}
 
@@ -115,7 +108,15 @@ func (d *DockerDriver) Import(path string, changes []string, repo string) (strin
 
 	args = append(args, "-")
 	args = append(args, repo)
+
 	cmd := exec.Command("docker", args...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	stdin, err := cmd.StdinPipe()
+
+	if err != nil {
+		return "", err
+	}
 
 	// There should be only one artifact of the Docker builder
 	file, err := os.Open(path)
@@ -124,7 +125,7 @@ func (d *DockerDriver) Import(path string, changes []string, repo string) (strin
 	}
 	defer file.Close()
 
-	log.Printf("Importing container with args: %v", args)
+	log.Printf("Importing tarball with args: %v", args)
 
 	if err := cmd.Start(); err != nil {
 		return "", err
