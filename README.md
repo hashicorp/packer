@@ -29,7 +29,7 @@ docker-compose run build
 
 The binaries will be in `bin/` directory.
 
-Artifacts can be also downloaded from [TeamCity builds](https://teamcity.jetbrains.com/viewLog.html?buildTypeId=PackerVSphere_Build&buildId=lastSuccessful&tab=artifacts).
+Artifacts can be also downloaded from [TeamCity builds](https://teamcity.jetbrains.com/viewLog.html?buildTypeId=PackerVSphere_Build&buildId=lastSuccessful&tab=artifacts&guest=1).
 
 ## Examples
 
