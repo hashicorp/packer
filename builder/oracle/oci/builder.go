@@ -89,9 +89,14 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		return nil, err
 	}
 
+	image, ok := state.GetOk("image")
+	if !ok {
+		return nil, err
+	}
+
 	// Build the artifact and return it
 	artifact := &Artifact{
-		Image:  state.Get("image").(core.Image),
+		Image:  image.(core.Image),
 		Region: region,
 		driver: driver,
 	}
