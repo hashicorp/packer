@@ -40,6 +40,7 @@ type RunConfig struct {
 	UseBlockStorageVolume  bool   `mapstructure:"use_blockstorage_volume"`
 	VolumeName             string `mapstructure:"volume_name"`
 	VolumeType             string `mapstructure:"volume_type"`
+	VolumeSize             int    `mapstructure:"volume_size"`
 	VolumeAvailabilityZone string `mapstructure:"volume_availability_zone"`
 
 	// Not really used, but here for BC
