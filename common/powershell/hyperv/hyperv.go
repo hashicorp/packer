@@ -204,10 +204,9 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
-func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
+func getCreateVMScript(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
-	diffDisks bool, fixedVHD bool, version string) error {
-
+	diffDisks bool, fixedVHD bool, version string) string {
 	type scriptOptions struct {
 		VersionTag         string
 		VMName             string
@@ -287,7 +286,18 @@ else {
 		DiffDisks:          diffDisks,
 		FixedVHD:           fixedVHD,
 	})
-	script := scriptBuilder.String()
+
+	return scriptBuilder.String()
+}
+
+func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
+	diskSize int64, diskBlockSize int64, switchName string, generation uint,
+	diffDisks bool, fixedVHD bool, version string) error {
+
+	script := getCreateVMScript(vmName, path, harddrivePath, ram,
+		diskSize, diskBlockSize, switchName, generation,
+		diffDisks, fixedVHD, version)
+
 	var ps powershell.PowerShellCmd
 	if err := ps.Run(script); err != nil {
 		return err
