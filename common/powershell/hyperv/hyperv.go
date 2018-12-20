@@ -243,6 +243,7 @@ func getCreateVMScript(vmName string, path string, harddrivePath string, ram int
 		vhdx = vmName + ".vhd"
 	}
 
+	// Create VHD
 	templateString := `$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}` + "\n"
 	if harddrivePath != "" {
 		if diffDisks {
@@ -252,13 +253,15 @@ func getCreateVMScript(vmName string, path string, harddrivePath string, ram int
 		}
 	} else {
 		if fixedVHD {
-			// We only end up in here with generation 1 vms, because gen 2 doesn't support VHDs
 			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}` + "\n"
 		} else {
 			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}` + "\n"
 		}
 	}
+
+	// Create new VM using the VHD you just made
 	templateString = templateString + `Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}`
+	// Add optional tags to the end of the VM creation command
 	if generation == 2 {
 		templateString = templateString + ` -Generation {{ .Generation }}`
 	}
