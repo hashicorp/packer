@@ -100,6 +100,7 @@ require (
 	github.com/sirupsen/logrus v0.0.0-20180315010703-90150a8ed11b
 	github.com/stretchr/objx v0.1.0
 	github.com/stretchr/testify v1.2.1
+	github.com/tencentcloud/tencentcloud-sdk-go v0.0.0-20181220135002-f1744d40d346 // indirect
 	github.com/tent/http-link-go v0.0.0-20130702225549-ac974c61c2f9
 	github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1
 	github.com/ulikunitz/xz v0.0.0-20180703112113-636d36a76670
