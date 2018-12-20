@@ -3,9 +3,11 @@ package hyperv
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/hashicorp/packer/common/powershell"
 )
@@ -204,75 +206,100 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
-	diffDisks bool, fixedVHD bool) error {
+	diffDisks bool, fixedVHD bool, version string) error {
 
+	type scriptOptions struct {
+		VersionTag         string
+		VMName             string
+		Path               string
+		HardDrivePath      string
+		MemoryStartupBytes int64
+		NewVHDSizeBytes    int64
+		VHDBlockSizeBytes  int64
+		SwitchName         string
+		Generation         uint
+		DiffDisks          bool
+		FixedVHD           bool
+	}
+
+	versionTag := ""
+	if version != "" {
+		versionTag = fmt.Sprintf("-Version %s", version)
+	}
+
+	var scriptBuilder strings.Builder
+
+	scriptTemplate := template.Must(template.New("psScript").Parse(`
+param([string]$fixedVHD)
+
+{{if .FixedVHD}}
+$vhdx = {{ .VMName }} + '.vhd'
+{{- else}}
+$vhdx = {{ .VMName }} + '.vhdx'
+{{- end}}
+
+$vhdPath = Join-Path -Path {{ .Path }} -ChildPath $vhdx
+if ({{ .HardDrivePath }}){
+	{{if .DiffDisks}}
+	New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+	{{- else}}
+	Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
+	{{- end}}
+	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} {{ .VersionTag }}
+} else {
+	{{if .FixedVHD}}
+	Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}
+	{{- else}}
+	Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+	{{- end}}
+	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} {{ .VersionTag }}
+}
+`))
 	if generation == 2 {
-		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [int]$generation, [string]$diffDisks)
-$vhdx = $vmName + '.vhdx'
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-if ($harddrivePath){
-	if($diffDisks -eq "true"){
-		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
-	} else {
-		Copy-Item -Path $harddrivePath -Destination $vhdPath
-	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
-} else {
-	Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName -Generation $generation
+		scriptTemplate = template.Must(template.New("psScript").Parse(`
+$vhdx = {{ .VMName }} + '.vhdx'
+$vhdPath = Join-Path -Path {{ .Path }} -ChildPath $vhdx
+if ({{ .HardDrivePath }}){
+	{{if .DiffDisks}}
+	New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+	{{- else}}
+	Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
+	{{- end}}
+	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} -Generation {{ .Generation }} {{ .VersionTag }}
 }
-`
-		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
-			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
-			switchName, strconv.FormatInt(int64(generation), 10),
-			strconv.FormatBool(diffDisks)); err != nil {
-			return err
-		}
+else {
+	Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} -Generation {{ .Generation }} {{ .VersionTag }}
+}
+`))
+	}
 
-		return DisableAutomaticCheckpoints(vmName)
-	} else {
-		var script = `
-param([string]$vmName, [string]$path, [string]$harddrivePath, [long]$memoryStartupBytes, [long]$newVHDSizeBytes, [long]$vhdBlockSizeBytes, [string]$switchName, [string]$diffDisks, [string]$fixedVHD)
-if($fixedVHD -eq "true"){
-	$vhdx = $vmName + '.vhd'
-}
-else{
-	$vhdx = $vmName + '.vhdx'
-}
-$vhdPath = Join-Path -Path $path -ChildPath $vhdx
-if ($harddrivePath){
-	if($diffDisks -eq "true"){
-		New-VHD -Path $vhdPath -ParentPath $harddrivePath -Differencing -BlockSizeBytes $vhdBlockSizeBytes
+	scriptTemplate.Execute(&scriptBuilder, scriptOptions{
+		VersionTag:         versionTag,
+		VMName:             vmName,
+		Path:               path,
+		HardDrivePath:      harddrivePath,
+		MemoryStartupBytes: ram,
+		NewVHDSizeBytes:    diskSize,
+		VHDBlockSizeBytes:  diskBlockSize,
+		SwitchName:         switchName,
+		Generation:         generation,
+		DiffDisks:          diffDisks,
+		FixedVHD:           fixedVHD,
+	})
+	script := scriptBuilder.String()
+	var ps powershell.PowerShellCmd
+	if err := ps.Run(script); err != nil {
+		return err
 	}
-	else{
-		Copy-Item -Path $harddrivePath -Destination $vhdPath
-	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
-} else {
-	if($fixedVHD -eq "true"){
-		Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes $newVHDSizeBytes
-	}
-	else {
-		Hyper-V\New-VHD -Path $vhdPath -SizeBytes $newVHDSizeBytes -BlockSizeBytes $vhdBlockSizeBytes
-	}
-	Hyper-V\New-VM -Name $vmName -Path $path -MemoryStartupBytes $memoryStartupBytes -VHDPath $vhdPath -SwitchName $switchName
-}
-`
-		var ps powershell.PowerShellCmd
-		if err := ps.Run(script, vmName, path, harddrivePath, strconv.FormatInt(ram, 10),
-			strconv.FormatInt(diskSize, 10), strconv.FormatInt(diskBlockSize, 10),
-			switchName, strconv.FormatBool(diffDisks), strconv.FormatBool(fixedVHD)); err != nil {
-			return err
-		}
 
-		if err := DisableAutomaticCheckpoints(vmName); err != nil {
-			return err
-		}
-
+	if err := DisableAutomaticCheckpoints(vmName); err != nil {
+		return err
+	}
+	if generation != 2 {
 		return DeleteAllDvdDrives(vmName)
 	}
+	return nil
 }
 
 func DisableAutomaticCheckpoints(vmName string) error {
