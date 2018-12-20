@@ -3,12 +3,13 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/pkg/errors"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
-	"strings"
 )
 
 type stepConfigSubnet struct {

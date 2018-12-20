@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"io/ioutil"
 	"log"
 	"time"
+
+	"github.com/hashicorp/packer/helper/multistep"
+	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 type stepRunInstance struct {

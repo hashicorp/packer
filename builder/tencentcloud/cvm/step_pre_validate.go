@@ -2,6 +2,7 @@ package cvm
 
 import (
 	"context"
+
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 )

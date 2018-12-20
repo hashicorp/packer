@@ -3,11 +3,11 @@ package cvm
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"time"
 )
 
 func CheckResourceIdFormat(resource string, id string) bool {

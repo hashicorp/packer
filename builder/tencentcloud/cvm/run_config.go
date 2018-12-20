@@ -2,11 +2,12 @@ package cvm
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/pkg/errors"
-	"os"
 )
 
 type TencentCloudRunConfig struct {

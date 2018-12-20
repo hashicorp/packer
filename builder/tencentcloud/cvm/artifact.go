@@ -2,11 +2,12 @@ package cvm
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/packer"
-	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/packer/packer"
+	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 type Artifact struct {

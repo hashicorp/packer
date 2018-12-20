@@ -3,15 +3,16 @@ package cvm
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"runtime"
+	"strings"
+
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
-	"io/ioutil"
-	"os"
-	"runtime"
-	"strings"
 )
 
 type stepConfigKeyPair struct {

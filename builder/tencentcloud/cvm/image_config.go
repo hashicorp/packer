@@ -2,8 +2,9 @@ package cvm
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/template/interpolate"
 	"regexp"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type TencentCloudImageConfig struct {
