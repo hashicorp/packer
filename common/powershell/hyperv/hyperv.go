@@ -12,6 +12,21 @@ import (
 	"github.com/hashicorp/packer/common/powershell"
 )
 
+type scriptOptions struct {
+	Version            string
+	VMName             string
+	VHDX               string
+	Path               string
+	HardDrivePath      string
+	MemoryStartupBytes int64
+	NewVHDSizeBytes    int64
+	VHDBlockSizeBytes  int64
+	SwitchName         string
+	Generation         uint
+	DiffDisks          bool
+	FixedVHD           bool
+}
+
 func GetHostAdapterIpAddressForSwitch(switchName string) (string, error) {
 	var script = `
 param([string]$switchName, [int]$addressIndex)
@@ -204,78 +219,60 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 	return err
 }
 
+// This was created as a proof of concept for moving logic out of the powershell
+// scripting so that we can test the pathways activated by our variables.
+// Rather than creating a powershell script with several conditionals, this will
+// generate a conditional-free script which already sets all of the necessary
+// variables inline.
+//
+// $vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
+// New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
+// Hyper-V\New-VHD -Path $vhdPath -SizeBytes 8192 -BlockSizeBytes 10
+// Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch
+//
 func getCreateVMScript(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
-	diffDisks bool, fixedVHD bool, version string) string {
-	type scriptOptions struct {
-		VersionTag         string
-		VMName             string
-		Path               string
-		HardDrivePath      string
-		MemoryStartupBytes int64
-		NewVHDSizeBytes    int64
-		VHDBlockSizeBytes  int64
-		SwitchName         string
-		Generation         uint
-		DiffDisks          bool
-		FixedVHD           bool
+	diffDisks bool, fixedVHD bool, version string) (string, error) {
+
+	if fixedVHD && generation == 2 {
+		return "", fmt.Errorf("Generation 2 VMs don't support fixed disks.")
 	}
 
-	versionTag := ""
+	vhdx := vmName + ".vhdx"
+	if fixedVHD {
+		vhdx = vmName + ".vhd"
+	}
+
+	templateString := `$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}` + "\n"
+	if harddrivePath != "" {
+		if diffDisks {
+			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}` + "\n"
+		} else {
+			templateString = templateString + `Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath` + "\n"
+		}
+	} else {
+		if fixedVHD {
+			// We only end up in here with generation 1 vms, because gen 2 doesn't support VHDs
+			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}` + "\n"
+		} else {
+			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}` + "\n"
+		}
+	}
+	templateString = templateString + `Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}`
+	if generation == 2 {
+		templateString = templateString + ` -Generation {{ .Generation }}`
+	}
 	if version != "" {
-		versionTag = fmt.Sprintf("-Version %s", version)
+		templateString = templateString + ` -Version {{ .Version }}`
 	}
 
 	var scriptBuilder strings.Builder
 
-	scriptTemplate := template.Must(template.New("psScript").Parse(`
-param([string]$fixedVHD)
-
-{{if .FixedVHD}}
-$vhdx = {{ .VMName }} + '.vhd'
-{{- else}}
-$vhdx = {{ .VMName }} + '.vhdx'
-{{- end}}
-
-$vhdPath = Join-Path -Path {{ .Path }} -ChildPath $vhdx
-if ({{ .HardDrivePath }}){
-	{{if .DiffDisks}}
-	New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
-	{{- else}}
-	Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
-	{{- end}}
-	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} {{ .VersionTag }}
-} else {
-	{{if .FixedVHD}}
-	Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}
-	{{- else}}
-	Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
-	{{- end}}
-	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} {{ .VersionTag }}
-}
-`))
-	if generation == 2 {
-		scriptTemplate = template.Must(template.New("psScript").Parse(`
-$vhdx = {{ .VMName }} + '.vhdx'
-$vhdPath = Join-Path -Path {{ .Path }} -ChildPath $vhdx
-if ({{ .HardDrivePath }}){
-	{{if .DiffDisks}}
-	New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
-	{{- else}}
-	Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
-	{{- end}}
-	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} -Generation {{ .Generation }} {{ .VersionTag }}
-}
-else {
-	Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
-	Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }} -Generation {{ .Generation }} {{ .VersionTag }}
-}
-`))
-	}
-
+	scriptTemplate := template.Must(template.New("psScript").Parse(templateString))
 	scriptTemplate.Execute(&scriptBuilder, scriptOptions{
-		VersionTag:         versionTag,
+		Version:            version,
 		VMName:             vmName,
+		VHDX:               vhdx,
 		Path:               path,
 		HardDrivePath:      harddrivePath,
 		MemoryStartupBytes: ram,
@@ -287,19 +284,22 @@ else {
 		FixedVHD:           fixedVHD,
 	})
 
-	return scriptBuilder.String()
+	return scriptBuilder.String(), nil
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 
-	script := getCreateVMScript(vmName, path, harddrivePath, ram,
+	script, err := getCreateVMScript(vmName, path, harddrivePath, ram,
 		diskSize, diskBlockSize, switchName, generation,
 		diffDisks, fixedVHD, version)
+	if err != nil {
+		return err
+	}
 
 	var ps powershell.PowerShellCmd
-	if err := ps.Run(script); err != nil {
+	if err = ps.Run(script); err != nil {
 		return err
 	}
 
