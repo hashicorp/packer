@@ -66,6 +66,11 @@ type DriverMock struct {
 	GetVirtualMachineNetworkAdapterAddress_Return string
 	GetVirtualMachineNetworkAdapterAddress_Err    error
 
+	ReplaceVirtualMachineNetworkAdapter_Called  bool
+	ReplaceVirtualMachineNetworkAdapter_VmName  string
+	ReplaceVirtualMachineNetworkAdapter_Replace bool
+	ReplaceVirtualMachineNetworkAdapter_Err     error
+
 	SetNetworkAdapterVlanId_Called     bool
 	SetNetworkAdapterVlanId_SwitchName string
 	SetNetworkAdapterVlanId_VlanId     string
@@ -143,6 +148,7 @@ type DriverMock struct {
 	CloneVirtualMachine_HarddrivePath         string
 	CloneVirtualMachine_Ram                   int64
 	CloneVirtualMachine_SwitchName            string
+	CloneVirtualMachine_Copy                  bool
 	CloneVirtualMachine_Err                   error
 
 	DeleteVirtualMachine_Called bool
@@ -334,6 +340,13 @@ func (d *DriverMock) GetVirtualMachineNetworkAdapterAddress(vmName string) (stri
 	return d.GetVirtualMachineNetworkAdapterAddress_Return, d.GetVirtualMachineNetworkAdapterAddress_Err
 }
 
+func (d *DriverMock) ReplaceVirtualMachineNetworkAdapter(vmName string, replace bool) error {
+	d.ReplaceVirtualMachineNetworkAdapter_Called = true
+	d.ReplaceVirtualMachineNetworkAdapter_VmName = vmName
+	d.ReplaceVirtualMachineNetworkAdapter_Replace = replace
+	return d.ReplaceVirtualMachineNetworkAdapter_Err
+}
+
 func (d *DriverMock) SetNetworkAdapterVlanId(switchName string, vlanId string) error {
 	d.SetNetworkAdapterVlanId_Called = true
 	d.SetNetworkAdapterVlanId_SwitchName = switchName
@@ -425,7 +438,7 @@ func (d *DriverMock) CreateVirtualMachine(vmName string, path string, harddriveP
 
 func (d *DriverMock) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string,
-	harddrivePath string, ram int64, switchName string) error {
+	harddrivePath string, ram int64, switchName string, copyTF bool) error {
 	d.CloneVirtualMachine_Called = true
 	d.CloneVirtualMachine_CloneFromVmcxPath = cloneFromVmcxPath
 	d.CloneVirtualMachine_CloneFromVmName = cloneFromVmName
@@ -436,6 +449,8 @@ func (d *DriverMock) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmNa
 	d.CloneVirtualMachine_HarddrivePath = harddrivePath
 	d.CloneVirtualMachine_Ram = ram
 	d.CloneVirtualMachine_SwitchName = switchName
+	d.CloneVirtualMachine_Copy = copyTF
+
 	return d.CloneVirtualMachine_Err
 }
 

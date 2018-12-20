@@ -24,8 +24,6 @@ type vmxTemplateData struct {
 	CpuCount   string
 	MemorySize string
 
-	HDD_BootOrder string
-
 	SCSI_Present         string
 	SCSI_diskAdapterType string
 	SATA_Present         string
@@ -166,7 +164,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		NVME_Present:         "FALSE",
 
 		DiskType:                   "scsi",
-		HDD_BootOrder:              "scsi0:0",
 		CDROMType:                  "ide",
 		CDROMType_PrimarySecondary: "0",
 
@@ -189,20 +186,17 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "ide"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_PrimarySecondary = "1"
-		templateData.HDD_BootOrder = "ide0:0"
 	case "sata":
 		templateData.SATA_Present = "TRUE"
 		templateData.DiskType = "sata"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_PrimarySecondary = "1"
-		templateData.HDD_BootOrder = "sata0:0"
 	case "nvme":
 		templateData.NVME_Present = "TRUE"
 		templateData.DiskType = "nvme"
 		templateData.SATA_Present = "TRUE"
 		templateData.CDROMType = "sata"
 		templateData.CDROMType_PrimarySecondary = "0"
-		templateData.HDD_BootOrder = "nvme0:0"
 	case "scsi":
 		diskAdapterType = "lsilogic"
 		fallthrough
@@ -212,7 +206,6 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.DiskType = "scsi"
 		templateData.CDROMType = "ide"
 		templateData.CDROMType_PrimarySecondary = "0"
-		templateData.HDD_BootOrder = "scsi0:0"
 	}
 
 	/// Handle the cdrom adapter type. If the disk adapter type and the
@@ -242,6 +235,13 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
+
+	/// Now that we figured out the CDROM device to add, store it
+	/// to the list of temporary build devices in our statebag
+	tmpBuildDevices := state.Get("temporaryDevices").([]string)
+	tmpCdromDevice := fmt.Sprintf("%s0:%s", templateData.CDROMType, templateData.CDROMType_PrimarySecondary)
+	tmpBuildDevices = append(tmpBuildDevices, tmpCdromDevice)
+	state.Put("temporaryDevices", tmpBuildDevices)
 
 	/// Assign the network adapter type into the template if one was specified.
 	network_adapter := strings.ToLower(config.HWConfig.NetworkAdapterType)
@@ -314,6 +314,18 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 		templateData.Serial_Endpoint = ""
 		templateData.Serial_Host = ""
 		templateData.Serial_Auto = "FALSE"
+
+		// Set the number of cpus if it was specified
+		if config.HWConfig.CpuCount > 0 {
+			templateData.CpuCount = strconv.Itoa(config.HWConfig.CpuCount)
+		}
+
+		// Apply the memory size that was specified
+		if config.HWConfig.MemorySize > 0 {
+			templateData.MemorySize = strconv.Itoa(config.HWConfig.MemorySize)
+		} else {
+			templateData.MemorySize = "512"
+		}
 
 		switch serial.Union.(type) {
 		case *vmwcommon.SerialConfigPipe:
@@ -412,15 +424,8 @@ func (s *stepCreateVMX) Run(_ context.Context, state multistep.StateBag) multist
 
 	/// Now to handle options that will modify the template
 	vmxData := vmwcommon.ParseVMX(vmxContents)
-
-	// Set the number of cpus if it was specified
-	if config.HWConfig.CpuCount > 0 {
-		vmxData["numvcpus"] = strconv.Itoa(config.HWConfig.CpuCount)
-	}
-
-	// Apply the memory size that was specified
-	if config.HWConfig.MemorySize > 0 {
-		vmxData["memsize"] = strconv.Itoa(config.HWConfig.MemorySize)
+	if vmxData["numvcpus"] == "" {
+		delete(vmxData, "numvcpus")
 	}
 
 	/// Write the vmxData to the vmxPath
@@ -464,7 +469,6 @@ nvram = "{{ .Name }}.nvram"
 
 floppy0.present = "FALSE"
 bios.bootOrder = "hdd,cdrom"
-bios.hddOrder = "{{ .HDD_BootOrder }}"
 
 // Configuration
 extendedConfigFile = "{{ .Name }}.vmxf"

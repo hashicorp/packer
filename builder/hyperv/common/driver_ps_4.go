@@ -151,6 +151,11 @@ func (d *HypervPS4Driver) SetVmNetworkAdapterMacAddress(vmName string, mac strin
 	return hyperv.SetVmNetworkAdapterMacAddress(vmName, mac)
 }
 
+//Replace the network adapter with a (non-)legacy adapter
+func (d *HypervPS4Driver) ReplaceVirtualMachineNetworkAdapter(vmName string, virtual bool) error {
+	return hyperv.ReplaceVirtualMachineNetworkAdapter(vmName, virtual)
+}
+
 func (d *HypervPS4Driver) UntagVirtualMachineNetworkAdapterVlan(vmName string, switchName string) error {
 	return hyperv.UntagVirtualMachineNetworkAdapterVlan(vmName, switchName)
 }
@@ -190,9 +195,9 @@ func (d *HypervPS4Driver) CreateVirtualMachine(vmName string, path string, hardd
 
 func (d *HypervPS4Driver) CloneVirtualMachine(cloneFromVmcxPath string, cloneFromVmName string,
 	cloneFromSnapshotName string, cloneAllSnapshots bool, vmName string, path string, harddrivePath string,
-	ram int64, switchName string) error {
+	ram int64, switchName string, copyTF bool) error {
 	return hyperv.CloneVirtualMachine(cloneFromVmcxPath, cloneFromVmName, cloneFromSnapshotName,
-		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName)
+		cloneAllSnapshots, vmName, path, harddrivePath, ram, switchName, copyTF)
 }
 
 func (d *HypervPS4Driver) DeleteVirtualMachine(vmName string) error {

@@ -66,6 +66,7 @@ import (
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
+	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer/provisioner/chef-solo"
 	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
@@ -124,6 +125,7 @@ var Builders = map[string]packer.Builder{
 var Provisioners = map[string]packer.Provisioner{
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
+	"breakpoint":        new(breakpointprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
 	"converge":          new(convergeprovisioner.Provisioner),

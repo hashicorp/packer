@@ -25,7 +25,6 @@ func getFakeAccessConfig(region string) *AccessConfig {
 func TestAMIConfigPrepare_name(t *testing.T) {
 	c := testAMIConfig()
 	accessConf := testAccessConfig()
-	c.AMISkipRegionValidation = true
 	if err := c.Prepare(accessConf, nil); err != nil {
 		t.Fatalf("shouldn't have err: %s", err)
 	}
@@ -53,7 +52,6 @@ func (m *mockEC2Client) DescribeRegions(*ec2.DescribeRegionsInput) (*ec2.Describ
 func TestAMIConfigPrepare_regions(t *testing.T) {
 	c := testAMIConfig()
 	c.AMIRegions = nil
-	c.AMISkipRegionValidation = true
 
 	var errs []error
 	var err error
@@ -63,18 +61,12 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		t.Fatalf("shouldn't have err: %#v", errs)
 	}
 
-	c.AMISkipRegionValidation = false
 	c.AMIRegions, err = listEC2Regions(mockConn)
 	if err != nil {
 		t.Fatalf("shouldn't have err: %s", err.Error())
 	}
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatalf("shouldn't have err: %#v", errs)
-	}
-
-	c.AMIRegions = []string{"foo"}
-	if errs = c.prepareRegions(accessConf); len(errs) == 0 {
-		t.Fatal("should have error")
 	}
 	errs = errs[:0]
 
@@ -89,11 +81,9 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 	}
 
 	c.AMIRegions = []string{"custom"}
-	c.AMISkipRegionValidation = true
 	if errs = c.prepareRegions(accessConf); len(errs) > 0 {
 		t.Fatal("shouldn't have error")
 	}
-	c.AMISkipRegionValidation = false
 
 	c.AMIRegions = []string{"us-east-1", "us-east-2", "us-west-1"}
 	c.AMIRegionKMSKeyIDs = map[string]string{
@@ -142,11 +132,9 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 		"us-west-1": "789-012-3456",
 	}
 
-	c.AMISkipRegionValidation = true
 	if err := c.Prepare(accessConf, nil); err == nil {
 		t.Fatal("should have error b/c theres a region in in ami_regions that isn't in the key map")
 	}
-	c.AMISkipRegionValidation = false
 
 	c.SnapshotUsers = []string{"foo", "bar"}
 	c.AMIKmsKeyId = "123-abc-456"
@@ -172,7 +160,6 @@ func TestAMIConfigPrepare_regions(t *testing.T) {
 
 func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	c := testAMIConfig()
-	c.AMISkipRegionValidation = true
 	c.AMIUsers = []string{"testAccountID"}
 	c.AMIEncryptBootVolume = true
 
@@ -189,9 +176,43 @@ func TestAMIConfigPrepare_Share_EncryptedBoot(t *testing.T) {
 	}
 }
 
+func TestAMIConfigPrepare_ValidateKmsKey(t *testing.T) {
+	c := testAMIConfig()
+	c.AMIEncryptBootVolume = true
+
+	accessConf := testAccessConfig()
+
+	validCases := []string{
+		"abcd1234-e567-890f-a12b-a123b4cd56ef",
+		"alias/foo/bar",
+		"arn:aws:kms:us-east-1:012345678910:key/abcd1234-a123-456a-a12b-a123b4cd56ef",
+		"arn:aws:kms:us-east-1:012345678910:alias/foo/bar",
+	}
+	for _, validCase := range validCases {
+		c.AMIKmsKeyId = validCase
+		if err := c.Prepare(accessConf, nil); err != nil {
+			t.Fatalf("%s should not have failed KMS key validation", validCase)
+		}
+	}
+
+	invalidCases := []string{
+		"ABCD1234-e567-890f-a12b-a123b4cd56ef",
+		"ghij1234-e567-890f-a12b-a123b4cd56ef",
+		"ghij1234+e567_890f-a12b-a123b4cd56ef",
+		"foo/bar",
+		"arn:aws:kms:us-east-1:012345678910:foo/bar",
+	}
+	for _, invalidCase := range invalidCases {
+		c.AMIKmsKeyId = invalidCase
+		if err := c.Prepare(accessConf, nil); err == nil {
+			t.Fatalf("%s should have failed KMS key validation", invalidCase)
+		}
+	}
+
+}
+
 func TestAMINameValidation(t *testing.T) {
 	c := testAMIConfig()
-	c.AMISkipRegionValidation = true
 
 	accessConf := testAccessConfig()
 

@@ -49,7 +49,10 @@ func (a *artifact) State(name string) interface{} {
 }
 
 func (a *artifact) Destroy() error {
-	return a.dir.RemoveAll()
+	if a.dir != nil {
+		return a.dir.RemoveAll()
+	}
+	return nil
 }
 
 func NewArtifact(remoteType string, format string, exportOutputPath string, vmName string, skipExport bool, keepRegistered bool, state multistep.StateBag) (packer.Artifact, error) {
@@ -59,10 +62,10 @@ func NewArtifact(remoteType string, format string, exportOutputPath string, vmNa
 	if remoteType != "" && !skipExport {
 		dir = new(LocalOutputDir)
 		dir.SetOutputDir(exportOutputPath)
-		files, err = dir.ListFiles()
 	} else {
-		files, err = state.Get("dir").(OutputDir).ListFiles()
+		dir = state.Get("dir").(OutputDir)
 	}
+	files, err = dir.ListFiles()
 	if err != nil {
 		return nil, err
 	}

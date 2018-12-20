@@ -58,6 +58,9 @@ type Driver interface {
 
 	SetVmNetworkAdapterMacAddress(string, string) error
 
+	//Replace the network adapter with a (non-)legacy adapter
+	ReplaceVirtualMachineNetworkAdapter(string, bool) error
+
 	UntagVirtualMachineNetworkAdapterVlan(string, string) error
 
 	CreateExternalVirtualSwitch(string, string) error
@@ -74,7 +77,7 @@ type Driver interface {
 
 	AddVirtualMachineHardDrive(string, string, string, int64, int64, string) error
 
-	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string) error
+	CloneVirtualMachine(string, string, string, bool, string, string, string, int64, string, bool) error
 
 	DeleteVirtualMachine(string) error
 

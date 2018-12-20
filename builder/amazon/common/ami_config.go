@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -62,6 +63,23 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 		errs = append(errs, fmt.Errorf("Cannot share AMI with encrypted boot volume"))
 	}
 
+	var kmsKeys []string
+	if len(c.AMIKmsKeyId) > 0 {
+		kmsKeys = append(kmsKeys, c.AMIKmsKeyId)
+	}
+	if len(c.AMIRegionKMSKeyIDs) > 0 {
+		for _, kmsKey := range c.AMIRegionKMSKeyIDs {
+			if len(kmsKey) == 0 {
+				kmsKeys = append(kmsKeys, c.AMIKmsKeyId)
+			}
+		}
+	}
+	for _, kmsKey := range kmsKeys {
+		if !validateKmsKey(kmsKey) {
+			errs = append(errs, fmt.Errorf("%s is not a valid KMS Key Id.", kmsKey))
+		}
+	}
+
 	if len(c.SnapshotUsers) > 0 {
 		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume {
 			errs = append(errs, fmt.Errorf("Cannot share snapshot encrypted with default KMS key"))
@@ -96,14 +114,6 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 	if len(c.AMIRegions) > 0 {
-		if !c.AMISkipRegionValidation {
-			// Verify the regions are real
-			err := accessConfig.ValidateRegion(c.AMIRegions...)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("error validating regions: %v", err))
-			}
-		}
-
 		regionSet := make(map[string]struct{})
 		regions := make([]string, 0, len(c.AMIRegions))
 
@@ -135,4 +145,24 @@ func (c *AMIConfig) prepareRegions(accessConfig *AccessConfig) (errs []error) {
 		c.AMIRegions = regions
 	}
 	return errs
+}
+
+// See https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CopyImage.html
+func validateKmsKey(kmsKey string) (valid bool) {
+	kmsKeyIdPattern := `[a-f0-9-]+$`
+	aliasPattern := `alias/[a-zA-Z0-9:/_-]+$`
+	kmsArnStartPattern := `^arn:aws:kms:([a-z]{2}-(gov-)?[a-z]+-\d{1})?:(\d{12}):`
+	if regexp.MustCompile(fmt.Sprintf("^%s", kmsKeyIdPattern)).MatchString(kmsKey) {
+		return true
+	}
+	if regexp.MustCompile(fmt.Sprintf("^%s", aliasPattern)).MatchString(kmsKey) {
+		return true
+	}
+	if regexp.MustCompile(fmt.Sprintf("%skey/%s", kmsArnStartPattern, kmsKeyIdPattern)).MatchString(kmsKey) {
+		return true
+	}
+	if regexp.MustCompile(fmt.Sprintf("%s%s", kmsArnStartPattern, aliasPattern)).MatchString(kmsKey) {
+		return true
+	}
+	return false
 }

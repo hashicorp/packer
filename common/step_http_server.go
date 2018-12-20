@@ -96,6 +96,22 @@ func GetHTTPAddr() string {
 	return fmt.Sprintf("%s:%s", ip, port)
 }
 
+func GetHTTPPort() string {
+	port, err := common.RetrieveSharedState("port", "")
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%s", port)
+}
+
+func GetHTTPIP() string {
+	ip, err := common.RetrieveSharedState("ip", "")
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%s", ip)
+}
+
 func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 	if s.l != nil {
 		// Close the listener so that the HTTP server stops

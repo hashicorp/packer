@@ -103,6 +103,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	if len(errs.Errors) > 0 {
 		return errs
 	}
+	awscommon.LogEnvOverrideWarnings()
 
 	packer.LogSecretFilter.Set(p.config.AccessKey, p.config.SecretKey, p.config.Token)
 	log.Println(p.config)

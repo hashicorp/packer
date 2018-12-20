@@ -35,20 +35,25 @@ func (s *StepCreateVolume) Run(_ context.Context, state multistep.StateBag) mult
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
-	imageClient, err := config.imageV2Client()
-	if err != nil {
-		err = fmt.Errorf("Error initializing image client: %s", err)
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
+
+	volumeSize := config.VolumeSize
 
 	// Get needed volume size from the source image.
-	volumeSize, err := GetVolumeSize(imageClient, sourceImage)
-	if err != nil {
-		err := fmt.Errorf("Error creating volume: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	if volumeSize == 0 {
+		imageClient, err := config.imageV2Client()
+		if err != nil {
+			err = fmt.Errorf("Error initializing image client: %s", err)
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+		volumeSize, err = GetVolumeSize(imageClient, sourceImage)
+		if err != nil {
+			err := fmt.Errorf("Error creating volume: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	ui.Say("Creating volume...")
