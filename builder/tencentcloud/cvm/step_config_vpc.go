@@ -24,7 +24,7 @@ func (s *stepConfigVPC) Run(_ context.Context, state multistep.StateBag) multist
 	ui := state.Get("ui").(packer.Ui)
 
 	if len(s.VpcId) != 0 { // exist vpc
-		ui.Say(fmt.Sprintf("Try to use existing vpc(%s)", s.VpcId))
+		ui.Say(fmt.Sprintf("Trying to use existing vpc(%s)", s.VpcId))
 		req := vpc.NewDescribeVpcsRequest()
 		req.VpcIds = []*string{&s.VpcId}
 		resp, err := vpcClient.DescribeVpcs(req)
@@ -44,7 +44,7 @@ func (s *stepConfigVPC) Run(_ context.Context, state multistep.StateBag) multist
 		ui.Error(message)
 		return multistep.ActionHalt
 	} else { // create a new vpc, tencentcloud create vpc api is synchronous, no need to wait for create.
-		ui.Say(fmt.Sprintf("Try to create a new vpc"))
+		ui.Say(fmt.Sprintf("Trying to create a new vpc"))
 		req := vpc.NewCreateVpcRequest()
 		req.VpcName = &s.VpcName
 		req.CidrBlock = &s.CidrBlock

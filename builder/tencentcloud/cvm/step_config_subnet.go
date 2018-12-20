@@ -26,7 +26,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 	vpcId := state.Get("vpc_id").(string)
 
 	if len(s.SubnetId) != 0 { // exist subnet
-		ui.Say(fmt.Sprintf("Try to use existing subnet(%s)", s.SubnetId))
+		ui.Say(fmt.Sprintf("Trying to use existing subnet(%s)", s.SubnetId))
 		req := vpc.NewDescribeSubnetsRequest()
 		req.SubnetIds = []*string{&s.SubnetId}
 		resp, err := vpcClient.DescribeSubnets(req)
@@ -53,7 +53,7 @@ func (s *stepConfigSubnet) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Error(message)
 		return multistep.ActionHalt
 	} else { // create a new subnet, tencentcloud create subnet api is synchronous, no need to wait for create.
-		ui.Say(fmt.Sprintf("Try to create a new subnet"))
+		ui.Say(fmt.Sprintf("Trying to create a new subnet"))
 		req := vpc.NewCreateSubnetRequest()
 		req.VpcId = &vpcId
 		req.SubnetName = &s.SubnetName
