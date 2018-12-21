@@ -13,6 +13,7 @@ func TestStepGetRootPasswordShouldFailIfOperationGetRootPasswordFails(t *testing
 		GetRootPassword: func(string, string) (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
 		Say:             func(message string) {},
 		Error:           func(e error) {},
+		Config:          &Config{},
 	}
 
 	stateBag := DeleteTestStateBagStepGetRootPassword()
@@ -33,6 +34,7 @@ func TestStepGetRootPasswordShouldPassIfOperationGetRootPasswordPasses(t *testin
 		GetRootPassword: func(string, string) (string, error) { return "a", nil },
 		Say:             func(message string) {},
 		Error:           func(e error) {},
+		Config:          &Config{},
 	}
 
 	stateBag := DeleteTestStateBagStepGetRootPassword()
