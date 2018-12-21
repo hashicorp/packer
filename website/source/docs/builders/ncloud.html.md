@@ -75,13 +75,15 @@ Platform](https://www.ncloud.com/).
           "access_key": "{{user `ncloud_access_key`}}",
           "secret_key": "{{user `ncloud_secret_key`}}",
 
-          "server_image_product_code": "SPSW0WINNT000016",
-          "server_product_code": "SPSVRSSD00000011",
-          "member_server_image_no": "4223",
+          "server_image_product_code": "SPSW0WINNTEN0016",
+          "server_product_code": "SPSVRSSD00000002",
           "server_image_name": "packer-test {{timestamp}}",
-          "server_description": "server description",
+          "server_image_description": "server description",
           "user_data": "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm quickconfig -q & sc config WinRM start= auto & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm get winrm/config/service\")",
-          "region": "US-West"
+          "region": "US-West",
+          "communicator": "winrm",
+          "winrm_username": "Administrator",
+          "access_control_group_configuration_no" : 4964
         }
       ]
     }
