@@ -37,6 +37,11 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
+		InterpolateFilter: &interpolate.RenderFilter{
+			Exclude: []string{
+				"boot_command",
+			},
+		},
 	}, raws...)
 	if err != nil {
 		return nil, nil, err

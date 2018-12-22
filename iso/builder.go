@@ -74,6 +74,8 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			},
 			&StepBootCommand{
 				Config: &b.config.BootConfig,
+				Ctx:    b.config.ctx,
+				VMName: b.config.VMName,
 			},
 			&common.StepWaitForIp{},
 			&communicator.StepConnect{
