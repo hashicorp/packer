@@ -3,12 +3,14 @@ package iso
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/packer/common"
+	packerCommon "github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/jetbrains-infra/packer-builder-vsphere/driver"
 	"golang.org/x/mobile/event/key"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -18,8 +20,15 @@ import (
 type BootConfig struct {
 	BootCommand []string `mapstructure:"boot_command"`
 	RawBootWait string   `mapstructure:"boot_wait"` // example: "1m30s"; default: "10s"
+	HTTPIP      string   `mapstructure:"http_ip"`
 
 	bootWait time.Duration
+}
+
+type bootCommandTemplateData struct {
+	HTTPIP   string
+	HTTPPort uint
+	Name     string
 }
 
 func (c *BootConfig) Prepare() []error {
@@ -40,6 +49,8 @@ func (c *BootConfig) Prepare() []error {
 
 type StepBootCommand struct {
 	Config *BootConfig
+	VMName string
+	Ctx    interpolate.Context
 }
 
 var special = map[string]key.Code{
@@ -71,10 +82,10 @@ var special = map[string]key.Code{
 	"<down>":     key.CodeDownArrow,
 }
 
-var keyInterval = common.PackerKeyDefault
+var keyInterval = packerCommon.PackerKeyDefault
 
 func init() {
-	if delay, err := time.ParseDuration(os.Getenv(common.PackerKeyEnv)); err == nil {
+	if delay, err := time.ParseDuration(os.Getenv(packerCommon.PackerKeyEnv)); err == nil {
 		keyInterval = delay
 	}
 }
@@ -101,13 +112,29 @@ WAITLOOP:
 		}
 	}
 
-	ui.Say("Typing boot command...")
+	ip := getHostIP(s.Config.HTTPIP)
+	err := packerCommon.SetHTTPIP(ip)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	s.Ctx.Data = &bootCommandTemplateData{
+		ip,
+		state.Get("http_port").(uint),
+		s.VMName,
+	}
 
+	ui.Say("Typing boot command...")
 	var keyAlt bool
 	var keyCtrl bool
 	var keyShift bool
+	for _, command := range s.Config.BootCommand {
+		message, err := interpolate.Render(command, &s.Ctx)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
 
-	for _, message := range s.Config.BootCommand {
 		for len(message) > 0 {
 			if _, ok := state.GetOk(multistep.StateCancelled); ok {
 				return multistep.ActionHalt
@@ -205,3 +232,24 @@ WAITLOOP:
 }
 
 func (s *StepBootCommand) Cleanup(state multistep.StateBag) {}
+
+func getHostIP(s string) string {
+	if net.ParseIP(s) != nil {
+		return s
+	}
+
+	var ipaddr string
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	for _, a := range addrs {
+		if ip, ok := a.(*net.IPNet); ok && !ip.IP.IsLoopback() {
+			ipaddr = ip.IP.String()
+			break
+		}
+	}
+	return ipaddr
+}
