@@ -31,6 +31,7 @@ project {
             param("type", "GithubIssues")
             param("repository", "https://github.com/jetbrains-infra/packer-builder-vsphere")
             param("authType", "anonymous")
+            param("pattern", """#(\d+)""")
         }
     }
 }
@@ -128,7 +129,7 @@ object Build : BuildType({
         vcs {
             triggerRules = """
                 -:*.md
-                -.teamcity/
+                -:.teamcity/
             """.trimIndent()
             branchFilter = """
                 +:*
