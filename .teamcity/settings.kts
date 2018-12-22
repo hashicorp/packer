@@ -17,9 +17,20 @@ project {
 
     features {
         feature {
+            type = "OAuthProvider"
+            param("providerType", "GitHub")
+            param("displayName", "GitHub.com")
+            param("gitHubUrl", "https://github.com/")
+            param("clientId", "1abfd46417d7795298a1")
+            param("secure:clientSecret", "credentialsJSON:5fe99dc3-4d1d-4fd6-9f5c-e87fbcbd9a4e")
+            param("defaultTokenScope", "public_repo,repo,repo:status,write:repo_hook")
+        }
+        feature {
             type = "IssueTracker"
+            param("name", "packer-builder-vsphere")
             param("type", "GithubIssues")
             param("repository", "https://github.com/jetbrains-infra/packer-builder-vsphere")
+            param("authType", "anonymous")
         }
     }
 }
@@ -99,15 +110,14 @@ object Build : BuildType({
             publisher = github {
                 githubUrl = "https://api.github.com"
                 authType = personalToken {
-                    token = "credentialsJSON:95bbfc46-3141-4bed-86ec-f8ec751f3e94"
+                    token = "credentialsJSON:5ead3bb1-c370-4589-beb8-24f8d02c36bc"
                 }
             }
-            param("github_oauth_user", "mkuzmin")
         }
         pullRequests {
             provider = github {
                 authType = token {
-                    token = "credentialsJSON:39727f26-62ed-4152-ab9a-f6845076a979"
+                    token = "credentialsJSON:5ead3bb1-c370-4589-beb8-24f8d02c36bc"
                 }
                 filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
             }
@@ -116,7 +126,10 @@ object Build : BuildType({
 
     triggers {
         vcs {
-            triggerRules = "-:*.md"
+            triggerRules = """
+                -:*.md
+                -.teamcity/
+            """.trimIndent()
             branchFilter = """
                 +:*
                 -:temp-*
