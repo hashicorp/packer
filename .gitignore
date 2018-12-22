@@ -1,5 +1,6 @@
 .idea/
 packer-builder-vsphere*
+build/
 bin/
 .env
 test*.json

@@ -2,7 +2,7 @@
 
 RETVAL=0
 
-for file in $(find . -name '*.go' -not -path './vendor/*')
+for file in $(find . -name '*.go' -not -path './build/*')
 do
     if [ -n "$(gofmt -l $file)" ]
     then
