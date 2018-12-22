@@ -2,7 +2,9 @@ package patches.buildTypes
 
 import jetbrains.buildServer.configs.kotlin.v2018_2.*
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.CommitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.PullRequests
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.commitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.pullRequests
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.ui.*
@@ -50,6 +52,25 @@ changeBuildType(RelativeId("Build")) {
                 authType = personalToken {
                     token = "credentialsJSON:5ead3bb1-c370-4589-beb8-24f8d02c36bc"
                 }
+            }
+        }
+        val feature2 = find<PullRequests> {
+            pullRequests {
+                provider = github {
+                    authType = token {
+                        token = "credentialsJSON:39727f26-62ed-4152-ab9a-f6845076a979"
+                    }
+                    filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
+                }
+            }
+        }
+        feature2.apply {
+            provider = github {
+                authType = token {
+                    token = "credentialsJSON:5ead3bb1-c370-4589-beb8-24f8d02c36bc"
+                }
+                filterTargetBranch = ""
+                filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
             }
         }
     }
