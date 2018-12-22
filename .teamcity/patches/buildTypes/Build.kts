@@ -1,6 +1,8 @@
 package patches.buildTypes
 
 import jetbrains.buildServer.configs.kotlin.v2018_2.*
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.CommitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.ui.*
@@ -27,6 +29,28 @@ changeBuildType(RelativeId("Build")) {
                 -:*.md
                 -.teamcity/
             """.trimIndent()
+        }
+    }
+
+    features {
+        val feature1 = find<CommitStatusPublisher> {
+            commitStatusPublisher {
+                publisher = github {
+                    githubUrl = "https://api.github.com"
+                    authType = personalToken {
+                        token = "credentialsJSON:95bbfc46-3141-4bed-86ec-f8ec751f3e94"
+                    }
+                }
+                param("github_oauth_user", "mkuzmin")
+            }
+        }
+        feature1.apply {
+            publisher = github {
+                githubUrl = "https://api.github.com"
+                authType = personalToken {
+                    token = "credentialsJSON:5ead3bb1-c370-4589-beb8-24f8d02c36bc"
+                }
+            }
         }
     }
 }
