@@ -23,5 +23,19 @@ changeProject(DslContext.projectId) {
                 param("providerType", "GitHub")
             }
         }
+        add {
+            feature {
+                type = "IssueTracker"
+                id = "PROJECT_EXT_190"
+                param("secure:password", "")
+                param("name", "packer-builder-vsphere")
+                param("pattern", """#(\d+)""")
+                param("authType", "anonymous")
+                param("repository", "https://github.com/jetbrains-infra/packer-builder-vsphere")
+                param("type", "GithubIssues")
+                param("secure:accessToken", "credentialsJSON:70cd214c-6949-4bb6-931c-e32e9a02edf2")
+                param("username", "")
+            }
+        }
     }
 }
