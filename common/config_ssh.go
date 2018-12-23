@@ -9,8 +9,14 @@ import (
 	"io/ioutil"
 )
 
-func CommHost(state multistep.StateBag) (string, error) {
-	return state.Get("ip").(string), nil
+func CommHost(host string) func(multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		if host != "" {
+			return host, nil
+		} else {
+			return state.Get("ip").(string), nil
+		}
+	}
 }
 
 func SshConfig(state multistep.StateBag) (*ssh.ClientConfig, error) {
