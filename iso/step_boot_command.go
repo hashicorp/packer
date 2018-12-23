@@ -112,23 +112,26 @@ WAITLOOP:
 		}
 	}
 
-	ip, err := getHostIP(s.Config.HTTPIP)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
-	err = packerCommon.SetHTTPIP(ip)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
-	}
 	port := state.Get("http_port").(uint)
-	s.Ctx.Data = &bootCommandTemplateData{
-		ip,
-		port,
-		s.VMName,
+	if port > 0 {
+		ip, err := getHostIP(s.Config.HTTPIP)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		err = packerCommon.SetHTTPIP(ip)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+
+		s.Ctx.Data = &bootCommandTemplateData{
+			ip,
+			port,
+			s.VMName,
+		}
+		ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 	}
-	ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 
 	ui.Say("Typing boot command...")
 	var keyAlt bool
