@@ -112,17 +112,23 @@ WAITLOOP:
 		}
 	}
 
-	ip := getHostIP(s.Config.HTTPIP)
-	err := packerCommon.SetHTTPIP(ip)
+	ip, err := getHostIP(s.Config.HTTPIP)
 	if err != nil {
 		state.Put("error", err)
 		return multistep.ActionHalt
 	}
+	err = packerCommon.SetHTTPIP(ip)
+	if err != nil {
+		state.Put("error", err)
+		return multistep.ActionHalt
+	}
+	port := state.Get("http_port").(uint)
 	s.Ctx.Data = &bootCommandTemplateData{
 		ip,
-		state.Get("http_port").(uint),
+		port,
 		s.VMName,
 	}
+	ui.Say(fmt.Sprintf("HTTP server is working at http://%v:%v/", ip, port))
 
 	ui.Say("Typing boot command...")
 	var keyAlt bool
@@ -233,23 +239,27 @@ WAITLOOP:
 
 func (s *StepBootCommand) Cleanup(state multistep.StateBag) {}
 
-func getHostIP(s string) string {
-	if net.ParseIP(s) != nil {
-		return s
+func getHostIP(s string) (string, error) {
+	if s != "" {
+		if net.ParseIP(s) != nil {
+			return s, nil
+		} else {
+			return "", fmt.Errorf("invalid IP address")
+		}
 	}
 
-	var ipaddr string
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
+		return "", err
 	}
 
 	for _, a := range addrs {
-		if ip, ok := a.(*net.IPNet); ok && !ip.IP.IsLoopback() {
-			ipaddr = ip.IP.String()
-			break
+		ipnet, ok := a.(*net.IPNet)
+		if ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
 		}
 	}
-	return ipaddr
+	return "", fmt.Errorf("IP not found")
 }
