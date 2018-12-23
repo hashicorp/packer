@@ -58,7 +58,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 			&common.StepWaitForIp{},
 			&communicator.StepConnect{
 				Config:    &b.config.Comm,
-				Host:      common.CommHost,
+				Host:      common.CommHost(b.config.Comm.SSHHost),
 				SSHConfig: common.SshConfig,
 			},
 			&packerCommon.StepProvision{},
