@@ -48,12 +48,12 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 ### VM Location
 
 * `vm_name`(string) - Name of the new VM to create.
-* `notes`(string) - Add some notes.
 * `folder`(string) - VM folder to create the VM in.
 * `host`(string) - ESXi host where target VM is created. A full path must be specified if the host is in a folder. For example `folder/host`. See the `Specifying Clusters and Hosts` section above for more details.
-* `cluster`(string)  - ESXi cluster where target VM is created. See [Working with Clusters](#working-with-clusters) section.
+* `cluster`(string)  - ESXi cluster where target VM is created. See [Working with Clusters](#working-with-clusters).
 * `resource_pool`(string) - VMWare resource pool. Defaults to the root resource pool of the `host` or `cluster`.
 * `datastore`(string) - VMWare datastore. Required if `host` is a cluster, or if `host` has multiple datastores.
+* `notes`(string) - VM notes.
 
 ### VM Location (`vsphere-clone` only)
 
@@ -63,6 +63,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 ### Hardware
 
 * `CPUs`(number) - Number of CPU sockets.
+* `cpu_cores`(number) - Number of CPU cores per socket.
 * `CPU_limit`(number) - Upper limit of available CPU resources in MHz.
 * `CPU_reservation`(number) - Amount of reserved CPU resources in MHz.
 * `CPU_hot_plug`(boolean) - Enable CPU hot plug setting for virtual machine. Defaults to `false`.
@@ -70,6 +71,7 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 * `RAM_reservation`(number) - Amount of reserved RAM in MB.
 * `RAM_reserve_all`(boolean) - Reserve all available RAM. Defaults to `false`. Cannot be used together with `RAM_reservation`.
 * `RAM_hot_plug`(boolean) - Enable RAM hot plug setting for virtual machine. Defaults to `false`.
+* `video_ram`(number) - Amount of video memory in MB.
 * `disk_size`(number) - The size of the disk in MB.
 * `NestedHV`(boolean) - Enable nested hardware virtualization for VM. Defaults to `false`.
 * `configuration_parameters`(map) - Custom parameters.
@@ -90,24 +92,24 @@ See complete Ubuntu, Windows, and macOS templates in the [examples folder](https
 
 ### Boot (`vsphere-iso` only)
 
-* `boot_wait`(string) Amount of time to wait for the VM to boot. Examples 45s and 10m. Defaults to 10 seconds. See the Go Lang [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation for full details.
-* `boot_command`(array of strings) - List of commands to type when the VM is first booted. Used to initalize the operating system installer.
-* `floppy_dirs`(array of strings) - Seems to not do anything useful yet. Not implemented.
+* `iso_paths`(array of strings) - List of datastore paths to ISO files that will be mounted to the VM. Example `"[datastore1] ISO/ubuntu.iso"`.
 * `floppy_files`(array of strings) - List of local files to be mounted to the VM floppy drive. Can be used to make Debian preseed or RHEL kickstart files available to the VM.
-* `floppy_img_path`(string) - Data store path to a floppy image that will be mounted to the VM. Cannot be used with `floppy_files` or `floppy_dir` options. Example `[datastore1] ISO/VMware Tools/10.2.0/pvscsi-Windows8.flp`.
-* `iso_paths`(array of strings) - List of data store paths to ISO files that will be mounted to the VM. Example `"[datastore1] ISO/ubuntu-16.04.3-server-amd64.iso"`.
+* `floppy_dirs`(array of strings) - List of directories to copy files from.
+* `floppy_img_path`(string) - Datastore path to a floppy image that will be mounted to the VM. Example `[datastore1] ISO/pvscsi-Windows8.flp`.
+* `http_directory`(string) - Path to a directory to serve using a local HTTP server. Beware of [limitations](https://github.com/jetbrains-infra/packer-builder-vsphere/issues/108#issuecomment-449634324).
+* `http_ip`(string) - Specify IP address on which the HTTP server is started. If not provided the first non-loopback interface is used.
+* `http_port_min` and `http_port_max` as in other [builders](https://www.packer.io/docs/builders/virtualbox-iso.html#http_port_min).
+* `boot_wait`(string) Amount of time to wait for the VM to boot. Examples 45s and 10m. Defaults to 10 seconds. See [format](https://golang.org/pkg/time/#ParseDuration).
+* `boot_command`(array of strings) - List of commands to type when the VM is first booted. Used to initalize the operating system installer. See details in [Packer docs](https://www.packer.io/docs/builders/virtualbox-iso.html#boot-command).
 
 ### Provision
 
 * `communicator` - `ssh` (default), `winrm`, or `none` (create/clone, customize hardware, but do not boot).
-
 * `ssh_username`(string) - Username in guest OS.
 * `ssh_password`(string) - Password to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
 * `ssh_private_key_file`(string) - Path to the SSH private key file to access guest OS. Only specify `ssh_password` or `ssh_private_key_file`, but not both.
-
 * `winrm_username`(string) - Username in guest OS.
 * `winrm_password`(string) - Password to access guest OS.
-
 * `shutdown_command`(string) - Specify a VM guest shutdown command. VMware guest tools are used by default.
 * `shutdown_timeout`(string) - Amount of time to wait for graceful VM shutdown. Examples 45s and 10m. Defaults to 5m(5 minutes). See the Go Lang [ParseDuration](https://golang.org/pkg/time/#ParseDuration) documentation for full details.
 
