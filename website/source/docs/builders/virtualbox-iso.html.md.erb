@@ -102,7 +102,7 @@ builder.
 
 -   `export_opts` (array of strings) - Additional options to pass to the
     [VBoxManage
-    export](https://www.virtualbox.org/manual/ch08.html#vboxmanage-export). This
+    export](https://www.virtualbox.org/manual/ch09.html#vboxmanage-export). This
     can be useful for passing product information to include in the resulting
     appliance file. Packer JSON configuration file example:
 
@@ -121,9 +121,9 @@ builder.
     ```
 
     A VirtualBox [VM
-    description](https://www.virtualbox.org/manual/ch08.html#idm3756) may
-    contain arbitrary strings; the GUI interprets HTML formatting. However, the
-    JSON format does not allow arbitrary newlines within a value. Add a
+    description](https://www.virtualbox.org/manual/ch09.html#vboxmanage-modifyvm-general)
+    may contain arbitrary strings; the GUI interprets HTML formatting. However,
+    the JSON format does not allow arbitrary newlines within a value. Add a
     multi-line description by preparing the string in the shell before the
     packer call like this (shell `>` continuation character snipped for easier
     copy & paste):
@@ -411,7 +411,7 @@ directory of the SSH user.
 
 In order to perform extra customization of the virtual machine, a template can
 define extra calls to `VBoxManage` to perform.
-[VBoxManage](https://www.virtualbox.org/manual/ch08.html) is the command-line
+[VBoxManage](https://www.virtualbox.org/manual/ch09.html) is the command-line
 interface to VirtualBox where you can completely control VirtualBox. It can be
 used to do things such as set RAM, CPUs, etc.
 
