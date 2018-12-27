@@ -1,22 +1,32 @@
 package common
 
 import (
+  "log"
+
 	"github.com/hashicorp/packer/helper/multistep"
 )
 
-func CommHost(state multistep.StateBag) (string, error) {
-	vmName := state.Get("vmName").(string)
-	driver := state.Get("driver").(Driver)
+func CommHost(host string) func(multistep.StateBag) (string, error) {
+  return func(state multistep.StateBag) (string, error) {
 
-	mac, err := driver.Mac(vmName)
-	if err != nil {
-		return "", err
-	}
+    if host != "" {
+      log.Println("Using ssh_host value: %s", ipAddress)
+      return host, nil
+  	}
 
-	ip, err := driver.IpAddress(mac)
-	if err != nil {
-		return "", err
-	}
+  	vmName := state.Get("vmName").(string)
+  	driver := state.Get("driver").(Driver)
 
-	return ip, nil
+  	mac, err := driver.Mac(vmName)
+  	if err != nil {
+  		return "", err
+  	}
+
+  	ip, err := driver.IpAddress(mac)
+  	if err != nil {
+  		return "", err
+  	}
+
+  	return ip, nil
+  }
 }
