@@ -9,6 +9,7 @@ import (
 func CommHost(host string) func(multistep.StateBag) (string, error) {
 	return func(state multistep.StateBag) (string, error) {
 
+		// Skip IP auto detection if the configuration has an ssh host configured.
 		if host != "" {
 			log.Printf("Using ssh_host value: %s", host)
 			return host, nil
