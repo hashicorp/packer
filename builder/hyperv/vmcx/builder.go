@@ -482,7 +482,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		// configure the communicator ssh, winrm
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
-			Host:      hypervcommon.CommHost,
+			Host:      hypervcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
 			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 
