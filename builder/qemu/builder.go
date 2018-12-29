@@ -96,6 +96,7 @@ type Config struct {
 
 	ISOSkipCache      bool       `mapstructure:"iso_skip_cache"`
 	Accelerator       string     `mapstructure:"accelerator"`
+	CpuCount          int        `mapstructure:"cpus"`
 	DiskInterface     string     `mapstructure:"disk_interface"`
 	DiskSize          uint       `mapstructure:"disk_size"`
 	DiskCache         string     `mapstructure:"disk_cache"`
@@ -108,6 +109,7 @@ type Config struct {
 	DiskImage         bool       `mapstructure:"disk_image"`
 	UseBackingFile    bool       `mapstructure:"use_backing_file"`
 	MachineType       string     `mapstructure:"machine_type"`
+	MemorySize        int        `mapstructure:"memory"`
 	NetDevice         string     `mapstructure:"net_device"`
 	OutputDir         string     `mapstructure:"output_directory"`
 	QemuArgs          [][]string `mapstructure:"qemuargs"`
@@ -198,6 +200,16 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.QemuBinary == "" {
 		b.config.QemuBinary = "qemu-system-x86_64"
+	}
+
+	if b.config.MemorySize < 10 {
+		log.Printf("MemorySize %d is too small, using default: 512", b.config.MemorySize)
+		b.config.MemorySize = 512
+	}
+
+	if b.config.CpuCount < 1 {
+		log.Printf("CpuCount %d too small, using default: 1", b.config.CpuCount)
+		b.config.CpuCount = 1
 	}
 
 	if b.config.SSHHostPortMin == 0 {
