@@ -192,10 +192,46 @@ func (s *StepConnectSSH) waitForSSH(state multistep.StateBag, cancel <-chan stru
 
 		log.Println("[INFO] Attempting SSH connection...")
 		if s.DebugConnection {
-			ui.Say(fmt.Sprintf("Trying to connect with SSH to: %s", address))
-			ui.Say(fmt.Sprintf("Using username \"%s\" and password \"%s\"", s.Config.SSHUsername, s.Config.SSHPassword))
+
+			if s.Config.SSHBastionHost != "" {
+				// ssh_bastion_agent_auth => see agent_auth
+				// ssh_bastion_host
+				// ssh_bastion_password
+				// ssh_bastion_port
+				// ssh_bastion_private_key_file
+				// ssh_bastion_username
+			}
+
+			if s.Config.SSHProxyHost != "" {
+				ui.Message(fmt.Sprintf("[Connection] Using proxy: %s:%s@%s:%d",
+					s.Config.SSHProxyUsername, s.Config.SSHProxyPassword,
+					s.Config.SSHProxyHost, s.Config.SSHProxyPort))
+			}
+
+			ui.Message(fmt.Sprintf("[Connection] Trying to connect with SSH to: %s@%s", s.Config.SSHUsername, address))
+
+			if s.Config.SSHAgentAuth {
+
+				ui.Message(fmt.Sprintf("[Connection] Using SSH Agent on: %s", os.Getenv("SSH_AUTH_SOCK")))
+				// for k = agent.List {
+				// pubKey := ssh.ParsePublicKey(k.Blob)
+				// fingerprint := FingerprintLegacyMD5(pubKey)
+			}
+
+			if s.Config.SSHPrivateKeyFile != "" {
+				ui.Message(fmt.Sprintf("[Connection] Using SSH private key: %s", s.Config.SSHBastionPrivateKeyFile))
+
+			} else if s.Config.SSHPassword != "" {
+				ui.Message(fmt.Sprintf("[Connection] Using SSH password: %s", s.Config.SSHBastionPrivateKeyFile))
+
+			}
+			if pubKey, err := gossh.ParsePublicKey(s.Config.SSHPrivateKey); err == nil {
+				ui.Message(fmt.Sprintf("[Connection] Key fingerprint (MD5): %s", gossh.FingerprintLegacyMD5(pubKey)))
+
+			}
+			//	ssh_agent_auth = true => show loaded fingerprints
 			// TODO rickard
-			// Bastion config and other things...
+
 		}
 
 		comm, err = ssh.New(address, config)

@@ -71,7 +71,7 @@ func (s *StepKeyPair) Run(_ context.Context, state multistep.StateBag) multistep
 	// If we're upposed to show connection info output the private key to the working
 	// directory.
 	if s.DebugConnection {
-		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
+		ui.Message(fmt.Sprintf("[Connection] Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
 			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
