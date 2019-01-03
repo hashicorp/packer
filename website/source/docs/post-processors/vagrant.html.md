@@ -33,14 +33,13 @@ providers.
 -   AWS
 -   Azure
 -   DigitalOcean
--   Azure
+-   Docker
 -   Hyper-V
 -   LXC
 -   Parallels
 -   QEMU
 -   VirtualBox
 -   VMware
--   Docker
 
 -&gt; **Support for additional providers** is planned. If the Vagrant
 post-processor doesn't support creating boxes for a provider you care about,
