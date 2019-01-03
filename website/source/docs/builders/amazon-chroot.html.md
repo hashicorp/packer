@@ -455,6 +455,11 @@ services:
 }
 ```
 
+### Ansible provisioner
+
+Running ansible against `amazon-chroot` requires changing the Ansible connection
+to chroot.
+
 ### Using Instances with NVMe block devices.
 
 In C5, C5d, M5, and i3.metal instances, EBS volumes are exposed as NVMe block
