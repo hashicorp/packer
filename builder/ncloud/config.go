@@ -105,7 +105,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		errs = packer.MultiErrorAppend(errs, errors.New("If user_data field is set, length of UserData should be max 21847"))
 	}
 
-	if c.Comm.Type == "wrinrm" && c.AccessControlGroupConfigurationNo == "" {
+	if c.Comm.Type == "winrm" && c.AccessControlGroupConfigurationNo == "" {
 		errs = packer.MultiErrorAppend(errs, errors.New("If Communicator is winrm, access_control_group_configuration_no is required"))
 	}
 

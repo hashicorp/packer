@@ -14,13 +14,15 @@ type StepGetRootPassword struct {
 	GetRootPassword func(serverInstanceNo string, privateKey string) (string, error)
 	Say             func(message string)
 	Error           func(e error)
+	Config          *Config
 }
 
-func NewStepGetRootPassword(conn *ncloud.Conn, ui packer.Ui) *StepGetRootPassword {
+func NewStepGetRootPassword(conn *ncloud.Conn, ui packer.Ui, config *Config) *StepGetRootPassword {
 	var step = &StepGetRootPassword{
-		Conn:  conn,
-		Say:   func(message string) { ui.Say(message) },
-		Error: func(e error) { ui.Error(e.Error()) },
+		Conn:   conn,
+		Say:    func(message string) { ui.Say(message) },
+		Error:  func(e error) { ui.Error(e.Error()) },
+		Config: config,
 	}
 
 	step.GetRootPassword = step.getRootPassword
@@ -51,7 +53,11 @@ func (s *StepGetRootPassword) Run(_ context.Context, state multistep.StateBag) m
 
 	rootPassword, err := s.GetRootPassword(serverInstanceNo, loginKey.PrivateKey)
 
-	state.Put("Password", rootPassword)
+	if s.Config.Comm.Type == "ssh" {
+		s.Config.Comm.SSHPassword = rootPassword
+	} else if s.Config.Comm.Type == "winrm" {
+		s.Config.Comm.WinRMPassword = rootPassword
+	}
 
 	return processStepResult(err, s.Error, state)
 }
