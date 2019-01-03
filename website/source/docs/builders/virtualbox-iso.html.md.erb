@@ -75,9 +75,12 @@ builder.
     and `iso_checksum_url` must be defined. This will be ignored if
     `iso_checksum` is non empty.
 
--   `iso_url` (string) - A URL to the ISO containing the installation image.
-    This URL can be either an HTTP URL or a file URL (or path to a file). If
-    this is an HTTP URL, Packer will download it and cache it between runs.
+-   `iso_url` (string) or `iso_urls` (array of strings) - `iso_url` is a URL to
+    the ISO containing the installation image. This URL can be either an HTTP
+    URL or a file URL (or path to a file). If this is an HTTP URL, Packer will
+    download it and cache it between runs. `iso_url` is required unless
+    `iso_urls` is set in its place (see below for documentation on the
+    `iso_urls` option)
 
 ### Optional:
 
