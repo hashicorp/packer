@@ -69,7 +69,7 @@
 ### BUG FIXES:
 * builder/amazon: Better error handling of region/credential guessing from
     metadata [GH-6931]
-* builder.amazon: move region validation to run so that we don't break
+* builder/amazon: move region validation to run so that we don't break
     validation when no credentials are set [GH-7032]
 * builder/hyperv: Remove -Copy:$false when calling Hyper-V\Compare-VM
     compatability report [GH-7030]
