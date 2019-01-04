@@ -195,7 +195,7 @@ Redhat / CentOS builds have been known to fail with the following error due to
 ### chroot communicator
 
 Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible
-connection to chroot.
+connection to chroot and running Ansible as root/sudo.
 
 ``` json
 {
