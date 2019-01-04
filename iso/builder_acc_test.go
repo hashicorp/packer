@@ -441,7 +441,7 @@ func fullConfig() map[string]interface{} {
 			"y<enter>",
 			"<wait10><wait10><wait10><wait10>",
 			"reboot<enter>",
-			"<wait10><wait10>",
+			"<wait10><wait10><wait10>",
 			"root<enter>",
 			"jetbrains<enter><wait>",
 			"mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
