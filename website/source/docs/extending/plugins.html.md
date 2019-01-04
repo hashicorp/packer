@@ -52,10 +52,13 @@ later, it will take precedence over one found earlier.
 
 1.  The directory where `packer` is, or the executable directory.
 
-2.  `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins` on
-    Windows.
+2.  The `$HOME/packer.d/plugins` directory, if `$HOME` is defined (unix)
 
-3.  The current working directory.
+3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
+
+4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined (windows)
+
+4.  The current working directory.
 
 The valid types for plugins are:
 
