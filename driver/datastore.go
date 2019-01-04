@@ -100,6 +100,15 @@ func (ds *Datastore) Delete(path string) error {
 	return fm.Delete(ds.driver.ctx, path)
 }
 
+func (ds *Datastore) MakeDirectory(path string) error {
+	dc, err := ds.driver.finder.Datacenter(ds.driver.ctx, ds.ds.DatacenterPath)
+	if err != nil {
+		return err
+	}
+	fm := ds.ds.NewFileManager(dc, false)
+	return fm.FileManager.MakeDirectory(ds.driver.ctx, path, dc, true)
+}
+
 // Cuts out the datastore prefix
 // Example: "[datastore1] file.ext" --> "file.ext"
 func RemoveDatastorePrefix(path string) string {

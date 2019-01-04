@@ -26,6 +26,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
 	state := new(multistep.BasicStateBag)
+	state.Put("cache", cache)
 	state.Put("comm", &b.config.Comm)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
@@ -36,6 +37,27 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&common.StepConnect{
 			Config: &b.config.ConnectConfig,
 		},
+	)
+
+	if b.config.ISOUrls != nil {
+		steps = append(steps,
+			&packerCommon.StepDownload{
+				Checksum:     b.config.ISOChecksum,
+				ChecksumType: b.config.ISOChecksumType,
+				Description:  "ISO",
+				Extension:    b.config.TargetExtension,
+				ResultKey:    "iso_path",
+				TargetPath:   b.config.TargetPath,
+				Url:          b.config.ISOUrls,
+			},
+			&StepRemoteUpload{
+				Datastore: b.config.Datastore,
+				Host:      b.config.Host,
+			},
+		)
+	}
+
+	steps = append(steps,
 		&StepCreateVM{
 			Config:   &b.config.CreateConfig,
 			Location: &b.config.LocationConfig,
