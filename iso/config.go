@@ -19,11 +19,14 @@ type Config struct {
 	common.HardwareConfig     `mapstructure:",squash"`
 	common.ConfigParamsConfig `mapstructure:",squash"`
 
-	CDRomConfig           `mapstructure:",squash"`
-	FloppyConfig          `mapstructure:",squash"`
-	common.RunConfig      `mapstructure:",squash"`
-	BootConfig            `mapstructure:",squash"`
-	Comm                  communicator.Config `mapstructure:",squash"`
+	packerCommon.ISOConfig `mapstructure:",squash"`
+
+	CDRomConfig      `mapstructure:",squash"`
+	FloppyConfig     `mapstructure:",squash"`
+	common.RunConfig `mapstructure:",squash"`
+	BootConfig       `mapstructure:",squash"`
+	Comm             communicator.Config `mapstructure:",squash"`
+
 	common.ShutdownConfig `mapstructure:",squash"`
 
 	CreateSnapshot    bool `mapstructure:"create_snapshot"`
@@ -47,7 +50,15 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, err
 	}
 
+	warnings := make([]string, 0)
 	errs := new(packer.MultiError)
+
+	if c.ISOUrls != nil {
+		isoWarnings, isoErrs := c.ISOConfig.Prepare(&c.ctx)
+		warnings = append(warnings, isoWarnings...)
+		errs = packer.MultiErrorAppend(errs, isoErrs...)
+	}
+
 	errs = packer.MultiErrorAppend(errs, c.ConnectConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.CreateConfig.Prepare()...)
 	errs = packer.MultiErrorAppend(errs, c.LocationConfig.Prepare()...)
