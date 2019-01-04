@@ -72,7 +72,7 @@ object Build : BuildType({
     steps {
         script {
             name = "Build"
-            scriptContent = "./build.sh"
+            scriptContent = "make build -j 3"
             dockerImage = golangImage
             dockerPull = true
         }
@@ -84,15 +84,7 @@ object Build : BuildType({
 
         script {
             name = "Test"
-            scriptContent = """
-                set -eux
-                
-                go test -c ./driver
-                go test -c ./iso
-                go test -c ./clone
-                
-                ./test.sh | go-test-teamcity
-            """.trimIndent()
+            scriptContent = "make test | go-test-teamcity"
             dockerImage = golangImage
             dockerPull = true
             dockerRunParameters = "--network=container:vpn"

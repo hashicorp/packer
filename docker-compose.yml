@@ -7,7 +7,7 @@ services:
       - modules:/go/pkg/mod
       - cache:/root/.cache
     working_dir: /work
-    command: ./build.sh
+    command: make build -j 3
 
   test:
     image: jetbrainsinfra/golang:1.11.4
@@ -20,7 +20,7 @@ services:
     environment:
       VSPHERE_USERNAME:
       VSPHERE_PASSWORD:
-    command: ./test.sh
+    command: make test
 
 volumes:
   modules:
