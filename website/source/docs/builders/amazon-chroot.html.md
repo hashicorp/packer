@@ -458,7 +458,7 @@ services:
 ### Ansible provisioner
 
 Running ansible against `amazon-chroot` requires changing the Ansible connection
-to chroot.
+to chroot and running Ansible as root/sudo.
 
 ### Using Instances with NVMe block devices.
 
