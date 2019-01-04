@@ -172,7 +172,7 @@ func (p *Provisioner) ProvisionUpload(ui packer.Ui, comm packer.Communicator) er
 		}
 
 		if strings.HasSuffix(dst, "/") {
-			dst = filepath.Join(dst, filepath.Base(src))
+			dst = dst + filepath.Base(src)
 		}
 
 		// Get a default progress bar
