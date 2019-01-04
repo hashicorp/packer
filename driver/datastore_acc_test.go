@@ -1,7 +1,10 @@
 package driver
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
+	"time"
 )
 
 func TestDatastoreAcc(t *testing.T) {
@@ -16,5 +19,75 @@ func TestDatastoreAcc(t *testing.T) {
 	}
 	if info.Name != "datastore1" {
 		t.Errorf("Wrong datastore. expected: 'datastore1', got: '%v'", info.Name)
+	}
+}
+
+func TestFileUpload(t *testing.T) {
+	dsName := "datastore1"
+	hostName := "esxi-1.vsphere65.test"
+
+	fileName := fmt.Sprintf("test-%v", time.Now().Unix())
+	tmpFile, err := ioutil.TempFile("", fileName)
+	if err != nil {
+		t.Fatalf("Error creating temp file")
+	}
+	err = tmpFile.Close()
+	if err != nil {
+		t.Fatalf("Error creating temp file")
+	}
+
+	d := newTestDriver(t)
+	ds, err := d.FindDatastore(dsName, hostName)
+	if err != nil {
+		t.Fatalf("Cannot find datastore '%v': %v", dsName, err)
+	}
+
+	err = ds.UploadFile(tmpFile.Name(), fileName, hostName)
+	if err != nil {
+		t.Fatalf("Cannot upload file: %v", err)
+	}
+
+	if ds.FileExists(fileName) != true {
+		t.Fatalf("Cannot find file")
+	}
+
+	err = ds.Delete(fileName)
+	if err != nil {
+		t.Fatalf("Cannot delete file: %v", err)
+	}
+}
+
+func TestFileUploadDRS(t *testing.T) {
+	dsName := "datastore3"
+	hostName := ""
+
+	fileName := fmt.Sprintf("test-%v", time.Now().Unix())
+	tmpFile, err := ioutil.TempFile("", fileName)
+	if err != nil {
+		t.Fatalf("Error creating temp file")
+	}
+	err = tmpFile.Close()
+	if err != nil {
+		t.Fatalf("Error creating temp file")
+	}
+
+	d := newTestDriver(t)
+	ds, err := d.FindDatastore(dsName, hostName)
+	if err != nil {
+		t.Fatalf("Cannot find datastore '%v': %v", dsName, err)
+	}
+
+	err = ds.UploadFile(tmpFile.Name(), fileName, hostName)
+	if err != nil {
+		t.Fatalf("Cannot upload file: %v", err)
+	}
+
+	if ds.FileExists(fileName) != true {
+		t.Fatalf("Cannot find file")
+	}
+
+	err = ds.Delete(fileName)
+	if err != nil {
+		t.Fatalf("Cannot delete file: %v", err)
 	}
 }

@@ -83,11 +83,16 @@ func (ds *Datastore) ResolvePath(path string) string {
 
 func (ds *Datastore) UploadFile(src, dst string, host string) error {
 	p := soap.DefaultUpload
-	h, err := ds.driver.FindHost(host)
-	if err != nil {
-		return err
+	ctx := ds.driver.ctx
+
+	if host != "" {
+		h, err := ds.driver.FindHost(host)
+		if err != nil {
+			return err
+		}
+		ctx = ds.ds.HostContext(ctx, h.host)
 	}
-	ctx := ds.ds.HostContext(ds.driver.ctx, h.host)
+
 	return ds.ds.UploadFile(ctx, src, dst, &p)
 }
 
