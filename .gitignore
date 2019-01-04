@@ -5,3 +5,4 @@ bin/
 .env
 test*.json
 crash.log
+packer_cache/
