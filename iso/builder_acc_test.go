@@ -387,7 +387,6 @@ func createFloppyConfig(filePath string) string {
 }
 
 func TestISOBuilderAcc_full(t *testing.T) {
-	t.Skip("test is too slow")
 	config := fullConfig()
 	builderT.Test(t, builderT.TestCase{
 		Builder:  &Builder{},
@@ -415,40 +414,41 @@ func fullConfig() map[string]interface{} {
 		"vm_name": commonT.NewVMName(),
 		"host":    "esxi-1.vsphere65.test",
 
-		"RAM":                   1024,
+		"RAM":                   512,
 		"disk_controller_type":  "pvscsi",
-		"disk_size":             4096,
+		"disk_size":             1024,
 		"disk_thin_provisioned": true,
 		"network_card":          "vmxnet3",
-		"guest_os_type":         "ubuntu64Guest",
+		"guest_os_type":         "other3xLinux64Guest",
 
 		"iso_paths": []string{
-			"[datastore1] ISO/ubuntu-16.04.3-server-amd64.iso",
+			"[datastore1] ISO/alpine-standard-3.8.2-x86_64.iso",
 		},
 		"floppy_files": []string{
-			"preseed.cfg",
+			"../examples/alpine/answerfile",
+			"../examples/alpine/setup.sh",
 		},
 
+		"boot_wait": "15s",
 		"boot_command": []string{
-			"<enter><wait><f6><wait><esc><wait>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>",
-			"<bs><bs><bs>",
-			"/install/vmlinuz",
-			" initrd=/install/initrd.gz",
-			" priority=critical",
-			" locale=en_US",
-			" file=/media/preseed.cfg",
-			"<enter>",
+			"root<enter><wait>",
+			"mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
+			"setup-alpine -f /media/floppy/answerfile<enter>",
+			"<wait5>",
+			"jetbrains<enter>",
+			"jetbrains<enter>",
+			"<wait5>",
+			"y<enter>",
+			"<wait10><wait10><wait10><wait10>",
+			"reboot<enter>",
+			"<wait10><wait10>",
+			"root<enter>",
+			"jetbrains<enter><wait>",
+			"mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
+			"/media/floppy/SETUP.SH<enter>",
 		},
 
-		"ssh_username": "jetbrains",
+		"ssh_username": "root",
 		"ssh_password": "jetbrains",
 	}
 
@@ -487,7 +487,6 @@ func checkFull(t *testing.T) builderT.TestCheckFunc {
 }
 
 func TestISOBuilderAcc_bootOrder(t *testing.T) {
-	t.Skip("test is too slow")
 	config := fullConfig()
 	config["boot_order"] = "disk,cdrom,floppy"
 
