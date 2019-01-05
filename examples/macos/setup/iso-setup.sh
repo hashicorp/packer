@@ -23,3 +23,5 @@ productbuild --package out/postinstall.pkg out/iso/postinstall.pkg
 
 rm -f out/setup.iso
 hdiutil makehybrid -iso -joliet -default-volume-name setup -o out/setup.iso out/iso
+cd out
+shasum -a 256 setup.iso >sha256sums
