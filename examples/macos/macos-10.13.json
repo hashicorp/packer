@@ -30,9 +30,12 @@
 
       "iso_paths": [
         "[datastore-mac] ISO/macOS 10.13.3.iso",
-        "[datastore-mac] ISO/setup.iso",
         "[datastore-mac] ISO/VMware Tools/10.2.0/darwin.iso"
       ],
+
+      "iso_urls": ["{{template_dir}}/setup/out/setup.iso"],
+      "iso_checksum_type": "sha256",
+      "iso_checksum_url": "file:///{{template_dir}}/setup/out/sha256sums",
 
       "boot_wait": "4m",
       "boot_command": [
