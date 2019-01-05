@@ -429,7 +429,7 @@ func fullConfig() map[string]interface{} {
 			"../examples/alpine/setup.sh",
 		},
 
-		"boot_wait": "15s",
+		"boot_wait": "20s",
 		"boot_command": []string{
 			"root<enter><wait>",
 			"mount -t vfat /dev/fd0 /media/floppy<enter><wait>",
