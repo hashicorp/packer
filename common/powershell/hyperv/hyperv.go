@@ -135,7 +135,7 @@ func SetBootDvdDrive(vmName string, controllerNumber uint, controllerLocation ui
 	if generation < 2 {
 		script := `
 param([string]$vmName)
-Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("CD", "IDE","LegacyNetworkAdapter","Floppy")
+Hyper-V\Set-VMBios -VMName $vmName -StartupOrder @("IDE","CD","LegacyNetworkAdapter","Floppy")
 `
 		var ps powershell.PowerShellCmd
 		err := ps.Run(script, vmName)
