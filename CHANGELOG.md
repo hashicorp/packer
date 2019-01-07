@@ -9,6 +9,7 @@
 * builder/amazon: don't Cleanup Temp Keys when there is no communicator to
     avoid a panic [GH-7100] [GH-7095]
 * builder/azure: allow to configure disk caching [GH-7061]
+* builder/openstack: Don't require network v2 [GH-6933]
 * core/shell: Add env vars "PACKER_HTTP_IP" and "PACKER_HTTP_PORT" to shell
     provisioners [GH-7075]
 * core: Deprecate mitchellh/go-homedir package in favor of os/user [GH-7062]
