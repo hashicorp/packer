@@ -58,7 +58,7 @@ later, it will take precedence over one found earlier.
 
 4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined (windows)
 
-4.  The current working directory.
+5.  The current working directory.
 
 The valid types for plugins are:
 
