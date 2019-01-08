@@ -1,10 +1,12 @@
 package hyperv
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -243,36 +245,7 @@ func getCreateVMScript(vmName string, path string, harddrivePath string, ram int
 		vhdx = vmName + ".vhd"
 	}
 
-	// Create VHD
-	templateString := `$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}` + "\n"
-	if harddrivePath != "" {
-		if diffDisks {
-			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}` + "\n"
-		} else {
-			templateString = templateString + `Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath` + "\n"
-		}
-	} else {
-		if fixedVHD {
-			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}` + "\n"
-		} else {
-			templateString = templateString + `Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}` + "\n"
-		}
-	}
-
-	// Create new VM using the VHD you just made
-	templateString = templateString + `Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}`
-	// Add optional tags to the end of the VM creation command
-	if generation == 2 {
-		templateString = templateString + ` -Generation {{ .Generation }}`
-	}
-	if version != "" {
-		templateString = templateString + ` -Version {{ .Version }}`
-	}
-
-	var scriptBuilder strings.Builder
-
-	scriptTemplate := template.Must(template.New("psScript").Parse(templateString))
-	scriptTemplate.Execute(&scriptBuilder, scriptOptions{
+	opts := scriptOptions{
 		Version:            version,
 		VMName:             vmName,
 		VHDX:               vhdx,
@@ -285,9 +258,46 @@ func getCreateVMScript(vmName string, path string, harddrivePath string, ram int
 		Generation:         generation,
 		DiffDisks:          diffDisks,
 		FixedVHD:           fixedVHD,
-	})
+	}
 
-	return scriptBuilder.String(), nil
+	var tpl = template.Must(template.New("createVM").Parse(`
+$vhdPath = Join-Path -Path {{ .Path }} -ChildPath {{ .VHDX }}
+
+{{ if ne .HardDrivePath "" -}}
+    {{- if .DiffDisks -}}
+    Hyper-V\New-VHD -Path $vhdPath -ParentPath {{ .HardDrivePath }} -Differencing -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+    {{- else -}}
+    Copy-Item -Path {{ .HardDrivePath }} -Destination $vhdPath
+    {{- end -}}
+{{- else -}}
+    {{- if .FixedVHD -}}
+    Hyper-V\New-VHD -Path $vhdPath -Fixed -SizeBytes {{ .NewVHDSizeBytes }}
+    {{- else -}}
+    Hyper-V\New-VHD -Path $vhdPath -SizeBytes {{ .NewVHDSizeBytes }} -BlockSizeBytes {{ .VHDBlockSizeBytes }}
+    {{- end -}}
+{{- end }}
+
+Hyper-V\New-VM -Name {{ .VMName }} -Path {{ .Path }} -MemoryStartupBytes {{ .MemoryStartupBytes }} -VHDPath $vhdPath -SwitchName {{ .SwitchName }}
+{{- if eq .Generation 2}} -Generation {{ .Generation }} {{- end -}}
+{{- if ne .Version ""}} -Version {{ .Version }} {{- end -}}
+`))
+
+	var b bytes.Buffer
+	err := tpl.Execute(&b, opts)
+	if err != nil {
+		return "", err
+	}
+
+	// Tidy away the excess newlines left over by the template
+	regex, err := regexp.Compile("^\n")
+	if err != nil {
+		return "", err
+	}
+	final := regex.ReplaceAllString(b.String(), "")
+	regex, err = regexp.Compile("\n\n")
+	final = regex.ReplaceAllString(final, "\n")
+
+	return final, nil
 }
 
 func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram int64,
