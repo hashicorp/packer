@@ -227,10 +227,8 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 // generate a conditional-free script which already sets all of the necessary
 // variables inline.
 //
-// $vhdPath = Join-Path -Path C://mypath -ChildPath myvm.vhdx
-// New-VHD -Path $vhdPath -ParentPath C://harddrivepath -Differencing -BlockSizeBytes 10
-// Hyper-V\New-VHD -Path $vhdPath -SizeBytes 8192 -BlockSizeBytes 10
-// Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch
+// For examples of what this template will generate, you can look at the
+// test cases in ./hyperv_test.go
 //
 func getCreateVMScript(opts *scriptOptions) (string, error) {
 
