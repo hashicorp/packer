@@ -232,32 +232,15 @@ Hyper-V\Set-VMFloppyDiskDrive -VMName $vmName -Path $null
 // Hyper-V\New-VHD -Path $vhdPath -SizeBytes 8192 -BlockSizeBytes 10
 // Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vhdPath -SwitchName hyperv-vmx-switch
 //
-func getCreateVMScript(vmName string, path string, harddrivePath string, ram int64,
-	diskSize int64, diskBlockSize int64, switchName string, generation uint,
-	diffDisks bool, fixedVHD bool, version string) (string, error) {
+func getCreateVMScript(opts *scriptOptions) (string, error) {
 
-	if fixedVHD && generation == 2 {
+	if opts.FixedVHD && opts.Generation == 2 {
 		return "", fmt.Errorf("Generation 2 VMs don't support fixed disks.")
 	}
 
-	vhdx := vmName + ".vhdx"
-	if fixedVHD {
-		vhdx = vmName + ".vhd"
-	}
-
-	opts := scriptOptions{
-		Version:            version,
-		VMName:             vmName,
-		VHDX:               vhdx,
-		Path:               path,
-		HardDrivePath:      harddrivePath,
-		MemoryStartupBytes: ram,
-		NewVHDSizeBytes:    diskSize,
-		VHDBlockSizeBytes:  diskBlockSize,
-		SwitchName:         switchName,
-		Generation:         generation,
-		DiffDisks:          diffDisks,
-		FixedVHD:           fixedVHD,
+	opts.VHDX = opts.VMName + ".vhdx"
+	if opts.FixedVHD {
+		opts.VHDX = opts.VMName + ".vhd"
 	}
 
 	var tpl = template.Must(template.New("createVM").Parse(`
@@ -304,9 +287,21 @@ func CreateVirtualMachine(vmName string, path string, harddrivePath string, ram 
 	diskSize int64, diskBlockSize int64, switchName string, generation uint,
 	diffDisks bool, fixedVHD bool, version string) error {
 
-	script, err := getCreateVMScript(vmName, path, harddrivePath, ram,
-		diskSize, diskBlockSize, switchName, generation,
-		diffDisks, fixedVHD, version)
+	opts := scriptOptions{
+		Version:            version,
+		VMName:             vmName,
+		Path:               path,
+		HardDrivePath:      harddrivePath,
+		MemoryStartupBytes: ram,
+		NewVHDSizeBytes:    diskSize,
+		VHDBlockSizeBytes:  diskBlockSize,
+		SwitchName:         switchName,
+		Generation:         generation,
+		DiffDisks:          diffDisks,
+		FixedVHD:           fixedVHD,
+	}
+
+	script, err := getCreateVMScript(&opts)
 	if err != nil {
 		return err
 	}
