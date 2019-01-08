@@ -6,22 +6,22 @@ import (
 )
 
 func Test_getCreateVMScript(t *testing.T) {
-	vmName := "myvm"
-	path := "C://mypath"
-	harddrivepath := "C://harddrivepath"
-	ram := int64(1024)
-	disksize := int64(8192)
-	diskBlockSize := int64(10)
-	switchName := "hyperv-vmx-switch"
-	generation := uint(1)
-	diffdisks := true
-	fixedVHD := true
-	version := "5.0"
+	opts := scriptOptions{
+		Version:            "5.0",
+		VMName:             "myvm",
+		Path:               "C://mypath",
+		HardDrivePath:      "C://harddrivepath",
+		MemoryStartupBytes: int64(1024),
+		NewVHDSizeBytes:    int64(8192),
+		VHDBlockSizeBytes:  int64(10),
+		SwitchName:         "hyperv-vmx-switch",
+		Generation:         uint(1),
+		DiffDisks:          true,
+		FixedVHD:           true,
+	}
 
 	// Check Fixed VHD conditional set
-	scriptString, err := getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	scriptString, err := getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -35,19 +35,15 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 
 	// We should never get here thanks to good template validation, but it's
 	// good to fail rather than trying to run the ps script and erroring.
-	generation = uint(2)
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.Generation = uint(2)
+	scriptString, err = getCreateVMScript(&opts)
 	if err == nil {
 		t.Fatalf("Should have Error: %s", err.Error())
 	}
 
 	// Check VHDX conditional set
-	fixedVHD = false
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.FixedVHD = false
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -60,11 +56,9 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	}
 
 	// Check generation 1 no fixed VHD
-	fixedVHD = false
-	generation = uint(1)
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.FixedVHD = false
+	opts.Generation = uint(1)
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -77,10 +71,8 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 	}
 
 	// Check that we use generation one template even if generation is unset
-	generation = uint(0)
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.Generation = uint(0)
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -89,10 +81,8 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
 
-	version = ""
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.Version = ""
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -103,10 +93,8 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
 
-	diffdisks = false
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.DiffDisks = false
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -117,10 +105,8 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
 
-	harddrivepath = ""
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.HardDrivePath = ""
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -131,10 +117,8 @@ Hyper-V\New-VM -Name myvm -Path C://mypath -MemoryStartupBytes 1024 -VHDPath $vh
 		t.Fatalf("EXPECTED: \n%s\n\n RECEIVED: \n%s\n\n", expected, scriptString)
 	}
 
-	fixedVHD = true
-	scriptString, err = getCreateVMScript(vmName, path, harddrivepath, ram,
-		disksize, diskBlockSize, switchName, generation, diffdisks, fixedVHD,
-		version)
+	opts.FixedVHD = true
+	scriptString, err = getCreateVMScript(&opts)
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
