@@ -374,6 +374,11 @@ here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
     {
         "type": "powershell",
         "inline": [
+            " # NOTE: the following *3* lines are only needed if the you have installed the Guest Agent.",
+            "  while ((Get-Service RdAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+            "  while ((Get-Service WindowsAzureTelemetryService).Status -ne 'Running') { Start-Sleep -s 5 }",
+            "  while ((Get-Service WindowsAzureGuestAgent).Status -ne 'Running') { Start-Sleep -s 5 }",
+
             "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
             "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
         ]
@@ -381,6 +386,15 @@ here](https://technet.microsoft.com/en-us/library/hh824815.aspx)
   ]
 }
 ```
+
+The Windows Guest Agent participates in the Sysprep process.  The
+agent must be fully installed before the VM can be sysprep'ed.  To
+ensure this is true all agent services must be running before
+executing sysprep.exe. The above JSON snippet shows one way to do this
+in the PowerShell provisioner. This snippet is **only** required if
+the VM is configured to install the agent, which is the default.  To
+learn more about disabling the Windows Guest Agent please see [Install the VM Agent](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/agent-windows#install-the-vm-agent).
+
 
 ### Linux
 
