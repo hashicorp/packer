@@ -222,6 +222,7 @@ For a shell script, that means the script **must** exit with a zero code. You
 
 ## Usage Examples:
 
+### Windows Host
 Example of running a .cmd file on windows:
 
           {
@@ -283,7 +284,8 @@ customizations: env\_var\_format, tempfile\_extension, and execute\_command
               "inline": ["write-output $env:SHELLLOCALTEST"]
           }
 
-Example of running a bash script on linux:
+### Unix Host
+Example of running a bash script on unix:
 
           {
               "type": "shell-local",
@@ -291,7 +293,7 @@ Example of running a bash script on linux:
               "scripts": ["./scripts/dummy_bash.sh"]
           }
 
-Example of running a bash "inline" on linux:
+Example of running a bash "inline" on unix:
 
           {
               "type": "shell-local",
@@ -299,3 +301,22 @@ Example of running a bash "inline" on linux:
               "inline": ["echo hello",
                          "echo $PROVISIONERTEST"]
           }
+
+Example of running a python script on unix:
+
+```
+      {
+          "type": "shell-local",
+          "script": "hello.py",
+          "environment_vars": ["HELLO_USER=packeruser"],
+          "execute_command": ["/bin/sh", "-c", "{{.Vars}} /usr/local/bin/python {{.Script}}"]
+      }
+```
+
+Where "hello.py" contains:
+
+```
+import os
+
+print('Hello, %s!' % os.getenv("HELLO_USER"))
+```
