@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 const (
@@ -93,7 +93,7 @@ func (s *StepMountFloppydrive) Cleanup(state multistep.StateBag) {
 }
 
 func (s *StepMountFloppydrive) copyFloppy(path string) (string, error) {
-	tempdir, err := ioutil.TempDir("", "packer")
+	tempdir, err := tmp.Dir("hyperv")
 	if err != nil {
 		return "", err
 	}

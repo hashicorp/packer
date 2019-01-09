@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/tmp"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -137,13 +138,13 @@ func berToDer(ber []byte, ui packer.Ui) []byte {
 		return ber
 	}
 
-	berKey, err := ioutil.TempFile("", "packer-ber-privatekey-")
+	berKey, err := tmp.File("packer-ber-privatekey-")
 	defer os.Remove(berKey.Name())
 	if err != nil {
 		return ber
 	}
 	ioutil.WriteFile(berKey.Name(), ber, os.ModeAppend)
-	derKey, err := ioutil.TempFile("", "packer-der-privatekey-")
+	derKey, err := tmp.File("packer-der-privatekey-")
 	defer os.Remove(derKey.Name())
 	if err != nil {
 		return ber

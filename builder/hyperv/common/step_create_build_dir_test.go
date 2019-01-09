@@ -38,7 +38,7 @@ func TestStepCreateBuildDir_Defaults(t *testing.T) {
 		// This prevents the regexp interpreting backslashes as escape sequences
 		stateBuildDir := filepath.ToSlash(v.(string))
 		expectedBuildDirRe := regexp.MustCompile(
-			filepath.ToSlash(filepath.Join(os.TempDir(), "packerhv") + `[[:digit:]]{9}$`))
+			filepath.ToSlash(filepath.Join(os.TempDir(), "hyperv") + `[[:digit:]]{9}$`))
 		match := expectedBuildDirRe.MatchString(stateBuildDir)
 		if !match {
 			t.Fatalf("Got path that doesn't match expected format in 'build_dir': %s", stateBuildDir)
@@ -79,7 +79,7 @@ func TestStepCreateBuildDir_UserDefinedTempPath(t *testing.T) {
 		// This prevents the regexp interpreting backslashes as escape sequences
 		stateBuildDir := filepath.ToSlash(v.(string))
 		expectedBuildDirRe := regexp.MustCompile(
-			filepath.ToSlash(filepath.Join(step.TempPath, "packerhv") + `[[:digit:]]{9}$`))
+			filepath.ToSlash(filepath.Join(step.TempPath, "hyperv") + `[[:digit:]]{9}$`))
 		match := expectedBuildDirRe.MatchString(stateBuildDir)
 		if !match {
 			t.Fatalf("Got path that doesn't match expected format in 'build_dir': %s", stateBuildDir)

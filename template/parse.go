@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/packer/packer/tmp"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -328,7 +328,7 @@ func ParseFile(path string) (*Template, error) {
 	var err error
 	if path == "-" {
 		// Create a temp file for stdin in case of errors
-		f, err = ioutil.TempFile(os.TempDir(), "packer")
+		f, err = tmp.File("parse")
 		if err != nil {
 			return nil, err
 		}

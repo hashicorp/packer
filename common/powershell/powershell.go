@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/tmp"
 )
 
 const (
@@ -121,7 +122,7 @@ func (ps *PowerShellCmd) getPowerShellPath() (string, error) {
 }
 
 func saveScript(fileContents string) (string, error) {
-	file, err := ioutil.TempFile(os.TempDir(), "ps")
+	file, err := tmp.File("powershell")
 	if err != nil {
 		return "", err
 	}
