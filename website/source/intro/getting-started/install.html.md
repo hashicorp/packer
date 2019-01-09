@@ -130,3 +130,5 @@ On *Arch* Linux there is a package named `packer` in the main
 repository and in the AUR. The package `packer` in the AUR is an old
 name for a package management tool for Arch, it's not Hashicorp
 Packer.
+
+[Continue to building an image](./build-image.html)
