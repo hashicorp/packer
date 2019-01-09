@@ -3,7 +3,7 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/go-version"
+	versionUtil "github.com/hashicorp/go-version"
 	"log"
 	"os/exec"
 	"regexp"
@@ -27,16 +27,16 @@ func (d *VBox42Driver) CreateSATAController(vmName string, name string, portcoun
 
 	portCountArg := "--portcount"
 
-	currentVersion, err := version.NewVersion(version)
+	currentVersion, err := versionUtil.NewVersion(version)
 	if err != nil {
 		return err
 	}
-	versionUsingPortCount, err := version.NewVersion("4.3")
+	firstVersionUsingPortCount, err := versionUtil.NewVersion("4.3")
 	if err != nil {
 		return err
 	}
 
-	if currentVersion.LessThan(versionUsingPortCount) {
+	if currentVersion.LessThan(firstVersionUsingPortCount) {
 		portCountArg = "--sataportcount"
 	}
 
